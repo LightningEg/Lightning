@@ -92,6 +92,91 @@ Record on a real phone with the demo household (no real money on screen); upload
 | `com.android.vending.BILLING` | Theme purchases (Play build only). |
 | `INTERNET`, `ACCESS_NETWORK_STATE`, `VIBRATE`, `FOREGROUND_SERVICE*` | Normal permissions; no declaration. |
 
+## Store listing
+
+Graphics: `python tools/play_listing.py OUT` makes the eight phone slides (1080 x 1920) and the feature graphic (1024 x 500)
+in English and Arabic from Mohab's year, and the 512 px icon (a full square; Play rounds it). Retake them after IV-11E and
+IV-11D change the phone screens. Play's metadata policy: no "free", "best" or other promotional words in the title, icon,
+short description or graphics; "free" is said once, in the full description.
+
+| Field | English | Arabic |
+|---|---|---|
+| App name | Lightning: Budget & Net Worth | لايتنينج: الميزانية وصافي الثروة |
+| Short description (80) | Budget, spending and net worth for Egypt, private on your phone. No account. | ميزانيتك ومصاريفك وصافي ثروتك لمصر، على موبايلك ومن غير حساب. |
+| Category | Finance | |
+| Contact email | hello@lightningeg.com | |
+| Website | https://lightningeg.com | https://lightningeg.com/ar/ |
+
+### Full description (English)
+
+```text
+Lightning is a personal finance app for salaried people in Egypt. Every account, dollar, certificate and gram of gold, in one place, on your phone. No account to create, no ads and no server holding your money data.
+
+KNOW WHAT YOU CAN SPEND
+• Safe to spend: what is left after the bills due before payday, and about how much a day until the next salary.
+• Budget by category, with a pace line that shows each day whether the month is on plan.
+• Every bill, loan payment and subscription ahead, with its date and amount, before payday.
+
+RECORD MONEY QUICKLY
+• Bank SMS: allow it and Lightning reads the messages your banks send (CIB, NBE and others) and turns each payment, transfer and salary into a transaction you check before it is saved. It reads only senders with a name or short code, never people's numbers, and the messages never leave your phone.
+• Import bank statement files, or add a transaction in a few taps.
+• Categories and payees are learned once, then suggested.
+
+SEE ALL YOU OWN
+• Net worth from every account: banks, cash, wallets such as Vodafone Cash, certificates, gold at home and shares.
+• Investments: EGX and US shares, funds and more, with what changed this month and why.
+• Dollars and other currencies, money you hold for others, gam'eya circles, loans and zakat.
+• A report for any month: money in, money out, what you kept and your savings rate.
+
+PRIVATE BY DESIGN
+• Your data stays in an encrypted profile on your phone. Lightning never receives it.
+• Optional fingerprint unlock. Amounts are hidden in the recent-apps view.
+• Pair the Lightning app on your Windows PC over your own Wi-Fi and use the same ledger on both.
+• Backups you keep, and a recovery key if you forget your password.
+
+FREE TO USE
+Every feature is free: no trial, no subscription, no paid feature. Optional themes change how the app looks and support its development.
+
+In English and Egyptian Arabic. Try it on a full sample year before entering your own money.
+
+Questions or ideas: hello@lightningeg.com
+```
+
+### Full description (Arabic)
+
+```text
+لايتنينج تطبيق لإدارة فلوسك، معمول للموظفين في مصر. كل حساب ودولار وشهادة وجرام دهب في مكان واحد، على موبايلك. من غير حساب تعمله، ومن غير إعلانات، ومفيش سيرفر شايل بيانات فلوسك.
+
+اعرف تقدر تصرف كام
+• المتاح للصرف: اللي فاضل بعد الفواتير المستحقة قبل القبض، وحوالي كام في اليوم لحد المرتب الجاي.
+• ميزانية لكل فئة، بخط بيقولك كل يوم الشهر ماشي على الخطة ولا لأ.
+• كل فاتورة وقسط واشتراك جاي، بالتاريخ والمبلغ، قبل القبض.
+
+سجّل فلوسك بسرعة
+• رسائل البنك: لو سمحت، لايتنينج بيقرا الرسائل اللي بنوكك بتبعتها (CIB وNBE وغيرهم) ويحوّل كل دفعة وتحويل ومرتب لحركة تراجعها قبل ما تتحفظ. بيقرا بس الرسائل اللي جاية من اسم أو رقم مختصر، عمره ما بيقرا رسائل الناس، والرسائل عمرها ما بتخرج من موبايلك.
+• استورد ملفات كشف الحساب من البنك، أو ضيف حركة في كام لمسة.
+• الفئات والأسماء بيتعلمها مرة واحدة، وبعد كده بيقترحها.
+
+شوف كل اللي تملكه
+• صافي ثروتك من كل حساباتك: البنوك والكاش والمحافظ زي فودافون كاش والشهادات والدهب اللي في البيت والأسهم.
+• الاستثمارات: أسهم البورصة المصرية والأمريكية والصناديق وغيرها، وإيه اللي اتغير الشهر ده وليه.
+• الدولار والعملات التانية، والفلوس اللي معاك لناس تانية، والجمعيات، والقروض، والزكاة.
+• تقرير لأي شهر: الفلوس اللي دخلت، واللي خرجت، واللي فضل معاك، ونسبة الادخار.
+
+خصوصيتك الأول
+• بياناتك بتفضل في بروفايل متشفّر على موبايلك، ولايتنينج عمره ما بيستلمها.
+• فتح بالبصمة لو حبيت، والمبالغ بتستخبى في شاشة التطبيقات الأخيرة.
+• اربط موبايلك بتطبيق لايتنينج على الكمبيوتر (ويندوز) على الواي فاي بتاعك، واستخدم نفس السجل على الاتنين.
+• نسخ احتياطية معاك إنت، ومفتاح استرجاع لو نسيت كلمة السر.
+
+ببلاش
+كل المميزات ببلاش: من غير فترة تجربة ولا اشتراك ولا ميزة بفلوس. فيه ثيمات اختيارية بتغيّر شكل التطبيق وبتدعم تطويره.
+
+بالعربي المصري والإنجليزي. جرّبه على سنة كاملة من بيانات تجريبية قبل ما تدخّل فلوسك.
+
+أسئلة أو أفكار: hello@lightningeg.com
+```
+
 ## In-app products
 
 One managed product per paid theme, product id = theme id: `cotton`, `dendera` (day and night), `nile`, `papyrus`. Name and description from the theme; price set by the owner in Egyptian pounds. One purchase per person (owner, 2026-11-09): a purchase unlocks every profile opened in the Play build with the buying Google account, up to 10, and each profile's other devices through sync. A refunded or voided purchase unlocks no new profile; licences already issued stay.
