@@ -3963,3 +3963,7 @@ html { scrollbar-color: var(--line-control) transparent; scrollbar-width: thin; 
 ::selection { background: var(--tint-growth); color: inherit; }
 h1, h2, h3 { text-wrap: balance; }
 p { text-wrap: pretty; }
+
+/* IV-3BF4 · The Add form: no empty well above the buttons; the card title shows only inside a popup (the page title says it). */
+.transaction-effect:empty { display: none; }
+.main > .app-popup-content > h2[data-popup-title] { display: none; }

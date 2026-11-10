@@ -87,7 +87,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IT-3BI3 | ↳ One week start ([#406](https://github.com/LightningEg/Lightning/issues/406)) | | | S | Sonnet | |
 | IT-3BI4 | ↳ One clock ([#407](https://github.com/LightningEg/Lightning/issues/407)) | | | S | Sonnet | |
 | **IV-3BF** | [PC finish - one focus ring, branded validation, only the brand's fonts, styled scrollbars, amount-first Add and fewer one-off styles](3-polish-and-arabic/IV-3BF-pc-finish.md) | improvement, visual | Feel | M | Sonnet | ready |
-| IV-3BF4 | ↳ PC Add starts on the amount, says its name once ([#417](https://github.com/LightningEg/Lightning/issues/417)) | | | S | Sonnet | |
 | IV-3BF5 | ↳ Our message, not the browser's bubble ([#418](https://github.com/LightningEg/Lightning/issues/418)) | | | M | Sonnet | |
 | IV-3BF6 | ↳ One set of icons ([#419](https://github.com/LightningEg/Lightning/issues/419)) | | | M | Sonnet | |
 | IV-3BF7 | ↳ Styles from tokens ([#420](https://github.com/LightningEg/Lightning/issues/420)) | | | M | Sonnet | |

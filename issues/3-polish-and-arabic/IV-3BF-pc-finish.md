@@ -29,12 +29,6 @@ In that order, one PR each: a single `:focus-visible` ring token plus `@media (f
 
 Each step is one pull request. Read only the files a step names; never open `guideline/app.html` whole (use `python tools/guideline.py A10`). Run the step's test command, then for a visible change `python -m pytest tests/test_mohab_year.py -q` and check A16 on a screenshot; delete the step's heading in the same commit.
 
-## 3BF4 PC Add starts on the amount, says its name once · S · #417
-Files: `lightning/ui/templates/transactions/form_popup.html` (amount input at line ~28), the PC route `lightning/ui/routes/accounts.py:446`.
-Verify first: open `/accounts/1/transaction/new` on the PC app; if the amount already has focus, delete this step.
-Do: move the Amount field to the first row (beside Date), add `autofocus` to `#popup-amount` (the phone template `phone/transactions/form_popup.html` already does), remove `placeholder="0.00"` (A06.1: no 0.00 pretending to be data), and drop the inner card title "Add transaction" (the page title already says it; A16 "a line that repeats its label"). Find and remove the empty well above the buttons (inspect the element just before `.actions`).
-Done when: new `tests/test_pc_add_focus_browser.py` opens the page, types `120` and asserts `input[name=amount]` has value `120`; saving with a category creates one transaction of 120 (check `/transactions`). Screenshot shows one "Add transaction" heading.
-
 ## 3BF5 Our message, not the browser's bubble · M · #418
 Files: `lightning/ui/static/app.js` (~261, ~755, ~800), `lightning/ui/templates/partials/macros.html` (the `err()` macro), `lightning/ui/templates/base.html` and `phone/base.html`.
 Do: add `novalidate` to every `<form>` by setting `form.noValidate = true` for all forms on load in `app.js` (one place); on submit, if `!form.checkValidity()`, prevent it, and for each invalid field show the `err()` well's markup under the field (`aria-invalid="true"`, `aria-describedby` pointing at the message) with the field's `validationMessage` replaced by our sentence ("Enter an amount.", "Choose a category.", "Pick a date.") from a small map keyed by `name`; focus the first invalid field. Remove `reportValidity()` at ~800.

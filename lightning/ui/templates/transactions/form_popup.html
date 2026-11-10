@@ -18,15 +18,15 @@
       {% endfor %}
     </div>{% endif %}
     <div class="row">
+      <div class="field {{ 'has-error' if error_field == 'amount' }}">
+        <label for="popup-amount">Amount ({{ account.currency }})</label>
+        <input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" required autofocus {{ 'readonly' if split_categories }}>
+        {% if error_field == 'amount' %}<small class="field-error">{{ error|tr(locale) }}</small>{% endif %}
+      </div>
       <div class="field {{ 'has-error' if error_field == 'date' }}">
         <label for="popup-date">{{ 'Date'|tr(locale) }}</label>
         <input id="popup-date" name="date" type="text" value="{{ values.date }}" placeholder="yyyy-mm-dd" inputmode="numeric" data-smart-date required>
         {% if error_field == 'date' %}<small class="field-error">{{ 'Check the date.'|tr(locale) }}</small>{% endif %}
-      </div>
-      <div class="field {{ 'has-error' if error_field == 'amount' }}">
-        <label for="popup-amount">Amount ({{ account.currency }})</label>
-        <input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" placeholder="0.00" required {{ 'readonly' if split_categories }}>
-        {% if error_field == 'amount' %}<small class="field-error">{{ error|tr(locale) }}</small>{% endif %}
       </div>
     </div>
     <div class="row">
