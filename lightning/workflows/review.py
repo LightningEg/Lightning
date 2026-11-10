@@ -15,15 +15,10 @@ from lightning.core.errors import ValidationError
 
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, month_of
-from lightning.core.money import ZERO, fmt as _fmt
+from lightning.core.money import ZERO, fmt
 from lightning.planning.salary_day import review_identity, salary_review
 from lightning.transactions.domain import TxnFilter
 from lightning.workflows.market_prices import missing_prices
-
-
-def fmt(value, places: int = 0, signed: bool = False) -> str:
-    """Reporting text rounds to the nearest unit (stored values keep their decimals)."""
-    return _fmt(value, places, signed)
 
 
 def _month_name(month: str) -> str:
@@ -144,7 +139,7 @@ class ReviewInbox:
             if (reserve["spent"] > ZERO and reserve["remaining"] > ZERO
                     and (reserve["kind"] == "EMERGENCY" or reserve["recurrence"] != "NONE")):
                 items.append({"label": "Refill a reserve",
-                              "detail": f"{reserve['name']} · {fmt(reserve['remaining'])} {c.base_currency} to refill.",
+                              "detail": f"{reserve['name']} · {fmt(reserve['remaining'], 0)} {c.base_currency} to refill.",
                               "href": "/plan/reserves", "action": "Refill", "priority": 2,
                               "glance": glance(reserve["name"], "Refill", reserve["remaining"], "to refill"),
                               "source_version": {"reserve": reserve["id"],
@@ -152,14 +147,14 @@ class ReviewInbox:
                                                               c.reserves.links_for_reserve(reserve["id"])]}})
             if reserve.get("due_date") and reserve["due_date"] < fmt_date(on) and reserve["effective_allocated"] > ZERO:
                 items.append({"label": f"{reserve['name']} is past its date",
-                              "detail": f"Due {reserve['due_date']} · {fmt(reserve['effective_allocated'])} {c.base_currency} still set aside.",
+                              "detail": f"Due {reserve['due_date']} · {fmt(reserve['effective_allocated'], 0)} {c.base_currency} still set aside.",
                               "href": "/plan/reserves", "priority": 2,
                               "glance": glance(reserve["name"], "Open", reserve["effective_allocated"], "past its date")})
         # Payments that are due and unpaid on this day, whatever period a page shows.
         for payment in c.planning.what_you_owe(on).bills_due_items:
             kind = "Loan payment due" if payment.item.kind.value == "LOAN" else "Bill due"
             items.append({"label": f"{kind}: {payment.item.name}",
-                          "detail": f"Due {payment.due_date} · {fmt(payment.amount)} {c.base_currency} · not paid yet.",
+                          "detail": f"Due {payment.due_date} · {fmt(payment.amount, 0)} {c.base_currency} · not paid yet.",
                           "href": f"/plan/items/{payment.item.id}/pay?due={payment.due_date}&back=%2F",
                           "popup": True, "action": "Mark paid", "priority": 1,
                           "late_days": payment.days_late(on)})
@@ -169,7 +164,7 @@ class ReviewInbox:
             item, payment, txn = early["item"], early["payment"], early["transaction"]
             currency = c.accounts.get(item.account_id).currency if item.account_id else c.base_currency
             items.append({"label": f"{item.name} arrived early" if item.is_income else f"{item.name} was paid early",
-                          "detail": f"{fmt(txn['amount'])} {currency} on {txn['date']}, for the payment due {payment.due_date}. "
+                          "detail": f"{fmt(txn['amount'], 0)} {currency} on {txn['date']}, for the payment due {payment.due_date}. "
                                     "Link it so the plan does not count it again.",
                           "href": f"/plan/items/{item.id}/pay?due={payment.due_date}&back=%2F", "popup": True,
                           "action": "Link", "priority": 1,
@@ -191,8 +186,8 @@ class ReviewInbox:
             from lightning.core.money import from_e6
             currency = c.accounts.get(changed["account_id"]).currency if changed["account_id"] else c.base_currency
             items.append({"label": f"{changed['name']} was paid at a different amount",
-                          "detail": f"Latest payment {fmt(from_e6(changed['paid_e6']))} {currency}; "
-                                    f"planned {fmt(from_e6(changed['amount_e6']))}. Review future payments.",
+                          "detail": f"Latest payment {fmt(from_e6(changed['paid_e6']), 0)} {currency}; "
+                                    f"planned {fmt(from_e6(changed['amount_e6']), 0)}. Review future payments.",
                           "href": f"/plan/items/{changed['id']}/edit", "priority": 2,
                           "glance": glance(changed["name"], "Update", from_e6(changed["paid_e6"]), "new amount")})
         if getattr(c, "deposit_receipts", None) is not None:
@@ -209,7 +204,7 @@ class ReviewInbox:
                     suggested = sum(1 for issue in issues if issue["suggested"])
                     item = {"label": f"{name}: {len(issues)} interest payments to match" if len(issues) != 1
                                      else f"{name}: 1 interest payment to match",
-                            "detail": f"{fmt(sum(i['remaining'] for i in issues))} {account.currency} still unmatched"
+                            "detail": f"{fmt(sum(i['remaining'] for i in issues), 0)} {account.currency} still unmatched"
                                       + (f"; {suggested} have a suggested bank receipt." if suggested else "."),
                             "href": f"/deposits/{account.id}#interest-receipts", "priority": 1, "action": "Review",
                             "glance": glance(name, "Match", sum(i["remaining"] for i in issues),
@@ -231,7 +226,7 @@ class ReviewInbox:
             for claim in claims:
                 if claim["issues"] or (claim["outstanding"] and claim["due_date"] and claim["due_date"] <= on.isoformat()):
                     items.append({"label": "Reimbursement needs review",
-                                  "detail": f"{fmt(claim['outstanding'])} {c.base_currency} outstanding.",
+                                  "detail": f"{fmt(claim['outstanding'], 0)} {c.base_currency} outstanding.",
                                   "href": "/reimbursements", "priority": 1,
                                   "glance": glance("Reimbursement", "Check", claim["outstanding"], "outstanding")})
         forecast = self.forecast = c.forecaster.forecast(on)  # the Overview's Safe to spend card reads it too
@@ -242,14 +237,14 @@ class ReviewInbox:
         account_shortfalls = getattr(dated, "account_shortfalls", ()) or ()
         if first_shortfall is not None:
             items.append({"label": "Cash may run short",
-                          "detail": f"Scheduled payments may leave cash short by {fmt(abs(first_shortfall.balance))} "
+                          "detail": f"Scheduled payments may leave cash short by {fmt(abs(first_shortfall.balance), 0)} "
                                     f"{first_shortfall.currency} on {first_shortfall.date}.",
                           "href": "/plan#plan-dated-cash", "priority": 1,
                           "glance": glance("Cash", "See", abs(first_shortfall.balance), "short on {sa}", sa=first_shortfall.date)})
         elif account_shortfalls:
             earliest = min(account_shortfalls, key=lambda item: item.date)
             items.append({"label": f"{earliest.account_name} may run short",
-                          "detail": f"Scheduled payments may leave this account short by {fmt(abs(earliest.balance))} "
+                          "detail": f"Scheduled payments may leave this account short by {fmt(abs(earliest.balance), 0)} "
                                     f"{earliest.currency} on {earliest.date}.",
                           "href": "/plan#plan-dated-cash", "priority": 1,
                           "glance": glance(earliest.account_name, "See", abs(earliest.balance), "short on {sa}", sa=earliest.date)})
@@ -258,7 +253,7 @@ class ReviewInbox:
             lowest = forecast.lowest
             if lowest is not None and lowest.closing < ZERO:
                 items.append({"label": "Cash may run short",
-                              "detail": f"The cash forecast ends {lowest.month} at {fmt(lowest.closing)} {c.base_currency}.",
+                              "detail": f"The cash forecast ends {lowest.month} at {fmt(lowest.closing, 0)} {c.base_currency}.",
                               "href": "/plan", "priority": 1,
                               "glance": glance("Cash", "See", -lowest.closing, "short in {sa}", sa=lowest.month)})
         # Honest numbers: a holding priced more than two months ago is shown at an old value.
@@ -287,20 +282,20 @@ class ReviewInbox:
             for line in section.lines:
                 if line.depth == 2 and line.over:
                     items.append({"label": f"{line.name} over plan",
-                                  "detail": f"{fmt(line.planned_actual - line.available)} {c.base_currency} over this month's plan.",
+                                  "detail": f"{fmt(line.planned_actual - line.available, 0)} {c.base_currency} over this month's plan.",
                                   "href": f"/budget?month={month_of(on)}&open_group=all#limit-{line.category_id}",
                                   "action": "Change the plan", "priority": 2,
                                   "glance": glance(line.name, "Adjust", line.planned_actual - line.available, "over plan")})
             if section.planned_actual > section.available:
                 items.append({"label": f"{section.name} over plan",
-                              "detail": f"{fmt(section.planned_actual - section.available)} {c.base_currency} over this month's plan.",
+                              "detail": f"{fmt(section.planned_actual - section.available, 0)} {c.base_currency} over this month's plan.",
                               "href": "/budget", "priority": 2,
                               "glance": glance(section.name, "Adjust", section.planned_actual - section.available, "over plan")})
         # A category's own plan below what is already scheduled in it: the bill will overrun the plan.
         for row in c.budgets.below_scheduled(month_of(on), schedule=c.schedules.view()):
             items.append({"label": f"{row['name']} is planned below its bills",
-                          "detail": f"Planned {fmt(row['planned'])} {c.base_currency}; bills and loan payments "
-                                    f"scheduled this month come to {fmt(row['scheduled'])}.",
+                          "detail": f"Planned {fmt(row['planned'], 0)} {c.base_currency}; bills and loan payments "
+                                    f"scheduled this month come to {fmt(row['scheduled'], 0)}.",
                           "href": f"/budget?month={month_of(on)}&open_group=all#limit-{row['category_id']}",
                           "action": "Change the plan", "priority": 2,  # where its limit is typed (IV-3AL2)
                           "glance": glance(row["name"], "Adjust", row["scheduled"] - row["planned"], "below its bills")})
@@ -310,15 +305,15 @@ class ReviewInbox:
             if check.short_for == "goals":
                 items.append({"label": "This month's plan is short for your goals" if check.goals else
                                        "This month's plan is short for your emergency fund",
-                              "detail": f"It leaves {fmt(check.plan_saves)} {c.base_currency}; {check.needs_label} "
-                                        f"{fmt(check.needs)}. Plan {fmt(check.over_by)} less.",
+                              "detail": f"It leaves {fmt(check.plan_saves, 0)} {c.base_currency}; {check.needs_label} "
+                                        f"{fmt(check.needs, 0)}. Plan {fmt(check.over_by, 0)} less.",
                               "href": f"/budget?month={check.month}", "priority": 2,
                               "glance": glance("This month's plan", "Plan less", check.over_by,
                                                "short for your goals" if check.goals else "short for your emergency fund")})
             else:
                 items.append({"label": "This month's plan is below your savings target",
-                              "detail": f"It saves {fmt(check.planned_savings_rate)}% of income; your target is "
-                                        f"{fmt(check.target_percent)}%. Plan {fmt(check.over_by)} {c.base_currency} less.",
+                              "detail": f"It saves {fmt(check.planned_savings_rate, 0)}% of income; your target is "
+                                        f"{fmt(check.target_percent, 0)}%. Plan {fmt(check.over_by, 0)} {c.base_currency} less.",
                               "href": f"/budget?month={check.month}", "priority": 2,
                               "glance": glance("This month's plan", "Plan less", check.over_by, "below your savings target")})
         items.extend(self._smarter_plan(on, forecast.free_cash))
@@ -352,7 +347,7 @@ class ReviewInbox:
             currency = (self.c.accounts.get(offer["account_id"]).currency
                         if offer.get("account_id") else self.c.base_currency)
             items.append({"label": "Looks recurring",
-                          "detail": f"{offer['name']} · {fmt(offer['amount'])} {currency} · {offer['months']} months · last {offer['last_date']}.",
+                          "detail": f"{offer['name']} · {fmt(offer['amount'], 0)} {currency} · {offer['months']} months · last {offer['last_date']}.",
                           "href": "/plan/recurring#recurring-suggest", "action": "Track", "priority": 2,
                           "glance": glance(offer["name"], "Make it a bill", offer["amount"], "every month"),
                           "source_version": str(offer["counterparty_id"])})
@@ -431,37 +426,37 @@ class ReviewInbox:
         found = []
         for goal in c.health.goal_reach(month):
             # Nothing moves into a goal by itself: the pace holds only if he sets that much aside each month.
-            pace = (f"Setting aside {fmt(goal['can'])} a month, it is ready in {_month_name(goal['reached'])}."
+            pace = (f"Setting aside {fmt(goal['can'], 0)} a month, it is ready in {_month_name(goal['reached'])}."
                     if goal["reached"] else "Your plan leaves nothing for it.")
             # Free cash that already covers the goal is the quickest way: set it aside now (Reserves).
-            way = (f"Set aside {fmt(goal['missing'])} of your {fmt(free_cash)} free cash now, or give it a later date."
+            way = (f"Set aside {fmt(goal['missing'], 0)} of your {fmt(free_cash, 0)} free cash now, or give it a later date."
                    if free_cash >= goal["missing"] else "Give it a later date, or plan less.")
             found.append({"label": f"{goal['name']} will not be ready by its date",
-                          "detail": f"Due {goal['due_date']} · it needs {fmt(goal['need'])} {cur} a month and your plan "
-                                    f"leaves {fmt(goal['can'])} for it. {pace} {way}",
+                          "detail": f"Due {goal['due_date']} · it needs {fmt(goal['need'], 0)} {cur} a month and your plan "
+                                    f"leaves {fmt(goal['can'], 0)} for it. {pace} {way}",
                           "href": "/plan/reserves", "action": "See reserves", "priority": 2,
                           "glance": glance(goal["name"], "Set aside", goal["need"], "a month")})
         offer = c.health.raise_offer(month)
         if offer:
             found.append({"label": "Your income went up",
-                          "detail": f"Recurring expects {fmt(offer['recurring'])} {cur} a month, {fmt(offer['raise'])} "
-                                    f"more than your average of {fmt(offer['average'])}. Plan with it, or save the difference.",
+                          "detail": f"Recurring expects {fmt(offer['recurring'], 0)} {cur} a month, {fmt(offer['raise'], 0)} "
+                                    f"more than your average of {fmt(offer['average'], 0)}. Plan with it, or save the difference.",
                           "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose", "priority": 2,
                           "glance": glance("Your income", "Choose", offer["raise"], "more a month")})
         short = c.health.short_month(on)
         if short:
             found.append({"label": f"{_month_name(short['month'])} saved less than your target",
-                          "detail": f"It saved {fmt(short['rate'])}% of money in; your target is {fmt(short['limit'])}%, "
-                                    f"{fmt(short['short'])} {cur} more.",
+                          "detail": f"It saved {fmt(short['rate'], 0)}% of money in; your target is {fmt(short['limit'], 0)}%, "
+                                    f"{fmt(short['short'], 0)} {cur} more.",
                           "href": "/financial-health", "action": "See financial health", "priority": 2,
                           "glance": glance(_month_name(short["month"]), "See", short["short"], "short of your target")})
         below = {row["category_id"] for row in c.budgets.below_scheduled(month, schedule=c.schedules.view())}  # already named: plan below its bills
         for row in (row for row in c.budgets.over_twice(month, schedule=c.schedules.view()) if row["category_id"] not in below):
             first, second = (_month_name(key).split()[0] for key in row["months"])
-            detail = f"Over its plan in {first} and {second}, by up to {fmt(row['amount'])} {cur}."
+            detail = f"Over its plan in {first} and {second}, by up to {fmt(row['amount'], 0)} {cur}."
             if row["from_id"]:
                 found.append({"label": f"{row['name']} over plan two months running",
-                              "detail": f"{detail} Move {fmt(row['amount'])} from {row['from_name']}, "
+                              "detail": f"{detail} Move {fmt(row['amount'], 0)} from {row['from_name']}, "
                                         "which had that left both months.",
                               "href": f"/budget/move?month={month}&to={row['category_id']}&from={row['from_id']}"
                                       f"&amount={row['amount']}", "popup": True, "action": "Move it", "priority": 2,

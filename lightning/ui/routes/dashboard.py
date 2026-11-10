@@ -13,13 +13,8 @@ from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, month_of, parse_date, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.figures import FIGURES, label
-from lightning.core.money import ZERO, fmt as _fmt, to_decimal
+from lightning.core.money import ZERO, fmt, to_decimal
 from lightning.core.refs import DocType
-
-
-def fmt(value, places: int = 0, signed: bool = False) -> str:
-    """Reporting text rounds to the nearest unit (stored values keep their decimals)."""
-    return _fmt(value, places, signed)
 from lightning.investments.report import investing_rate, investment_period, saved_and_invested
 from lightning.planning.bill_state import NEEDS_ACTION, open_bills
 from lightning.planning.position import net_worth_bridge
@@ -351,7 +346,7 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
     stats = [{
         "key": "change", "surface": "hold", "label": label("change_in_net_worth" if owes else "change_in_what_you_own"),
         "value": nw_change, "kind": "money", "badge": {"tone": "flat" if as_of.day < calendar.monthrange(as_of.year, as_of.month)[1] else sign(nw_change), "text": period_name + (" so far" if as_of.day < calendar.monthrange(as_of.year, as_of.month)[1] else "")},
-        "sub": nw_reason if nw_change is None else f"{label(lead)} {fmt(position.net_worth if owes else position.what_you_own)}",
+        "sub": nw_reason if nw_change is None else f"{label(lead)} {fmt(position.net_worth if owes else position.what_you_own, 0)}",
         "spark": visuals.trend_spark(networth_trend), "spark_tone": "hold", "href": "#owned-heading",
     }]
     rate = cash_flow.savings_rate
@@ -361,13 +356,13 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
     if rate is None:
         savings_sub = "No money in this period"
     elif thin:
-        savings_sub = f"{fmt(-cash_flow.net)} more went out than the {fmt(cash_flow.inflows)} that came in"
+        savings_sub = f"{fmt(-cash_flow.net, 0)} more went out than the {fmt(cash_flow.inflows, 0)} that came in"
     else:
-        savings_sub = f"kept of {fmt(cash_flow.inflows)} {label('money_in').lower()}"
+        savings_sub = f"kept of {fmt(cash_flow.inflows, 0)} {label('money_in').lower()}"
     # Feedback ticket 97: spending more than came in is not a negative savings rate. The card says so, in rose.
     overspent = rate is not None and not thin and cash_flow.net < 0
     if overspent:
-        savings_sub = f"{fmt(-cash_flow.net)} more went out than the {fmt(cash_flow.inflows)} that came in"
+        savings_sub = f"{fmt(-cash_flow.net, 0)} more went out than the {fmt(cash_flow.inflows, 0)} that came in"
     stats.append({
         "key": "savings", "surface": "over" if thin or overspent else "in",
         "label": "Spent over money in" if overspent else label("savings_rate"),
@@ -397,7 +392,7 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
             "value": -left if left < 0 else left, "kind": "money",
             "badge": {"tone": "over" if left < 0 else "flat",
                       "text": "Over plan" if left < 0 else (f"{share:.0f}% used" if share is not None else month)},
-            "sub": f"of {fmt(planned)} {label('planned').lower()}",
+            "sub": f"of {fmt(planned, 0)} {label('planned').lower()}",
             "meter": {"width": float(min(max(share or 0, 0), 100)), "tone": "over" if left < 0 else "in"},
             "href": f"/budget?month={month}", "warn": keynotes.low_confidence_note(summary["low_confidence"]),
         })
@@ -442,7 +437,7 @@ def _safe_hero(f) -> dict:
     value, until = f.safe_to_spend, f.next_income_date
     days = (parse_date(until) - today()).days if until else 0
     if value < 0:
-        line = page_status.sentence("{amt} more is promised than your free cash.", amt=fmt(-value))
+        line = page_status.sentence("{amt} more is promised than your free cash.", amt=fmt(-value, 0))
     elif until and days > 0:
         line = page_status.sentence("On top of your plan until {sa}.", sa=until)  # no per-day figure: Budget owns it (BV-12A)
     else:
@@ -500,11 +495,9 @@ def _due_soon(c, attention=()) -> dict | None:
         amount = c.planning.amount_in_base(p, p.still_owed, day)
         days = 0 if late else (parse_date(p.due_date) - day).days
         rows.append({"name": p.item.name, "amount": amount, "late": late, "days": days, "pay": pay,
-                     "listed": pay.split("&")[0] in known, "line": _due_line(p.item.name, fmt(amount), days, late)})
+                     "listed": pay.split("&")[0] in known, "line": _due_line(p.item.name, fmt(amount, 0), days, late)})
     return {"count": len(rows), "total": sum((r["amount"] for r in rows), ZERO), "late": any(r["late"] for r in rows),
             "next": rows[0], "rows": rows, "extra": sum(1 for r in rows if not r["listed"])}
-
-
 
 
 def _period_chip(period, first, as_of) -> str:
@@ -518,7 +511,7 @@ def _safe_tile(f) -> dict:
     """Safe to spend on the Overview: the Cash planning figure (its home), as a card that opens it. ``f`` is today's
     forecast, the one Needs you already worked out."""
     until = f.next_income_date
-    share = f"{f.safe_to_spend / f.free_cash * 100:.0f}% of your {fmt(f.free_cash)} free cash" if f.free_cash > 0 else "No free cash today"
+    share = f"{f.safe_to_spend / f.free_cash * 100:.0f}% of your {fmt(f.free_cash, 0)} free cash" if f.free_cash > 0 else "No free cash today"
     return {"key": "safe", "surface": "over" if f.safe_to_spend < 0 else "hold", "label": label("safe_to_spend"),
             "value": f.safe_to_spend, "kind": "money",
             "badge": {"tone": "over" if f.safe_to_spend < 0 else "flat", "text": f"until {until}" if until else "3 months"},
