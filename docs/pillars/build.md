@@ -15,7 +15,6 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 | **IT-1E** | [Audit public repositories for personal data and security exposure](../../issues/1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | M | ready |
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](../../issues/1-easy-to-contribute/IT-1H-coordinate-packaged-dependency-refresh.md) | L | blocked on repository Actions allowlist update and native runtime acceptance |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](../../issues/1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | M | ready |
-| **IT-1R** | [Direct tests for investment_breakdown](../../issues/1-easy-to-contribute/IT-1R-investment-breakdown-direct-tests.md) | M | ready |
 | **IT-1W** | [Four wheel files (49 MB) sit in the repository root by accident](../../issues/1-easy-to-contribute/IT-1W-stray-wheels-in-the-repository-root.md) | S | ready |
 | **IT-1X** | [Two sessions take the same code](../../issues/1-easy-to-contribute/IT-1X-two-sessions-take-the-same-code.md) | M | ready |
 | **IT-1Y** | [Every page is asked once and measured](../../issues/1-easy-to-contribute/IT-1Y-every-page-asked-once-and-measured.md) | M | ready |

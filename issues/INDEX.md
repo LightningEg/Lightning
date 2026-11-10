@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 78 open items. Each folder holds its reports and its items.
+11 big pictures, 77 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -32,7 +32,6 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H4 | ↳ Validate | | | M | Opus | |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1N2 | ↳ Post the approved batch | | | S | Sonnet | |
-| **IT-1R** | [Direct tests for investment_breakdown](1-easy-to-contribute/IT-1R-investment-breakdown-direct-tests.md) ([#339](https://github.com/LightningEg/Lightning/issues/339)) | improvement, technical | Build | M | Sonnet | ready |
 | **IT-1W** | [Four wheel files (49 MB) sit in the repository root by accident - remove them and stop the next one](1-easy-to-contribute/IT-1W-stray-wheels-in-the-repository-root.md) | improvement, technical | Build | S | Sonnet | ready |
 | **IT-1X** | [Two sessions take the same code - report and item codes are handed out from the local checkout, and a guideline change can merge in one repository only](1-easy-to-contribute/IT-1X-two-sessions-take-the-same-code.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1X1 | ↳ Reserve a code in NOW.md before using it | | | S | Sonnet | |
@@ -46,7 +45,7 @@ Anyone can find how to help in one click and send a first fix the same evening.
 
 Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md) · [r33](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md).
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1S, 1T, 1U. Next free code: 1AA.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1R, 1S, 1T, 1U. Next free code: 1AA.
 
 ## 2 Safe for real money
 
