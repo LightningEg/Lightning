@@ -263,3 +263,157 @@ def test_the_open_file_screen_speaks_arabic(tmp_path):
         assert "ده مش ملف بروفايل من لايتنينج." in _post_file(browser, junk, PASSWORD).text
     finally:
         browser.__exit__(None, None, None)
+
+
+# --- BT-2AI3: a copy outside the app ---------------------------------------------------------------------------
+
+class _Folder:
+    """A fake of the phone's chosen folder (`BackupFolderBridge`)."""
+
+    def __init__(self, state="ok", name="Lightning copies"):
+        self.kind, self.name, self.files, self.asked, self.fail = state, name, {}, 0, False
+
+    def state(self):
+        return self.kind, self.name if self.kind == "ok" else ""
+
+    def choose(self):
+        self.asked += 1
+
+    def forget(self):
+        self.kind = "none"
+
+    def write(self, path, name):
+        from pathlib import Path
+        if self.fail:
+            return ""
+        given, n = name, 1
+        while given in self.files:  # the system renames a second file of the same name
+            n += 1
+            given = name.replace(".lightning", f" ({n}).lightning")
+        self.files[given] = Path(path).read_bytes()
+        return given
+
+    def names(self):
+        return list(self.files)
+
+    def delete(self, name):
+        return self.files.pop(name, None) is not None
+
+
+def _outside(tmp_path, folder):
+    from lightning.runtime.outside_copy import OutsideCopy
+    return OutsideCopy(folder, tmp_path / "files" / "outside-copy", tmp_path / "files" / "appdata" / "outside-copy.json")
+
+
+def _open_session(root):
+    session = ProfileSession(root)
+    session.prepare("Home", PASSWORD, PASSWORD, "Which school?", ANSWER)
+    session.confirm(session.pending.recovery)
+    session.container.account_flows.open_account("Current", "BANK", "2026-09-01", "10000", institution="CIB")
+    return session
+
+
+def test_the_outside_folder_gets_one_copy_a_day_and_keeps_the_newest_three(tmp_path, monkeypatch):
+    from lightning.runtime import outside_copy
+    folder = _Folder()
+    folder.files["holiday.jpg"] = b"theirs"
+    folder.files["Other-2020-01-01.lightning"] = b"not written by this phone"
+    outside = _outside(tmp_path, folder)
+    session = _open_session(tmp_path / "Documents" / "Lightning")
+    try:
+        profile = session.paths.profile.profile_id
+        assert outside.status(profile) == {"chosen": True, "folder": "Lightning copies", "last": "", "problem": ""}
+        days = ["2026-11-01", "2026-11-02", "2026-11-03", "2026-11-04", "2026-11-05"]
+        for day in days:
+            monkeypatch.setattr(outside_copy, "_today", lambda day=day: day)
+            monkeypatch.setattr(profile_file, "_today", lambda day=day: day)
+            assert outside.keep(session) is True
+            assert outside.keep(session) is False  # once a day
+        ours = sorted(name for name in folder.files if name.startswith("Home-"))
+        assert ours == [f"Home-{day}.lightning" for day in days[-3:]]
+        assert {"holiday.jpg", "Other-2020-01-01.lightning"} <= set(folder.files)  # never a file Lightning did not write
+        assert outside.status(profile)["last"] == "2026-11-05"
+        assert list((tmp_path / "files" / "outside-copy").iterdir()) == []  # nothing waits in the app's folder
+
+        carried = tmp_path / "carried.lightning"
+        carried.write_bytes(folder.files["Home-2026-11-05.lightning"])
+    finally:
+        session.close()
+    # After an uninstall the folder is all that is left: the copy opens on a fresh install.
+    assert read_profile_file(carried, PASSWORD, tmp_path / "fresh").name == "Home"
+
+
+def test_a_lost_folder_or_a_failed_copy_is_said_and_never_breaks_a_page(tmp_path, monkeypatch):
+    from lightning.runtime import outside_copy
+    folder = _Folder()
+    outside = _outside(tmp_path, folder)
+    session = _open_session(tmp_path / "Documents" / "Lightning")
+    try:
+        profile = session.paths.profile.profile_id
+        folder.fail = True
+        assert outside.keep(session) is False
+        assert outside.status(profile)["problem"] == outside_copy.WRITE_FAILED
+        folder.fail = False
+        assert outside.keep(session) is False          # not hammered: once a day
+        outside.choose()                               # choosing the folder again tries again at once
+        assert folder.asked == 1 and outside.keep(session) is True
+        assert outside.status(profile)["problem"] == "" and outside.status(profile)["last"]
+
+        folder.kind = "lost"
+        assert outside.keep(session) is False
+        assert outside.status(profile) == {"chosen": True, "folder": "", "last": "", "problem": outside_copy.FOLDER_LOST}
+
+        monkeypatch.setattr(session, "write_profile_file", lambda out: (_ for _ in ()).throw(OSError("disk")))
+        folder.kind, folder.name = "ok", "Another folder"
+        assert outside.keep(session) is False          # an error is a line in Settings, not an exception
+        assert outside.status(profile)["problem"] == outside_copy.WRITE_FAILED
+
+        kept = dict(folder.files)
+        outside.stop()
+        assert folder.files == kept and outside.status(profile)["chosen"] is False  # the copies stay the person's
+    finally:
+        session.close()
+
+
+def test_phone_settings_offers_the_outside_copy_and_writes_it(tmp_path):
+    import re
+    from fastapi.testclient import TestClient
+    from lightning.runtime.app import profile_app
+    from lightning.runtime.http import Credentials
+    from tests.test_phone_downloads import _created
+    folder = _Folder(state="none")
+    cfg = Credentials("http://127.0.0.1:9872")
+    app = profile_app(cfg, tmp_path / "Documents" / "Lightning", phone=True, outside=_outside(tmp_path, folder))
+    with TestClient(app, base_url=cfg.origin, headers={"Origin": cfg.origin}) as phone:
+        phone.get("/__launch", params={"code": cfg.launch_code})
+        _created(phone)
+        page = phone.get("/settings").text
+        assert "Keep a copy outside the app" in page and "Choose a folder" in page and folder.files == {}
+        csrf = re.search(r'action="/profiles/outside-copy".*?name="csrf" value="([^"]+)"', page, re.S).group(1)
+        answer = phone.post("/profiles/outside-copy", data={"csrf": csrf, "action": "choose"}, follow_redirects=False)
+        assert answer.status_code == 303 and folder.asked == 1
+        folder.kind = "ok"                              # the person picked a folder; the app shows Settings again
+        page = phone.get("/settings").text
+        assert len(folder.files) == 1 and next(iter(folder.files)).startswith("Home-")
+        row = page[page.index("Keep a copy outside the app"):][:200]
+        assert "Last copy: Today, in Lightning copies." in row and "Change folder" in page, row
+        phone.post("/profiles/outside-copy", data={"csrf": csrf, "action": "stop"})
+        assert "Choose a folder" in phone.get("/settings").text and len(folder.files) == 1
+    # A PC never offers it, and neither does a phone without the bridge.
+    pc = profile_app(Credentials("http://127.0.0.1:9873"), tmp_path / "pc", outside=_outside(tmp_path / "pc-files", _Folder()))
+    assert pc.gate.outside is None
+
+
+def test_the_android_shell_keeps_the_folder_permission_and_writes_through_documents():
+    from pathlib import Path
+    java = Path(__file__).resolve().parents[1] / "android/app/src/main/java/org/lightning/app"
+    bridge = (java / "BackupFolderBridge.java").read_text()
+    main = (java / "MainActivity.java").read_text()
+    assert "Intent.ACTION_OPEN_DOCUMENT_TREE" in bridge and "takePersistableUriPermission(tree, FLAGS)" in bridge
+    assert "DocumentsContract.createDocument" in bridge and "DocumentsContract.deleteDocument" in bridge
+    assert '"outside-copy"' in bridge                    # only a file from the app's own staging folder is copied out
+    assert "BackupFolderBridge.activity = this;" in main and "BackupFolderBridge.REQUEST_FOLDER" in main
+    manifest = (java.parents[3] / "AndroidManifest.xml").read_text()
+    assert "MANAGE_EXTERNAL_STORAGE" not in manifest and "WRITE_EXTERNAL_STORAGE" not in manifest  # no storage permission
+    adapter = (java.parents[3] / "python/lightning_android.py").read_text()
+    assert 'jclass("org.lightning.app.BackupFolderBridge")' in adapter and "outside=outside" in adapter
