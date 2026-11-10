@@ -3,6 +3,8 @@ from __future__ import annotations
 import re
 from dataclasses import replace
 from decimal import Decimal
+from datetime import timedelta
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
@@ -407,7 +409,13 @@ def _capture_context(c, account) -> dict:
     from lightning.core.dates import _local_now
     from lightning.planning import bill_state
     hour = _local_now().hour
-    return {"entry_accounts": [{"id": a.id, "name": a.name} for a in _entry_accounts(c)],
+    # From lists accounts money is paid from (cash and bank), plus the one this sheet is already for.
+    spend = [a for a in _entry_accounts(c) if a.account_type.value in ("CASH", "BANK") or a.id == account.id]
+    return {"entry_accounts": [{"id": a.id, "name": a.name} for a in spend],
+            "usual_payees": [p for p in c.transactions.usual_payees()
+                             if p["account_id"] in {a.id for a in spend}][:3],
+            "usual_accounts": {name: a_id for name, a_id in c.transactions.usual_accounts().items()
+                               if a_id in {a.id for a in spend}},
             "bills_due": len(bill_state.unpaid_bills(c.planning, today(), bill_state.SOON_DAYS)),
             "chips_out": named(c.transactions.usual_capture_categories("out", hour=hour)),
             "chips_in": named(c.transactions.usual_capture_categories("in", hour=hour))}
@@ -456,7 +464,8 @@ async def new_transaction_popup(request: Request, account_id: int):
               "category_id": _category_id(request), "counterparty": str(asked.get("counterparty", ""))[:80],
               # HO-1: Held for others' Give back and Spend for them open this sheet with the person chosen
               "owner_id": str(asked.get("owner_id", "")) if str(asked.get("owner_id", "")).isdigit() else "",
-              "to_account_id": "", "notes": str(asked.get("notes", ""))[:200],
+              "to_account_id": str(asked.get("to_account_id", "")) if str(asked.get("to_account_id", "")).isdigit() else "",
+              "notes": str(asked.get("notes", ""))[:200], "repeat": "1" if asked.get("repeat") else "",
               "sms_fp": str(asked.get("sms_fp", "")) if re.fullmatch(r"[0-9a-f]{32}", str(asked.get("sms_fp", ""))) else "",
               "sms_ending": str(asked.get("sms_ending", "")) if re.fullmatch(r"\d{4}|salary", str(asked.get("sms_ending", ""))) else "",
               "return_to": _safe_return(asked.get("return_to"), f"/accounts/{account_id}")}
@@ -576,6 +585,13 @@ async def save_transaction_popup(request: Request, account_id: int):
                 _remember_sms(c, form, account_id)
         if earlier is not None:
             return redirect(values["return_to"], "Saved.")
+        if str(form.get("again", "")) == "1" and earlier is None:  # Save and add another: a fresh sheet, same account and day
+            back = "/accounts/%d/transaction/new?%s" % (account_id, urlencode({
+                "date": values["date"], "return_to": values["return_to"]}))
+            response = redirect(back, "Saved. Add the next one.")
+            response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,
+                                httponly=True, samesite="lax")
+            return response
         feedback = register._budget_feedback(c, txn)
         if matched_reserve < 0:
             feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
@@ -681,7 +697,11 @@ def _bank_check_page(request, c, account_id: int, through: str, raw_balance: str
     except LightningError as exc:
         error = exc.message
     dated = len(through) == 10 and through[4] == "-"
-    return render(request, "accounts/reconcile.html", account=account, through=through, balance_input=raw_balance,
+    recent = []
+    if dated:  # the account's last rows beside the form: what to compare the bank's figure with
+        first = (parse_date(through) - timedelta(days=60)).isoformat()
+        recent = list(reversed(c.reporting.statement(account_id, first, through).rows))[:6]
+    return render(request, "accounts/reconcile.html", account=account, recent=recent, through=through, balance_input=raw_balance,
                   lightning_balance=c.reconciliation.balance(account_id, through) if dated else None,
                   check=check, checked_through=c.reconciliation.checked_through(account_id), error=error,
                   month_start=through[:8] + "01" if dated else "", status_code=status_code)

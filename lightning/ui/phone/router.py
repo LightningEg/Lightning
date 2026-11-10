@@ -54,9 +54,9 @@ def phone_router() -> APIRouter:
     """Every phone-owned URL. Home is served at /home while the old Overview keeps /; the slot URLs switch over
     together with the tab bar (3AY10)."""
     router = APIRouter()
-    started = APIRouter(route_class=_plain(when=lambda request: bool(container(request).accounts.list())))
+    started = APIRouter(route_class=_plain("msg", when=lambda request: bool(container(request).accounts.list())))
     slots = APIRouter(route_class=_plain())              # a bare slot URL: no query at all
-    months = APIRouter(route_class=_plain("month"))      # Budget keeps its month stepper
+    months = APIRouter(route_class=_plain("month", "msg"))      # Budget keeps its month stepper
 
     @router.get("/home")
     @started.get("/")

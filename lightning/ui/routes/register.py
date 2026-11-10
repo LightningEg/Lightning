@@ -32,7 +32,7 @@ from ..web import settled_save, container, render, _shift_month as shift_month
 from ..charts import class_tone
 from ..i18n import translate
 
-ENTRY_FIELDS = ("date", "account_id", "counterparty", "counterparty_choice", "counterparty_typed", "category", "category_choice", "whom", "notes", "amount", "early_checked")
+ENTRY_FIELDS = ("date", "account_id", "counterparty", "counterparty_choice", "counterparty_typed", "category", "category_choice", "whom", "notes", "amount", "early_checked", "sign_checked")
 FAR_PAST, FAR_FUTURE = "1900-01-01", "9999-12-31"
 # The phone's chips narrow the list by what a row did (?kind=): money in, money out, a move between accounts, or money
 # in or out nobody has sorted into a category yet. Without ?kind= the register is exactly what it was.
@@ -796,6 +796,22 @@ def check_before_opening(c, account_id: int | None, day: str, values: dict) -> N
                           "to keep it.".format(when=when, opened=opened), "date")
 
 
+def check_forgotten_minus(values: dict, category, other_id) -> None:
+    """Ask once when a positive amount lands on a spending category (IV-12W, owner 2026-11-10): the minus may have been
+    forgotten, and saved as typed it is money back, a refund. The second Save, with the same amount, keeps it."""
+    if other_id or category is None or category.is_system or category.movement.value != "OUTFLOW":
+        return
+    try:
+        amount = to_decimal(values["amount"], "amount")
+    except (LightningError, ValueError):
+        return  # a bad amount is refused by the save itself
+    if amount <= ZERO or values.get("sign_checked") == values["amount"].strip():
+        return
+    values["sign_checked"] = values["amount"].strip()
+    raise ValidationError("Refund of {amount}, or a payment? For a payment put a minus before the amount; press Save "
+                          "again to keep it as a refund.".format(amount=fmt(amount, 0)), "amount")
+
+
 def resent_guard(c, form):
     """On a journal profile a resent form reuses its first proposal (2J); on every other profile, nothing."""
     scope = getattr(c, "journal_submission", None)
@@ -819,6 +835,7 @@ async def create(request: Request, account_id: int | None, *, auto_reserves: boo
             check_before_opening(c, row_account, entry["date"], entry)
             other_id, category_id, counterparty = _resolve(request, row_account, entry)
             category = c.categories.get(category_id) if category_id else None
+            check_forgotten_minus(entry, category, other_id)
             owner_name = (_transfer_custody_owner(c, entry) if other_id else _custody_owner(c, entry, category))
             owner_party = c.counterparties.resolve(owner_name) if owner_name else None
             txn = c.transactions.record_in_account(row_account, entry["date"], entry["amount"], category_id, other_id,

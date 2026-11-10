@@ -14,6 +14,7 @@
 <section class="app-popup-content phone-entry{{ ' is-new' if fresh }}" data-transaction-form data-account-name="{{ account.name }}" data-currency="{{ account.currency }}">
   <h2 data-popup-title class="phone-sheet-title">{{ title|tr(locale) }}</h2>
   {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+  {% if fresh and request.query_params.get('msg') %}<p class="phone-note" role="status">{{ request.query_params.get('msg')|tr(locale) }}</p>{% endif %}
   <form method="post" action="{{ action }}" class="phone-form" {% if txn_id %}data-popup-autosave{% else %}data-phone-toast{% endif %}>
     <input type="hidden" name="return_to" value="{{ return_to }}">
     <input type="hidden" name="early_checked" value="{{ values.early_checked or '' }}">
@@ -30,10 +31,13 @@
       {% if fresh and bills_due %}<a class="phone-chip phone-pay-bill" href="/add/bills?return_to={{ return_to|urlencode }}">{{ 'Pay a bill'|tr(locale) }}</a>{% endif %}
       {% if fresh %}<button type="button" class="phone-chip phone-sms-paste" data-sms-paste data-sms-url="/sms/read-one" hidden>{{ 'Paste SMS'|tr(locale) }}</button>{% endif %}
     </div>{% endif %}
+    {% if fresh and usual_payees and not values.repeat and not values.amount %}<div class="phone-cat-chips phone-usual" role="group" aria-label="{{ 'Usual entries'|tr(locale) }}" data-usual-entries>
+      {% for p in usual_payees %}<a class="phone-chip" data-popup-open href="/accounts/{{ p.account_id }}/transaction/new?{{ {'kind': p.kind, 'counterparty': p.name, 'category_id': p.category_id, 'return_to': return_to}|urlencode }}">{{ p.name }}</a>{% endfor %}
+    </div>{% endif %}
     {% if fresh %}<p class="phone-note phone-sms-status" data-sms-paste-status role="status" aria-live="polite"></p>{% endif %}
     <div class="field phone-amount {{ 'has-error' if error_field == 'amount' }}">
       <label for="popup-amount">{{ 'Amount'|tr(locale) }}</label>
-      <div class="phone-amount-box"><input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" placeholder="0" required autocomplete="off" enterkeyhint="next"{% if fresh %} autofocus{% endif %} {{ 'readonly' if split_categories }}><span class="phone-amount-unit" aria-hidden="true">{{ account.currency }}</span></div>
+      <div class="phone-amount-box"><input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" placeholder="0" required autocomplete="off" enterkeyhint="next"{% if fresh %} autofocus{% endif %}{% if values.repeat %} data-repeat{% endif %} {{ 'readonly' if split_categories }}><span class="phone-amount-unit" aria-hidden="true">{{ account.currency }}</span></div>
       {% if error_field == 'amount' %}<small class="field-error">{{ error|tr(locale) }}</small>{% endif %}
     </div>
     {% if fresh and entry_accounts|length > 1 %}<div class="field phone-account-field">
@@ -65,7 +69,7 @@
     <div class="field money-only {{ 'has-error' if error_field == 'counterparty' }}" {{ 'hidden' if values.kind == 'transfer' }}>
       <label for="popup-counterparty">{{ 'Who'|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label>
       <input id="popup-counterparty" name="counterparty" value="{{ values.counterparty }}" list="popup-counterparties" data-own-suggestions placeholder="{{ 'Who you paid or who paid you'|tr(locale) }}" autocomplete="off" enterkeyhint="next">
-      <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}<option value="{{ person.name }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}>{% endfor %}</datalist>
+      <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}{% set usual_account = (usual_accounts or {}).get(person.name) %}<option value="{{ person.name }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}{% if usual_account %} data-account="{{ usual_account }}"{% endif %}>{% endfor %}</datalist>
       {% if error_field == 'counterparty' %}<small class="field-error">{{ "Choose a saved counterparty."|tr(locale) }}</small>{% endif %}
     </div>
     <div class="field {{ 'has-error' if error_field == 'date' }}">
@@ -84,7 +88,7 @@
       </div>
     </details>
     <p class="small muted inline-save-status" data-popup-status aria-live="polite"></p>
-    {% if not txn_id %}<div class="phone-save-bar"><button type="submit" class="btn primary phone-save">{{ 'Save'|tr(locale) }}</button></div>{% endif %}
+    {% if not txn_id %}<div class="phone-save-bar"><button type="submit" class="btn primary phone-save">{{ 'Save'|tr(locale) }}</button>{% if fresh %}<button type="submit" name="again" value="1" class="btn phone-save-again">{{ 'Save and add another'|tr(locale) }}</button>{% endif %}</div>{% endif %}
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
   {% if txn_id %}<div class="phone-sheet-foot"><a class="phone-quiet" href="/transactions/{{ txn_id }}">{{ "All details"|tr(locale) }}</a>
   <form method="post" action="/transactions/{{ txn_id }}/delete" data-confirm-delete><button class="btn danger phone-save">{{ 'Delete'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endif %}

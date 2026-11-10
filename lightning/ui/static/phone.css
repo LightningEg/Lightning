@@ -201,6 +201,7 @@ html.phone .main :is(input, select, textarea):not([type=hidden], [type=checkbox]
 .phone-save-bar { position: sticky; bottom: 0; z-index: 2; margin: 4px -16px -16px; padding: 10px 16px calc(12px + env(safe-area-inset-bottom));
   background: var(--surface, #fff); border-top: 1px solid var(--c-line); }
 .phone-save-bar .phone-save { margin: 0; }
+.phone-save-bar .phone-save-again { margin: 8px 0 0; width: 100%; }
 .phone-txn-head { display: flex; align-items: center; gap: 12px; padding-inline-end: 44px; }
 .phone-txn-head-text { min-width: 0; }
 .phone-txn-head .phone-note { margin: 2px 0 0; }

@@ -952,6 +952,10 @@ if (ledger) {
     if (editSelected) editSelected.title = t("Opens the first of {count} editable rows; the next stays selected.", {count: eligible});
     const categoryButton = document.querySelector("#bulk-category-form button.btn");
     if (categoryButton) categoryButton.textContent = t("Set category for {count}", {count: eligible});
+    // An action that would touch no selected row is not offered (IV-12W): "Set category for 0" beside "Delete 2" says nothing useful.
+    const categoryForm = document.getElementById("bulk-category-form");
+    if (categoryForm) categoryForm.hidden = eligible === 0;
+    if (editSelected) editSelected.hidden = eligible === 0;
     label("export-selected", "Export {count}", {count: ids.length});
     label("delete-selected", "Delete {count}", {count: ids.length});
     const scope = document.getElementById("selection-scope");
@@ -1139,6 +1143,7 @@ if (ledger) {
     menu.querySelector("[data-context-save]").hidden = !editing;
     menu.querySelector("[data-context-cancel]").hidden = !editing;
     menu.querySelector("[data-context-edit]").hidden = editing;
+    menu.querySelector("[data-context-repeat]").hidden = editing || !menu.dataset.repeat;
   };
   ledger.addEventListener("contextmenu", (event) => {
     if (!menu) return;
@@ -1159,6 +1164,12 @@ if (ledger) {
       delete menu.dataset.editing;
       menu.dataset.href = row.dataset.href;
       menu.dataset.txn = checkbox.value;
+      if (row.dataset.repeatAccount) {
+        const d = row.dataset;
+        const q = new URLSearchParams({ kind: d.repeatWay, amount: d.repeatAmount, counterparty: d.repeatPayee, category_id: d.repeatCategory, repeat: "1" });
+        for (const [key, value] of [...q]) if (!value) q.delete(key);
+        menu.dataset.repeat = `/accounts/${d.repeatAccount}/transaction/new?${q}`;
+      } else delete menu.dataset.repeat;
     }
     showItems(Boolean(editing));
     menu.hidden = false;
@@ -1168,6 +1179,11 @@ if (ledger) {
     syncSelection();
   });
   menu?.querySelector("[data-context-edit]").addEventListener("click", () => { if (menu.dataset.href) location.href = menu.dataset.href; });
+  menu?.querySelector("[data-context-repeat]").addEventListener("click", () => {  // Repeat: Add filled from this row, dated today (NF-7AM)
+    menu.hidden = true;
+    if (menu.dataset.repeat && window.lightningPopupOpen) window.lightningPopupOpen(menu.dataset.repeat);
+    else if (menu.dataset.repeat) location.href = menu.dataset.repeat;
+  });
   menu?.querySelector("[data-context-details]").addEventListener("click", () => { if (menu.dataset.txn) location.href = `/transactions/${menu.dataset.txn}`; });
   menu?.querySelector("[data-context-save]").addEventListener("click", () => { menu.hidden = true; document.getElementById("f-edit")?.requestSubmit(); });
   menu?.querySelector("[data-context-cancel]").addEventListener("click", () => { if (menu.dataset.cancel) location.href = menu.dataset.cancel; });
@@ -2094,7 +2110,7 @@ initCurrencySearch();
     snapshot = formState();
     // Money fields are formatted by a MutationObserver after this runs; take the snapshot after it.
     setTimeout(() => { snapshot = formState(); dirty = false; }, 0);
-    requestAnimationFrame(() => (content.querySelector("[autofocus], input:not([type=hidden]), select, button, a[href]") ||
+    requestAnimationFrame(() => (content.querySelector("[autofocus]") || content.querySelector("input:not([type=hidden]), select, button, a[href]") ||
       dialog.querySelector("[data-popup-close]")).focus());
   };
   const initPopupFields = () => {
@@ -2217,7 +2233,17 @@ initCurrencySearch();
       if (!category || category.disabled || !known || (category.value && category.value !== filled)) return;
       const typed = counterparty.value.trim().toLocaleLowerCase();
       const match = [...known.options].find((option) => option.value.toLocaleLowerCase() === typed);
+      const usualAccount = match?.dataset.account || "";
+      const accountChip = form.querySelector("[data-account-chip]");
       const wanted = match?.dataset.category || "";
+      if (usualAccount && accountChip && accountChip.value !== usualAccount && [...accountChip.options].some((o) => o.value === usualAccount)) {
+        // The payee's usual account (3 of its last 5): the sheet reopens for it, with what was typed carried over.
+        const want = wanted && [...category.options].some((item) => item.value === wanted && !item.hidden) ? wanted : "";
+        if (want) category.value = want;
+        accountChip.value = usualAccount;
+        accountChip.dispatchEvent(new Event("change", { bubbles: true }));
+        return;
+      }
       const option = wanted && [...category.options].find((item) => item.value === wanted && !item.hidden);
       if (!option) return;
       filled = wanted;
@@ -2296,13 +2322,14 @@ initCurrencySearch();
     const form = event.target;
     if (!(form instanceof HTMLFormElement) || form.target === "_blank" || form.method.toLowerCase() === "get") return;
     event.preventDefault();
-    const submit = form.querySelector("button[type=submit]:not([form]),button:not([type])") || form.querySelector("button[type=submit]");
+    const submit = event.submitter || form.querySelector("button[type=submit]:not([form]),button:not([type])") || form.querySelector("button[type=submit]");
+    const again = !!(event.submitter && event.submitter.name === "again");  // Save and add another: the sheet comes back (NF-7AM)
     const status = content.querySelector("[data-popup-status]");
     if (status) status.textContent = t("Saving…");
     if (submit) submit.disabled = true;
     try {
       const response = await fetch(form.action || location.href, {
-        method: (form.method || "POST").toUpperCase(), body: new FormData(form),
+        method: (form.method || "POST").toUpperCase(), body: again ? new FormData(form, event.submitter) : new FormData(form),
         headers: { "X-Lightning-Popup": "1" }, redirect: "follow"
       });
       const text = await response.text();
@@ -2315,7 +2342,7 @@ initCurrencySearch();
       } else {
         const msg = new URL(response.url).searchParams.get("msg");
         const goToResponse = form.dataset.popupReturn === "response";
-        const keepInPopup = form.dataset.popupReturn === "popup";
+        const keepInPopup = form.dataset.popupReturn === "popup" || again;
         if (keepInPopup) {
           const doc = new DOMParser().parseFromString(text, "text/html");
           show(extract(doc), doc.title);

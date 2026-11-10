@@ -3134,7 +3134,7 @@ html[dir="rtl"] .code, html[dir="rtl"] code, html[dir="rtl"] [data-ref], html[di
 .main .register-rows .col-date { width:132px; }
 .main .register-rows .col-counterparty { width:23%; }
 .main .register-rows .col-category { width:20%; }
-.main .register-rows .col-notes { width:13%; }
+.main .register-rows .col-notes { width:auto; min-width:160px; } /* Notes is free text: it takes the spare width (IV-12W) */
 .main .register-rows .col-amount { width:160px; }
 .main .register-rows .col-balance { width:160px; }
 .main .register-rows thead th { padding:10px 8px!important; white-space:nowrap; color:var(--ink); font-size:var(--fs-meta); border-bottom:1px solid var(--line); }

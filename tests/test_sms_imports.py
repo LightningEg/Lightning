@@ -147,7 +147,7 @@ def test_from_sms_shows_what_it_could_not_read(c, setup):
     assert "1 kept for you" in page.text and "Messages kept for you" in page.text
     enter = c.sms_imports.unread()[0]
     from lightning.sms_imports import prefill
-    assert prefill(enter["text"]) == {"amount": "900.00", "kind": "out"}
+    assert prefill(enter["text"])["amount"] == "900.00" and prefill(enter["text"])["kind"] == "out"
     assert "amount=900.00" in page.text and "sms_fp=" in page.text  # Enter it opens Add filled from the message
     c.sms_imports.mark_seen(enter["id"].split("@")[0])  # saving that entry takes it off From SMS
     assert c.sms_imports.unread() == []
@@ -441,3 +441,56 @@ def test_arabic_decimal_and_thousands_marks_read_as_the_right_amount():
     tx = parse_sms("تم خصم ١٤٧٫٨٧ جم من بطاقة الخصم المباشر رقم ١٢٣٤ عند كارفور يوم ٠٦/١١/٢٦")
     assert tx is not None and tx.amount == Decimal("147.87")
     assert prefill("تم خصم ١٬٢٥٠٫٥٠ جم من حسابك")["amount"] == "1250.50"
+
+
+def test_prefill_reads_date_shop_and_foreign_currency():
+    """IV-7AJ: a message no pattern read still gives its amount, its own day and the shop after "at"; a dollar purchase
+    is kept for the person (looks like money), never read as pounds."""
+    from lightning.sms_imports import looks_like_money, prefill
+
+    card = "Your debit card ending with 1234 was charged EGP 250.00 at TALABAT on 08/11/26"
+    got = prefill(card)
+    assert (got["amount"], got["kind"], got["date"], got["counterparty"], got["currency"]) == \
+        ("250.00", "out", "2026-11-08", "TALABAT", "")
+    usd = "Purchase: charged USD 12.99 at NETFLIX.COM"
+    assert looks_like_money(usd)
+    got = prefill(usd)
+    assert (got["amount"], got["currency"], got["counterparty"]) == ("12.99", "USD", "NETFLIX.COM")
+
+
+def test_read_one_falls_back_to_prefill(c, setup):
+    """IV-7AJ: Paste SMS on the phone says "Check the account and who" instead of "No amount found"."""
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    client = TestClient(create_app(c))
+    r = client.post("/sms/read-one", data={"text": "Purchase: charged USD 12.99 at NETFLIX.COM on 08/11/26"})
+    assert r.status_code == 200
+    body = r.json()
+    assert body["amount"] == "12.99" and body["currency"] == "USD" and body["date"] == "2026-11-08"
+    assert body["counterparty"] == "NETFLIX.COM" and body["note"] == "Check the account and who."
+    nothing = client.post("/sms/read-one", data={"text": "Hello there"})
+    assert nothing.status_code == 422
+
+
+def test_stated_balance_gap_is_one_quiet_row_that_clears(c, setup):
+    """NF-7AP: a bank message's stated balance is compared with the ledger; a gap is one To do row, never an adjustment."""
+    import json
+    from datetime import date
+    from lightning.sms_imports import STATED_KEY
+    from lightning.workflows.review import ReviewInbox
+    accounts, _ = setup
+    cib = accounts["cib"]
+    c.sms_imports.assign("7351", cib.id)
+    withdrawal = [s for s in SAMPLES["samples"] if s["bank"] == "CIB" and "12904.50" in s["text"]][0]
+    c.sms_imports.read([(withdrawal["sender"], withdrawal["text"], datetime.fromisoformat(withdrawal["received"]))])
+    stated = json.loads(c.settings.get(STATED_KEY))[str(cib.id)]
+    assert stated["balance"] == "12904.50"
+    assert c.sms_imports.balance_gaps() == []        # its own rows still wait in review: the gap may be those
+    c.settings.set(STATED_KEY, json.dumps({str(cib.id): {"date": "2026-09-30", "balance": "49650.00"}}))
+    c.bank_imports.db.execute("DELETE FROM bank_import_rows")  # nothing waits any more
+    gaps = c.sms_imports.balance_gaps()
+    assert [(g["account_id"], g["difference"]) for g in gaps] == [(cib.id, Decimal("-350"))]
+    rows = [i for i in ReviewInbox(c).items(date(2026, 10, 5)) if "off the bank's balance" in i["label"]]
+    assert len(rows) == 1 and "350" in rows[0]["label"] and str(cib.id) in rows[0]["href"]
+    c.settings.set(STATED_KEY, json.dumps({str(cib.id): {"date": "2026-09-30", "balance": "50000.00"}}))  # a later message agrees
+    assert c.sms_imports.balance_gaps() == []

@@ -64,6 +64,30 @@ def usual_categories(repo, *, window: int, minimum: int, days: int) -> dict[str,
     return usual
 
 
+def usual_accounts(repo, *, window: int, minimum: int, days: int) -> dict[str, int]:
+    """The account each counterparty is usually paid from or into: the same habit rule as `usual_categories` (3 of its
+    last 5, or all of them while it has 2 to 4, within 180 days of its newest). {name: account_id}."""
+    tally: dict[str, dict[int, int]] = {}
+    totals: dict[str, int] = {}
+    newest: dict = {}
+    for row in repo.recent_accounts(window):
+        name = row["counterparty"]
+        day = parse_date(row["date"])
+        newest.setdefault(name, day)  # rows come newest first
+        if (newest[name] - day).days > days:
+            continue
+        seen = tally.setdefault(name, {})
+        seen[int(row["account_id"])] = seen.get(int(row["account_id"]), 0) + 1
+        totals[name] = totals.get(name, 0) + 1
+    usual = {}
+    for name, seen in tally.items():
+        account_id, count = max(seen.items(), key=lambda kv: kv[1])
+        total = totals[name]
+        if count >= minimum or (2 <= total < window and count == total):
+            usual[name] = account_id
+    return usual
+
+
 def usual_capture_categories(repo, categories, kind: str, limit: int, *, days: int, hour: int | None = None) -> list[int]:
     """The categories the Add sheet offers first as chips (3AN3): what this person files money of that kind
     under most often in the last 180 days, then the other categories in the tree's own order until there are
