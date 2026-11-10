@@ -343,7 +343,7 @@ html[dir="rtl"].phone .chevron.chevron-back:has(> path) { transform: none; }
 /* C08: the list grouped by day; search full width, then chips. */
 .phone-search input { width: 100%; }
 .phone-chips { display: flex; gap: 8px; margin: 10px 0 4px; flex-wrap: wrap; }
-.phone-chip { display: inline-flex; align-items: center; min-height: 40px; padding: 0 14px; border-radius: 999px;
+.phone-chip { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 14px; border-radius: 999px;
   background: var(--c-well); color: var(--c-ink); font-weight: 600; text-decoration: none; }
 .phone-chip.is-chosen { background: var(--c-nile); color: #fff; }
 .phone-chip.is-chosen a { color: #fff; }

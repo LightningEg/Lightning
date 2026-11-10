@@ -7,7 +7,7 @@
 {% set s = screen %}
 <div class="phone-chips" role="tablist">
   <a class="phone-chip{{ ' is-chosen' if s.tab == 'all' }}" role="tab" aria-selected="{{ 'true' if s.tab == 'all' else 'false' }}" href="/activity">{{ 'All'|tr(locale) }}</a>
-  <a class="phone-chip{{ ' is-chosen' if s.tab == 'review' }}" role="tab" aria-selected="{{ 'true' if s.tab == 'review' else 'false' }}" href="/activity?tab=review">{{ 'To review'|tr(locale) }}{% if s.review_total %} <b>{{ s.review_total }}</b>{% endif %}</a>
+  <a class="phone-chip{{ ' is-chosen' if s.tab == 'review' }}" role="tab" aria-selected="{{ 'true' if s.tab == 'review' else 'false' }}" href="/activity?tab=review"><span>{{ 'To review'|tr(locale) }}</span>{% if s.review_total %}<b>{{ s.review_total }}</b>{% endif %}</a>
 </div>
 {% if s.tab == 'all' and s.ledger_empty %}
 <p class="phone-note">{{ 'No transactions yet.'|tr(locale) }}</p>
