@@ -7,6 +7,8 @@ with ``partials/ai_prompt.html`` (Copy and Edit; the text is never open on the p
 
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 import re
 
 from lightning.core.figures import FIGURES
@@ -46,7 +48,7 @@ def rejected_csv_prompt(account_name: str, currency: str, headers: list[str], pr
     more = (f"\n- ... and {len(problems) - len(shown)} more lines with the same kinds of problem"
             if len(problems) > len(shown) else "")
     count = failing_rows or len(problems)
-    rows = f"{count} row{'s' if count != 1 else ''}" if count else "the file"
+    rows = f"{counted(count, 'row')}" if count else "the file"
     return f'''I tried to import a bank statement CSV into Lightning, a personal finance app, and it rejected {rows}. Help me fix the file.
 Account: {account_name}
 Currency: {currency}

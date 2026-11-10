@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 
 from fastapi import APIRouter, Request
 
@@ -153,7 +155,7 @@ async def match_all_suggested_receipts(request: Request, account_id: int, certif
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose valid bank receipts."
         return _page(request, account_id, error=message, status_code=400)
-    return redirect(back, f"Matched {result['matched']} interest payment(s) to bank receipts.")
+    return redirect(back, f"Matched {counted(result['matched'], 'interest payment')} to bank receipts.")
 
 
 @router.post("/{account_id:int}/certificates/{certificate_id:int}/interest/{event_date}/confirm")
@@ -170,7 +172,7 @@ async def confirm_interest_receipts(request: Request, account_id: int, certifica
         message = exc.message if isinstance(exc, LightningError) else "Choose valid bank receipts."
         return _page(request, account_id, error=message, status_code=400)
     return redirect(f"/deposits/{account_id}",
-                    f"Matched {len(result['receipts'])} bank receipt(s); {result['remaining']} remains expected.")
+                    f"Matched {counted(len(result['receipts']), 'bank receipt')}; {result['remaining']} remains expected.")
 
 
 @router.post("/{account_id:int}/certificates/{certificate_id:int}/interest/{event_date}/remove")

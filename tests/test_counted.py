@@ -36,3 +36,24 @@ FORMS = {  # English key: (one, two, 3-10, 11+)
 @pytest.mark.parametrize("index, n", [(0, 1), (1, 2), (2, 3), (3, 11)])
 def test_arabic_agrees_for_each_noun(key, index, n):
     assert translate(key, "ar", n=n) == FORMS[key][index]
+
+
+def test_no_hand_built_plurals_in_ui_or_workflows():
+    """IV-3BC3: every count goes through counted(); no `'s' if` or "noun(s)" in what people read."""
+    import re
+    from pathlib import Path
+    root = Path(__file__).resolve().parent.parent / "lightning"
+    pattern = re.compile(r"'s' if|\"s\" if|[A-Za-z]\(s\)")
+    allowed = {("ui/sections.py", "keep(s)"), ("ui/templates/phone/partials/charts.html", "(s)")}
+    hits = []
+    for folder in ("ui", "workflows"):
+        for path in (root / folder).rglob("*"):
+            if path.suffix not in {".py", ".html"}:
+                continue
+            for number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+                for match in pattern.finditer(line):
+                    rel = path.relative_to(root).as_posix()
+                    if any(rel == f and tok in line for f, tok in allowed):
+                        continue
+                    hits.append(f"{rel}:{number}")
+    assert not hits, hits

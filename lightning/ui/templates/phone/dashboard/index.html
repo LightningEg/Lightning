@@ -19,7 +19,7 @@
 {% else %}
 {{ hero(fig[lead].label, pos.net_worth if owes else pos.what_you_own, note="As of {date}"|tr(locale, date=position_as_of)) }}
 {% endif %}
-{% if pos.unvalued %}<p class="notice">{{ pos.unvalued|length }} asset valuation(s) are missing from this total.</p>{% endif %}
+{% if pos.unvalued %}<p class="notice">{{ (pos.unvalued|length)|counted('asset valuation') }} {{ 'is' if pos.unvalued|length == 1 else 'are' }} missing from this total.</p>{% endif %}
 {% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}
 {# One Needs you card under the stepper (C04.4, 3AN4): it names the next bill due within three days by payee, amount
    and days, and that line opens the bill's pay sheet (J3: tap it, then Record and mark paid). Opened in place, the card

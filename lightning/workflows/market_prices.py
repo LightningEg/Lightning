@@ -8,6 +8,8 @@ source MARKET, so a price you typed on the same day still wins, and an instrumen
 currency is left for you (no silent conversion). What the packs lack is listed, never guessed."""
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 import calendar
 import json
 import shutil
@@ -39,10 +41,9 @@ class FillReport:
     rates: int = 0                                                    # exchange rates filled from the fx file
 
     def summary(self) -> str:
-        parts = [f"Filled {self.added} price{'s' if self.added != 1 else ''} for {len(self.matched)} "
-                 f"investment{'s' if len(self.matched) != 1 else ''} from the price files of {self.file_date[:10]}."]
+        parts = [f"Filled {counted(self.added, 'price')} for {counted(len(self.matched), 'investment')} from the price files of {self.file_date[:10]}."]
         if self.rates:
-            parts.append(f"{self.rates} exchange rate{'s' if self.rates != 1 else ''} filled.")
+            parts.append(f"{counted(self.rates, 'exchange rate')} filled.")
         if self.missing:
             shown = ", ".join(f"{name} {day}" for name, day in self.missing[:3])
             parts.append(f"{len(self.missing)} still missing: {shown}{' and more' if len(self.missing) > 3 else ''}.")

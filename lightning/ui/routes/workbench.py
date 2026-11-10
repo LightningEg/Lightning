@@ -2,6 +2,8 @@
 transaction list (P7). Both reuse the services the per-account pages already use; deletes stay restorable."""
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 import re
 
 from fastapi import APIRouter, Request
@@ -105,7 +107,7 @@ async def find_replace(request: Request):
                 changed, skipped = changed + len(done), skipped + len(left)
     except LightningError as exc:
         return redirect(destination, exc.message)
-    message = f"Replaced “{find}” on {changed} row{'s' if changed != 1 else ''}."
+    message = f"Replaced “{find}” on {counted(changed, 'row')}."
     if skipped:
         message += f" {skipped} left as they were (transfers and investment rows)."
     return redirect(destination, message)

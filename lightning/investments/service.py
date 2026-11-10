@@ -389,7 +389,7 @@ class InvestmentService:
         day = parse_date(date).isoformat()
         held = self.holding_for_owner(source.id, asset.id, day)
         if units > held:
-            raise ValidationError(f"{source.label} holds {_num(held)} {asset.unit}(s) of {asset.name}; "
+            raise ValidationError(f"{source.label} holds {_num(held)} {asset.unit} of {asset.name}; "
                                   f"you cannot move {_num(units)}.", "units")
         position = next((p for p in self.portfolio(day, source.id).positions
                          if p.asset_id == asset.id and p.owned_quantity), None)

@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 from decimal import Decimal, ROUND_HALF_UP
 from dataclasses import replace
 from collections import defaultdict
@@ -1044,7 +1046,7 @@ async def import_price_csv(request: Request):
     if rows.unmatched:
         parts.append(f"Not found: {', '.join(rows.unmatched[:5])}{'…' if len(rows.unmatched) > 5 else ''}")
     if rows.bad:
-        parts.append(f"Skipped {len(rows.bad)} row(s) with no usable price or date")
+        parts.append(f"Skipped {counted(len(rows.bad), 'row')} with no usable price or date")
     note = " · ".join(parts)
     return redirect("/investments/prices", note)
 
@@ -1080,7 +1082,7 @@ async def save_prices(request: Request):
             c.reevaluations.process_due()
     except LightningError as exc:
         return redirect(f"/investments/prices?date={day}", exc.message)
-    return redirect("/investments", f"Saved {count} price input{'s' if count != 1 else ''}; reevaluation catch-up completed." if count
+    return redirect("/investments", f"Saved {counted(count, 'price input')}; reevaluation catch-up completed." if count
                     else "No prices entered.")
 
 

@@ -175,7 +175,7 @@ def at_cost(items: list[dict]) -> dict | None:
     if not items:
         return None
     names = ", ".join(i["asset"] for i in items[:2]) + (f" and {len(items) - 2} more" if len(items) > 2 else "")
-    return note("info", f"{len(items)} holding(s) valued at cost", f"{names}: no price yet, so no gain is shown.",
+    return note("info", f"{counted(len(items), 'holding')} valued at cost", f"{names}: no price yet, so no gain is shown.",
                 "/investments/prices", "Update prices", label="Holdings valued at cost", figure=str(len(items)))
 
 
@@ -199,7 +199,7 @@ def loans_summary(loans: list[dict]) -> dict | None:
     ends = max((entry["progress"]["last_date"] or "" for entry in loans), default="")
     due = sum(len(entry["progress"]["due"]) for entry in loans)
     if due:
-        return note("attention", f"{due} loan payment{'s' if due > 1 else ''} due now",
+        return note("attention", f"{counted(due, 'loan payment')} due now",
                     f"{fmt(left, 0)} still to pay. The last payment is on {ends}.",
                     label="Loan payments due now", figure=str(due))
     paid = sum(entry["progress"]["paid"] for entry in loans)

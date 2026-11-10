@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 from datetime import timedelta
 from urllib.parse import quote
 from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal
@@ -1096,7 +1098,7 @@ async def apply_budget_fill(request: Request):
                       values=values, error=exc.message, status_code=400)
     if not changed:
         return redirect(f"/budget?month={month}", "Those base limits are already set for this month.")
-    return redirect(f"/budget?month={month}", f"Applied {changed} budget{'s' if changed != 1 else ''} for {month} only.")
+    return redirect(f"/budget?month={month}", f"Applied {counted(changed, 'budget')} for {month} only.")
 
 
 @router.post("")
@@ -1122,7 +1124,7 @@ async def save_budget(request: Request):
     if not changed:
         return redirect(f"/budget?month={month}", "Nothing changed.")
     scope = f"for {month} only" if only else f"from {month} onward"
-    return redirect(f"/budget?month={month}&open_group=all", f"Saved {changed} budget{'s' if changed != 1 else ''} {scope}.")
+    return redirect(f"/budget?month={month}&open_group=all", f"Saved {counted(changed, 'budget')} {scope}.")
 
 
 @router.post("/setup")
@@ -1168,7 +1170,7 @@ async def update_carryover(request: Request):
             changed = c.budgets.set_carryover(month, settings, schedule=c.schedules.view())
     except LightningError as exc:
         return redirect(f"/budget?month={month}", exc.message)
-    return redirect(f"/budget?month={month}", f"Updated carryover for {changed} budget line{'s' if changed != 1 else ''}.")
+    return redirect(f"/budget?month={month}", f"Updated carryover for {counted(changed, 'budget line')}.")
 
 
 @router.post("/carryover/global")

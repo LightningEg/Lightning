@@ -148,7 +148,7 @@ def _figures(spec: EventSpec, v: EventValues) -> _Figures:
         if v.held is None or v.held <= ZERO:
             raise ValidationError("A bonus or split needs units you hold on that date.", "instrument")
         if after == v.held:
-            raise ValidationError(f"You already hold {_num(after)} {v.asset.unit}(s); enter the number after the bonus or split.",
+            raise ValidationError(f"You already hold {_num(after)} {v.asset.unit}; enter the number after the bonus or split.",
                                   "quantity")
         return _Figures(units=after - v.held)
     if spec.lowers_cost:  # a return of capital: one amount, no units

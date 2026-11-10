@@ -11,7 +11,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IV-3BC** | [Counts read right in English and Arabic](../../issues/3-polish-and-arabic/IV-3BC-counts-read-right-in-both-languages.md) | M | ready |
 | **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page](../../issues/3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | M | ready |
 | **IV-3BF** | [PC finish](../../issues/3-polish-and-arabic/IV-3BF-pc-finish.md) | M | ready |
 | **IV-3BH** | [One name per thing and no accounting jargon](../../issues/3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | M | ready |
@@ -34,7 +33,7 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 - [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 3H, 3AM
 - [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 3H
 - [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 3H, 3AM
-- [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BC, 3BD, 3BF, 3BH
+- [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BD, 3BF, 3BH
 - [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 12Y, 12Z, 3BH
 <!-- work:end -->
 

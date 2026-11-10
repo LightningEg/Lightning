@@ -12,6 +12,7 @@ import re
 from decimal import Decimal
 
 from lightning.core.figures import FIGURES
+from lightning.core.plural import counted  # noqa: F401  (re-exported for templates and callers)
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
@@ -224,7 +225,8 @@ ARABIC_UI = {
     'Suggested': 'مقترح',
     'Show all receipts': 'اعرض كل الإيصالات',
     'No receipt looks like this payout.': 'مفيش إيصال شبه الدفعة دي.',
-    'Matched {count} interest payment(s) to bank receipts.': 'اتطابقت {count} دفعة عائد مع إيصالات البنك.',
+    'Matched {count} interest payments to bank receipts.': 'اتطابقت {count} دفعة عائد مع إيصالات البنك.',
+    'Matched 1 interest payment to bank receipts.': 'اتطابقت 1 دفعة عائد مع إيصالات البنك.',
     'Reimbursement needs review': 'التعويض محتاج مراجعة',
     'This activity is no longer a posted cash income or expense.': 'النشاط ده ما بقاش إيراد أو مصروف نقدي مسجل.',
     '{name} needs review': '{name} محتاج مراجعة',
@@ -1910,9 +1912,11 @@ ARABIC_UI = {
     'Delete {subject}?': 'تحذف {subject}؟',
     'Transfer to {name} selected': 'تحويل إلى {name} المحدد',
     'Delete {count} transactions?': 'تحذف {count} معاملات؟',
+    'Delete 1 transaction?': 'تحذف معاملة واحدة؟',
+    'You can restore it from transaction history.': 'تقدر ترجّعها من تاريخ المعاملات.',
     'Delete {count} selected?': 'تحذف {count} المحدد؟',
-    'You have {owned} {unit}(s); you cannot sell {quantity}.': 'أنت تملك {owned} {unit}، ومش ممكن تبيع {quantity}.',
-    'You hold {quantity} {unit}(s) here.': 'أنت تملك هنا {quantity} {unit}.',
+    'You have {owned} {unit}; you cannot sell {quantity}.': 'أنت تملك {owned} {unit}، ومش ممكن تبيع {quantity}.',
+    'You hold {quantity} {unit} here.': 'أنت تملك هنا {quantity} {unit}.',
     'The total dividend uses this rate × shares held by the selected owner on the transaction date.': 'إجمالي التوزيعات بيتحسب بالسعر ده × الأسهم اللي يملكها الشخص المختار بتاريخ المعاملة.',
     'Enter the total dividend received. The selected owner must hold shares on the transaction date.': 'اكتب إجمالي التوزيعات المستلمة. لازم الشخص المختار يكون مالك الأسهم بتاريخ المعاملة.',
     'Enter the number of units sold. Choose whether the sale total includes fees below.': 'اكتب عدد الوحدات المباعة. وحدد تحت إذا كان إجمالي البيع يشمل الرسوم.',
@@ -3320,7 +3324,8 @@ ARABIC_UI = {
     'Saved {n} prices': 'اتحفظ {n} سعر',
     'Saved {n} price': 'اتحفظ سعر واحد',
     'Not found: {names}': 'مش موجود: {names}',
-    'Skipped {n} row(s) with no usable price or date': 'اتساب {n} صف من غير سعر أو تاريخ صالح',
+    'Skipped {n} rows with no usable price or date': 'اتساب {n} صف من غير سعر أو تاريخ صالح',
+    'Skipped 1 row with no usable price or date': 'اتساب 1 صف من غير سعر أو تاريخ صالح',
     'Yes. You keep {amt} safe to spend until {date}.': 'أيوه. هيفضل معاك {amt} آمن للصرف لحد {date}.',
     'Yes. You keep {amt} safe to spend.': 'أيوه. هيفضل معاك {amt} آمن للصرف.',
     'Only by cutting your plan: it takes {amt} from budget, bills or goals until {date}.': 'بس لو قللت خطتك: هياخد {amt} من الميزانية أو الفواتير أو الأهداف لحد {date}.',
@@ -3560,6 +3565,7 @@ _COUNTED = {"يوم": ("يوم واحد", "يومين", "أيام"), "شهر": (
             "صف": ("صف واحد", "صفين", "صفوف"), "بند": ("بند واحد", "بندين", "بنود"),
             "فاتورة": ("فاتورة واحدة", "فاتورتين", "فواتير"), "قاعدة": ("قاعدة واحدة", "قاعدتين", "قواعد"),
             "عنصر": ("عنصر واحد", "عنصرين", "عناصر"), "سنة": ("سنة واحدة", "سنتين", "سنين")}
+COUNTED_FORMS = {lemma: list(forms) for lemma, forms in _COUNTED.items()}  # shipped to the browser: lemma -> [one, two, plural]
 _COUNTED_FORMS = {form: lemma for lemma, (_, dual, plural) in _COUNTED.items() for form in (lemma, dual, plural)}
 _COUNT_PHRASE = re.compile(r"\{(\w+)\}\s+(" + "|".join(sorted(_COUNTED_FORMS, key=len, reverse=True)) + r")(?![\u0621-\u064A])")
 
@@ -3584,11 +3590,6 @@ def _agree_counts(template: str, values: dict) -> str:
             return "{%s} %s" % (key, plural)
         return "{%s} %s" % (key, lemma)
     return _COUNT_PHRASE.sub(phrase, template)
-
-
-def counted(n: int | Decimal, one: str, other: str) -> str:
-    """English count with the right noun: counted(1, "day", "days") is "1 day", counted(2, ...) is "2 days"."""
-    return f"{n} {one}" if n == 1 else f"{n} {other}"
 
 
 def translate(text: str, locale: str = "en", **values: object) -> str:

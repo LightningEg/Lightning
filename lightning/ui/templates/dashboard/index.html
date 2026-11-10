@@ -24,7 +24,7 @@
             <tr><td>{{ fig.market_moves.label }}</td><td class="num">{{ bridge.market_moves|money(true) }}</td></tr>
             <tr><td>{{ fig.other_changes.label }}</td><td class="num">{{ bridge.other_changes|money(true) }}</td></tr>
             <tr><th>{{ fig['change_in_net_worth' if owes else 'change_in_what_you_own'].label }}</th><th class="num">{{ bridge.change|money(true) }}</th></tr></tbody></table></details>{% endif %}
-          {% if pos.unvalued %}<p class="notice">{{ pos.unvalued|length }} asset valuation(s) are missing from this total.</p>{% endif %}
+          {% if pos.unvalued %}<p class="notice">{{ (pos.unvalued|length)|counted('asset valuation') }} {{ 'is' if pos.unvalued|length == 1 else 'are' }} missing from this total.</p>{% endif %}
           <div class="overview-inline-list" aria-label="{{ fig.what_you_own.label }}">
             {% if owes %}{# 3AM3 (O1): what you own opens on its parts, each a link to its home (A16: one home, a link) #}<details class="overview-disclosure overview-subtotal"><summary><span>{{ fig.what_you_own.label }}</span><b>{{ pos.what_you_own|money }}</b></summary><div class="overview-disclosure-body"><a href="/accounts"><span>{{ fig.cash_you_own.label }}</span><b>{{ pos.cash_you_own|money }}</b></a>{% if pos.holdings_value %}<a href="/investments"><span>{{ fig.holdings_value.label }}</span><b>{{ pos.holdings_value|money }}</b></a>{% endif %}{% if pos.other_you_own %}<a href="/accounts"><span>{{ fig.other_you_own.label }}</span><b>{{ pos.other_you_own|money }}</b></a>{% endif %}</div></details>
             {% else %}

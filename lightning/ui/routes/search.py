@@ -10,6 +10,8 @@ Choosing a result is the user's click; the matcher changes nothing.
 """
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 import json
 import re
 from urllib.parse import quote, urlencode
@@ -167,7 +169,7 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[di
     tag_needle = normal_tag(needle) if needle.startswith("#") or len(needle) > 1 else ""
     for tag, count in (c.transactions.tags() if tag_needle else []):
         add(_score(tag_needle, tag, False) or (0.7 if needle == "#" else 0), f"#{tag}", f"/transactions?tag={quote(tag)}", "Tag",
-            f"{count} transaction{'s' if count != 1 else ''}")
+            f"{counted(count, 'transaction')}")
     results: list[dict] = [e for e in (entry(c, query),) if e]  # a typed entry comes first (3G7)
     for group in GROUPS:
         ranked = sorted((pair for pair in found if pair[1]["kind"] == group), key=lambda p: (-p[0], p[1]["label"].casefold()))

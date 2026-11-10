@@ -37,7 +37,7 @@ from lightning.workflows import live_prices
 from lightning.ui import charts, sections
 from lightning.ui.themes import theme_id
 from lightning.ui.entitlements import marketplace_url, owned as owned_themes, store_themes
-from lightning.ui.i18n import BROWSER_UI, counted, localize_html, localized_figures, translate
+from lightning.ui.i18n import BROWSER_UI, COUNTED_FORMS, counted, localize_html, localized_figures, translate
 
 UI_DIR = Path(__file__).parent
 templates = Jinja2Templates(directory=str(UI_DIR / "templates"))
@@ -256,12 +256,11 @@ templates.env.filters["units"] = _units
 
 
 def _units_of(value, unit: str) -> str:
-    """A quantity with its unit, singular for exactly one: 75 shares, 1 piece, 12.5 grams."""
+    """A quantity with its unit exactly as stored: 75 shares, 1 piece, 12.5 grams."""
     if value is None:
         return ""
     unit = (unit or "").strip()
-    plural = unit and Decimal(value) != 1 and not unit.endswith("s") and unit.upper() != unit
-    return f"{_units(value)} {unit}{'s' if plural else ''}".strip()
+    return f"{_units(value)} {unit}".strip()  # the unit as the person typed it: never add an "s"
 
 
 templates.env.filters["units_of"] = _units_of
@@ -487,7 +486,8 @@ templates.env.globals["static_url"] = static_url
 
 
 # The browser half of the Arabic table, served once as a cached script instead of inside every Arabic page (3AC).
-_ARABIC_UI_JS = ("window.LIGHTNING_UI=" + json.dumps(BROWSER_UI, ensure_ascii=False, sort_keys=True) + ";").encode("utf-8")
+_ARABIC_UI_JS = ("window.LIGHTNING_UI=" + json.dumps(BROWSER_UI, ensure_ascii=False, sort_keys=True) + ";"
+                 + "window.LIGHTNING_COUNTED=" + json.dumps(COUNTED_FORMS, ensure_ascii=False, sort_keys=True) + ";").encode("utf-8")
 ARABIC_UI_SRC = "/static/ui-ar.js?v=" + hashlib.sha256(_ARABIC_UI_JS).hexdigest()[:12]
 
 

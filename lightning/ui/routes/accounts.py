@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 import re
 from dataclasses import replace
 from decimal import Decimal
@@ -129,7 +131,7 @@ async def list_accounts(request: Request):
         lead = kpis.card(label("what_you_own"), net_worth.what_you_own,
                          kpis.compare("is held for others, not yours", fmt(held, 0), "hold") if held
                          else kpis.compare("All of it is yours"), tone="hold", key="own",
-                         line_=kpis.line(f"Across {len(active)} account{'s' if len(active) != 1 else ''}"))
+                         line_=kpis.line(f"Across {counted(len(active), 'account')}"))
     groups: dict[str, dict] = {}
     for row in rows:
         group = groups.setdefault(SIDEBAR_GROUPS[row[0].account_type], {"rows": [], "balance": ZERO, "owned": ZERO})

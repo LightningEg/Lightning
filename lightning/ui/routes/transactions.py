@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 from datetime import datetime
 from urllib.parse import urlencode
 
@@ -619,7 +621,7 @@ async def delete_transactions(request: Request):
                 c.reevaluations.process_due()
     except LightningError as exc:
         return redirect(destination, exc.message)
-    return redirect(destination, f"Deleted {count} transaction(s). You can restore them from history.")
+    return redirect(destination, f"Deleted {counted(count, 'transaction')}. You can restore {'it' if count == 1 else 'them'} from history.")
 
 
 @router.post("/transactions/bulk-category")
@@ -643,7 +645,7 @@ async def categorize_transactions(request: Request):
     except LightningError as exc:
         return redirect(destination, exc.message)
     name = c.categories.display_name(category_id)   # Personal › Transportation, never just "Transportation"
-    message = f"{name} is now the category of {len(changed)} row{'s' if len(changed) != 1 else ''}."
+    message = f"{name} is now the category of {counted(len(changed), 'row')}."
     if skipped:
         message += (f" {len(skipped)} left as {'they were' if len(skipped) != 1 else 'it was'}: transfers, investment rows, "
                     "split expenses and rows going the other way keep their own category.")
@@ -699,7 +701,7 @@ async def bulk_edit_transactions(request: Request):
                                                              cash.account_id, cash.quantity, txn.notes)
     except LightningError as exc:
         return respond(exc.message, error=True)
-    message = f"Changed {len(changed)} row{'s' if len(changed) != 1 else ''}."
+    message = f"Changed {counted(len(changed), 'row')}."
     if skipped:
         message += (f" {len(skipped)} left as {'they were' if len(skipped) != 1 else 'it was'}: transfers, investment rows, "
                     "split expenses and rows going the other way keep their own values.")

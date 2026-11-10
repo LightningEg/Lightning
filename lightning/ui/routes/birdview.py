@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 import calendar
 from datetime import date, timedelta
 from decimal import Decimal
@@ -306,7 +308,7 @@ def _expense_stats(a, total, prior, prior_label, largest, selected, first, last,
     before = payments(prior_from, prior_to) if prior_from and prior_to else None
     stats.append({"key": "payments", "surface": "out", "label": "Average payment", "value": average, "kind": "money",
                   "empty": "—", "spark": charts.sparkline(counts), "spark_tone": "spend",
-                  "sub": (f"{count} payment{'s' if count != 1 else ''}"
+                  "sub": (f"{counted(count, 'payment')}"
                           + (f" · {len(before)} in {prior_label}" if before is not None and prior_label else "")),
                   "href": f"/transactions?{query}"})
     top = a["rows"][0] if a["rows"] else None

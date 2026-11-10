@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 import base64
 import json
 from fastapi import APIRouter, Request
@@ -551,7 +553,7 @@ async def discard(request: Request, account_id: int, batch_id: int):
     if str(batch["file_name"]).startswith("SMS "):  # messages read from bank SMS go back to From SMS (IV-3AU)
         return redirect("/sms", "Discarded: nothing from these messages was posted.")
     return redirect(f"/accounts/{account_id}",
-                    f"Import discarded: {count} row{'s' if count != 1 else ''} from {batch['file_name']} were not posted.")
+                    f"Import discarded: {counted(count, 'row')} from {batch['file_name']} were not posted.")
 
 
 def _decision(form, row) -> dict:
@@ -681,7 +683,7 @@ async def confirm(request: Request, account_id: int, batch_id: int):
         for row in review_rows:
             row["_row_error"] = count["errors"].get(int(row["_import_row_id"]))
         problems = len(count["errors"])
-        msg = (f"Nothing was imported yet: {problems} row{'s' if problems != 1 else ''} need{'' if problems != 1 else 's'} "
+        msg = (f"Nothing was imported yet: {counted(problems, 'row')} need{'' if problems != 1 else 's'} "
                "attention. Fix them below; your other choices are kept.")
         return _render_review(request, c, account_id, batch, review_rows, summary=c.bank_imports.summary(batch_id),
                               form=form, msg=msg)
@@ -695,7 +697,7 @@ async def confirm(request: Request, account_id: int, batch_id: int):
         if report is not None and (report.added or report.missing):
             feedback += f" {report.summary()}"
     if count.get("ambiguous_reserves"):
-        feedback += f" {count['ambiguous_reserves']} row(s) could match multiple reserves; choose beside each transaction in its account list."
+        feedback += f" {counted(count['ambiguous_reserves'], 'row')} could match multiple reserves; choose beside each transaction in its account list."
     batch, result_rows = c.bank_imports.preview(batch_id)
     remaining = sum(row["_status"] == "REVIEW" for row in result_rows)
     if remaining:

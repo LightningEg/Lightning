@@ -63,7 +63,7 @@
 {% include "investments/_explain.html" %}
 {% if investment_report.missing %}<p class="notice">Price quality: {% for issue in investment_report.missing %}{{ issue.asset }} — {{ issue.reason|tr(locale) }}{% if not loop.last %}; {% endif %}{% endfor %}</p>{% endif %}
 {% if investment_report.unrealized_change is none %}<p class="notice">{{ "A dated market price is missing at a period boundary, so the result is unavailable."|tr(locale) }}</p>{% endif %}
-{% if investment_report.unresolved_dividends %}<p class="notice">{{ investment_report.unresolved_dividends }} dividend(s) have unresolved asset attribution; the amount remains in cash.</p>{% endif %}
+{% if investment_report.unresolved_dividends %}<p class="notice">{{ investment_report.unresolved_dividends|counted('dividend') }} {{ 'has' if investment_report.unresolved_dividends == 1 else 'have' }} unresolved asset attribution; the amount remains in cash.</p>{% endif %}
 {% if investment_report.recon_difference is not none and investment_report.recon_difference|abs > 0.01 %}<p class="notice">Portfolio reconciliation differs from closing value by {{ investment_report.recon_difference|money(True) }}. The source is unresolved.</p>{% endif %}
 
 <header class="overview-section-head inv-head"><h2>{{ 'Holdings'|tr(locale) }}</h2><span>As of {{ period.end_text }}{% if lens.usd %} · {{ "at 1 USD = {rate} {base}, as of {date}"|tr(locale, rate=lens.rate|money(False, 2), base=base, date=lens.as_of) }}{% endif %}</span></header>
