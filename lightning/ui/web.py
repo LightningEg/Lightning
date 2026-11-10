@@ -51,7 +51,7 @@ def _minus(text: str) -> str:
 # Reporting pages show money rounded to the nearest unit; stored values, entry fields and registers
 # keep their decimals. A template that asks for places explicitly (an input's value) gets them.
 _ROUND_MONEY: contextvars.ContextVar[bool] = contextvars.ContextVar("round_money", default=False)
-REPORTING_TEMPLATES = ("dashboard/", "phone/home.html", "phone/money.html", "phone/money_accounts.html", "phone/money_bills.html", "phone/money_report.html", "phone/add_bills.html", "phone/budget_flexible.html", "phone/birdview/", "budget.html", "birdview/", "investments/index.html", "investments/holding.html", "financial_health.html",
+REPORTING_TEMPLATES = ("dashboard/", "phone/home.html", "phone/money.html", "phone/money_accounts.html", "phone/money_bills.html", "phone/money_report.html", "phone/add_bills.html", "phone/catch_up.html", "phone/budget_flexible.html", "phone/birdview/", "budget.html", "birdview/", "investments/index.html", "investments/holding.html", "financial_health.html",
                        "investments/_targets.html", "investments/targets.html", "investments/report_detail.html",
                        "planning/plan.html", "reserves.html", "settings/index.html", "accounts/currencies.html", "zakat.html",
                        "accounts/list.html", "counterparty.html", "tag.html", "analysis/", "planning/loans.html",
@@ -384,7 +384,6 @@ _BARE_ERROR_PAGE = ("<!doctype html><meta charset=utf-8><meta name=viewport cont
                     "<p>Lightning could not open this page. Your records are safe.</p><p><a href='/'>Back to the dashboard</a></p>")
 
 _PHONE: contextvars.ContextVar[bool] = contextvars.ContextVar("lightning_phone", default=False)
-_PHONE_TEMPLATES: set[str] | None = None
 
 
 def phone_mode() -> bool:
@@ -439,18 +438,11 @@ from . import status as _page_status  # noqa: E402  the status sentences (A05), 
 templates.env.globals["page_status"] = _page_status
 
 
-def _phone_template(name: str) -> str:
-    """A page with its own phone screen has it under templates/phone/; every other page keeps its own."""
-    global _PHONE_TEMPLATES
-    if _PHONE_TEMPLATES is None:
-        _PHONE_TEMPLATES = {t for t in templates.env.list_templates() if t.startswith("phone/")}
-    return f"phone/{name}" if f"phone/{name}" in _PHONE_TEMPLATES else name
-
-
 def _render(request, name, status_code, c, total, owned_total, groups, context) -> HTMLResponse:
     phone = bool(getattr(request.state, "phone", False))
-    if phone:
-        name = _phone_template(name)
+    if phone:  # the phone layer picks its own template and adds what it shows (3AY11); this module knows no phone page
+        from lightning.ui.phone.presenters import present
+        name, context = present(request, c, name, context)
     marker = _PHONE.set(phone)
     try:
         return _render_page(request, name, status_code, c, total, owned_total, groups, context)

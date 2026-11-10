@@ -1,0 +1,25 @@
+{# Catch up (IV-3AY6, C13): after days away, one question, then the two ways to bring the rest in, then Later. #}
+{% extends "phone/base.html" %}
+{% block title %}Catch up{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Home'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Catch up'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% set s = screen %}
+{% if not s.away %}<p class="phone-note">{{ 'You are caught up.'|tr(locale) }}</p>
+{% else %}
+{% if s.days is not none and s.days >= 3 and s.last_entry %}<p class="phone-note">{{ 'Nothing recorded since {sa}.'|tr(locale, sa=s.last_entry) }}</p>{% endif %}
+{% if s.bills %}<section class="phone-section" aria-labelledby="missed-heading">
+  <header class="phone-section-head"><h2 id="missed-heading">{{ 'Did you pay these?'|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for b in s.bills %}<a class="phone-row" data-popup-open href="/plan/items/{{ b.payment.item.id }}/pay?due={{ b.payment.due_date }}&amp;back=%2Fcatch-up"><span>{{ b.payment.item.name }}<small>{{ 'Due {sa}'|tr(locale, sa=b.payment.due_date) }}</small></span><b><bdi class="fig">{{ b.payment.still_owed|money }}</bdi></b></a>{% endfor %}</div>
+  <p class="phone-note">{{ 'Tap one you paid. The rest wait here.'|tr(locale) }}</p>
+</section>{% endif %}
+<section class="phone-section" aria-labelledby="bring-heading">
+  <header class="phone-section-head"><h2 id="bring-heading">{{ 'Bring in what you missed'|tr(locale) }}</h2></header>
+  <div class="phone-rows">
+    <a class="phone-row" href="/sms"><span>{{ ('Read bank messages' if s.has_sms else 'Paste SMS')|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+    <a class="phone-row" href="/import"><span>{{ 'Import a statement'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  </div>
+</section>
+{% endif %}
+<section class="phone-section"><a class="btn" href="/home">{{ ("Done" if not s.away else "Later")|tr(locale) }}</a></section>
+{% endblock %}

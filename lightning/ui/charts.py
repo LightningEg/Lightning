@@ -497,7 +497,7 @@ def pace(by_day: list[Decimal], plan: Decimal, days: int, last_month: list[Decim
         return 100 - float(value / top * 100)
 
     def line(values: list[Decimal]) -> str:
-        return " ".join([f"0,100"] + [f"{x(i + 1):.2f},{y(v):.2f}" for i, v in enumerate(values[:days])])
+        return " ".join(["0,100"] + [f"{x(i + 1):.2f},{y(v):.2f}" for i, v in enumerate(values[:days])])
 
     now = len(by_day)
     allowed = plan * now / days if days else ZERO
