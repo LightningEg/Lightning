@@ -9,12 +9,12 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 from lightning.transactions.domain import TxnFilter, TxnStatus
 
 from lightning.core.errors import LightningError
-from lightning.core.refs import DOC_LABELS
 from lightning.core.dates import fmt_date, parse_date
 from lightning.core.money import to_decimal
 from lightning.core.errors import ValidationError
 
 from . import register
+from ..row_sheet import next_in_queue, return_to, sheet_context, sort_args, sort_queue
 from ..web import settled_save, container, redirect, render
 from ..i18n import translate
 
@@ -22,84 +22,13 @@ router = APIRouter()
 
 
 FAR_PAST, FAR_FUTURE = "1900-01-01", "9999-12-31"
-SORT_KEYS = ("sort", "sa", "sf", "st")  # the To sort list a sheet was opened from: its account and days (3AN3)
-
-
-def _sort_args(source) -> dict:
-    """The To sort queue a sheet belongs to, from the query or the form: {} when the row was not opened from it."""
-    if not str(source.get("sort", "")):
-        return {}
-    return {"sort": "1", "sa": str(source.get("sa", ""))[:12], "sf": str(source.get("sf", ""))[:10],
-            "st": str(source.get("st", ""))[:10]}
-
-
-def _sort_queue(c, args: dict) -> list[int]:
-    """The rows still to sort in that list, newest first."""
-    account = int(args["sa"]) if args.get("sa", "").isdigit() else None
-    day = lambda text, fallback: text if len(text) == 10 else fallback  # noqa: E731
-    return c.reporting.unsorted_in_order(account, day(args.get("sf", ""), FAR_PAST), day(args.get("st", ""), FAR_FUTURE))
-
-
-def _next_in_queue(queue: list[int], current: int) -> int | None:
-    """The row after this one in the queue (older), else the first one left: the sheet walks the list and wraps."""
-    older = [txn_id for txn_id in queue if txn_id < current and txn_id != current]
-    others = [txn_id for txn_id in queue if txn_id != current]
-    return (older or others or [None])[0]
-
-
-def _sheet_context(request: Request, c, txn) -> dict:
-    """What a transaction's own sheet shows (3AD2): who, how much, when and where, its category with the plan left, the
-    note; for a row nobody has sorted, the usual categories to pick from. Figures come from the services."""
-    cash = [line for line in txn.lines if c.assets.get_asset(line.asset_id).is_cash]
-    transfer = txn.type.value == "TRF"
-    source = next((line for line in cash if line.quantity < 0), cash[0])
-    account = c.accounts.get(source.account_id)
-    target = next((c.accounts.get(line.account_id) for line in cash if line.account_id != source.account_id), None) \
-        if transfer else None
-    amount = abs(source.quantity) if transfer else abs(sum((line.quantity for line in cash), start=0))
-    category_ids = sorted({line.category_id for line in cash if line.category_id})
-    category = c.categories.get(category_ids[0]) if len(category_ids) == 1 else None
-    unsorted = not transfer and (not category_ids or (category is not None and category.code.endswith("UNACCOUNTED")))
-    kind = "move" if transfer else "out" if source.quantity < 0 else "in"
-    plan = None
-    if kind == "out" and category is not None and not unsorted:
-        plan = c.budgets.plan_left(category.id, txn.date[:7], schedule=c.schedules.view())
-    chips, other = [], []
-    if unsorted or request.query_params.get("change"):
-        movement = "out" if kind == "out" else "in"
-        usual = c.transactions.usual_capture_categories(movement, 5)
-        party = c.counterparties.resolve(txn.counterparty) if txn.counterparty else None
-        pickable = {item.id for item in c.categories.pickable()}
-        learned = register._category_for_party(party, c.transactions.usual_categories(), pickable)
-        if learned and c.categories.get(learned).movement.value == ("OUTFLOW" if movement == "out" else "INFLOW"):
-            usual = [learned] + [item for item in usual if item != learned]
-        chips = [{"id": item, "label": c.categories.get(item).name} for item in usual[:5]]
-        other = [item for item in c.categories.pickable()
-                 if item.movement.value == ("OUTFLOW" if movement == "out" else "INFLOW") and not item.is_system]
-    args = _sort_args(request.query_params)
-    queue = _sort_queue(c, args) if args else []
-    skip = _next_in_queue(queue, txn.id) if queue else None
-    return dict(txn=txn, kind=kind, account=account, target=target, amount=amount, currency=account.currency,
-                category=category, unsorted=unsorted, plan=plan, chips=chips, other=other, sort=args, hide_global_error=True,
-                sort_query=urlencode(args), skip=skip, split=txn.type.value == "OUT" and len(cash) == 1 and not unsorted,
-                return_to=_return_to(request.query_params.get("return_to")), who=txn.counterparty or txn.description or "", label=DOC_LABELS.get(txn.type, "Transaction"))
-
-
-def _return_to(value) -> str:
-    """Where a sheet goes back to: a page of this app, else the Transactions list."""
-    value = str(value or "")
-    return value if value.startswith("/") and not value.startswith("//") else "/transactions"
 
 
 @router.get("/transactions/{txn_id:int}/sheet")
 async def transaction_sheet(request: Request, txn_id: int):
-    """A row's own sheet, to look at first (guideline C09.7, owner 2026-11-02): Edit opens the form."""
-    c = container(request)
-    txn = c.transactions.get(txn_id)
-    if not getattr(request.state, "phone", False) or txn.type.value not in {"OUT", "IN", "TRF"} or txn.is_void \
-            or not any(c.assets.get_asset(line.asset_id).is_cash for line in txn.lines):
-        return redirect(f"/transactions/{txn_id}")
-    return render(request, "transactions/sheet.html", **_sheet_context(request, c, txn))
+    """A row's sheet is the phone's (guideline C09.7; the phone router answers this address first): here the row opens
+    its full page."""
+    return redirect(f"/transactions/{txn_id}")
 
 
 def _own_categories(c, ids) -> dict:
@@ -128,8 +57,8 @@ async def set_transaction_category(request: Request, txn_id: int):
     """One tap on a category chip in a row's sheet: file the row, then, in the To sort list, open the next unsorted one."""
     c = container(request)
     form = await request.form()
-    args = _sort_args(form)
-    back = _return_to(form.get("return_to") or request.query_params.get("return_to"))
+    args = sort_args(form)
+    back = return_to(form.get("return_to") or request.query_params.get("return_to"))
     try:
         with settled_save(request, c):
             category_id = int(str(form.get("category_id", "")))
@@ -140,14 +69,14 @@ async def set_transaction_category(request: Request, txn_id: int):
         message = exc.message if isinstance(exc, LightningError) else "Choose a category to give this row."
         txn = c.transactions.get(txn_id)
         return render(request, "transactions/sheet.html", status_code=400, error=message,
-                      **_sheet_context(request, c, txn) | {"return_to": back})
+                      **sheet_context(request, c, txn) | {"return_to": back})
     if skipped:
         txn = c.transactions.get(txn_id)
         return render(request, "transactions/sheet.html", status_code=400,
                       error="That category does not fit this row. Choose another.",
-                      **_sheet_context(request, c, txn) | {"return_to": back})
+                      **sheet_context(request, c, txn) | {"return_to": back})
     if args:
-        nxt = _next_in_queue(_sort_queue(c, args), txn_id)
+        nxt = next_in_queue(sort_queue(c, args), txn_id)
         if nxt is not None:
             return redirect(f"/transactions/{nxt}/sheet?" + urlencode({**args, "return_to": back}))
         return redirect("/transactions/sorted?" + urlencode({"return_to": back}))
@@ -158,7 +87,7 @@ async def set_transaction_category(request: Request, txn_id: int):
 @router.get("/transactions/sorted")
 async def sorted_sheet(request: Request):
     """The end of To sort: nothing left to sort."""
-    return render(request, "transactions/sorted.html", return_to=_return_to(request.query_params.get("return_to")))
+    return render(request, "transactions/sorted.html", return_to=return_to(request.query_params.get("return_to")))
 
 
 @router.get("/transactions/{txn_id:int}/edit-popup")
@@ -473,7 +402,6 @@ async def all_accounts_update(request: Request, txn_id: int):
 @router.get("/transactions/{txn_id:int}")
 async def transaction_detail(request: Request, txn_id: int):
     return detail_page(request, txn_id)
-
 
 
 def _display_timestamp(value: str) -> str:

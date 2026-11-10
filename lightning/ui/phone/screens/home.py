@@ -16,6 +16,16 @@ from lightning.workflows.review import ReviewInbox
 from lightning.workflows.todo import TodoRow, todo_rows
 
 TODO_SHOWN = 3
+
+
+def _shown(rows) -> tuple:
+    """To do's three rows. After days away the Catch up row is always one of them (guideline C13): bills that fill the
+    list would hide the one question that clears the long-overdue ones, so it takes the last place instead."""
+    first = list(rows[:TODO_SHOWN])
+    away = next((r for r in rows[TODO_SHOWN:] if r.kind == "catch_up"), None)
+    if away is not None:
+        first[-1] = away
+    return tuple(first)
 LATEST = 5
 STATES = ("first_run", "catch_up", "payday", "overspent", "calm")
 
@@ -100,7 +110,7 @@ def build(c, day: date) -> HomeScreen:
                       per_day_to_payday=bool(until) and until <= next_month.isoformat(),
                       meter=None if first_run else payday_meter(everyday),
                       working=tuple((name, value) for name, value in forecast.safe_to_spend_parts),
-                      todo=tuple(rows[:TODO_SHOWN]), todo_total=len(rows), latest=latest,
+                      todo=_shown(rows), todo_total=len(rows), latest=latest,
                       spent=c.reporting.cash_flow(day.replace(day=1), day).outflows,
                       left_in_plan=plan["left"] if plan else None, month=month, catch_up=away,
                       month_bar=month_bar(plan["planned"], plan["spent"]) if plan else None)

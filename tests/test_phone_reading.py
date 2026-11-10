@@ -145,8 +145,10 @@ def test_spending_light_first_page_does_not_draw_the_rest(phone, monkeypatch):
 
 def _phone_client(c, monkeypatch, today):
     from lightning.ui.web import create_app
+    from lightning.ui.phone.router import mount_phone
     monkeypatch.setenv("LIGHTNING_TODAY", today)
     app = create_app(c)
+    mount_phone(app)   # the real phone app: its router answers first (3AY11)
 
     @app.middleware("http")
     async def as_phone(request, call_next):
