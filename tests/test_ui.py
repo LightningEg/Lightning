@@ -539,3 +539,8 @@ def test_the_pc_message_carries_the_same_undo_words_as_the_phone():
         locale="en", path="/", session_token="", in_flash=True, undo_only=True)
     assert page.count('data-history="undo"') == 1 and "data-history=\"redo\"" not in page
     assert "is-words" in page and ">Undo</button>" in page and "Ctrl+Z" not in page
+
+
+def test_phone_only_sorted_sheet_goes_back_on_the_pc(client):
+    r = client.get("/transactions/sorted", follow_redirects=False)
+    assert r.status_code == 303

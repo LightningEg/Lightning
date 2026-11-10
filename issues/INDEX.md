@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 78 open items. Each folder holds its reports and its items.
+11 big pictures, 77 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -37,15 +37,11 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1X1 | ↳ Reserve a code in NOW.md before using it | | | S | Sonnet | |
 | IT-1X2 | ↳ CI refuses a code that main already has | | | S | Sonnet | |
 | IT-1X3 | ↳ A guideline change cannot merge alone | | | S | Sonnet | |
-| **IT-1Y** | [Every page is asked once and measured - one test fetches all 130 pages on the PC and the phone, and perf_check times the pages people use](1-easy-to-contribute/IT-1Y-every-page-asked-once-and-measured.md) | improvement, technical | Build | M | Sonnet | ready |
-| IT-1Y1 | ↳ The PC never gets a phone-only sheet ([#488](https://github.com/LightningEg/Lightning/issues/488)) | | | S | Sonnet | |
-| IT-1Y2 | ↳ One test asks every page | | | M | Sonnet | |
-| IT-1Y3 | ↳ perf_check measures the real pages ([#489](https://github.com/LightningEg/Lightning/issues/489)) | | | S | Sonnet | |
 | **IT-1Z** | [Unused functions and names - five that nothing calls, and eleven that only tests call](1-easy-to-contribute/IT-1Z-unused-functions-and-names.md) | improvement, technical | Build | S | Sonnet | ready |
 
 Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md) · [r33](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md).
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1R, 1S, 1T, 1U. Next free code: 1AA.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1R, 1S, 1T, 1U, 1Y. Next free code: 1AA.
 
 ## 2 Safe for real money
 

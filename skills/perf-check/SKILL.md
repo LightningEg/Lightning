@@ -31,11 +31,17 @@ Measure first, change the one worst thing, measure again. Never read a service f
    `tests/test_reporting_performance.py::test_main_tabs_read_each_figure_once_and_show_the_same_pages_as_without_the_cache`). Run the suite and Mohab.
 6. **Record:** one Release-note and Detail trailer with the before and after numbers (queries and milliseconds), one branch per fix, merge.
 
-## Known hotspots (measured 2026-10-15 on the sample year, after the first round of fixes)
+## Known hotspots (measured 2026-11-10 on the sample year; `python tools/perf_check.py`)
 
-Overview `/` is still the heaviest page: 444 queries (was 642), about 110 ms. Fixed already: exchange-rate lookups (`fx._stored`), per-date price lookups (now one read per asset: `ReportQueries._prices_of`,
-`_trade_prices_of`), category and cash-asset lookups. Left, each a loop that is hard to batch: category totals per month (44 queries on Overview and Spending), the counterparty match per register row
-(34 on `/accounts/1`, `/transactions`), per-owner holdings on `/plan`, physical item lookups. These are ideas, not facts: re-measure before acting.
+| Page | Warm ms | Queries | Cause | Item |
+| --- | --- | --- | --- | --- |
+| `/accounts/1/import/1` (180-row review) | 329 | 1,136 | four "seen before" reads and three account reads per row | IT-9N |
+| `/activity` | 84 | 1,039 | ten reads per listed row | IT-9M |
+| `/` | 151 | 375 | investment report reads the whole ledger; 39 purity reads | IT-9L |
+| `/plan/reserves` | 90 | 286 | 80x the planning payments read (under budget) | none |
+| `/investments` | 138 | 184 | the same ledger read; 42 purity reads | IT-9L |
+
+On the phone (`--phone`) Home is 213 queries, Money 228, Investments 250, Activity 202. These are measurements, not ideas: re-measure before acting.
 
 ## Report
 
