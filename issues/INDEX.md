@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 80 open items. Each folder holds its reports and its items.
+11 big pictures, 79 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -186,7 +186,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IV-7AJ** | [A message in another currency (USD) is kept for you, not dropped](7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) | improvement, visual | Capture | S | Sonnet | ready |
-| **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually uses](7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | improvement, visual | Capture | M | Sonnet | new |
+| **IV-7AL** | [Phone Add: our own message for a missing category](7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | improvement, visual | Capture | M | Sonnet | new |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | Opus | ready |
 | NF-7AB1 | ↳ Summary first, rows last | | | M | Opus | |
 | NF-7AB3 | ↳ Group by the question, not the name | | | M | Opus | |
@@ -199,13 +199,12 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7AK2 | ↳ Wallets, which name no card ending | | | M | Opus | |
 | NF-7AK3 | ↳ Purchases in another currency | | | M | Opus | |
 | NF-7AK4 | ↳ Use the researched formats | | | M | Opus | |
-| **NF-7AM** | [Repeat an entry in one tap, and Save and add another](7-planning-import-and-search/NF-7AM-repeat-and-add-another.md) | new feature | Capture | M | Sonnet | ready |
+| **NF-7AM** | [Add sheet: the three usual payees as chips](7-planning-import-and-search/NF-7AM-repeat-and-add-another.md) | new feature | Capture | M | Sonnet | ready |
 | **NF-7AN** | [Save now, sort later: an entry with only an amount waits in To sort](7-planning-import-and-search/NF-7AN-save-now-sort-later.md) | new feature | Capture | M | Opus | ready |
 | **NF-7AO** | [Bank messages Lightning is sure about save themselves, marked and undoable](7-planning-import-and-search/NF-7AO-sure-bank-messages-save-themselves.md) | new feature | Capture | L | Opus | new |
 | NF-7AO1 | ↳ What "sure" means, and the service | | | M | Opus | |
 | NF-7AO2 | ↳ Seen, marked, undoable | | | M | Opus | |
 | NF-7AO3 | ↳ Not twice | | | M | Opus | |
-| **NF-7AP** | [Compare the balance a bank message states with the account, as a quiet To do row](7-planning-import-and-search/NF-7AP-bank-message-balance-check.md) | new feature | Capture | M | Sonnet | ready |
 | **NF-7AQ** | [Search answers a typed question - "food last month" gives the figure, its comparison and the rows, not a link to a filter](7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md) | new feature | Capture | L | Opus | new |
 | NF-7AQ1 | ↳ The PC lists matching payments first, as the phone does | | | S | Sonnet | |
 | NF-7AQ2 | ↳ A period grammar, tested alone | | | M | Opus | |
@@ -214,7 +213,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md) · [r31](7-planning-import-and-search/r31-logging-entries/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI. Next free code: 7AR.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI, NF-7AP. Next free code: 7AR.
 
 ## 8 Website
 
@@ -368,7 +367,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-12Q4 | ↳ Phone Recurring and the PC's doubled list | | | S | Opus | |
 | IV-12Q5 | ↳ Budget page and Budget settings | | | M | Opus | |
 | **IV-12T** | [The three "explain this figure" pages have no way in - /explain/owned, /explain/free-cash and /explain/flow are built and tested, and nothing links to them](12-desktop-ux/IV-12T-explain-pages-have-no-way-in.md) | improvement, visual | Understand | S | Sonnet | ready |
-| **IV-12V** | [Adjust balance: a cash wallet that is far off has no way forward, and the page is one bare form](12-desktop-ux/IV-12V-adjust-balance-for-cash.md) | improvement, visual | Capture | M | Sonnet | ready |
+| **IV-12V** | [Adjust balance: show the account's last rows beside the form](12-desktop-ux/IV-12V-adjust-balance-for-cash.md) | improvement, visual | Capture | M | Sonnet | ready |
 | **IV-12W** | [Register and search: the forgotten minus, transactions in PC search, and small things on the rows](12-desktop-ux/IV-12W-register-and-search-small-traps.md) | improvement, visual | Capture | M | Sonnet | ready |
 | **IV-12X** | [Held for others gives instructions where it should give actions](12-desktop-ux/IV-12X-held-for-others-actions.md) | improvement, visual | Own | S | Sonnet | new |
 | **IV-12Y** | [One page skeleton on the PC, kept by a test - every tab has the same title rule, an answer sentence, its dates, and the same controls in the same order](12-desktop-ux/IV-12Y-one-page-skeleton-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
