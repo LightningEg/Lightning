@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 70 open items. Each folder holds its reports and its items.
+11 big pictures, 69 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -180,12 +180,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 |---|---|---|---|---|---|---|
 | **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) ([#490](https://github.com/LightningEg/Lightning/issues/490)) | improvement, visual | Capture | S | Sonnet | ready |
 | **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually uses](7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | improvement, visual | Capture | M | Sonnet | new |
-| **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | Opus | ready |
-| NF-7AB3 | ↳ Group by the question, not the name | | | M | Opus | |
-| NF-7AB2 | ↳ Post in rounds, continue from the account | | | S | Sonnet | |
-| NF-7AB6 | ↳ Safe to go fast: Undo and the balance on the result | | | S | Sonnet | |
-| NF-7AB4 | ↳ Smart buttons on a group | | | M | Sonnet | |
-| NF-7AB5 | ↳ Quick mode for leftovers | | | M | Sonnet | |
 | **NF-7AK** | [Bank messages beyond CIB and NBE in Arabic: English card messages, wallets, other currencies, and the researched formats](7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | new feature | Capture | L | Opus | new |
 | NF-7AK1 | ↳ English card and account messages | | | M | Opus | |
 | NF-7AK2 | ↳ Wallets, which name no card ending | | | M | Opus | |
@@ -206,7 +200,7 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md) · [r31](7-planning-import-and-search/r31-logging-entries/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI. Next free code: 7AR.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AB, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI. Next free code: 7AR.
 
 ## 8 Website
 
