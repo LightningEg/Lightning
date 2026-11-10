@@ -12,7 +12,7 @@ from starlette.concurrency import run_in_threadpool
 from lightning.core.dates import fmt_date, parse_date, parse_month, today
 from lightning.core.errors import LightningError, NotFoundError, ValidationError
 from lightning.core.refs import DocType
-from lightning.core.money import ZERO, fmt, from_e6, to_decimal
+from lightning.core.money import ZERO, fmt, from_e6, signed_pct, to_decimal
 
 from urllib.parse import urlencode
 
@@ -201,7 +201,7 @@ async def portfolio(request: Request):
         spark, change = extras["value_spark"], extras["hero_change"]
         six = (f"{fmt(change, 0, True)} since six months ago" + (f", not counting {fmt(spark['added'], 0)} of opening balances"
                                                                   if spark.get("added") else "")) if change is not None else ""
-        since = f"Return since purchase {ret.percent:+.1f}%" if ret and ret.percent is not None else ""
+        since = f"Return since purchase {signed_pct(ret.percent)}%" if ret and ret.percent is not None else ""
         if result is not None and not result and current and change is not None:
             # A08.5 (3Q2): nothing has moved yet this period, so the comparison is the last six months, not a dead 0
             compare = kpis.compare("since six months ago", fmt(change, 0, True), "good" if change >= 0 else "bad")
@@ -256,8 +256,7 @@ def _signed_percent(value) -> str | None:
     """+1.9% or −0.4%, one decimal, a real minus sign; a value that rounds to zero reads 0.0% (as the signed_pct filter)."""
     if value is None:
         return None
-    text = f"{value:+.1f}"
-    return "0.0%" if float(text) == 0 else text.replace("-", "\u2212") + "%"
+    return signed_pct(value) + "%"
 
 
 def _when_phrase(period, current: bool, locale: str) -> str:

@@ -25,11 +25,6 @@ A single `window.lightningMoney(value, {signed, places})` pinned to `en-US` grou
 
 Each step is one pull request. Read only the files a step names; never open `guideline/app.html` whole (use `python tools/guideline.py A10`). Run the step's test command, then for a visible change `python -m pytest tests/test_mohab_year.py -q` and check A16 on a screenshot; delete the step's heading in the same commit.
 
-## 3BE1 The KPI "points" use a true minus · S · #401
-Files: `lightning/ui/kpis.py:294` and `:341`; `_signed_pct` lives in `lightning/ui/web.py` (~line 179).
-Do: move `_signed_pct` to `lightning/ui/kpis.py`'s imports (import it from `web.py`, or better move it to `lightning/core/money.py` as `signed_pct` and import it in both), then build `f"{signed_pct(gap)} points"` instead of `f"{gap:+.1f} points"`. Search for the same pattern elsewhere: `grep -rn ':+\.[0-9]f}' lightning/ui`.
-Done when: that grep is empty and a test in `tests/test_number_format.py` (new) renders `/` on the sample household and finds no `-` directly before a digit in the KPI row (`.kpi` elements). `python -m pytest tests/test_number_format.py -q`.
-
 ## 3BE3 One money formatter in Python · S · #403
 Files: `lightning/ui/keynotes.py:15`, `lightning/ui/routes/dashboard.py:20`, `lightning/workflows/review.py:24`, `lightning/ui/routes/search.py:103`.
 Do: delete the local `fmt` wrappers and import `fmt` from `lightning.core.money` (same signature). For `search.py fmt_amount`, replace its body with a call to `lightning.ui.web._money` or `core.money.fmt` with a true minus; keep its name if templates call it.
