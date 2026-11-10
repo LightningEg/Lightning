@@ -20,7 +20,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 | **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
 | **NF-10C** | [Theme materials, selling themes, owner console](../../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md) | L | building |
 | **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](../../issues/10-looks-and-store/NF-10D-papyrus-and-dendera-bundles.md) | M | ready |
-| **IV-3F** | [The phone's top bar looks too white to one user](../../issues/11-phone-ux/IV-3F-phone-top-bar-looks-too-white.md) | S | ready |
 | **IV-3AM** | [PC declutter, tab by tab](../../issues/12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | L | building |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](../../issues/12-desktop-ux/IV-3H-tab-by-tab-review.md) | L | ready |
 
@@ -31,7 +30,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 - [Store and community: unlocking themes, the market, rewards and staying in Lightning](../../issues/10-looks-and-store/r13-store-and-community/report.md): 10C, 10D
 - [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../issues/12-desktop-ux/r19-desktop-tab-audit/report.md): 3AM
 - [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 3H, 3AM
-- [The phone, redesigned: a phone-first architecture, tab by tab](../../issues/11-phone-ux/r25-phone-ux-architecture/report.md): 3F
 - [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 3H
 - [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 3H, 3AM
 - [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BC, 3BD, 3BF, 3BH

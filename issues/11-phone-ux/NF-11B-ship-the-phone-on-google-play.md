@@ -25,7 +25,7 @@ The SMS declaration answers and the video script are in `docs/google-play.md` (1
 
 **Signing key (owner, 2026-11-10, replaces 2026-11-09):** Google manages the Play app signing key (no current users to carry over). The Play build and the GitHub APK are signed differently, so moving from one to the other means backup, uninstall, install, restore. The upload key (`ANDROID_UPLOAD_*` in the `android-signing` environment) signs every bundle; Google can reset it if lost.
 
-**Before the first submission (owner, 2026-11-09):** IV-11A, IV-11E and IV-11D; screenshots after those. The upload key works (Phone app run 42634615473 signed the bundle).
+**Before the first submission (owner, 2026-11-09):** IV-11A, IV-11E and IV-11D (all built 2026-11-10); screenshots next. The upload key works (Phone app run 42634615473 signed the bundle).
 
 ## 11B8 Owner: closed test, 12 testers for 14 days · owner
 Only for a personal account made after 2023-11-13: 12 testers opted in for 14 days in a row, then apply for production.
