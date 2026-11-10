@@ -12,8 +12,7 @@ from decimal import Decimal
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, now_iso, parse_date, today
 from lightning.core.errors import NotFoundError, ValidationError
-from lightning.core.money import ZERO, check_places, fmt, from_e6, to_decimal
-from lightning.deposits.repository import DepositRepository
+from lightning.core.money import ZERO, check_places, fmt, from_e6, to_decimal, to_e6
 
 LIQUID = {AccountType.BANK, AccountType.CASH}
 
@@ -24,7 +23,6 @@ class PeopleMoneyService:
         self.accounts = accounts
         self.transactions = transactions
         self.counterparties = counterparties
-        self.repo = DepositRepository(db)  # the owned-cash walk a certificate purchase uses
 
     # ------------------------------------------------------------ accounts
     def account_id_for(self, person_id: int) -> int | None:
@@ -141,16 +139,22 @@ class PeopleMoneyService:
     def _opening(self, when) -> str:
         return fmt_date(min(when, today()))
 
+    _OWNED_CASH = ("SELECT {cols} FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id "
+                   "AND t.status='POSTED' JOIN financial_assets fa ON fa.id=le.asset_id AND fa.is_cash=1 "
+                   "WHERE le.account_id=? AND le.owner_id IS NULL AND le.date{op}? {tail}")
+
     def _check_owned_cash(self, source, when, value: Decimal) -> None:
         """You cannot lend cash you do not own that day (money held for others stays theirs), nor leave a later day
-        short."""
-        from lightning.core.money import to_e6
-        available = self.repo.owned_balance_e6(source.id, fmt_date(when))
+        short: the walk a certificate purchase does."""
+        day = fmt_date(when)
+        available = int(self.db.scalar(self._OWNED_CASH.format(cols="COALESCE(SUM(le.quantity_e6),0)", op="<=", tail=""),
+                                       (source.id, day)) or 0)
         if available < to_e6(value):
             raise ValidationError(f"{source.name} had {fmt(from_e6(available), 2)} {source.currency} of your cash on "
-                                  f"{fmt_date(when)}; lending {fmt(value, 2)} needs more.", "amount")
+                                  f"{day}; lending {fmt(value, 2)} needs more.", "amount")
         remaining = available - to_e6(value)
-        for movement in self.repo.owned_cash_deltas_after(source.id, fmt_date(when)):
+        for movement in self.db.all(self._OWNED_CASH.format(cols="le.date,SUM(le.quantity_e6) AS delta_e6", op=">",
+                                                            tail="GROUP BY le.date ORDER BY le.date"), (source.id, day)):
             remaining += int(movement["delta_e6"] or 0)
             if remaining < 0:
                 raise ValidationError(f"After activity dated {movement['date']}, {source.name} would go below zero. "
