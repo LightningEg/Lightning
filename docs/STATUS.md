@@ -10,7 +10,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | [Plan](pillars/plan.md) | 6 |  | 4 | 2 |  |  |
 | [Understand](pillars/understand.md) | 9 |  | 6 | 2 | 1 |  |
 | [Own](pillars/own.md) | 13 | 1 | 6 | 4 | 2 |  |
-| [Protect](pillars/protect.md) | 4 | 2 | 2 |  |  |  |
+| [Protect](pillars/protect.md) | 4 | 1 | 2 |  | 1 |  |
 | [Everywhere](pillars/everywhere.md) | 10 | 3 | 7 |  |  |  |
 | [Feel](pillars/feel.md) | 14 | 3 | 10 |  | 1 | 1 |
 | [Build](pillars/build.md) | 9 |  | 8 |  | 1 |  |
@@ -20,7 +20,6 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 
 ## Being built now
 
-- **BT-2AI** (Protect) [Phone data must survive every app update and reinstall](../issues/2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md)
 - **IT-2A** (Protect) [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../issues/2-safe-for-real-money/IT-2A-restore-safety.md)
 - **NF-4A** (Everywhere) [Edit journal: edit anywhere, one home confirms](../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md)
 - **NF-4B** (Everywhere) [Multiple devices: implementation plan](../issues/4-edit-journal-and-devices/NF-4B-multiple-devices.md)

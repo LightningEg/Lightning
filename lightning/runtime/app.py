@@ -106,6 +106,19 @@ class SessionGate:
             line, values = "The ledger's lending record needs checking.", {}
         return line, ("take-back" if line else ""), values
 
+    def outside_row(self, path: str):
+        """For the phone's Settings › Backup: None when the phone cannot keep a copy outside the app, else its
+        status (BT-2AI3). Loading Settings or Home is also when a due copy is written, at most once a day."""
+        outside = getattr(self, "outside", None)
+        if outside is None or path not in ("/", "/settings") or self.session.container is None:
+            return None
+        try:
+            outside.keep(self.session)
+            profile = self.session.paths.profile if self.session.paths is not None else None
+            return outside.status(profile.profile_id if profile is not None else "") if path == "/settings" else None
+        except Exception:  # noqa: BLE001 - a bridge that cannot answer offers no row
+            return None
+
     async def change_role(self, role) -> None:
         """Change the open profile's role between requests, never during one (multi-device task 06)."""
         async with self.mutex:
@@ -189,6 +202,7 @@ class SessionGate:
             line, device_action, device_values = self.device_line()
             scope.setdefault("state", {}).update(fingerprint_row=self.fingerprint_row(request.url.path),
                                                   recents_row=self.recents_row(request.url.path),
+                                                  outside_row=self.outside_row(request.url.path) if scope["method"] == "GET" else None,
                                                   secure_profiles=True, csrf=self.session.csrf,
                                                   phone=getattr(self, "phone", False),
                                                   session_token=self.session.token,
@@ -208,7 +222,7 @@ class SessionGate:
 
 def profile_app(credentials: Credentials, root: Path | str | None = None, devices: Devices | None = None,
                 *, phone: bool = False, sms=None, biometric=None, stay=None, files=None, updates=None, recents=None,
-                billing=None):
+                billing=None, outside=None):
     """`phone`: the Android app, whose pages use the phone frame and screens (guideline Part C). `sms`: where
     bank messages come from on that phone (`lightning.sms_imports.SmsSource`), or None. `biometric`: the phone's
     optional fingerprint unlock (`lightning.security.biometric.FingerprintUnlock`), or None: never on a PC.
@@ -217,7 +231,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     `updates`: the Windows app's `UpdateController` (Settings › Lightning version), or None: never elsewhere.
     `recents`: the phone's "Hide in recent apps" switch (`hidden()`, `set_hidden(bool)`; NF-11B6), or None.
     `billing`: Google Play Billing in the Play build (`lightning.ui.play_store.PlayBilling`), or None: the GitHub APK and
-    the PC sell themes on the website instead."""
+    the PC sell themes on the website instead. `outside`: the phone's copy outside the app
+    (`lightning.runtime.outside_copy.OutsideCopy`; BT-2AI3), or None."""
     configure_memory_only_import_uploads()
     session = ProfileSession(root)
     session.borrowed_home = ""
@@ -252,6 +267,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     fingerprint = biometric if phone else None
     gate.fingerprint = fingerprint
     gate.recents = recents if phone else None
+    gate.outside = outside if phone else None
     # Stay signed in (owner, 2026-11-01): the phone opens the profile by itself until Lock, and never locks for idling.
     kept = stay if phone else None
 
@@ -455,6 +471,18 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         if gate.recents is not None:
             form = await request.form()
             gate.recents.set_hidden("1" in form.getlist("on"))
+        return RedirectResponse("/settings" if session.container else "/profiles", 303)
+
+    @app.post("/profiles/outside-copy")
+    async def outside_copy(request: Request):
+        """Settings › Backup › Keep a copy outside the app (BT-2AI3): choose the folder, or stop. A phone setting:
+        the folder belongs to the phone, not to one profile."""
+        if gate.outside is not None:
+            form = await request.form()
+            if form.get("action") == "stop":
+                gate.outside.stop()
+            else:
+                gate.outside.choose()
         return RedirectResponse("/settings" if session.container else "/profiles", 303)
 
     @app.post("/profiles/lock")
