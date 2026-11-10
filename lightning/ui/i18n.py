@@ -2514,6 +2514,7 @@ ARABIC_UI = {
     'Back to the dashboard': 'ارجع للوحة الرئيسية',
     'Back to Overview': 'ارجع للنظرة العامة',
     'Active: {kind}': 'شغّال: {kind}',
+    'That did not save': 'ما اتحفظش',
     'Edit in this list': 'عدّل من القايمة دي',
     'View details': 'شوف التفاصيل',
     'Too many wrong tries. Try again in {n} minutes.': 'محاولات غلط كتير. جرّب تاني بعد {n} دقيقة.',

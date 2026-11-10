@@ -44,3 +44,21 @@ def test_no_plain_text_or_framework_errors_in_routes():
             if re.search(r"HTTPException\((?!404)", line)
             or (re.search(r"PlainTextResponse\(", line) and p.relative_to(root).as_posix() not in allowed)]
     assert not hits, hits
+
+
+def test_a_failed_save_shows_the_did_not_save_page_with_a_back_link(client):
+    response = client.post("/exports/transactions", data={}, headers={"Referer": "http://testserver/transactions"})
+    assert response.status_code == 422
+    assert "That did not save" in response.text and "Select between 1 and 10,000 records" in response.text
+    assert 'href="/transactions"' in response.text and "Check your setup" not in response.text
+
+
+def test_back_link_never_leaves_the_app():
+    from starlette.requests import Request
+    from lightning.ui.web import _back_path
+
+    def request(referer):
+        return Request({"type": "http", "headers": [(b"referer", referer.encode()), (b"host", b"testserver")]})
+    assert _back_path(request("http://testserver/budget?month=2026-10")) == "/budget?month=2026-10"
+    assert _back_path(request("http://evil.example/x")) == "/"
+    assert _back_path(request("")) == "/"
