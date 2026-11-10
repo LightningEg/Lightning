@@ -3,7 +3,7 @@
 The user types the ending balance from the bank (or wallet app) on a date. Lightning compares it with the
 account's own cash balance on that date. A small difference is settled with one balance adjustment, posted as
 ordinary Money out (Other Personal) or Money in (Other Income), so it counts in spending and income like any
-other row. A big difference is never adjusted: the user reviews the register or reimports the statement.
+other row. A big difference on a bank account is never adjusted (a cash wallet has no statement, so any size is): the user reviews the register or reimports the statement.
 """
 
 from __future__ import annotations
@@ -20,6 +20,8 @@ SMALL_SHARE = Decimal("0.01")   # a difference up to 1% of the bank balance is s
 SMALL_FLOOR = Decimal("100")    # ...or up to 100 in the account's currency, whichever is larger
 ADJUSTMENT = "Balance adjustment"
 SHORTFALL_CATEGORY = "EXP.PERSONAL.OTHER"          # Other Personal
+UNACCOUNTED_SPENT = "EXP.UNACCOUNTED"               # Unaccounted Spending (cash and wallets)
+UNACCOUNTED_FOUND = "INC.UNACCOUNTED"               # Unaccounted Money Found
 EXCESS_CATEGORY = "EXP.PERSONAL.OTHER_INCOME"      # Other Income
 
 
@@ -30,6 +32,7 @@ class BalanceCheck:
     lightning_balance: Decimal
     difference: Decimal          # bank − Lightning: positive means the bank has more
     limit: Decimal               # the largest difference that is still small
+    cash: bool = False           # a cash or wallet account has no statement: any difference can be adjusted (IV-12V)
 
     @property
     def matches(self) -> bool:
@@ -37,7 +40,7 @@ class BalanceCheck:
 
     @property
     def small(self) -> bool:
-        return not self.matches and abs(self.difference) <= self.limit
+        return not self.matches and (self.cash or abs(self.difference) <= self.limit)
 
 
 class ReconciliationService:
@@ -84,7 +87,8 @@ class ReconciliationService:
     def check(self, account_id: int, through: str, bank_balance: Decimal) -> BalanceCheck:
         mine = self.balance(account_id, through)
         limit = max(SMALL_FLOOR, (abs(bank_balance) * SMALL_SHARE).quantize(Decimal("0.01")))
-        return BalanceCheck(through, bank_balance, mine, bank_balance - mine, limit)
+        cash = self.db.scalar("SELECT account_type FROM accounts WHERE id=?", (account_id,)) == "CASH"
+        return BalanceCheck(through, bank_balance, mine, bank_balance - mine, limit, cash)
 
     def adjust(self, account_id: int, through: str, bank_balance: Decimal):
         """Post the small difference so the account matches the bank on ``through``."""
@@ -95,6 +99,13 @@ class ReconciliationService:
             raise ValidationError("The difference is too big to adjust. Review the register, or delete and "
                                   "reimport the statement.", "balance")
         notes = f"Bank showed {bank_balance:,.2f} on {through}"
+        if result.cash:  # money that cannot be traced is filed as such, outside the budget (IV-12V)
+            category = self.categories.get_by_code(UNACCOUNTED_FOUND if result.difference > ZERO else UNACCOUNTED_SPENT)
+            if result.difference > ZERO:
+                return self.transactions.record_inflow(through, account_id, result.difference, category.id,
+                                                       counterparty=ADJUSTMENT, notes=notes, allow_system_category=True)
+            return self.transactions.record_outflow(through, account_id, -result.difference, category.id,
+                                                    counterparty=ADJUSTMENT, notes=notes, allow_system_category=True)
         if result.difference > ZERO:
             category = self.categories.get_by_code(EXCESS_CATEGORY)
             return self.transactions.record_inflow(through, account_id, result.difference, category.id,

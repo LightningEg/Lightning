@@ -61,7 +61,9 @@ def _page(request, c, **context):
     # Every ending not known yet is asked in one form, each with the account it most likely is already chosen.
     waiting = [g | {"guess": c.sms_imports.guess(g["ending"], g.get("banks", []))} for g in c.sms_imports.waiting()]
     unread = [m | {"enter": _enter_url(m)} for m in c.sms_imports.unread()]
-    return render(request, "sms.html", waiting=waiting, accounts=accounts, batches=batches,
+    from lightning.workflows.review import ReviewInbox
+    checks = ReviewInbox(c)._balance_checks()
+    return render(request, "sms.html", balance_checks=checks, waiting=waiting, accounts=accounts, batches=batches,
                   unread=unread, permission=permission, last_read=c.sms_imports.last_read(),
                   salary=SALARY_ENDING, **context)
 
@@ -148,6 +150,14 @@ async def assign(request: Request):
         account_id = c.bank_imports.preview(distinct[0])[0]["account_id"]
         return redirect(f"/accounts/{account_id}/import/{distinct[0]}", "Check each row, then post them.")
     return redirect("/sms", "Saved." if not distinct else "Check each account's messages below.")
+
+
+@router.post("/balance/{account_id:int}/dismiss")
+async def dismiss_balance(request: Request, account_id: int):
+    """Quiet the 'off the bank's balance' row until a later message states a balance (NF-7AP)."""
+    with settled_save(request, container(request)):
+        container(request).sms_imports.dismiss_balance(account_id)
+    return redirect("/", "Dismissed.")
 
 
 @router.post("/read-one")

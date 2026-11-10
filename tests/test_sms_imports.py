@@ -443,3 +443,42 @@ def test_arabic_decimal_and_thousands_marks_read_as_the_right_amount():
     tx = parse_sms("تم خصم ١٤٧٫٨٧ جم من بطاقة الخصم المباشر رقم ١٢٣٤ عند كارفور يوم ٠٦/١١/٢٦")
     assert tx is not None and tx.amount == Decimal("147.87")
     assert prefill("تم خصم ١٬٢٥٠٫٥٠ جم من حسابك")["amount"] == "1250.50"
+
+
+def test_stated_balance_is_compared_with_the_account(c, setup):
+    """NF-7AP: a message's balance against the ledger on its day: a quiet row when they differ, gone when they agree,
+    quiet once dismissed, and a card's available limit is no balance."""
+    from datetime import date
+    from lightning.sms_imports import SmsTransaction
+    from lightning.workflows.review import ReviewInbox
+    accounts, _ = setup
+    account = accounts["cib"]
+    ledger = c.reconciliation.balance(account.id, "2026-10-07")
+    def said(balance, day="2026-10-07", text=""):
+        return SmsTransaction("purchase", Decimal("10"), "7351", f"{day}T10:00", "Shop", balance=Decimal(balance), text=text)
+    c.sms_imports._note_balance(account.id, [said(ledger + 350)])
+    rows = ReviewInbox(c)._balance_checks()
+    assert len(rows) == 1 and "350" in rows[0]["label"] and rows[0]["href"].endswith("date=2026-10-07")
+    c.sms_imports.dismiss_balance(account.id)
+    assert ReviewInbox(c)._balance_checks() == []  # dismissed: quiet
+    c.sms_imports._note_balance(account.id, [said(ledger + 350, "2026-10-08")])
+    assert len(ReviewInbox(c)._balance_checks()) == 1  # a later message states one again
+    c.sms_imports._note_balance(account.id, [said(c.reconciliation.balance(account.id, "2026-10-09"), "2026-10-09")])
+    assert ReviewInbox(c)._balance_checks() == []  # a later message agrees
+    c.sms_imports._note_balance(account.id, [said(ledger + 999, "2026-10-10", "available limit EGP 5,000")])
+    assert ReviewInbox(c)._balance_checks() == []  # a card's limit is not a balance
+
+
+def test_cash_wallet_adjusts_any_difference_as_unaccounted_and_a_bank_still_refuses(c, setup):
+    """IV-12V: a wallet has no statement, so a large difference is posted under Unaccounted Spending; a bank keeps the limit."""
+    from lightning.core.errors import ValidationError
+    accounts, _ = setup
+    wallet, bank = accounts["wallet"], accounts["cib"]
+    through = "2026-10-20"
+    have = c.reconciliation.balance(wallet.id, through)
+    drop = have * Decimal("0.9")  # far off: more than the 1% / 100 a bank account would allow
+    txn = c.reconciliation.adjust(wallet.id, through, have - drop)
+    assert any(line.category_id == c.categories.get_by_code("EXP.UNACCOUNTED").id for line in txn.lines)
+    assert c.reconciliation.balance(wallet.id, through) == have - drop
+    with pytest.raises(ValidationError):
+        c.reconciliation.adjust(bank.id, through, c.reconciliation.balance(bank.id, through) - Decimal("500000"))

@@ -27,6 +27,13 @@
   <div class="compact-list">{% for b in batches %}<a class="compact-row" href="/accounts/{{ b.account_id }}/import/{{ b.batch_id }}"><span>{{ b.account }} <small class="muted">{{ 'Read on {when}'|tr(locale, when=b.file_name[4:]) }}</small></span><b>{{ b.waiting }}</b></a>{% endfor %}</div>
 </section>
 {% endif %}
+{% if balance_checks %}
+<section class="card" aria-labelledby="balance-heading">
+  <h2 id="balance-heading">{{ "Balance checks"|tr(locale) }}</h2>
+  {% for check in balance_checks %}<div class="compact-row"><a href="{{ check.href }}"><span>{{ check.label }}</span> <small class="muted">{{ check.detail }}</small></a>
+    <form method="post" action="/sms/balance/{{ check.account_id }}/dismiss"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn small">{{ 'Dismiss'|tr(locale) }}</button></form></div>{% endfor %}
+</section>
+{% endif %}
 {% if unread %}
 <section class="card" aria-labelledby="unread-heading">
   <h2 id="unread-heading">{{ "Messages kept for you"|tr(locale) }}</h2>

@@ -2440,6 +2440,7 @@ ARABIC_UI = {
     'No amount found in this message.': 'مفيش مبلغ في الرسالة دي.',
     'Paste a bank message first.': 'انسخ رسالة البنك الأول.',
     'Repeat this entry': 'كرّر الحركة دي',
+    'Balance checks': 'مراجعة الرصيد',
     'Save and add another': 'احفظ وضيف تاني',
     'Check the account and who.': 'راجع الحساب وعند مين.',
     'Filled from the message. Check and save.': 'اتملت من الرسالة. راجع واحفظ.',

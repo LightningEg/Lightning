@@ -29,8 +29,8 @@
   </form>{% endif %}
   {% elif check.small %}
   <h2>{{ "A small difference"|tr(locale) }}</h2>
-  <p>Lightning is {{ check.difference|abs|money }} {{ account.currency }} {{ 'below' if check.difference > 0 else 'above' }} your bank, within the {{ check.limit|money }} that counts as small (1% of the balance, at least 100).</p>
-  <p class="muted small">One balance adjustment on {{ check.through }} makes them match. It counts as {{ 'Other Income' if check.difference > 0 else 'Other Personal spending' }}, and you can edit or delete it later like any row.</p>
+  <p>Lightning is {{ check.difference|abs|money }} {{ account.currency }} {{ 'below' if check.difference > 0 else 'above' }} your bank{% if check.cash %}. A cash wallet has no statement, so any difference can be adjusted.{% else %}, within the {{ check.limit|money }} that counts as small (1% of the balance, at least 100).{% endif %}</p>
+  <p class="muted small">One balance adjustment on {{ check.through }} makes them match. It counts as {% if check.cash %}{{ 'Unaccounted Money Found' if check.difference > 0 else 'Unaccounted Spending' }}{% else %}{{ 'Other Income' if check.difference > 0 else 'Other Personal spending' }}{% endif %}, and you can edit or delete it later like any row.</p>
   <form class="phone-form" method="post" action="/accounts/{{ account.id }}/reconcile" class="actions">
     <input type="hidden" name="date" value="{{ check.through }}"><input type="hidden" name="balance" value="{{ balance_input }}">
     <button class="btn primary">Post adjustment of {{ check.difference|money(True) }}</button>

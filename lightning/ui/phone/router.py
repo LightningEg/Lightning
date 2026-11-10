@@ -26,7 +26,7 @@ def _plain(*allowed: str, when=None) -> type[APIRoute]:
             match, child = super().matches(scope)
             if match == Match.FULL:
                 keys = {part.split("=", 1)[0] for part in scope.get("query_string", b"").decode().split("&") if part}
-                if keys - set(allowed) - {"msg"}:  # msg is the toast after a save: still the same screen
+                if keys - set(allowed):
                     return Match.NONE, {}
                 if when is not None:
                     try:
@@ -54,7 +54,7 @@ def phone_router() -> APIRouter:
     """Every phone-owned URL. Home is served at /home while the old Overview keeps /; the slot URLs switch over
     together with the tab bar (3AY10)."""
     router = APIRouter()
-    started = APIRouter(route_class=_plain(when=lambda request: bool(container(request).accounts.list())))
+    started = APIRouter(route_class=_plain("msg", when=lambda request: bool(container(request).accounts.list())))
     slots = APIRouter(route_class=_plain())              # a bare slot URL: no query at all
     months = APIRouter(route_class=_plain("month"))      # Budget keeps its month stepper
 

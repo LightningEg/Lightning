@@ -1,5 +1,5 @@
 ---
-title: Adjust balance: a cash wallet that is far off has no way forward, and the page is one bare form
+title: Adjust balance: show the account's last rows beside the form
 type: polish
 pillar: capture
 size: M
@@ -23,7 +23,4 @@ repo: app
 - The page is a date and a number with no account context; "Lightning shows 83,393.36" keeps piastres.
 
 ## Fix
-**Owner, 2026-11-10:** any size on cash and
-wallet accounts, filed under Unaccounted Spending (or Unaccounted Money Found when cash is above the books); bank
-accounts keep the limit. The page shows the account's last rows beside the form. Tests: wallet large difference
-posts one row in the right category; a bank account still refuses.
+Built: any size on cash and wallet accounts, filed under Unaccounted Spending or Unaccounted Money Found; bank accounts keep the limit. Left: the page shows the account's last rows beside the form. Test: the page lists them.

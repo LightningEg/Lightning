@@ -9,9 +9,10 @@ from __future__ import annotations
 
 import json
 from datetime import date
+from decimal import Decimal
 from hashlib import sha256
 
-from lightning.core.errors import ValidationError
+from lightning.core.errors import LightningError, ValidationError
 
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, month_of
@@ -127,6 +128,7 @@ class ReviewInbox:
                  for item in c.reporting.net_worth(on).unvalued]
         items.extend(self._statements())
         items.extend(self._sms())
+        items.extend(self._balance_checks())
         items.extend(self._uncategorized())
         items.extend(self._smart_suggestions(on))
         from lightning.workflows.bill_alerts import bill_alerts
@@ -483,6 +485,33 @@ class ReviewInbox:
                           "detail": f"{_plural(unread, 'message waits', 'messages wait')}: unread, or the other side "
                                     "of a transfer. Enter or dismiss.", "href": "/sms", "action": "Look at them", "priority": 2,
                           "glance": glance("Bank SMS", "Enter", None, "1 kept for you" if unread == 1 else "{n} kept for you", unread)})
+        return found
+
+    def _balance_checks(self) -> list[dict]:
+        """NF-7AP: the balance a bank message states, compared with the account's ledger on that day. One quiet row per
+        account that differs by more than a piastre; it clears when a later message agrees or it is dismissed. An
+        account with messages still waiting to be posted is left alone: its entries are not in the ledger yet."""
+        c = self.c
+        waiting = {b["account_id"] for b in c.bank_imports.waiting_all() if str(b["file_name"]).startswith("SMS ")}
+        names = {a.id: a.name for a in c.accounts.list(active_only=True)}
+        found = []
+        for account_id, note in c.sms_imports.stated_balances().items():
+            if note.get("dismissed") or account_id in waiting or account_id not in names:
+                continue
+            try:
+                off = c.reconciliation.balance(account_id, note["date"]) - Decimal(note["balance"])
+            except (LightningError, ArithmeticError, ValueError):
+                continue
+            if abs(off) <= Decimal("0.01"):
+                continue
+            shown = fmt(abs(off))
+            found.append({"label": f"{names[account_id]} is {shown} {'above' if off > 0 else 'below'} the bank's balance",
+                          "detail": f"The bank's message on {fmt_date(date.fromisoformat(note['date']))} said "
+                                    f"{fmt(Decimal(note['balance']))}; Lightning has {fmt(c.reconciliation.balance(account_id, note['date']))}. "
+                                    "An entry may be missing, or a payment is still pending.",
+                          "href": f"/accounts/{account_id}?date={note['date']}", "action": "Look at the day", "account_id": account_id,
+                          "priority": 2, "consequence": "unreconciled",
+                          "glance": glance(names[account_id], "Check", abs(off), "off the bank's balance")})
         return found
 
     def _statements(self) -> list[dict]:

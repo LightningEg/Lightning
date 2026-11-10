@@ -28,6 +28,7 @@ from lightning.core.errors import ValidationError
 ENDINGS_KEY = "sms_account_endings"   # {"0285": account_id}
 SEEN_KEY = "sms_seen"                  # messages already read, newest last: "fp" (text only) or "fp@ms" (inbox)
 WAITING_KEY = "sms_waiting"            # parsed messages whose account ending is not known yet
+BALANCES_KEY = "sms_stated_balances"   # {account_id: {"balance", "date", "dismissed"}}: the newest balance a message stated
 UNREAD_KEY = "sms_unread"              # messages with an amount that no rule could read: never dropped unseen
 LAST_READ_KEY = "sms_last_read_ms"     # the phone's inbox is read from here on
 QUIET_KEY = "sms_quiet_senders"        # {"Vodafone365": dismissals}: senders whose unreadable messages are offers
@@ -198,6 +199,9 @@ _PROMO = re.compile(r"(https?://|www\.|\.link/|\*\d{2,}#|\boffers?\b|\bpromo|\br
 # Something that says money moved in an account, a card or a wallet.
 _ACCOUNTISH = re.compile(_OUT_WORDS + "|" + _IN_WORDS + r"|حساب|بطاق[ةه]|محفظ|الرصيد|رصيدك|عملية|account|card|wallet|"
                          r"balance|transaction|" + "|".join(BANK_PHONES), re.IGNORECASE)
+
+
+_CARD_LIMIT = re.compile(r"available\s*limit|credit\s*limit|الحد\s*المتاح|الحد\s*الائتماني", re.IGNORECASE)
 
 
 def is_offer(text: str) -> bool:
@@ -573,6 +577,30 @@ class SmsImportService:
                                        "Dismiss it once that transfer is posted; enter it only if it was not one."})
         return paired
 
+    def _note_balance(self, account_id: int, rows: list[SmsTransaction]) -> None:
+        """Keep the newest balance a message states for the account (NF-7AP). A card's available limit is not a balance."""
+        stated = [r for r in rows if r.balance is not None and not _CARD_LIMIT.search(getattr(r, "text", "") or "")]
+        if not stated:
+            return
+        newest = max(stated, key=lambda r: r.when)
+        notes = self._json(BALANCES_KEY, {})
+        old = notes.get(str(account_id))
+        if old and old["date"] > newest.when[:10]:
+            return
+        notes[str(account_id)] = {"balance": format(newest.balance, "f"), "date": newest.when[:10], "dismissed": False}
+        self.settings.set(BALANCES_KEY, json.dumps(notes))
+
+    def stated_balances(self) -> dict[int, dict]:
+        """{account_id: {"balance", "date", "dismissed"}}: what the bank last said, to compare with the ledger."""
+        return {int(k): v for k, v in self._json(BALANCES_KEY, {}).items() if str(k).isdigit()}
+
+    def dismiss_balance(self, account_id: int) -> None:
+        """A pending hold makes the bank's figure lag: the row stays quiet until a later message states a balance."""
+        notes = self._json(BALANCES_KEY, {})
+        if str(account_id) in notes:
+            notes[str(account_id)]["dismissed"] = True
+            self.settings.set(BALANCES_KEY, json.dumps(notes))
+
     def _stage(self, account_id: int, rows: list[SmsTransaction], transfers: dict[int, str] | None = None) -> int:
         out = io.StringIO()
         writer = csv.writer(out)
@@ -592,6 +620,7 @@ class SmsImportService:
             elif row.kind == "salary":
                 category = "Salary"
             writer.writerow([row.when[:10], format(row.signed, "f"), counterparty, category, notes, row.reference, row.text])
+        self._note_balance(account_id, rows)
         batch_id, _ = self.bank_imports.stage(account_id, f"SMS {datetime.now():%Y-%m-%d %H:%M}",
                                               out.getvalue().encode("utf-8"))
         return batch_id
