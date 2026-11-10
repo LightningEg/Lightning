@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 70 open items. Each folder holds its reports and its items.
+11 big pictures, 69 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -238,10 +238,6 @@ Good ideas that wait until the milestones above are done.
 | IT-9F1 | ↳ A tool that lists unreachable CSS rules | | | S | Sonnet | |
 | IT-9F2 | ↳ Delete the unreachable rules from style.css | | | M | Sonnet | |
 | IT-9F3 | ↳ Do async routes with synchronous database work slow anything? | | | S | Opus | |
-| **IT-9K** | [Structure left - restore, device and borrowing routes out of profile_app](9-later/IT-9K-layers-and-copies.md) | improvement, technical | Build | M | Opus | ready |
-| IT-9K1 | ↳ Restore routes out of profile_app | | | S | Sonnet | |
-| IT-9K2 | ↳ The phone's device routes out of profile_app | | | M | Opus | |
-| IT-9K3 | ↳ The PC's borrowing routes and Lock out of profile_app | | | M | Opus | |
 | **IT-9L** | [The investment report reads the whole ledger four times per Overview - 426 ms at 4,400 transactions; a narrower query gives the same report twelve times faster](9-later/IT-9L-investment-report-reads-the-whole-ledger.md) | improvement, technical | Understand | M | Sonnet | ready |
 | IT-9L1 | ↳ Read only the transactions the report uses | | | M | Sonnet | |
 | IT-9L2 | ↳ Memo the purity read ([#491](https://github.com/LightningEg/Lightning/issues/491)) | | | S | Sonnet | |
@@ -257,7 +253,7 @@ Good ideas that wait until the milestones above are done.
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 
-Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J. Next free code: 9O.
+Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J, 9K. Next free code: 9O.
 
 ## 10 Looks and store
 

@@ -1,7 +1,7 @@
 """The profile lifecycle screens: the list, new profile, unlock (password and fingerprint), recovery and the
-security settings of an open profile (IT-9K). Moved out of `profile_app` unchanged; the routes of restore, devices
-and Lock stay beside the session code they call. A route here sees the session, the devices and the gate only
-through `ProfileScreens`."""
+security settings of an open profile (IT-9K). Moved out of `profile_app` unchanged; restore, devices, borrowing
+and Lock live in `restore_screens`, `device_screens` and `borrow_screens`. A route here sees the session, the
+devices and the gate only through `ProfileScreens`."""
 from __future__ import annotations
 
 import asyncio

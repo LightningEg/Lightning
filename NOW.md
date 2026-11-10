@@ -44,11 +44,10 @@ Plan: `issues/INDEX.md`.
 1. **Report work paused** (owner); branches wait on native checks. **Read:** `issues/9-later/r22-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.
 2. **Report fixes:** 1G, 2AB, 3J, 4K, 7M, 7S built. **Read:** `issues/REPORTS.md`.
 3. **Audit 9 links:** 7T merged (#312); native CI held. **Read:** `tests/test_reserve_bills.py`, `tests/test_salary_day_portability.py`.
-4. **9K:** profile lifecycle routes split in #300; bank-import parsing/review/posting are split in the follow-up branch; claimed device/restore routes remain. **Read:** 9K.
-5. **1H:** locks merged (#286); native checks held by owner; #302 open. **Read:** `issues/1-easy-to-contribute/IT-1H-coordinate-packaged-dependency-refresh.md`.
-6. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `issues/4-edit-journal-and-devices/r11-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
-7. **Website recapture** (Sonnet M3 session, last) for 3W, 3AG, 7Q, 3Q, 3S, 3T, 3G, 3H.  Fix the `a-kpis` caption. **Read:** `skills/site-recapture/SKILL.md`.
-8. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
-9. **6F:** London's board and Gulf month-end history (5G done). **Read:** 6F.
-10. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
-11. **6B, 6D, 3AI:** shares, gold and institution logos remain as their items describe. **Read:** each item in `issues/INDEX.md`.
+4. **1H:** locks merged (#286); native checks held by owner; #302 open. **Read:** `issues/1-easy-to-contribute/IT-1H-coordinate-packaged-dependency-refresh.md`.
+5. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `issues/4-edit-journal-and-devices/r11-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
+6. **Website recapture** (Sonnet M3 session, last) for 3W, 3AG, 7Q, 3Q, 3S, 3T, 3G, 3H.  Fix the `a-kpis` caption. **Read:** `skills/site-recapture/SKILL.md`.
+7. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
+8. **6F:** London's board and Gulf month-end history (5G done). **Read:** 6F.
+9. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
+10. **6B, 6D, 3AI:** shares, gold and institution logos remain as their items describe. **Read:** each item in `issues/INDEX.md`.
