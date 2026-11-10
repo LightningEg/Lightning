@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 80 open items. Each folder holds its reports and its items.
+11 big pictures, 79 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -310,9 +310,6 @@ The phone is its own product: a few places that each answer one question, quick 
 | BV-11L1 | ↳ Phone Budget's lead is named "Left for everyday" | | | S | Sonnet | |
 | BV-11L3 | ↳ "To review 1", and no PC tab bar under Add | | | S | Sonnet | |
 | BV-11L4 | ↳ Money's Coming up agrees with Bills; an empty Money says one line | | | S | Sonnet | |
-| **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | Opus | building |
-| IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
-| IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
 | **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](11-phone-ux/IV-3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | Opus | ready |
 | IV-3AY4 | ↳ The phone shell: its own router, base, stylesheet and navigation | | | L | Opus | |
 | IV-3AY6 | ↳ Home | | | M | Opus | |
@@ -330,7 +327,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md) · [r36](11-phone-ux/r36-figures-one-owner/report.md).
 
-Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 3AY1, 3AY3, 3AY5, IV-3F, BV-11G, BV-11L2, IV-11D3. Next free code: 11M.
+Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 3AY1, 3AY3, 3AY5, IV-3F, BV-11G, IV-3AN, BV-11L2, IV-11D3. Next free code: 11M.
 
 ## 12 Desktop UX and smart next steps
 

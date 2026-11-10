@@ -34,7 +34,7 @@ Pages were captured with Audit 10's [capture.py](../r17-phone-tab-audit/evidence
 ## Findings
 
 The findings (P1-P15), the tap budget for the five jobs and the visual plan are one item, so they are kept in one place:
-[IV-3AN](../IV-3AN-phone-visual-plan-quick-actions.md). Screens are in [evidence/](evidence/),
+IV-3AN, done 2026-11-10 ([the item as it closed](https://github.com/lightningeg/lightning/blob/eaab123cd151/issues/11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md); tests `tests/test_phone_capture.py`, `test_phone_reading.py`, `test_phone_search.py`, `test_phone_sms.py`, `test_phone_transactions.py`). Screens are in [evidence/](evidence/),
 numbered as the item cites them.
 
 The owner then asked why the app is slow and whether it needs another language than Python. The timing, the
@@ -66,4 +66,4 @@ choice and scroll. Figures counted by a pattern, so approximate. No code was cha
   | J5 Find or fix a payment | pages only; 6 to sort | **1** to search (live, payments first); **3** to sort, the next row opens by itself |
 
   Overview's first Latest row: 583 px (target under 600). Nothing scrolls sideways at 360 or 320, sheets included.
-  Left: Accounts tab first (3AN12, needs the owner), and the owner's one end-to-end check on a phone.
+  Closed 2026-11-10: Accounts tab first (3AN12) was overtaken by the Money tab (IV-3AY), and the owner's check (3AN13) is IV-3AY's 3AY13.
