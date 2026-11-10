@@ -86,10 +86,8 @@ async def set_transaction_category(request: Request, txn_id: int):
 
 @router.get("/transactions/sorted")
 async def sorted_sheet(request: Request):
-    """The end of To sort: nothing left to sort."""
-    if not getattr(request.state, "phone", False):
-        return redirect(return_to(request.query_params.get("return_to")))
-    return render(request, "transactions/sorted.html", return_to=return_to(request.query_params.get("return_to")))
+    """The end of To sort has no PC page: the phone router answers this address on the phone."""
+    return redirect(return_to(request.query_params.get("return_to")))  # the phone draws its own (ui/phone/router.py)
 
 
 @router.get("/transactions/{txn_id:int}/edit-popup")

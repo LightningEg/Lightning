@@ -797,6 +797,10 @@ class TransactionService:
             raise NotFoundError("Transaction not found.")
         return found
 
+    def get_many(self, txn_ids: list[int]) -> dict[int, Transaction]:
+        """Several transactions at once (the Activity list); an id that does not exist is left out."""
+        return self.repo.get_many([int(i) for i in txn_ids])
+
     def revision(self, txn_id: int) -> str:
         """Opaque form version, covering the header and every posting line."""
         return submissions.revision(self._snapshot(self.get(txn_id)))

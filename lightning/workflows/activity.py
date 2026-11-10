@@ -52,13 +52,7 @@ class ActivityReview:
         The same keys the list pages read from ``summary``; the three yes/no marks hold a placeholder, not the links."""
         if not ids:
             return []
-        from lightning.transactions.repository import _header
-        marks = ",".join("?" for _ in ids)
-        headers = {int(r["id"]): _header(r)
-                   for r in self.db.all(f"SELECT * FROM transactions WHERE id IN ({marks})", tuple(ids))}
-        lines = self.c.transactions.repo.lines_for(list(headers))
-        for txn_id, txn in headers.items():
-            txn.lines = lines[txn_id]
+        headers = self.c.transactions.get_many(ids)
         from_others = self._marked("SELECT transaction_id FROM money_from_others WHERE transaction_id IN ({marks})", ids)
         planned = self._marked(
             "SELECT transaction_id FROM planned_payments WHERE transaction_id IN ({marks}) UNION "
