@@ -20,6 +20,7 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 | **IT-1Y** | [Every page is asked once and measured](../../issues/1-easy-to-contribute/IT-1Y-every-page-asked-once-and-measured.md) | M | ready |
 | **IT-1Z** | [Unused functions and names](../../issues/1-easy-to-contribute/IT-1Z-unused-functions-and-names.md) | S | ready |
 | **IT-9K** | [Structure left](../../issues/9-later/IT-9K-layers-and-copies.md) | M | ready |
+| **IT-12AE** | [A screen cannot work out money](../../issues/12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | L | ready |
 
 ## Reports with open follow-ups here
 
@@ -28,5 +29,6 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 - [v1.5.0 PR review, theme switching and package preparation](../../issues/10-looks-and-store/r12-v150-release/report.md): 1H
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 1H, 9K
 - [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r33-code-review-and-loose-ends/report.md): 1V, 1W, 1X, 1Y, 1Z, 9K
+- [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](../../issues/11-phone-ux/r36-figures-one-owner/report.md): 12AE
 <!-- work:end -->
 
