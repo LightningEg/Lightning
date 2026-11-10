@@ -19,6 +19,10 @@ COMMANDS = {
         account_id=ref("accounts"), name=TEXT, start_date=TEXT, lockup_end_date=TEXT, maturity_date=TEXT, principal=AMOUNT,
         annual_rate=TEXT, interest_method=TEXT, payout_frequency=TEXT, compounding_frequency=TEXT,
         destination_account_id=ref("accounts"), funding_account_id=ref("accounts"), term_years=TEXT)),
+    "deposits.record_owned": Command("deposits.record_owned", dict(
+        account_id=ref("accounts"), name=TEXT, start_date=TEXT, lockup_end_date=TEXT, maturity_date=TEXT, principal=AMOUNT,
+        annual_rate=TEXT, interest_method=TEXT, payout_frequency=TEXT, compounding_frequency=TEXT,
+        destination_account_id=ref("accounts"), term_years=TEXT)),
     # The older account-level terms of a CD, one row per account.
     "deposits.save": Command("deposits.save", dict(
         account_id=ref("accounts"), start_date=TEXT, maturity_date=TEXT, principal=TEXT, annual_rate=TEXT,

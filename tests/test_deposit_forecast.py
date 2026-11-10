@@ -89,3 +89,20 @@ def test_maturity_beyond_forecast_horizon_is_excluded(c, setup):
     forecast = c.forecaster.forecast(date(2026, 10, 1))
     assert [month.month for month in forecast.months] == ["2026-10", "2026-11", "2026-12"]
     assert all(month.deposit_cash == 0 for month in forecast.months)
+
+
+def test_a_monthly_certificate_pays_the_same_every_month_and_a_broken_last_period_by_days(c, setup):
+    """IV-12J2: banks pay principal x rate / 12 each month (30,000 at 22% is 550), not actual days / 365;
+    only a period shorter than the schedule (here a maturity mid-month) is counted by days."""
+    accounts, _ = setup
+    certificate, _ = c.deposits.purchase(
+        accounts["cd"].id, "NBE monthly", "2026-09-01", "2026-09-01", "2027-01-16", "30000", "22", "SIMPLE",
+        "MONTHLY", "MONTHLY", accounts["cib"].id, accounts["cib"].id)
+    events = [e for e in c.deposits.future_events(date(2026, 8, 31), date(2027, 2, 1))
+              if e.certificate_id == certificate.terms.id and e.kind == "INTEREST"]
+
+    monthly = [e.amount.quantize(Decimal("0.01")) for e in events[:-1]]
+    assert [e.date for e in events] == ["2026-10-01", "2026-11-01", "2026-12-01", "2027-01-01", "2027-01-16"]
+    assert monthly == [Decimal("550.00")] * 4
+    assert events[-1].amount.quantize(Decimal("0.01")) == (Decimal("30000") * Decimal("0.22") * 15 / 365).quantize(
+        Decimal("0.01"))

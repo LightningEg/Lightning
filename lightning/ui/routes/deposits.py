@@ -30,7 +30,7 @@ def _values():
             "term_years": "",
             "principal": "", "annual_rate": "", "interest_method": "SIMPLE",
             "compounding_frequency": "MONTHLY", "payout_frequency": "AT_MATURITY",
-            "destination_account_id": "", "funding_account_id": ""}
+            "destination_account_id": "", "funding_account_id": "", "already_owned": ""}
 
 
 def _page(request: Request, account_id: int, values=None, error="", status_code=200):
@@ -55,7 +55,14 @@ def _page(request: Request, account_id: int, values=None, error="", status_code=
                   certificates=certificates, values=values or _values(), error=error,
                   liquid_accounts=liquid, liquid_by_id=liquid_by_id, sale_factor=factor, legacy=legacy,
                   legacy_cash=c.deposits.legacy_cash_balance(account_id), today_iso=fmt_date(today()),
-                  interest_receipts=interest_receipts, suggestions=suggestions, outlooks=outlooks)
+                  interest_receipts=interest_receipts, suggestions=suggestions, outlooks=outlooks,
+                  redeem_id=_query_int(request, "redeem"))
+
+
+def _query_int(request: Request, key: str) -> int | None:
+    """IV-12J4: Needs you opens one certificate's redemption form (``?redeem=<id>``) with what the bank should pay."""
+    text = str(request.query_params.get(key, "")).strip()
+    return int(text) if text.isdigit() else None
 
 
 @router.get("/{account_id:int}")
@@ -79,18 +86,22 @@ async def purchase(request: Request, account_id: int):
             earlier = c.transactions.submitted(submission, payload)  # a resent form returns its first purchase
             if earlier is not None:
                 return redirect(f"/deposits/{account_id}", f"Saved {earlier.ref}.")
-            certificate, txn = c.deposits.purchase(
-                account_id, values["name"], values["start_date"], values["lockup_end_date"],
-                values["maturity_date"], values["principal"], values["annual_rate"],
-                values["interest_method"], values["payout_frequency"], values["compounding_frequency"],
-                _int(values["destination_account_id"]), _int(values["funding_account_id"]),
-                term_years=values["term_years"],
-            )
+            terms = (values["name"], values["start_date"], values["lockup_end_date"], values["maturity_date"],
+                     values["principal"], values["annual_rate"], values["interest_method"],
+                     values["payout_frequency"], values["compounding_frequency"],
+                     _int(values["destination_account_id"]))
+            if values["already_owned"]:  # NF-12I: bought before tracking began, no money moves
+                certificate, txn = c.deposits.record_owned(account_id, *terms, term_years=values["term_years"])
+            else:
+                certificate, txn = c.deposits.purchase(account_id, *terms,
+                                                       _int(values["funding_account_id"], "funding_account_id"),
+                                                       term_years=values["term_years"])
             c.transactions.remember_submission(submission, payload, txn.id)
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose the funding and payout accounts."
         return _page(request, account_id, values, message, 400)
-    return redirect(f"/deposits/{account_id}", f"Bought {certificate.terms.name} · {txn.ref}.")
+    verb = "Added" if values["already_owned"] else "Bought"
+    return redirect(f"/deposits/{account_id}", f"{verb} {certificate.terms.name} · {txn.ref}.")
 
 
 @router.post("/{account_id:int}/certificates/{certificate_id:int}/terms")
@@ -226,7 +237,7 @@ async def save_legacy(request: Request, account_id: int):
     return redirect(f"/deposits/{account_id}", "Legacy CD terms saved.")
 
 
-def _int(value: str) -> int:
+def _int(value: str, field: str = "destination_account_id") -> int:
     if not value.isdigit():
-        raise ValidationError("Choose an account.", "destination_account_id")
+        raise ValidationError("Choose an account.", field)
     return int(value)
