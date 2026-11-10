@@ -34,3 +34,7 @@ def test_rules_inside_media_are_found_with_their_line_and_keyframes_are_skipped(
     css = "@keyframes spin { from { a: b } }\n@media (max-width: 600px) {\n  .ghost { x: y }\n  .live { x: y }\n}\n"
     dead = _dead(tmp_path, css, **{"a.html": "live"})
     assert [(d["selector"], d["line"]) for d in dead] == [(".ghost", 3)]
+
+
+def test_a_class_inside_not_does_not_make_a_rule_dead(tmp_path):
+    assert _dead(tmp_path, "input:not(.x_)::file-selector-button { a: b }\n", **{"a.html": "<input>"}) == []

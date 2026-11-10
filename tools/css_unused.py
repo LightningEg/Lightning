@@ -3,7 +3,8 @@
     python tools/css_unused.py                       # lightning/ui/static/style.css
     python tools/css_unused.py --file other.css [--json]
 
-A class token is *seen* when it occurs as a whole word in any .html, .js or .py file under lightning/. A token
+A class token is *seen* when it occurs as a whole word in any .html, .js or .py file under lightning/ or tests/
+(a class inside :not(...) is not needed). A token
 built at run time ("tone-" + x, f"is-{state}", `chip-${k}`) is *dynamic*: its prefix up to a "-" appears before a
 quote, "{", "$" or "+", and it counts as seen. A selector is dead when one of its class tokens is not seen; a rule is
 dead when every selector in it is. No browser: hover, focus and themes are not guessed, a class is judged by its name.
@@ -86,6 +87,15 @@ def seen_token(token: str, vocab: tuple[set[str], set[str]]) -> bool:
     return token in words or any(token[:m.end()] in stems for m in re.finditer("-", token))
 
 
+def class_tokens(selector: str) -> list[str]:
+    """The classes a selector needs: a class inside :not(...) is a class it must NOT have, so it is not needed."""
+    while True:
+        stripped = re.sub(r":not\([^()]*\)", "", selector)
+        if stripped == selector:
+            return CLASS.findall(selector)
+        selector = stripped
+
+
 def dead_rules(css: str, text: str) -> tuple[list[dict], int]:
     vocab = vocabulary(text)
     dead = []
@@ -94,7 +104,7 @@ def dead_rules(css: str, text: str) -> tuple[list[dict], int]:
         selectors = [s.strip() for s in head.split(",") if s.strip()]
         verdicts = []
         for selector in selectors:
-            tokens = CLASS.findall(selector)
+            tokens = class_tokens(selector)
             verdicts.append(bool(tokens) and any(not seen_token(t, vocab) for t in tokens))
         if verdicts and all(verdicts):
             dead.append({"line": line, "selector": head, "bytes": size})
@@ -105,10 +115,11 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--file", default=str(DEFAULT))
     parser.add_argument("--json", action="store_true")
-    parser.add_argument("--root", default=str(ROOT / "lightning"), help="the folder whose templates and scripts are read")
+    parser.add_argument("--root", action="append", help="a folder whose .html, .js and .py files are read "
+                        "(repeat; default lightning/ and tests/, since a test that names a class depends on it)")
     args = parser.parse_args()
     css = Path(args.file).read_text(encoding="utf-8")
-    dead, total = dead_rules(css, corpus(Path(args.root)))
+    dead, total = dead_rules(css, "\n".join(corpus(Path(r)) for r in (args.root or [ROOT / "lightning", ROOT / "tests"])))
     if args.json:
         print(json.dumps(dead))
         return 0

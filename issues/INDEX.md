@@ -238,8 +238,6 @@ Good ideas that wait until the milestones above are done.
 |---|---|---|---|---|---|---|
 | **IT-9A** | [Stored month-end figures](9-later/IT-9A-stored-month-end-figures.md) | improvement, technical | Understand | M | Opus | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
 | **IT-9F** | [Page speed: a CSS trim](9-later/IT-9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | Sonnet | new |
-| IT-9F1 | ↳ A tool that lists unreachable CSS rules | | | S | Sonnet | |
-| IT-9F2 | ↳ Delete the unreachable rules from style.css | | | M | Sonnet | |
 | IT-9F3 | ↳ Do async routes with synchronous database work slow anything? | | | S | Opus | |
 | **IT-9K** | [Structure left - restore, device and borrowing routes out of profile_app](9-later/IT-9K-layers-and-copies.md) | improvement, technical | Build | M | Opus | ready |
 | IT-9K1 | ↳ Restore routes out of profile_app | | | S | Sonnet | |

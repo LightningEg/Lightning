@@ -19,7 +19,9 @@ Measured 2026-11-06 on demo data in Chromium over loopback (commit bbc768c7 on b
 
 2026-11-08: still true on main: `style.css` 380,405 bytes, `style.rtl.css` 380,575 bytes; the cache header is unchanged.
 
-## Fix
+2026-11-10 (9F1, 9F2 done): `tools/css_unused.py` found 934 unreachable rules; they are deleted, `style.css` 380,716 → 301,468 bytes and `style.rtl.css` 380,886 → 301,612 (the 380,405 above was before the file grew); screenshots of `/`, `/budget`, `/transactions`, `/investments`, `/plan` are pixel-identical. Only rules whose class names appear in no template, script, Python string or test were removed.
+
+## Fix (done: 9F1, 9F2)
 Find the `style.css` rules that no template, script or Python string can reach, delete them, rebuild the RTL sheet, measure again. Coverage alone misses hover, focus, dialogs, themes and unvisited pages, so a rule is removed only when its class names appear nowhere in the source. Expect a few milliseconds, not a rewrite.
 
 Not in this item: Architecture's "routes are `async def` with synchronous database work" (step 9F3 only checks whether it matters).
@@ -27,13 +29,6 @@ Not in this item: Architecture's "routes are `async def` with synchronous databa
 ## How to work on this item
 
 Each step below is one pull request. Read only the files a step names; never open `guideline/*.html` whole. Run the step's test command, then `python -m pytest tests/test_issues.py -q`; delete the step's heading in the same commit.
-
-## 9F2 Delete the unreachable rules from style.css · M · sonnet
-Needs 9F1 merged first.
-Files: `lightning/ui/static/style.css`; regenerated `lightning/ui/static/style.rtl.css` (by `tools/build_rtl_css.js`, read its header lines 1-5 for the command).
-Verify first: run `python tools/css_unused.py`; if it reports under 20 KB, write the number in this item under Report and delete this step instead.
-Do: delete exactly the rules `python tools/css_unused.py` lists, and nothing else. Before deleting, for each listed class token run `grep -rn "<token>" lightning --include=*.py --include=*.js --include=*.html` once more; keep any rule whose token is built in a way the tool did not catch (string join, `classList.add(variable)`, a Jinja `~` concatenation) and add that case to `tests/test_css_unused.py` as a kept rule. Then rebuild the RTL sheet (`cd /tmp && npm i rtlcss postcss && NODE_PATH=/tmp/node_modules node /home/user/Lightning/tools/build_rtl_css.js`). Record bytes before and after in the commit's `Detail:` line.
-Done when: `python tools/css_unused.py | tail -1` says `dead rules: 0`; `python -m pytest tests/test_theme_build.py tests/test_brand_audit.py tests/test_page_header.py tests/test_arabic_no_english.py tests/test_pc_layout_browser.py tests/test_mohab_year.py -q` has no new failure against main; `python tools/phone_check.py` reports nothing new; screenshots of `/`, `/budget` and `/transactions` before and after look the same.
 
 ## 9F3 Do async routes with synchronous database work slow anything? · S · opus
 Files: `lightning/runtime/http.py`, `lightning/ui/web.py`, one route file to sample (`lightning/ui/routes/zakat.py`); `ai/ARCHITECTURE.md` (the **Page speed** paragraph).
