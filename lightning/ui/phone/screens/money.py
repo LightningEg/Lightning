@@ -18,6 +18,7 @@ from lightning.ui.visuals import month_ends
 ZERO = Decimal(0)
 ACCOUNTS_SHOWN = 4
 COMING_UP = 2   # IV-11H: twelve rows at most under the hero; the head opens every bill
+BILLS_HORIZON_DAYS = 60   # BV-11L4: Coming up and Bills read the same window
 UPCOMING = (BillState.DUE_SOON, BillState.BEFORE_PAYDAY, BillState.LATER)
 TREND_MONTHS = 12
 # A04.1: what you own in a fixed order, four then Other; a fund joins its family (the bar has no room for shades).
@@ -47,6 +48,7 @@ class MoneyScreen:
     coming_up: tuple[BillRow, ...]     # at most COMING_UP, never late
     late_count: int                    # late bills are one pointer to Home's catch-up, not rows here
     holdings_value: Decimal
+    has_accounts: bool                # a fresh profile gets one first step instead of zero figures
     zakat: bool = False                # Zakat is on: its page is one of the places below
     goals_funded: int = 0              # goals and reserves at their target ("3 of 4 funded")
     goals_count: int = 0
@@ -105,7 +107,7 @@ def build(c, day: date) -> MoneyScreen:
     except Exception:  # history that cannot be rebuilt: the hero then says nothing about change
         since = None
     rows = _balances(c, day)
-    bills = bill_state.open_bills(c.planning, day, bill_state.SOON_DAYS * 3)
+    bills = bill_state.unpaid_bills(c.planning, day, BILLS_HORIZON_DAYS)
     funded, goals = _goals(c)
     return MoneyScreen(
         net_worth=now.net_worth, what_you_own=now.what_you_own, what_you_owe=now.what_you_owe, since_start=since,
@@ -113,7 +115,7 @@ def build(c, day: date) -> MoneyScreen:
         accounts_total=sum((r.balance for r in rows), ZERO), held_for_others=now.held_for_others,
         coming_up=tuple(b for b in bills if b.state in UPCOMING)[:COMING_UP],
         late_count=sum(1 for b in bills if b.state in (BillState.LATE, BillState.LATE_STALE)),
-        holdings_value=now.holdings_value, zakat=c.zakat.enabled(),
+        holdings_value=now.holdings_value, has_accounts=bool(c.accounts.list()), zakat=c.zakat.enabled(),
         goals_funded=funded, goals_count=goals, health_watch=_health_watch(c, day),
         trend=net_worth_trend(c, day), own_split=own_split(now))
 
@@ -142,7 +144,7 @@ class BillsPage:
 def bills_page(c, day: date) -> BillsPage:
     """The one bill state, grouped for the phone (C11.5): Late first as a block, then this week, before payday and after.
     The same open bills Home's To do and Money's Coming up read, so a bill is counted once everywhere."""
-    rows = bill_state.unpaid_bills(c.planning, day, 60)
+    rows = bill_state.unpaid_bills(c.planning, day, BILLS_HORIZON_DAYS)
     pick = lambda *states: tuple(b for b in rows if b.state in states)  # noqa: E731
     return BillsPage(pick(BillState.LATE, BillState.LATE_STALE), pick(BillState.DUE_SOON),
                      pick(BillState.BEFORE_PAYDAY), pick(BillState.LATER))
