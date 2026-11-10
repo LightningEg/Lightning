@@ -5,7 +5,7 @@ type: polish
 pillar: own
 size: M
 model: sonnet
-status: new
+status: ready
 created: 2026-11-09
 by: Claude
 skills: bug-hunt
@@ -33,3 +33,5 @@ karat (22K priced from 21K by purity, as 18K is). Bars and coins bought by the g
 and are valued by the same dated karat price; workmanship is shown as what resale will not return. Plain valuation
 labels ("21K price, 9 Nov" / "Your estimate, 9 Nov" / "At cost"). Tests: one post creates item and purchase; a 22K
 item saves without a reference; a 24K bar and a 24K coin show the same value per gram.
+
+**Built (2026-11-10):** *Add gold* (`/investments/gold/new`, `tests/test_investment_doors.py`) saves the piece and its purchase in one post, with the price reference chosen from the karat. **Left:** bars and coins as rows of the same table with the dated karat price, plain valuation labels, whole-EGP amounts.

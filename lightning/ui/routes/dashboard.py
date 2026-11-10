@@ -559,7 +559,7 @@ async def money_from_others(request: Request):
     held_total = c.position.at(today()).held_for_others
     return render(request, "money_from_others.html", accounts=c.accounts.list(active_only=True),
                   counterparties=c.counterparties.list_active(), held_total=held_total,
-                  owners=owners, investments=investments,
+                  owners=owners, investments=investments, today_iso=today().isoformat(),
                   entries=c.reporting.money_from_others_history(),
                   investment_entries=c.money_from_others.investment_history())
 

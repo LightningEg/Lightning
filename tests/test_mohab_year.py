@@ -320,11 +320,13 @@ def _first_evening(o: Mohab) -> None:
     b.submit({}, button="Review statement", files={"file": ("cib-jul-sep.csv", _statement(), "text/csv")})
     b.submit({"map_Date": Choose("Date"), "map_Amount": Choose("Amount"), "map_Counterparty": Choose("Description")},
              button="Preview rows")
-    o.notes["review"] = b.page
+    o.notes["questions"] = b.page  # the review opens on its questions (NF-7AB1)
+    o.notes["review"] = b.click("See every row")
     # Halfway through he leaves to check something, then comes back to the review from the Overview.
     o.ask("import_waiting", "I left the import half done. Does Lightning remember it?")
     o.notes["import_again"] = b.go("Transactions", "Accounts", "CIB Payroll", "Import statement")
     b.go("Imported activity needs a decision")
+    b.click("See every row")
     review = b.page.form("Post ready rows")
     # Rows like the register: he answers each row's own wells. Rows share an imported name, so he answers the
     # same way for each; a new counterparty is "+ New counterparty" in the well, a transfer is picking his account.
@@ -811,6 +813,8 @@ def _the_feedback_round(o: Mohab) -> None:
     o.notes["big_review"] = b.submit({"amount_model": "SEPARATE", "map_Date": Choose("Date"), "map_Inflow": Choose("Credit"),
                                       "map_Outflow": Choose("Debit"), "map_Counterparty": Choose("Description"),
                                       "map_Reference": Choose("Reference")}, button="Preview rows")
+    o.notes["big_questions"] = o.notes["big_review"]
+    o.notes["big_review"] = b.click("See every row")
     first = min(int(k.rsplit("_", 1)[1]) for k in b.page.form("Post ready rows").fields if k.startswith("notes_"))
     o.notes["import_error"] = b.submit({f"date_{first}": "31/31/2026"}, button="Post ready rows")
 
@@ -1333,6 +1337,13 @@ def test_one_decision_per_name_in_the_import(mohab):
     assert mohab.notes["import_decisions"] == 17
 
 
+def test_the_import_asks_its_questions_before_its_rows(mohab):
+    # 43 rows open as a few questions with a count each; the rows are one click away (NF-7AB1).
+    page = mohab.notes["questions"]
+    assert 'class="import-summary"' in page.html and '<div class="import-line' not in page.html
+    assert page.shows("Needs you", "See every row")
+
+
 def test_thndr_can_be_where_a_transfer_went(mohab):
     assert re.search(r'<option value="THNDR" data-pick="account:\d+"', mohab.notes["review"].html)
 
@@ -1455,7 +1466,7 @@ def test_other_investments_are_in_the_investment_analysis(mohab):
     assert route(mohab, "flat") == ["/", "/investments"]
     assert mohab.answers["flat"].shows("Other Investments", "400,000")
     # Recording the flat is not growth: the investments line and the net worth chart both say so.
-    assert re.search(r"since six months ago, not counting 400,000 of opening balances", mohab.answers["flat"].screen.text)
+    assert re.search(r"since six months ago, excluding 400,000 you already owned", mohab.answers["flat"].screen.text)
     assert mohab.answers["flat_jump"].shows("2027-09 includes 400,000 of opening balances: yours before, so not a change.")
 
 

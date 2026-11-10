@@ -37,7 +37,7 @@ Reserved codes: none
 
 - **Website (11-09):** owner: Home ends on Download; Marketplace in search (site PR). Analytics host blocked here: unread. **Read:** site README › Search.
 
-- **Import:** NF-7AB flow decided. 2AI5, 2AI2, 2AI3 built; 2AI4 waits on 4A4; owner 2AI6. **Read:** 2AI, 7AB.
+- **Import:** 7AB1 built. Next 7AB3, 2, 6, 4, 5; then 7AK, 7AO, 7AN, 7AQ. 2AI4 waits on 4A4. **Read:** 7AB.
 
 
 Plan: `issues/INDEX.md`.

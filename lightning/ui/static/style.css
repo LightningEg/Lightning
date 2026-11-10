@@ -3950,3 +3950,18 @@ label > .field-note { color:var(--muted); font-size:var(--fs-meta, 12px); margin
   .main .topbar > .section-bar .plan-tabs-bar { flex-wrap:nowrap; }
   .main .topbar > .actions { flex:none; }
 }
+/* NF-7AB1: the import review's questions, lines inside the review card (never cards in a card) */
+.main .import-summary { display:grid; margin:4px 0 12px; }
+.main .import-question { border-top:1px solid var(--line); }
+.main .import-question-head { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:16px; padding:12px 4px; }
+.main .import-question-name { display:grid; gap:2px; min-width:0; }
+.main .import-question-name small { color:var(--ink-2); font-size:var(--fs-meta); }
+.main .import-question-n { font-size:var(--fs-2); }
+.main .import-question.is-err .import-question-n { color:var(--rose); }
+.main .import-question-actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
+.main .import-question-rows { padding:0 0 12px; }
+@media (max-width:700px) {
+  .main .import-question-head { grid-template-columns:minmax(0,1fr) auto; }
+  .main .import-question-actions { grid-column:1 / -1; justify-content:stretch; }
+  .main .import-question-actions .btn { flex:1 1 0; min-height:52px; }
+}

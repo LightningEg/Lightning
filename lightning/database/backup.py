@@ -28,7 +28,7 @@ def list_backups(folder: str | Path, database: str | Path) -> list[BackupFile]:
     if not folder.is_dir():
         return []
     pattern = re.compile(re.escape(Path(database).stem) +
-                         r"_(backup|upgrade)_(\d{4}-\d{2}-\d{2})_(\d{3,})_([0-9a-f]{8})\.db$")
+                         r"_(backup|upgrade)_(\d{4}-\d{2}-\d{2})_(\d{3,})_([0-9a-f]{8})(?:_picked)?\.db$")
     found = []
     for path in folder.iterdir():
         match = pattern.fullmatch(path.name)

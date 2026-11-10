@@ -190,6 +190,31 @@ class PendingProfile:
     slot: dict          # the whole key file: both locks, the question and the checks
     base_currency: str
     expires: float
+    legacy_source: Path | None = None   # an old plaintext database to bring in (IT-2C2); opened read only, never changed
+
+
+LEGACY_REFUSED = "This file is not an old Lightning database. Nothing was changed."
+
+
+def check_legacy_database(source: Path) -> Path:
+    """An old plaintext Lightning database, or ProfileError. Opened read only; the file is never changed."""
+    import sqlite3
+    try:
+        source = Path(source).resolve(strict=True)
+        with source.open("rb") as handle:
+            if handle.read(16) != b"SQLite format 3\x00":
+                raise ProfileError(LEGACY_REFUSED)
+        connection = sqlite3.connect(f"{source.as_uri()}?mode=ro", uri=True)
+        try:
+            found = connection.execute(
+                "SELECT 1 FROM sqlite_master WHERE type='table' AND name='schema_migrations'").fetchone()
+        finally:
+            connection.close()
+    except (OSError, sqlite3.Error) as exc:
+        raise ProfileError(LEGACY_REFUSED) from exc
+    if not found:
+        raise ProfileError(LEGACY_REFUSED)
+    return source
 
 
 @dataclass
@@ -250,9 +275,11 @@ class ProfileSession:
             raise ProfileError("Lock the current profile before choosing another one.")
 
     def prepare(self, name: str, password: str, confirm: str, question: str, answer: str,
-                currency: str = "EGP") -> PendingProfile:
+                currency: str = "EGP", legacy_source: Path | None = None) -> PendingProfile:
         self._locked()
         validate_password(password, confirm)
+        if legacy_source is not None:
+            legacy_source = check_legacy_database(legacy_source)
         if not name.strip() or len(name) > 200:
             raise ProfileError("Enter a profile name of 1–200 characters.")
         currency = currency.strip().upper()
@@ -265,7 +292,7 @@ class ProfileSession:
         paths = create_profile(name, root=self.root)
         key, recovery = new_data_key(), new_recovery_key()
         self.pending = PendingProfile(paths, recovery, key, create_key_file(key, password, recovery, question, answer),
-                                      currency, time.monotonic() + 900)
+                                      currency, time.monotonic() + 900, legacy_source)
         # Invalidate confirmation forms from any older setup tab. Otherwise a
         # user could acknowledge key A while the pending database uses key B.
         self.csrf = secrets.token_urlsafe(32)
@@ -291,6 +318,11 @@ class ProfileSession:
         container = None
         try:
             publish_keys(paths, pending.slot, replace=False)
+            if pending.legacy_source is not None:
+                # The old database's encrypted copy becomes the candidate; migrations then run on the copy only.
+                from lightning.database.staging import stage_database
+                staged = stage_database(pending.legacy_source, paths.data_dir, destination_key=pending.key)
+                os.replace(staged.path, candidate)
             container = build(candidate, key=pending.key, backup_dir=paths.backups_dir)
             verify_connection(container.db.conn, encrypted=True)
             container.db.close()
@@ -305,8 +337,9 @@ class ProfileSession:
                 finally:
                     os.close(directory)
             container = build(paths.db_path, key=pending.key, backup_dir=paths.backups_dir)
-            CurrencyRegistry(container.db).register(pending.base_currency)
-            container.set_profile_currency(pending.base_currency)
+            if pending.legacy_source is None:  # brought-in data keeps its own currency
+                CurrencyRegistry(container.db).register(pending.base_currency)
+                container.set_profile_currency(pending.base_currency)
             self._activate(paths, lock, container)
         except BaseException:
             if container is not None:
@@ -344,7 +377,7 @@ class ProfileSession:
             raise ProfileError("This is a backup. Keep it unchanged; restoring into a new profile is not available yet.")
         with paths.db_path.open("rb") as handle:
             if handle.read(16) == b"SQLite format 3\x00":
-                raise ProfileError("This is an unencrypted legacy database. It has not been changed. Explicit import is not available yet.")
+                raise ProfileError("This is an unencrypted legacy database. It has not been changed. To bring it in, choose Profiles, then Bring in your old Lightning data.")
         for companion in (paths.data_dir, paths.keys_path, paths.backups_dir, paths.lock_path):
             if companion.is_symlink():
                 raise ProfileError("Profile companion files must not be symbolic links.")
@@ -605,6 +638,14 @@ class ProfileSession:
         db = self.container.db
         # A journal profile's connection refuses ATTACH: its snapshot runs on a second, read-only connection.
         return write_profile_file(self.paths, db.copy_key(), out, db=db if self.journal is None else None)
+
+    def go_back_before_restore(self, selected: str, password: str) -> Path:
+        from lightning.runtime.restore import EncryptedBackupRestorer
+        return EncryptedBackupRestorer(self).go_back_before_restore(selected, password)
+
+    def restore_evidence(self, selected: str) -> list[dict]:
+        from lightning.runtime.restore import EncryptedBackupRestorer
+        return EncryptedBackupRestorer(self).restore_evidence(selected)
 
     def resume_interrupted_restore(self, selected: str, password: str) -> None:
         from lightning.runtime.restore import EncryptedBackupRestorer

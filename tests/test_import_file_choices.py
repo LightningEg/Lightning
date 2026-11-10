@@ -176,7 +176,7 @@ def test_reupload_matches_only_active_rows_and_explicit_override_posts_once(c, s
     assert rows[1]['_possible_duplicate'] and rows[1]['_repeat_import']
     before = c.reporting.account_balance(bank.id)
     client = TestClient(create_app(c))
-    page = client.get(f'/accounts/{bank.id}/import/{second}')
+    page = client.get(f'/accounts/{bank.id}/import/{second}?rows=all')
     assert 'Not a duplicate' in page.text
     decisions = {rows[0]['_import_row_id']: {'skip': True}, rows[1]['_import_row_id']: {'match': 'new'}}
     assert c.bank_imports.confirm(second, decisions)['posted'] == 1

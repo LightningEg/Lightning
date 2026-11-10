@@ -455,10 +455,26 @@ def _take_page(pieces: list[dict], start: int) -> list[dict]:
     return page
 
 
+def _question_cards(rows: list[dict], summary: dict) -> list[dict]:
+    """NF-7AB1: the file's few questions, one per state of the rows still waiting, worst first; skipped is a count."""
+    waiting = [r for r in rows if r.get("_status") == "REVIEW"]
+    counts = {state: sum(1 for r in waiting if _row_status(r) == state) for state in _STATUS_ORDER}
+    cards = [{"state": state, "n": counts[state]} for state in ("err", "needs", "dup", "ready") if counts[state]]
+    if summary.get("skipped"):
+        cards.append({"state": "skipped", "n": summary["skipped"]})
+    return cards
+
+
 def _render_review(request, c, account_id: int, batch, rows, *, summary, form=None, msg="", error="", status_code=200,
-                   paged=False):
+                   paged=False, view="rows"):
     account = c.accounts.get(account_id)
-    groups = _review_groups(c, rows, form)
+    if view == "summary" and batch["status"] != "POSTED":
+        # Summary first (NF-7AB1): no rows are drawn; each question card fetches its own rows when opened.
+        paged, form = True, None
+        rows_for_groups = []
+    else:
+        view, rows_for_groups = "rows", rows
+    groups = _review_groups(c, rows_for_groups, form)
     # Rows not drawn post with their suggested choices, as an untouched row does today; names that need the person
     # come first, so a long file's first page is the part that asks something.
     pieces = _review_pieces(groups) if paged else groups
@@ -480,7 +496,8 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
                   groups=shown, balance_gaps=balance_gaps(rows) if batch["status"] != "POSTED" else [], shown_groups=len(shown),
                   more_rows=sum(len(p['rows']) for p in pieces[len(shown):]) if paged else 0, counts=counts, categories=_categories(c), file_labels=file_labels,
                   counterparties=c.counterparties.list_active(), owners=c.counterparties.list_people(), account_choices=accounts_here,
-                  summary=summary, msg=msg, error=error, reject_prompt=reject_prompt, status_code=status_code)
+                  summary=summary, msg=msg, error=error, reject_prompt=reject_prompt, status_code=status_code,
+                  view=view, cards=_question_cards(rows, summary) if view == "summary" else [])
 
 
 @router.post("/{account_id:int}/import/counterparty")
@@ -514,22 +531,32 @@ async def preview(request: Request, account_id: int, batch_id: int):
     batch, rows = c.bank_imports.preview(batch_id)
     if batch["account_id"] != account_id:
         return redirect(f"/accounts/{account_id}", "Import batch not found for this account.")
-    return _render_review(request, c, account_id, batch, rows, summary=c.bank_imports.summary(batch_id), paged=True)
+    # A bank-SMS batch is a handful of messages: it keeps its rows. A file opens on its questions; "See every row"
+    # (?rows=all) keeps the full row page one link away (owner, 7AB7).
+    every_row = request.query_params.get("rows") == "all" or str(batch["file_name"]).startswith("SMS ")
+    return _render_review(request, c, account_id, batch, rows, summary=c.bank_imports.summary(batch_id), paged=True,
+                          view="rows" if every_row else "summary")
 
 
 @router.get("/{account_id:int}/import/{batch_id:int}/groups")
-async def more_groups(request: Request, account_id: int, batch_id: int, start: int = 0):
-    """The next names of a long review, as HTML to append to the form (IT-7AA8)."""
+async def more_groups(request: Request, account_id: int, batch_id: int, start: int = 0, state: str = ""):
+    """The next names of a long review, as HTML to append to the form (IT-7AA8). With ``state`` (NF-7AB1) only the
+    waiting rows in that state: what one question card shows when it is opened."""
     c = container(request)
     batch, rows = c.bank_imports.preview(batch_id)
     if batch["account_id"] != account_id or batch["status"] == "POSTED":
         return PlainTextResponse("", status_code=404)
+    if state:
+        if state not in _STATUS_ORDER:
+            return PlainTextResponse("", status_code=404)
+        rows = [r for r in rows if r.get("_status") == "REVIEW" and _row_status(r) == state]
     pieces = _review_pieces(_review_groups(c, rows))
     start = max(0, start)
     page = _take_page(pieces, start)
     account = c.accounts.get(account_id)
     categories = _categories(c)
     response = render(request, "partials/bank_import_groups.html", account=account, batch=batch, groups=page,
+                      gp=state,
                       sms=batch["file_name"].startswith("SMS "), categories=categories,
                       cat_groups=c.categories.select_groups([cat["id"] for cat in categories]))
     response.headers["X-Next-Start"] = str(start + len(page))
@@ -685,6 +712,11 @@ async def confirm(request: Request, account_id: int, batch_id: int):
                "attention. Fix them below; your other choices are kept.")
         return _render_review(request, c, account_id, batch, review_rows, summary=c.bank_imports.summary(batch_id),
                               form=form, msg=msg)
+    return _posted_result(request, c, account_id, batch_id, count, form, view=str(form.get("view", "rows")))
+
+
+def _posted_result(request, c, account_id: int, batch_id: int, count: dict, form, *, view="rows"):
+    """The page after a post: what posted, the follow-ups it triggered, and the rows (or questions) still waiting."""
     feedback = _budget_import_feedback(c, batch_id)
     if count.get("posted") and c.accounts.get(account_id).account_type.value == "BROKERAGE":
         # A brokerage statement brings holdings: give each the month-end prices it needs from the price files.
@@ -705,7 +737,40 @@ async def confirm(request: Request, account_id: int, batch_id: int):
     if settled:
         feedback += " Settled bills: " + ", ".join(settled) + "."
     return _render_review(request, c, account_id, batch, result_rows, summary=count, form=form if remaining else None,
+                          paged=view == "summary", view=view,
                           msg=f"Import {'updated' if remaining else 'complete'}: {count['posted']} posted, "
                               + (f"{count['linked']} linked to entries you already had, " if count.get("linked") else "")
                               + f"{count['skipped']} skipped, {count['duplicates']} duplicates."
                               + (" Some rows still need review." if remaining else "") + feedback)
+
+
+@router.post("/{account_id:int}/import/{batch_id:int}/post-ready")
+async def post_ready(request: Request, account_id: int, batch_id: int):
+    """NF-7AB1: the summary's "Post them": every waiting row Lightning already placed posts with its suggestions,
+    as an untouched row does from the full page; the rest stay waiting, and the questions come back."""
+    c = container(request)
+    batch, rows = c.bank_imports.preview(batch_id)
+    if batch["account_id"] != account_id:
+        return redirect(f"/accounts/{account_id}", "Import batch not found for this account.")
+    account_names = {a.name.casefold() for a in c.accounts.list(active_only=True) if a.id != account_id}
+    decisions = {}
+    for row in rows:
+        if row.get("_status") != "REVIEW" or _row_status(row) != "ready":
+            continue
+        decision = _decision({}, row)
+        if _ready_decision({}, row, decision, account_names):
+            decisions[row["_import_row_id"]] = decision
+    try:
+        with settled_save(request, c):
+            count = c.bank_imports.confirm(batch_id, decisions)
+    except LightningError as exc:
+        return redirect(f"/accounts/{account_id}/import/{batch_id}", exc.message)
+    if count.get("errors"):
+        batch, review_rows = c.bank_imports.preview(batch_id)
+        for row in review_rows:
+            row["_row_error"] = count["errors"].get(int(row["_import_row_id"]))
+        problems = len(count["errors"])
+        return _render_review(request, c, account_id, batch, review_rows, summary=c.bank_imports.summary(batch_id),
+                              msg=f"Nothing was imported yet: {problems} row{'s' if problems != 1 else ''} "
+                                  f"need{'' if problems != 1 else 's'} attention. Fix them below.")
+    return _posted_result(request, c, account_id, batch_id, count, {}, view="summary")
