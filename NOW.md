@@ -5,7 +5,7 @@
 | Who | Work | Files | Since |
 |---|---|---|---|
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
-| Claude | BT-2AI: 2AI2, 2AI3. | `lightning/runtime/profile_file.py` and its test | 2026-11-09 |
+| Claude | BT-2AI: 2AI3. | `lightning/runtime/profile_file.py` and its test | 2026-11-09 |
 
 ## Messages
 
@@ -34,7 +34,7 @@
 
 - **Website (2026-10-28):** analytics, Downloads, leaderboard contrast and badge merged; banners redrawn plus Felucca and Sand wind (site #130). **Read:** site README › Analytics.
 
-- **Import:** NF-7AB flow decided. 2AI5 built; next 2AI2. **Read:** 2AI, 7AB.
+- **Import:** NF-7AB flow decided. 2AI5, 2AI2 built; next 2AI3. **Read:** 2AI, 7AB.
 
 
 Plan: `issues/INDEX.md`.

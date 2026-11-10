@@ -181,3 +181,85 @@ def test_save_a_copy_sends_the_profile_file(tmp_path):
     carried = tmp_path / name
     carried.write_bytes(data)
     assert read_profile_file(carried, PHONE_PASSWORD, tmp_path / "fresh").name == "Home"
+
+
+# --- BT-2AI2: "Open a profile file" on the profile chooser -------------------------------------------------------
+
+def _locked_app(root, *, phone=True):
+    from fastapi.testclient import TestClient
+    from lightning.runtime.app import profile_app
+    from lightning.runtime.http import Credentials
+    cfg = Credentials("http://127.0.0.1:9872")
+    app = profile_app(cfg, root, phone=phone)
+    browser = TestClient(app, base_url=cfg.origin, headers={"Origin": cfg.origin})
+    browser.__enter__()
+    browser.get("/__launch", params={"code": cfg.launch_code})
+    return app, browser
+
+
+def _post_file(browser, saved, password, *, path="/profiles/open-file"):
+    from tests.test_phone_downloads import token
+    csrf = token(browser.get("/profiles/open-file").text, "csrf")
+    return browser.post(path, data={"csrf": csrf, "password": password},
+                        files={"profile": (saved.name, saved.read_bytes(), "application/octet-stream")},
+                        follow_redirects=False)
+
+
+@pytest.mark.parametrize("phone", [True, False])
+def test_the_chooser_opens_a_profile_file_as_a_new_unlocked_profile(tmp_path, phone):
+    saved, expected = _book(tmp_path / "old" / "Lightning")
+    fresh = tmp_path / "new" / "Lightning"
+    app, browser = _locked_app(fresh, phone=phone)
+    try:
+        chooser = browser.get("/profiles").text
+        assert 'href="/profiles/open-file"' in chooser
+        form = browser.get("/profiles/open-file").text
+        assert 'type="file"' in form and 'accept=".lightning"' in form and 'enctype="multipart/form-data"' in form
+
+        answer = _post_file(browser, saved, PASSWORD)
+        assert answer.status_code == 303 and answer.headers["location"] == "/"
+        session = app.gate.session
+        assert session.container is not None and session.role.writable and session.name == "Home"
+        assert browser.portal.call(_balances, session) == expected
+        assert [info.name for info in discover_profiles(fresh)] == ["Home"]
+        assert not [name for name in _folders(fresh) if name.startswith(".")]  # the upload's temporary file is gone
+    finally:
+        browser.__exit__(None, None, None)
+
+
+def test_a_wrong_password_or_a_bad_upload_adds_no_profile(tmp_path):
+    saved, _ = _book(tmp_path / "old" / "Lightning")
+    fresh = tmp_path / "new" / "Lightning"
+    app, browser = _locked_app(fresh)
+    try:
+        answer = _post_file(browser, saved, "not the password at all")
+        assert answer.status_code == 400 and "The password is incorrect." in answer.text
+        junk = tmp_path / "junk.lightning"
+        junk.write_bytes(b"not a profile file")
+        answer = _post_file(browser, junk, PASSWORD)
+        assert answer.status_code == 400 and "This is not a Lightning profile file." in answer.text
+        assert app.gate.session.container is None
+        assert _folders(fresh) == [] or not discover_profiles(fresh)
+        assert not [name for name in _folders(fresh) if name.startswith(".")]
+
+        # Any other form still refuses a file part: the request is turned away before its route runs.
+        refused = _post_file(browser, junk, PASSWORD, path="/profiles/new")
+        assert refused.status_code == 403
+        assert not discover_profiles(fresh)
+    finally:
+        browser.__exit__(None, None, None)
+
+
+def test_the_open_file_screen_speaks_arabic(tmp_path):
+    saved, _ = _book(tmp_path / "old" / "Lightning")
+    _, browser = _locked_app(tmp_path / "new" / "Lightning")
+    try:
+        browser.cookies.set("lightning_ui_locale", "ar")
+        assert "افتح ملف بروفايل" in browser.get("/profiles").text
+        page = browser.get("/profiles/open-file").text
+        assert "<h1 id=\"page-title\">افتح ملف بروفايل</h1>" in page and "اختار الملف" in page
+        junk = tmp_path / "junk.lightning"
+        junk.write_bytes(b"x")
+        assert "ده مش ملف بروفايل من لايتنينج." in _post_file(browser, junk, PASSWORD).text
+    finally:
+        browser.__exit__(None, None, None)
