@@ -6,6 +6,7 @@ severity: medium
 pillar: own
 size: S
 model: sonnet
+github: 493
 status: ready
 created: 2026-11-09
 by: Claude

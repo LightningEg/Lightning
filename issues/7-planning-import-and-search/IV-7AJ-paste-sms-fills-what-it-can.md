@@ -4,6 +4,7 @@ type: polish
 pillar: capture
 size: S
 model: sonnet
+github: 490
 status: ready
 created: 2026-11-09
 by: Claude

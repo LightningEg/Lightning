@@ -34,7 +34,7 @@ and pass the ids as parameters after `end` (sorted, so the SQL text is stable). 
 Test: copy the comparison from `evidence/investment_query.py` into a test: keep the old query text in the test as a helper, run both on the sample and the demo for the five periods, assert `repr(old) == repr(new)`. Then `python -m pytest tests/test_reporting_performance.py tests/test_investments*.py tests/test_mohab_year.py -q` and skill `number-audit`.
 Done when: the test passes and `evidence/scale.py 4000` shows the Overview under 330 ms on the same machine (it was 426).
 
-## 9L2 Memo the purity read · S
+## 9L2 Memo the purity read · S · #491
 Files: `lightning/reporting/queries.py:349`.
 Do: put `@request_cached` on `asset_purity` (the decorator is imported at the top of the file; the argument is an int and the result an int or None, so no `deep=True`).
 Test: `python tools/perf_check.py`: the Overview drops from 375 queries to about 340 and Investments from 184 to about 145; page text unchanged (`tests/test_reporting_performance.py::test_main_tabs_read_each_figure_once_and_show_the_same_pages_as_without_the_cache`).
