@@ -33,7 +33,7 @@ Severity: high = wrong money or a lost entry; medium = a job that takes the long
 
 | ID | Severity | Observation and expected behavior | Follow-up |
 | --- | --- | --- | --- |
-| S1 | high | A message written with the Arabic decimal mark is read as the wrong amount: ١٤٧٫٨٧ becomes 87. | BT-7AI |
+| S1 | high | A message written with the Arabic decimal mark is read as the wrong amount: ١٤٧٫٨٧ becomes 87. | Fixed: `tests/test_sms_imports.py::test_arabic_decimal_and_thousands_marks_read_as_the_right_amount` |
 | S2 | high | Phone, Add › Paste SMS on an English card message says "No amount found in this message." though EGP 250.00 is in it; the PC's *Enter it* finds it. [Screenshot](evidence/phone-paste-english-card.png). | IV-7AJ |
 | S3 | medium | *Enter it* opens Add dated today with no payee, though the message says 08/11/26 at TALABAT. | IV-7AJ |
 | S4 | high | A dollar purchase ("charged USD 12.99 at NETFLIX.COM") is "1 skipped": not read, not kept, no trace. [PC after paste](evidence/pc-sms-after-paste.png). | IV-7AJ, NF-7AK3 |

@@ -112,3 +112,11 @@ def test_net_worth_trend_ends_at_the_hero_and_what_you_own_adds_up(mohab):
     assert 'class="phone-chart-trend"' in html and html.count('class="phone-chart-trend-dot') == len(line["dots"])
     assert html.count("<span>", html.index('class="phone-chart-trend-x"'), html.index("</div>", html.index('class="phone-chart-trend-x"'))) <= 3
     assert all(f'tone-{p["key"]}' in html for p in s.own_split)
+
+
+def test_change_this_month_is_the_overviews_figure_even_when_pay_lands_on_the_first(mohab):
+    """BV-12U: salary and interest arrive on the 1st; the change compares with the end of last month, as the Overview."""
+    day = date(2026, 10, 4)
+    expected, _ = mohab.position.change_in_net_worth(date(2026, 10, 1), day)
+    assert screen.build(mohab, day).since_start == expected
+    assert expected is not None and expected > 0

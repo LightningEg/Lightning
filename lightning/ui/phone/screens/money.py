@@ -100,9 +100,8 @@ def _balances(c, day: date) -> list[AccountRow]:
 
 def build(c, day: date) -> MoneyScreen:
     now = c.position.at(day)
-    try:
-        start = c.position.at(day.replace(day=1)).net_worth
-        since = now.net_worth - start
+    try:  # the Overview's own figure: the day before the month began to today (PositionService, one home)
+        since, _reason = c.position.change_in_net_worth(day.replace(day=1), day)
     except Exception:  # history that cannot be rebuilt: the hero then says nothing about change
         since = None
     rows = _balances(c, day)
