@@ -16,7 +16,6 @@ The overview, spending, financial health, net worth and reports. They read the l
 | **IT-9L** | [The investment report reads the whole ledger four times per Overview](../../issues/9-later/IT-9L-investment-report-reads-the-whole-ledger.md) | M | ready |
 | **IT-9M** | [Activity on the PC asks ten queries for each of its 100 rows](../../issues/9-later/IT-9M-activity-asks-ten-queries-a-row.md) | M | ready |
 | **BT-11K** | [Phone Money says net worth fell this month while its chart and the Report say it rose](../../issues/11-phone-ux/BT-11K-phone-money-change-since-month-start.md) | S | ready |
-| **BV-12U** | [Phone Money says net worth fell 10,438 this month where the Overview says it rose 36,395](../../issues/12-desktop-ux/BV-12U-phone-money-net-worth-change.md) | S | ready |
 | **IV-12N** | [Investments figures that mislead outside stocks: purchases shown as change in value, yearly rates o…](../../issues/12-desktop-ux/IV-12N-investment-figures-beyond-stocks.md) | M | new |
 | **IV-12T** | [The three "explain this figure" pages have no way in](../../issues/12-desktop-ux/IV-12T-explain-pages-have-no-way-in.md) | S | ready |
 | **NF-12AB** | [Every headline figure explains itself in place](../../issues/12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | L | new |
@@ -28,7 +27,6 @@ The overview, spending, financial health, net worth and reports. They read the l
 - [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](../../issues/11-phone-ux/r29-google-play-readiness/report.md): 3BK
 - [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12N
 - [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r33-code-review-and-loose-ends/report.md): 9L, 9M, 12T, 9A
-- [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](../../issues/12-desktop-ux/r34-accounts-and-transactions/report.md): 12U
 - [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 11K, 12AB
 <!-- work:end -->
 

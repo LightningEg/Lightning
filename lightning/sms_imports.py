@@ -42,7 +42,8 @@ SALARY_ENDING = "salary"               # the salary message names no account: it
 MAX_SEEN = 5000
 MAX_TEXT = 1000
 
-_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹", "01234567890123456789")
+# Arabic digits plus the Arabic decimal mark (U+066B) and thousands mark (U+066C) as plain ASCII
+_DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹٫٬", "01234567890123456789.,")
 _NUM = r"([\d,]+(?:\.\d{1,2})?)"
 _CUR = r"(?:EGP|جم|ج\.م\.?|جنيه)"
 _AMOUNT = _CUR + r"?\s*" + _NUM + r"\s*" + _CUR + r"?"

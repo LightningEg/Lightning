@@ -11,7 +11,6 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **BT-7AI** | [A bank message with the Arabic decimal mark is read as the wrong amount (147.87 becomes 87)](../../issues/7-planning-import-and-search/BT-7AI-sms-arabic-decimal-mark.md) | S | ready |
 | **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](../../issues/7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) | S | ready |
 | **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually…](../../issues/7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | M | new |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](../../issues/7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | L | ready |
@@ -31,7 +30,7 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 - [CSV import stress test: where it breaks and how to rebuild it](../../issues/7-planning-import-and-search/r23-csv-import-stress/report.md): 7AB
 - [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 7AB
 - [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12K
-- [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](../../issues/7-planning-import-and-search/r31-logging-entries/report.md): 7AI, 7AJ, 7AK, 7AL, 7AM, 7AN, 7AO, 7AP, 7AB
+- [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](../../issues/7-planning-import-and-search/r31-logging-entries/report.md): 7AJ, 7AK, 7AL, 7AM, 7AN, 7AO, 7AP, 7AB
 - [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r33-code-review-and-loose-ends/report.md): 9N
 - [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](../../issues/12-desktop-ux/r34-accounts-and-transactions/report.md): 12V, 12W
 - [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 7AQ
