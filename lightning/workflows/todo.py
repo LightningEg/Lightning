@@ -59,7 +59,7 @@ def todo_rows(c, day: date, bills: list[BillRow], inbox_items: list[dict], away:
     if payday and paid_today:
         rows.append(_row("payday", payday[0]))
     if away.away:
-        rows.append(TodoRow("catch_up", "", "Catch up", "/sms", days=away.days_since_entry, count=away.stale_bills,
+        rows.append(TodoRow("catch_up", "", "Catch up", "/catch-up", days=away.days_since_entry, count=away.stale_bills,
                             since=away.last_entry or ""))
     for item in others:
         kind = "weekly" if item["href"] == "/review" else {"activity": "sort", "prices": "prices", "checks": "check"}.get(group_of(item), "other")

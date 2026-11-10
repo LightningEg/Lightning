@@ -16,8 +16,15 @@ from fastapi.testclient import TestClient
 from lightning.ui.web import create_app
 
 
+# The every-account register on the phone. Its bare address is the Activity slot now (3AY10); any other address still
+# opens the register, and one that names no period opens on this month (the phone router adds it).
+REGISTER = "/transactions?page=1"
+
+
 def _phone(c) -> TestClient:
+    from lightning.ui.phone.router import mount_phone
     app = create_app(c)
+    mount_phone(app)   # the real phone app: its router answers first (3AY11)
 
     @app.middleware("http")
     async def use_phone(request, call_next):
@@ -126,7 +133,7 @@ def test_a_search_makes_the_line_that_of_what_it_found(month):
 def test_the_tab_has_no_back_link_but_an_accounts_page_has(month):
     c, accounts, _ = month
     phone = _phone(c)
-    tab = phone.get("/transactions").text
+    tab = phone.get(REGISTER).text
     assert 'class="phone-back"' not in tab and 'class="phone-appbar-title"' in tab   # the mark and the page's name
     assert 'class="phone-back" href="/accounts"' in phone.get(f"/accounts/{accounts['cib'].id}").text
 
@@ -164,7 +171,7 @@ def test_the_month_stepper_keeps_what_you_searched_and_ends_at_this_month(month)
     now = phone.get("/transactions?month=2026-12").text   # conftest pins today to 2026-12-31
     assert 'class="phone-reg-step is-off"' in now
     # The tab opens on this month (IV-3AL3); All time is a choice in the sheet, and then the control has no arrows.
-    opened = phone.get("/transactions").text
+    opened = phone.get(REGISTER).text
     assert '<summary class="phone-period-now" aria-label="Choose period">2026-12</summary>' in opened
     assert {"preset": "all_time"} in _queries(opened)
     free = phone.get("/transactions?preset=all_time").text
@@ -176,7 +183,7 @@ def test_the_month_stepper_keeps_what_you_searched_and_ends_at_this_month(month)
 def test_the_sheet_offers_the_periods_and_year_to_date_is_the_registers_own_preset(month):
     c, _, _ = month
     phone = _phone(c)
-    page = phone.get("/transactions").text
+    page = phone.get(REGISTER).text
     asked = _queries(page)
     assert {"preset": "year_to_date"} in asked and {"month": "2026-11"} in asked   # last month, with today pinned to December
     ytd = phone.get("/transactions?preset=year_to_date").text
@@ -239,7 +246,7 @@ def test_saved_views_are_listed_in_their_sheet_and_open_with_their_summary(month
     assert "Summary and export" in opened.text and "Delete view" in opened.text
     assert "2026-09-01 to 2026-09-30" in opened.text and "Carrefour" in opened.text and "Seoudi" not in opened.text
     assert 'class="phone-row is-chosen"' in opened.text      # the open view is ticked in the sheet
-    listed = phone.get("/transactions").text
+    listed = phone.get(REGISTER).text
     assert "<span>September</span>" in listed and "Summary and export" not in listed
     # A view of all time says All time, not the far dates behind it.
     everything = phone.post("/transactions/views", follow_redirects=True, data={"name": "Everything", "preset": "all_time"})

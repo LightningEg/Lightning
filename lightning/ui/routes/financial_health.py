@@ -4,12 +4,11 @@ from decimal import Decimal
 
 from fastapi import APIRouter, Request
 
-from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
+from lightning.core.dates import month_of, parse_date, today
 from lightning.core.figures import FIGURES
 from lightning.core.errors import ValidationError
-from lightning.investments.report import investing_rate, investment_period
 from lightning.planning.emergency_context import emergency_liquidity_context
-from lightning.planning.health import HealthFigure
+from ..health_rows import _TONE, limit_words, meter as figure_meter, tone_of
 
 from .. import charts, kpis, status as page_status
 from ..periods import parse_period
@@ -17,11 +16,6 @@ from ..web import container, render
 
 router = APIRouter()
 
-# What each figure's colour means when it is inside its limit (guideline A03, A08): a cushion is money you
-# hold, a savings rate is money kept, debt and fixed costs are money out. Outside its limit it needs you.
-_TONE = {"emergency_fund": "hold", "net_worth": "hold", "savings_rate": "in", "planned_savings_rate": "in",
-         "investing_rate": "in", "debt_to_cash": "out", "debt_to_net_worth": "out", "fixed_costs_to_income": "out",
-         "loan_payments_to_income": "out"}
 # The page answers "Am I financially healthy?": four headline figures, then every figure against its limit.
 KPI_KEYS = ("emergency_fund", "savings_rate", "debt_to_net_worth", "fixed_costs_to_income")
 GROUPS = (("Cushion", ("emergency_fund",)),
@@ -32,7 +26,6 @@ GROUPS = (("Cushion", ("emergency_fund",)),
 
 BAND_WORDS = {"good": "Good", "watch": "Watch", "alert": "Needs you"}
 _BAND_CHIP = {"good": "up", "watch": "", "alert": "over"}  # green tint, quiet, rose (A08)
-
 
 
 def _health_trend(months, values, name: str, tone: str) -> dict:
@@ -61,43 +54,6 @@ def _health_trend(months, values, name: str, tone: str) -> dict:
     return chart
 
 
-def _tone(item) -> str:
-    return "over" if item.band == "alert" else _TONE.get(item.key, "hold")
-
-
-def _meter(item) -> dict | None:
-    """The figure on a track that reaches a little past the larger of the figure and its limit; the
-    limit is a tick. Percentages use 0–100% unless a figure or limit goes past it."""
-    if item.value is None or item.gap:
-        return None
-    value = max(Decimal(item.value), Decimal(0))
-    limit = Decimal(item.limit) if item.limit is not None else None
-    if item.unit == "%":
-        top = max(Decimal(100), value * Decimal("1.1"), (limit or 0) * Decimal("1.1"))
-    else:
-        top = max((limit or 0) * Decimal("1.25"), value * Decimal("1.1"), Decimal(1))
-    alert = Decimal(item.alert) if item.alert is not None else None
-    return {"fill": float(min(value / top * 100, Decimal(100))),
-            "tick": float(limit / top * 100) if limit is not None else None,
-            "ticks": [float(min(bound / top * 100, Decimal(100))) for bound in (limit, alert) if bound is not None],
-            "tone": {"out": "spend"}.get(_tone(item), _tone(item))}  # the chart tone names (style.css)
-
-
-def _limit_words(item) -> str:
-    if item.limit is None:
-        return "No limit set"
-    side = "at least" if item.direction == "minimum" else "at most"
-    amount = f"{item.limit:.1f}%" if item.unit == "%" else f"{item.limit:.0f} months"
-    if item.band == "alert" and item.alert is not None:
-        past = f"{item.alert:.1f}%" if item.unit == "%" else f"{item.alert:.0f} months"
-        return f"{'Below' if item.direction == 'minimum' else 'Above'} {past}: needs you"
-    if item.band == "watch":
-        return f"Good is {side} {amount}"
-    if item.band == "good":
-        return f"Good: {side} {amount}"
-    return f"Good is {side} {amount}"
-
-
 def _chip(period: str) -> str:
     """The period in a few characters: "As of 2026-10-06 · months of …" → "2026-10-06",
     "Monthly · 2026-07 to 2026-09" → "2026-07 to 2026-09"."""
@@ -108,14 +64,14 @@ def _chip(period: str) -> str:
 
 def _kpi(item, label: str) -> dict:
     """One headline card (stat_tile): coloured by what the figure means, its chip says good or bad."""
-    tone = _tone(item)
+    tone = tone_of(item)
     chip_tone = _BAND_CHIP.get(item.band or "", "")
-    meter = _meter(item)
+    meter = figure_meter(item)
     return {"key": item.key, "label": label, "href": item.href, "surface": tone,
             "value": None if item.gap else item.value, "empty": "—",
             "kind": "months" if item.unit == "months" else "rate",
             "badge": {"text": BAND_WORDS.get(item.band or "") or _chip(item.period), "tone": chip_tone, "arrow": ""},
-            "sub": item.gap or _limit_words(item), "band": item.band,
+            "sub": item.gap or limit_words(item), "band": item.band,
             "meter": {"tone": meter["tone"], "width": meter["fill"], "ticks": meter["ticks"]} if meter else None}
 
 
@@ -148,14 +104,12 @@ async def financial_health(request: Request):
     if period is None or error:
         period = parse_period({"period": "month", "month": month_of(as_of)}, today())
     overview = c.health.overview(as_of)
-    if getattr(request.state, "phone", False):  # the Overview's Investing rate tile moved here (3AN4, owner 2026-11-02)
-        overview = {**overview, "figures": overview["figures"] + (_investing_figure(c, overview["savings_month"]),)}
     liquidity_context = emergency_liquidity_context(c.position.at(as_of, match_payments=False))
     trends = overview["trends"]
     labels = {key: ("Emergency fund" if key == "emergency_fund" else FIGURES[key].label) for key in _TONE}
     by_key = {item.key: item for item in overview["figures"]}
-    rows = [{"title": title, "items": [{"item": by_key[k], "meter": _meter(by_key[k]),
-                                        "limit_words": _limit_words(by_key[k])} for k in keys if k in by_key]}
+    rows = [{"title": title, "items": [{"item": by_key[k], "meter": figure_meter(by_key[k]),
+                                        "limit_words": limit_words(by_key[k])} for k in keys if k in by_key]}
             for title, keys in GROUPS]
     judged = [item for item in overview["figures"] if item.status in ("within your limit", "outside your limit") and item.limit is not None]  # BV-12D: only a figure with a limit
     savings_values = [month.savings_rate for month in trends]
@@ -169,7 +123,7 @@ async def financial_health(request: Request):
                       line_=kpis.line(f"{len(outside)} need{'s' if len(outside) == 1 else ''} you" if outside else "All of them are good"))
             if judged else None)
     needs = [{"label": f"{labels.get(item.key, item.key)} is outside your limit",
-              "detail": " · ".join(x for x in (_limit_words(item), item.period) if x), "href": item.href,
+              "detail": " · ".join(x for x in (limit_words(item), item.period) if x), "href": item.href,
               "action": "See details"} for item in outside]
     status = page_status.health(within, len(judged), [labels.get(item.key, item.key) for item in outside])
     return render(request, "financial_health.html", **overview, lead=lead, needs=needs, status=status,
@@ -191,11 +145,3 @@ async def financial_health(request: Request):
                   error=error)
 
 
-def _investing_figure(c, month: str) -> HealthFigure:
-    """The investing rate of the last completed month, next to the savings rate it comes out of: the share of what
-    you kept that you moved into investments (3AN4). It has no limit; it is the Overview's old tile, moved here."""
-    first, last = parse_month(month)
-    flow = c.reporting.cash_flow(first, last)
-    added = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(first), fmt_date(last))["net_money"]
-    return HealthFigure("investing_rate", investing_rate(added, flow.net), "%", month, None, "minimum", None,
-                        (("Net flow", flow.net), ("Money added", added)), "/investments")
