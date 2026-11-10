@@ -28,11 +28,6 @@ One error path: every 4xx/5xx renders the branded page (PC and phone), or for fe
 
 Each step is one pull request. Read only the files a step names. Run the step's test command and `python -m pytest tests/test_arabic_no_english.py -q`; delete the step's heading in the same commit. Never show a Python exception's text to a person; log it with `logging.getLogger("lightning")`.
 
-## 3BD3 Half-English sentences and internal codes · S · #411
-Files: `lightning/runtime/session.py:84`, `lightning/ui/templates/categories/list.html:100`, `lightning/core/ledger.py:164`, `lightning/ui/templates/register.html:217`, `lightning/ui/templates/budget.html:83`.
-Do: (1) session: build the wait with a `{n}` key: "Too many wrong tries. Try again in {n} minutes." and "… in 1 hour." (Arabic agreement from IV-3BC2 if merged; else write the forms). (2) categories confirm: move the whole sentence into one `|tr(locale)` key. (3) ledger: the row label and the message in one key "Row {n}: the price and the exchange rate must be above zero." (4) register tooltip: `title="{{ 'Edit in this list'|tr(locale) }}"` without `r.ref`. (5) budget.html: `'Active: '+` and `e.message` go through `t()`.
-Done when: `tests/test_arabic_no_english.py` gains a case that renders the locked-profile page and the categories page in Arabic and finds no Latin word other than names; `grep -n "r.ref }} —" lightning/ui/templates/register.html` is empty. `python -m pytest tests/test_arabic_no_english.py -q`.
-
 ## 3BD4 Import errors never show Python's text · S · #412
 Files: `lightning/bank_import_rows.py:277`, `lightning/bank_import_posting.py:50,127`, `lightning/investments/events.py:127`, `lightning/money_from_others.py:28`, `lightning/deposits/service.py:296`, `lightning/transactions/service.py:813`.
 Do: replace each `{exc}` with a fixed plain sentence that says what to do ("This file is not a CSV Lightning can read. Save it from your bank as CSV and try again."; "Row {n}: the fee is not a number."), log the exception, and rewrite the developer wording as A14 voice ("Record this from the transaction screen." / "You can take out at most {amount} from this certificate." / "That transaction no longer exists."). Add Arabic for each.

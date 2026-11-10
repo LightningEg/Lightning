@@ -1,6 +1,8 @@
 """Single-owner encrypted profile lifecycle. Never opens a profile implicitly."""
 from __future__ import annotations
 
+from lightning.core.plural import counted
+
 import json
 import os
 import re
@@ -81,7 +83,7 @@ class AttemptGuard:
         left = self.wait_left()
         if left:
             minutes = (left + 59) // 60
-            wait = "1 hour" if minutes >= 60 else f"{minutes} minute{'s' if minutes != 1 else ''}"
+            wait = "1 hour" if minutes >= 60 else counted(minutes, "minute")
             raise ProfileError(f"Too many wrong tries. Try again in {wait}.")
 
     def failed(self) -> None:

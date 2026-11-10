@@ -299,3 +299,19 @@ def test_the_new_phone_screens_have_no_english_system_text(sample):
         if bad:
             problems[path] = sorted(set(bad))[:8]
     assert not problems, problems
+
+
+@pytest.mark.parametrize("n", [1, 2, 5, 11])
+def test_locked_profile_wait_is_fully_arabic(n):
+    """IV-3BD3: the wrong-password wait agrees in Arabic and carries no English word."""
+    from lightning.core.plural import counted
+    message = translate(f"Too many wrong tries. Try again in {counted(n, 'minute')}.", "ar")
+    assert not re.search(r"[A-Za-z]", message), message
+    assert not re.search(r"[A-Za-z]", translate("Too many wrong tries. Try again in 1 hour.", "ar"))
+
+
+def test_categories_page_and_ledger_message_have_no_half_english(sample):
+    c, names = sample
+    page = _client(c, False).get("/categories").text
+    assert "احذف this" not in page and "Delete this category? If it has history" not in page  # the sentence is translated whole
+    assert not re.search(r"[A-Za-z]{3,}", translate("Line 2: the price cannot be negative and the exchange rate must be above zero.", "ar"))

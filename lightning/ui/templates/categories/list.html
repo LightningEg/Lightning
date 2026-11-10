@@ -97,7 +97,7 @@
     if (e.target.closest('[data-cancel]')) e.target.closest('form').hidden = true;
   });
   card.addEventListener('submit', (e) => {
-    if (e.submitter?.matches('[data-confirm-delete]')) window.confirmSubmit(e, 'Delete this category? If it has history or is in use, it is archived instead.');
+    if (e.submitter?.matches('[data-confirm-delete]')) window.confirmSubmit(e, {{ 'Delete this category? If it has history or is in use, it is archived instead.'|tr(locale)|tojson }});
   });
   const checks = [...document.querySelectorAll('.category-select')];
   const all = document.getElementById('select-all-categories');

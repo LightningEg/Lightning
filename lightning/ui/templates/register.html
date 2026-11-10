@@ -215,7 +215,7 @@
       </tr>
       {% else %}
       {% set href = (base_url ~ '?' ~ (keep_qs ~ '&' if keep_qs else '') ~ 'edit=' ~ r.txn_id ~ '&acct=' ~ r.account_id) if r.type in ('IN','OUT','TRF') else '/transactions/' ~ r.txn_id %}
-      <tr class="clickable row-{{ kind }}" data-href="{{ href }}" title="{{ r.ref }} — {{ 'edit in this list' if r.type in ('IN','OUT','TRF') else 'view details' }}">
+      <tr class="clickable row-{{ kind }}" data-href="{{ href }}" title="{{ ('Edit in this list' if r.type in ('IN','OUT','TRF') else 'View details')|tr(locale) }}">
         <td><input type="checkbox" class="transaction-select" value="{{ r.txn_id }}"{{ ' checked' if request.query_params.get('pick') == r.txn_id|string }} data-type="{{ r.type }}" aria-label="Select {{ r.counterparty or r.type_label }}" {% if r.type == 'OPN' %}disabled title="{{ 'Edit opening balances from the account page'|tr(locale) }}"{% endif %}></td>
         {% set cat = r.type_label if r.type in ('BUY', 'SEL', 'DIV') or r.type_label == 'Ownership change' else r.category_label.split(' › ')[-1] %}
         {% set note_text = (r.notes ~ ((' ' ~ r.description) if r.type == 'TRF' and r.description else ''))|trim %}

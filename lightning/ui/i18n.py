@@ -2513,6 +2513,13 @@ ARABIC_UI = {
     'Not found': 'مش موجود',
     'Back to the dashboard': 'ارجع للوحة الرئيسية',
     'Back to Overview': 'ارجع للنظرة العامة',
+    'Active: {kind}': 'شغّال: {kind}',
+    'Edit in this list': 'عدّل من القايمة دي',
+    'View details': 'شوف التفاصيل',
+    'Too many wrong tries. Try again in {n} minutes.': 'محاولات غلط كتير. جرّب تاني بعد {n} دقيقة.',
+    'Too many wrong tries. Try again in 1 minute.': 'محاولات غلط كتير. جرّب تاني بعد دقيقة واحدة.',
+    'Too many wrong tries. Try again in 1 hour.': 'محاولات غلط كتير. جرّب تاني بعد ساعة.',
+    'Line {a}: the price cannot be negative and the exchange rate must be above zero.': 'البند {a}: السعر مينفعش يكون بالسالب وسعر الصرف لازم يكون أكبر من صفر.',
     'This form came from outside Lightning, so it was not sent.': 'الاستمارة دي جاية من برّه لايتنينج، فمااتبعتتش.',
     'That request was not complete.': 'الطلب ده مكانش كامل.',
     'That page cannot do this.': 'الصفحة دي مش بتعمل كده.',
@@ -3527,6 +3534,7 @@ def _translate_whole(value: str) -> str | None:
                 continue  # a one-part pattern must not swallow a `A · B` line: each part is translated on its own
             if match:
                 try:
+                    translated = _agree_counts(translated, match.groupdict())  # "{n} دقيقة" becomes "دقيقتين" for 2
                     return translated.format(**{k: _translate_text(v) for k, v in match.groupdict().items()})
                 except (KeyError, IndexError):
                     continue
@@ -3573,7 +3581,8 @@ _COUNTED = {"يوم": ("يوم واحد", "يومين", "أيام"), "شهر": (
             "حساب": ("حساب واحد", "حسابين", "حسابات"), "فئة": ("فئة واحدة", "فئتين", "فئات"),
             "صف": ("صف واحد", "صفين", "صفوف"), "بند": ("بند واحد", "بندين", "بنود"),
             "فاتورة": ("فاتورة واحدة", "فاتورتين", "فواتير"), "قاعدة": ("قاعدة واحدة", "قاعدتين", "قواعد"),
-            "عنصر": ("عنصر واحد", "عنصرين", "عناصر"), "سنة": ("سنة واحدة", "سنتين", "سنين")}
+            "عنصر": ("عنصر واحد", "عنصرين", "عناصر"), "سنة": ("سنة واحدة", "سنتين", "سنين"),
+            "دقيقة": ("دقيقة واحدة", "دقيقتين", "دقايق"), "ساعة": ("ساعة واحدة", "ساعتين", "ساعات")}
 COUNTED_FORMS = {lemma: list(forms) for lemma, forms in _COUNTED.items()}  # shipped to the browser: lemma -> [one, two, plural]
 _COUNTED_FORMS = {form: lemma for lemma, (_, dual, plural) in _COUNTED.items() for form in (lemma, dual, plural)}
 _COUNT_PHRASE = re.compile(r"\{(\w+)\}\s+(" + "|".join(sorted(_COUNTED_FORMS, key=len, reverse=True)) + r")(?![\u0621-\u064A])")
