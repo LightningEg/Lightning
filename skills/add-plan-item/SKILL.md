@@ -10,7 +10,7 @@ Tool-neutral. Everything still to do is an item in `issues/`; the plan is `issue
 ## Steps
 
 1. **Duplicate check.** Read `issues/INDEX.md`, then `grep -rln "<key words>" issues`. Add to an existing item when it is the same problem.
-2. **Folder.** Pick the big picture whose goal it serves (`issues/<n>-<name>/README.md` states each goal; a report that started it sits in the same folder). Get the next code: `python tools/issues.py next <n>` (for example `3AN`). A code is never reused and never changes when the item moves.
+2. **Folder.** Pick the big picture whose goal it serves (`issues/<n>-<name>/README.md` states each goal; a report that started it sits in the same folder). Get the next code: `python tools/issues.py next <n>` (for example `3AN`; it skips codes on NOW.md's `Reserved codes:` line). A report or more than one new item: write your codes on that line and push that commit first; remove them in the pull request that adds the files. A code is never reused and never changes when the item moves.
 3. **File.** `issues/<n>-<name>/<TAG>-<code>-<what-in-hyphens>.md` (the kind tag from the front matter: `python tools/issues.py tag <code>` prints it after the file exists; BV, BT, IV, IT, NF or OW), front matter first:
 
 ```

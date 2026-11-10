@@ -213,3 +213,21 @@ def test_finished_milestones_move_to_the_archive(tmp_path):
     assert (tmp_path / "ai" / "archive" / "issues" / "5-done" / "README.md").exists()
     assert "5A, 5B" in (tmp_path / "ai" / "archive" / "issues" / "README.md").read_text()
     assert "../ai/archive/issues/5-done/README.md" in (tmp_path / "docs" / "page.md").read_text()
+
+
+def test_reserved_report_codes_are_skipped_and_duplicate_report_numbers_fail(tmp_path):
+    tool = _docs_check_tool()
+    for name in ("docs", "feedback", "templates", "guideline", "issues"):
+        (tmp_path / name).mkdir()
+        (tmp_path / name / "README.md").write_text("# Index")
+    catalogue = ["# Reports"]
+    for subject in ("r30-a", "r30-b"):
+        folder = tmp_path / "issues" / "3-polish" / subject
+        folder.mkdir(parents=True)
+        (folder / "report.md").write_text("Code: r30\n")
+        catalogue.append(f"[x]({'3-polish/' + subject + '/report.md'})")
+    (tmp_path / "issues" / "REPORTS.md").write_text("\n".join(catalogue))
+    assert any("code r30 is also used" in error for error in tool.check(tmp_path))
+    assert tool.next_report_code(tmp_path) == "r31"
+    (tmp_path / "NOW.md").write_text("## Claimed\n\nReserved codes: r31 Claude, 12U-12W Claude\n")
+    assert tool.next_report_code(tmp_path) == "r32"

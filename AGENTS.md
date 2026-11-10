@@ -47,7 +47,7 @@ Never at the cost of a test, a required check, or a read you need.
 ## 3. Every task
 
 1. **Start fresh:** `git pull` on `main`, create your branch (§6), read per §2.
-2. **Claim** work longer than one sitting in `NOW.md` *Claimed* and push that first. Stay out of others' claimed files.
+2. **Claim** work longer than one sitting in `NOW.md` *Claimed* and push that first. Stay out of others' claimed files. A report or more than one new item: write your codes on NOW.md's `Reserved codes:` line and push that commit first; remove them in the pull request that adds the files.
 3. **Small finished steps:** commit and push each once its tests pass.
 4. **Test.** For visible changes also run Mohab (`tests/test_mohab_year.py`) and check A16.
 5. **Record:** end the commit message with `Release-note: <pillar>: one plain sentence a user would understand` (or `Release-note: none`) and `Detail: <what changed, where, why, in one line>`, and name the item's full code (`BV-3C`) in the subject. CI checks the pull request has both; the squash keeps every commit's trailers. Update the §1 files you touched, and run `python tools/status.py` if you changed the plan.
