@@ -87,7 +87,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3BH** | [One name per thing and no accounting jargon - ledger, counterparty, reevaluation, Title Case categories, three names for planning](3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | improvement, visual | Feel | M | Sonnet | ready |
 | IV-3BH5 | ↳ Curly apostrophes in visible English strings ([#426](https://github.com/LightningEg/Lightning/issues/426)) | | | S | Sonnet | |
 | IV-3BH6 | ↳ Built-in categories in sentence case ([#427](https://github.com/LightningEg/Lightning/issues/427)) | | | M | Opus | |
-| IV-3BH8 | ↳ More words found by r35 | | | S | Sonnet | |
+| IV-3BH8 | ↳ "Other Investments" beside "Other" in one legend | | | S | Sonnet | |
 | **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | improvement, visual | Understand | L | Opus | ready |
 | IV-3BK1 | ↳ Guideline: human dates on screens ([#429](https://github.com/LightningEg/Lightning/issues/429)) | | | M | Opus | |
 | IV-3BK2 | ↳ The date filters, tested alone | | | M | Sonnet | |

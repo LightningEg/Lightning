@@ -2,7 +2,7 @@
 {% block title %}{{ 'Reports'|tr(locale) }}{% endblock %}
 {% block heading %}<div class="birdview-title"><div><h1>{{ 'Reports'|tr(locale) }}</h1></div></div>{% endblock %}
 {% block top_actions %}<a class="btn" href="/exports/all">{{ 'Export all data (CSV or Excel)'|tr(locale) }}</a><button type="button" class="btn" data-print>{{ 'Print this page'|tr(locale) }}</button><script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelector("[data-print]").addEventListener("click",()=>window.print())</script>{% endblock %}
-{% block content %}<p><a href="/spending/calendar">{{ 'Age of Money and spending calendar'|tr(locale) }}</a></p>
+{% block content %}<p><a href="/spending/calendar">{{ 'Age of money and spending calendar'|tr(locale) }}</a></p>
 {% from "partials/charts.html" import kpi_row %}
 {{ kpi_row(cards, base, 'Reports') }}
 {% if views %}<section class="card data-panel" aria-labelledby="views-head"><div class="section-head"><div><h2 id="views-head">{{ 'Saved views'|tr(locale) }}</h2></div></div>

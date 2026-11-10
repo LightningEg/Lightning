@@ -53,7 +53,7 @@ def group_of(item: dict) -> str:
 
 # NF-3AZ10: the same items by job and consequence, whatever page shows them: what puts money at risk, events that
 # do not yet agree with the bank or the ledger, and cleanup that can wait. Reviewed and snoozed items are still open.
-CONSEQUENCES = (("risk", "Money at risk"), ("unreconciled", "Unreconciled events"), ("cleanup", "Optional cleanup"))
+CONSEQUENCES = (("risk", "Late or due"), ("unreconciled", "To match"), ("cleanup", "Optional cleanup"))
 CONSEQUENCE_LABELS = dict(CONSEQUENCES)
 _UNRECONCILED = ("/sms", "/accounts/", "/transactions", "/activity", "/deposits/", "/reimbursements")
 

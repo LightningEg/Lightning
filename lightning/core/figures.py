@@ -42,7 +42,7 @@ class Figure:
 
 
 _TABLE = [
-    ("age_of_money", "Age of Money",
+    ("age_of_money", "Age of money",
      "Amount-weighted days from receipt to use of owned cash, consumed oldest first, over the last ten cash expense transactions in profile currency. Unknown opening cash makes the sample unavailable. This is historical timing, not a runway estimate."),
     ("lowest_scheduled_cash", "Lowest scheduled cash",
      "The lowest projected day-end owned cash balance from confirmed cash and scheduled payments. Excludes variable spending and savings goals; reserves remain in cash. Missing FX makes it unavailable."),

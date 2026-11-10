@@ -22,7 +22,7 @@
   <p class="muted">{{ "Use the account’s transaction form and choose the person in"|tr(locale) }}<b>{{ 'Held for'|tr(locale) }}</b>{{ ". For cash already held for someone else, record money in; record a return with a negative amount. Both paths update the owner’s balance."|tr(locale) }}</p>
   <a class="btn primary" href="/transactions">{{ "Open transactions"|tr(locale) }}</a>
 </details>
-<details class="flow-disclosure data-panel"><summary><b>{{ "Cash ownership history"|tr(locale) }}</b><span class="muted small">{{ entries|length }} {{ 'entry' if entries|length == 1 else 'entries' }}</span></summary>
+<details class="flow-disclosure data-panel"><summary><b>{{ "History"|tr(locale) }}</b><span class="muted small">{{ entries|length }} {{ 'entry' if entries|length == 1 else 'entries' }}</span></summary>
   <table><thead><tr><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'Held for'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ 'Notes'|tr(locale) }}</th><th class="num">{{ "Change"|tr(locale) }}</th></tr></thead><tbody>
   {% for row in entries %}<tr><td data-label="{{ 'Date'|tr(locale) }}">{{ row.date }}</td><td data-label="{{ 'Held for'|tr(locale) }}">{{ row.owner }}</td><td data-label="{{ 'Account'|tr(locale) }}">{{ row.account_name }}</td><td data-label="{{ 'Notes'|tr(locale) }}">{{ row.notes }}</td><td class="num" data-label="{{ 'Change'|tr(locale) }}">{{ row.amount|money(True) }} {{ row.currency }}</td>
   {% else %}<tr><td class="empty" colspan="5">{{ "No entries yet."|tr(locale) }}</td></tr>{% endfor %}

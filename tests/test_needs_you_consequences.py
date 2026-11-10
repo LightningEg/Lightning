@@ -41,7 +41,7 @@ def test_the_three_pages_lead_to_the_same_task_and_snoozing_is_not_resolving(c, 
     needs = client.get("/needs-you").text
     weekly = client.get("/review").text
     overview = client.get("/").text
-    assert "Money at risk" in needs and "Money at risk" in weekly
+    assert "Late or due" in needs and "Late or due" in weekly
     assert href in needs and href in weekly and "Bill due: Rent" in overview
     ReviewInbox(c).decide(rent["review_id"], "snoozed", TODAY, "2026-12-27")
     assert "Bill due: Rent" not in client.get("/needs-you").text
