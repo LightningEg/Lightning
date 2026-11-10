@@ -21,7 +21,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r22 | [Code audit: refactoring, loose ends and smart features](9-later/r22-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B, 9A, 9K |
 | r23 | [CSV import stress test: where it breaks and how to rebuild it](7-planning-import-and-search/r23-csv-import-stress/report.md) | 2026-11-05 | audit | 7AB |
 | r24 | [Desktop and phone UX: logic, visuals, simpler tasks and connected features](12-desktop-ux/r24-desktop-phone-ux/report.md) | 2026-11-05 | audit | 3H, 3AM, 3AN, 4A, 4B |
-| r25 | [The phone, redesigned: a phone-first architecture, tab by tab](11-phone-ux/r25-phone-ux-architecture/report.md) | 2026-11-06 | research | 3AY, 3AN, 3F |
+| r25 | [The phone, redesigned: a phone-first architecture, tab by tab](11-phone-ux/r25-phone-ux-architecture/report.md) | 2026-11-06 | research | 3AY, 3AN |
 | r26 | [Audit 14: using Lightning as a user, on the PC and the phone](12-desktop-ux/r26-user-test-pc-and-phone/report.md) | 2026-11-06 | audit | 12G, 11A, 3H |
 | r27 | [User journeys and visual unity](12-desktop-ux/r27-journeys-and-visual-unity/report.md) | 2026-11-08 | audit | 3AY, 3H, 3AM, 7AB |
 | r28 | [International polish: the small things that make Lightning feel finished](3-polish-and-arabic/r28-international-polish/report.md) | 2026-11-08 | audit | 3BC, 3BD, 3BF, 3BH, 3BI, 3BK |
