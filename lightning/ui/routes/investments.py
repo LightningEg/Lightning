@@ -295,7 +295,7 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
     spark = _portfolio_value_spark(c, today())
     breakdown = c.position.investment_breakdown(day, owned_rows, report)
     holding_groups, horizons = breakdown.groups, breakdown.horizons
-    balances, holdings_total = breakdown.balances, breakdown.total
+    holdings_total = breakdown.total
     biggest = charts.bars_with_other([{"label": r["name"], "value": r["value"], "note": f"{r['weight']:.1f}% · {g['name']}",
                             "href": f"/accounts/{r['account_id']}"} if r["h"] is None else
                            {"label": r["h"].asset_name, "value": r["value"], "note": f"{r['weight']:.1f}% · {r['h'].asset_class.split(' › ')[-1]}",
