@@ -58,7 +58,7 @@
     <label for="cash_account_id">{{ 'Cash account'|tr(locale) }}</label>
     <select id="cash_account_id" name="cash_account_id" data-own-picker>
       <option value="">{{ "The same account (its broker cash)"|tr(locale) }}</option>
-      {% for a in all_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
+      {% for a in cash_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
     </select>
     <div class="help">{{ 'Where the money came from' if spec.cash_from else 'Where the money went' }}. For gold at home, choose the wallet or bank account.</div>
   </div>
@@ -93,7 +93,7 @@
     <label for="cash_account_id">{{ 'Cash account'|tr(locale) }}</label>
     <select id="cash_account_id" name="cash_account_id" data-own-picker>
       <option value="">{{ "The same account (its broker cash)"|tr(locale) }}</option>
-      {% for a in all_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
+      {% for a in cash_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
     </select>
     <div class="help">{{ 'Where the money went' }}.</div>
   </div>

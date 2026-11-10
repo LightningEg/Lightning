@@ -1455,7 +1455,7 @@ def test_other_investments_are_in_the_investment_analysis(mohab):
     assert route(mohab, "flat") == ["/", "/investments"]
     assert mohab.answers["flat"].shows("Other Investments", "400,000")
     # Recording the flat is not growth: the investments line and the net worth chart both say so.
-    assert re.search(r"since six months ago, not counting 400,000 of opening balances", mohab.answers["flat"].screen.text)
+    assert re.search(r"since six months ago, excluding 400,000 you already owned", mohab.answers["flat"].screen.text)
     assert mohab.answers["flat_jump"].shows("2027-09 includes 400,000 of opening balances: yours before, so not a change.")
 
 
