@@ -27,7 +27,7 @@ Severity: high = a wrong figure or a job that cannot be done; medium = the long 
 
 | ID | Severity | Observation and expected behavior | Follow-up |
 | --- | --- | --- | --- |
-| N1 | high | Phone Money: "Net worth 198,821 · −10,438 since the start of the month"; the PC Overview: "+36,395 this month". Money compares with the end of day 1, after the salary lands (36,395 − 46,833 = −10,438). [Screenshot](evidence/phone-money.png). | BV-12U |
+| N1 | high | Phone Money: "Net worth 198,821 · −10,438 since the start of the month"; the PC Overview: "+36,395 this month". Money compares with the end of day 1, after the salary lands (36,395 − 46,833 = −10,438). [Screenshot](evidence/phone-money.png). | Fixed: `tests/test_phone_money.py::test_change_this_month_is_the_overviews_figure_even_when_pay_lands_on_the_first` |
 | B1 | low | Adjust balance is one bare form (a date and a number); the figure keeps piastres. A small difference is then handled well. [Screenshot](evidence/pc-adjust-small.png). | IV-12V |
 | B2 | high | A cash wallet 1,975 off is "Too big to adjust": review row by row or "import the statement again". A wallet has no statement. [Screenshot](evidence/pc-adjust-too-big.png). | IV-12V |
 | B3 | low | The adjustment is filed as "Other Personal spending", inside the budget; *Unaccounted Spending* exists and is not used. | IV-12V |
