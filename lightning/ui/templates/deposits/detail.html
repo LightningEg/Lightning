@@ -13,7 +13,7 @@
   <div class="table-scroll"><table>
     <thead><tr><th>{{ 'Certificate'|tr(locale) }}</th><th>{{ 'Interest'|tr(locale) }}</th><th>{{ 'Purchase'|tr(locale) }}</th><th>{{ 'Earliest withdrawal'|tr(locale) }}</th><th>{{ 'Maturity'|tr(locale) }}</th><th class="num">{{ 'Principal'|tr(locale) }}</th><th>{{ 'Forecast account'|tr(locale) }}</th><th>{{ 'Status'|tr(locale) }}</th><th></th></tr></thead>
     <tbody>{% for cert in certificates %}{% set t = cert.terms %}
-      <tr>
+      <tr id="certificate-{{ t.id }}">
         <td><b>{{ t.name }}</b><br><small class="muted">CD {{ t.asset_id }}</small></td>
         <td>{{ t.annual_rate }}% · {{ 'Simple' if t.interest_method.value == 'SIMPLE' else 'Compound' }}<br><small class="muted">{% if t.interest_method.value == 'SIMPLE' %}{{ t.payout_frequency.value|replace('_',' ')|title }} payout{% else %}{{ t.compounding_frequency.value|title }} compounding · paid at maturity{% endif %}</small></td>
         <td>{{ t.start_date }}</td>
@@ -23,7 +23,7 @@
         <td>{% set payout_account = liquid_by_id.get(t.destination_account_id) %}{% if payout_account %}{{ payout_account.institution or payout_account.name }} · {{ payout_account.name }}{% else %}<span class="muted">{{ 'Account unavailable'|tr(locale) }}</span>{% endif %}</td>
         <td>{% if cert.redeemed or cert.units == 0 %}Redeemed{% elif today_iso >= t.maturity_date %}Matured · awaiting redemption{% elif today_iso >= t.lockup_end_date %}Can redeem{% else %}Locked{% endif %}
           {% set o = outlooks[t.id] %}{% if not (cert.redeemed or cert.units == 0) and o.expected %}<br><small class="muted">{{ 'Expected {date}: about {amount} {currency}. A forecast from its terms, not cash received.'|tr(locale, date=o.expected_date, amount=o.expected|money(places=0), currency=account.currency) }}</small>{% endif %}</td>
-        <td><details><summary>{{ 'Actions'|tr(locale) }}</summary>
+        <td><details{{ ' open' if redeem_id == t.id }}><summary>{{ 'Actions'|tr(locale) }}</summary>
           <form method="post" action="/deposits/{{ account.id }}/certificates/{{ t.id if t.id else cert.id }}/terms" class="stack">
             <label>{{ 'Name'|tr(locale) }}<input name="name" value="{{ t.name }}" required></label>
             <label>{{ 'Earliest withdrawal'|tr(locale) }}<input name="lockup_end_date" type="text" value="{{ t.lockup_end_date }}" placeholder="yyyy-mm-dd" data-smart-date required></label>
@@ -38,7 +38,7 @@
           <form method="post" action="/deposits/{{ account.id }}/certificates/{{ cert.id }}/redeem" class="stack" style="margin-top:16px">
             <h3>{{ 'Record actual redemption'|tr(locale) }}</h3><p class="muted small">{{ 'Use the date and amount shown by the bank. Lightning records the actual proceeds; it never creates an interest transaction.'|tr(locale) }}</p>
             <label>{{ 'Date'|tr(locale) }}<input name="date" type="text" value="{{ today_iso }}" placeholder="yyyy-mm-dd" data-smart-date required></label>
-            <label>Principal proceeds after any early withdrawal fee ({{ account.currency }})<input name="proceeds" inputmode="decimal" required></label>
+            <label>Principal proceeds after any early withdrawal fee ({{ account.currency }})<input name="proceeds" inputmode="decimal" value="{{ '%.2f'|format(outlooks[t.id].expected) if redeem_id == t.id and today_iso >= t.maturity_date and outlooks[t.id].expected else '' }}" required></label>
             <label>{{ 'Deposit into'|tr(locale) }}<select name="destination_account_id" data-own-picker aria-label="{{ 'Deposit into'|tr(locale) }}" required>{% for a in liquid_accounts %}<option value="{{ a.id }}" {{ 'selected' if t.destination_account_id == a.id }}>{{ a.institution or a.name }} · {{ a.name }}</option>{% endfor %}</select></label>
             <button class="btn{{ ' primary' if phone_mode() else '' }}">{{ 'Record redemption'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
           </form>
@@ -66,6 +66,7 @@
       <label>{{ 'Certificate name'|tr(locale) }}<input name="name" value="{{ values.name }}" placeholder="e.g. CIB 3-year certificate" required></label>
       <label>{{ 'Purchase date'|tr(locale) }}<input name="start_date" type="text" value="{{ values.start_date }}" placeholder="yyyy-mm-dd" data-smart-date required></label>
     </div>
+    <label class="check"><input type="checkbox" name="already_owned" value="1" data-unrequires="funding_account_id" {{ 'checked' if values.already_owned }}> {{ 'I already own it: bought before I started tracking, so no money leaves an account'|tr(locale) }}</label>
     <div class="row">
       <label>Amount invested ({{ account.currency }})<input name="principal" value="{{ values.principal }}" inputmode="decimal" required></label>
       <label>{{ 'Buy from'|tr(locale) }}<select name="funding_account_id" data-own-picker aria-label="{{ 'Buy from'|tr(locale) }}" required><option value="">{{ 'Choose the account paying for this CD…'|tr(locale) }}</option>{% for a in liquid_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.funding_account_id == a.id|string }}>{{ a.institution or a.name }} · {{ a.name }}</option>{% endfor %}</select></label>

@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 74 open items. Each folder holds its reports and its items.
+11 big pictures, 73 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -342,9 +342,8 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-12AA5 | ↳ Catch up on late bills, on the PC | | | M | Opus | |
 | **IV-12J** | [Certificates read as certificates: their own holding page, payouts as the bank pays them, value that grows, and a nudge at maturity](12-desktop-ux/IV-12J-certificates-read-as-certificates.md) | improvement, visual | Own | L | Opus | new |
 | IV-12J1 | ↳ The certificate's holding page and the certificates page | | | M | Opus | |
-| IV-12J2 | ↳ Payouts forecast the way Egyptian banks pay them | | | M | Opus | |
 | IV-12J3 | ↳ A certificate paid at maturity gains value as it earns | | | M | Opus | |
-| IV-12J4 | ↳ Maturity and notices | | | S | Opus | |
+| IV-12J4 | ↳ A variable rate is dated | | | S | Opus | |
 | **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | improvement, visual | Capture | M | Sonnet | ready |
 | **IV-12L** | [Gold: add a piece and its purchase in one step, pick the price by karat, and show bars with the jewellery](12-desktop-ux/IV-12L-gold-one-step-and-one-table.md) | improvement, visual | Own | M | Sonnet | new |
 | **IV-12N** | [Investments figures that mislead outside stocks: purchases shown as change in value, yearly rates on weeks, two Others](12-desktop-ux/IV-12N-investment-figures-beyond-stocks.md) | improvement, visual | Understand | M | Sonnet | new |
@@ -395,7 +394,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12G7 | ↳ Split on the Add sheet, PC and phone | | | M | Sonnet | |
 | NF-12G4 | ↳ Who owes what, per person | | | M | Sonnet | |
 | NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | Sonnet | |
-| **NF-12I** | [Record a certificate you already own, bought before you started tracking](12-desktop-ux/NF-12I-certificate-already-owned.md) | new feature | Own | M | Opus | ready |
 | **NF-12M** | [Property as an investment: its own kind, gain from what you paid, instalments, rent and costs](12-desktop-ux/NF-12M-property-as-an-investment.md) | new feature | Own | L | Opus | new |
 | NF-12M1 | ↳ Real estate is its own class, with the gain from what you paid | | | M | Opus | |
 | NF-12M2 | ↳ A property page, not a bank register | | | M | Opus | |
@@ -406,4 +404,4 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 12U, 3AZ, BV-12O. Next free code: 12AF.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 12U, 3AZ, BV-12O, NF-12I. Next free code: 12AF.

@@ -32,6 +32,7 @@ def test_certificate_receipts_allow_partial_multiple_confirmations_and_reduce_pr
         certificate.terms, date(2026, 8, 31), date.fromisoformat(event_date))
                           if e.kind == "INTEREST")
     expected = expected_event.amount
+    assert expected == Decimal("52.083333")  # 5,000 x 12.5% / 12, as the bank pays a month (IV-12J2)
     first = _receipt(c, accounts["cib"].id, "20", event_date, cats["EXP.INVEST.INTEREST"].id)
     second = _receipt(c, accounts["cib"].id, "15", event_date, cats["EXP.INVEST.INTEREST"].id)
     balance_before_confirmation = c.reporting.account_balance(accounts["cib"].id)
@@ -44,13 +45,13 @@ def test_certificate_receipts_allow_partial_multiple_confirmations_and_reduce_pr
     adjusted = c.deposit_receipts.adjust_events([projected], "2026-12-31")
     assert len(adjusted) == 1 and adjusted[0].amount == expected - Decimal("35")
 
-    final = _receipt(c, accounts["cib"].id, "16.37", event_date,
+    final = _receipt(c, accounts["cib"].id, "17.09", event_date,
                      cats["EXP.INVEST.INTEREST"].id)
     completed = c.deposit_receipts.confirm(certificate.terms.id, event_date, [final.id])
     assert completed["remaining"] == Decimal("0")
     assert c.deposit_receipts.adjust_events([projected], "2026-12-31") == []
     # Reconciliation creates no ledger entries and does not change actual certificate returns.
-    assert c.reporting.account_balance(accounts["cib"].id) == balance_before_confirmation + Decimal("16.37")
+    assert c.reporting.account_balance(accounts["cib"].id) == balance_before_confirmation + Decimal("17.09")
 
 
 def test_receipts_validate_one_use_and_exclude_reimbursement_receipts(c, setup):

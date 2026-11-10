@@ -220,3 +220,79 @@ def test_a_certificate_holding_page_lists_its_interest_payouts(c, setup):
     assert all(t["held"] == trades[-1]["held"] > 0 for t in paid)
     page = TestClient(create_app(c)).get(f"/investments/holding/{asset_id}?account={cd_id}&date=2026-12-31")
     assert page.status_code == 200 and page.text.count("Interest paid") == 2
+
+
+def test_a_certificate_already_owned_saves_with_no_bank_movement_and_redeems_normally(c, setup):
+    """NF-12I: a certificate bought two years before tracking began posts an opening line on the first tracked day,
+    keeps its true purchase date for the schedule, forecasts only future payouts and redeems like a bought one."""
+    accounts, _ = setup
+    cd, cib = accounts["cd"], accounts["cib"]
+    before = c.reporting.account_balance(cib.id, "2026-12-31")
+
+    certificate, txn = c.deposits.record_owned(
+        cd.id, "NBE 3-year certificate", "2024-12-01", "2026-10-01", "2027-12-01", "100000", "18", "SIMPLE",
+        "MONTHLY", "MONTHLY", cib.id)
+
+    assert txn.type == "OPN" and txn.date == "2026-09-01"  # the profile's first tracked day
+    assert certificate.terms.start_date == "2024-12-01" and certificate.units == Decimal("1")
+    assert c.reporting.account_balance(cib.id, "2026-12-31") == before
+    holdings, _ = c.position.owned_holdings("2026-12-31")
+    assert certificate.terms.asset_id in {h.asset_id for h in holdings}
+    events = [e for e in c.deposits.future_events("2026-12-31", "2027-03-01")
+              if e.certificate_id == certificate.terms.id]
+    assert events and all(e.date > "2026-12-31" for e in events)
+    past = c.deposit_receipts.expected_past(cd.id, "2026-12-31")
+    assert past and min(item["event_date"] for item in past) > "2026-09-01"
+
+    redemption = c.deposits.redeem(certificate.terms.id, "2026-12-31", "99000", cib.id)
+    assert redemption.type == "SEL"
+    assert c.reporting.account_balance(cib.id, "2026-12-31") == before + Decimal("99000")
+
+
+def test_the_owned_choice_on_the_form_needs_no_funding_account(c, setup):
+    accounts, _ = setup
+    cd, cib = accounts["cd"], accounts["cib"]
+    client = TestClient(create_app(c), follow_redirects=False)
+    form = {"name": "CIB old certificate", "start_date": "2024-01-15", "lockup_end_date": "", "maturity_date": "",
+            "term_years": "3", "principal": "50000", "annual_rate": "20", "interest_method": "SIMPLE",
+            "compounding_frequency": "MONTHLY", "payout_frequency": "MONTHLY",
+            "destination_account_id": str(cib.id), "funding_account_id": ""}
+
+    refused = client.post(f"/deposits/{cd.id}/purchase", data=form)
+    saved = client.post(f"/deposits/{cd.id}/purchase", data=form | {"already_owned": "1"})
+
+    assert refused.status_code == 400 and "Choose an account." in refused.text
+    assert saved.status_code == 303 and "Added" in saved.headers["location"]
+    assert c.reporting.account_balance(cib.id, "2026-12-31") == Decimal("50000")
+    assert "I already own it" in client.get(f"/deposits/{cd.id}").text
+
+
+def test_a_matured_certificate_asks_in_needs_you_and_opens_its_prefilled_redemption(c, setup):
+    """IV-12J4: maturity and the earliest withdrawal day each raise a Needs you row and a reminder; the row opens the
+    certificate's redemption form with what the bank should pay; a certificate is never an old price."""
+    from lightning.investments.report import explain_period, investment_period
+    from lightning.workflows.reminders import ReminderService
+    from lightning.workflows.review import ReviewInbox
+
+    accounts, _ = setup
+    cd = accounts["cd"]
+    matured, _ = _buy(c, accounts, name="CIB short", principal="5000", lockup="2026-12-01", maturity="2026-12-01",
+                      start="2026-09-01")
+    unlocked, _ = _buy(c, accounts, name="CIB long", principal="5000", lockup="2026-12-25", maturity="2028-09-01",
+                       start="2026-09-01")
+    labels = {item["label"]: item for item in ReviewInbox(c).items(date(2026, 12, 31))}
+
+    row = labels["Certificate matured: CIB short"]
+    assert row["action"] == "Record what the bank paid"
+    assert row["href"] == f"/deposits/{cd.id}?redeem={matured.terms.id}#certificate-{matured.terms.id}"
+    assert "Certificate can now be withdrawn: CIB long" in labels
+    page = TestClient(create_app(c)).get(row["href"]).text
+    assert f'id="certificate-{matured.terms.id}"' in page and "<details open>" in page
+    assert 'name="proceeds" inputmode="decimal" value="5' in page
+
+    _buy(c, accounts, name="CIB next", principal="1000", lockup="2027-01-01", maturity="2028-01-01")
+    c.settings.set("reminders_enabled", "1")
+    reminders = {item["label"]: item["detail"] for item in ReminderService(c).due()}
+    assert reminders.get("Certificate can be withdrawn from tomorrow") == "CIB next"
+    report = investment_period(c.db, c.accounts, c.assets, c.reporting, "2026-09-01", "2026-12-31")
+    assert not explain_period(report, "2026-09-01", "2026-12-31")["stale"]

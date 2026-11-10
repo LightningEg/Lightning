@@ -43,7 +43,7 @@ Severity: high = wrong money or a job that cannot be done; medium = a wrong or m
 
 | ID | Severity | Observation and expected behavior | Follow-up |
 | --- | --- | --- | --- |
-| C1 | high | A certificate bought before tracking began is refused: "CIB Payroll had 0.00 EGP of your cash on 2024-01-15; this purchase needs 50,000.00 EGP." Dated today instead, it takes the money from the bank now. There is no "I already own it". | NF-12I |
+| C1 | high | A certificate bought before tracking began is refused: "CIB Payroll had 0.00 EGP of your cash on 2024-01-15; this purchase needs 50,000.00 EGP." Dated today instead, it takes the money from the bank now. There is no "I already own it". | NF-12I done: `DepositService.record_owned`, `tests/test_deposit_certificates.py` |
 | C2 | medium | The certificate's holding page is the stock page: "Price 100,000", "1 certificate", "Unrealized gain 0.0%", "Average cost", a flat price chart, *Buy more* (opens the stock form that refuses it). No rate, next payout, unlock date or maturity. [Screenshot](evidence/certificate-holding-page.png). | IV-12J1 |
 | C3 | medium | Monthly interest is forecast by day count (1,808.22, then 1,868.49) while the bank pays a fixed 1,833.33; matching copes with a 15% tolerance. | IV-12J2 |
 | C4 | medium | A certificate paid at maturity (or compound) stays at its principal for its whole life; all its interest then appears as *Gain from sales* on one day. | IV-12J3 |
