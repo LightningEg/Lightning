@@ -3,6 +3,7 @@
 Run `prepare --root <new-empty-local-folder> --phase P3`, reboot Windows, then
 run `resume --root <same-folder>`. This exercises one real durable phase across
 a normal OS restart; it is not a power-cut test. Never point it at user data.
+Row 2 of the ordinary-PC owner sheet (issues/2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md).
 """
 
 from __future__ import annotations
