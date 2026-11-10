@@ -1,6 +1,15 @@
 // Small helpers only — no financial logic lives in the browser.
 const t = (text, values) => window.lightningT ? window.lightningT(text, values) : String(text);
 
+// Match server-rendered numbers regardless of the device's regional settings.
+window.lightningNumber = (value, {min = 0, max = 2, signed = false} = {}) => {
+  const text = new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: min, maximumFractionDigits: max,
+    signDisplay: signed ? "exceptZero" : "auto",
+  }).format(value);
+  return text.replace(/^-/, "−");
+};
+
 // Give every server-rendered or dynamically-inserted message the same
 // accessible behavior. Success/status messages are transient; errors stay
 // visible so users can correct the cause or dismiss them through the flow.
@@ -1396,7 +1405,7 @@ const initTradeTotals = (root = document) => root.querySelectorAll(".trade-total
     const included = !feeChoice?.checked;
     const gross = amount + (included ? (form.dataset.tradeKind === "buy" ? -fee : fee) : 0);
     preview.value = units > 0 && gross > 0
-      ? new Intl.NumberFormat(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 }).format(gross / units)
+      ? window.lightningNumber(gross / units, {min: 2, max: 6})
       : "";
   };
   quantity.addEventListener("input", update);
@@ -1448,7 +1457,7 @@ const initTradeCatalogue = () => {
     if (!(value > 0)) return "";
     const maximumFractionDigits = Math.max(0, Number.isFinite(decimals) ? decimals : 6);
     const minimumFractionDigits = Math.min(2, maximumFractionDigits);
-    return new Intl.NumberFormat(undefined, { minimumFractionDigits, maximumFractionDigits }).format(value);
+    return window.lightningNumber(value, {min: minimumFractionDigits, max: maximumFractionDigits});
   };
   const sync = () => {
     const actionKind = action?.value || "buy";
@@ -1531,7 +1540,7 @@ const initTradeCatalogue = () => {
     // The live "You pay …" line (display only; the posted amounts are recomputed in Python).
     if (payLine) {
       const cur = form.dataset.currency || "";
-      const money = (value) => new Intl.NumberFormat(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 0 }).format(value);
+      const money = (value) => window.lightningNumber(value, {min: 2, max: 2});
       let text = "";
       if (isDividend) {
         if (cashTotal !== null && dividendBasis?.value !== "per_share") text = t("You receive {cash} {currency}", {cash: money(cashTotal), currency: cur});
@@ -2188,7 +2197,7 @@ initCurrencySearch();
         else destination.required = kind === "transfer";
       }
       const value = Number((amount.value || "").replaceAll(",", ""));
-      const shown = Number.isFinite(value) && value > 0 ? new Intl.NumberFormat(undefined, { maximumFractionDigits: 2 }).format(value) : "…";
+      const shown = Number.isFinite(value) && value > 0 ? window.lightningNumber(value) : "…";
       const account = root.dataset.accountName, currency = root.dataset.currency;
       if (kind === "transfer") {
         const to = destination.selectedOptions[0]?.textContent || "the selected account";

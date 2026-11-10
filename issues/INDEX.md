@@ -86,7 +86,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 |---|---|---|---|---|---|---|
 | **IT-3BE** | [One number format on screen - the browser follows the app, not the Windows locale, and every negative uses a true minus](3-polish-and-arabic/IT-3BE-one-number-format.md) | improvement, technical | Understand | S | Sonnet | ready |
 | IT-3BE1 | ↳ The KPI "points" use a true minus ([#401](https://github.com/LightningEg/Lightning/issues/401)) | | | S | Sonnet | |
-| IT-3BE2 | ↳ Browser numbers ignore the Windows region ([#402](https://github.com/LightningEg/Lightning/issues/402)) | | | S | Sonnet | |
 | IT-3BE3 | ↳ One money formatter in Python ([#403](https://github.com/LightningEg/Lightning/issues/403)) | | | S | Sonnet | |
 | **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | improvement, technical | Everywhere | M | Sonnet | ready |
 | IT-3BI1 | ↳ The Transactions search finds Arabic however it is spelled ([#404](https://github.com/LightningEg/Lightning/issues/404)) | | | M | Opus | |
