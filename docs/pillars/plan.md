@@ -11,6 +11,7 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
+| **IV-12AA** | [Suggestions with sensible defaults and honest counts](../../issues/12-desktop-ux/IV-12AA-suggestions-with-sensible-defaults.md) | M | ready |
 | **IV-12P** | [One name, one figure across Budget, Cash planning and Home](../../issues/12-desktop-ux/IV-12P-one-name-one-figure-budget-and-cash.md) | M | new |
 | **IV-12Q** | [The unfinished pages of Budget and Cash planning get the page pattern: a lead figure, a visual, car…](../../issues/12-desktop-ux/IV-12Q-unfinished-budget-and-cash-pages.md) | L | new |
 | **NF-12R** | [Fill this month from your average of the last three months](../../issues/12-desktop-ux/NF-12R-fill-budget-from-average.md) | S | ready |
@@ -19,5 +20,6 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 ## Reports with open follow-ups here
 
 - [Audit 18: Budget and Cash planning, every tab and sub-page](../../issues/12-desktop-ux/r32-budget-and-cash-planning/report.md): 12P, 12Q, 12R, 12S
+- [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 12AA
 <!-- work:end -->
 

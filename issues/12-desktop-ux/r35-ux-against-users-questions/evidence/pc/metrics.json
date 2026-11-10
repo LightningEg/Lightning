@@ -1,0 +1,1456 @@
+{
+ "/": {
+  "title": "Overview · Lightning",
+  "h1": "Overview",
+  "status": "You kept 93% of what came in this month.",
+  "height": 1125,
+  "folds": 1.5,
+  "cards": 0,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 1,
+  "controlsFold": 11,
+  "controls": [
+   "All time",
+   "YTD",
+   "Custom",
+   "Show the numbers",
+   "What you own 988,804",
+   "What you owe −79,740",
+   "Show all 4"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Overview"
+   },
+   {
+    "t": "H3",
+    "y": 156,
+    "s": "Net worth"
+   },
+   {
+    "t": "H3",
+    "y": 156,
+    "s": "Over time"
+   },
+   {
+    "t": "H2",
+    "y": 498,
+    "s": "Needs you · 17"
+   },
+   {
+    "t": "H2",
+    "y": 935,
+    "s": "Get set up"
+   },
+   {
+    "t": "H2",
+    "y": 1031,
+    "s": "Your position"
+   }
+  ],
+  "sideways": 0,
+  "words": 207,
+  "status_code": 200,
+  "url": "/",
+  "errors": []
+ },
+ "/birdview/expenses": {
+  "title": "Expense analysis · Birdview · Lightning",
+  "h1": "Spending",
+  "status": "You spent 35,268 that month, 9,353 less than 2026-08.",
+  "height": 3162,
+  "folds": 4.1,
+  "cards": 3,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 1,
+  "controlsFold": 6,
+  "controls": [
+   "All time",
+   "YTD",
+   "Custom"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Spending"
+   },
+   {
+    "t": "H2",
+    "y": 510,
+    "s": "Where did it go?"
+   },
+   {
+    "t": "H3",
+    "y": 606,
+    "s": "By category"
+   },
+   {
+    "t": "H3",
+    "y": 606,
+    "s": "How each one moved"
+   },
+   {
+    "t": "H2",
+    "y": 1111,
+    "s": "Is this period unusual?"
+   },
+   {
+    "t": "H3",
+    "y": 1207,
+    "s": "Now against your usual month"
+   },
+   {
+    "t": "H3",
+    "y": 1207,
+    "s": "Inside its usual range?"
+   },
+   {
+    "t": "H2",
+    "y": 1661,
+    "s": "Day by day"
+   },
+   {
+    "t": "H3",
+    "y": 1757,
+    "s": "Total expenses"
+   },
+   {
+    "t": "H2",
+    "y": 2213,
+    "s": "Cash flow"
+   },
+   {
+    "t": "H3",
+    "y": 2293,
+    "s": "Where money in went"
+   },
+   {
+    "t": "H3",
+    "y": 2293,
+    "s": "The last six months"
+   },
+   {
+    "t": "H2",
+    "y": 2831,
+    "s": "Month by month"
+   },
+   {
+    "t": "H3",
+    "y": 2911,
+    "s": "Net cash flow"
+   }
+  ],
+  "sideways": 0,
+  "words": 493,
+  "status_code": 200,
+  "url": "/birdview/expenses",
+  "errors": []
+ },
+ "/spending/compare": {
+  "title": "Compare periods · Lightning",
+  "h1": "Compare periods",
+  "status": "Money out is 21,422 lower than 2026-09-01 to 2026-09-21.",
+  "height": 1005,
+  "folds": 1.3,
+  "cards": 2,
+  "tables": 0,
+  "selects": 1,
+  "inputsFold": 5,
+  "controlsFold": 6,
+  "controls": [
+   "Month",
+   "Quarter",
+   "Year",
+   "Compare",
+   "Export CSV"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Compare periods"
+   },
+   {
+    "t": "H2",
+    "y": 158,
+    "s": "Money out"
+   },
+   {
+    "t": "H2",
+    "y": 512,
+    "s": "Biggest changes first"
+   }
+  ],
+  "sideways": 0,
+  "words": 70,
+  "status_code": 200,
+  "url": "/spending/compare",
+  "errors": []
+ },
+ "/reports": {
+  "title": "Reports · Lightning",
+  "h1": "Reports",
+  "status": "",
+  "height": 768,
+  "folds": 1,
+  "cards": 1,
+  "tables": 1,
+  "selects": 0,
+  "inputsFold": 0,
+  "controlsFold": 3,
+  "controls": [
+   "Export all data (CSV or Excel)",
+   "Print this page"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 30,
+    "s": "Reports"
+   },
+   {
+    "t": "H2",
+    "y": 463,
+    "s": "Saved views"
+   }
+  ],
+  "sideways": 0,
+  "words": 73,
+  "status_code": 200,
+  "url": "/reports",
+  "errors": []
+ },
+ "/budget": {
+  "title": "Budget · Lightning",
+  "h1": "Budget",
+  "status": "You are 10,105 under your plan's pace.",
+  "height": 1615,
+  "folds": 2.1,
+  "cards": 3,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 1,
+  "controlsFold": 7,
+  "controls": [
+   "All time",
+   "YTD",
+   "Custom",
+   "Fill this month"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Budget"
+   },
+   {
+    "t": "H2",
+    "y": 157,
+    "s": "Left in plan"
+   },
+   {
+    "t": "H3",
+    "y": 156,
+    "s": "Is everyday spending on pace?"
+   },
+   {
+    "t": "H2",
+    "y": 1002,
+    "s": "Spent of plan"
+   },
+   {
+    "t": "H2",
+    "y": 1297,
+    "s": "Spending by group"
+   }
+  ],
+  "sideways": 0,
+  "words": 228,
+  "status_code": 200,
+  "url": "/budget",
+  "errors": []
+ },
+ "/payday": {
+  "title": "Fund your payday plan · Lightning",
+  "h1": "Fund your payday plan",
+  "status": "",
+  "height": 2868,
+  "folds": 3.7,
+  "cards": 6,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 0,
+  "controlsFold": 3,
+  "controls": [
+   "Cash planning",
+   "Turn on cash funding"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 32,
+    "s": "Fund your payday plan"
+   },
+   {
+    "t": "H2",
+    "y": 305,
+    "s": "Before your next payday"
+   },
+   {
+    "t": "H2",
+    "y": 520,
+    "s": "Cash available to assign"
+   },
+   {
+    "t": "H2",
+    "y": 750,
+    "s": "Your payday proposal"
+   },
+   {
+    "t": "H2",
+    "y": 1128,
+    "s": "Fund spending"
+   },
+   {
+    "t": "H2",
+    "y": 2403,
+    "s": "Top up reserves"
+   }
+  ],
+  "sideways": 0,
+  "words": 363,
+  "status_code": 200,
+  "url": "/payday",
+  "errors": []
+ },
+ "/plan": {
+  "title": "Cash planning · Lightning",
+  "h1": "Cash planning",
+  "status": "You can spend 114,288 before payday and stay on plan.",
+  "height": 3088,
+  "folds": 4,
+  "cards": 4,
+  "tables": 0,
+  "selects": 1,
+  "inputsFold": 3,
+  "controlsFold": 4,
+  "controls": [
+   "⋯",
+   "Show the numbers",
+   "Check"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Cash planning"
+   },
+   {
+    "t": "H2",
+    "y": 157,
+    "s": "Safe to spend"
+   },
+   {
+    "t": "H3",
+    "y": 156,
+    "s": "How safe to spend is worked out"
+   },
+   {
+    "t": "H3",
+    "y": 522,
+    "s": "Can I afford this?"
+   },
+   {
+    "t": "H2",
+    "y": 740,
+    "s": "Needs you · 5"
+   },
+   {
+    "t": "H3",
+    "y": 1038,
+    "s": "The next 30 days"
+   },
+   {
+    "t": "H2",
+    "y": 1993,
+    "s": "Where is my cash heading?"
+   },
+   {
+    "t": "H3",
+    "y": 2089,
+    "s": "Free cash, then the forecast"
+   },
+   {
+    "t": "H3",
+    "y": 2089,
+    "s": "In and out each month ahead"
+   },
+   {
+    "t": "H2",
+    "y": 2655,
+    "s": "What is promised?"
+   },
+   {
+    "t": "H3",
+    "y": 2751,
+    "s": "What you owe"
+   },
+   {
+    "t": "H3",
+    "y": 2751,
+    "s": "By loan"
+   }
+  ],
+  "sideways": 0,
+  "words": 471,
+  "status_code": 200,
+  "url": "/plan",
+  "errors": []
+ },
+ "/plan/recurring": {
+  "title": "Recurring · Cash planning · Lightning",
+  "h1": "Cash planning",
+  "status": "",
+  "height": 1960,
+  "folds": 2.6,
+  "cards": 3,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 0,
+  "controlsFold": 2,
+  "controls": [
+   "Add recurring item"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 32,
+    "s": "Cash planning"
+   },
+   {
+    "t": "H2",
+    "y": 363,
+    "s": "Every month"
+   },
+   {
+    "t": "H2",
+    "y": 443,
+    "s": "Bills and subscriptions"
+   },
+   {
+    "t": "H2",
+    "y": 796,
+    "s": "Recurring items"
+   },
+   {
+    "t": "H2",
+    "y": 1444,
+    "s": "Looks recurring"
+   }
+  ],
+  "sideways": 0,
+  "words": 309,
+  "status_code": 200,
+  "url": "/plan/recurring",
+  "errors": []
+ },
+ "/plan/loans": {
+  "title": "Loans · Cash planning · Lightning",
+  "h1": "Cash planning",
+  "status": "",
+  "height": 1499,
+  "folds": 2,
+  "cards": 3,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 0,
+  "controlsFold": 4,
+  "controls": [
+   "Add loan",
+   "Bought in instalments",
+   "1 due · mark paid"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 32,
+    "s": "Cash planning"
+   },
+   {
+    "t": "H2",
+    "y": 125,
+    "s": "Loans still to pay"
+   },
+   {
+    "t": "H2",
+    "y": 644,
+    "s": "Your loans"
+   },
+   {
+    "t": "H2",
+    "y": 724,
+    "s": "Car loan"
+   },
+   {
+    "t": "H2",
+    "y": 1055,
+    "s": "Laptop instalments"
+   }
+  ],
+  "sideways": 0,
+  "words": 172,
+  "status_code": 200,
+  "url": "/plan/loans",
+  "errors": []
+ },
+ "/plan/reserves": {
+  "title": "Reserves · Safety · Lightning",
+  "h1": "Safety",
+  "status": "",
+  "height": 1715,
+  "folds": 2.2,
+  "cards": 4,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 1,
+  "controlsFold": 5,
+  "controls": [
+   "Refill 117,786",
+   "Move more anyway",
+   "Refill in instalments",
+   "Preview"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 32,
+    "s": "Safety"
+   },
+   {
+    "t": "H2",
+    "y": 647,
+    "s": "Emergency fund"
+   },
+   {
+    "t": "H2",
+    "y": 1034,
+    "s": "What are you saving for?"
+   }
+  ],
+  "sideways": 0,
+  "words": 266,
+  "status_code": 200,
+  "url": "/plan/reserves",
+  "errors": []
+ },
+ "/financial-health": {
+  "title": "Financial health · Lightning",
+  "h1": "Financial health",
+  "status": "One thing needs you: Emergency fund. Everything else is within your limits.",
+  "height": 1527,
+  "folds": 2,
+  "cards": 2,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 1,
+  "controlsFold": 7,
+  "controls": [
+   "All time",
+   "YTD",
+   "Custom",
+   "Show the numbers"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Financial health"
+   },
+   {
+    "t": "H2",
+    "y": 216,
+    "s": "Within your limits"
+   },
+   {
+    "t": "H3",
+    "y": 216,
+    "s": "Savings rate over time"
+   },
+   {
+    "t": "H2",
+    "y": 626,
+    "s": "Needs you · 1"
+   },
+   {
+    "t": "H2",
+    "y": 732,
+    "s": "Against your limits"
+   },
+   {
+    "t": "H3",
+    "y": 828,
+    "s": "Cushion"
+   },
+   {
+    "t": "H3",
+    "y": 956,
+    "s": "Saving"
+   },
+   {
+    "t": "H3",
+    "y": 1132,
+    "s": "Debt and monthly commitments"
+   }
+  ],
+  "sideways": 0,
+  "words": 186,
+  "status_code": 200,
+  "url": "/financial-health",
+  "errors": []
+ },
+ "/investments": {
+  "title": "Investments · Lightning",
+  "h1": "Investments",
+  "status": "Your holdings' value did not move this month.",
+  "height": 2632,
+  "folds": 3.4,
+  "cards": 4,
+  "tables": 1,
+  "selects": 2,
+  "inputsFold": 1,
+  "controlsFold": 7,
+  "controls": [
+   "All time",
+   "YTD",
+   "Custom",
+   "⋯"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Investments"
+   },
+   {
+    "t": "H2",
+    "y": 217,
+    "s": "Portfolio value"
+   },
+   {
+    "t": "H3",
+    "y": 216,
+    "s": "Allocation"
+   },
+   {
+    "t": "H3",
+    "y": 650,
+    "s": "By currency"
+   },
+   {
+    "t": "H3",
+    "y": 911,
+    "s": "What changed · 2026-10-01 to 2026-10-21"
+   },
+   {
+    "t": "H2",
+    "y": 1354,
+    "s": "Holdings"
+   },
+   {
+    "t": "H3",
+    "y": 2319,
+    "s": "Income collected (dividends and interest)"
+   },
+   {
+    "t": "H3",
+    "y": 2319,
+    "s": "Money and value by class"
+   }
+  ],
+  "sideways": 0,
+  "words": 441,
+  "status_code": 200,
+  "url": "/investments",
+  "errors": []
+ },
+ "/investments/planner": {
+  "title": "Investment plan helper · Lightning",
+  "h1": "Planner",
+  "status": "",
+  "height": 1040,
+  "folds": 1.4,
+  "cards": 2,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 4,
+  "controlsFold": 2,
+  "controls": [
+   "Show suggested split"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 32,
+    "s": "Planner"
+   },
+   {
+    "t": "H3",
+    "y": 388,
+    "s": "Suggested allocation"
+   }
+  ],
+  "sideways": 0,
+  "words": 125,
+  "status_code": 200,
+  "url": "/investments/planner",
+  "errors": []
+ },
+ "/investments/prices": {
+  "title": "Investment prices · Lightning",
+  "h1": "Investment prices",
+  "status": "",
+  "height": 1534,
+  "folds": 2,
+  "cards": 2,
+  "tables": 1,
+  "selects": 0,
+  "inputsFold": 9,
+  "controlsFold": 5,
+  "controls": [
+   "Where prices come from",
+   "Update prices",
+   "Upload prices from a spreadsheet",
+   "Shared price files"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 32,
+    "s": "Investment prices"
+   },
+   {
+    "t": "H2",
+    "y": 126,
+    "s": "Update prices"
+   }
+  ],
+  "sideways": 0,
+  "words": 157,
+  "status_code": 200,
+  "url": "/investments/prices",
+  "errors": []
+ },
+ "/accounts/currencies": {
+  "title": "Currencies · Lightning",
+  "h1": "Currencies",
+  "status": "",
+  "height": 1392,
+  "folds": 1.8,
+  "cards": 2,
+  "tables": 1,
+  "selects": 0,
+  "inputsFold": 0,
+  "controlsFold": 7,
+  "controls": [
+   "All time",
+   "YTD",
+   "Month",
+   "Custom",
+   "Accounts",
+   "Add account"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Currencies"
+   },
+   {
+    "t": "H2",
+    "y": 495,
+    "s": "USD · Cash and investments over time"
+   },
+   {
+    "t": "H2",
+    "y": 884,
+    "s": "USD"
+   }
+  ],
+  "sideways": 0,
+  "words": 193,
+  "status_code": 200,
+  "url": "/accounts/currencies",
+  "errors": []
+ },
+ "/transactions": {
+  "title": "Transactions · Lightning",
+  "h1": "Transactions",
+  "status": "",
+  "height": 2525,
+  "folds": 3.3,
+  "cards": 1,
+  "tables": 1,
+  "selects": 2,
+  "inputsFold": 19,
+  "controlsFold": 7,
+  "controls": [
+   "Import statement",
+   "Choose an account",
+   "⋯",
+   "Views",
+   "Find and replace"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 30,
+    "s": "Transactions"
+   }
+  ],
+  "sideways": 0,
+  "words": 577,
+  "status_code": 200,
+  "url": "/transactions",
+  "errors": []
+ },
+ "/import": {
+  "title": "Import · Lightning",
+  "h1": "Import statements",
+  "status": "",
+  "height": 1023,
+  "folds": 1.3,
+  "cards": 2,
+  "tables": 1,
+  "selects": 1,
+  "inputsFold": 2,
+  "controlsFold": 5,
+  "controls": [
+   "Review statements",
+   "Bank SMS",
+   "Review",
+   "Undo"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 32,
+    "s": "Import statements"
+   },
+   {
+    "t": "H2",
+    "y": 575,
+    "s": "Import history"
+   }
+  ],
+  "sideways": 0,
+  "words": 84,
+  "status_code": 200,
+  "url": "/import",
+  "errors": []
+ },
+ "/accounts": {
+  "title": "Accounts · Lightning",
+  "h1": "Accounts",
+  "status": "10 accounts. 6,900 of it is held for others.",
+  "height": 1659,
+  "folds": 2.2,
+  "cards": 2,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 0,
+  "controlsFold": 3,
+  "controls": [
+   "Add account",
+   "⋯"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Accounts"
+   },
+   {
+    "t": "H2",
+    "y": 195,
+    "s": "What you own"
+   },
+   {
+    "t": "H3",
+    "y": 195,
+    "s": "How it adds up"
+   },
+   {
+    "t": "H2",
+    "y": 510,
+    "s": "Cash & bank"
+   },
+   {
+    "t": "H2",
+    "y": 843,
+    "s": "Deposits"
+   },
+   {
+    "t": "H2",
+    "y": 1003,
+    "s": "Investments"
+   },
+   {
+    "t": "H2",
+    "y": 1278,
+    "s": "Other"
+   },
+   {
+    "t": "H2",
+    "y": 1439,
+    "s": "Gam'eya"
+   }
+  ],
+  "sideways": 0,
+  "words": 170,
+  "status_code": 200,
+  "url": "/accounts",
+  "errors": []
+ },
+ "/accounts/1": {
+  "title": "CIB Payroll · Lightning",
+  "h1": "CIB Payroll",
+  "status": "",
+  "height": 3275,
+  "folds": 4.3,
+  "cards": 2,
+  "tables": 1,
+  "selects": 2,
+  "inputsFold": 20,
+  "controlsFold": 7,
+  "controls": [
+   "Import statement",
+   "Money actions",
+   "⋯",
+   "Views",
+   "Find and replace"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "CIB Payroll"
+   },
+   {
+    "t": "H2",
+    "y": 109,
+    "s": "Transactions"
+   },
+   {
+    "t": "H2",
+    "y": 2452,
+    "s": "What depends on this account"
+   }
+  ],
+  "sideways": 0,
+  "words": 661,
+  "status_code": 200,
+  "url": "/accounts/1",
+  "errors": []
+ },
+ "/money-from-others": {
+  "title": "Held for others · Lightning",
+  "h1": "Held for others",
+  "status": "",
+  "height": 768,
+  "folds": 1,
+  "cards": 1,
+  "tables": 1,
+  "selects": 0,
+  "inputsFold": 0,
+  "controlsFold": 6,
+  "controls": [
+   "Give back",
+   "Spend for them",
+   "How to record ownership",
+   "Cash ownership history 4 entries",
+   "Investment ownership history 0 entries"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 30,
+    "s": "Held for others"
+   },
+   {
+    "t": "H2",
+    "y": 182,
+    "s": "Cash"
+   }
+  ],
+  "sideways": 0,
+  "words": 50,
+  "status_code": 200,
+  "url": "/money-from-others",
+  "errors": []
+ },
+ "/zakat": {
+  "title": "Zakat · Lightning",
+  "h1": "Zakat",
+  "status": "",
+  "height": 1218,
+  "folds": 1.6,
+  "cards": 2,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 0,
+  "controlsFold": 2,
+  "controls": [
+   "Record payment"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Zakat"
+   },
+   {
+    "t": "H2",
+    "y": 168,
+    "s": "Your zakat"
+   },
+   {
+    "t": "H2",
+    "y": 683,
+    "s": "What counts"
+   }
+  ],
+  "sideways": 0,
+  "words": 130,
+  "status_code": 200,
+  "url": "/zakat",
+  "errors": []
+ },
+ "/settings": {
+  "title": "Settings · Lightning",
+  "h1": "Settings",
+  "status": "",
+  "height": 2449,
+  "folds": 3.2,
+  "cards": 6,
+  "tables": 0,
+  "selects": 3,
+  "inputsFold": 2,
+  "controlsFold": 4,
+  "controls": [
+   "Full screen",
+   "Show setup guide",
+   "Unlock a theme you bought"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 30,
+    "s": "Settings"
+   },
+   {
+    "t": "H2",
+    "y": 176,
+    "s": "Appearance and language"
+   },
+   {
+    "t": "H2",
+    "y": 534,
+    "s": "Settings in each tab"
+   },
+   {
+    "t": "H2",
+    "y": 949,
+    "s": "Your data"
+   },
+   {
+    "t": "H2",
+    "y": 1422,
+    "s": "Features"
+   },
+   {
+    "t": "H2",
+    "y": 1571,
+    "s": "Ask an AI"
+   },
+   {
+    "t": "H2",
+    "y": 2332,
+    "s": "Advanced"
+   }
+  ],
+  "sideways": 0,
+  "words": 301,
+  "status_code": 200,
+  "url": "/settings",
+  "errors": []
+ },
+ "/rules": {
+  "title": "Rules · Lightning",
+  "h1": "Rules",
+  "status": "",
+  "height": 768,
+  "folds": 1,
+  "cards": 1,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 0,
+  "controlsFold": 2,
+  "controls": [
+   "Add rule"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 30,
+    "s": "Rules"
+   },
+   {
+    "t": "H2",
+    "y": 157,
+    "s": "Rules"
+   }
+  ],
+  "sideways": 0,
+  "words": 27,
+  "status_code": 200,
+  "url": "/rules",
+  "errors": []
+ },
+ "/categories": {
+  "title": "Categories · Lightning",
+  "h1": "Settings",
+  "status": "",
+  "height": 2141,
+  "folds": 2.8,
+  "cards": 1,
+  "tables": 0,
+  "selects": 34,
+  "inputsFold": 35,
+  "controlsFold": 49,
+  "controls": [
+   "Archive selected",
+   "Export selected",
+   "Delete selected",
+   "Add category",
+   "Recurring",
+   "One-off"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Settings"
+   },
+   {
+    "t": "H3",
+    "y": 256,
+    "s": "Personal15 categories"
+   },
+   {
+    "t": "H3",
+    "y": 1000,
+    "s": "Work8 categories"
+   },
+   {
+    "t": "H3",
+    "y": 1436,
+    "s": "Investment5 categories"
+   },
+   {
+    "t": "H3",
+    "y": 1740,
+    "s": "System Categories6 categories"
+   }
+  ],
+  "sideways": 0,
+  "words": 304,
+  "status_code": 200,
+  "url": "/categories",
+  "errors": []
+ },
+ "/counterparties": {
+  "title": "Counterparties · Lightning",
+  "h1": "Settings",
+  "status": "",
+  "height": 2111,
+  "folds": 2.7,
+  "cards": 2,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 1,
+  "controlsFold": 12,
+  "controls": [
+   "Add a counterparty Save a name and optional suggested category",
+   "Get another analysis",
+   "Abou El Sid Learned: Eating Out",
+   "ACME Egypt Learned: Salary",
+   "Al Mansour Service",
+   "Al Orman",
+   "Amazon Learned: Shopping",
+   "Barber Learned: Other Personal",
+   "Bawab Learned: Gifts & Donations",
+   "British Council",
+   "Carrefour Learned: Food & Groceries"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Settings"
+   },
+   {
+    "t": "H2",
+    "y": 224,
+    "s": "Find and correct names"
+   }
+  ],
+  "sideways": 0,
+  "words": 184,
+  "status_code": 200,
+  "url": "/counterparties",
+  "errors": []
+ },
+ "/checks": {
+  "title": "Data checks · Lightning",
+  "h1": "Settings",
+  "status": "",
+  "height": 768,
+  "folds": 1,
+  "cards": 0,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 1,
+  "controlsFold": 3,
+  "controls": [
+   "Check",
+   "Passed checks"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Settings"
+   }
+  ],
+  "sideways": 0,
+  "words": 19,
+  "status_code": 200,
+  "url": "/checks",
+  "errors": []
+ },
+ "/search?q=food": {
+  "title": "Search · Lightning",
+  "h1": "Search",
+  "status": "",
+  "height": 768,
+  "folds": 1,
+  "cards": 1,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 1,
+  "controlsFold": 2,
+  "controls": [
+   "Search"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 32,
+    "s": "Search"
+   },
+   {
+    "t": "H2",
+    "y": 202,
+    "s": "Categories"
+   },
+   {
+    "t": "H2",
+    "y": 288,
+    "s": "Transactions"
+   }
+  ],
+  "sideways": 0,
+  "words": 32,
+  "status_code": 200,
+  "url": "/search?q=food",
+  "errors": []
+ },
+ "/accounts/add-transaction": {
+  "title": "Add transaction · Lightning",
+  "h1": "Add transaction",
+  "status": "",
+  "height": 810,
+  "folds": 1.1,
+  "cards": 1,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 9,
+  "controlsFold": 6,
+  "controls": [
+   "Money out",
+   "Money in",
+   "Transfer",
+   "Cancel",
+   "Add transaction"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Add transaction"
+   },
+   {
+    "t": "H2",
+    "y": 134,
+    "s": "Add transaction"
+   }
+  ],
+  "sideways": 0,
+  "words": 61,
+  "status_code": 200,
+  "url": "/accounts/add-transaction",
+  "errors": []
+ },
+ "/review": {
+  "title": "Weekly review · Lightning",
+  "h1": "Weekly review",
+  "status": "",
+  "height": 1764,
+  "folds": 2.3,
+  "cards": 3,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 0,
+  "controlsFold": 3,
+  "controls": [
+   "Overview",
+   "Match all suggested"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 32,
+    "s": "Weekly review"
+   },
+   {
+    "t": "H2",
+    "y": 126,
+    "s": "Money at risk · 6"
+   },
+   {
+    "t": "H2",
+    "y": 541,
+    "s": "Unreconciled events · 3"
+   },
+   {
+    "t": "H2",
+    "y": 799,
+    "s": "Optional cleanup · 8"
+   },
+   {
+    "t": "H2",
+    "y": 1405,
+    "s": "Record this review"
+   },
+   {
+    "t": "H2",
+    "y": 1545,
+    "s": "Optional reminders"
+   }
+  ],
+  "sideways": 0,
+  "words": 323,
+  "status_code": 200,
+  "url": "/review",
+  "errors": []
+ },
+ "/activity": {
+  "title": "Review activity · Lightning",
+  "h1": "Review activity",
+  "status": "100 recent transactions.",
+  "height": 6493,
+  "folds": 8.5,
+  "cards": 1,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 0,
+  "controlsFold": 2,
+  "controls": [
+   "All transactions"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 24,
+    "s": "Review activity"
+   }
+  ],
+  "sideways": 0,
+  "words": 1081,
+  "status_code": 200,
+  "url": "/activity",
+  "errors": []
+ },
+ "/plan/purchases/new": {
+  "title": "Bought in instalments · Lightning",
+  "h1": "Bought in instalments",
+  "status": "",
+  "height": 768,
+  "folds": 1,
+  "cards": 1,
+  "tables": 0,
+  "selects": 0,
+  "inputsFold": 5,
+  "controlsFold": 4,
+  "controls": [
+   "Fee included in instalments",
+   "Preview",
+   "Cancel"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 32,
+    "s": "Bought in instalments"
+   }
+  ],
+  "sideways": 0,
+  "words": 38,
+  "status_code": 200,
+  "url": "/plan/purchases/new",
+  "errors": []
+ },
+ "/exports/all": {
+  "title": "Export all data · Lightning",
+  "h1": "Export all data",
+  "status": "",
+  "height": 768,
+  "folds": 1,
+  "cards": 1,
+  "tables": 0,
+  "selects": 1,
+  "inputsFold": 1,
+  "controlsFold": 3,
+  "controls": [
+   "Download",
+   "Cancel"
+  ],
+  "headings": [
+   {
+    "t": "H1",
+    "y": 32,
+    "s": "Export all data"
+   }
+  ],
+  "sideways": 0,
+  "words": 43,
+  "status_code": 200,
+  "url": "/exports/all",
+  "errors": []
+ }
+}

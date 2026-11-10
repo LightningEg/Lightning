@@ -6,7 +6,8 @@ severity: high
 pillar: protect
 size: L
 model: opus
-status: building
+status: blocked
+blocked_by: 4A4 (step 2AI4) and the owner phone check (2AI6)
 created: 2026-11-05
 by: Claude Opus 5.5
 skills: feedback-review
@@ -42,9 +43,10 @@ publishes it as a new profile (a journal profile as a read-only review copy), an
 2AI2 is built too: the profile chooser (phone and PC) has "Open a profile file" (`/profiles/open-file`,
 `lightning/runtime/profile_screens.py`), which takes a `.lightning` file and its password, adds the book as a new
 profile and opens it; Arabic included. On Android the WebView's `onShowFileChooser` (`MainActivity.java`, ~222) shows
-the system picker. Nothing yet keeps a copy outside the app (2AI3): no `ACTION_OPEN_DOCUMENT_TREE` in `android/`, and
-the manifest still has `allowBackup="false"`. Saving goes through the system "Save to" screen (`FileBridge.java`, files
-up to 64 MB: `phone_files.MAX_FILE_BYTES`).
+the system picker. 2AI3 is built: phone Settings › Backup has "Keep a copy outside the app" (`lightning/runtime/outside_copy.py`,
+`BackupFolderBridge.java`): a folder chosen once gets a profile file a day and keeps the newest three. The manifest still
+has `allowBackup="false"` (owner decision, unchanged). Saving by hand goes through the system "Save to" screen
+(`FileBridge.java`, files up to 64 MB: `phone_files.MAX_FILE_BYTES`). Left: 2AI4 (waits on 4A4) and the owner's 2AI6.
 Known limits: the request guard holds an upload in memory before the route sees it (Architecture › Profile file); a
 profile whose name is not ASCII is offered as `Lightning-profile-<date>.lightning`; a journal review copy saved by an
 older schema is refused until its home saves a new one.
@@ -58,19 +60,6 @@ One step is one pull request. Read only the files a step names; Android and prof
 `python -m pytest tests/test_profile_file.py tests/test_phone_identity_frozen.py -q` plus the step's own; native
 Android behaviour is checked by the owner at the end (2AI6), not step by step. Dummy profiles only. Delete the
 step's heading in the same commit.
-
-## 2AI3 A copy outside the app · M · opus
-Files: `android/app/src/main/java/org/lightning/app/MainActivity.java`, a new `BackupFolderBridge.java` beside
-`FileBridge.java`, `android/app/src/main/python/lightning_android.py` (adapter as for `FileBridge`, ~87-115),
-the page that links `/backup/latest` (`grep -rln "backup/latest" lightning/ui/templates`), `tests/test_android_shell.py`.
-Do: next to "Save a copy", "Keep a copy outside the app" (phone only): once, `ACTION_OPEN_DOCUMENT_TREE`, and
-`takePersistableUriPermission` on the chosen folder (URI kept in app settings, no storage permission). After the
-day's first backup (made when a profile opens: `lightning/bootstrap.py` ~213, `backed_up_today`), write a profile file (2AI5) there through the
-DocumentsContract API and keep the newest three, deleting older `*.lightning` files Lightning wrote. Settings shows
-"Last copy: <date>" or why it failed (folder gone, permission revoked). An uninstall leaves the folder; 2AI2 opens it.
-Done when: a Python test of the adapter's choice of what to write and what to prune (fake bridge), and
-`tests/test_android_shell.py` asserts the bridge class and the persisted-permission call exist; the Android build
-workflow passes (run `android-app.yml` by hand once, AGENTS §2).
 
 ## 2AI4 The PC can always send its copy to a fresh phone · M · opus
 Needs 4A4 merged first.
