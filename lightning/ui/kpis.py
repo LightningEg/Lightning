@@ -21,7 +21,7 @@ from decimal import Decimal
 
 from lightning.core.dates import month_of, parse_date, parse_month
 from lightning.core.figures import label as figure_label
-from lightning.core.money import ZERO
+from lightning.core.money import ZERO, signed_pct
 
 from . import charts
 from .keynotes import fmt
@@ -291,7 +291,7 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
     else:
         if usual is not None:
             gap = rate - usual
-            savings_compare = compare(f"on your usual {usual:.1f}%", f"{gap:+.1f} points", "good" if gap >= 0 else "bad")
+            savings_compare = compare(f"on your usual {usual:.1f}%", f"{signed_pct(gap)} points", "good" if gap >= 0 else "bad")
             arrow = "up" if gap > 0 else "down" if gap < 0 else None
             savings_chip = chip(period_chip, "good" if gap >= 0 else "bad", arrow)
         else:
@@ -338,7 +338,7 @@ def _investing(flow, invest, invest_before, before_label: str, money_added: Deci
                     chip_=chip(period_chip), line_=line(action="Plan to invest", href="/investments/planner"), href=href)
     if invest is not None and invest_before is not None:
         gap = invest - invest_before
-        comparison = compare(f"on {before_label} ({invest_before:.1f}%)", f"{gap:+.1f} points", "good" if gap >= 0 else "bad")
+        comparison = compare(f"on {before_label} ({invest_before:.1f}%)", f"{signed_pct(gap)} points", "good" if gap >= 0 else "bad")
     elif invest is not None:
         comparison = compare(f"Nothing was kept in {before_label} to compare with")
     else:
