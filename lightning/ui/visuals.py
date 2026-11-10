@@ -9,7 +9,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from urllib.parse import urlencode
 
-from lightning.core.dates import fmt_date, months_back, parse_date, parse_month
+from lightning.core.dates import WEEK_STARTS, fmt_date, months_back, parse_date, parse_month
 from lightning.core.money import ZERO, fmt, quantize, round_to_total
 
 from lightning.planning.domain import PlanKind
@@ -244,7 +244,6 @@ def holding_journey(c, account_id: int, asset_id: int, end: date, months: int = 
     }
 
 
-WEEK_STARTS_ON = 5  # Saturday (Python weekday), as calendars in Egypt run; Monday would be 0
 WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
@@ -281,7 +280,7 @@ def day_calendars(c, first: date, last: date, code_filter: str = "", months: int
     spend = {k: v["spending"] for k, v in flows.items() if k >= fmt_date(shown_from)}
     net = {k: v["net"] for k, v in flows.items() if k >= fmt_date(shown_from)}
     spend_rank, net_rank = _ranked(list(spend.values())), _ranked(list(net.values()))
-    order = [(WEEK_STARTS_ON + i) % 7 for i in range(7)]
+    order = [(WEEK_STARTS + i) % 7 for i in range(7)]
 
     def grid(start: date) -> list[list[dict | None]]:
         end = (start.replace(day=28) + timedelta(days=4)).replace(day=1) - timedelta(days=1)

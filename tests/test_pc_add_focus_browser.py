@@ -56,3 +56,14 @@ def test_an_empty_amount_shows_our_sentence_not_the_browser_bubble(pc_page):
     assert page.get_attribute("#popup-amount", "aria-invalid") == "true"
     page.keyboard.type("5")
     assert page.locator("#popup-amount ~ .field-error").count() == 0
+
+
+def test_the_date_picker_starts_the_week_on_saturday(pc_page):
+    page, origin = pc_page
+    _open(page, origin)
+    assert page.evaluate("document.documentElement.dataset.weekStart") == "6"
+    page.click("#popup-date")
+    first = page.locator(".date-popup-dow").first.inner_text()
+    assert first == "Sat", first
+    # a Saturday really sits in the first column: the 1st of the shown month is placed by the same rule
+    assert page.locator(".date-popup-dow").count() == 7

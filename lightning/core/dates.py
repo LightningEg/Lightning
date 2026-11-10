@@ -104,3 +104,9 @@ def months_back(end: date, count: int, first_activity: str | None) -> list[str]:
         keys.append(month_of(cursor))
         cursor = (cursor - timedelta(days=1)).replace(day=1)
     return list(reversed(keys))
+
+
+# The week starts on Saturday in Egypt. One setting for the heatmap (Python's weekday(): Monday 0 ... Saturday 5) and the
+# date picker (JavaScript's getDay(): Sunday 0 ... Saturday 6), so the two always agree (IT-3BI3).
+WEEK_STARTS = 5
+WEEK_STARTS_JS = (WEEK_STARTS + 1) % 7

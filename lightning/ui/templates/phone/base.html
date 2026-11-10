@@ -1,7 +1,7 @@
 {# The phone frame (guideline Part C, C02–C05): app bar on top, content, the five-slot tab bar at the bottom.
    base.html hands over to this when the request comes from the phone app; pages keep their blocks. #}
 <!doctype html>
-<html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}" class="phone{% if privacy_on(request) %} privacy{% endif %}">
+<html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}" data-week-start="{{ week_start }}" class="phone{% if privacy_on(request) %} privacy{% endif %}">
 <head>
   {% include "partials/theme_head.html" %}
   <meta charset="utf-8">

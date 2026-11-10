@@ -28,7 +28,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from lightning import DISPLAY_VERSION
 from lightning.bootstrap import Container
-from lightning.core.dates import fmt_date, month_of, today
+from lightning.core.dates import WEEK_STARTS_JS, fmt_date, month_of, today
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.figures import FIGURES
 from lightning.core.memo import request_cache
@@ -485,6 +485,7 @@ def static_url(name: str) -> str:
 
 
 templates.env.globals["static_url"] = static_url
+templates.env.globals["week_start"] = WEEK_STARTS_JS
 
 
 # The browser half of the Arabic table, served once as a cached script instead of inside every Arabic page (3AC).
