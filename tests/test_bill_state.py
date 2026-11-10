@@ -12,7 +12,7 @@ from lightning.bootstrap import build
 from lightning.core.figures import label
 from lightning.planning import bill_state as bs
 from lightning.samples import load_mohab_2026
-from lightning.ui.routes import dashboard
+from lightning.ui.phone.presenters import overview as dashboard
 from lightning.ui.web import create_app
 from lightning.workflows.review import ReviewInbox
 

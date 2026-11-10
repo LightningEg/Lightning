@@ -17,24 +17,20 @@ async def selected_merge(request: Request):
     return redirect(f"/transactions/merge?keep={ids[0]}&drop={ids[1]}")
 
 
-def _template(request):
-    return "phone/transactions/merge.html" if getattr(request.state, "phone", False) else "transactions/merge.html"
-
-
 @router.get("/transactions/merge")
 async def merge_preview(request: Request):
     keep_id = request.query_params.get("keep", "")
     drop_id = request.query_params.get("drop", "")
     if any(not value.isdigit() or len(value) > 19 for value in (keep_id, drop_id)):
-        return render(request, _template(request), keep_id=keep_id if keep_id.isdigit() else "",
+        return render(request, "transactions/merge.html", keep_id=keep_id if keep_id.isdigit() else "",
                       drop_id="", preview=None, error="Select both transaction entries to compare.")
     c = container(request)
     try:
         preview = c.transactions.merge_preview(int(keep_id), int(drop_id))
     except LightningError as exc:
-        return render(request, _template(request), keep_id=keep_id, drop_id=drop_id, preview=None, error=str(exc))
+        return render(request, "transactions/merge.html", keep_id=keep_id, drop_id=drop_id, preview=None, error=str(exc))
     context = _context(c, preview)
-    return render(request, _template(request), keep_id=keep_id, drop_id=drop_id, preview=preview, error="", **context)
+    return render(request, "transactions/merge.html", keep_id=keep_id, drop_id=drop_id, preview=preview, error="", **context)
 
 
 @router.post("/transactions/merge")
@@ -42,7 +38,7 @@ async def confirm_merge(request: Request):
     form = await request.form()
     keep_id, drop_id = str(form.get("keep_id", "")), str(form.get("drop_id", ""))
     if any(not value.isdigit() or len(value) > 19 for value in (keep_id, drop_id)):
-        return render(request, _template(request), keep_id="", drop_id="", preview=None,
+        return render(request, "transactions/merge.html", keep_id="", drop_id="", preview=None,
                       error="Select both transaction entries to compare.", status_code=400)
     c = container(request)
     try:
@@ -53,7 +49,7 @@ async def confirm_merge(request: Request):
             preview = c.transactions.merge_preview(int(keep_id), int(drop_id))
         except LightningError:
             preview = None
-        return render(request, _template(request), keep_id=keep_id, drop_id=drop_id,
+        return render(request, "transactions/merge.html", keep_id=keep_id, drop_id=drop_id,
                       preview=preview, error=str(exc), **(_context(c, preview) if preview else {}), status_code=400)
     return redirect(f"/transactions/{merged.id}", f"Merged duplicate into {merged.ref}.")
 

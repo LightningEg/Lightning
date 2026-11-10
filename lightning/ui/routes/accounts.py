@@ -172,30 +172,29 @@ async def currency_accounts(request: Request):
         trend = charts.trend([point.day[:7] for point in points], [
             {"name": "Value of what you hold", "tone": "hold", "values": [point.value for point in points]},
             {"name": "What it cost", "tone": "other", "dashed": True, "values": [point.cost for point in points]}])
-        if not getattr(request.state, "phone", False):
-            values = []
-            for point in points:
-                invested, unpriced = c.position.foreign_holdings(point.day, c.base_currency).get(
-                    chosen.currency, (ZERO, False))
-                values.append(None if unpriced or point.value is None else point.value + invested)
-            # Never bridge an unknown valuation with a line that suggests a known history.
-            combined_unavailable = any(value is None for value in values)
-            combined_trend = charts.trend([point.day[:7] for point in points], [
-                {"name": translate("Cash and investments", ui_locale()), "tone": "hold", "values": values}])
-            if not combined_trend["too_short"]:
-                series = combined_trend["series"][0]
-                dots, run, lines = iter(series["dots"]), [], []
-                for value in values:
-                    if value is None:
-                        if len(run) > 1:
-                            lines.append(" ".join(run))
-                        run = []
-                    else:
-                        dot = next(dots)
-                        run.append(f"{dot['x']:.2f},{dot['y']:.2f}")
-                if len(run) > 1:
-                    lines.append(" ".join(run))
-                series["lines"] = lines
+        values = []
+        for point in points:
+            invested, unpriced = c.position.foreign_holdings(point.day, c.base_currency).get(
+                chosen.currency, (ZERO, False))
+            values.append(None if unpriced or point.value is None else point.value + invested)
+        # Never bridge an unknown valuation with a line that suggests a known history.
+        combined_unavailable = any(value is None for value in values)
+        combined_trend = charts.trend([point.day[:7] for point in points], [
+            {"name": translate("Cash and investments", ui_locale()), "tone": "hold", "values": values}])
+        if not combined_trend["too_short"]:
+            series = combined_trend["series"][0]
+            dots, run, lines = iter(series["dots"]), [], []
+            for value in values:
+                if value is None:
+                    if len(run) > 1:
+                        lines.append(" ".join(run))
+                    run = []
+                else:
+                    dot = next(dots)
+                    run.append(f"{dot['x']:.2f},{dot['y']:.2f}")
+            if len(run) > 1:
+                lines.append(" ".join(run))
+            series["lines"] = lines
     totals = c.reporting.fx_positions.totals(positions)
     return render(request, "accounts/currencies.html", positions=shown, other=other, chosen=chosen, trend=trend,
                   totals=totals, period=period, period_error=period_error,
@@ -396,28 +395,10 @@ async def update_other_asset_details(request: Request, account_id: int):
     return redirect(f"/accounts/{account_id}", "Details saved.")
 
 
-def _capture_context(c, account) -> dict:
-    """What the phone's Add sheet shows besides the fields (3AN3): the accounts its From chip can change to, and the
-    usual categories for money out and money in as chips, most used first (computed from this person's history in
-    TransactionService.usual_capture_categories; never in the template)."""
-    def named(group):
-        names = [c.categories.get(category_id).name for category_id in group]
-        return [{"id": category_id, "label": c.categories.get(category_id).name if names.count(name) == 1
-                 else c.categories.display_name(category_id)} for category_id, name in zip(group, names)]
-    from lightning.core.dates import _local_now
-    from lightning.planning import bill_state
-    hour = _local_now().hour
-    return {"entry_accounts": [{"id": a.id, "name": a.name} for a in _entry_accounts(c)],
-            "bills_due": len(bill_state.unpaid_bills(c.planning, today(), bill_state.SOON_DAYS)),
-            "chips_out": named(c.transactions.usual_capture_categories("out", hour=hour)),
-            "chips_in": named(c.transactions.usual_capture_categories("in", hour=hour))}
-
-
 def _transaction_popup_context(request, account, values, action, error=None, txn_id=None, split_categories=None):
     c = container(request)
     counterparties = c.counterparties.list_active()
-    capture = _capture_context(c, account) if txn_id is None and getattr(request.state, "phone", False) else {}
-    return dict(**capture, account=account, values=values, action=action, txn_id=txn_id, hide_global_error=True,
+    return dict(account=account, values=values, action=action, txn_id=txn_id, hide_global_error=True,
                 title="Edit transaction" if txn_id else "Add transaction",
                 revision=values.get("revision", c.transactions.revision(txn_id)) if txn_id else "",
                 accounts=c.accounts.list(active_only=True),
