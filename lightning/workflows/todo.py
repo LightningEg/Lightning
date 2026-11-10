@@ -1,5 +1,5 @@
 """Home's To do (IV-3AY6, IV-11E, guideline C04.4, C11.1): the actions waiting on the person, one row each with its
-figure and one verb, in the order late or due-soon bill, payday, catch-up, to sort, weekly check, prices, then the
+figure and one verb, in the order a failed data check, late or due-soon bill, payday, catch-up, to sort, weekly check, prices, then the
 rest. Bills come from the one bill state (planning/bill_state.py); everything else from the review inbox, one row per
 item, read from the item's glance."""
 from __future__ import annotations
@@ -11,7 +11,7 @@ from decimal import Decimal
 from lightning.planning.bill_state import BillRow, BillState, CatchUp
 from lightning.workflows.review import group_of
 
-ORDER = ("bill", "payday", "catch_up", "sort", "weekly", "prices", "other")
+ORDER = ("check", "bill", "payday", "catch_up", "sort", "weekly", "prices", "other")  # a figure that is wrong first (NF-2AJ)
 
 
 @dataclass(frozen=True)
@@ -62,6 +62,6 @@ def todo_rows(c, day: date, bills: list[BillRow], inbox_items: list[dict], away:
         rows.append(TodoRow("catch_up", "", "Catch up", "/sms", days=away.days_since_entry, count=away.stale_bills,
                             since=away.last_entry or ""))
     for item in others:
-        kind = "weekly" if item["href"] == "/review" else {"activity": "sort", "prices": "prices"}.get(group_of(item), "other")
+        kind = "weekly" if item["href"] == "/review" else {"activity": "sort", "prices": "prices", "checks": "check"}.get(group_of(item), "other")
         rows.append(_row(kind, item))
     return sorted(rows, key=lambda r: ORDER.index(r.kind))  # stable: bills earliest first, the rest in the inbox's order

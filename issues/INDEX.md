@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 76 open items. Each folder holds its reports and its items.
+11 big pictures, 75 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -69,11 +69,10 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2C5 | ↳ Native reminder delivery: test what runs on Windows | | | S | Sonnet | |
 | IT-2C6 | ↳ One ordinary-PC acceptance sheet | | | S | Sonnet | |
 | IT-2C1 | ↳ Owner: run the ordinary-PC sheet | | | owner |  | |
-| **NF-2AJ** | [A failed data check reaches Needs you - today a check that reads ISSUE is visible only to someone who opens Settings › Data checks](2-safe-for-real-money/NF-2AJ-a-failed-data-check-reaches-needs-you.md) | new feature | Protect | M | Opus | ready |
 
 Reports: [r2](2-safe-for-real-money/r2-backend-efficiency/report.md) · [r5](2-safe-for-real-money/r5-backend-correctness/report.md).
 
-Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE, 2AF, 2AG, 2AH. Next free code: 2AK.
+Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE, 2AF, 2AG, 2AH, 2AJ. Next free code: 2AK.
 
 ## 3 Polish and Arabic
 

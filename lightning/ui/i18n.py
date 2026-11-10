@@ -1129,6 +1129,8 @@ ARABIC_UI = {
     'Counterparties': 'الأطراف المقابلة',
     'Rules': 'القواعد',
     'Data checks': 'فحوصات البيانات',
+    'A data check does not add up': 'فحص بيانات مش مظبوط',
+    'does not add up': 'مش مظبوط',
     'Sale factors': 'عوامل التسييل',
     'Financial health limits': 'حدود الصحة المالية',
     'Budget settings': 'إعدادات الميزانية',
