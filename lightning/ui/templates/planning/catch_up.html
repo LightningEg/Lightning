@@ -8,7 +8,7 @@
 {% if step %}
 <section class="card stack" id="catch-up-step">
   <h2>{{ step.item.name }}</h2>
-  <p><b>{{ amount|money(places=0) }} {{ currency }}</b> · {{ 'Due {date}'|tr(locale, date=step.payment.due_date) }} · {{ ('Late · 1 day' if late_days == 1 else 'Late · {n} days')|tr(locale, n=late_days) }}</p>
+  <p><b>{{ amount|money(places=0) }} {{ currency }}</b> · {{ 'Due on {date}'|tr(locale, date=step.payment.due_date) }} · {{ ('Late · 1 day' if late_days == 1 else 'Late · {n} days')|tr(locale, n=late_days) }}</p>
   <p class="muted">{{ 'Was it paid? A matching payment already in your transactions is offered first.'|tr(locale) }}</p>
   <div class="actions"><a class="btn primary" href="{{ pay_href }}">{{ 'It was paid'|tr(locale) }}</a><a class="btn" href="{{ later_href }}">{{ 'Not yet'|tr(locale) }}</a></div>
 </section>
@@ -16,12 +16,12 @@
 <section class="card stack" id="catch-up-summary">
   <h2>{{ 'Caught up'|tr(locale) }}</h2>
   {% if summary.paid %}<h3>{{ 'Marked paid · {amount} {base}'|tr(locale, amount=summary.paid_total|money(places=0), base=base) }}</h3>
-  <div class="compact-list">{% for r in summary.paid %}<div class="compact-row"><span><b>{{ r.item.name }}</b><small class="muted">{{ 'Due {date}'|tr(locale, date=r.payment.due_date) }}</small></span><b>{{ r.paid|money(places=0) }} {{ base }}</b></div>{% endfor %}</div>
+  <div class="compact-list">{% for r in summary.paid %}<div class="compact-row"><span><b>{{ r.item.name }}</b><small class="muted">{{ 'Due on {date}'|tr(locale, date=r.payment.due_date) }}</small></span><b>{{ r.paid|money(places=0) }} {{ base }}</b></div>{% endfor %}</div>
   <div class="actions catch-up-undo"><span class="muted small">{{ 'Undo takes back the last one; press it again for the one before.'|tr(locale) }}</span>{% set in_flash = true %}{% set undo_only = true %}{% include "partials/history.html" %}</div>{% endif %}
   {% if summary.skipped %}<h3>{{ 'Skipped'|tr(locale) }}</h3>
-  <div class="compact-list">{% for r in summary.skipped %}<div class="compact-row"><span><b>{{ r.item.name }}</b><small class="muted">{{ 'Due {date}'|tr(locale, date=r.payment.due_date) }}</small></span></div>{% endfor %}</div>{% endif %}
+  <div class="compact-list">{% for r in summary.skipped %}<div class="compact-row"><span><b>{{ r.item.name }}</b><small class="muted">{{ 'Due on {date}'|tr(locale, date=r.payment.due_date) }}</small></span></div>{% endfor %}</div>{% endif %}
   {% if summary.not_yet %}<h3>{{ 'Not paid yet'|tr(locale) }}</h3>
-  <div class="compact-list">{% for r in summary.not_yet %}<a class="compact-row" data-popup-open href="/plan/items/{{ r.item.id }}/pay?due={{ r.payment.due_date }}&back=%2Fplan"><span><b>{{ r.item.name }}</b><small class="muted">{{ 'Due {date}'|tr(locale, date=r.payment.due_date) }}</small></span><span class="needs-act">{{ 'Mark paid'|tr(locale) }}</span></a>{% endfor %}</div>{% endif %}
+  <div class="compact-list">{% for r in summary.not_yet %}<a class="compact-row" data-popup-open href="/plan/items/{{ r.item.id }}/pay?due={{ r.payment.due_date }}&back=%2Fplan"><span><b>{{ r.item.name }}</b><small class="muted">{{ 'Due on {date}'|tr(locale, date=r.payment.due_date) }}</small></span><span class="needs-act">{{ 'Mark paid'|tr(locale) }}</span></a>{% endfor %}</div>{% endif %}
   <div class="actions"><a class="btn primary" href="/plan">{{ 'Back to Cash planning'|tr(locale) }}</a></div>
 </section>
 {% endif %}

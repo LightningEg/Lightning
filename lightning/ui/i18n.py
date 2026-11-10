@@ -3449,7 +3449,7 @@ ARABIC_UI = {
     'Undo takes back the last one; press it again for the one before.': 'تراجع بيلغي آخر واحدة؛ دوس تاني عشان تلغي اللي قبلها.',
     'Not paid yet': 'لسه متدفعتش',
     'Back to Cash planning': 'ارجع لتخطيط النقدية',
-    'Due {date}': 'مستحقة {date}',
+    'Due on {date}': 'مستحقة يوم {date}',
     'Sort': 'رتّب',
     'Investment revaluation': 'إعادة تقييم الاستثمارات',
     'Investment revaluation · month_end': 'إعادة تقييم الاستثمارات · نهاية الشهر',
