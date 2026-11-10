@@ -21,19 +21,12 @@ One helper on both sides: `plural(n, one, other)` in Python/Jinja and `window.li
 
 Each step is one pull request; do them in order. Read only the files a step names. Run the step's test command and `python -m pytest tests/test_arabic_ranges_and_counts.py tests/test_arabic_no_english.py -q`; delete the step's heading in the same commit.
 
-## 3BC2 Arabic agrees for every counted noun the UI uses · S
-Files: `lightning/ui/i18n.py` (`_COUNTED`, line ~3485).
-Do: add (one, two, plural) forms for حساب (حساب واحد، حسابين، حسابات), فئة (فئة واحدة، فئتين، فئات), صف (صف واحد، صفين، صفوف), بند (بند واحد، بندين، بنود), فاتورة (فاتورة واحدة، فاتورتين، فواتير), قاعدة (قاعدة واحدة، قاعدتين، قواعد), عنصر (عنصر واحد، عنصرين، عناصر), سنة (سنة واحدة، سنتين، سنين). Nothing else changes: `_agree_counts` already applies them.
-Done when: `tests/test_counted.py` gains a parametrised test: for each noun and n in 1, 2, 3, 11, `translate("{n} accounts", "ar", n=n)` (and the matching English key per noun; add keys to `ARABIC_UI` if missing) gives the one/two/plural/singular form. `python -m pytest tests/test_counted.py -q`.
-
 ## 3BC3 Counts built in English before translation · M
-Needs 3BC2 merged first.
 Files: the sites found by `grep -rn "'s' if\|\"s\" if\|(s)" lightning/ui lightning/workflows --include=*.py --include=*.html` (47 today; e.g. `kpis.py:240-242`, `keynotes.py:206`, `templates/rules/past.html:6`, `templates/dashboard/index.html:27`, `templates/phone/dashboard/index.html:22`), and `web.py:270 _units_of`.
 Do: at each site, replace the hand-built plural with `counted()` in English **and** make sure the string reaches `translate(key, locale, n=…)` as a `{n} <noun>` key (not a finished English sentence), so Arabic agreement from 3BC2 applies. `_units_of` must not add "s" to a unit the user typed: take the unit as given.
 Done when: the grep above returns no line in `lightning/ui` or `lightning/workflows`, and a new test in `tests/test_counted.py` greps for it so it stays at zero. Mohab: `python -m pytest tests/test_mohab_year.py -q`.
 
 ## 3BC4 Counts built in the browser · S
-Needs 3BC2 merged first.
 Files: `lightning/ui/static/lightning-t.js`, `lightning/ui/static/app.js:850`, `lightning/ui/templates/budget.html:83`.
 Do: (1) in `lightning-t.js`, after filling values, apply the same agreement as `_agree_counts` for Arabic: ship the `_COUNTED` table to the page with the rest of `LIGHTNING_UI` (find where `ARABIC_UI_SRC` is built in `web.py` ~line 477) and port the function (one, two, 3–10 plural, else singular). (2) In `app.js:850` pass `count: ids.size` as a number (formatting happens after agreement), and add the English key "Delete 1 transaction?" so English says it right. (3) `budget.html:83` "for {count} categories" the same way.
 Done when: a Node test `tests/plural-runtime.test.cjs` (copy the harness of `tests/theme-runtime.test.cjs`) loads `lightning-t.js` with a two-entry Arabic table and asserts "Delete {count} transactions?" with count 1, 2, 5, 11. `node tests/plural-runtime.test.cjs`.
