@@ -1531,7 +1531,7 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
         xml = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
         root = ET.fromstring(workbook.read("xl/workbook.xml"))
         assert [sheet.attrib["name"] for sheet in root.findall(f".//{{{xml}}}sheet")] == [
-            "Summary", "Transactions", "Investment ledger", "Categories"]
+            "Summary", "Transactions", "Investment history", "Categories"]
         transaction_sheet = ET.fromstring(workbook.read("xl/worksheets/sheet2.xml"))
         roles = {row.findall(f"{{{xml}}}c")[12].find(f"{{{xml}}}is/{{{xml}}}t").text
                  for row in transaction_sheet.findall(f".//{{{xml}}}row")[1:]

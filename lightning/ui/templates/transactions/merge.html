@@ -5,7 +5,7 @@
 {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
 {% if not preview %}
 <section class="card">
-  <p>Choose the two entries you confirmed are the same payment or transfer. The kept entry stays in the ledger.</p>
+  <p>Choose the two entries you confirmed are the same payment or transfer. The kept entry stays in your records.</p>
   <p>{{ 'Select two transactions in the register, then choose Merge selected.'|tr(locale) }}</p><a class="btn" href="/transactions?select=1">{{ 'Open register'|tr(locale) }}</a>
 </section>
 {% else %}
@@ -24,7 +24,7 @@
 </section>
 <section class="card">
   <h2>Before you confirm</h2>
-  <p>Confirm these are the same real-world entry. The merge keeps the kept entry’s date and ledger lines. Blank payee, category, and notes are filled from the duplicate.</p>
+  <p>Confirm these are the same real-world entry. The merge keeps the kept entry’s date and lines. Blank payee, category, and notes are filled from the duplicate.</p>
   <form method="post" action="/transactions/merge" class="actions" data-confirm-delete="Merge {{ preview.drop.ref }} into {{ preview.keep.ref }}? The duplicate will be voided; its entry and source records remain in history.">
     <input type="hidden" name="keep_id" value="{{ preview.keep.id }}">
     <input type="hidden" name="drop_id" value="{{ preview.drop.id }}">

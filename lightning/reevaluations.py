@@ -89,7 +89,7 @@ class ReevaluationService:
                      forced_prices: dict[tuple[int, int | None], Decimal] | None = None) -> bool:
         day = fmt_date(parse_date(day))
         if reason not in {"MONTH_END", "SALE"}:
-            raise ValidationError("Unknown reevaluation checkpoint.")
+            raise ValidationError("Unknown value update checkpoint.")
         with self.db.transaction():
             self.db.execute("INSERT INTO reevaluation_periods(date,reason,status,created_at) VALUES(?,?, 'PENDING',?) "
                             "ON CONFLICT(date,reason) DO NOTHING", (day, reason, now_iso()))

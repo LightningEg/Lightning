@@ -753,7 +753,7 @@ class ProfileSession:
         self._locked()
         paths = node.paths
         if writable and not node.writable:
-            raise ProfileError("This PC does not hold the ledger now.")
+            raise ProfileError("This PC does not hold the profile now.")
         profile_paths = ProfilePaths(None, paths.data_dir, paths.working_path, paths.keys_path,
                                      paths.data_dir / "backups", paths.lock_path)
         profile_paths.backups_dir.mkdir(mode=0o700, exist_ok=True)

@@ -66,7 +66,7 @@ def test_workbook_preserves_ownership_and_marks_all_finance_events(c):
     with ZipFile(BytesIO(workbook)) as archive:
         sheets = ET.fromstring(archive.read("xl/workbook.xml"))
         assert [sheet.attrib["name"] for sheet in sheets.findall(f".//{{{NS}}}sheet")] == [
-            "Summary", "Transactions", "Investment ledger", "Categories"]
+            "Summary", "Transactions", "Investment history", "Categories"]
         transactions = _sheet_rows(archive, "xl/worksheets/sheet2.xml")
         columns = {name: index for index, name in enumerate(transactions[0])}
         roles = [row[columns["Analysis role"]] for row in transactions[1:]]

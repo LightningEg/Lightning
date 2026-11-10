@@ -8,7 +8,7 @@ import pytest
 from lightning.bootstrap import build
 from lightning.samples import SAMPLE_TODAY, load_mohab_2026
 
-FREE_CASH = "Free cash matches the ledger"
+FREE_CASH = "Free cash matches your records"
 
 
 @pytest.fixture(scope="module")
@@ -64,8 +64,8 @@ def test_removed_checks_that_compared_a_figure_with_itself(tmp_path):
 
 
 # ---- NF-5C: the holdings' lots against the ledger ----
-UNITS, NEVER_SHORT, SALES = ("Units held match the ledger", "Nothing was sold that was not held",
-                             "Sales match the ledger")
+UNITS, NEVER_SHORT, SALES = ("Units held match your records", "Nothing was sold that was not held",
+                             "Sales match your records")
 
 
 @pytest.fixture

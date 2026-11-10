@@ -31,7 +31,7 @@
     </table>
     <div class="actions" style="margin-top:14px">
       {% if not txn.is_void %}
-        {% if txn.source == 'SYSTEM' %}<span class="muted small">{{ "Deleting this reevaluation removes its effect from the account."|tr(locale) }}</span>
+        {% if txn.source == 'SYSTEM' %}<span class="muted small">{{ "Deleting this value update removes its effect from the account."|tr(locale) }}</span>
         {% elif txn.type == 'CNV' %}<a class="btn" href="/transactions/{{ txn.id }}/convert/edit">{{ 'Edit'|tr(locale) }}</a>
         {% elif is_ownership %}<a class="btn" data-popup-open href="/transactions/{{ txn.id }}/ownership/edit">{{ 'Edit'|tr(locale) }}</a>
         {% elif txn.type in ('BUY', 'SEL', 'DIV') or (txn.type == 'OPN' and lines[0].asset != 'CASH:' ~ base) %}<a class="btn" href="/investments/{{ txn.id }}/edit">{{ 'Edit'|tr(locale) }}</a>
@@ -95,7 +95,7 @@
 {% if pair_actions %}</div>{% endif %}
 <div class="card" style="margin-top:16px">
   <details>
-    <summary>{{ "Ledger lines — how this transaction affects balances"|tr(locale) }}</summary>
+    <summary>{{ "Lines — how this transaction affects balances"|tr(locale) }}</summary>
     <table style="margin-top:10px">
       <thead><tr><th>{{ "Line"|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ "Asset"|tr(locale) }}</th><th>{{ "Effect"|tr(locale) }}</th><th>{{ 'Category'|tr(locale) }}</th><th class="num">{{ "Quantity"|tr(locale) }}</th><th class="num">Value ({{ base }})</th></tr></thead>
       {% for l in lines %}

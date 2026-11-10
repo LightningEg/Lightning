@@ -21,6 +21,8 @@ BANNED = {
     "Submit": "a button names its action (Save, Add, Send)",
     "Error:": "say what to do, not the label of a failure",
     "Invalid": "say what is wrong with the thing, in a sentence",
+    "ledger": "accounting jargon: say records, history or the profile (the data file)",
+    "reevaluation": "jargon: say value update",
     "Counterpart": "accounting jargon: the word is Payee (Arabic: الجهة); code and routes keep counterparty",
 }
 

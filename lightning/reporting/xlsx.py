@@ -77,7 +77,7 @@ def _worksheet(headers: list[str], rows: list[tuple], widths: list[int]) -> byte
 
 def workbook_bytes(sheets: list[tuple[str, list[str], list[tuple], list[int]]]) -> bytes:
     """Write (sheet name, headings, rows, widths) tables to one XLSX entirely in memory."""
-    if len(sheets) != 4 or [sheet[0] for sheet in sheets] != ["Summary", "Transactions", "Investment ledger", "Categories"]:
+    if len(sheets) != 4 or [sheet[0] for sheet in sheets] != ["Summary", "Transactions", "Investment history", "Categories"]:
         raise ValueError("AI analysis workbooks must contain the four required sheets in order.")
     return tabular_workbook_bytes(sheets)
 

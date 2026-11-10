@@ -8,7 +8,7 @@
 {% block content %}
 <section class="card">
   <h2>{{ 'Your certificates'|tr(locale) }}</h2>
-  <p class="muted">{{ 'Each purchase is a ledger transaction from the bank or cash account you select. Certificates are held here as non-cash assets.'|tr(locale) }}</p>
+  <p class="muted">{{ 'Each purchase is a transaction from the bank or cash account you select. Certificates are held here as non-cash assets.'|tr(locale) }}</p>
   {% if certificates %}
   <div class="table-scroll"><table>
     <thead><tr><th>{{ 'Certificate'|tr(locale) }}</th><th>{{ 'Interest'|tr(locale) }}</th><th>{{ 'Purchase'|tr(locale) }}</th><th>{{ 'Earliest withdrawal'|tr(locale) }}</th><th>{{ 'Maturity'|tr(locale) }}</th><th class="num">{{ 'Principal'|tr(locale) }}</th><th>{{ 'Forecast account'|tr(locale) }}</th><th>{{ 'Status'|tr(locale) }}</th><th></th></tr></thead>

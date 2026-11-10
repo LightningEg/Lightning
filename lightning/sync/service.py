@@ -76,7 +76,7 @@ SPARE_BYTES = 64 * 1024 * 1024  # left free after a copy arrives, so the phone k
 def require_space(folder: Path, size: int) -> None:
     """Refuse a copy the device has no room for, before any byte is written."""
     if shutil.disk_usage(folder).free < size + SPARE_BYTES:
-        raise ProtocolError("NO_SPACE", "The phone does not have enough free space for the ledger. Free some "
+        raise ProtocolError("NO_SPACE", "The phone does not have enough free space for the profile. Free some "
                             "space on it and try again.")
 
 
@@ -165,7 +165,7 @@ class HomeNode:
     def _owner_step(self) -> Iterator[None]:
         """The owner's buttons wait at most a moment for a transfer in progress, never minutes (review M8)."""
         if not self._lock.acquire(timeout=OWNER_WAIT):
-            raise ProtocolError("BUSY", "A PC is sending or fetching the ledger right now. Try again in a minute.")
+            raise ProtocolError("BUSY", "A PC is sending or fetching the profile right now. Try again in a minute.")
         try:
             yield
         finally:
@@ -201,8 +201,8 @@ class HomeNode:
                                       home.active.grant.base_sha256, path.stat().st_size,
                                       home.compatibility.ledger_schema), path
                 holder = self.store.peer(home.active.grant.borrower_id) if home.active is not None else None
-                raise ProtocolError("ALREADY_LENT", f"The ledger is lent to {holder.name}." if holder else
-                                    "The ledger is lent to another PC.")
+                raise ProtocolError("ALREADY_LENT", f"The profile is lent to {holder.name}." if holder else
+                                    "The profile is lent to another PC.")
             key = self._key()
             from lightning.database.connection import Database
             from lightning.database.snapshot import export_snapshot
@@ -309,7 +309,7 @@ class HomeNode:
                 raise ProtocolError("UNKNOWN_RETURN", "The phone has not received that copy.")
             pending = home.pending_return()
             if isinstance(receipt, Received) and (pending is None or pending.return_id != message.return_id):
-                raise ProtocolError("STALE_AUTHORITY", "The phone took the ledger back; this copy will not go in.")
+                raise ProtocolError("STALE_AUTHORITY", "The phone took the profile back; this copy will not go in.")
             return receipt
 
     # ------------------------------------------------------------ the home's own steps
@@ -400,10 +400,10 @@ class HomeNode:
         with self._owner_step():
             if self.store.unresolved_promotion() is not None:
                 raise ProtocolError("BUSY", "The phone is taking in the PC's copy. Lock and unlock Lightning to "
-                                    "finish, then the ledger is home with the PC's changes.")
+                                    "finish, then the profile is home with the PC's changes.")
             if self.model.state is not HomeState.NEEDS_REPAIR and self.model.pending_return() is not None:
                 raise ProtocolError("BUSY", "The PC's copy has arrived. Unlock Lightning on this phone to take it in; "
-                                    "no need to take the ledger back.")
+                                    "no need to take the profile back.")
             self.store.home(lambda h: h.take_back(new_id()))
             if reopen and self.bridge.key() is not None:
                 self.bridge.set_mode("home")
@@ -452,7 +452,7 @@ class BorrowerNode:
         with self._lock:
             pc = self.model
             if pc.state not in (BorrowerState.HANDED_BACK, BorrowerState.ABORTED, BorrowerState.PREFETCHED):
-                raise ProtocolError("STALE_AUTHORITY", "This PC already holds the ledger.")
+                raise ProtocolError("STALE_AUTHORITY", "This PC already holds the profile.")
             reply = link.status(Status(pc.device_id))
             if reply.lineage_id != pc.lineage_id:  # taken back or kept again on the phone: follow it
                 pc = self.store.borrower(lambda m: (m.adopt_lineage(reply.lineage_id), m)[1])
@@ -561,7 +561,7 @@ class BorrowerNode:
                 fsync_file(candidate)
                 size = candidate.stat().st_size
                 if size > MAX_CANDIDATE_BYTES:
-                    raise ProtocolError("NO_SPACE", "The ledger is too large to hand back.")
+                    raise ProtocolError("NO_SPACE", "The profile is too large to hand back.")
                 grant = pc.grant
                 begin = ReturnBegin(new_id(), return_id, grant.checkout_id, pc.device_id, grant.lineage_id,
                                     grant.epoch, grant.base_checkpoint_id, sha256_file(candidate), size)
@@ -569,7 +569,7 @@ class BorrowerNode:
             elif pc.state is BorrowerState.RETURNING:
                 begin = pc.returning
             else:
-                raise ProtocolError("STALE_AUTHORITY", "This PC does not hold the ledger.")
+                raise ProtocolError("STALE_AUTHORITY", "This PC does not hold the profile.")
             try:
                 with open(self._candidate_path(begin.return_id), "rb") as source:
                     receipt = link.send_return(begin, source)

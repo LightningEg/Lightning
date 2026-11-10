@@ -98,12 +98,12 @@ class SessionGate:
                 if session.borrowed_home:
                     return "Borrowed from {name}", "hand-back", {"name": session.borrowed_home}
                 return "Borrowed from your phone", "hand-back", {}
-            return "Read only on this PC: the ledger is going home or needs repair.", "", {}
+            return "Read only on this PC: the profile is going home or needs repair.", "", {}
         try:
             lending = devices.lending_state(session.paths)
             line, values = home_state_message(devices.home_node(session.paths) if lending == "ok" else None, lending)
         except Exception:  # noqa: BLE001 - an unreadable record shows as needing the Devices page
-            line, values = "The ledger's lending record needs checking.", {}
+            line, values = "The profile's lending record needs checking.", {}
         return line, ("take-back" if line else ""), values
 
     def outside_row(self, path: str):
@@ -416,7 +416,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         backup_path = str(form.get("backup", ""))
         if devices.blocks_restore(selected):  # review H2: an old backup would fork a lent ledger
             return page(request, "restore", status=400, selected=selected, backup=backup_path,
-                        error="This profile is lent to a PC or has a hand-back to finish. Bring the ledger home "
+                        error="This profile is lent to a PC or has a hand-back to finish. Bring the profile home "
                               "first (Devices), then restore.")
         if form.get("confirm") != "yes":
             return page(request, "restore", status=400, selected=selected, backup=backup_path,
@@ -449,7 +449,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         selected = str(form.get("db", ""))
         if devices.blocks_restore(selected):
             return page(request, "resume-restore", status=400, selected=selected,
-                        error="This profile is lent to a PC or has a hand-back to finish. Bring the ledger home "
+                        error="This profile is lent to a PC or has a hand-back to finish. Bring the profile home "
                               "first (Devices).")
         if form.get("confirm") != "yes":
             return page(request, "resume-restore", status=400, selected=selected,
@@ -579,7 +579,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
             app.state.container = session.container
         except (ProtocolError, OSError, ValueError) as exc:
             return device_page(request, error=str(exc), status=400)
-        return device_page(request, notice="This copy is the ledger again and opens for editing. Pair your PC "
+        return device_page(request, notice="This copy is the profile again and opens for editing. Pair your PC "
                                            "again; its copy from before stays on it, read only.")
 
     @app.post("/profiles/devices/stop-pairing")
@@ -611,14 +611,14 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
             return RedirectResponse("/profiles/devices", 303)
         if form.get("confirm") != "yes":
             return device_page(request, error="Tick the box to confirm that the PC's edits since it borrowed "
-                                              "the ledger will not come back.", status=400)
+                                              "the profile will not come back.", status=400)
         try:
             node.take_back(reopen=False)  # this request holds the gate: reopen here, not through it
             session.set_mode("home")
             app.state.container = session.container
         except ProtocolError as exc:
             return device_page(request, error=str(exc), status=400)
-        return device_page(request, notice="The ledger is back on this phone. That PC's copy can no longer be "
+        return device_page(request, notice="The profile is back on this phone. That PC's copy can no longer be "
                                            "handed back; it stays on the PC, read only.")
 
     # ------------------------------------------------------------ multiple devices: the PC's side
@@ -694,7 +694,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
             notice = ""
             if state is BorrowerState.SEALED:
                 if await asyncio.to_thread(devices.taken_back, node):
-                    notice = "The phone took the ledger back. This copy is kept here, read only."
+                    notice = "The phone took the profile back. This copy is kept here, read only."
                 else:
                     node.reopen()
             elif state is BorrowerState.RETURNING:
@@ -703,16 +703,16 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
                     return page(request, "choose", notice=f"{found.name} is home on {found.home_name}. Open it "
                                                           "again to borrow it.", profiles=discover_profiles(session.root),
                                 borrowed=devices.borrowed())
-                notice = "The phone has not taken the ledger back yet. This copy is read only until it does."
+                notice = "The phone has not taken the profile back yet. This copy is read only until it does."
             elif state is BorrowerState.NEEDS_REPAIR and form.get("start_over") == "yes":
                 kept = await asyncio.to_thread(node.start_over)
                 link = devices.link(node)
                 await asyncio.to_thread(node.fetch, link, key)
                 await asyncio.to_thread(node.borrow, link, key)
-                notice = (f"You now edit the phone's ledger. This PC's earlier copy is kept as {kept.name}."
+                notice = (f"You now edit the phone's profile. This PC's earlier copy is kept as {kept.name}."
                           if kept is not None else "")
             elif state is BorrowerState.NEEDS_REPAIR:
-                notice = "The phone took the ledger back. This copy is kept here, read only."
+                notice = "The phone took the profile back. This copy is kept here, read only."
             elif state is not BorrowerState.BORROWING:
                 link = devices.link(node)
                 if state is not BorrowerState.BORROW_PREPARED:
@@ -813,7 +813,7 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
             "returning": f"Sending to {home_name} stopped halfway. Open {name} here near the phone to finish.",
             "unpaired": f"{home_name} no longer knows this PC. Your changes are saved here; pair this PC again on "
                         f"the phone (Devices), then open {name} here.",
-            "refused": f"{home_name} took the ledger back, so this copy stays on this PC, read only. Open {name} "
+            "refused": f"{home_name} took the profile back, so this copy stays on this PC, read only. Open {name} "
                        "here to borrow again; the copy is kept as a backup.",
         }
         return page(request, "choose", notice=notices.get(result, ""), profiles=discover_profiles(session.root),

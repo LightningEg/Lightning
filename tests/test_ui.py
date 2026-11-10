@@ -242,7 +242,7 @@ def test_settings_registers_and_selects_profile_currencies(client, c):
     assert 'data-search="usd us dollar"' in page.text.lower()
     assert 'Set active' in page.text and 'Active' in page.text
     fx_page = client.get('/settings?section=currencies&tab=rates')
-    assert 'FX reevaluation history' in fx_page.text and 'name="currency"' in fx_page.text
+    assert 'FX value updates' in fx_page.text and 'name="currency"' in fx_page.text
     assert client.post("/settings/currency", data={"action": "base", "base_currency": "USD"}).status_code == 200
     assert c.settings.base_currency == "USD"
 

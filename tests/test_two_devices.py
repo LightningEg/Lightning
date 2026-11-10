@@ -261,7 +261,7 @@ def test_3_a_form_left_open_never_saves_over_the_other_devices_work(mohab):
     borrow(pc)
     pc.fix_amount("Wallet", "Talabat", "180")
     late = phone.b.submit({"amount": "175"}, action="edit-popup", page=sheet, expect=403)
-    assert late.shows("Nothing was saved", "Office PC has the ledger now")
+    assert late.shows("Nothing was saved", "Office PC has the profile now")
 
     # The PC's own row, open in its register when the ledger goes home (the 15-minute lock, or Hand back).
     txn = pc.hand.transaction_id("Wallet", "Seoudi")
@@ -288,8 +288,8 @@ def test_3b_a_save_on_a_lent_phone_says_who_has_the_ledger_and_where_to_go(mohab
     refused = phone.b.submit({"kind": "out", "date": "2026-10-04", "counterparty": "Cafe", "amount": "40",
                               "category_id": screens.Choose("Food & Groceries")}, button="Save", expect=403)
     assert 'class="phone-appbar"' in refused.html            # a phone page, not bare text
-    assert refused.shows("Nothing was saved", "Office PC has the ledger now", "Hand it back on that PC")
-    assert phone.b.click("Devices").shows("Office PC", "Has the ledger")
+    assert refused.shows("Nothing was saved", "Office PC has the profile now", "Hand it back on that PC")
+    assert phone.b.click("Devices").shows("Office PC", "Has the profile")
     # An inline save (no page to show) gets one line that says the same.
     inline = phone.client.post("/accounts/new", data={"__session": phone.app.session.token},
                                headers={"X-Requested-With": "fetch"})
@@ -323,7 +323,7 @@ def test_4_he_forgets_to_hand_back_and_the_edits_reach_the_phone_next_morning(mo
     # At home the phone reads, and says the PC still has it.
     assert phone.b.open("/").shows("Lent to Office PC")
     devices = phone.b.click("Devices")
-    assert devices.shows("Office PC", "Has the ledger", "Only when the PC is lost or broken")
+    assert devices.shows("Office PC", "Has the profile", "Only when the PC is lost or broken")
 
     # Next morning at the office: the PC opens Mohab where it stopped, then hands it back.
     phone.back()
@@ -350,7 +350,7 @@ def test_5_the_phone_takes_the_ledger_back_from_a_pc_out_of_reach(mohab):
     unticked = phone.b.submit({}, button="Take back", expect=400)
     assert unticked.shows("will not come back")
     taken = phone.b.submit({"confirm": "yes"}, button="Take back")
-    assert taken.shows("The ledger is back on this phone")
+    assert taken.shows("The profile is back on this phone")
     phone.spend("Wallet", "2026-10-06", "Kiosk", "15")
     assert phone.owns() == "635"
 
@@ -358,7 +358,7 @@ def test_5_the_phone_takes_the_ledger_back_from_a_pc_out_of_reach(mohab):
     phone.back()
     pc.restart()
     kept = borrow(pc)
-    assert kept.shows("The phone took the ledger back. This copy is kept here, read only.")
+    assert kept.shows("The phone took the profile back. This copy is kept here, read only.")
     # He reads his lunch in the kept copy, which saves nothing...
     assert "Office lunch" in pc.register("Wallet")
     refused = pc.b.submit({"date": "2026-10-07", "counterparty": "Taxi", "category": "Food & Groceries",
@@ -370,7 +370,7 @@ def test_5_the_phone_takes_the_ledger_back_from_a_pc_out_of_reach(mohab):
     listing = pc.b.open("/profiles")
     again = pc.b.click(next(l.text for l in listing.links if "/profiles/borrowed?id=" in l.href))
     assert again.shows("Edits made here since then did not go to the phone")
-    assert pc.b.submit({"password": PASSWORD}, button="Borrow again").shows("You now edit the phone's ledger")
+    assert pc.b.submit({"password": PASSWORD}, button="Borrow again").shows("You now edit the phone's profile")
     pc.b.click("Open finance")
     rows = pc.register("Wallet")
     assert "Kiosk" in rows and "Office lunch" not in rows
@@ -409,8 +409,8 @@ def test_7_a_second_pc_waits_its_turn_and_a_wrong_password_borrows_nothing(mohab
         wrong = borrow(home, password="not my password", expect=400)
         assert wrong.shows("The password is incorrect. It is the profile's password, the same as on the phone.")
         busy = borrow(home, expect=400)
-        assert busy.shows("The ledger is lent to Office PC.")
-        assert phone.b.open("/profiles/devices").shows("Office PC", "Has the ledger", "Home laptop")
+        assert busy.shows("The profile is lent to Office PC.")
+        assert phone.b.open("/profiles/devices").shows("Office PC", "Has the profile", "Home laptop")
 
         # The office PC hands back; that evening the home laptop borrows and has the office's edit.
         office.spend("Wallet", "2026-10-05", "Carrefour", "300")

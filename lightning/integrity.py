@@ -95,12 +95,12 @@ class IntegrityService:
             if line["type"] == "SEL" and (quantity < ZERO or (quantity == ZERO and line["effect"] == "INTERNAL" and amount < ZERO)):
                 proceeds -= amount
         return [
-            self._check("Units held match the ledger", sum((p.quantity for p in positions), ZERO), units,
-                        "The units in every holding's lots add up to the units on the ledger lines."),
+            self._check("Units held match your records", sum((p.quantity for p in positions), ZERO), units,
+                        "The units in every holding's lots add up to the units on the lines."),
             self._check("Nothing was sold that was not held", Decimal(len(below)), ZERO,
                         "Replayed by date, no holding drops below zero units. The figure is how many holdings did."),
-            self._check("Sales match the ledger", sum((d.proceeds for p in positions for d in p.disposals), ZERO), proceeds,
-                        "The proceeds credited to the sales (and returns of capital) equal what the ledger shows coming in."),
+            self._check("Sales match your records", sum((d.proceeds for p in positions for d in p.disposals), ZERO), proceeds,
+                        "The proceeds credited to the sales (and returns of capital) equal what your records show coming in."),
         ]
 
     def _base_cash_check(self) -> IntegrityCheck:
@@ -116,9 +116,9 @@ class IntegrityService:
     def _free_cash_check(self, day: str) -> IntegrityCheck:
         """Free cash as every screen shows it (`Position.free_cash`, built from valued holdings) against free cash
         rebuilt from ledger sums: each spendable account's cash quantity less the cash it holds for others."""
-        name = "Free cash matches the ledger"
+        name = "Free cash matches your records"
         detail = ("Free cash = spendable cash you own − reserves − bills due + bill cash already set aside, "
-                  "rebuilt from each account's ledger lines.")
+                  "rebuilt from each account's lines.")
         shown = self.position.at(day, match_payments=False)
         reserves = self.reserves.allocation_at(day)
         if reserves is None and day == fmt_date(today()):

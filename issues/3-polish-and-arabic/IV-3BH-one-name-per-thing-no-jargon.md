@@ -25,11 +25,6 @@ Per term, one PR: pick the plain word in the Glossary first (payee/who for count
 
 Each step is one pull request, one term at a time. The Glossary (`ai/GLOSSARY.md`, read only the term's line: `grep -n "<term>" ai/GLOSSARY.md`) is changed first in the same PR; then English keys, their Arabic in `lightning/ui/i18n.py`, templates and tests. Never rename a route, a database column or a code. Run `python -m pytest tests/test_arabic_no_english.py tests/test_mohab_year.py -q` and delete the step's heading in the same commit.
 
-## 3BH3 "Ledger" and "reevaluation" leave the screen · S
-Files: `grep -rn "ledger\|Ledger\|reevaluation\|Reevaluation" lightning/ui/i18n.py lightning/ui/templates` (57 + 12 keys), `lightning/deposits/service.py:296`.
-Do: "Reevaluation ledger" → "Value updates"; "reevaluation" → "value update"; sentences with "ledger" are rewritten without it ("in your records", or just dropped: "Principal cannot exceed the CD's currently owned ledger balance." → "You can take out at most {amount} from this certificate."). Add both words to the test's list.
-Done when: `tests/test_voice.py` passes with "ledger" and "reevaluation" listed.
-
 ## 3BH4 One name per place · S
 Files: `lightning/ui/sections.py` (section and tab names), `lightning/ui/templates/not_found.html`, `lightning/ui/templates/investments/holding.html:83`, `lightning/ui/templates/budget.html:83`, the "YTD" button (`grep -rn '"YTD"\|>YTD<' lightning/ui`).
 Do: the section is "Cash planning" everywhere (tab and heading too, not "Plan"/"Planning"); "Back to the dashboard" → "Back to Overview" (phone: "Back to Home"); "The journey" → "How it went"; "Could not save; retry with Enter or blur." → "Not saved. Press Enter to try again."; "YTD" → "This year". Add "dashboard" and "journey" to the test's list.

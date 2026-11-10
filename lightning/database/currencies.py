@@ -90,7 +90,7 @@ class CurrencyRegistry:
             if self.db.scalar("SELECT EXISTS(SELECT 1 FROM ledger_entries)") or self.db.scalar(
                 "SELECT EXISTS(SELECT 1 FROM fx_rates)"
             ):
-                raise ValueError("The profile currency cannot change after ledger entries or FX rates exist.")
+                raise ValueError("The profile currency cannot change after any entries or FX rates exist.")
             reference_codes = ("GLD:18K", "REF:GLD-21K", "REF:GLD-24K")
             placeholders = ",".join("?" for _ in reference_codes)
             if self.db.scalar(

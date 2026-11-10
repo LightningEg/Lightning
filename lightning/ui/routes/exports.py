@@ -106,7 +106,7 @@ async def reevaluations(request: Request):
     ids = _selected(await request.form(), "entry_ids")
     selected = c.reevaluations.history(limit=len(ids), entry_ids=ids)
     if len(selected) != len(ids):
-        raise ValidationError("One or more selected reevaluations no longer exist. Refresh the page and select again.")
+        raise ValidationError("One or more selected value updates no longer exist. Refresh the page and select again.")
     rows = [(row["id"], row["date"], row["reason"], row["status"], row["account_id"],
              _safe_text(row["account_name"]), row["asset_id"], _safe_text(row["asset_name"]),
              row["owner_id"] or "", _safe_text(row["owner_name"]),

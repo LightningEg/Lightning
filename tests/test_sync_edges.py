@@ -121,7 +121,7 @@ def test_space_check_leaves_64_mb_free_after_the_copy(tmp_path, monkeypatch):
     require_space(tmp_path, 1000)
     free["bytes"] -= 1
     error = refused("NO_SPACE", require_space, tmp_path, 1000)
-    assert str(error).startswith("The phone does not have enough free space for the ledger.")
+    assert str(error).startswith("The phone does not have enough free space for the profile.")
 
 
 def test_a_phone_without_room_refuses_the_copy_keeps_the_lend_and_takes_it_once_there_is_room(pair, monkeypatch):

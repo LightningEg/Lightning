@@ -57,7 +57,7 @@
           <h1 id="page-title">{{ 'Bring a profile from your PC'|tr(locale) }}</h1>
         {% elif mode == 'checking' %}
           <h1 id="page-title">{{ 'One moment'|tr(locale) }}</h1>
-          <p>Your PC handed the ledger back. Lightning is checking its copy; this page opens {{ active_name }} by itself in a few seconds.</p>
+          <p>Your PC handed the profile back. Lightning is checking its copy; this page opens {{ active_name }} by itself in a few seconds.</p>
         {% elif mode == 'manage' %}
           <h1 id="page-title">{{ 'Profile settings'|tr(locale) }}</h1>
           <p>{{ 'Because this profile is open, each change needs one more proof: your security answer or your recovery key.'|tr(locale) }}</p>
@@ -108,7 +108,7 @@
               {% endfor %}
             </ul>
           {% else %}
-            <p class="empty-note">{{ 'Keep your ledger on your phone and borrow it here when you work on the PC.'|tr(locale) }}</p>
+            <p class="empty-note">{{ 'Keep your profile on your phone and borrow it here when you work on the PC.'|tr(locale) }}</p>
           {% endif %}
           <details><summary class="button button-secondary">{{ 'Connect with an address and code'|tr(locale) }}</summary><p><a class="button button-secondary" href="/profiles/connect">{{ 'Connect to your phone'|tr(locale) }}</a></p></details>
         </section>{% endif %}
@@ -244,8 +244,8 @@
         {% if state_line %}<div class="alert alert-notice" role="status">{{ state_line }}</div>{% endif %}
         {% if lending in ['missing', 'damaged'] %}
           <section class="panel form-panel" aria-labelledby="keep-heading">
-            <h2 id="keep-heading">{{ 'Keep this copy as the ledger'|tr(locale) }}</h2>
-            <p>{{ 'Only if no PC holds the ledger now, or you accept losing what was changed there since it borrowed it. Afterwards pair your PCs again.'|tr(locale) }}</p>
+            <h2 id="keep-heading">{{ 'Keep this copy as the profile'|tr(locale) }}</h2>
+            <p>{{ 'Only if no PC holds the profile now, or you accept losing what was changed there since it borrowed it. Afterwards pair your PCs again.'|tr(locale) }}</p>
             <form method="post" action="/profiles/devices/keep-home" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
               <label class="check-row"><input type="checkbox" name="confirm" value="yes"> {{ 'A PC\'s copy from before will not come back'|tr(locale) }}</label>
@@ -276,7 +276,7 @@
             <p><a class="button button-primary" href="/profiles/journal/setup">{{ 'Set up nearby pairing'|tr(locale) }}</a></p>
             <details><summary class="button button-secondary">{{ 'Connect with an address and code'|tr(locale) }}</summary>
             {% endif %}
-            <p>{{ 'The PC can then borrow this ledger, edit it and hand it back. Only one device edits at a time.'|tr(locale) }}</p>
+            <p>{{ 'The PC can then borrow this profile, edit it and hand it back. Only one device edits at a time.'|tr(locale) }}</p>
             <form method="post" action="/profiles/devices/pair" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
               <div class="field"><label for="phone-name">{{ "This phone's name"|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off"></div>
@@ -290,18 +290,18 @@
             <h2 id="peers-heading">{{ 'Paired PCs'|tr(locale) }}</h2>
             <ul class="backup-list">
               {% for peer in peers %}
-                <li><span>{{ peer.name }}{% if peer.device_id == lent_to %} · {{ 'Has the ledger'|tr(locale) }}{% elif peer.revoked %} · {{ 'Revoked'|tr(locale) }}{% endif %}</span>{% if not peer.revoked %}<form method="post" action="/profiles/devices/revoke"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="device" value="{{ peer.device_id }}"><button class="text-button" type="submit">{{ 'Revoke'|tr(locale) }}</button></form>{% endif %}</li>
+                <li><span>{{ peer.name }}{% if peer.device_id == lent_to %} · {{ 'Has the profile'|tr(locale) }}{% elif peer.revoked %} · {{ 'Revoked'|tr(locale) }}{% endif %}</span>{% if not peer.revoked %}<form method="post" action="/profiles/devices/revoke"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="device" value="{{ peer.device_id }}"><button class="text-button" type="submit">{{ 'Revoke'|tr(locale) }}</button></form>{% endif %}</li>
               {% endfor %}
             </ul>
           </section>
         {% endif %}
         {% if lent_to or state_line %}
           <section class="panel form-panel" aria-labelledby="take-back-heading">
-            <h2 id="take-back-heading">{{ 'Take the ledger back'|tr(locale) }}</h2>
-            <p>{{ 'Only when the PC is lost or broken. The phone keeps editing from its own copy; what was changed on the PC since it borrowed the ledger does not come back.'|tr(locale) }}</p>
+            <h2 id="take-back-heading">{{ 'Take the profile back'|tr(locale) }}</h2>
+            <p>{{ 'Only when the PC is lost or broken. The phone keeps editing from its own copy; what was changed on the PC since it borrowed the profile does not come back.'|tr(locale) }}</p>
             <form method="post" action="/profiles/devices/take-back" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
-              <label class="check-row"><input type="checkbox" name="confirm" value="yes">{{ "The PC's changes since it borrowed the ledger will not come back"|tr(locale) }}</label>
+              <label class="check-row"><input type="checkbox" name="confirm" value="yes">{{ "The PC's changes since it borrowed the profile will not come back"|tr(locale) }}</label>
               <div class="form-actions"><button class="button button-secondary" type="submit">{{ 'Take back'|tr(locale) }}</button></div>
             </form>
           </section>
@@ -338,7 +338,7 @@
         <section class="panel form-panel" aria-labelledby="borrowed-unlock-heading">
           <h2 id="borrowed-unlock-heading">{% if item.state.value in ['BORROWING', 'SEALED'] %}{{ 'On this PC'|tr(locale) }}{% elif item.state.value == 'RETURNING' %}{{ 'Going home to {name}'|tr(locale, name=item.home_name) }}{% elif item.state.value == 'NEEDS_REPAIR' %}{{ 'Taken back by {name}'|tr(locale, name=item.home_name) }}{% else %}{{ 'Borrow it from {name}'|tr(locale, name=item.home_name) }}{% endif %}</h2>
           {% if item.state.value not in ['BORROWING', 'SEALED', 'RETURNING', 'NEEDS_REPAIR'] %}<p>{{ 'Open Lightning on the phone, on the same Wi-Fi. While you work here, the phone only reads.'|tr(locale) }}</p>{% endif %}
-          {% if item.state.value == 'NEEDS_REPAIR' %}<p>{{ "Edits made here since then did not go to the phone. Borrow again to work on the phone's ledger; this copy stays on this PC as a backup."|tr(locale) }}</p>{% endif %}
+          {% if item.state.value == 'NEEDS_REPAIR' %}<p>{{ "Edits made here since then did not go to the phone. Borrow again to work on the phone's profile; this copy stays on this PC as a backup."|tr(locale) }}</p>{% endif %}
           <form method="post" action="/profiles/borrowed" class="form-stack">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <input type="hidden" name="id" value="{{ item.profile_id }}">

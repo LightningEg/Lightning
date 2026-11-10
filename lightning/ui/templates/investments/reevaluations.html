@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
-{% block title %}Reevaluation ledger{% endblock %}
-{% block heading %}{{ page_header("Reevaluation ledger"|tr(locale), "Monthly investment returns and sale-day adjustments. Each account checkpoint links to one aggregated entry in the main ledger."|tr(locale)) }}{% endblock %}
+{% block title %}Value updates{% endblock %}
+{% block heading %}{{ page_header("Value updates"|tr(locale), "Monthly investment returns and sale-day adjustments. Each account checkpoint links to one aggregated entry in your records."|tr(locale)) }}{% endblock %}
 {% block top_actions %}<a class="btn small" href="/investments">{{ 'Investments'|tr(locale) }}</a><a class="btn small" href="/investments/prices">{{ "Prices needed"|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% if pending %}<div class="card" style="margin-bottom:14px"><b>{{ pending|length|counted('price input') }} needed.</b> <a href="/investments/prices">{{ "Review missing prices"|tr(locale) }}</a></div>{% endif %}
 <div class="card wide">
   <form id="reevaluation-export" method="post" action="/exports/reevaluations"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn small">{{ "Export selected"|tr(locale) }}</button></form>
-  <table><thead><tr><th><input type="checkbox" id="reevaluation-select-all" aria-label="Select all visible reevaluations"></th><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'Type'|tr(locale) }}</th><th>{{ 'Investment'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ 'Held for'|tr(locale) }}</th><th class="num">{{ "Units"|tr(locale) }}</th><th class="num">{{ "Price"|tr(locale) }}</th><th>{{ "Source"|tr(locale) }}</th><th class="num">{{ "Return"|tr(locale) }}</th><th>{{ "Main journal"|tr(locale) }}</th></tr></thead>
+  <table><thead><tr><th><input type="checkbox" id="reevaluation-select-all" aria-label="Select all visible value updates"></th><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'Type'|tr(locale) }}</th><th>{{ 'Investment'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ 'Held for'|tr(locale) }}</th><th class="num">{{ "Units"|tr(locale) }}</th><th class="num">{{ "Price"|tr(locale) }}</th><th>{{ "Source"|tr(locale) }}</th><th class="num">{{ "Return"|tr(locale) }}</th><th>{{ "Main journal"|tr(locale) }}</th></tr></thead>
   {% for row in rows %}<tr>
     <td><input type="checkbox" class="reevaluation-select" name="entry_ids" value="{{ row.id }}" form="reevaluation-export" aria-label="Select {{ row.asset_name }} on {{ row.date }}"></td><td>{{ row.date }}</td><td>{{ ('Sale-day' if row.reason == 'SALE' else 'Month-end')|tr(locale) }}</td>
     <td>{{ row.asset_name }}</td><td>{{ row.account_name }}</td><td>{{ row.owner_name or 'You' }}</td>
@@ -16,7 +16,7 @@
     <td>{{ row.price_source or '—' }}</td>
     <td class="num {{ row.return_base_e6|tone if row.return_base_e6 is not none else '' }}">{{ row.return_base_e6|money(True) if row.return_base_e6 is not none else '—' }}</td>
     <td>{% if row.ref %}<a href="/transactions/{{ row.journal_transaction_id }}">{{ row.ref }}</a>{% elif row.needs_price %}<span class="muted">{{ "Waiting for price"|tr(locale) }}</span>{% else %}<span class="muted">{{ "No change"|tr(locale) }}</span>{% endif %}</td>
-  </tr>{% else %}<tr><td colspan="11" class="empty">{{ "No reevaluations yet. The first monthly checkpoint is created on app start after prices are available."|tr(locale) }}</td></tr>{% endfor %}
+  </tr>{% else %}<tr><td colspan="11" class="empty">{{ "No value updates yet. The first monthly checkpoint is created on app start after prices are available."|tr(locale) }}</td></tr>{% endfor %}
   </table>
 </div>
 <script nonce="{{ request.state.csp_nonce|default('') }}">(() => { const all = document.getElementById('reevaluation-select-all'); const checks = [...document.querySelectorAll('.reevaluation-select')]; all?.addEventListener('change', () => checks.forEach((box) => { box.checked = all.checked; })); document.getElementById('reevaluation-export')?.addEventListener('submit', (event) => { if (checks.some((box) => box.checked)) return; event.preventDefault(); window.ask({ title: 'Select reevaluations first', message: 'Tick the rows to export, then try again.', ok: window.lightningT('Got it'), cancel: false }); }); })();</script>
