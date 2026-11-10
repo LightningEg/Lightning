@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 77 open items. Each folder holds its reports and its items.
+11 big pictures, 73 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -15,7 +15,6 @@ Anyone can find how to help in one click and send a first fix the same evening.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **BT-1V** | [The documented install misses four packages - a fresh clone, Codespaces and run.sh all stop at "No module named rapidfuzz"](1-easy-to-contribute/BT-1V-source-install-misses-four-packages.md) ([#486](https://github.com/LightningEg/Lightning/issues/486)) | bug, technical · medium | Build | S | Sonnet | ready |
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | improvement, technical | Build | M | Opus | ready |
 | IT-1E3 | ↳ Owner: deploy the website receiver and rotate the analytics key | | | owner |  | |
 | IT-1E4 | ↳ Check the live website receivers against formula injection and key leaks | | | S | Opus | |
@@ -32,20 +31,14 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H4 | ↳ Validate | | | M | Opus | |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1N2 | ↳ Post the approved batch | | | S | Sonnet | |
-| **IT-1W** | [Four wheel files (49 MB) sit in the repository root by accident - remove them and stop the next one](1-easy-to-contribute/IT-1W-stray-wheels-in-the-repository-root.md) ([#487](https://github.com/LightningEg/Lightning/issues/487)) | improvement, technical | Build | S | Sonnet | ready |
-| **IT-1X** | [Two sessions take the same code - report and item codes are handed out from the local checkout, and a guideline change can merge in one repository only](1-easy-to-contribute/IT-1X-two-sessions-take-the-same-code.md) | improvement, technical | Build | M | Sonnet | ready |
-| IT-1X1 | ↳ Reserve a code in NOW.md before using it | | | S | Sonnet | |
-| IT-1X2 | ↳ CI refuses a code that main already has | | | S | Sonnet | |
-| IT-1X3 | ↳ A guideline change cannot merge alone | | | S | Sonnet | |
 | **IT-1Y** | [Every page is asked once and measured - one test fetches all 130 pages on the PC and the phone, and perf_check times the pages people use](1-easy-to-contribute/IT-1Y-every-page-asked-once-and-measured.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1Y1 | ↳ The PC never gets a phone-only sheet ([#488](https://github.com/LightningEg/Lightning/issues/488)) | | | S | Sonnet | |
 | IT-1Y2 | ↳ One test asks every page | | | M | Sonnet | |
 | IT-1Y3 | ↳ perf_check measures the real pages ([#489](https://github.com/LightningEg/Lightning/issues/489)) | | | S | Sonnet | |
-| **IT-1Z** | [Unused functions and names - five that nothing calls, and eleven that only tests call](1-easy-to-contribute/IT-1Z-unused-functions-and-names.md) | improvement, technical | Build | S | Sonnet | ready |
 
 Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md) · [r33](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md).
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1R, 1S, 1T, 1U. Next free code: 1AA.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1R, 1S, 1T, 1U, 1V, 1W, 1X, 1Z. Next free code: 1AA.
 
 ## 2 Safe for real money
 
@@ -261,8 +254,6 @@ Good ideas that wait until the milestones above are done.
 | NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
 | NF-9D4 | ↳ Show the Hijri date beside every zakat day | | | S | Sonnet | |
 | NF-9D5 | ↳ Keep the zakat day on its Hijri date | | | M | Opus | |
-| NF-9D6 | ↳ Silver nisab in the zakat service | | | M | Opus | |
-| NF-9D7 | ↳ The gear and the page name the nisab basis | | | S | Sonnet | |
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 

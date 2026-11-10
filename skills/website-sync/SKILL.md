@@ -18,6 +18,7 @@ Read a site page only around the line you change.
 
 ## Steps
 
+0. **A guideline change merges in both repos in one sitting** (`ship-pr` step 6b): never leave the app's `guideline/` ahead of the site's open mirror PR.
 1. **Guideline copies identical.** `guideline/app.html`, `website.html`, `phone.html` and `brand-voice.md` must be byte-identical in both repos
    (`for f in app.html website.html phone.html brand-voice.md; do cmp Lightning/guideline/$f Lightning_website/guideline/$f; done`). The app repo's test
    `tests/test_docs_structure.py::test_the_app_and_website_guidelines_are_the_same_three_files` checks the three HTML files. If they differ, the one with the higher version number in its title

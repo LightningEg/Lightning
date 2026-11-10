@@ -2,9 +2,11 @@
 
 ## Claimed
 
+Reserved codes: none
+
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Claude | O5: 12J, 12M, 12G, 9D | `lightning/deposits/` | 2026-11-10 |
+| Claude | O5 | `lightning/deposits/` | 2026-11-10 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
 ## Messages
@@ -24,7 +26,7 @@
 
 - **Phone (11-10, Claude):** IV-3AY: PC routes no longer know the phone (3AY11), catch-up built. Sonnet: 3AY14-18; Opus: 3AY4, 8, 9, 10; then owner 3AY13. **Read:** 3AY; Architecture › UI contract.
 - **Play (Claude, 11-09):** NF-11B code done; bundle signs. Before submitting (owner): 10H3, then shots, 11B7-9 (11A and 11D built). **Read:** NF-11B.
-- **r33 review (Claude, 11-09):** first 1V, 1W, 1Y, 9L. **Read:** r33.
+- **r33 review (Claude, 11-09):** first 1Y, 9L. **Read:** r33.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 

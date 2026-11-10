@@ -151,7 +151,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Gold held as savings** | Your gold pieces and gold by the gram that you keep as savings, at the gold price. Pieces marked as worn are left out. | Read directly from the ledger | `zakat.ZakatService.assess` |
 | **Gold you wear** | Your gold pieces marked as worn. Zakat counts them only if you turn that on. | Read directly from the ledger | `zakat.ZakatService.assess` |
 | **Gam'eya instalments due now** | Instalments dated today or earlier and not yet recorded, on a savings circle you took the pot from early. Zakat takes them off with the debts due now. | Read directly from the ledger | `zakat.ZakatService.gameya_due_now` |
-| **Nisab** | The least wealth zakat applies to: 85 g of 24K gold at the gold price of the day, or the amount you typed when there is no gold price. | Read directly from the ledger | `zakat.ZakatService.nisab` |
+| **Nisab** | The least wealth zakat applies to: 85 g of 24K gold at the gold price of the day by default, 595 g of silver at the silver price you typed, or the lower of the two, as you choose; the amount you typed when that price is missing. | Read directly from the ledger | `zakat.ZakatService.nisab` |
 | **Zakat rate** | The share of zakatable wealth that is due: 2.5% by the common rule. | Read directly from the ledger | `zakat.ZAKAT_RATE` |
 | **Paid this zakat year** | What you spent in the Zakat category since your last zakat day, up to the next. | Read directly from the ledger | `zakat.ZakatService.paid_between` |
 | **Money in** | Your posted income in the period. Transfers, trades and money held for others are left out. | Read directly from the ledger | `reporting.service.CashFlow.inflows` |
