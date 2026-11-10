@@ -41,7 +41,8 @@ def _enter_url(message: dict) -> str:
     """Add, filled from a kept message as far as it can be read: the amount, its day and which way it went, with the
     message itself in Notes. Saving it takes the message off From SMS."""
     found = prefill(message.get("text", ""))
-    values = {"kind": found["kind"], "amount": found["amount"], "date": str(message.get("received", ""))[:10],
+    values = {"kind": found["kind"], "amount": found["amount"],
+              "date": found["date"] or str(message.get("received", ""))[:10], "counterparty": found["counterparty"],
               "notes": str(message.get("text", ""))[:200], "sms_fp": str(message.get("id", "")).split("@")[0],
               "return_to": "/sms"}
     return "/accounts/add-transaction?" + urlencode({k: v for k, v in values.items() if v})
@@ -159,9 +160,13 @@ async def read_one_message(request: Request):
         found = parse_sms(text)
     except ValueError:  # a clock or date the bank wrote wrongly (29:13): nothing to fill in
         found = None
-    if found is None:
-        return JSONResponse({"error": "No amount found in this message."}, status_code=422)
     c = container(request)
+    if found is None:  # no bank pattern reads it: fill what is there (amount, way, day, shop); the person checks
+        loose = prefill(text)
+        if not loose["amount"]:
+            return JSONResponse({"error": "No amount found in this message."}, status_code=422)
+        return JSONResponse({**loose, "bank": "", "sure": False, "ending": "", "account_id": None,
+                             "partial": True, "fingerprint": fingerprint(text)})
     # No account is asked (3AN5): the card or account ending in the message is the account, once it has been said. An
     # ending not seen before comes back with no account; the sheet asks once, and saving remembers the answer.
     return JSONResponse({"amount": f"{found.amount:.2f}", "counterparty": found.place, "date": found.when[:10],

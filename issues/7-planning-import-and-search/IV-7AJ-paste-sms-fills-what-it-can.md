@@ -1,5 +1,5 @@
 ---
-title: Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop
+title: A message in another currency (USD) is kept for you, not dropped
 type: polish
 pillar: capture
 size: S
@@ -23,7 +23,6 @@ repo: app
 - **A dollar purchase is dropped.** "charged USD 12.99 at NETFLIX.COM" is counted as "1 skipped": not read, not kept.
 
 ## Fix
-`read-one` falls back to `prefill` and says "Check the account and who" instead of an error. `prefill` also returns the
-date (the general rule's date pattern) and the shop after "at / عند / لدى". A message with an amount in another known
-currency is kept for you (and prefilled with that currency when the profile has it). Tests: the three messages above
-through `read-one` and `SmsImportService.read`.
+Built (7AJ part 1): `read-one` falls back to `prefill`, which now also returns the date and the shop. Left: a message with an
+amount in another known currency is kept for you (and prefilled with that currency when the profile has it). Tests: "charged
+USD 12.99 at NETFLIX.COM" through `SmsImportService.read`.

@@ -147,6 +147,17 @@ def test_paste_bank_sms_reads_one_message_into_the_sheet(phone):
     assert nothing.status_code == 422
 
 
+def test_paste_english_card_message_fills_amount_date_and_shop(phone):
+    """IV-7AJ: a message no bank pattern reads still fills what it says: amount, way, its own day and the shop."""
+    sheet = phone.get("/accounts/1/transaction/new").text
+    text = "Your debit card ending with 1234 was charged EGP 250.00 at TALABAT on 08/11/26"
+    read = phone.post("/sms/read-one", data={"__session": token(sheet, "__session"), "text": text})
+    assert read.status_code == 200
+    body = read.json()
+    assert body["amount"] == "250.00" and body["kind"] == "out"
+    assert body["date"] == "2026-11-08" and body["counterparty"] == "TALABAT"
+
+
 def test_profile_pages_on_the_phone_name_no_folders(phone):
     html = phone.get("/profiles").text  # unlocked: settings; locked: the chooser
     assert "on this phone" in html and "on this computer" not in html

@@ -2439,6 +2439,7 @@ ARABIC_UI = {
     'Paste bank SMS': 'الصق رسالة البنك',
     'No amount found in this message.': 'مفيش مبلغ في الرسالة دي.',
     'Paste a bank message first.': 'انسخ رسالة البنك الأول.',
+    'Check the account and who.': 'راجع الحساب وعند مين.',
     'Filled from the message. Check and save.': 'اتملت من الرسالة. راجع واحفظ.',
     'Mark paid': 'اتدفع',
     '1 payment due today or tomorrow': 'دفعة مستحقة النهارده أو بكره',

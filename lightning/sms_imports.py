@@ -185,7 +185,7 @@ def parse_sms(text: str, *, sender: str = "", received: datetime | None = None) 
     return _general(flat, received, balance, bank)
 
 
-_OUT_WORDS = r"(خصم|سحب|شراء|سداد|دفع|مدفوعات|تحويل\s*لحظي\s*من|تحويل\s*من\s*حساب|debited|withdraw\w*|purchase|paid|spent|sent)"
+_OUT_WORDS = r"(charged|خصم|سحب|شراء|سداد|دفع|مدفوعات|تحويل\s*لحظي\s*من|تحويل\s*من\s*حساب|debited|withdraw\w*|purchase|paid|spent|sent)"
 _IN_WORDS = r"(إضافة|اضافة|إيداع|ايداع|استلام|استرداد|لحسابكم|إلى\s*حسابك|الى\s*حسابك|credited|received|deposit\w*|refund\w*)"
 
 
@@ -224,7 +224,11 @@ def prefill(text: str) -> dict:
         except (InvalidOperation, AttributeError):
             amount = ""
     inflow = bool(re.search(_IN_WORDS, flat, re.IGNORECASE)) and not re.search(_OUT_WORDS, flat, re.IGNORECASE)
-    return {"amount": amount, "kind": "in" if inflow else "out"}
+    day = re.search(r"(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})", flat)
+    when = _when(day.group(1), None, datetime.now())[:10] if day else ""  # the message's own date
+    place = re.search(r"(?:عند|لدى|\bat)\s+(.+?)(?=\s+(?:يوم|في|on|بتاريخ|\d)|$)", flat)
+    return {"amount": amount, "kind": "in" if inflow else "out", "date": when,
+            "counterparty": place.group(1).strip() if place else ""}
 
 
 def _general(flat: str, received: datetime, balance: Decimal | None, bank: str) -> SmsTransaction | None:

@@ -147,7 +147,9 @@ def test_from_sms_shows_what_it_could_not_read(c, setup):
     assert "1 kept for you" in page.text and "Messages kept for you" in page.text
     enter = c.sms_imports.unread()[0]
     from lightning.sms_imports import prefill
-    assert prefill(enter["text"]) == {"amount": "900.00", "kind": "out"}
+    assert prefill(enter["text"]) == {"amount": "900.00", "kind": "out", "date": "", "counterparty": ""}
+    assert prefill("charged EGP 250.00 at TALABAT on 08/11/26") == {
+        "amount": "250.00", "kind": "out", "date": "2026-11-08", "counterparty": "TALABAT"}
     assert "amount=900.00" in page.text and "sms_fp=" in page.text  # Enter it opens Add filled from the message
     c.sms_imports.mark_seen(enter["id"].split("@")[0])  # saving that entry takes it off From SMS
     assert c.sms_imports.unread() == []

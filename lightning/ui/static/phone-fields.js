@@ -126,7 +126,8 @@
           : "Which account ends with {digits}? Choose it above; Lightning remembers it.", { digits: found.ending });
         const chip = form.querySelector("[data-account-chip]");
         if (chip) { chip.closest(".phone-account-chip").classList.add("needs-pick"); chip.focus({ preventScroll: true }); }
-      } else say("Filled from the message. Check and save.");
+      } else if (found.partial) say("Check the account and who.");
+      else say("Filled from the message. Check and save.");
       if (navigator.vibrate) navigator.vibrate(15);
     } finally { button.disabled = false; }
   });
