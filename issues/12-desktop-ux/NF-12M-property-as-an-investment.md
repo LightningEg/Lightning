@@ -32,14 +32,14 @@ brokerage, or move the *Other Investments* holding to its own place.
 ## 12M2 A property page, not a bank register · M
 The page offers "Record your first Money out, Money in, or Transfer", category bulk-edit and *Import statement*. Show
 the answer first: value now, since you bought it, value history, the loan and what is left, then *Update value*.
-Owner decision needed: PC sidebar place (Investments or Accounts).
+**Owner, 2026-11-09:** property (flat, land, car) lives under Investments, PC and phone.
 
 ## 12M3 Paying by instalments (off-plan) · L
 Most new flats are bought with a down payment and years of instalments to the developer. Today there is no way to say
 "paid 600,000 of 3,000,000": each payment either is household spending or needs a hand-made transfer into the account.
 Model the contract (price, paid so far, schedule) on the certificate/gam'eya backbone: instalments are internal
-transfers that raise cost, the unpaid part is in What you owe, and coming instalments are in the forecast and Safe to
-spend. Money logic: design first, owner confirms the net-worth treatment.
+transfers that raise cost. **Owner, 2026-11-09:** you own only what you paid (re-appraisable); the unpaid part is not
+a debt and stays out of What you owe; coming instalments are in the forecast and Safe to spend.
 
 ## 12M4 Rent and running costs · M
 Rent received and maintenance, tax or broker fees belong to the property's return (as dividends and fees do for a
