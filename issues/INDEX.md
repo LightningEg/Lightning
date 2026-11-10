@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 44 open items. Each folder holds its reports and its items.
+11 big pictures, 74 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -15,6 +15,7 @@ Anyone can find how to help in one click and send a first fix the same evening.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
+| **BT-1V** | [The documented install misses four packages - a fresh clone, Codespaces and run.sh all stop at "No module named rapidfuzz"](1-easy-to-contribute/BT-1V-source-install-misses-four-packages.md) | bug, technical · medium | Build | S | Sonnet | ready |
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | improvement, technical | Build | M | Opus | ready |
 | IT-1E3 | ↳ Owner: deploy the website receiver and rotate the analytics key | | | owner |  | |
 | IT-1E4 | ↳ Check the live website receivers against formula injection and key leaks | | | S | Opus | |
@@ -32,10 +33,20 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1N2 | ↳ Post the approved batch | | | S | Sonnet | |
 | **IT-1R** | [Direct tests for investment_breakdown](1-easy-to-contribute/IT-1R-investment-breakdown-direct-tests.md) ([#339](https://github.com/LightningEg/Lightning/issues/339)) | improvement, technical | Build | M | Sonnet | ready |
+| **IT-1W** | [Four wheel files (49 MB) sit in the repository root by accident - remove them and stop the next one](1-easy-to-contribute/IT-1W-stray-wheels-in-the-repository-root.md) | improvement, technical | Build | S | Sonnet | ready |
+| **IT-1X** | [Two sessions take the same code - report and item codes are handed out from the local checkout, and a guideline change can merge in one repository only](1-easy-to-contribute/IT-1X-two-sessions-take-the-same-code.md) | improvement, technical | Build | M | Sonnet | ready |
+| IT-1X1 | ↳ Reserve a code in NOW.md before using it | | | S | Sonnet | |
+| IT-1X2 | ↳ CI refuses a code that main already has | | | S | Sonnet | |
+| IT-1X3 | ↳ A guideline change cannot merge alone | | | S | Sonnet | |
+| **IT-1Y** | [Every page is asked once and measured - one test fetches all 130 pages on the PC and the phone, and perf_check times the pages people use](1-easy-to-contribute/IT-1Y-every-page-asked-once-and-measured.md) | improvement, technical | Build | M | Sonnet | ready |
+| IT-1Y1 | ↳ The PC never gets a phone-only sheet | | | S | Sonnet | |
+| IT-1Y2 | ↳ One test asks every page | | | M | Sonnet | |
+| IT-1Y3 | ↳ perf_check measures the real pages | | | S | Sonnet | |
+| **IT-1Z** | [Unused functions and names - five that nothing calls, and eleven that only tests call](1-easy-to-contribute/IT-1Z-unused-functions-and-names.md) | improvement, technical | Build | S | Sonnet | ready |
 
-Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md).
+Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md) · [r33](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md).
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1S, 1T, 1U. Next free code: 1V.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1S, 1T, 1U. Next free code: 1AA.
 
 ## 2 Safe for real money
 
@@ -62,10 +73,11 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2C5 | ↳ Native reminder delivery: test what runs on Windows | | | S | Sonnet | |
 | IT-2C6 | ↳ One ordinary-PC acceptance sheet | | | S | Sonnet | |
 | IT-2C1 | ↳ Owner: run the ordinary-PC sheet | | | owner |  | |
+| **NF-2AJ** | [A failed data check reaches Needs you - today a check that reads ISSUE is visible only to someone who opens Settings › Data checks](2-safe-for-real-money/NF-2AJ-a-failed-data-check-reaches-needs-you.md) | new feature | Protect | M | Opus | ready |
 
 Reports: [r2](2-safe-for-real-money/r2-backend-efficiency/report.md) · [r5](2-safe-for-real-money/r5-backend-correctness/report.md).
 
-Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE, 2AF, 2AG, 2AH. Next free code: 2AJ.
+Done: 2B, 2D, 2E, 2F, 2G, 2H, 2I, 2J, 2K, 2L, 2M, 2N, 2O, 2P, 2Q, 2R, 2S, 2T, 2U, 2V, 2W, 2X, 2Y, 2Z, 2AA, 2AB, 2AC, 2AD, 2AE, 2AF, 2AG, 2AH. Next free code: 2AK.
 
 ## 3 Polish and Arabic
 
@@ -180,6 +192,9 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
+| **BT-7AI** | [A bank message with the Arabic decimal mark is read as the wrong amount (147.87 becomes 87)](7-planning-import-and-search/BT-7AI-sms-arabic-decimal-mark.md) | bug, technical · high | Capture | S | Sonnet | ready |
+| **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) | improvement, visual | Capture | S | Sonnet | ready |
+| **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually uses](7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | improvement, visual | Capture | M | Sonnet | new |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | Opus | ready |
 | NF-7AB1 | ↳ Summary first, rows last | | | M | Opus | |
 | NF-7AB3 | ↳ Group by the question, not the name | | | M | Opus | |
@@ -187,10 +202,22 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | NF-7AB6 | ↳ Safe to go fast: Undo and the balance on the result | | | S | Sonnet | |
 | NF-7AB4 | ↳ Smart buttons on a group | | | M | Sonnet | |
 | NF-7AB5 | ↳ Quick mode for leftovers | | | M | Sonnet | |
+| **NF-7AK** | [Bank messages beyond CIB and NBE in Arabic: English card messages, wallets, other currencies, and the researched formats](7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | new feature | Capture | L | Opus | new |
+| NF-7AK1 | ↳ English card and account messages | | | M | Opus | |
+| NF-7AK2 | ↳ Wallets, which name no card ending | | | M | Opus | |
+| NF-7AK3 | ↳ Purchases in another currency | | | M | Opus | |
+| NF-7AK4 | ↳ Use the researched formats | | | M | Opus | |
+| **NF-7AM** | [Repeat an entry in one tap, and Save and add another](7-planning-import-and-search/NF-7AM-repeat-and-add-another.md) | new feature | Capture | M | Sonnet | ready |
+| **NF-7AN** | [Save now, sort later: an entry with only an amount waits in To sort](7-planning-import-and-search/NF-7AN-save-now-sort-later.md) | new feature | Capture | M | Opus | ready |
+| **NF-7AO** | [Bank messages Lightning is sure about save themselves, marked and undoable](7-planning-import-and-search/NF-7AO-sure-bank-messages-save-themselves.md) | new feature | Capture | L | Opus | new |
+| NF-7AO1 | ↳ What "sure" means, and the service | | | M | Opus | |
+| NF-7AO2 | ↳ Seen, marked, undoable | | | M | Opus | |
+| NF-7AO3 | ↳ Not twice | | | M | Opus | |
+| **NF-7AP** | [Compare the balance a bank message states with the account, as a quiet To do row](7-planning-import-and-search/NF-7AP-bank-message-balance-check.md) | new feature | Capture | M | Sonnet | ready |
 
-Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md).
+Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md) · [r31](7-planning-import-and-search/r31-logging-entries/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH. Next free code: 7AI.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH. Next free code: 7AQ.
 
 ## 8 Website
 
@@ -225,6 +252,14 @@ Good ideas that wait until the milestones above are done.
 | IT-9K1 | ↳ Restore routes out of profile_app | | | S | Sonnet | |
 | IT-9K2 | ↳ The phone's device routes out of profile_app | | | M | Opus | |
 | IT-9K3 | ↳ The PC's borrowing routes and Lock out of profile_app | | | M | Opus | |
+| **IT-9L** | [The investment report reads the whole ledger four times per Overview - 426 ms at 4,400 transactions; a narrower query gives the same report twelve times faster](9-later/IT-9L-investment-report-reads-the-whole-ledger.md) | improvement, technical | Understand | M | Sonnet | ready |
+| IT-9L1 | ↳ Read only the transactions the report uses | | | M | Sonnet | |
+| IT-9L2 | ↳ Memo the purity read | | | S | Sonnet | |
+| IT-9L3 | ↳ One investment period per request | | | S | Sonnet | |
+| **IT-9M** | [Activity on the PC asks ten queries for each of its 100 rows - 1,039 queries where the budget is 400](9-later/IT-9M-activity-asks-ten-queries-a-row.md) | improvement, technical | Understand | M | Sonnet | ready |
+| **IT-9N** | [The import review asks four or more queries for every statement row - 1,136 for a 90-row file, about 12,000 for a year's statement](9-later/IT-9N-import-review-asks-four-queries-a-row.md) | improvement, technical | Capture | M | Sonnet | ready |
+| IT-9N1 | ↳ Ask the account questions once | | | S | Sonnet | |
+| IT-9N2 | ↳ Ask the "seen before" questions once | | | M | Sonnet | |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | ready |
 | NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
 | NF-9D4 | ↳ Show the Hijri date beside every zakat day | | | S | Sonnet | |
@@ -234,7 +269,7 @@ Good ideas that wait until the milestones above are done.
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 
-Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J. Next free code: 9L.
+Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J. Next free code: 9O.
 
 ## 10 Looks and store
 
@@ -308,6 +343,24 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
+| **BT-12H** | [A second gold holding of the same karat cannot be added (GLD:24K already exists)](12-desktop-ux/BT-12H-second-gold-holding-same-karat.md) | bug, technical · medium | Own | S | Sonnet | ready |
+| **BV-12O** | [Phone Budget: Where the month went counts fixed costs twice (33,851 spent where 19,001 was)](12-desktop-ux/BV-12O-phone-budget-donut-counts-fixed-costs-twice.md) | bug, visual · high | Plan | S | Sonnet | ready |
+| **IV-12J** | [Certificates read as certificates: their own holding page, payouts as the bank pays them, value that grows, and a nudge at maturity](12-desktop-ux/IV-12J-certificates-read-as-certificates.md) | improvement, visual | Own | L | Opus | new |
+| IV-12J1 | ↳ The certificate's holding page and the certificates page | | | M | Opus | |
+| IV-12J2 | ↳ Payouts forecast the way Egyptian banks pay them | | | M | Opus | |
+| IV-12J3 | ↳ A certificate paid at maturity gains value as it earns | | | M | Opus | |
+| IV-12J4 | ↳ Maturity and notices | | | S | Opus | |
+| **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | improvement, visual | Capture | M | Sonnet | ready |
+| **IV-12L** | [Gold: add a piece and its purchase in one step, pick the price by karat, and show bars with the jewellery](12-desktop-ux/IV-12L-gold-one-step-and-one-table.md) | improvement, visual | Own | M | Sonnet | new |
+| **IV-12N** | [Investments figures that mislead outside stocks: purchases shown as change in value, yearly rates on weeks, two Others](12-desktop-ux/IV-12N-investment-figures-beyond-stocks.md) | improvement, visual | Understand | M | Sonnet | new |
+| **IV-12P** | [One name, one figure across Budget, Cash planning and Home](12-desktop-ux/IV-12P-one-name-one-figure-budget-and-cash.md) | improvement, visual | Plan | M | Opus | new |
+| **IV-12Q** | [The unfinished pages of Budget and Cash planning get the page pattern: a lead figure, a visual, cards](12-desktop-ux/IV-12Q-unfinished-budget-and-cash-pages.md) | improvement, visual | Plan | L | Opus | new |
+| IV-12Q1 | ↳ Fund your payday plan, as one short step | | | M | Opus | |
+| IV-12Q2 | ↳ Compare scenarios and Forecast inputs | | | M | Opus | |
+| IV-12Q3 | ↳ Change limit, Fill this month, Carryover | | | M | Opus | |
+| IV-12Q4 | ↳ Phone Recurring and the PC's doubled list | | | S | Opus | |
+| IV-12Q5 | ↳ Budget page and Budget settings | | | M | Opus | |
+| **IV-12T** | [The three "explain this figure" pages have no way in - /explain/owned, /explain/free-cash and /explain/flow are built and tested, and nothing links to them](12-desktop-ux/IV-12T-explain-pages-have-no-way-in.md) | improvement, visual | Understand | S | Sonnet | ready |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | Opus | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | Opus | |
 | IV-3AM2 | ↳ The shell gives back space (S1-S3, S6) | | | M | Opus | |
@@ -328,7 +381,15 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | NF-12G7 | ↳ Split on the Add sheet, PC and phone | | | M | Sonnet | |
 | NF-12G4 | ↳ Who owes what, per person | | | M | Sonnet | |
 | NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | Sonnet | |
+| **NF-12I** | [Record a certificate you already own, bought before you started tracking](12-desktop-ux/NF-12I-certificate-already-owned.md) | new feature | Own | M | Opus | ready |
+| **NF-12M** | [Property as an investment: its own kind, gain from what you paid, instalments, rent and costs](12-desktop-ux/NF-12M-property-as-an-investment.md) | new feature | Own | L | Opus | new |
+| NF-12M1 | ↳ Real estate is its own class, with the gain from what you paid | | | M | Opus | |
+| NF-12M2 | ↳ A property page, not a bank register | | | M | Opus | |
+| NF-12M3 | ↳ Paying by instalments (off-plan) | | | L | Opus | |
+| NF-12M4 | ↳ Rent and running costs | | | M | Opus | |
+| **NF-12R** | [Fill this month from your average of the last three months](12-desktop-ux/NF-12R-fill-budget-from-average.md) | new feature | Plan | S | Sonnet | ready |
+| **NF-12S** | [Warn before a category runs out, with Move room or Raise](12-desktop-ux/NF-12S-warn-before-a-category-runs-out.md) | new feature | Plan | M | Sonnet | ready |
 
-Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md).
+Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12H.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 3AZ. Next free code: 12U.

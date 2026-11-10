@@ -1,0 +1,18 @@
+READ  NBE Arabic card purchase (known pattern): purchase 147.87 ending=1234 when=2026-11-06T11:13 place='CARREFOUR MAADI' sure=True
+NONE  CIB English debit card: kept_for_you=True offer=False prefill={'amount': '250.00', 'kind': 'out'}
+NONE  CIB English credit card: kept_for_you=True offer=False prefill={'amount': '1250.00', 'kind': 'out'}
+READ  QNB English purchase: money_out 320.00 ending=4321 when=2026-11-07T18:40 place='SEOUDI MARKET' sure=False
+READ  Banque Misr Arabic ATM: money_out 2000 ending=9876 when=2026-11-05T14:00 place='' sure=False
+NONE  Dollar purchase: kept_for_you=False offer=False prefill={'amount': '', 'kind': 'out'}
+READ  Refund: money_in 450.00 ending=1234 when=2026-11-04T14:00 place='' sure=False
+NONE  Vodafone Cash payment: kept_for_you=True offer=False prefill={'amount': '150', 'kind': 'out'}
+NONE  Vodafone Cash received: kept_for_you=True offer=False prefill={'amount': '500', 'kind': 'in'}
+READ  InstaPay out, CIB (known pattern): transfer_out 2000.00 ending=1234 when=2026-11-01T11:05 place='' sure=True
+READ  Fawry bill: money_out 620.50 ending=1234 when=2026-11-02T14:00 place='' sure=False
+READ  Bank fee: money_out 25.00 ending=1234 when=2026-11-01T14:00 place='' sure=False
+NONE  One-time code: kept_for_you=False offer=False prefill={'amount': '500', 'kind': 'out'}
+NONE  Declined: kept_for_you=False offer=False prefill={'amount': '900', 'kind': 'out'}
+NONE  Telda English: kept_for_you=True offer=False prefill={'amount': '85.00', 'kind': 'out'}
+NONE  valU instalment: kept_for_you=True offer=False prefill={'amount': '1100', 'kind': 'out'}
+READ  Salary, CIB (known pattern): salary 19584.66 ending=salary when=2026-11-09T14:00 place='Salary' sure=True
+READ  Arabic digits and decimal mark: money_out 87 ending=1234 when=2026-11-06T14:00 place='كارفور' sure=False
