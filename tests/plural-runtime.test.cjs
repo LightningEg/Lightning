@@ -28,3 +28,8 @@ test('without a table (English) text is only filled in', () => {
   const english = load({});
   assert.equal(english('Delete {count} transactions?', { count: 3 }), 'Delete 3 transactions?');
 });
+
+test('a count already written in Arabic digits still agrees', () => {
+  assert.equal(t('Delete {count} transactions?', { count: '٢' }), 'تحذف معاملتين؟');
+  assert.equal(t('Delete {count} transactions?', { count: '٣' }), 'تحذف ٣ معاملات؟');
+});

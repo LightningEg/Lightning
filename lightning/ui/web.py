@@ -694,7 +694,8 @@ def create_app(c: Container | None = None) -> FastAPI:
     async def invalid_request(request: Request, exc: ValidationError):
         if request.url.path.endswith(".json"):
             return JSONResponse({"error": exc.message}, status_code=422)
-        return render(request, "validation_error.html", status_code=422, message=exc.message, back=_back_path(request))
+        return render(request, "validation_error.html", status_code=422, message=exc.message, back=_back_path(request),
+                      fix=("Exchange rates", "/settings?section=currencies&tab=rates") if "exchange rate" in exc.message.lower() else None)
 
     @app.exception_handler(NotFoundError)
     async def not_found(request: Request, exc: NotFoundError):

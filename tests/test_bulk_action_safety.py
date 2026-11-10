@@ -136,7 +136,7 @@ def test_arabic_phone_confirmation_uses_arabic_words_and_digits(c, rows, ui):
     page.locator('#phone-select-visible').check()
     expect(page.locator('.phone-select-count')).to_have_text('٢ محدد')
     page.locator('#phone-bulk button[formaction="/transactions/bulk-delete"]').click()
-    expect(page.locator('dialog.ask-dialog[open]')).to_contain_text('تحذف ٢ معاملات؟')
+    expect(page.locator('dialog.ask-dialog[open]')).to_contain_text('تحذف معاملتين؟')
     assert all(not c.transactions.get(t.id).is_void for t in made)
 
 

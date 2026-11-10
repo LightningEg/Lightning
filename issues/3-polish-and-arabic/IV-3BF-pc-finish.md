@@ -29,11 +29,6 @@ In that order, one PR each: a single `:focus-visible` ring token plus `@media (f
 
 Each step is one pull request. Read only the files a step names; never open `guideline/app.html` whole (use `python tools/guideline.py A10`). Run the step's test command, then for a visible change `python -m pytest tests/test_mohab_year.py -q` and check A16 on a screenshot; delete the step's heading in the same commit.
 
-## 3BF5 Our message, not the browser's bubble · M · #418
-Files: `lightning/ui/static/app.js` (~261, ~755, ~800), `lightning/ui/templates/partials/macros.html` (the `err()` macro), `lightning/ui/templates/base.html` and `phone/base.html`.
-Do: add `novalidate` to every `<form>` by setting `form.noValidate = true` for all forms on load in `app.js` (one place); on submit, if `!form.checkValidity()`, prevent it, and for each invalid field show the `err()` well's markup under the field (`aria-invalid="true"`, `aria-describedby` pointing at the message) with the field's `validationMessage` replaced by our sentence ("Enter an amount.", "Choose a category.", "Pick a date.") from a small map keyed by `name`; focus the first invalid field. Remove `reportValidity()` at ~800.
-Done when: `tests/test_pc_add_focus_browser.py` gains a case: Save with an empty amount shows `.field-error` (or the class `err()` uses) with "Enter an amount." and the amount is focused; no native bubble (assert `page.evaluate("document.querySelector('input:invalid')")` is the focused one and the error element is visible).
-
 ## 3BF6 One set of icons · M · #419
 Files: `lightning/ui/templates/partials/` (new `icons.html` macro file), templates found by `grep -rln "›\|×\|⋯" lightning/ui/templates --include=*.html` (PC ones; the phone is IV-3BG1), `lightning/ui/static/style.css`.
 Needs 3BG1 merged first. It creates the chevron macro; reuse it.

@@ -1,6 +1,63 @@
 // Small helpers only — no financial logic lives in the browser.
 const t = (text, values) => window.lightningT ? window.lightningT(text, values) : String(text);
 
+// IV-3BF5 · Our message, not the browser's bubble: every form is `novalidate`; a Save that would have shown a bubble
+// shows a sentence under the field instead (aria-invalid + aria-describedby) and focuses the first problem.
+const FIELD_MESSAGES = {amount: "Enter an amount.", amount_base: "Enter an amount.", category_id: "Choose a category.",
+  date: "Pick a date.", name: "Enter a name.", counterparty: "Enter a name.", kind: "Choose money out, money in or transfer."};
+const clearFieldError = (field) => {
+  document.getElementById(field.dataset.errorId || "")?.remove();
+  field.removeAttribute("aria-invalid");
+  if (field.dataset.errorId && field.getAttribute("aria-describedby") === field.dataset.errorId) field.removeAttribute("aria-describedby");
+  delete field.dataset.errorId;
+};
+const showFieldError = (field, message) => {
+  clearFieldError(field);
+  const note = document.createElement("small");
+  note.className = "field-error";
+  note.id = `${field.id || field.name || "field"}-error`;
+  note.textContent = message;
+  note.setAttribute("role", "alert");
+  (field.closest(".field, label") || field.parentElement).append(note);
+  field.dataset.errorId = note.id;
+  field.setAttribute("aria-invalid", "true");
+  field.setAttribute("aria-describedby", note.id);
+};
+const fieldMessage = (field) => {
+  if (field.validity.customError && field.validationMessage) return field.validationMessage;
+  return t(FIELD_MESSAGES[field.name] || (field.validity.valueMissing ? "Fill in this field." : field.validationMessage || "Check this field."));
+};
+// Any remaining reportValidity() on a field (period pickers, sums) shows our sentence, never the bubble.
+for (const control of typeof HTMLInputElement === "undefined" ? [] : [HTMLInputElement, HTMLSelectElement, HTMLTextAreaElement]) {
+  control.prototype.reportValidity = function () {
+    const ok = this.checkValidity();
+    if (!ok) showFieldError(this, fieldMessage(this));
+    return ok;
+  };
+}
+window.lightningValidate = (form) => {
+  form.querySelectorAll("[data-error-id]").forEach(clearFieldError);
+  if (form.checkValidity()) return true;
+  const bad = [...form.elements].filter((field) => field.willValidate && !field.checkValidity());
+  bad.forEach((field) => showFieldError(field, fieldMessage(field)));
+  bad[0]?.focus();
+  return false;
+};
+const markNoValidate = (root) => root.querySelectorAll?.("form").forEach((form) => { form.noValidate = true; });
+markNoValidate(document);
+if (typeof MutationObserver !== "undefined") new MutationObserver((records) => records.forEach((record) => record.addedNodes.forEach((node) => {
+  if (node.nodeType !== 1) return;
+  if (node.tagName === "FORM") node.noValidate = true;
+  markNoValidate(node);
+}))).observe(document.documentElement, {childList: true, subtree: true});
+document.addEventListener("submit", (event) => {
+  const form = event.target;
+  if (typeof HTMLFormElement === "undefined" || !(form instanceof HTMLFormElement) || event.submitter?.formNoValidate || form.hasAttribute("data-no-validate")) return;
+  if (!window.lightningValidate(form)) { event.preventDefault(); event.stopImmediatePropagation(); }
+}, true);
+document.addEventListener("input", (event) => { if (event.target.dataset?.errorId) clearFieldError(event.target); }, true);
+document.addEventListener("change", (event) => { if (event.target.dataset?.errorId) clearFieldError(event.target); }, true);
+
 // Match server-rendered numbers regardless of the device's regional settings.
 window.lightningNumber = (value, {min = 0, max = 2, signed = false} = {}) => {
   const text = new Intl.NumberFormat("en-US", {
@@ -813,7 +870,7 @@ const initDateFields = (root = document) => {
       form.dataset.dateSubmitReady = "1";
       form.addEventListener("submit", (event) => {
         const bad = [...form.elements].find((field) => field.matches?.("[data-smart-date]") && !normalizeDateField(field));
-        if (bad) { event.preventDefault(); event.stopImmediatePropagation(); bad.reportValidity(); bad.focus(); }
+        if (bad) { event.preventDefault(); event.stopImmediatePropagation(); showFieldError(bad, bad.validationMessage); bad.focus(); }
       }, true);
     }
   });
@@ -863,7 +920,7 @@ document.addEventListener("submit", (event) => {
       : null;
   if (confirmHost) {
     const ids = new Set(new FormData(form).getAll("txn_ids"));
-    const options = ids.size ? { title: ids.size === 1 ? t("Delete 1 transaction?") : t("Delete {count} transactions?", {count: ids.size}),
+    const options = ids.size ? { title: ids.size === 1 ? t("Delete 1 transaction?") : t("Delete {count} transactions?", {count: ids.size.toLocaleString(document.documentElement.lang)}),
       message: t(ids.size === 1 ? "You can restore it from transaction history." : "You can restore them from transaction history."), tone: "danger", ok: t("Delete") }
       : window.askFromOptions(confirmHost.dataset.confirmDelete || "Delete this transaction? You can restore it from its history page.",
         { tone: "danger", ok: t("Delete") });
@@ -1932,7 +1989,7 @@ const initAutosaveExisting = (root = document) => root.querySelectorAll("form[da
   let saved = new URLSearchParams(new FormData(form)).toString(), busy = false;
   const save = async () => {
     const data = new URLSearchParams(new FormData(form)), next = data.toString();
-    if (busy || next === saved || !form.reportValidity()) return;
+    if (busy || next === saved || !window.lightningValidate(form)) return;
     busy = true; status.textContent = t("Saving…");
     try {
       const response = await fetch(form.action || location.href, { method: "POST", body: data,
@@ -2137,7 +2194,7 @@ initCurrencySearch();
       const save = async () => {
         const data = new URLSearchParams(new FormData(form));
         const next = data.toString();
-        if (busy || next === saved || !form.reportValidity()) return;
+        if (busy || next === saved || !window.lightningValidate(form)) return;
         busy = true;
         if (status) status.textContent = t("Saving…");
         let succeeded = false;
@@ -2294,7 +2351,7 @@ initCurrencySearch();
   });
   content.addEventListener("submit", async (event) => {
     const form = event.target;
-    if (!(form instanceof HTMLFormElement) || form.target === "_blank" || form.method.toLowerCase() === "get") return;
+    if (typeof HTMLFormElement === "undefined" || !(form instanceof HTMLFormElement) || form.target === "_blank" || form.method.toLowerCase() === "get") return;
     event.preventDefault();
     const submit = form.querySelector("button[type=submit]:not([form]),button:not([type])") || form.querySelector("button[type=submit]");
     const status = content.querySelector("[data-popup-status]");

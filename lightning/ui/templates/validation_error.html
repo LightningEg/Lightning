@@ -2,5 +2,5 @@
 {% block title %}{{ 'That did not save'|tr(locale) }}{% endblock %}
 {% block heading %}<h1>{{ 'That did not save'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
-<section class="card"><p class="lead">{{ message|tr(locale) }}</p><div class="actions"><a class="btn primary" href="{{ back or '/' }}">{{ 'Back'|tr(locale) }}</a></div></section>
+<section class="card"><p class="lead">{{ message|tr(locale) }}</p><div class="actions"><a class="btn primary" href="{{ back or '/' }}">{{ 'Back'|tr(locale) }}</a>{% if fix %}<a class="btn" href="{{ fix[1] }}">{{ fix[0]|tr(locale) }}</a>{% endif %}</div></section>
 {% endblock %}

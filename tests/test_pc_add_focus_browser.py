@@ -42,3 +42,17 @@ def test_saving_creates_one_transaction_of_120(pc_page):
     page.wait_for_load_state()
     page.goto(origin + "/transactions")
     assert page.inner_text("body").count("120.00") == before + 1
+
+
+def test_an_empty_amount_shows_our_sentence_not_the_browser_bubble(pc_page):
+    page, origin = pc_page
+    _open(page, origin)
+    page.locator("label.transaction-choice", has_text="Money out").click()
+    page.locator("form button.primary", has_text="Add transaction").click()
+    error = page.locator("#popup-amount ~ .field-error")
+    assert error.is_visible() and error.inner_text() == "Enter an amount."
+    assert page.evaluate("document.activeElement.id") == "popup-amount"
+    assert page.evaluate("document.querySelector('input:invalid').id") == "popup-amount"
+    assert page.get_attribute("#popup-amount", "aria-invalid") == "true"
+    page.keyboard.type("5")
+    assert page.locator("#popup-amount ~ .field-error").count() == 0
