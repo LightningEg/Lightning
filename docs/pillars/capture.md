@@ -20,6 +20,7 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | **NF-7AN** | [Save now, sort later: an entry with only an amount waits in To sort](../../issues/7-planning-import-and-search/NF-7AN-save-now-sort-later.md) | M | ready |
 | **NF-7AO** | [Bank messages Lightning is sure about save themselves, marked and undoable](../../issues/7-planning-import-and-search/NF-7AO-sure-bank-messages-save-themselves.md) | L | new |
 | **NF-7AP** | [Compare the balance a bank message states with the account, as a quiet To do row](../../issues/7-planning-import-and-search/NF-7AP-bank-message-balance-check.md) | M | ready |
+| **IT-9N** | [The import review asks four or more queries for every statement row](../../issues/9-later/IT-9N-import-review-asks-four-queries-a-row.md) | M | ready |
 | **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](../../issues/12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | M | ready |
 
 ## Reports with open follow-ups here
@@ -28,5 +29,6 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 - [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 7AB
 - [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12K
 - [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](../../issues/7-planning-import-and-search/r31-logging-entries/report.md): 7AI, 7AJ, 7AK, 7AL, 7AM, 7AN, 7AO, 7AP, 7AB
+- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r33-code-review-and-loose-ends/report.md): 9N
 <!-- work:end -->
 
