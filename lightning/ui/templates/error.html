@@ -3,5 +3,5 @@
 {% block title %}{{ 'Something went wrong'|tr(locale) }}{% endblock %}
 {% block heading %}{{ page_header('Something went wrong'|tr(locale)) }}{% endblock %}
 {% block content %}
-<section class="card"><p>{{ (message or 'Lightning could not open this page. Your records are safe; nothing was changed by this error.')|tr(locale) }}</p><div class="actions"><a class="btn primary" href="{{ request.url.path }}">{{ 'Try again'|tr(locale) }}</a><a class="btn" href="/">{{ 'Back to Overview'|tr(locale) }}</a></div></section>
+<section class="card"><p>{{ (message or 'Lightning could not open this page. Your records are safe; nothing was changed by this error.')|tr(locale) }}</p><div class="actions"><a class="btn primary" href="{{ request.url.path }}">{{ 'Try again'|tr(locale) }}</a><a class="btn" href="/">{{ ('Back to Home' if request.state.phone else 'Back to Overview')|tr(locale) }}</a></div></section>
 {% endblock %}

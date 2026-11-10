@@ -21,6 +21,9 @@ BANNED = {
     "Submit": "a button names its action (Save, Add, Send)",
     "Error:": "say what to do, not the label of a failure",
     "Invalid": "say what is wrong with the thing, in a sentence",
+    "dashboard": "the page is Overview (PC) or Home (phone)",
+    "journey": "say how it went",
+    "YTD": "say This year",
     "ledger": "accounting jargon: say records, history or the profile (the data file)",
     "reevaluation": "jargon: say value update",
     "Counterpart": "accounting jargon: the word is Payee (Arabic: الجهة); code and routes keep counterparty",
@@ -70,3 +73,10 @@ def test_no_page_says_a_banned_word(sample, phone, locale):
             if re.search(r"(?<![A-Za-z])" + re.escape(word), text, re.I):
                 found.setdefault(path, []).append(word)
     assert not found, found
+
+
+def test_planning_has_one_name_in_the_sections():
+    """IV-3BH4: the section and its first tab are both 'Cash planning', never 'Plan' or 'Planning'."""
+    from pathlib import Path
+    source = (Path(__file__).resolve().parent.parent / "lightning/ui/sections.py").read_text(encoding="utf-8")
+    assert '"Plan"' not in source and '"Planning"' not in source and '"Cash planning"' in source

@@ -25,11 +25,6 @@ Per term, one PR: pick the plain word in the Glossary first (payee/who for count
 
 Each step is one pull request, one term at a time. The Glossary (`ai/GLOSSARY.md`, read only the term's line: `grep -n "<term>" ai/GLOSSARY.md`) is changed first in the same PR; then English keys, their Arabic in `lightning/ui/i18n.py`, templates and tests. Never rename a route, a database column or a code. Run `python -m pytest tests/test_arabic_no_english.py tests/test_mohab_year.py -q` and delete the step's heading in the same commit.
 
-## 3BH4 One name per place · S
-Files: `lightning/ui/sections.py` (section and tab names), `lightning/ui/templates/not_found.html`, `lightning/ui/templates/investments/holding.html:83`, `lightning/ui/templates/budget.html:83`, the "YTD" button (`grep -rn '"YTD"\|>YTD<' lightning/ui`).
-Do: the section is "Cash planning" everywhere (tab and heading too, not "Plan"/"Planning"); "Back to the dashboard" → "Back to Overview" (phone: "Back to Home"); "The journey" → "How it went"; "Could not save; retry with Enter or blur." → "Not saved. Press Enter to try again."; "YTD" → "This year". Add "dashboard" and "journey" to the test's list.
-Done when: `tests/test_voice.py` passes with both listed, and `grep -rn "'Plan'\|\"Planning\"" lightning/ui/sections.py` shows only the section's single name.
-
 ## 3BH5 One spelling per word · S · #426
 Files: `lightning/ui/i18n.py`, templates.
 Do: "Gam’eya" → "Gam'eya" in the 2 places (`grep -rn "Gam’eya" lightning`); Arabic دهب → ذهب (glossary spelling: check `ai/GLOSSARY.md`), انت → إنت; Free cash's Arabic is the glossary's النقدية المتاحة everywhere, and brand-voice's «المتاح للصرف» is for Safe to spend only (check `grep -n "المتاح" guideline/brand-voice.md`). Curly apostrophes in visible English strings: `’` in place of `'` inside words, in templates and `ARABIC_UI` keys **and** their callers together (a key change must change every `|tr` that uses it).

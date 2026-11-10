@@ -1515,7 +1515,7 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
     from zipfile import ZipFile
 
     screen = mohab.b.go("Settings", "Your data")
-    assert screen.shows("Your data", "Ask an AI", "All time", "YTD", "Month", "Custom",
+    assert screen.shows("Your data", "Ask an AI", "All time", "This year", "Month", "Custom",
                         "Copy for AI", "Save as a file", "Hide names", "Digest", "Standard", "Full",
                         "Review my period", "Where did the money go", "Check my budget",
                         "What changed my net worth", "My own question", "Export for AI analysis")

@@ -60,14 +60,14 @@ def test_one_chart_card_with_three_dates_and_the_period_links(phone):
     links = re.findall(r'<a href="(/investments\?[^"]+)"( class="is-chosen")?', card)
     assert [(href.split("period=")[1].split("&")[0], bool(chosen)) for href, chosen in links] == [
         ("month", True), ("ytd", False), ("all", False)]  # the same period system: ?period=month|ytd|all
-    assert 'class="phone-invest-seg"' in card and ">Month<" in card and ">YTD<" in card and ">All<" in card
+    assert 'class="phone-invest-seg"' in card and ">Month<" in card and ">This year<" in card and ">All<" in card
 
 
 @pytest.mark.parametrize("period, when", [("ytd", "this year"), ("all", "since your first record")])
 def test_the_other_ranges_read_in_words(phone, period, when):
     html = phone.get("/investments", params={"period": period}).text
     assert re.search(r'class="phone-hero-line">(Up|Down) [\d,]+ ' + when + r' \(', html)
-    assert 'class="is-chosen" aria-current="true">' + {"ytd": "YTD", "all": "All"}[period] in html
+    assert 'class="is-chosen" aria-current="true">' + {"ytd": "This year", "all": "All"}[period] in html
 
 
 def test_a_past_month_names_the_month_and_the_day_it_is_valued(phone):
@@ -114,7 +114,7 @@ def test_the_sentence_is_built_in_python():
     assert up == {"text": "Up {amt} {when} ({pct}).", "values": {"amt": "7,956", "when": "this month", "pct": "+1.9%"}}
     down = _phone_hero_line(Decimal("-1200"), Decimal("-0.44"), past, False, "en")
     assert down["text"] == "Down {amt} {when} ({pct})." and down["values"] == {"amt": "1,200", "when": "in 2026-09", "pct": "−0.4%"}
-    no_rate = _phone_hero_line(Decimal("500"), None, Period("ytd", "YTD", date(2026, 1, 1), date(2026, 10, 22)), True, "en")
+    no_rate = _phone_hero_line(Decimal("500"), None, Period("ytd", "This year", date(2026, 1, 1), date(2026, 10, 22)), True, "en")
     assert no_rate == {"text": "Up {amt} {when}.", "values": {"amt": "500", "when": "this year"}}
     assert "since your first record" in _phone_hero_line(Decimal("5"), None, Period("all", "All time", date(2026, 1, 5), date(2026, 10, 22)),
                                                           True, "en")["values"]["when"]

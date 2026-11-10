@@ -51,7 +51,7 @@ def parse_period(query, today: date, first_activity: str | None = None) -> Perio
         start = date.fromisoformat(first_activity) if first_activity else today
         return Period("all", "All time", start, today)
     if key == "ytd":
-        return Period("ytd", "YTD", date(today.year, 1, 1), today)
+        return Period("ytd", "This year", date(today.year, 1, 1), today)
     if key == "custom":
         try:
             from_value, to_value = str(query.get("date_from", "")), str(query.get("date_to", ""))
@@ -68,7 +68,7 @@ def parse_period(query, today: date, first_activity: str | None = None) -> Perio
             raise ValidationError("The end month must be the same as or after the start month.")
         return Period(key, "Custom", start, end)
     if key != "month":
-        raise ValidationError("Choose All time, YTD, Monthly, or Custom.")
+        raise ValidationError("Choose All time, This year, Monthly, or Custom.")
     month = str(query.get("month", month_of(today)))
     start, end = parse_month(month)
     if start > today:

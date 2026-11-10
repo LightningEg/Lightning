@@ -247,7 +247,7 @@ def _link(request: Request, **changes) -> str:
     return "/investments" + ("?" + urlencode(query) if query else "")
 
 
-PHONE_RANGES = (("month", "Month"), ("ytd", "YTD"), ("all", "All"))
+PHONE_RANGES = (("month", "Month"), ("ytd", "This year"), ("all", "All"))
 PHONE_HOLDINGS_SHOWN = 5  # the page lists the biggest five; "See all" lists every holding, grouped
 
 _SENTENCES = {(True, True): "Up {amt} {when} ({pct}).", (True, False): "Up {amt} {when}.",

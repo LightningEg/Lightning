@@ -34,7 +34,7 @@ def test_a_crash_shows_a_calm_page_not_the_server_text(c, setup):
     assert "Something went wrong" in crashed.text and "secret internals" not in crashed.text
     assert "Internal Server Error" not in crashed.text and 'href="/"' in crashed.text
     missing = client.get("/no-such-page")
-    assert missing.status_code == 404 and "Back to the dashboard" in missing.text
+    assert missing.status_code == 404 and "Back to Overview" in missing.text
 
 
 def test_shares_show_their_ticker_and_funds_are_not_an_exchange(c, setup):

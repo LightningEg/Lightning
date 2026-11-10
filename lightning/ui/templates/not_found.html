@@ -3,5 +3,5 @@
 {% block title %}Not found{% endblock %}
 {% block heading %}{{ page_header("Not found"|tr(locale)) }}{% endblock %}
 {% block content %}
-<div class="card empty">{{ message }} <a href="/">{{ "Back to the dashboard"|tr(locale) }}</a></div>
+<div class="card empty">{{ message }} <a href="/">{{ ("Back to Home" if request.state.phone else "Back to Overview")|tr(locale) }}</a></div>
 {% endblock %}

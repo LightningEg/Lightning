@@ -490,7 +490,7 @@ def test_holding_page_tells_the_journey_of_one_asset(c, setup, monkeypatch):
     import re
     worst = re.search(r'<span>Worst month</span><b class="([^"]*)">([^<]+)</b>', page.text)
     assert worst and 'neg' not in worst.group(1) and '−11.1%' in worst.group(2)
-    for question in ("Is it making money?", "How bumpy has it been?", "The journey", "Fall from its high"):
+    for question in ("Is it making money?", "How bumpy has it been?", "How it went", "Fall from its high"):
         assert question in page.text
 
 
@@ -697,7 +697,7 @@ def test_a_fixed_price_holding_shows_no_price_swings_and_no_checkpoint_rows(c, s
     j = visuals.holding_journey(c, thndr, cd.id, date(2026, 12, 31))
     assert j["flat"] and [t["kind"] for t in j["trades"]] == ["Bought"]
     page = TestClient(create_app(c)).get(f"/investments/holding/{cd.id}?account={thndr}&date=2026-12-31")
-    assert page.status_code == 200 and "How bumpy has it been?" not in page.text and "The journey" in page.text
+    assert page.status_code == 200 and "How bumpy has it been?" not in page.text and "How it went" in page.text
 
 
 @pytest.mark.parametrize("values", [
