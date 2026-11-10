@@ -45,7 +45,7 @@
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <div class="field">
               <label for="copy-name">{{ texts.profile_name }}</label>
-              <input id="copy-name" name="name" type="text" value="{{ name }}" maxlength="200" required autocomplete="off">
+              <input id="copy-name" name="name" type="text" value="{{ name }}" maxlength="200" required autocomplete="off" spellcheck="false">
               <small>{{ texts.name_help }}</small>
             </div>
             <div class="form-actions"><button class="button button-primary" type="submit">{{ texts.continue }}</button></div>

@@ -13,7 +13,7 @@
              autocomplete="off" aria-autocomplete="list" aria-expanded="false" aria-controls="{{ form_id }}-counterparty-results"
              data-counterparty-results="{{ form_id }}-counterparty-results"
              class="counterparty-input {{ 'bad' if error_field in ('counterparty', 'counterparty_review', 'to_account', 'from_account') }}"
-             {{ '' if is_edit else 'id=counterparty' }}>
+             {{ '' if is_edit else 'id=counterparty' }} spellcheck="false">
       <div id="{{ form_id }}-counterparty-results" class="counterparty-results" role="listbox" hidden></div>
     </div>
     {% if show_account %}<select form="{{ form_id }}" name="account_id" required class="register-account-picker {{ 'bad' if error_field == 'account' }}" aria-label="{{ 'Account'|tr(locale) }}" data-own-picker>
@@ -144,7 +144,7 @@
       <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="account_id" value="{{ view_account_id }}">
       <input type="hidden" name="preset" value="{{ preset or ('custom' if month else 'all_time') }}"><input type="hidden" name="date_from" value="{{ date_from if preset == 'custom' or month else '' }}"><input type="hidden" name="date_to" value="{{ date_to if preset == 'custom' or month else '' }}">
       <input type="hidden" name="q" value="{{ q }}"><input type="hidden" name="tag" value="{{ filter_tag }}"><input type="hidden" name="category_id" value="{{ active_view.category_id or '' if active_view else request.query_params.get('category_id', '') }}">
-      <label class="field">{{ 'Save this view'|tr(locale) }}<input name="name" maxlength="64" required placeholder="{{ 'Name this view'|tr(locale) }}" aria-label="{{ 'View name'|tr(locale) }}"></label><button class="btn small">{{ 'Save view'|tr(locale) }}</button>
+      <label class="field">{{ 'Save this view'|tr(locale) }}<input name="name" maxlength="64" required placeholder="{{ 'Name this view'|tr(locale) }}" aria-label="{{ 'View name'|tr(locale) }}" spellcheck="false" autocomplete="off"></label><button class="btn small">{{ 'Save view'|tr(locale) }}</button>
     </form>
     {% if active_view %}<a href="/transactions/views/{{ active_view.id }}/report?account_id={{ view_account_id }}">{{ 'Summary and export'|tr(locale) }}</a><form method="post" action="/transactions/views/{{ active_view.id }}/delete"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="account_id" value="{{ view_account_id }}"><button class="danger-text">{{ 'Delete view'|tr(locale) }}</button></form>{% endif %}
   </div></details>

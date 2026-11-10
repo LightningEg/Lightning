@@ -12,7 +12,7 @@
   {% for key,value in values.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
 {% else %}
   <div class="form-grid">
-  <label>{{ 'Name'|tr(locale) }}<input name="name" {{ 'aria-invalid=true' if error_field == 'name' }} value="{{ values.name }}" required class="{{ 'bad' if error_field == 'name' }}"></label>
+  <label>{{ 'Name'|tr(locale) }}<input name="name" {{ 'aria-invalid=true' if error_field == 'name' }} value="{{ values.name }}" required class="{{ 'bad' if error_field == 'name' }}" spellcheck="false" autocomplete="off"></label>
   <label>{{ 'Price still to pay'|tr(locale) }} ({{ base }})<input name="price" {{ 'aria-invalid=true' if error_field == 'price' }} value="{{ values.price }}" inputmode="decimal" class="money-input {{ 'bad' if error_field == 'price' }}" required></label>
   <label>{{ 'Number of instalments'|tr(locale) }}<input name="months" {{ 'aria-invalid=true' if error_field == 'months' }} type="number" min="1" max="600" value="{{ values.months }}" inputmode="numeric" required class="{{ 'bad' if error_field == 'months' }}"></label>
   <label>{{ 'First instalment'|tr(locale) }}<input name="first_date" {{ 'aria-invalid=true' if error_field == 'first_date' }} type="date" value="{{ values.first_date }}" required class="{{ 'bad' if error_field == 'first_date' }}"></label>

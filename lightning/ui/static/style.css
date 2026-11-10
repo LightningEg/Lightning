@@ -3957,3 +3957,9 @@ label > .field-note { color:var(--muted); font-size:var(--fs-meta, 12px); margin
 @media (forced-colors: active) {
   :is(a, button, summary, input, select, textarea, [tabindex]):focus-visible { outline: 2px solid CanvasText; }
 }
+
+/* IV-3BF3 · Windows chrome: thin scrollbars, a soft selection wash, balanced headings. */
+html { scrollbar-color: var(--line-control) transparent; scrollbar-width: thin; scrollbar-gutter: stable; }
+::selection { background: var(--tint-growth); color: inherit; }
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }

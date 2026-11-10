@@ -9,7 +9,7 @@
   <summary><b>{{ "Add a counterparty"|tr(locale) }}</b><span class="muted small">{{ "Save a name and optional suggested category"|tr(locale) }}</span></summary>
   <p class="muted small">{{ "Use one saved name across transactions. You can set a suggested category; each transaction can still use a different one."|tr(locale) }}</p>
   <form method="post" action="/counterparties" class="stack">
-    <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ entered_name or '' }}" placeholder="e.g. Talabat" required></label>
+    <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ entered_name or '' }}" placeholder="e.g. Talabat" required spellcheck="false" autocomplete="off"></label>
     <label>{{ 'Person or business'|tr(locale) }} <span class="muted small">{{ "(optional)"|tr(locale) }}</span>
       <select name="kind" data-own-picker><option value="">{{ "Not set"|tr(locale) }}</option><option value="PERSON">{{ "Person"|tr(locale) }}</option><option value="BUSINESS">{{ "Business"|tr(locale) }}</option></select>
     </label>
@@ -37,7 +37,7 @@
       <form id="{{ edit_form }}" method="post" action="/counterparties" class="counterparty-name-edit" data-counterparty-autosave>
         <input type="hidden" name="counterparty_action" value="rename">
         <input type="hidden" name="counterparty_id" value="{{ party.id }}">
-        <input type="text" name="name" value="{{ party.name }}" aria-label="Counterparty name">
+        <input type="text" name="name" value="{{ party.name }}" aria-label="Counterparty name" spellcheck="false" autocomplete="off">
         <span class="inline-save-status" role="status" aria-live="polite"></span>
       <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
       {% if aliases or aliases|length < alias_limit %}<details class="alias-details"><summary>Aliases{% if aliases %} · {{ aliases|length }}{% endif %}</summary>

@@ -29,11 +29,6 @@ In that order, one PR each: a single `:focus-visible` ring token plus `@media (f
 
 Each step is one pull request. Read only the files a step names; never open `guideline/app.html` whole (use `python tools/guideline.py A10`). Run the step's test command, then for a visible change `python -m pytest tests/test_mohab_year.py -q` and check A16 on a screenshot; delete the step's heading in the same commit.
 
-## 3BF3 Windows chrome: scrollbars, selection, spellcheck, balanced headings · S · #416
-Files: `lightning/ui/static/style.css` (append to the guideline layer), the templates with name inputs: `grep -rln 'name="name"\|name="counterparty"\|name="notes"' lightning/ui/templates`.
-Do: `html { scrollbar-color: var(--c-line, #C9D6D2) transparent; scrollbar-width: thin; scrollbar-gutter: stable; }`; `::selection { background: <the guideline's soft Nile/green wash token>; color: inherit; }` (find the token with `python tools/guideline.py A03`); `h1, h2, h3 { text-wrap: balance; }`, `p { text-wrap: pretty; }`. Add `spellcheck="false" autocomplete="off"` to name, counterparty, merchant and account-name inputs (not to notes).
-Done when: `grep -c 'spellcheck="false"' -r lightning/ui/templates` rises from 11 to cover every input from the grep above, and a screenshot of `/transactions` shows the thin scrollbar. `python -m pytest tests/test_pc_layout_browser.py -q`.
-
 ## 3BF4 PC Add starts on the amount, says its name once · S · #417
 Files: `lightning/ui/templates/transactions/form_popup.html` (amount input at line ~28), the PC route `lightning/ui/routes/accounts.py:446`.
 Verify first: open `/accounts/1/transaction/new` on the PC app; if the amount already has focus, delete this step.
