@@ -45,7 +45,7 @@
  "routes/workbench.py": 3,
  "row_sheet.py": 2,
  "search_index.py": 8,
- "spending_page.py": 20,
+ "spending_page.py": 16,
  "status.py": 3,
  "web.py": 28
 }
