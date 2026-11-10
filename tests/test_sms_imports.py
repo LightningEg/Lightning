@@ -432,3 +432,12 @@ def test_the_phone_asks_the_sms_provider_for_bank_senders_only():
     db.executemany("INSERT INTO inbox VALUES (?)", [(a,) for a in senders])
     kept = [row[0] for row in db.execute(f"SELECT address FROM inbox WHERE {sql}")]
     assert kept == [a for a in senders if not PERSON.match((a or "").replace(" ", ""))]
+
+
+def test_arabic_decimal_and_thousands_marks_read_as_the_right_amount():
+    """BT-7AI: ٫ is the decimal point and ٬ the thousands mark, not a separator that cuts the number."""
+    from decimal import Decimal
+    from lightning.sms_imports import parse_sms, prefill
+    tx = parse_sms("تم خصم ١٤٧٫٨٧ جم من بطاقة الخصم المباشر رقم ١٢٣٤ عند كارفور يوم ٠٦/١١/٢٦")
+    assert tx is not None and tx.amount == Decimal("147.87")
+    assert prefill("تم خصم ١٬٢٥٠٫٥٠ جم من حسابك")["amount"] == "1250.50"
