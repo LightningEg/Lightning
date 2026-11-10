@@ -25,26 +25,18 @@ Per term, one PR: pick the plain word in the Glossary first (payee/who for count
 
 Each step is one pull request, one term at a time. The Glossary (`ai/GLOSSARY.md`, read only the term's line: `grep -n "<term>" ai/GLOSSARY.md`) is changed first in the same PR; then English keys, their Arabic in `lightning/ui/i18n.py`, templates and tests. Never rename a route, a database column or a code. Run `python -m pytest tests/test_arabic_no_english.py tests/test_mohab_year.py -q` and delete the step's heading in the same commit.
 
-## 3BH1 A test that keeps jargon off the screen · S · #425
-Files: new `tests/test_voice.py`.
-Do: render (with the sample household, English and Arabic; copy the set-up from `tests/test_arabic_no_english.py`) the main PC and phone pages listed in `tools/phone_check.py` `PAGES`, take the visible text, and assert it contains none of a list of words. Start the list with the words that are already gone (`Successfully`, `Please`, `Submit`, `Error:`, `Invalid`) so it passes today; each later step adds its own word.
-Done when: `python -m pytest tests/test_voice.py -q` passes and the list lives at the top of the file with a one-line reason per word.
-
 ## 3BH2 "Counterparty" becomes "Payee" (Arabic: الطرف التاني → الجهة) · M
-Needs 3BH1 merged first.
 Decided (owner, 2026-11-08): "Payee" for money out and in, "Who" as a column heading.
 Files: `grep -rln "Counterpart" lightning/ui ai/GLOSSARY.md` (63 keys; the nav heading on `/counterparties`).
 Do: rename the visible words only; keep `/counterparties` and every variable. Add "counterparty" to the test's list.
 Done when: `tests/test_voice.py` passes with the word listed.
 
 ## 3BH3 "Ledger" and "reevaluation" leave the screen · S
-Needs 3BH1 merged first.
 Files: `grep -rn "ledger\|Ledger\|reevaluation\|Reevaluation" lightning/ui/i18n.py lightning/ui/templates` (57 + 12 keys), `lightning/deposits/service.py:296`.
 Do: "Reevaluation ledger" → "Value updates"; "reevaluation" → "value update"; sentences with "ledger" are rewritten without it ("in your records", or just dropped: "Principal cannot exceed the CD's currently owned ledger balance." → "You can take out at most {amount} from this certificate."). Add both words to the test's list.
 Done when: `tests/test_voice.py` passes with "ledger" and "reevaluation" listed.
 
 ## 3BH4 One name per place · S
-Needs 3BH1 merged first.
 Files: `lightning/ui/sections.py` (section and tab names), `lightning/ui/templates/not_found.html`, `lightning/ui/templates/investments/holding.html:83`, `lightning/ui/templates/budget.html:83`, the "YTD" button (`grep -rn '"YTD"\|>YTD<' lightning/ui`).
 Do: the section is "Cash planning" everywhere (tab and heading too, not "Plan"/"Planning"); "Back to the dashboard" → "Back to Overview" (phone: "Back to Home"); "The journey" → "How it went"; "Could not save; retry with Enter or blur." → "Not saved. Press Enter to try again."; "YTD" → "This year". Add "dashboard" and "journey" to the test's list.
 Done when: `tests/test_voice.py` passes with both listed, and `grep -rn "'Plan'\|\"Planning\"" lightning/ui/sections.py` shows only the section's single name.
@@ -65,5 +57,4 @@ Do: "Edit FND:AZMM" → "Edit {name}" with the asset's display name; "Edit OUT-�
 Done when: `grep -rn "'Edit ' ~" lightning/ui/templates` is empty.
 
 ## 3BH8 More words found by r35 · S
-Needs 3BH1 merged first.
 From [r35 F14](../12-desktop-ux/r35-ux-against-users-questions/report.md): "Completed payment occurrences" (Reserves) → "Payments made"; "Unreconciled events" and "Money at risk" (Weekly review) → "To match" and "Late or due"; "Cash ownership history" (Held for others) → "History"; "Funded spending left" and "Unfunded bills due" (payday) → plain sentences; "Other Investments" beside "Other" in one Investments legend (rename the class or the remainder); "Age of Money" → "Age of money". Arabic with each; add the retired words to the test's list.

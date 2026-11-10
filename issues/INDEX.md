@@ -85,7 +85,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BF6 | ↳ One set of icons ([#419](https://github.com/LightningEg/Lightning/issues/419)) | | | M | Sonnet | |
 | IV-3BF7 | ↳ Styles from tokens ([#420](https://github.com/LightningEg/Lightning/issues/420)) | | | M | Sonnet | |
 | **IV-3BH** | [One name per thing and no accounting jargon - ledger, counterparty, reevaluation, Title Case categories, three names for planning](3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | improvement, visual | Feel | M | Sonnet | ready |
-| IV-3BH1 | ↳ A test that keeps jargon off the screen ([#425](https://github.com/LightningEg/Lightning/issues/425)) | | | S | Sonnet | |
 | IV-3BH2 | ↳ "Counterparty" becomes "Payee" (Arabic: الطرف التاني → الجهة) | | | M | Sonnet | |
 | IV-3BH3 | ↳ "Ledger" and "reevaluation" leave the screen | | | S | Sonnet | |
 | IV-3BH4 | ↳ One name per place | | | S | Sonnet | |
