@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta
+from lightning.core.dates import now as _now
+
+from datetime import date, timedelta
 from decimal import Decimal
 
 from lightning.accounts.domain import INVESTMENT_ACCOUNT_TYPES
@@ -136,7 +138,7 @@ class AIAnalysisService:
         summary_rows = [
             ("Period start", period.start_text, "", "Inclusive"),
             ("Period end", period.end_text, "", "Inclusive"),
-            ("Generated at", datetime.now().astimezone().isoformat(timespec="seconds"), "", "Local device time"),
+            ("Generated at", _now().astimezone().isoformat(timespec="seconds"), "", "Local device time"),
             ("Base currency", c.base_currency, "", "Lightning's configured base currency"),
             ("Owner scope", "User-owned financial activity", "", "Ledger lines with another owner's ID are excluded."),
             ("Transactions included", preview["transactions"], "records", "Posted main-ledger transactions with at least one owned line."),

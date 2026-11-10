@@ -12,6 +12,7 @@ from pathlib import Path
 
 import pytest
 
+from lightning.core.dates import now
 from lightning.sms_imports import SALARY_ENDING, parse_sms
 
 SAMPLES = json.loads((Path(__file__).parent / "fixtures" / "bank_sms.json").read_text(encoding="utf-8"))
@@ -205,7 +206,7 @@ def test_the_phone_app_asks_then_reads_in_to_review(tmp_path):
     from lightning.runtime.http import Credentials
     from test_profile_app import create, token
     nbe = [s for s in SAMPLES["samples"] if s["bank"] == "NBE"][:3]
-    source = FakeSource([("NBE", s["text"], int(datetime.now().timestamp() * 1000) - i) for i, s in enumerate(nbe)],
+    source = FakeSource([("NBE", s["text"], int(now().timestamp() * 1000) - i) for i, s in enumerate(nbe)],
                         permission="not_granted")
     cfg = Credentials("http://127.0.0.1:9851")
     app = profile_app(cfg, tmp_path / "docs", devices=Devices(tmp_path / "app", port=0), phone=True, sms=source)

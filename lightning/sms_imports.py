@@ -22,7 +22,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Protocol
 
-from lightning.core.dates import today
+from lightning.core.dates import today, now as _now
 from lightning.core.errors import ValidationError
 
 ENDINGS_KEY = "sms_account_endings"   # {"0285": account_id}
@@ -123,7 +123,7 @@ def _clean(text: str) -> str:
 def parse_sms(text: str, *, sender: str = "", received: datetime | None = None) -> SmsTransaction | None:
     """One bank message as a proposed transaction, or None when it moves no money (a code, a declined payment,
     an offer). Patterns: CIB and NBE in Arabic (`tests/fixtures/bank_sms.json` holds a sample of each)."""
-    received = received or datetime.now()
+    received = received or _now()
     body = (text or "").translate(_DIGITS).replace("،", ",")[:MAX_TEXT]  # spaces kept: they bound merchants
     flat = " ".join(body.split())
     if not flat or _IGNORE.search(flat):
@@ -406,7 +406,7 @@ class SmsImportService:
         """New messages from the phone: shared ones, and the inbox since the last read when allowed (from
         OVERLAP_MS before the cursor, which only moves forward). Messages from phone numbers are people, never
         read. Returns `read`'s counts, or None when there was nothing."""
-        now = now or datetime.now()
+        now = now or _now()
         messages = [("Shared", text, now) for text in source.take_shared() if text and text.strip()]
         newest = None
         if source.permission() == "granted":
@@ -588,7 +588,7 @@ class SmsImportService:
             elif row.kind == "salary":
                 category = "Salary"
             writer.writerow([row.when[:10], format(row.signed, "f"), counterparty, category, notes, row.reference, row.text])
-        batch_id, _ = self.bank_imports.stage(account_id, f"SMS {datetime.now():%Y-%m-%d %H:%M}",
+        batch_id, _ = self.bank_imports.stage(account_id, f"SMS {_now():%Y-%m-%d %H:%M}",
                                               out.getvalue().encode("utf-8"))
         return batch_id
 

@@ -2,8 +2,9 @@
 bank import's review screen. The phone app will also send new messages here by itself."""
 from __future__ import annotations
 
+from lightning.core.dates import now as _now
+
 import re
-from datetime import datetime
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
@@ -89,7 +90,7 @@ async def paste(request: Request):
     messages = [m.strip() for m in re.split(r"\n\s*\n", text) if m.strip()][:MAX_PASTE]
     if not messages:
         return _page(request, c, error="Paste one or more bank messages, a blank line between each.")
-    now = datetime.now()
+    now = _now()
     with settled_save(request, container(request)):
         result = c.sms_imports.read([("", m, now) for m in messages])
     found = sum(len(c.bank_imports.preview(batch)[1]) for batch in result["staged"].values())

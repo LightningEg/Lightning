@@ -44,7 +44,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime, time as clock, timedelta, timezone
 from decimal import Decimal
 
-from lightning.core.dates import fmt_date
+from lightning.core.dates import fmt_date, today as _today
 from lightning.fx import rate_for, save_rate
 from lightning.market.http import APP_AGENT, Polite
 from lightning.market.model import Quote, SourceError
@@ -594,7 +594,7 @@ def probe(session=None) -> list[tuple[str, bool, str]]:
         ("Yahoo Finance", lambda: count(len(yahoo.fetch_history(session, "EG:COMI", "1mo")), "day", "days")
          + " of CIB's history"),
         ("Mubasher", lambda: count(len(mubasher.fetch(session).quotes), "Egyptian fund", "Egyptian funds")),
-        ("Banque Misr", lambda: count(len(banque_misr.fetch(session, fmt_date(date.today())).quotes),
+        ("Banque Misr", lambda: count(len(banque_misr.fetch(session, fmt_date(_today())).quotes),
                                                 "exchange rate", "exchange rates")),
     )
     results = []

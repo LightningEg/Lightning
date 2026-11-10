@@ -2,13 +2,14 @@
 
 from __future__ import annotations
 
+from lightning.core.dates import today as _today
+
 import importlib.metadata
 import json
 import os
 import re
 import threading
 import time
-from datetime import date
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
@@ -80,7 +81,7 @@ def _native_reminder_loop(window, origin: str, allowed_origin: tuple[str, str, i
                         closed.wait(0.15)
                     data = json.loads(payload) if payload else {}
                     if data.get("enabled") is True and isinstance(data.get("items"), list):
-                        today = date.today().isoformat()
+                        today = _today().isoformat()
                         seen = {key: value for key, value in seen.items() if value == today}
                         for item in data["items"]:
                             if not isinstance(item, dict):

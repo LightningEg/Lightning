@@ -62,6 +62,14 @@ def today() -> date:
     return date.fromisoformat(pinned) if pinned else date.today()
 
 
+def now() -> datetime:
+    """The current local date and time, naive. The date part follows LIGHTNING_TODAY like `today()`, so a pinned day
+    pins stamps too. UTC instants for the journal and sync (`datetime.now(timezone.utc)`) stay real wall-clock time."""
+    real = datetime.now()
+    pinned = os.environ.get("LIGHTNING_TODAY")
+    return datetime.combine(date.fromisoformat(pinned), real.time()) if pinned else real
+
+
 def _local_now() -> datetime:
     return datetime.now().astimezone()
 
