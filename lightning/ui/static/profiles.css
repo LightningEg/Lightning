@@ -76,6 +76,8 @@ h2 { margin-bottom: 6px; font: 700 17px/1.4 "Bricolage Grotesque", "Plus Jakarta
 .field label, .form-stack > label:not(.check-row) { color: var(--ink); font-size: 13px; font-weight: 700; }
 .field small { color: var(--ink-2); font-size: 12px; }
 input[type="text"], input[type="password"] { width: 100%; min-width: 0; height: 48px; padding: 0 14px; border: 0; border-radius: 16px; background: #EEF5F3; color: var(--ink); font-size: 15px; }
+input[type="file"] { width: 100%; min-width: 0; padding: 8px; border: 0; border-radius: 16px; background: #EEF5F3; color: var(--muted); font-size: 15px; cursor: pointer; }
+input[type="file"]::file-selector-button { min-height: 32px; margin-inline-end: 12px; padding: 0 16px; border: 1px solid var(--control); border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; font-weight: 700; cursor: pointer; }
 input::placeholder { color: var(--muted); }
 input:focus { background: #F5EFCF; outline: 0; box-shadow: 0 0 0 2px #097852; }
 /* Type-and-pick (A10.3), the same menu as the app's own pickers (app.js). */

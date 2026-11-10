@@ -5,7 +5,6 @@
 | Who | Work | Files | Since |
 |---|---|---|---|
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
-| Claude | BT-2AI: 2AI3. | `lightning/runtime/profile_file.py` and its test | 2026-11-09 |
 
 ## Messages
 
@@ -34,7 +33,7 @@
 
 - **Website (11-09):** owner: Home ends on Download; Marketplace in search (site PR). Analytics host blocked here: unread. **Read:** site README › Search.
 
-- **Import:** NF-7AB flow decided. 2AI5, 2AI2 built; next 2AI3. **Read:** 2AI, 7AB.
+- **Import:** NF-7AB flow decided. 2AI5, 2AI2, 2AI3 built; 2AI4 waits on 4A4; owner 2AI6. **Read:** 2AI, 7AB.
 
 
 Plan: `issues/INDEX.md`.

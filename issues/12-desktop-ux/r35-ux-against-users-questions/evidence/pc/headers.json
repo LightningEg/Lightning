@@ -1,0 +1,351 @@
+{
+ "/": {
+  "h1": "Overview",
+  "headH": 79,
+  "headCls": "topbar-main",
+  "lines": [
+   "You kept 93% of what came in this month.",
+   "2026-10-01 to 2026-10-21 \u00b7 so far"
+  ],
+  "items": []
+ },
+ "/birdview/expenses": {
+  "h1": "Spending",
+  "headH": 81,
+  "headCls": "birdview-title",
+  "lines": [
+   "You spent 35,268 that month, 9,353 less than 2026-08.",
+   "2026-09-01 to 2026-09-30"
+  ],
+  "items": []
+ },
+ "/spending/compare": {
+  "h1": "Compare periods",
+  "headH": 81,
+  "headCls": "birdview-title",
+  "lines": [
+   "Money out is 21,422 lower than 2026-09-01 to 2026-09-21.",
+   "2026-10-01 to 2026-10-21"
+  ],
+  "items": []
+ },
+ "/reports": {
+  "h1": "Reports",
+  "headH": 32,
+  "headCls": "birdview-title",
+  "lines": [],
+  "items": []
+ },
+ "/budget": {
+  "h1": "Budget",
+  "headH": 79,
+  "headCls": "topbar-main",
+  "lines": [
+   "You are 10,105 under your plan's pace.",
+   "2026-10-01 to 2026-10-21 \u00b7 so far"
+  ],
+  "items": []
+ },
+ "/plan": {
+  "h1": "Cash planning",
+  "headH": 79,
+  "headCls": "topbar-main",
+  "lines": [
+   "You can spend 114,288 before payday and stay on plan.",
+   "2026-10-21 to 2026-11-01 \u00b7 until payday",
+   "\u00b7 until payday"
+  ],
+  "items": []
+ },
+ "/plan/recurring": {
+  "h1": "Cash planning",
+  "headH": 32,
+  "headCls": "topbar-main",
+  "lines": [],
+  "items": []
+ },
+ "/plan/loans": {
+  "h1": "Cash planning",
+  "headH": 32,
+  "headCls": "topbar-main",
+  "lines": [],
+  "items": []
+ },
+ "/plan/reserves": {
+  "h1": "Safety",
+  "headH": 32,
+  "headCls": "topbar-main",
+  "lines": [],
+  "items": []
+ },
+ "/financial-health": {
+  "h1": "Financial health",
+  "headH": 79,
+  "headCls": "topbar-main",
+  "lines": [
+   "One thing needs you: Emergency fund. Everything else is within your limits.",
+   "Balances as of 2026-10-21 \u00b7 savings rate from 2026-09"
+  ],
+  "items": []
+ },
+ "/investments": {
+  "h1": "Investments",
+  "headH": 79,
+  "headCls": "topbar-main",
+  "lines": [
+   "Your holdings' value did not move this month.",
+   "2026-10-01 to 2026-10-21 \u00b7 valued as of 2026-10-21",
+   "\u00b7 valued as of 2026-10-21"
+  ],
+  "items": []
+ },
+ "/investments/planner": {
+  "h1": "Planner",
+  "headH": 61,
+  "headCls": "topbar",
+  "lines": [],
+  "items": [
+   {
+    "lab": "Investments",
+    "x": 781,
+    "y": 26,
+    "cls": "plan-tabs-bar section-tabs"
+   },
+   {
+    "lab": "Holdings",
+    "x": 785,
+    "y": 30,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Planner",
+    "x": 900,
+    "y": 30,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Prices",
+    "x": 1007,
+    "y": 30,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Currencies",
+    "x": 1106,
+    "y": 30,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Target allocation",
+    "x": 1244,
+    "y": 29,
+    "cls": "section-gear"
+   },
+   {
+    "lab": "Undo \u00b7 Link reimbursem",
+    "x": 1294,
+    "y": 24,
+    "cls": "btn icon-btn history-btn"
+   }
+  ]
+ },
+ "/investments/prices": {
+  "h1": "Investment prices",
+  "headH": 32,
+  "headCls": "page-head",
+  "lines": [],
+  "items": []
+ },
+ "/accounts/currencies": {
+  "h1": "Currencies",
+  "headH": 77,
+  "headCls": "page-head",
+  "lines": [
+   "Balances and unrealized gain as of 2026-10-21; realized gain and spread from 2026-01-01 to 2026-10-21."
+  ],
+  "items": []
+ },
+ "/transactions": {
+  "h1": "Transactions",
+  "headH": 32,
+  "headCls": "topbar-main",
+  "lines": [
+   "Every account \u00b7 EGP \u00b7 Held for others 6,900"
+  ],
+  "items": []
+ },
+ "/import": {
+  "h1": "Import statements",
+  "headH": 32,
+  "headCls": "birdview-title",
+  "lines": [],
+  "items": []
+ },
+ "/accounts": {
+  "h1": "Accounts",
+  "headH": 58,
+  "headCls": "topbar-main",
+  "lines": [
+   "10 accounts. 6,900 of it is held for others."
+  ],
+  "items": []
+ },
+ "/money-from-others": {
+  "h1": "Held for others",
+  "headH": 117,
+  "headCls": "topbar",
+  "lines": [
+   "Held for others"
+  ],
+  "items": [
+   {
+    "lab": "Transactions",
+    "x": 728,
+    "y": 24,
+    "cls": "plan-tabs-bar section-tabs"
+   },
+   {
+    "lab": "Transactions",
+    "x": 732,
+    "y": 28,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Import",
+    "x": 874,
+    "y": 28,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Accounts",
+    "x": 975,
+    "y": 28,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Held for others",
+    "x": 1094,
+    "y": 28,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Zakat",
+    "x": 1247,
+    "y": 28,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Undo \u00b7 Link reimbursem",
+    "x": 296,
+    "y": 80,
+    "cls": "btn icon-btn history-btn"
+   }
+  ]
+ },
+ "/zakat": {
+  "h1": "Zakat",
+  "headH": 128,
+  "headCls": "topbar",
+  "lines": [
+   "As of 2026-10-21 \u00b7 zakat day 2026-12-01",
+   "Held for others"
+  ],
+  "items": [
+   {
+    "lab": "Transactions",
+    "x": 680,
+    "y": 30,
+    "cls": "plan-tabs-bar section-tabs"
+   },
+   {
+    "lab": "Transactions",
+    "x": 684,
+    "y": 34,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Import",
+    "x": 826,
+    "y": 34,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Accounts",
+    "x": 927,
+    "y": 34,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Held for others",
+    "x": 1046,
+    "y": 34,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Zakat",
+    "x": 1199,
+    "y": 34,
+    "cls": "plan-tab"
+   },
+   {
+    "lab": "Zakat settings",
+    "x": 1304,
+    "y": 33,
+    "cls": "section-gear"
+   },
+   {
+    "lab": "Undo \u00b7 Link reimbursem",
+    "x": 296,
+    "y": 91,
+    "cls": "btn icon-btn history-btn"
+   },
+   {
+    "lab": "Record payment",
+    "x": 352,
+    "y": 91,
+    "cls": "btn"
+   }
+  ]
+ },
+ "/settings": {
+  "h1": "Settings",
+  "headH": 32,
+  "headCls": "topbar-main",
+  "lines": [],
+  "items": []
+ },
+ "/rules": {
+  "h1": "Rules",
+  "headH": 32,
+  "headCls": "topbar-main",
+  "lines": [],
+  "items": []
+ },
+ "/categories": {
+  "h1": "Settings",
+  "headH": 56,
+  "headCls": "page-head",
+  "lines": [
+   "Categories \u00b7 why money moved"
+  ],
+  "items": []
+ },
+ "/counterparties": {
+  "h1": "Settings",
+  "headH": 56,
+  "headCls": "page-head",
+  "lines": [
+   "36 saved names."
+  ],
+  "items": []
+ },
+ "/checks": {
+  "h1": "Settings",
+  "headH": 56,
+  "headCls": "page-head",
+  "lines": [
+   "Every check passes."
+  ],
+  "items": []
+ }
+}
