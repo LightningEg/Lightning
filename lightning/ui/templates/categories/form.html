@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import field with context %}
 {% block title %}{{ 'Edit category' if category else 'New category' }}{% endblock %}
-{% block heading %}<h1>{{ ('Edit ' ~ category.name) if category else 'New L2 category' }}</h1>
+{% block heading %}<h1>{{ ('Edit {name}'|tr(locale, name=category.name)) if category else ('New L2 category'|tr(locale)) }}</h1>
 {% if parent_name %}<div class="muted">In {{ parent_name.split(' › ')|join(' · ') }}{% if not category %} · the new category goes under it{% endif %}</div>{% endif %}{% endblock %}
 {% block content %}
 <form method="post" class="card" style="max-width:620px">

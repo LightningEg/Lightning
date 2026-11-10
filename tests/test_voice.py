@@ -80,3 +80,12 @@ def test_planning_has_one_name_in_the_sections():
     from pathlib import Path
     source = (Path(__file__).resolve().parent.parent / "lightning/ui/sections.py").read_text(encoding="utf-8")
     assert '"Plan"' not in source and '"Planning"' not in source and '"Cash planning"' in source
+
+
+def test_headings_never_show_a_code(sample):
+    """IV-3BH7: 'Edit {name}' and 'Edit transaction', never 'Edit OUT-2026-…' or 'Edit FND:AZMM'."""
+    import re
+    client = _client(sample, False, "en")
+    for path in ("/investments/assets/13/edit", "/transactions/315"):
+        text = _visible(client.get(path).text)
+        assert not re.search(r"Edit [A-Z]{2,5}[:-]", text), path

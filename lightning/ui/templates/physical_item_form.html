@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
 {% block title %}{{ 'Edit item' if item else 'Add physical item' }}{% endblock %}
-{% block heading %}{{ page_header('Edit ' ~ values.name if item else 'Add a physical item', "Track one named piece. Weight excludes stones and other non-gold parts."|tr(locale)) }}{% endblock %}
+{% block heading %}{{ page_header(('Edit {name}'|tr(locale, name=values.name)) if item else ('Add a physical item'|tr(locale)), "Track one named piece. Weight excludes stones and other non-gold parts."|tr(locale)) }}{% endblock %}
 {% block content %}
 <form method="post" class="card" style="max-width:760px" {% if item %}data-popup-autosave{% endif %}>
   {% if error %}<p class="error">{{ error|tr(locale) }}</p>{% endif %}
