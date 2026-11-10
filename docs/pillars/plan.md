@@ -11,13 +11,12 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IV-12P** | [One name, one figure across Budget, Cash planning and Home](../../issues/12-desktop-ux/IV-12P-one-name-one-figure-budget-and-cash.md) | M | new |
 | **IV-12Q** | [The unfinished pages of Budget and Cash planning get the page pattern: a lead figure, a visual, car…](../../issues/12-desktop-ux/IV-12Q-unfinished-budget-and-cash-pages.md) | L | new |
 | **NF-12R** | [Fill this month from your average of the last three months](../../issues/12-desktop-ux/NF-12R-fill-budget-from-average.md) | S | ready |
 | **NF-12S** | [Warn before a category runs out, with Move room or Raise](../../issues/12-desktop-ux/NF-12S-warn-before-a-category-runs-out.md) | M | ready |
 
 ## Reports with open follow-ups here
 
-- [Audit 18: Budget and Cash planning, every tab and sub-page](../../issues/12-desktop-ux/r32-budget-and-cash-planning/report.md): 12P, 12Q, 12R, 12S
+- [Audit 18: Budget and Cash planning, every tab and sub-page](../../issues/12-desktop-ux/r32-budget-and-cash-planning/report.md): 12Q, 12R, 12S
 <!-- work:end -->
 

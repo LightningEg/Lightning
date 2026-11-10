@@ -161,7 +161,8 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         elif check.over_by:
             tail = line(f"Plan {fmt(check.over_by, 0)} less to keep {fmt(check.to_save, 0)} a month")
         elif check.unassigned is not None and check.unassigned > 0:
-            tail = line(f"{fmt(check.unassigned, 0)} of the income is not yet given a job", "Give it a job", f"/budget/fill?month={month}")
+            # IV-12P: the figure is the Not yet given a job row's own; here it is a link to that row
+            tail = line("Some income has no job yet", "Give it a job", "#budget-unassigned")
         else:
             tail = line(f"{fmt(check.to_save, 0)} a month to save")
         good = not check.over_by

@@ -118,10 +118,11 @@ class CashForecaster:
         average = self.budgets.income_average(month_of(as_of), schedule=self.schedules.view())
         return average.amount, average.months_counted
 
-    def free_cash(self, as_of: date) -> Decimal:
+    def free_cash(self, as_of: date, *, match_payments: bool = True) -> Decimal:
         """Free cash from the position (Position.free_cash, its one formula). Forecasts run on today, whose
-        reserves are always known, so it is never None here; an older date without reserve history is refused."""
-        free = self.position.at(as_of).free_cash
+        reserves are always known, so it is never None here; an older date without reserve history is refused.
+        ``match_payments=False`` reads without linking recorded payments to the plan (a page that must not write)."""
+        free = self.position.at(as_of, match_payments=match_payments).free_cash
         if free is None:
             raise ValueError(f"Free cash on {as_of} is unknown: reserve history is incomplete for that date.")
         return free
@@ -237,11 +238,12 @@ class CashForecaster:
 
     # -------------------------------------------------------------- forecast
     def forecast(self, as_of: date | None = None, months: int = HORIZON_MONTHS, *,
-                 refill: Decimal = ZERO) -> CashForecast:
+                 refill: Decimal = ZERO, match_payments: bool = True) -> CashForecast:
         """The cash forecast. ``refill`` asks "what if" this much free cash were moved into the emergency fund now:
-        free cash falls by it and the top-up the plan still needs is recomputed (BT-2AH). Nothing is written."""
+        free cash falls by it and the top-up the plan still needs is recomputed (BT-2AH). Nothing is written.
+        ``match_payments=False``: see free_cash."""
         day = as_of or today()
-        free = self.free_cash(day) - refill
+        free = self.free_cash(day, match_payments=match_payments) - refill
         average, average_months = self.average_income(day)
         month_keys = _months(day, months)
         horizon_end = parse_month(month_keys[-1])[1]

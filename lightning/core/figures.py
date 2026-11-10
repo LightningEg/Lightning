@@ -185,7 +185,8 @@ _TABLE = [
     ("left_in_plan", "Left in plan", "What is left of the plan; the Overview and Budget show the same month "
      "figure, and a negative one reads \"Over plan\". One-off categories are left out of Spent.", "Planned − Spent"),
     ("everyday_left", "Left for everyday", "The plan's remaining money after unpaid planned bills and loans, "
-     "floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance."),
+     "floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance and "
+     "the phone Home's lead (owner, 2026-11-09); Safe to spend leads Cash planning on both apps (IV-12P)."),
     ("plan_leaves_to_save", "Plan leaves to save", "What this month's plan leaves of average monthly income.",
      "Average monthly income − Planned"),
     ("not_yet_given_a_job", "Not yet given a job", "Income no plan, goal or emergency top-up has claimed this "
@@ -246,6 +247,9 @@ _TABLE = [
      "last month by the same day."),
     ("payments_before_next_income", "Due before payday",
      "Scheduled bills, subscriptions and loan payments that are not due yet, up to your next income."),
+    ("lowest_point_ahead", "Lowest point ahead", "The lowest month-end free cash in the cash forecast, everyday "
+     "spending and savings included. Compare scenarios shows the same figure and moves it by what a scenario changes "
+     "in scheduled cash (IV-12P)."),
     ("saving_for_goals", "Saving for goals", "What dated reserve goals still need this month, spread over the months left."),
     ("savings_target_rest", "Rest of savings target", "What the Savings target asks a month beyond Saving for goals and "
      "Emergency fund top-up (never below zero), so Safe to spend never counts what you mean to save (owner "
@@ -352,6 +356,7 @@ _SOURCES = {
     "left_in_plan_after_bills": (BOTH, "lightning.planning.domain.ForecastMonth.budget_spending"),
     "everyday_spending": (BOTH, "lightning.planning.domain.EverydayBudget.everyday_spent"),
     "payments_before_next_income": (PLAN, f"{FC}._safe_to_spend"),
+    "lowest_point_ahead": (PLAN, "lightning.planning.domain.CashForecast.lowest"),
     "saving_for_goals": (PLAN, f"{FC}._goal_need"),
     "savings_target_rest": (PLAN, f"{FC}.forecast"),
 }
