@@ -13,6 +13,7 @@ from decimal import Decimal
 
 from lightning.core.figures import FIGURES
 from lightning.core.plural import counted  # noqa: F401  (re-exported for templates and callers)
+from lightning.ui.i18n_errors import ERROR_TEXT
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
@@ -3465,7 +3466,7 @@ from lightning.ui.i18n_phone_reading import PHONE_READING as _PHONE_READING  # n
 
 ARABIC_UI.update(_PHONE_READING)
 _ORIGINAL = frozenset(ARABIC_UI)
-for _key, _value in SYSTEM_TEXT.items():
+for _key, _value in {**ERROR_TEXT, **SYSTEM_TEXT}.items():
     ARABIC_UI.setdefault(_key, _value)
 # The page script (`lightningT`) only needs what the browser looks up; server-side sentences stay out of it.
 BROWSER_UI = {k: v for k, v in ARABIC_UI.items() if k in _ORIGINAL or k not in SERVER_ONLY}

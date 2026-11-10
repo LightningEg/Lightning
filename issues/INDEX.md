@@ -87,7 +87,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IT-3BI3 | ↳ One week start ([#406](https://github.com/LightningEg/Lightning/issues/406)) | | | S | Sonnet | |
 | IT-3BI4 | ↳ One clock ([#407](https://github.com/LightningEg/Lightning/issues/407)) | | | S | Sonnet | |
 | **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page - no JSON, plain text, raw exceptions or half-English](3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | improvement, visual | Feel | M | Sonnet | ready |
-| IV-3BD2 | ↳ Every validation message has Arabic ([#410](https://github.com/LightningEg/Lightning/issues/410)) | | | M | Sonnet | |
 | IV-3BD3 | ↳ Half-English sentences and internal codes ([#411](https://github.com/LightningEg/Lightning/issues/411)) | | | S | Sonnet | |
 | IV-3BD4 | ↳ Import errors never show Python's text ([#412](https://github.com/LightningEg/Lightning/issues/412)) | | | S | Sonnet | |
 | IV-3BD5 | ↳ The validation page names the problem, not "Check your setup" ([#413](https://github.com/LightningEg/Lightning/issues/413)) | | | S | Sonnet | |

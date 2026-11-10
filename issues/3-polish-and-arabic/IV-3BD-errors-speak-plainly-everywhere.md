@@ -28,11 +28,6 @@ One error path: every 4xx/5xx renders the branded page (PC and phone), or for fe
 
 Each step is one pull request. Read only the files a step names. Run the step's test command and `python -m pytest tests/test_arabic_no_english.py -q`; delete the step's heading in the same commit. Never show a Python exception's text to a person; log it with `logging.getLogger("lightning")`.
 
-## 3BD2 Every validation message has Arabic · M · #410
-Files: a new test `tests/test_messages_translated.py`; `lightning/ui/i18n.py` (`ARABIC_UI`); the message sources it reports.
-Do: (1) Write the test first: walk `lightning/**/*.py` with `ast`, collect every string literal passed as the first argument to `ValidationError(...)`, `NotFoundError(...)` or `ProfileError(...)`, and assert each is a key of `ARABIC_UI` (or matches a `{…}` pattern key). It fails with today's list (about 87). (2) Add the Arabic for each, in Egyptian colloquial per `guideline/brand-voice.md` (read its Arabic section only). (3) For an f-string message the test cannot read, add a pattern key with `{name}` placeholders to `ARABIC_UI` that matches it (e.g. `"Row {n}: the fee is not a number."`); `translate` already fills pattern keys.
-Done when: `python -m pytest tests/test_messages_translated.py -q` passes with no allowlist longer than 10 entries, each with a reason.
-
 ## 3BD3 Half-English sentences and internal codes · S · #411
 Files: `lightning/runtime/session.py:84`, `lightning/ui/templates/categories/list.html:100`, `lightning/core/ledger.py:164`, `lightning/ui/templates/register.html:217`, `lightning/ui/templates/budget.html:83`.
 Do: (1) session: build the wait with a `{n}` key: "Too many wrong tries. Try again in {n} minutes." and "… in 1 hour." (Arabic agreement from IV-3BC2 if merged; else write the forms). (2) categories confirm: move the whole sentence into one `|tr(locale)` key. (3) ledger: the row label and the message in one key "Row {n}: the price and the exchange rate must be above zero." (4) register tooltip: `title="{{ 'Edit in this list'|tr(locale) }}"` without `r.ref`. (5) budget.html: `'Active: '+` and `e.message` go through `t()`.
