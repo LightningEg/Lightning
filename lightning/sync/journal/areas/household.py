@@ -26,4 +26,5 @@ COMMANDS = {
     # The settings are one row that always exists; the last save wins.
     "zakat.save_settings": Command("zakat.save_settings", dict(
         zakat_day=optional(TEXT), typed_nisab=optional(AMOUNT), count_worn_gold=FLAG, deduct_debts_due=FLAG)),
+    "zakat.save_nisab_basis": Command("zakat.save_nisab_basis", dict(nisab_basis=TEXT, typed_silver=optional(AMOUNT))),
 }
