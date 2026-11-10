@@ -1,4 +1,4 @@
-{# Budget, flexible first (IV-3AY9, guideline C11.2): Left in plan counts everyday money; Needs attention (at most four);
+{# Budget, flexible first (IV-3AY9, BV-11L1): Left for everyday is the service's allowance; Needs attention (at most four);
    flexible categories with left as the figure and no fields; Fixed costs as one row. No plan: the Make my plan step. #}
 {% extends "base.html" %}
 {% from "phone/partials/charts.html" import month_bar with context %}
@@ -16,7 +16,7 @@
 </section>
 {% else %}
 <section class="phone-hero has-seam" aria-labelledby="lead-heading">
-  <div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Over plan'|tr(locale) if s.left < 0 else fig.left_in_plan.label }}</div>
+  <div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Over plan'|tr(locale) if s.left < 0 else fig.everyday_left.label }}</div>
   <div class="phone-lead{{ ' is-negative' if s.left < 0 }}">{{ (s.left|abs)|money }} <small>{{ base }}</small></div>
   {% if s.pace_gap is not none %}<p class="phone-hero-line">{% if s.pace_gap <= 0 %}{{ '{amt} under your pace for {m}.'|tr(locale, amt=(-s.pace_gap)|money, m=s.month) }}{% else %}{{ '{amt} over your pace for {m}.'|tr(locale, amt=s.pace_gap|money, m=s.month) }}{% endif %}{% if s.per_day %} {{ 'About {amt} a day.'|tr(locale, amt=s.per_day|money) }}{% endif %}</p>
   {% elif s.state == 'past' and s.used_pct is not none %}<p class="phone-hero-line">{{ '{pct}% of the plan was spent.'|tr(locale, pct=s.used_pct) }}</p>{% endif %}
