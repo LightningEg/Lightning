@@ -6,9 +6,9 @@ from io import StringIO
 from urllib.parse import urlencode
 
 import pytest
-from fastapi import HTTPException
 from starlette.requests import Request
 
+from lightning.core.errors import ValidationError
 from lightning.ui.routes import exports
 from lightning.ui.web import create_app
 
@@ -49,9 +49,8 @@ def test_transaction_export_is_selected_and_keeps_ledger_detail(c):
     assert second.ref not in {row["reference"] for row in rows}
     assert any(row["amount"] == "-1234.56" for row in rows)
     assert any(row["description"] == "'=SUM(1,2)" for row in rows)
-    with pytest.raises(HTTPException) as empty:
+    with pytest.raises(ValidationError):
         _post(c, "/exports/transactions", {})
-    assert empty.value.status_code == 400
 
 
 def test_category_export_keeps_parent_and_flags(c):
@@ -80,7 +79,6 @@ def test_reevaluation_export_is_selected_and_linked(c):
     assert rows[0]["entry_id"] == str(history[0]["id"])
     assert rows[0]["journal_reference"] == history[0]["ref"]
     assert rows[0]["asset"] == history[0]["asset_name"]
-    with pytest.raises(HTTPException) as missing:
+    with pytest.raises(ValidationError):
         _post(c, "/exports/reevaluations", {"entry_ids": "999999"})
-    assert missing.value.status_code == 400
 

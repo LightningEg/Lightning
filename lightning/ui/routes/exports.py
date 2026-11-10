@@ -5,10 +5,10 @@ from __future__ import annotations
 import csv
 from io import StringIO
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Request
 from fastapi.responses import Response
 
-from lightning.core.errors import LightningError
+from lightning.core.errors import LightningError, ValidationError
 from ..web import container, render
 
 router = APIRouter(prefix="/exports")
@@ -34,7 +34,7 @@ MAX_EXPORT = 10_000  # PC P7: was 1,000; a year of rows fits
 def _selected(form, field: str) -> set[int]:
     values = form.getlist(field)
     if not values or len(values) > MAX_EXPORT or any(not str(value).isdigit() or int(value) < 1 for value in values):
-        raise HTTPException(400, "Select between 1 and 10,000 records to export.")
+        raise ValidationError("Select between 1 and 10,000 records to export.")
     return {int(value) for value in values}
 
 
@@ -106,7 +106,7 @@ async def reevaluations(request: Request):
     ids = _selected(await request.form(), "entry_ids")
     selected = c.reevaluations.history(limit=len(ids), entry_ids=ids)
     if len(selected) != len(ids):
-        raise HTTPException(400, "One or more selected reevaluations no longer exist. Refresh the page and select again.")
+        raise ValidationError("One or more selected reevaluations no longer exist. Refresh the page and select again.")
     rows = [(row["id"], row["date"], row["reason"], row["status"], row["account_id"],
              _safe_text(row["account_name"]), row["asset_id"], _safe_text(row["asset_name"]),
              row["owner_id"] or "", _safe_text(row["owner_name"]),
@@ -130,10 +130,10 @@ async def saved_view(request: Request, view_id: int):
         scope = c.accounts.get(int(raw_scope)).id if raw_scope else None
         view = c.saved_views.get(view_id, scope)
         report = c.saved_views.report(view)
-    except LightningError as exc:
-        return Response(exc.message, status_code=404, media_type="text/plain")
+    except LightningError:
+        raise
     except ValueError as exc:
-        return Response(str(exc), status_code=400, media_type="text/plain")
+        raise ValidationError(str(exc)) from exc  # the sentences raised above are plain ones
     rows = [(row.date, row.ref, row.type, _safe_text(row.account_label),
              _safe_text(row.counterparty or row.description), _safe_text(row.category_label),
              _safe_text(row.notes), str(row.amount), row.currency, str(row.amount_base))
@@ -158,7 +158,7 @@ async def import_workbook_template(request: Request):
         _unused(c)
         data, _, media = export_all(c, 'xlsx')
     except ValueError:
-        return Response('Download the template from a new, empty profile.', status_code=400, media_type='text/plain')
+        raise ValidationError("Download the template from a new, empty profile.")
     return Response(data, media_type=media, headers={'Content-Disposition': 'attachment; filename="lightning-onboarding-template.xlsx"', 'Cache-Control': 'no-store'})
 
 

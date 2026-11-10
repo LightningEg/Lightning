@@ -159,7 +159,9 @@ async def set_transaction_category(request: Request, txn_id: int):
 
 @router.get("/transactions/sorted")
 async def sorted_sheet(request: Request):
-    """The end of To sort: nothing left to sort."""
+    """The end of To sort: nothing left to sort. The PC has no such sheet: it goes back to Transactions."""
+    if not getattr(request.state, "phone", False):
+        return redirect("/transactions")
     return render(request, "transactions/sorted.html", return_to=_return_to(request.query_params.get("return_to")))
 
 
