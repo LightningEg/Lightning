@@ -62,11 +62,14 @@ class NetWorth:
     by_class: list[Group]
     unvalued: list[str]
     gameya_owed: Decimal = ZERO     # what circles you took the pot from still ask of you (negative balances)
+    owed_to_you: Decimal = ZERO     # NF-12G: people's Owed to you accounts above zero
+    you_owe_people: Decimal = ZERO  # NF-12G: those accounts below zero, as a positive amount
 
     @property
     def what_you_own(self) -> Decimal:
-        """What you own: a circle's negative balance is a debt (Gam'eya still to pay), not a negative asset."""
-        return self.total + self.gameya_owed
+        """What you own: a circle's negative balance is a debt (Gam'eya still to pay), not a negative asset; so is a
+        person's account below zero (what you owe them)."""
+        return self.total + self.gameya_owed + self.you_owe_people
 
 
 @dataclass
@@ -306,7 +309,9 @@ class ReportingService:
             by_class.append(Group("CUSTODY", "Less: money from others", -custody))
         gameya_owed = sum((-(h.value or ZERO) for h in holdings
                            if h.account.account_type == AccountType.GAMEYA and (h.value or ZERO) < ZERO), ZERO)
-        return NetWorth(day, total, accounts_sorted, by_class, unvalued, gameya_owed)
+        people = [h.value or ZERO for h in holdings if h.account.account_type == AccountType.RECEIVABLE]
+        return NetWorth(day, total, accounts_sorted, by_class, unvalued, gameya_owed,
+                        sum((v for v in people if v > ZERO), ZERO), sum((-v for v in people if v < ZERO), ZERO))
 
     def owned_liquid_cash(self, as_of: date | str) -> Decimal:
         """Owned wallet, bank, and brokerage cash; excludes custody balances and locked assets."""

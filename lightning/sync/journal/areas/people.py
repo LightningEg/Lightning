@@ -3,10 +3,18 @@ from decimal import Decimal
 
 from .spec import AMOUNT, DATE, FLAG, LONG, RATE, TEXT, Command, optional, ref
 
-TABLES = ("counterparty_aliases", "money_from_others")
+TABLES = ("counterparty_aliases", "money_from_others", "owed_to_you_accounts")
 PERSON = ("counterparties", "counterparty_id")
 CUSTODY = dict(transaction_id=ref("transactions"), day=DATE, owner=optional(TEXT), amount=AMOUNT, notes=LONG)
+# NF-12G: money lent to a person. The first lend makes the person's Owed to you account and its link row.
+LENT = dict(day=DATE, person_id=ref("counterparties"), amount=AMOUNT, notes=LONG)
 COMMANDS = {
+    "people_money.lend": Command("people_money.lend", LENT | dict(from_account_id=ref("accounts")),
+                                 creates="transactions"),
+    "people_money.repay": Command("people_money.repay", LENT | dict(to_account_id=ref("accounts")),
+                                  creates="transactions"),
+    "people_money.forgive": Command("people_money.forgive", LENT | dict(category_id=ref("categories")),
+                                    creates="transactions"),
     "counterparties.add_alias": Command("counterparties.add_alias", dict(counterparty_id=ref("counterparties"), alias=TEXT),
                                         target=("counterparties", "counterparty_id")),
     # Returns an existing person or a new one, so it binds nothing and has no precondition.

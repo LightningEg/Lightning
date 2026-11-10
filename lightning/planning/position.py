@@ -4,10 +4,11 @@ Base figures are read from the ledger once; every other figure is a formula of t
 never re-adds balances its own way. The names match ai/GLOSSARY.md and the UI figure registry.
 
     In your accounts            = What you own + Held for others
-    What you own                = Cash you own + Holdings value + Other you own
+    What you own                = Cash you own + Holdings value + Other you own (Owed to you included)
     Holdings value              = everything that is not cash, Deposits and Gam'eya paid in included
     Cash you own                = Bank and wallet cash + Brokerage cash
     What you owe                = Bills due (other than loan payments) + Loans still to pay + Gam'eya still to pay
+                                  + You owe people
     Net worth                   = What you own − What you owe
     Kept apart                  = Cash you own in brokerages, other currencies or accounts set apart
     Free cash                   = Cash you own − Kept apart − Reserves − Bills due + Bill cash already set aside
@@ -19,6 +20,10 @@ A gam'eya (savings circle) is one GAMEYA account per circle: its positive balanc
 Holdings value, sale factor 100%, not liquid so never in Cash you own or Free cash); its negative balance, the pot
 taken early, is Gam'eya still to pay, in What you owe and out of What you own. An instalment or a payout moves cash
 between your accounts, so Net worth never changes with either.
+
+Money lent (NF-12G) sits in one RECEIVABLE account per person: above zero it is Owed to you, part of Other you own
+(never a holding, never cash); below zero it is You owe people, in What you owe. Lending and repayment are transfers;
+only forgiving (spending) moves Net worth.
 """
 from __future__ import annotations
 
@@ -103,6 +108,8 @@ class Position:
     reserve_rows: tuple[dict, ...] | None
     owe: WhatYouOwe
     gameya_owed: Decimal = ZERO         # Gam'eya still to pay: circles with a negative balance
+    owed_to_you: Decimal = ZERO         # NF-12G: people's accounts above zero (inside Other you own)
+    you_owe_people: Decimal = ZERO      # NF-12G: people's accounts below zero
     kept_apart: Decimal = ZERO          # owned cash that is not spendable (brokerage, foreign, set apart)
 
     bill_reserve_coverage: Decimal = ZERO  # cash already counted under Reserves for bills due
@@ -137,7 +144,7 @@ class Position:
     @property
     def in_your_accounts(self) -> Decimal:
         # Owner decision 2026-11-05 (BV-3AQ): what the account rows add up to, a circle you still owe counted below zero.
-        return self.what_you_own + self.held_for_others - self.gameya_owed
+        return self.what_you_own + self.held_for_others - self.gameya_owed - self.you_owe_people
 
     @property
     def cash_you_own(self) -> Decimal:
@@ -149,7 +156,7 @@ class Position:
 
     @property
     def what_you_owe(self) -> Decimal:
-        return self.owe.total + self.gameya_owed
+        return self.owe.total + self.gameya_owed + self.you_owe_people
 
     @property
     def net_worth(self) -> Decimal:
@@ -250,8 +257,8 @@ class PositionService:
         result = []
         for row in rows:
             asset = self.assets.get_asset(row.asset_id)
-            if asset.is_cash and row.asset_class_code.split(".")[0] == "CASH":
-                continue
+            if asset.is_cash and row.asset_class_code.split(".")[0] in ("CASH", "RECEIVABLE"):
+                continue  # cash, and money lent (Owed to you, inside Other you own), are not holdings
             held = custody.get((row.account.id, row.asset_id), ZERO)
             if asset.is_cash:
                 held = self.money_from_others.cash_total_for_account(row.account.id, day)
@@ -416,5 +423,6 @@ class PositionService:
             reserves=None if rows is None else sum((r["effective_allocated"] for r in rows), ZERO),
             reserve_rows=None if rows is None else tuple(rows),
             owe=self.planning.what_you_owe(day), gameya_owed=wealth.gameya_owed,
+            owed_to_you=wealth.owed_to_you, you_owe_people=wealth.you_owe_people,
             kept_apart=self.reporting.owned_cash_kept_apart(text),
             bill_reserve_coverage=sum(self.planning.bill_reserve_coverage(day, day).values(), ZERO))
