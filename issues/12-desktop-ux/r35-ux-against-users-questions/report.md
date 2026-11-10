@@ -68,7 +68,7 @@ Reached from Money, the phone's Investments, Cash planning, Financial health and
 
 | ID | Severity | Observation and expected behavior | Evidence | Follow-up |
 | --- | --- | --- | --- | --- |
-| F1 | medium | **Phone Money: "−10,438 since the start of the month" while the chart rises and the Report says +31,895.** `position.at(day.replace(day=1))` is the end of day 1, after the salary and the first bills, so the month's change leaves out the first day. Expected: the change from the last month's end, the same figure the Report shows. | [texts](evidence/phone/texts.json), [Money](evidence/phone/money-english-chart.webp); `lightning/ui/phone/screens/money.py:104` | [BT-11K](../../11-phone-ux/BT-11K-phone-money-change-since-month-start.md) |
+| F1 | medium | **Phone Money: "−10,438 since the start of the month" while the chart rises and the Report says +31,895.** `position.at(day.replace(day=1))` is the end of day 1, after the salary and the first bills, so the month's change leaves out the first day. Expected: the change from the last month's end, the same figure the Report shows. | [texts](evidence/phone/texts.json), [Money](evidence/phone/money-english-chart.webp); `lightning/ui/phone/screens/money.py:104` | BT-11K fixed in [PR #478](https://github.com/LightningEg/Lightning/pull/478); [month-start regression](../../../tests/test_phone_money.py) |
 | F2 | medium | **Two figures named Left in plan on the phone.** Home's This month row says 6,598 (the whole plan, `plan["left"]`); Budget's hero says 5,468 (everyday money, C11.2). The 1,130 between them is a bill not yet paid. Expected: one name, one figure; Home's row repeats Budget's. | [texts](evidence/phone/texts.json); `lightning/ui/phone/screens/home.py:105` | [BV-11L](../../11-phone-ux/BV-11L-phone-slots-agree-with-each-other.md) |
 | F3 | low | **Phone finish.** (a) In Arabic the Money chart's labels are mirrored (newest on the left) but the line is not, so the latest dot sits over the oldest month. (b) "To review1": the count touches the label. (c) The Add page shows a PC tab bar under the form. (d) Money says "Nothing is due soon." while Bills lists two before payday. (e) Empty Money prints zeros as sentences. | [Arabic chart](evidence/phone/money-arabic-chart.webp), [slots](evidence/phone/sheet-home-budget-add-activity.webp), [first run](evidence/phone/sheet-first-run-and-add-sheet.webp) | [BV-11L](../../11-phone-ux/BV-11L-phone-slots-agree-with-each-other.md) |
 | F4 | medium | **The Add sheet opened from Home does not start on the amount** (focus on `kind`). r27 J1 found it on 2026-11-08; it still reproduces on this commit. | `phone_capture.py` prints `add focus: kind`; [sheet](evidence/phone/sheet-first-run-and-add-sheet.webp) | IV-3AY7 (open), r27 J1 |
@@ -96,7 +96,7 @@ Each is a suggestion the person confirms; none moves money by itself. Most exten
 
 ## Recommended order (phone first)
 
-1. **Phone, before Google Play:** BT-11K (F1), BV-11L (F2, F3), then the open IV-3AY7 focus (F4), IV-11A and IV-3AY11.
+1. **Phone, before Google Play:** BV-11L (F2, F3), then the open IV-3AY7 focus (F4), IV-11A and IV-3AY11. BT-11K (F1) is fixed in PR #478.
 2. **PC frame:** IV-12Y (one skeleton and its test), then IV-12Z (one screen).
 3. **Smart:** IV-12AA (defaults and counts, small), NF-12AB (explain in place), NF-7AQ (search answers).
 
