@@ -15,7 +15,7 @@
 
 ## Next
 
-- **r28 (Codex):** Next: 3BF (owner order); 3BC, 3BD done. **Read:** r28.
+- **r28 (Claude, 11-10):** 3BC, 3BD, 3BI done; 3BF1-5 and 3BH1-4, 3BH7 done. Left: 3BF6-7, 3BH5 (apostrophes), 3BH6 (Opus), 3BH8 (Other legend). **Read:** r28.
 
 - **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
