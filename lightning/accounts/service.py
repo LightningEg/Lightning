@@ -108,12 +108,15 @@ class AccountService:
         code: str | None = None,
         last4: str | None = None,
         notes: str = "",
+        *,
+        internal: bool = False,
     ) -> Account:
+        """``internal``: a type no form offers, made by its own service (an Owed to you account, NF-12G)."""
         name = (name or "").strip()
         if not name:
             raise ValidationError("Enter an account name.", "name")
         self._ensure_unique_name(name)
-        selected_type = self._type(account_type)
+        selected_type = AccountType(account_type) if internal else self._type(account_type)
         cash_at_hand = selected_type == AccountType.CASH_AT_HAND
         account_type = AccountType.CASH if cash_at_hand else selected_type
         currency = (currency or self.base_currency).strip().upper()

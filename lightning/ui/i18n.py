@@ -1179,6 +1179,7 @@ ARABIC_UI = {
     'Cash you own': 'النقدية اللي تملكها',
     'Deposits': 'الودائع والشهادات',
     "Gam'eya paid in": 'جمعية مدفوعة',
+    'Owed to you': 'ليك عند الناس',
     "Gam'eya still to pay": 'جمعية لسه عليك',
     'Holdings value': 'قيمة الاستثمارات',
     'Other you own': 'أصول تانية تملكها',
