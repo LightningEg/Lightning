@@ -31,6 +31,9 @@ from lightning.security.keys import unwrap_key
 from .session import ProfileError, read_slot
 
 
+NO_COPY_FROM_BEFORE = "Lightning cannot find the record of this restore, so it cannot tell which copy came before it. Nothing was changed."
+COPY_FROM_BEFORE_CHANGED = "The copy from before the restore does not match its record or does not open with this password. Nothing was changed."
+NOT_THIS_PROFILES_BACKUP = "The selected backup is damaged, uses another key, or needs a newer Lightning version."
 _MANIFEST_FIELDS = {
     "schema_version", "state", "operation_id", "profile_id", "live_name",
     "old_checkpoint_id", "old_sha256", "candidate_name", "new_checkpoint_id",
@@ -409,7 +412,7 @@ class EncryptedBackupRestorer:
             try:
                 self._verify_file(source, key)
             except Exception as exc:
-                raise ProfileError("The selected backup is damaged, uses another key, or needs a newer Lightning version.") from exc
+                raise ProfileError(NOT_THIS_PROFILES_BACKUP) from exc
             if self._digest(source) != source_hash:
                 raise ProfileError("The selected backup changed during verification.")
 
@@ -692,6 +695,131 @@ class EncryptedBackupRestorer:
             raise ProfileError("Restore recovery failed safely; the profile remains locked and evidence was preserved.") from exc
         finally:
             lock.close()
+
+    def _pending_manifest(self, paths: ProfilePaths) -> tuple[Path, RestoreManifest]:
+        """The one readable PENDING restore record of this profile, or ProfileError."""
+        found = []
+        for marker in self._restore_marker_paths(paths):
+            try:
+                info = marker.stat(follow_symlinks=False)
+                if marker.is_symlink() or not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                    raise OSError("unsafe restore manifest")
+                with marker.open("rb") as handle:
+                    manifest = RestoreManifest.from_bytes(handle.read(_MAX_MANIFEST_BYTES + 1))
+            except Exception:
+                continue  # an unreadable record stays where it is, as evidence
+            if (paths.profile is not None and manifest.state == "PENDING" and
+                    manifest.profile_id == paths.profile.profile_id and manifest.live_name == paths.db_path.name and
+                    marker.name == f".lightning-restore-{manifest.operation_id}.state"):
+                found.append((marker, manifest))
+        if len(found) != 1:
+            raise ProfileError(NO_COPY_FROM_BEFORE)
+        return found[0]
+
+    def restore_evidence(self, selected: str) -> list[dict]:
+        """What "Restore needs checking" lists (IT-2C4): each kept file and whether it matches the restore record.
+        Names, sizes and a check only; nothing is opened with the key and nothing is changed."""
+        paths = self.session._select(selected)
+        try:
+            _marker, manifest = self._pending_manifest(paths)
+        except ProfileError:
+            return []
+        rows = []
+        for label, path, expected in (
+                ("The copy from before the restore", paths.backups_dir / manifest.pre_restore_name, manifest.pre_restore_sha256),
+                ("The backup you chose", paths.backups_dir / manifest.source_copy_name, manifest.source_copy_sha256),
+                ("The profile as it was", paths.data_dir / manifest.previous_name, manifest.old_sha256),
+                ("The restored copy being put in", paths.data_dir / manifest.candidate_name, manifest.candidate_sha256),
+                ("The profile now", paths.db_path, None)):
+            try:
+                present = path.is_file() and not path.is_symlink()
+                matches = present and expected is not None and self._digest(path) == expected
+                size = path.stat().st_size if present else 0
+            except OSError:
+                present = matches = False
+                size = 0
+            rows.append({"label": label, "name": path.name, "size": size, "present": present,
+                         "matches": matches if expected is not None else None})
+        return rows
+
+    def go_back_before_restore(self, selected: str, password: str) -> Path:
+        """Owner 2026-11-08 (IT-2C7 a): after the password, go back to the copy from before an interrupted restore.
+
+        The pre-restore copy must match the hash its restore record holds and open with the key. The record, its
+        journal, the kept checkpoint, the candidate and the protected source copy move to a folder of evidence (and
+        the live file too when it no longer opens). A live file that still opens goes through the ordinary
+        ``restore_backup``; one that does not is replaced by a verified copy of the pre-restore file. Returns the
+        evidence folder."""
+        self.session._attempt()
+        self.session._locked()
+        paths = self.session._select(selected)
+        if paths.profile is None:
+            raise ProfileError("Restore recovery requires a named Lightning profile.")
+        lock = self.session._acquire(paths)
+        try:
+            try:
+                key = unwrap_key(read_slot(paths.keys_path), password)
+            except (ProfileError, ValueError) as exc:
+                raise ProfileError("The profile password could not unlock its encrypted database.") from exc
+            marker, manifest = self._pending_manifest(paths)
+            pre_restore = paths.backups_dir / manifest.pre_restore_name
+            try:
+                self._require_clean_database_file(pre_restore)
+                if self._digest(pre_restore) != manifest.pre_restore_sha256:
+                    raise ProfileError("changed")
+                self._verify_file(pre_restore, key)
+            except Exception as exc:
+                raise ProfileError(COPY_FROM_BEFORE_CHANGED) from exc
+            live_opens = True
+            try:
+                self._verify_file(paths.db_path, key)
+            except Exception:
+                live_opens = False
+            evidence = paths.data_dir / f"restore-evidence-{manifest.operation_id}"
+            evidence.mkdir(mode=0o700)
+            moving = [marker, paths.data_dir / f".lightning-restore-{manifest.operation_id}.sqlite",
+                      paths.data_dir / manifest.previous_name, paths.data_dir / manifest.candidate_name,
+                      paths.backups_dir / manifest.source_copy_name]
+            if not live_opens:
+                moving.append(paths.db_path)
+            for path in moving:
+                for item in (path, *self._sidecars(path)):
+                    if item.exists() or item.is_symlink():
+                        os.replace(item, evidence / item.name)
+            self._fsync_directory(paths.data_dir)
+            self._fsync_directory(paths.backups_dir)
+            if not live_opens:
+                temporary = paths.data_dir / f".lightning-go-back-{uuid4().hex}.partial"
+                try:
+                    with pre_restore.open("rb") as reader, open(temporary, "xb") as writer:
+                        shutil.copyfileobj(reader, writer, 1024 * 1024)
+                        writer.flush()
+                        os.fsync(writer.fileno())
+                    if self._digest(temporary) != manifest.pre_restore_sha256:
+                        raise ProfileError(COPY_FROM_BEFORE_CHANGED)
+                    self._verify_file(temporary, key)
+                    os.replace(temporary, paths.db_path)
+                finally:
+                    temporary.unlink(missing_ok=True)
+                self._fsync_directory(paths.data_dir)
+            self._check_restore_control(paths, key)
+        finally:
+            lock.close()
+        if live_opens:
+            self.session.retry_at = 0.0
+            self.restore_backup(selected, str(pre_restore), password)
+        self.session.retry_at = 0.0
+        return evidence
+
+    @staticmethod
+    def _fsync_directory(folder: Path) -> None:
+        if os.name == "nt" or not folder.is_dir():
+            return
+        descriptor = os.open(folder, os.O_RDONLY)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
 
     @staticmethod
     def _migrate_candidate(path: Path, key: bytes) -> None:

@@ -56,11 +56,6 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2A4 | ↳ Restore screens and docs | | | M | Opus | |
 | IT-2A5 | ↳ Reboot drill on an ordinary PC | | | owner |  | |
 | **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidence repair](2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) | improvement, technical | Protect | L | Opus | ready |
-| IT-2C2 | ↳ Legacy import | | | M | Opus | |
-| IT-2C3 | ↳ Restore a backup from anywhere (Windows Open dialog) | | | M | Opus | |
-| IT-2C4 | ↳ Unresolved-evidence repair | | | M | Opus | |
-| IT-2C5 | ↳ Native reminder delivery: test what runs on Windows | | | S | Sonnet | |
-| IT-2C6 | ↳ One ordinary-PC acceptance sheet | | | S | Sonnet | |
 | IT-2C1 | ↳ Owner: run the ordinary-PC sheet | | | owner |  | |
 | **NF-2AJ** | [A failed data check reaches Needs you - today a check that reads ISSUE is visible only to someone who opens Settings › Data checks](2-safe-for-real-money/NF-2AJ-a-failed-data-check-reaches-needs-you.md) | new feature | Protect | M | Opus | ready |
 

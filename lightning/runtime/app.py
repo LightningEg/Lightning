@@ -20,7 +20,8 @@ from .http import (MARKET_IMPORT_PATH, PRICE_CSV_PATH, MAX_IMPORT_CONFIRM_BODY, 
                    MAX_IMPORT_MAP_BODY, PROFILE_FILE_PATH, Credentials, Guard,
                    body_receiver, configure_memory_only_import_uploads, equal)
 from .devices import Devices, home_state_line, home_state_message, move_to_phone, open_move
-from .paths import discover_profiles
+from .paths import discover_profiles, resolve_profile
+from .restore import NOT_THIS_PROFILES_BACKUP
 from .profile_screens import ProfileScreens, register as register_profile_screens
 from .roles import READ_ONLY_REFUSAL
 
@@ -402,12 +403,49 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
     screens = register_profile_screens(app, ProfileScreens(session, devices, gate, fingerprint, kept, open_kept, keep_signed_in))
     page, action = screens.page, screens.action
 
+    def _remove_picked(selected: str, backup_path: str) -> None:
+        try:
+            folder = resolve_profile(db_path=selected).backups_dir.resolve()
+            target = Path(backup_path)
+            if not target.is_symlink() and target.resolve().parent == folder:
+                target.unlink(missing_ok=True)
+        except (OSError, ValueError):
+            pass
+
     @app.get("/profiles/restore")
     async def restore_page(request: Request):
         if session.container:
             return RedirectResponse("/profiles", 303)
         return page(request, "restore", selected=request.query_params.get("db", ""),
                     backup=request.query_params.get("backup", ""))
+
+    @app.post("/profiles/restore/pick")
+    async def restore_pick(request: Request):
+        """Choose a backup file… (IT-2C3): the Windows Open dialog, opened by Python. The chosen file is copied into
+        this profile's backups and goes through the ordinary restore, which checks it with the profile's key."""
+        from lightning.runtime import file_picker
+        picker = file_picker.current()
+        if picker is None:
+            return Response(status_code=404)
+        if session.container:
+            return RedirectResponse("/profiles", 303)
+        form = await request.form()
+        selected = str(form.get("db", ""))
+        try:
+            paths = session._select(selected)
+            if paths.profile is None:
+                raise ProfileError("Restore requires a named Lightning profile.")
+        except ProfileError as exc:
+            return page(request, "restore", status=400, selected=selected, error=str(exc), can_pick=True)
+        chosen = await asyncio.to_thread(picker)
+        if not chosen:
+            return RedirectResponse("/profiles/restore?" + urlencode({"db": selected}), 303)
+        try:
+            copied = file_picker.copy_into_backups(chosen, paths.backups_dir, paths.db_path)
+        except (OSError, ValueError):
+            return page(request, "restore", status=400, selected=selected, can_pick=True,
+                        error="That file could not be read as a backup. Choose another file.")
+        return RedirectResponse("/profiles/restore?" + urlencode({"db": selected, "backup": str(copied)}), 303)
 
     @app.post("/profiles/restore")
     async def restore(request: Request):
@@ -424,6 +462,11 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         try:
             restored_copy = session.restore_backup(selected, backup_path, str(form.get("password", "")))
         except ProfileError as exc:
+            from lightning.runtime import file_picker
+            if file_picker.is_picked(backup_path) and str(exc) == NOT_THIS_PROFILES_BACKUP:
+                # A picked file that is not this profile's backup is removed; it was only ever a copy.
+                _remove_picked(selected, backup_path)
+                backup_path = ""
             return page(request, "restore", status=400, selected=selected,
                         backup=backup_path, error=str(exc))
         except Exception:
@@ -463,6 +506,42 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
                         error="Restore recovery needs inspection. The profile remains locked and its copies were kept.")
         return page(request, "unlock", selected=selected,
                     notice="Restore checks finished. Unlock this profile to review the recovered database.")
+
+    @app.get("/profiles/restore/repair")
+    async def repair_restore_page(request: Request):
+        """Restore needs checking (IT-2C4): the kept files and their check, and the way back to the copy from before."""
+        if session.container:
+            return RedirectResponse("/profiles", 303)
+        selected = request.query_params.get("db", "")
+        try:
+            evidence = session.restore_evidence(selected)
+        except ProfileError as exc:
+            return page(request, "repair-restore", status=400, selected=selected, error=str(exc))
+        return page(request, "repair-restore", selected=selected, evidence=evidence)
+
+    @app.post("/profiles/restore/repair")
+    async def repair_restore(request: Request):
+        form = await request.form()
+        selected = str(form.get("db", ""))
+
+        def again(error: str):
+            try:
+                evidence = session.restore_evidence(selected)
+            except ProfileError:
+                evidence = []
+            return page(request, "repair-restore", status=400, selected=selected, evidence=evidence, error=error)
+        if devices.blocks_restore(selected):
+            return again("This profile is lent to a PC or has a hand-back to finish. Bring the ledger home first (Devices).")
+        if form.get("confirm") != "yes":
+            return again("Confirm that Lightning should go back to the copy from before the restore.")
+        try:
+            session.go_back_before_restore(selected, str(form.get("password", "")))
+        except ProfileError as exc:
+            return again(str(exc))
+        except Exception:
+            return again("Going back could not finish. The profile remains locked and every file was kept.")
+        return page(request, "unlock", selected=selected,
+                    notice="Back to the copy from before the restore. The other files were kept in a restore-evidence folder. Unlock this profile to check it.")
 
     @app.post("/profiles/recents")
     async def recents_switch(request: Request):

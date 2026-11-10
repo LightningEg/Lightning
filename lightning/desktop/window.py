@@ -111,6 +111,13 @@ def _native_reminder_loop(window, origin: str, allowed_origin: tuple[str, str, i
         pass
 
 
+def _pick_backup(window, webview) -> str | None:
+    """The Windows Open dialog for "Choose a backup file…" (IT-2C3); the chosen path, or None when cancelled."""
+    kind = getattr(getattr(webview, "FileDialog", None), "OPEN", None) or webview.OPEN_DIALOG
+    chosen = window.create_file_dialog(kind, allow_multiple=False, file_types=("Lightning backup (*.db)",))
+    return str(chosen[0]) if chosen else None
+
+
 def _show_balloon(icon, text: str, closed: threading.Event) -> None:
     if closed.is_set():
         return
@@ -461,6 +468,8 @@ def run_window(url: str, origin: str, *, smoke: bool = False, diagnostics: dict 
         window.events.closed += close_window
 
         if profile_mode and not smoke:
+            from lightning.runtime import file_picker
+            file_picker.register(lambda: _pick_backup(window, webview))
             threading.Thread(target=_native_reminder_loop,
                              args=(window, origin, allowed_origin, app_ready, window_closed, reminder_native),
                              name="lightning-native-reminders", daemon=True).start()
@@ -517,7 +526,11 @@ def run_window(url: str, origin: str, *, smoke: bool = False, diagnostics: dict 
 
             threading.Thread(target=startup_watchdog, daemon=True).start()
 
-        webview.start(gui="edgechromium", debug=False, private_mode=True)
+        try:
+            webview.start(gui="edgechromium", debug=False, private_mode=True)
+        finally:
+            from lightning.runtime import file_picker
+            file_picker.register(None)
         if state["failure"] and not smoke:
             _show_error(str(state["failure"]))
             return 1

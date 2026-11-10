@@ -13,116 +13,37 @@ by: Claude
 ## Report
 What stands between the paired apps beta (1.0.0-beta.1) and real money (AGENTS.md §4): ordinary-PC recovery and fault acceptance, importing data from the legacy mode (`python -m lightning`), native file pickers, unresolved-evidence repair, and native Windows/Android delivery of reminders (Overview, smarter workflows 2026-10-15).
 
-## What is left (2026-11-08)
+## What is left (2026-11-10)
 
-Checked against the code on 2026-11-08 (Claude). None of the five parts is finished, but some pieces exist:
-- **Recovery and faults:** `tools/promotion_drill.py` (Windows reboot drill, held as 2B in Overview §9), restore and
-  resume (`runtime/restore.py`, IT-2A), the pairing fault kit (`tools/pairing_acceptance.py`,
-  `issues/4-edit-journal-and-devices/r11-pairing-hardening/evidence/acceptance.md`). No single sheet brings them together.
-- **Legacy import:** not built (`runtime/session.py:347` says "Explicit import is not available yet"). The parts exist:
-  `database/staging.py` `stage_database(source, folder, destination_key=key)` with no `source_key` reads plaintext
-  and writes an encrypted copy; `runtime/paths.py:412` `legacy_database_candidates` finds old `data/lightning.db`
-  files without opening them. Only people who ran `python -m lightning` from source before OW-2AB have such a file.
-- **File pickers:** every `<input type="file">` (6 templates: `import.html`, `bank_import_upload.html`,
-  `broker_import.html`, `exports/import.html`, `exports/starter.html`, `investments/prices.html`) and the "Save a copy"
-  download (`/backup/latest`, `webview.settings["ALLOW_DOWNLOADS"]` in `desktop/window.py`) rely on WebView2's own
-  dialogs; none was run on an ordinary PC. Restore only takes a backup already in the profile's `backups/` folder
-  (`runtime/restore.py` ~388), so a backup on a USB stick cannot be restored.
-- **Unresolved evidence:** when a restore or its resume cannot prove the next step, the profile stays locked "with
-  evidence preserved" (`runtime/restore.py` ~641-692, `database/promotion.py` `PromotionBlocked`); the person has no
-  way forward but to leave it.
-- **Notifications:** built while the app runs (`desktop/window.py` `_native_reminder_loop`,
-  `ReminderNotifications.java`); with the app closed is NF-3AU. Only `_safe_reminder_href` is unit-tested.
-
-The owner runs native checks only end to end (NOW.md, Overview §9), so the AI builds and prepares everything first
-(2C2-2C6), and the owner runs one sheet once (2C1).
+2C2-2C6 were built on 2026-11-10 (Claude, one pull request at the owner's choice):
+- **Legacy import (2C2):** Profiles shows "Bring in your old Lightning data" when an old `data/lightning.db` is found;
+  it becomes a new encrypted profile (`runtime/session.py` `check_legacy_database`, `confirm`; `tests/test_legacy_import.py`).
+- **Restore from anywhere (2C3):** "Choose a backup file…" opens the Windows Open dialog from Python
+  (`runtime/file_picker.py`, `desktop/window.py` `_pick_backup`, `POST /profiles/restore/pick`; `tests/test_restore_picker.py`).
+- **Repair (2C4):** "Restore needs checking" lists the kept files and goes back to the copy from before the restore
+  (`runtime/restore.py` `go_back_before_restore`, `/profiles/restore/repair`; `tests/test_restore_go_back.py`).
+- **Reminders (2C5):** `tests/test_native_reminders.py`. With the app closed stays [NF-3AU](../3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md).
+- **Sheet (2C6):** below. Left: the owner runs it once (2C1).
 
 ## Decided
 
 - 2026-11-08, owner (2C7): (a) "Go back to the copy from before the restore" after the password, through the normal restore path; every other file stays as evidence.
 
-## How to work on this item
+## Owner sheet
 
-One step is one pull request. Read only the files a step names; dummy profiles only, never a real one. Run the
-step's test, then `python -m pytest tests/test_mohab_year.py -q` for visible changes; new text gets Arabic in
-`lightning/ui/i18n.py` `ARABIC_UI` (or `i18n_system.py` for profile-screen messages, where the others are). Delete the
-step's heading in the same commit; update `ai/ARCHITECTURE.md` "Open before a release" (~582) when a part is done.
+One sitting on an ordinary Windows PC with a **dummy** profile, never a real one. Write *pass* or what happened in the
+last column; a failed row becomes a bug item.
 
-## 2C2 Legacy import · M · opus
-Files: `lightning/runtime/session.py` (`PendingProfile` ~186, `prepare` ~252, `confirm` ~274, the refusal ~347),
-`lightning/database/staging.py` (`stage_database`), `lightning/runtime/paths.py` (`legacy_database_candidates` ~412),
-`lightning/runtime/profile_screens.py` (`/profiles` ~86, `/profiles/new` ~124-146), `lightning/ui/templates/profiles.html`
-(`choose` and `setup` modes), new `tests/test_legacy_import.py`.
-Do: `PendingProfile` gains `legacy_source: Path | None`. `prepare(..., legacy_source=None)` checks the file starts
-with `b"SQLite format 3\x00"` and has `schema_migrations`. In `confirm`, when `legacy_source` is set, replace the fresh
-`build(candidate, ...)` with `stage_database(legacy_source, paths.data_dir, destination_key=pending.key)` renamed to the
-`.partial` candidate, then `build()` it (migrations run on the copy), fsync and `publish_new` as today; keep the old
-database's own currency (skip `register`/`set_profile_currency`). The source is opened read only and never changed.
-The chooser shows "Bring in your old Lightning data" when `legacy_database_candidates(project_root=<repo root>,
-cwd=Path.cwd())` finds files, linking `/profiles/new?legacy=<index>` (an index into that list, never a path from
-the request). The refusal at ~347 points to that link.
-Done when: `tests/test_legacy_import.py` builds a plaintext database with `build(path)` and a few transactions,
-imports it, and asserts: the new file is encrypted (first 16 bytes are not the SQLite header), account balances and
-transaction count are equal, the source's SHA-256 is unchanged, a non-Lightning SQLite file and a `?legacy=9` index
-are refused, and a failed import leaves no published profile. `python -m pytest tests/test_legacy_import.py tests/test_legacy_launcher.py -q`.
-
-## 2C3 Restore a backup from anywhere (Windows Open dialog) · M · opus
-Files: `lightning/desktop/window.py` (`run_window` ~251; `create_window(..., js_api=None)` ~397),
-`lightning/runtime/app.py` (`/profiles/restore` ~365-398), `lightning/runtime/restore.py` (`restore_backup` ~368-395),
-`lightning/database/backup.py` (`list_backups` naming), `lightning/ui/templates/profiles.html` (`restore` mode ~196),
-`tests/test_desktop_window.py`, `tests/test_database_promotion.py` (restore fixtures).
-Do: keep `js_api=None` (no page script reaches native code). Add `POST /profiles/restore/pick?db=` which, only when a
-desktop window registered a picker (a callable the window sets on app state at start; absent in browser mode and on
-the phone, where the route answers 404), opens `window.create_file_dialog(webview.OPEN_DIALOG,
-file_types=("Lightning backup (*.db)",))` from Python, copies the chosen file into that profile's `backups/` under a
-name `list_backups` accepts (suffix `_picked`), and redirects to the existing `/profiles/restore?db=&backup=`; the
-restore then verifies it with the profile's key as now. A file that is not this profile's backup fails there with the
-existing message, and the copy is removed. The restore page shows "Choose a backup file…" beside the list on Windows.
-Done when: a test with a fake picker returns a dummy profile's backup from a temp folder outside the profile and the
-restore completes; a picker returning another profile's backup is refused and leaves no copy; with no picker the
-route is 404. `python -m pytest tests/test_desktop_window.py tests/test_database_promotion.py -q`.
-
-## 2C4 Unresolved-evidence repair · M · opus
-Needs 2C7 agreed first.
-Verify first: IT-2A (2A3 deterministic repair) may already offer a way out; read `runtime/restore.py`
-`resume_interrupted_restore` (~545-692) and the `resume-restore` screen before building.
-Files: `lightning/runtime/restore.py`, `lightning/database/promotion.py` (`PromotionBlocked` ~775), `lightning/runtime/app.py`
-(`/profiles/restore/resume` ~400-425), `lightning/ui/templates/profiles.html` (`resume-restore` mode ~211),
-`tests/test_database_promotion.py`.
-Do: what 2C7 chose. For (a): a screen "Restore needs checking" listing the kept files with their check result, and
-"Go back to the copy from before the restore" that, after the password, restores the pre-restore snapshot recorded in
-the restore manifest (`RestoreManifest`) through `restore_backup`, refusing if its hash differs from the manifest. For
-(b): `GET /profiles/restore/diagnostic?db=` returns JSON of file names, sizes, SHA-256 and the last phase, with no
-database bytes, key material or profile name.
-Done when: a fault test interrupts a restore so that resume raises `PromotionBlocked`, then the chosen way out leaves
-a profile that unlocks with the pre-restore data (a) and/or a diagnostic with no secret (b, asserted by searching it
-for the password, key and name). `python -m pytest tests/test_database_promotion.py -q`.
-
-## 2C5 Native reminder delivery: test what runs on Windows · S · sonnet
-Verify first: [NF-3AU](../3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) covers the app-closed
-case; do not build that here.
-Files: `lightning/desktop/window.py` (`_read_reminder_prefs`, `_write_reminder_prefs`, `_native_reminder_loop` ~37-110),
-new `tests/test_native_reminders.py`.
-Do: tests only, no product change. (1) prefs: a missing, corrupt or non-dict file reads as `{}`; write then read
-round-trips. (2) the loop with a fake `window` whose `evaluate_js` returns a JSON payload, `native_state={"icon": object()}`,
-a fake `window.native` with `BeginInvoke`, and `sys.modules["System"]` monkeypatched to a module with `Action = lambda f: f`;
-`closed` is set by the fake after the first poll. Assert: one balloon for the first valid item; none when `enabled`
-is false; items with a bad id, an outside href or an empty label are skipped; an id already seen today is not shown
-again (prefs path monkeypatched to `tmp_path`).
-Done when: `python -m pytest tests/test_native_reminders.py tests/test_workflow_views_review.py -q` passes on Linux.
-
-## 2C6 One ordinary-PC acceptance sheet · S · sonnet
-Files: this item (append a section `## Owner sheet`), `tools/promotion_drill.py` (header), `ai/ARCHITECTURE.md`
-"Open before a release" (~582) and "Updating", `issues/4-edit-journal-and-devices/r11-pairing-hardening/evidence/acceptance.md`
-(physical matrix), `ai/PROJECT_OVERVIEW.md` §9.
-Do: one table the owner can run in one sitting on an ordinary Windows PC with a dummy profile, each row with the exact
-action, the expected safe result and a blank result cell: (1) a clean install from the release ZIP, on the PC that
-once failed at window startup too; (2) `tools/promotion_drill.py` phases P1-P4 across a reboot (2B); (3) a restore
-interrupted by a reboot, then resumed (2A5); (4) legacy import of a dummy plaintext database (2C2); (5) each of the
-six file fields above, "Save a copy", and "Choose a backup file…" (2C3); (6) the repair screen (2C4); (7) a reminder
-balloon while the app is open, clicked through to its page (2C5); (8) the Windows rows of the pairing matrix. Link
-each row to its source; copy no steps that already live elsewhere (link them).
-Done when: `python -m pytest tests/test_docs_structure.py -q` passes and every row names one command or screen.
+| # | Do | Safe result | Source | Result |
+|---|---|---|---|---|
+| 1 | Unzip the release ZIP into a new folder and start `Lightning.exe`; repeat on the PC that once failed at window startup | The profile chooser opens; nothing asks for Python | Architecture › Desktop app | |
+| 2 | `python tools/promotion_drill.py prepare --root <empty folder> --phase P1`, reboot, `resume --root <same>`; repeat for P2, P3, P4 | Each resume reports the promoted database and no lost data | `tools/promotion_drill.py` (2B) | |
+| 3 | Start a restore (Profiles › a backup › Restore backup), turn the PC off with the power button while it runs, start again, unlock | "Check interrupted restore →" leads to "Check and resume"; the profile opens with the backup's data | Architecture › Restore (IT-2A) | |
+| 4 | Make a dummy plaintext database from a source checkout (`python -c "from lightning.bootstrap import build; build('data/lightning.db')"`), copy it to `data\lightning.db` in the folder `Lightning.exe` starts from, open Profiles | "Bring in your old Lightning data" appears; the new profile has the same accounts and transactions; the old file is unchanged | 2C2 | |
+| 5 | Use each file field once: Import, Bank statement, Broker import, Exports › Import, Exports › Starter, Investments › Prices; then Settings › Save a copy; then Profiles › Restore a backup file… › Choose a backup file… from a USB stick | Each Windows dialog opens, the file goes in (or is refused with a message), the saved copy lands in Downloads, the USB backup restores | 2C3 | |
+| 6 | After row 3, if resume says it is blocked: "Resume cannot finish? Go back to the copy from before the restore →", password, confirm | The profile opens with its data from before the restore; a `restore-evidence-…` folder holds the other files | 2C4 | |
+| 7 | Turn on reminders with a bill due today and keep the app open for a minute; click the balloon | One Windows balloon; clicking opens that bill's page | 2C5 | |
+| 8 | The Windows rows of the physical matrix | As each row says | [pairing acceptance](../4-edit-journal-and-devices/r11-pairing-hardening/evidence/acceptance.md) | |
 
 ## 2C1 Owner: run the ordinary-PC sheet · owner
 Needs 2C2, 2C3, 2C4, 2C5 and 2C6 merged first. Held for the end-to-end check (Overview §9): the owner runs the
