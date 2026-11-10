@@ -407,12 +407,11 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         """The database path of a profile Lightning itself found in the profiles folder that ``selected`` names.
         The new restore routes (IT-2C3, 2C4) pass on this enumerated path, never the text of the request."""
         try:
-            wanted = Path(selected).resolve() if selected and len(selected) <= 4096 else None
-            found = discover_profiles(session.root) if wanted is not None else []
+            found = discover_profiles(session.root) if selected and len(selected) <= 4096 else []
         except (OSError, ValueError):
             found = []
-        for info in found:
-            if info.db_path.resolve() == wanted:
+        for info in found:  # plain text compared with what was found; the request's text never touches the disk
+            if selected in (str(info.db_path), str(info.db_path.resolve())):
                 return str(info.db_path)
         raise ProfileError("Restore requires a named Lightning profile.")
 
