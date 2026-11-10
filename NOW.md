@@ -4,7 +4,7 @@
 
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Claude | O5 new investment kinds: IV-12J, NF-12M, NF-12G, NF-9D (NF-12I done). | `lightning/deposits/`, `lightning/people_money.py`, `lightning/zakat.py`, `lightning/core/hijri.py` | 2026-11-10 |
+| Claude | O5: 12J, 12M, 12G, 9D | `lightning/deposits/`, `lightning/zakat.py` | 2026-11-10 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
 ## Messages
