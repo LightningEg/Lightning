@@ -3237,6 +3237,8 @@ ARABIC_UI = {
     'This month against last month': 'هذا الشهر مقابل الشهر الماضي',
     'This quarter against last quarter': 'هذا الربع مقابل الربع الماضي',
     'This year against last year': 'هذه السنة مقابل السنة الماضية',
+    'No {period} to compare with.': 'مفيش {period} نقارن بيه.',
+    'last quarter': 'الربع اللي فات',
     'Biggest change': 'أكبر تغيير',
     'Save a filter on Transactions to see it here.': 'احفظ تصفية في المعاملات لتظهر هنا.',
     'No saved views yet.': 'لا طرق عرض محفوظة بعد.',

@@ -233,19 +233,28 @@ async def item_page(request: Request, kind: str, item_id: int | None = None):
 async def reports_page(request: Request):
     c = container(request)
     presets = []
+    first = c.reporting.first_activity_date()
+    month_start = preset_periods("month")[0][0]
     for kind, label in (("month", "This month against last month"), ("quarter", "This quarter against last quarter"),
                         ("year", "This year against last year")):
         a, b = preset_periods(kind)
+        if kind == "quarter" and a[0] == month_start:
+            continue  # IV-12AA4: a quarter's first month is This month again, the same figure twice
         rows = compare(c, a, b)
         total_a, total_b = sum((r["a"] for r in rows), ZERO), sum((r["b"] for r in rows), ZERO)
+        # IV-12AA4: nothing recorded by the end of the earlier period is not a rise from zero
+        empty = first is None or str(first) > fmt_date(b[1])
+        earlier = (str(b[0].year) if kind == "year" else b[0].strftime("%B %Y") if kind == "month" else "last quarter")
         presets.append({"kind": kind, "label": label, "a": a, "b": b, "total_a": total_a, "total_b": total_b,
-                        "diff": total_a - total_b, "mover": rows[0] if rows else None})
+                        "diff": total_a - total_b, "mover": rows[0] if rows else None, "empty": empty,
+                        "earlier": earlier})
     try:
         views = c.saved_views.list(None)
     except (LightningError, TypeError, AttributeError):
         views = []
     # Each comparison is a KPI card (A08): money out now, against the period before, in whole currency.
     cards = [kpis.card(p["label"], p["total_a"].quantize(Decimal(1)),
+                       kpis.compare(f"No {p['earlier']} to compare with.") if p["empty"] else
                        kpis.compare(f"against {fmt(p['total_b'], 0)} before" + (f" · biggest change {p['mover']['name']}" if p["mover"] else ""),
                                     ("+" if p["diff"] > 0 else "−" if p["diff"] < 0 else "") + fmt(abs(p["diff"]), 0),
                                     "bad" if p["diff"] > 0 else "good" if p["diff"] < 0 else "plain"),
