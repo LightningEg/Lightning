@@ -306,3 +306,38 @@ def test_arabic_pages_load_the_translation_table_as_one_cached_script(c):
         script = browser.get(web.ARABIC_UI_SRC)
     assert web.ARABIC_UI_SRC in page.text and '"% a year"' not in page.text
     assert script.status_code == 200 and script.text.startswith("window.LIGHTNING_UI={")
+
+
+def test_investment_report_reads_only_portfolio_transactions_and_is_unchanged():
+    """IT-9L1: the narrower ledger read gives the same report as the old whole-ledger read, on the sample and the demo."""
+    import re
+    import tempfile
+    from pathlib import Path
+    import lightning.investments.report as report
+    from lightning.bootstrap import build
+    from lightning.demo import build_demo
+    from lightning.samples import load_mohab_2026
+
+    marker = re.compile(r"AND le\.transaction_id IN \(SELECT x\.transaction_id.*?\) ORDER BY", re.S)
+    periods = [("2026-01-01", "2026-10-31"), ("2026-03-01", "2026-03-31"), ("2020-01-01", "2026-11-09"),
+               ("2026-06-15", "2026-08-02"), ("2025-01-01", "2025-12-31")]
+    for loader in (load_mohab_2026, build_demo):
+        with tempfile.TemporaryDirectory() as folder:
+            c = build(str(Path(folder) / "p.db"), backup_on_start=False)
+            loader(c)
+            original = c.db.all
+
+            def old_read(sql, params=()):  # the query as it was: every posted line, no portfolio filter
+                if "dividend_asset_id" in sql and "le.*" in sql:
+                    sql, params = marker.sub("ORDER BY", sql), tuple(params)[:1]
+                return original(sql, params)
+
+            for start, end in periods:
+                new = report.investment_period(c.db, c.accounts, c.assets, c.reporting, start, end)
+                c.db.all = old_read
+                try:
+                    old = report.investment_period(c.db, c.accounts, c.assets, c.reporting, start, end)
+                finally:
+                    c.db.all = original
+                assert repr(new) == repr(old), (loader.__name__, start, end)
+            c.db.close()

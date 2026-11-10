@@ -37,9 +37,9 @@ Measure first, change the one worst thing, measure again. Never read a service f
 | --- | --- | --- | --- | --- |
 | `/accounts/1/import/1` (180-row review) | 329 | 1,136 | four "seen before" reads and three account reads per row | IT-9N |
 | `/activity` | 84 | 1,039 | ten reads per listed row | IT-9M |
-| `/` | 151 | 375 | investment report reads the whole ledger; 39 purity reads | IT-9L |
+| `/` | 102 | 338 | 28x the planning payments read (IT-9L cut the ledger read: 426 to 328 ms at 4,374 rows) | none |
 | `/plan/reserves` | 90 | 286 | 80x the planning payments read (under budget) | none |
-| `/investments` | 138 | 184 | the same ledger read; 42 purity reads | IT-9L |
+| `/investments` | 104 | 144 | 13x the planning payments read | none |
 
 On the phone (`--phone`) Home is 213 queries, Money 228, Investments 250, Activity 202. These are measurements, not ideas: re-measure before acting.
 
