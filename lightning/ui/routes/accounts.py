@@ -15,6 +15,7 @@ from lightning.core.money import ZERO, fmt, to_decimal
 
 from . import register
 from .. import charts, kpis, status as page_status
+from ..entry import entry_accounts
 from ..i18n import translate
 from ..periods import parse_period
 from ..web import settled_save, container, redirect, render, ui_locale
@@ -300,18 +301,15 @@ def _account_id(text: str, field: str) -> int:
 LAST_ACCOUNT_COOKIE = "lightning_last_account"  # the account the last entry went to (phone roadmap M2)
 
 
-def _entry_accounts(c) -> list:
-    """The accounts a hand-entered transaction can go to: every active one that holds money, not a thing you own."""
-    return [a for a in c.accounts.list(active_only=True) if a.account_type.value not in ("PHYSICAL_ASSET", "OTHER_ASSET")]
 
 
 @router.get("/add-transaction")
 async def pick_account_for_entry(request: Request):
     """The phone's Add button (guideline C05.2): the sheet opens on the amount with an account already chosen, the one
     used last, else the one this person uses most (3AN3). No list of accounts first; the sheet's From chip changes it.
-    ?pick=1 still shows the list."""
+    ?pick=1, or no account yet, is the phone router's account list (3AY18); here the PC goes to Accounts."""
     c = container(request)
-    accounts = _entry_accounts(c)
+    accounts = entry_accounts(c)
     if not request.query_params.get("pick") and accounts:
         remembered = str(request.cookies.get(LAST_ACCOUNT_COOKIE, ""))
         ids = [a.id for a in accounts]
@@ -321,7 +319,7 @@ async def pick_account_for_entry(request: Request):
             cashy = [a.id for a in accounts if a.account_type.value in ("CASH", "BANK") and not a.parent_id]
             chosen = c.transactions.usual_account(cashy or ids)
         return await new_transaction_popup(request, chosen)
-    return render(request, "phone/accounts/pick.html", accounts=accounts)
+    return redirect("/accounts")
 
 
 @router.get("/new")

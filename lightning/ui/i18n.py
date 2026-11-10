@@ -2942,6 +2942,10 @@ ARABIC_UI = {
     'matured {sa}': 'استحقت {sa}',
     'unlocked {sa}': 'اتفكت {sa}',
     'Zakat day is approaching': 'يوم الزكاة قرب',
+    # NF-3AU2: what a reminder says with the app closed, from its kind alone
+    'A payment is due tomorrow.': 'فيه دفعة مستحقة بكرة.',
+    "A gam'eya instalment is due tomorrow.": 'فيه قسط جمعية مستحق بكرة.',
+    'Zakat day is tomorrow.': 'يوم الزكاة بكرة.',
     'Weekly review is ready': 'المراجعة الأسبوعية جاهزة',
     'Review pending decisions and record your progress.': 'راجع القرارات المعلقة وسجّل اللي خلصته.',
     'A fresh backup is due': 'حان وقت نسخة احتياطية جديدة',

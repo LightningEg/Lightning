@@ -44,3 +44,22 @@ def test_no_emoji_is_drawn_on_the_phone(page):
     assert not EMOJI.search(page)
     css = (Path(__file__).parents[1] / "lightning/ui/static/phone.css").read_text(encoding="utf8")
     assert not EMOJI.search(css)
+
+
+def test_the_account_list_is_the_phone_routers_and_the_pc_goes_to_accounts(c, monkeypatch):
+    """IV-3AY18: ?pick=1 draws phone/accounts/pick.html only through the phone router; the PC route never draws a phone
+    template, and goes to Accounts instead. Without ?pick both open the entry sheet."""
+    from lightning.ui.phone.router import mount_phone
+    monkeypatch.setenv("LIGHTNING_PRICES_OFFLINE", "1")
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-12")
+    load_mohab_2026(c)
+    pc = TestClient(create_app(c))
+    gone = pc.get("/accounts/add-transaction?pick=1", follow_redirects=False)
+    assert gone.status_code in (302, 303) and gone.headers["location"].startswith("/accounts")
+    app = create_app(c)
+    mount_phone(app)
+    phone = TestClient(app)
+    listed = phone.get("/accounts/add-transaction?pick=1").text
+    assert "To which account?" in listed and "/transaction/new?return_to=" in listed
+    sheet = phone.get("/accounts/add-transaction").text
+    assert "To which account?" not in sheet and 'name="amount"' in sheet

@@ -95,9 +95,11 @@ def test_quick_add_saves_once_however_often_it_is_sent(c, monkeypatch):
 
 def test_an_overview_fold_draws_when_opened(c, monkeypatch):
     _history(c, monkeypatch)
+    from lightning.ui.phone.router import mount_phone
     app = web.create_app(c)
+    mount_phone(app)  # the fold is the phone router's route (3AY18); a period link still reaches the older Overview
     with TestClient(_as_phone(app)) as phone:
-        page = phone.get("/")
+        page = phone.get("/?period=month")
         trend = phone.get("/overview/fold/trend")
         money = phone.get("/overview/fold/money-in?period=month&month=2026-09")
         missing = phone.get("/overview/fold/nope")
