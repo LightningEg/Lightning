@@ -30,7 +30,7 @@ def test_drop_excel_and_csv_for_one_account_preserves_both_through_choices(c, se
     page.locator('select[name=map_Counterparty]').select_option('Payee', force=True)
     page.get_by_role('button', name='Preview rows', exact=True).click()
     page.wait_for_url('**/import/*')
-    page.wait_for_selector('[name^=amount_]')
+    page.wait_for_selector('.import-summary')  # the review opens on its questions (NF-7AB1)
     assert c.db.scalar('SELECT COUNT(*) FROM bank_import_batches') == 2
     assert c.db.scalar("SELECT COUNT(*) FROM bank_import_rows WHERE status='REVIEW'") == 2
     assert c.reporting.account_balance(bank.id) == before

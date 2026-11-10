@@ -181,7 +181,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) ([#490](https://github.com/LightningEg/Lightning/issues/490)) | improvement, visual | Capture | S | Sonnet | ready |
 | **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually uses](7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | improvement, visual | Capture | M | Sonnet | new |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | Opus | ready |
-| NF-7AB1 | ↳ Summary first, rows last | | | M | Opus | |
 | NF-7AB3 | ↳ Group by the question, not the name | | | M | Opus | |
 | NF-7AB2 | ↳ Post in rounds, continue from the account | | | S | Sonnet | |
 | NF-7AB6 | ↳ Safe to go fast: Undo and the balance on the result | | | S | Sonnet | |

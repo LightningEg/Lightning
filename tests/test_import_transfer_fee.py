@@ -58,7 +58,7 @@ def test_review_shows_the_fee_well_on_transfer_rows_only_and_posts_the_split(c):
     client = TestClient(create_app(c))
     batch_id, _ = c.bank_imports.stage(
         nbe.id, "nbe.csv", b"Date,Counterparty,Amount\n2026-09-02,CIB,-1005\n2026-09-03,Shop,-20\n")
-    page = client.get(f"/accounts/{nbe.id}/import/{batch_id}")
+    page = client.get(f"/accounts/{nbe.id}/import/{batch_id}?rows=all")
     assert page.status_code == 200 and page.text.count('name="fee_') == 1
     _, rows = c.bank_imports.preview(batch_id)
     form = {}

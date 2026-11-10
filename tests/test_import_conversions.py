@@ -73,7 +73,7 @@ def test_review_shows_currency_amount_field_and_retains_value_on_refusal(c, phon
         request.state.phone = phone
         return await call_next(request)
     with TestClient(app) as client:
-        page = client.get(f'/accounts/{a.id}/import/{batch}')
+        page = client.get(f'/accounts/{a.id}/import/{batch}?rows=all')
         assert page.status_code == 200 and f'name="conversion_amount_{row["_import_row_id"]}"' in page.text
         assert 'Other account amount' in page.text
 
