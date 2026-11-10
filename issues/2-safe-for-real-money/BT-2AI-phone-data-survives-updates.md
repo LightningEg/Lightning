@@ -39,13 +39,15 @@ Built: 2AI1 (c5396702, #352: `tests/test_phone_identity_frozen.py` pins the appl
 2AI5 (`lightning/runtime/profile_file.py`, `tests/test_profile_file.py`; Architecture › Profile file): one
 `<name>-<date>.lightning` file holds the key file and a fresh encrypted snapshot, `read_profile_file(path, password, root)`
 publishes it as a new profile (a journal profile as a read-only review copy), and Settings › Save a copy sends it.
-Nothing yet lets a person bring such a file in (2AI2) or keeps one outside the app (2AI3): no
-`ACTION_OPEN_DOCUMENT`/`ACTION_OPEN_DOCUMENT_TREE` in `android/`, and the manifest still has `allowBackup="false"`.
-The WebView already opens the system picker for any `<input type="file">` (`MainActivity.java` `onShowFileChooser`,
-~222) and saves through the system "Save to" screen (`FileBridge.java`, files up to 64 MB: `phone_files.MAX_FILE_BYTES`).
-Known limits for 2AI2: `profile_file`'s error messages are English only (add them to `lightning/ui/i18n.py`); a profile
-whose name is not ASCII is offered as `Lightning-profile-<date>.lightning`; a journal review copy saved by an older
-schema is refused until its home saves a new one.
+2AI2 is built too: the profile chooser (phone and PC) has "Open a profile file" (`/profiles/open-file`,
+`lightning/runtime/profile_screens.py`), which takes a `.lightning` file and its password, adds the book as a new
+profile and opens it; Arabic included. On Android the WebView's `onShowFileChooser` (`MainActivity.java`, ~222) shows
+the system picker. Nothing yet keeps a copy outside the app (2AI3): no `ACTION_OPEN_DOCUMENT_TREE` in `android/`, and
+the manifest still has `allowBackup="false"`. Saving goes through the system "Save to" screen (`FileBridge.java`, files
+up to 64 MB: `phone_files.MAX_FILE_BYTES`).
+Known limits: the request guard holds an upload in memory before the route sees it (Architecture › Profile file); a
+profile whose name is not ASCII is offered as `Lightning-profile-<date>.lightning`; a journal review copy saved by an
+older schema is refused until its home saves a new one.
 
 Note for the owner's own lost book: it is still inside the old app "Lightning Test" (`org.lightning.app.test`) as
 long as that app is not uninstalled. Once 2AI5 ships in a build of the old ID, that app can save a profile file.
@@ -56,19 +58,6 @@ One step is one pull request. Read only the files a step names; Android and prof
 `python -m pytest tests/test_profile_file.py tests/test_phone_identity_frozen.py -q` plus the step's own; native
 Android behaviour is checked by the owner at the end (2AI6), not step by step. Dummy profiles only. Delete the
 step's heading in the same commit.
-
-## 2AI2 Open a profile file on the phone · M · opus
-Files: `lightning/ui/templates/profiles.html` (the `choose` mode), `lightning/runtime/profile_screens.py` (routes
-~86-160), `lightning/runtime/app.py` (`_body_limit`, `_form_file_limit` ~44-56: only listed routes accept a file),
-`lightning/runtime/http.py` (`configure_memory_only_import_uploads`), `lightning/ui/i18n.py`, `tests/test_profile_file.py`.
-Do: on the profile chooser (phone and PC), a link "Open a profile file" to `GET /profiles/open-file`: a form with
-`<input type="file" name="profile" accept=".lightning">` and the profile password. `POST /profiles/open-file` is
-added to the file-accepting routes with the 256 MB cap; the upload is spooled to a private temporary file in the
-app's data folder (not memory), passed to `read_profile_file`, and deleted after. Works with no network and no
-pairing; on Android the existing `onShowFileChooser` shows the system picker (USB, Drive, WhatsApp files).
-Done when: an HTTP test posts a profile file made by `write_profile_file` and then unlocks the new profile with its
-password; a wrong password leaves no new folder; any other route still rejects a file part
-(`python -m pytest tests/test_profile_file.py -q`).
 
 ## 2AI3 A copy outside the app · M · opus
 Files: `android/app/src/main/java/org/lightning/app/MainActivity.java`, a new `BackupFolderBridge.java` beside

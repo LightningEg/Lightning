@@ -55,7 +55,6 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **BT-2AI** | [Phone data must survive every app update and reinstall](2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md) | bug, technical · high | Protect | L | Opus | building |
-| BT-2AI2 | ↳ Open a profile file on the phone | | | M | Opus | |
 | BT-2AI3 | ↳ A copy outside the app | | | M | Opus | |
 | BT-2AI4 | ↳ The PC can always send its copy to a fresh phone | | | M | Opus | |
 | BT-2AI6 | ↳ Owner: the phone survives an update and a reinstall | | | owner |  | |

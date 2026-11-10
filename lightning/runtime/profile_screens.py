@@ -153,6 +153,50 @@ def register(app, screens: ProfileScreens) -> ProfileScreens:
         return await action(request, "recovery-key", lambda: session.confirm(pending.recovery),
                             recovery=pending.recovery, name=pending.paths.profile.name if pending.paths.profile else "")
 
+    @app.get("/profiles/open-file")
+    async def open_file_page(request: Request):
+        if session.container:
+            return RedirectResponse("/profiles", 303)
+        return page(request, "open-file")
+
+    @app.post("/profiles/open-file")
+    async def open_file(request: Request):
+        """Bring a profile file in (BT-2AI2): it becomes a new profile here and opens. The upload is written to a
+        private temporary file in the profiles folder, checked there, and deleted whatever happens."""
+        import os
+        import secrets
+        from .http import PROFILE_FILE_PATH
+        from .profile_file import MAX_BYTES, TOO_LARGE, read_profile_file
+        if session.container:
+            return RedirectResponse("/profiles", 303)
+        assert request.url.path == PROFILE_FILE_PATH
+        form = await request.form(max_files=1, max_fields=10)
+        upload, password = form.get("profile"), str(form.get("password", ""))
+
+        def operation():
+            if not hasattr(upload, "file") or not getattr(upload, "filename", ""):
+                raise ProfileError("Choose a profile file to open.")
+            session.root.mkdir(parents=True, exist_ok=True)
+            incoming = session.root / f".incoming-{secrets.token_hex(12)}.partial"
+            try:
+                descriptor = os.open(incoming, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
+                size = 0
+                with os.fdopen(descriptor, "wb") as target:
+                    for block in iter(lambda: upload.file.read(1024 * 1024), b""):
+                        size += len(block)
+                        if size > MAX_BYTES:
+                            raise ProfileError(TOO_LARGE)
+                        target.write(block)
+                opened = read_profile_file(incoming, password, session.root)
+            finally:
+                incoming.unlink(missing_ok=True)
+            selected = str(opened.paths.db_path)
+            role = SessionRole.READER if opened.review_copy or devices.role_for(selected) == "reader" else SessionRole.HOME
+            session.unlock(selected, password, role=role)
+            if session.journal is None:
+                devices.after_unlock(session.paths)
+        return await action(request, "open-file", operation)
+
     @app.post("/profiles/cancel")
     async def cancel(request: Request):
         session.pending = None

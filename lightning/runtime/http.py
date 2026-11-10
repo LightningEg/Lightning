@@ -39,6 +39,9 @@ MARKET_IMPORT_PATH = "/investments/prices/market/import"
 MAX_MARKET_IMPORT_BODY = 40 * 1024 * 1024
 # Many investment prices from one CSV (PC roadmap P6): one file, bounded like a statement upload.
 PRICE_CSV_PATH = "/investments/prices/csv"
+# One profile file brought in from outside (BT-2AI2): the encrypted book and its key file, plus the form's envelope.
+PROFILE_FILE_PATH = "/profiles/open-file"
+MAX_PROFILE_FILE_BODY = 256 * 1024 * 1024 + 64 * 1024
 
 
 def request_body_limit(path: str, method: str = "POST") -> int:
@@ -57,6 +60,8 @@ def request_body_limit(path: str, method: str = "POST") -> int:
         return MAX_MARKET_IMPORT_BODY
     if path == PRICE_CSV_PATH:
         return MAX_CSV_UPLOAD_REQUEST_BYTES
+    if path == PROFILE_FILE_PATH:
+        return MAX_PROFILE_FILE_BODY
     return MAX_BODY
 
 
@@ -67,6 +72,8 @@ def request_too_large_message(path: str) -> str:
         return "CSV files must be 5 MB or smaller. Choose a smaller CSV and try again."
     if re.fullmatch(r"/accounts/\d+/import/\d+/confirm", path):
         return "This import review is too large to submit at once. Split the CSV into smaller files."
+    if path == PROFILE_FILE_PATH:
+        return "This profile file is too large to open."
     return "This request is too large."
 
 
