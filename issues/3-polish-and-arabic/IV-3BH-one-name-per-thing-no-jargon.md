@@ -25,10 +25,9 @@ Per term, one PR: pick the plain word in the Glossary first (payee/who for count
 
 Each step is one pull request, one term at a time. The Glossary (`ai/GLOSSARY.md`, read only the term's line: `grep -n "<term>" ai/GLOSSARY.md`) is changed first in the same PR; then English keys, their Arabic in `lightning/ui/i18n.py`, templates and tests. Never rename a route, a database column or a code. Run `python -m pytest tests/test_arabic_no_english.py tests/test_mohab_year.py -q` and delete the step's heading in the same commit.
 
-## 3BH5 One spelling per word · S · #426
-Files: `lightning/ui/i18n.py`, templates.
-Do: "Gam’eya" → "Gam'eya" in the 2 places (`grep -rn "Gam’eya" lightning`); Arabic دهب → ذهب (glossary spelling: check `ai/GLOSSARY.md`), انت → إنت; Free cash's Arabic is the glossary's النقدية المتاحة everywhere, and brand-voice's «المتاح للصرف» is for Safe to spend only (check `grep -n "المتاح" guideline/brand-voice.md`). Curly apostrophes in visible English strings: `’` in place of `'` inside words, in templates and `ARABIC_UI` keys **and** their callers together (a key change must change every `|tr` that uses it).
-Done when: `grep -rc "دهب\|\bانت\b" lightning/ui/i18n.py` is 0 and `python -m pytest tests/test_arabic_no_english.py -q` passes.
+## 3BH5 Curly apostrophes in visible English strings · S · #426
+Done in 3BH5's first part: Gam'eya (straight, the 43× spelling), ذهب, إنت and النقدية المتاحة for Free cash. Left: about 30 visible strings use a straight `'` inside a word where 6 use `’`. Pick one with the owner (the guideline has no rule), then change it in templates and `ARABIC_UI` keys **and** their callers together (a key change must change every `|tr` that uses it).
+Done when: `grep -rn "[a-z]'[a-z]" lightning/ui/templates` shows only code, and `python -m pytest tests/test_arabic_no_english.py -q` passes.
 
 ## 3BH6 Built-in categories in sentence case · M · opus · #427
 Files: `lightning/database/seed.py`, a new migration (skill `add-migration`: read `skills/add-migration/SKILL.md` first), `lightning/ui/i18n.py` (Arabic keys for the new names).

@@ -2776,10 +2776,10 @@ PERIODS = {
     "{amt} still to pay. The last payment is on": "فاضل {amt} للدفع. آخر دفعة في",
     "Optional, 12 characters from your statement, e.g. EGS60121C018.": "اختياري، 12 حرف من كشف حسابك، مثلًا EGS60121C018.",
     "e.g. Commercial International Bank": "مثلًا البنك التجاري الدولي",
-    "18K gold price": "سعر الدهب عيار 18",
-    "21K gold price": "سعر الدهب عيار 21",
-    "22K gold price": "سعر الدهب عيار 22",
-    "24K gold price": "سعر الدهب عيار 24",
+    "18K gold price": "سعر الذهب عيار 18",
+    "21K gold price": "سعر الذهب عيار 21",
+    "22K gold price": "سعر الذهب عيار 22",
+    "24K gold price": "سعر الذهب عيار 24",
 }
 
 SYSTEM_TEXT = {
