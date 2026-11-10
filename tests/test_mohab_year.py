@@ -384,7 +384,7 @@ def _first_evening(o: Mohab) -> None:
     o.ask("moms_money", "How much of Mom's money am I holding?", "Transactions", "Held for others")
 
     # The plan: a budget from his own spending, an emergency fund, his bills and the car loan.
-    b.go("Set a plan for 2026-09")
+    b.go("Set a plan for September 2026")
     b.submit({}, button="Create plan")
     b.go("Safety", "Reserves", "Edit")  # Reserves reads; Edit opens the emergency fund's amount
     b.submit({"allocated": "20,000"}, action="/reserves/emergency")
@@ -1002,9 +1002,9 @@ def test_paying_from_the_overview_moves_net_worth_only_by_the_salary(mohab):
 
 def test_a_mistake_is_fixed_in_place_and_a_double_entry_deleted(mohab):
     register = mohab.answers["fixed"]
-    assert register.shows("2026-10-26 Carrefour Food & Groceries — −4,060.00")
+    assert register.shows("2026-10-26 Carrefour Food & Groceries — −4,060")
     assert "−4,600" not in register.screen.text
-    assert register.screen.text.count("2026-10-10 Talabat Eating Out") == 1
+    assert register.screen.text.count(register.screen.said("2026-10-10 Talabat Eating Out")) == 1
 
 
 def test_the_atm_fee_is_only_inside_others(mohab):
@@ -1497,7 +1497,7 @@ def test_a_small_difference_from_the_bank_is_one_adjustment(mohab):
     assert check.shows("A small difference", "Lightning is 30.00 EGP above your bank", "Post adjustment of −30.00")
     assert mohab.notes["wallet_adjusted"].shows("Balance adjustment", "The account now matches your bank")
     assert mohab.notes["wallet_adjusted"].shows("2027-09-30 Balance adjustment Other Personal Bank showed",
-                                                "−30.00 Edit 42,950")
+                                                "−30 Edit 42,950")
     assert mohab.notes["wallet_rechecked"].shows("It matches")
 
 

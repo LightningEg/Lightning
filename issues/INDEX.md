@@ -158,9 +158,8 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/IT-6D-gold-price-source.md) | improvement, technical | Own | S | Sonnet | blocked on a test from a home connection |
-| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history source](6-market-data/IT-6F-london-board-and-gulf-history.md) | improvement, technical | Own | M | Opus | ready |
-| IT-6F1 | ↳ London asks for pound and pence shares only, then the picker list is rebuilt ([#430](https://github.com/LightningEg/Lightning/issues/430)) | | | S | Sonnet | |
-| IT-6F2 | ↳ Dubai, Abu Dhabi and Bahrain month-ends from Yahoo, by venue ([#431](https://github.com/LightningEg/Lightning/issues/431)) | | | S | Opus | |
+| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history source](6-market-data/IT-6F-london-board-and-gulf-history.md) | improvement, technical | Own | S | Opus | ready |
+| IT-6F2 | ↳ Abu Dhabi and Bahrain month-ends from Yahoo, by venue ([#431](https://github.com/LightningEg/Lightning/issues/431)) | | | S | Opus | |
 | **NF-6A** | [Market data: price packs, collected in the cloud](6-market-data/NF-6A-price-packs.md) | new feature | Own | L | Opus | building |
 | NF-6A1 | ↳ Funds, currencies and gold matched to holdings | | | M | Opus | |
 | NF-6A2 | ↳ US stocks and FX revaluation, with multi-currency | | | L | Opus | |
