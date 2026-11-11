@@ -5,7 +5,7 @@
 {% block heading %}<h1>{{ item.name }}</h1><p class="phone-note">{{ item.kind_label|tr(locale) }} · {{ payment.due_date }} · <bdi class="fig">{{ payment.amount|money }} {{ currency }}</bdi></p>{% endblock %}
 {% block content %}
 {% set session = request.state.session_token|default('') %}
-{% macro hidden() %}<input type="hidden" name="due" value="{{ payment.due_date }}"><input type="hidden" name="back" value="{{ back }}"><input type="hidden" name="__session" value="{{ session }}">{% endmacro %}
+{% macro hidden() %}<input type="hidden" name="due" value="{{ payment.due_date }}"><input type="hidden" name="back" value="{{ back }}">{% endmacro %}
 {% if bill_reserve and payment.outstanding %}<p class="phone-note">{{ 'Saved for this bill: {amount} {currency} in {name}.'|tr(locale, amount=bill_reserve.effective_allocated|money(places=0), currency=base, name=bill_reserve.name) }}</p>{% endif %}
 {% if msg %}<div class="flash error" role="alert">{{ msg|tr(locale) }}</div>{% endif %}
 {% if not payment.outstanding %}
@@ -13,10 +13,10 @@
   <header class="phone-section-head"><h2 id="pay-done">{{ ('Paid' if payment.status.value == 'PAID' else 'Skipped')|tr(locale) }}</h2></header>
   {% if payment.status.value == 'SKIPPED' %}<p class="phone-note">{{ ('Still owed: this payment moved to the end of the loan.' if item.kind.value == 'LOAN' else 'It does not count as due or in the forecast.')|tr(locale) }}</p>{% endif %}
   {% if payment.transaction_id %}<div class="phone-rows"><a class="phone-row" href="/transactions/{{ payment.transaction_id }}"><span>{{ 'Open the transaction'|tr(locale) }}</span><b>{{ chevron() }}</b></a></div>{% endif %}
-  <form class="phone-form" method="post" action="/plan/items/{{ item.id }}/pay">{{ hidden() }}<input type="hidden" name="outcome" value="reopen"><button class="btn phone-save">{{ ('Put it back on the schedule' if payment.status.value == 'SKIPPED' else 'Mark unpaid')|tr(locale) }}</button></form>
+  <form class="phone-form" method="post" action="/plan/items/{{ item.id }}/pay">{{ hidden() }}<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="outcome" value="reopen"><button class="btn phone-save">{{ ('Put it back on the schedule' if payment.status.value == 'SKIPPED' else 'Mark unpaid')|tr(locale) }}</button></form>
 </section>
 {% else %}
-{% macro matches(rows, label) %}<div class="phone-rows">{% for r in rows %}<form class="phone-row" method="post" action="/plan/items/{{ item.id }}/pay">{{ hidden() }}<input type="hidden" name="transaction_id" value="{{ r.id }}"><input type="hidden" name="outcome" value="link"><span>{{ r.counterparty or r.ref }}<small>{{ r.date }} · <bdi class="fig">{{ r.amount|money }} {{ currency }}</bdi></small></span><button class="btn small">{{ label|tr(locale) }}</button></form>{% endfor %}</div>{% endmacro %}
+{% macro matches(rows, label) %}<div class="phone-rows">{% for r in rows %}<form class="phone-row" method="post" action="/plan/items/{{ item.id }}/pay">{{ hidden() }}<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="transaction_id" value="{{ r.id }}"><input type="hidden" name="outcome" value="link"><span>{{ r.counterparty or r.ref }}<small>{{ r.date }} · <bdi class="fig">{{ r.amount|money }} {{ currency }}</bdi></small></span><button class="btn small">{{ label|tr(locale) }}</button></form>{% endfor %}</div>{% endmacro %}
 {% if exact or others %}<section class="phone-section" aria-labelledby="pay-found">
   <header class="phone-section-head"><h2 id="pay-found">{{ 'Already in your transactions?'|tr(locale) }}</h2></header>
   {% if exact %}{{ matches(exact, 'Use this') }}{% endif %}
@@ -32,14 +32,14 @@
 </section>{% endif %}
 <section class="phone-section" aria-labelledby="pay-record">
   <header class="phone-section-head"><h2 id="pay-record">{{ 'Record it now'|tr(locale) }}</h2></header>
-  <form class="phone-form" method="post" action="/plan/items/{{ item.id }}/pay">{{ hidden() }}<input type="hidden" name="outcome" value="record">
+  <form class="phone-form" method="post" action="/plan/items/{{ item.id }}/pay">{{ hidden() }}<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="outcome" value="record">
     {% if has_match %}<label class="import-check"><input type="checkbox" name="different_payment" value="1"> {{ 'This is a different payment'|tr(locale) }}</label><p class="phone-note">{{ 'A matching payment is already recorded above. Link it instead of recording a second one.'|tr(locale) }}</p>{% endif %}
     <label for="pay-amount">{{ 'Amount'|tr(locale) }} ({{ currency }})</label><input id="pay-amount" name="amount" value="{{ '%.2f'|format(payment.still_owed) }}" inputmode="decimal" class="money-input">
     <label for="date_paid">{{ 'Date'|tr(locale) }}</label><input id="date_paid" name="date_paid" value="{{ [payment.due_date, today]|min }}" data-smart-date inputmode="numeric">
     <label for="pay-account">{{ 'Account'|tr(locale) }}</label><select id="pay-account" name="account_id" data-own-picker>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if a.id == item.account_id }}>{{ a.name }}</option>{% endfor %}</select>
     <button class="btn primary phone-save">{{ ('Record and mark received' if item.is_income else 'Record and mark paid')|tr(locale) }}</button>
   </form>
-  {% if payment.status.value != 'PAID' %}<form class="phone-form" method="post" action="/plan/items/{{ item.id }}/pay">{{ hidden() }}<input type="hidden" name="outcome" value="skip"><button class="btn phone-save">{{ ('Move to the end of the loan' if item.kind.value == 'LOAN' else 'Skip this one')|tr(locale) }}</button><p class="phone-note">{{ ('You still owe it; the loan ends one payment later.' if item.kind.value == 'LOAN' else "It won't happen: it won't count as due or in the forecast.")|tr(locale) }}</p></form>{% endif %}
+  {% if payment.status.value != 'PAID' %}<form class="phone-form" method="post" action="/plan/items/{{ item.id }}/pay">{{ hidden() }}<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="outcome" value="skip"><button class="btn phone-save">{{ ('Move to the end of the loan' if item.kind.value == 'LOAN' else 'Skip this one')|tr(locale) }}</button><p class="phone-note">{{ ('You still owe it; the loan ends one payment later.' if item.kind.value == 'LOAN' else "It won't happen: it won't count as due or in the forecast.")|tr(locale) }}</p></form>{% endif %}
 </section>
 {% endif %}
 {% endblock %}

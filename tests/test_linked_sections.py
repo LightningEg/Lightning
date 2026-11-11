@@ -251,5 +251,5 @@ def test_pc_activity_uses_category_leaf_and_detail_keeps_hierarchy(c, setup):
     assert ' › ' not in summary_category
     from test_gameya_screens import _client
     phone = _client(c, phone=True).get(f"/transactions/{expense.id}").text
-    phone_category = phone.split('<td class="category-context">', 1)[1].split('</td>', 1)[0]
-    assert 'Personal ›' in phone_category and escape(food.name) in phone_category
+    phone_category = phone.split(f'<dt>Category</dt><dd>', 1)[1].split('</dd>', 1)[0]   # 3AY15: the phone's facts list
+    assert 'Personal · ' in phone_category and escape(food.name) in phone_category
