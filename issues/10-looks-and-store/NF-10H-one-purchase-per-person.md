@@ -55,6 +55,7 @@ Steps, in order; each is one pull request. Built: 10H1, 10H2 (app and `redeem-pl
 ## 10H4 Owner: prices · owner
 One EGP price per theme on a Play price step, the same coins on the website; set the four Play products (`cotton`,
 `dendera`, `nile`, `papyrus`) to it; confirm the Play service fee tier in the Console.
+Waits for launch (owner, 2026-11-11): the Console cannot be set up before it. Prices are decided; do not ask again before launch.
 
 ## 10H5 Owner: the extra seats already sold · owner
 Credit their coins back (recommended) or leave them.
