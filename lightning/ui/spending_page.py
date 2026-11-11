@@ -21,10 +21,9 @@ def period_of(c, query):
     return parse_period(query, today(), c.reporting.first_activity_date())
 
 
-def facts(c, params, early_month: bool) -> dict:
-    """``early_month``: early in a month with little to compare, lead with last month's whole picture and say in one
-    line where this month stands (audit 12, SP1). The PC page asks for it; the phone's lead compares the same days
-    instead, so it does not."""
+def facts(c, params) -> dict:
+    """The Spending page's figures for the asked period. Every tab opens on the current month (owner, 2026-11-10,
+    IV-12Y1): early in a month the lead compares the same days of earlier months instead of showing last month."""
     prior_from = prior_to = None
     try:
         selected = period_of(c, params)
@@ -34,22 +33,6 @@ def facts(c, params, early_month: bool) -> dict:
         selected = Period("custom", "Custom", fallback.start, fallback.end) if params.get("period") == "custom" else fallback
         error = exc.message
     first, last = selected.start, selected.end
-    # Early in a month (under 7 days, or under 3 categories with spending) the charts have nothing to compare, so the
-    # page leads with last month's whole picture and says in one line where this month stands (audit 12, SP1).
-    so_far = None
-    plain = not any(key in params for key in ("period", "month", "date_from", "date_to", "category_id"))
-    if plain and early_month and selected.key == "month" and not error and first <= today() <= last and last >= today():
-        days = (today() - first).days + 1
-        now_groups = [g for g in c.reporting.spending_by_category(first, last, depth=1) if g.value]
-        categories = [g for g in c.reporting.spending_by_category(first, last, depth=2) if g.value]  # not the 3 groups
-        if days < 7 or len(categories) < 3:
-            before_last = first - timedelta(days=1)
-            before_first = before_last.replace(day=1)
-            if c.reporting.cash_flow(before_first, before_last).outflows > 0:
-                so_far = {"month": month_of(first), "total": sum((g.value for g in now_groups), ZERO),
-                          "categories": len(categories), "days": days}
-                selected = Period("month", "Monthly", before_first, before_last)
-                first, last = selected.start, selected.end
     flow = c.reporting.cash_flow(first, last)
     l1 = c.reporting.spending_by_category(first, last, depth=1)
     l2 = c.reporting.spending_by_category(first, last, depth=2)
@@ -98,4 +81,4 @@ def facts(c, params, early_month: bool) -> dict:
         spending_total = flow.outflows
         prior_spending = prior.outflows if prior else None
     prior_label = (prior_from.strftime("%Y-%m") + (f" days {prior_from.day}–{prior_to.day}" if partial_months(first, last) else "") if selected.key == "month" else "the period before") if prior else ""
-    return {"selected": selected, "error": error, "first": first, "last": last, "so_far": so_far, "flow": flow, "l1": l1, "l2": l2, "prior": prior, "prior_from": prior_from, "prior_to": prior_to, "trend": trend, "trend_truncated": trend_truncated, "category_filter": category_filter, "category_code": category_code, "category_name": category_name, "spending_total": spending_total, "prior_spending": prior_spending, "prior_label": prior_label}
+    return {"selected": selected, "error": error, "first": first, "last": last, "flow": flow, "l1": l1, "l2": l2, "prior": prior, "prior_from": prior_from, "prior_to": prior_to, "trend": trend, "trend_truncated": trend_truncated, "category_filter": category_filter, "category_code": category_code, "category_name": category_name, "spending_total": spending_total, "prior_spending": prior_spending, "prior_label": prior_label}

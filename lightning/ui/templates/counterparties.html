@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
 {% block title %}Counterparties{% endblock %}
-{% block heading %}{{ page_header('Settings'|tr(locale), page_status.count(total_parties, '1 saved name.', '{n} saved names.', 'No saved names yet.')|status_text) }}{% endblock %}
+{% block heading %}{{ page_header('Counterparties'|tr(locale), page_status.count(total_parties, '1 saved name.', '{n} saved names.', 'No saved names yet.')|status_text) }}{% endblock %}
 {% block content %}
 
 {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}

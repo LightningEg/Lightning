@@ -30,6 +30,12 @@ Names used for two figures: "Kept" (phone Report: Net flow; PC Spending's flow c
 
 Three guards, in this order, so the tests exist before code moves. No screen changes its look.
 
+## Decided and built
+
+Owner, 2026-11-10 (12AE5): **Kept is Net flow everywhere**; the flow chart's last band becomes "Kept as cash". Still to do with 12AE4: the registry row for the name and a test that a registry label is rendered only through `fig.<key>.label`.
+
+12AE3: `tests/test_figures_layer.py` counts `+ - * /` and `sum()` per file in `lightning/ui` against `tests/ui_arithmetic.json`; a count may fall, never rise (`python -m tests.test_figures_layer` rewrites the file after a figure moves out).
+
 ## How to work on this item
 
 One PR per step. Money moves into the service that owns its inputs (`lightning/planning`, `budgeting`, `reporting`, `investments`), never into another UI module. A figure with a name on screen gets a registry row in `lightning/core/figures.py`, then `python -m lightning.core.figures` regenerates the Glossary. After each step: `python -m pytest -q tests/test_figures_layer.py tests/test_audit_numbers.py tests/test_mohab_year.py tests/test_mohab_phone.py`, and pages must be byte-identical unless the step says a figure was wrong. Stay out of `lightning/ui/journal*` (claimed). Delete the step's heading in the same commit.
@@ -40,11 +46,5 @@ A new `tests/test_figures_agree.py` from `issues/11-phone-ux/r36-figures-one-own
 ## 12AE2 Parts add up to their whole · S · sonnet
 In the same test file: every donut, split bar and proposal on the main pages sums to the figure it sits under (phone Budget donut = Money out in plan categories, What you own by kind = What you own, the Investments Lead, the payday proposal, Safe to spend's rows). BV-12O, BT-12AC and BT-12AD are strict `xfail` until fixed.
 
-## 12AE3 A ratchet on arithmetic in the UI · M · opus
-`tests/test_figures_layer.py` gains an AST count of `+ − × ÷` and `sum()` per file in `lightning/ui` (not `charts.py`, `visuals.py` or i18n; a line that is geometry, a count of rows or a date carries `# not money` and is skipped). The counts live in a committed file; a file's count may fall, never rise, and a file not listed must be zero. Done when adding `a - b` to a phone screen fails the suite.
-
 ## 12AE4 Derived figures move to their owners · L · opus
-Work down the list in the Report, one service at a time (position, budget and everyday, forecast, reserves, loans and recurring, accounts, investments), lowering the ratchet as each goes. Each becomes a property or method beside its inputs; `kpis.py` and the routes read it. Start with the phone screens (to zero) and `keynotes.per_day`. Done when the ratchet file lists only lines marked `# not money`, and the four counted files have been read and classified.
-
-## 12AE5 Owner: what "Kept" means · owner
-A pick-list: Kept is Net flow everywhere and the flow chart's last band is named "Kept as cash" (recommended); or Kept means cash not invested, and the Report and the Overview sentence say "Saved". Then a registry row for the name and a test that a registry label is rendered only through `fig.<key>.label`, so a template cannot type a figure's name beside another value.
+Work down the list in the Report, one service at a time (position, budget and everyday, forecast, reserves, loans and recurring, accounts, investments), lowering the ratchet as each goes. Each becomes a property or method beside its inputs; `kpis.py` and the routes read it. Start with the phone screens (to zero) and `keynotes.per_day`. Done when `tests/ui_arithmetic.json` is empty (every remaining line marked `# not money`), and the four counted files have been read and classified.

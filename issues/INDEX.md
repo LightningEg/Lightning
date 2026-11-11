@@ -324,9 +324,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **IT-12AE** | [A screen cannot work out money - derived figures move to their owners, a ratchet test counts arithmetic in the UI, and the PC and phone are compared on one household](12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | improvement, technical | Build | L | Opus | ready |
 | IT-12AE1 | ↳ The PC and the phone are compared on one household | | | M | Opus | |
 | IT-12AE2 | ↳ Parts add up to their whole | | | S | Sonnet | |
-| IT-12AE3 | ↳ A ratchet on arithmetic in the UI | | | M | Opus | |
 | IT-12AE4 | ↳ Derived figures move to their owners | | | L | Opus | |
-| IT-12AE5 | ↳ Owner: what "Kept" means | | | owner |  | |
 | **IV-12AA** | [Suggestions with sensible defaults and honest counts - Refill offers to empty Safe to spend, Needs you counts three ways, a year is compared with nothing](12-desktop-ux/IV-12AA-suggestions-with-sensible-defaults.md) | improvement, visual | Plan | M | Opus | ready |
 | IV-12AA1 | ↳ Owner: what Refill offers first | | | owner |  | |
 | IV-12AA2 | ↳ Refill offers the modest amount first and says what Home will show | | | M | Opus | |
@@ -350,13 +348,10 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **IV-12V** | [Adjust balance: a cash wallet that is far off has no way forward, and the page is one bare form](12-desktop-ux/IV-12V-adjust-balance-for-cash.md) | improvement, visual | Capture | M | Sonnet | ready |
 | **IV-12W** | [Register and search: the forgotten minus, transactions in PC search, and small things on the rows](12-desktop-ux/IV-12W-register-and-search-small-traps.md) | improvement, visual | Capture | M | Sonnet | ready |
 | **IV-12Y** | [One page skeleton on the PC, kept by a test - every tab has the same title rule, an answer sentence, its dates, and the same controls in the same order](12-desktop-ux/IV-12Y-one-page-skeleton-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
-| IV-12Y1 | ↳ Owner: the title rule and the control order | | | owner |  | |
-| IV-12Y2 | ↳ The test first, with today's exceptions listed | | | M | Opus | |
 | IV-12Y3 | ↳ One header partial, used by every tab | | | L | Opus | |
 | IV-12Y4 | ↳ An answer sentence on the 13 tabs that have none | | | M | Sonnet | |
 | IV-12Y5 | ↳ One filled action a tab, and one home for Ask an AI | | | M | Sonnet | |
 | **IV-12Z** | [The answer on one screen, the rest on request - Spending, Cash planning and Investments run 3 to 4 screens and repeat lists](12-desktop-ux/IV-12Z-answer-on-one-screen-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
-| IV-12Z1 | ↳ A length budget in the skeleton test ([#496](https://github.com/LightningEg/Lightning/issues/496)) | | | S | Sonnet | |
 | IV-12Z2 | ↳ Cash planning says each thing once | | | M | Sonnet | |
 | IV-12Z3 | ↳ Spending opens on the categories; the other charts open on request | | | M | Opus | |
 | IV-12Z4 | ↳ Investments shows nothing as one line ([#497](https://github.com/LightningEg/Lightning/issues/497)) | | | S | Sonnet | |
@@ -374,8 +369,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-3H7 | ↳ Loans: an optional rate and the cost of the loan | | | M | Opus | |
 | IV-3H9 | ↳ Build the chosen analysis | | | M | Opus | |
 | IV-3H10 | ↳ Triage the ids no step names ([#436](https://github.com/LightningEg/Lightning/issues/436)) | | | M | Opus | |
-| **NF-12AB** | [Every headline figure explains itself in place - one gesture and one label instead of "Show the numbers", "How it is worked out", "See details", "See them" and bare chevrons](12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | new feature | Understand | L | Opus | new |
-| NF-12AB1 | ↳ Owner: the pattern and its one label | | | owner |  | |
+| **NF-12AB** | [Every headline figure explains itself in place - one gesture and one label instead of "Show the numbers", "How it is worked out", "See details", "See them" and bare chevrons](12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | new feature | Understand | L | Opus | ready |
 | NF-12AB2 | ↳ One "working" shape from the services | | | M | Opus | |
 | NF-12AB3 | ↳ The PC's Leads and KPIs open their working in place | | | L | Opus | |
 | NF-12AB4 | ↳ The phone's heroes open their working as a sheet | | | M | Opus | |
