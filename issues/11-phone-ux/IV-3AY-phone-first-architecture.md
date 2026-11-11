@@ -60,12 +60,13 @@ leaves (`static/phone-nav.js`; report r25 › Cross-cutting 5).
 Done when: `PHONE_CSS` has no `style` entry, `tools/phone_check.py` and `tools/phone_check.py --arabic` pass, and
 `tests/test_phone_nav_browser.py` proves the back order.
 
-## 3AY8 Activity: the review cards that are rows, and search · M · opus
-Built: All and To review (one card, *Not now*), and a row's own sheet with category chips, now the phone router's
-(`/transactions/{id}/sheet`, `ui/row_sheet.py`). Left: the card kinds that are single rows (SMS, duplicates, interest,
-recurring) instead of grouped items; search and filters on `/activity` (today they are on `/transactions`); a rule
-offered from the sheet. Needs a choice of what each card's one action is. Done when: one tap per reviewed item for every
-kind, and `tools/phone_check.py` shows the first row above 330 px.
+## 3AY8 Activity: a card for possible duplicates · S · opus
+Built (2026-11-11): To review is one row per card (`phone/screens/review_cards.py`), each with its kind's own verb (owner
+pick): a row to sort *Looks right* (its payee's usual category, one tap) or *Choose a category*; a payment that looks
+monthly *Track it*; deposit interest *Match to deposit*; a bank message *Looks right*; Change and Skip beside it, Not now
+on inbox items (`tests/test_phone_review_cards.py`). Activity has search and Out / In / Transfers. Left: possible
+duplicates have no card, because no service lists them (they are merged from the register). Add a duplicate finder in
+`lightning/transactions/`, then a card whose Primary is *Delete the copy* (the merge, with Keep both beside it).
 
 ## 3AY9 Budget: the plan list as its own screen · M · opus
 Built (2026-11-11): `/budget` flexible first; the payday strip (`planning/salary_day.payday_to_plan`: from the salary's
