@@ -7,7 +7,7 @@
   {% if error %}<p class="error">{{ error|tr(locale) }}</p>{% endif %}
   <div class="row">
     <div class="field {{ 'has-error' if error_field == 'kind' }}"><label for="kind">{{ 'What is it'|tr(locale) }}</label><select id="kind" name="kind">{% for k in kinds %}<option value="{{ k }}" {{ 'selected' if values.kind == k }}>{{ {'Bar': 'Bar', 'Coin': 'Coin', 'Jewelry': 'Jewellery'}[k]|tr(locale) }}</option>{% endfor %}</select></div>
-    <div class="field {{ 'has-error' if error_field == 'name' }}"><label for="name">{{ 'Name'|tr(locale) }}</label><input id="name" name="name" value="{{ values.name }}" placeholder="{{ 'e.g. 10g bar'|tr(locale) }}" required></div>
+    <div class="field {{ 'has-error' if error_field == 'name' }}"><label for="name">{{ 'Name'|tr(locale) }}</label><input id="name" name="name" value="{{ values.name }}" placeholder="{{ 'e.g. 10g bar'|tr(locale) }}" required spellcheck="false" autocomplete="off"></div>
   </div>
   <div class="row">
     <div class="field {{ 'has-error' if error_field == 'weight' }}"><label for="weight">{{ 'Net gold weight per piece (g)'|tr(locale) }}</label><input id="weight" name="weight" value="{{ values.weight }}" inputmode="decimal" placeholder="10" required></div>

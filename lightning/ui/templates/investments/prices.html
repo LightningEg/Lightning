@@ -74,6 +74,6 @@
     <tr><td colspan="5" class="empty">{{ 'No investments yet.'|tr(locale) }} <a href="/investments/assets/new">{{ 'Add one'|tr(locale) }}</a>.</td></tr>
     {% endfor %}
   </table>
-  <div class="actions" style="margin-top:14px"><button class="btn primary">{{ 'Save prices'|tr(locale) }}</button><a class="btn" href="/investments">{{ 'Cancel'|tr(locale) }}</a></div>
+  <div class="actions mt-card"><button class="btn primary">{{ 'Save prices'|tr(locale) }}</button><a class="btn" href="/investments">{{ 'Cancel'|tr(locale) }}</a></div>
 <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 {% endblock %}

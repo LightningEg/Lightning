@@ -12,7 +12,7 @@
       action="{{ '/categories/add-row' if add_parent else '/categories/' ~ cat.id ~ '/row' }}" {% if not add_parent %}data-autosave data-category-name="{{ cat.name|lower }}"{% else %}hidden data-add-row="{{ add_parent }}"{% endif %}>
   <input type="hidden" name="__session" value="{{ session }}">{% if add_parent %}<input type="hidden" name="parent_id" value="{{ add_parent }}">{% else %}<input type="hidden" name="action" value="save">{% endif %}
   {% if not add_parent %}<input type="checkbox" class="category-select" name="category_ids" value="{{ cat.id }}" form="category-bulk-form" aria-label="Select {{ cat.name }}">{% else %}<span class="cat-spacer"></span>{% endif %}
-  <input class="cat-name-field" name="name" value="{{ cat.name if cat else '' }}" placeholder="{{ 'New detail' if level == 3 else 'New category' }}" aria-label="Name" required autocomplete="off">
+  <input class="cat-name-field" name="name" value="{{ cat.name if cat else '' }}" placeholder="{{ 'New detail' if level == 3 else 'New category' }}" aria-label="Name" required autocomplete="off" spellcheck="false">
   <select name="direction" aria-label="Income or expense" {{ 'disabled' if cat and cat.code == 'EXP.SYSTEM.CUSTODY' }} class="dir-{{ (cat.direction.value if cat else 'OUT')|lower }}">
     {% for value, text in (('OUT', '− Expense'), ('IN', '+ Income'), ('BOTH', '± Both')) %}<option value="{{ value }}" {{ 'selected' if cat and cat.direction.value == value }}>{{ text }}</option>{% endfor %}
   </select>

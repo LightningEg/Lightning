@@ -1,3 +1,5 @@
+{% from "partials/icons.html" import icon_close with context %}
+{% from "partials/chevron.html" import chevron with context %}
 {# On the phone app the same pages render in the phone frame (guideline Part C): phone/base.html. #}{% if request.state.phone|default(false) %}{% extends "phone/base.html" %}{% endif %}{% if not request.state.phone|default(false) %}<!doctype html>
 <html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}"{% if privacy_on(request) %} class="privacy"{% endif %}>
 <head>
@@ -45,7 +47,7 @@
           </svg></span><span>{{ item.label|tr(locale) }}</span>
         </a>
       {% endfor %}
-      {% if request.state.secure_profiles|default(false) %}<a href="/profiles">{{ 'Profiles & lock'|tr(locale) }}</a>{% endif %}
+      {% if request.state.secure_profiles|default(false) %}<a href="/profiles"><span class="nav-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></span><span>{{ 'Profiles & lock'|tr(locale) }}</span></a>{% endif %}
     </nav>
     <details class="side-accounts" id="sidebar-accounts">
       <summary class="mobile-accounts-summary"><span>{{ 'Accounts'|tr(locale) }}</span><b dir="ltr">{{ sidebar_total|amount_role('total') }} {{ base }}</b></summary>
@@ -60,7 +62,7 @@
         <a class="side-row side-account {{ 'active' if path == '/accounts/' ~ a.id or path.startswith('/accounts/' ~ a.id ~ '/') }}" href="/accounts/{{ a.id }}" title="{{ a.label }}">
           {{ inst_tile(a.institution or a.label, kind=a.kind) }}<span class="side-name">{{ a.label }}</span>
           <span class="num {{ 'neg' if a.value < 0 }}">{{ a.value|amount_role('total') }}</span></a>
-        {% if a.kind == 'GAMEYA' and a.value < 0 %}<a class="side-owed" href="/plan#what-you-owe">{{ "You owe the circle"|tr(locale) }} ›</a>{% endif %}
+        {% if a.kind == 'GAMEYA' and a.value < 0 %}<a class="side-owed" href="/plan#what-you-owe">{{ "You owe the circle"|tr(locale) }} {{ chevron() }}</a>{% endif %}
         {% endfor %}
       {% endfor %}
       </div>
@@ -78,7 +80,7 @@
 <dialog id="app-popup" class="app-popup" aria-modal="true" aria-labelledby="app-popup-title">
   <div class="app-popup-frame">
     <a class="app-popup-expand" href="#" data-popup-expand aria-label="Open as a full page" title="Open as a full page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg></a>
-    <button type="button" class="app-popup-close" data-popup-close aria-label="Close dialog">×</button>
+    <button type="button" class="app-popup-close" data-popup-close aria-label="Close dialog">{{ icon_close() }}</button>
     <div id="app-popup-content"></div>
   </div>
 </dialog>

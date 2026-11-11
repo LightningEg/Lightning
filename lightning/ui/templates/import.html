@@ -1,8 +1,9 @@
+{% from "partials/chevron.html" import chevron with context %}
 {% extends "base.html" %}
 {% block title %}{{ 'Import'|tr(locale) }}{% endblock %}
 {% block heading %}<div class="birdview-title"><div><h1>{{ 'Import'|tr(locale) }}</h1>{% set st = page_status.count(batches|length, '1 statement imported.', '{n} statements imported.', 'No statements imported yet.') %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p></div></div>{% endblock %}
 {% block content %}
-{% if waiting %}<div class="compact-list">{% for w in waiting %}<a class="compact-row import-waiting" href="/accounts/{{ w.account_id }}/import/{{ w.batch_id }}"><span>{{ w.file_name }} {{ 'is waiting for you'|tr(locale) }}<small>{{ w.waiting }} {{ ('row' if w.waiting == 1 else 'rows')|tr(locale) }}</small></span><b>{{ 'Continue the review'|tr(locale) }} ›</b></a>{% endfor %}</div>{% endif %}
+{% if waiting %}<div class="compact-list">{% for w in waiting %}<a class="compact-row import-waiting" href="/accounts/{{ w.account_id }}/import/{{ w.batch_id }}"><span>{{ w.file_name }} {{ 'is waiting for you'|tr(locale) }}<small>{{ w.waiting }} {{ ('row' if w.waiting == 1 else 'rows')|tr(locale) }}</small></span><b>{{ 'Continue the review'|tr(locale) }} {{ chevron() }}</b></a>{% endfor %}</div>{% endif %}
 
 {% if not accounts %}<section class="card empty"><h2>{{ 'No bank or cash accounts yet'|tr(locale) }}</h2><a class="btn" href="/accounts">{{ 'Add an account'|tr(locale) }}</a></section>{% else %}
 <section class="card import-drop" data-import-drop>
