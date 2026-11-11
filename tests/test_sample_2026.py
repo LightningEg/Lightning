@@ -68,7 +68,8 @@ def test_an_internal_row_whose_account_is_unknown_asks_which_account(c, on_2_oct
             "2026-09-10,-500.00,Savings pot,Internal transfer,Moved to savings\n"
             "2026-09-11,-300.00,Wallet,Internal transfer,ATM\n").encode()
     b.go("CIB Current", "Import statement")
-    page = b.submit({}, button="Review statement", files={"file": ("moves.csv", data, "text/csv")})
+    b.submit({}, button="Review statement", files={"file": ("moves.csv", data, "text/csv")})
+    page = b.click("See every row")
     assert page.shows("The category says internal, but no account matches")
     fields = page.form("Post ready rows").fields
     # "Wallet" is one of his accounts, so it comes already picked as the account (a transfer to it).

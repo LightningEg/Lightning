@@ -2,6 +2,7 @@
 held-for, so "money in from Dad" and "transfer to THNDR held for Dad" can both be right."""
 from __future__ import annotations
 
+import re
 from decimal import Decimal as D
 
 from fastapi.testclient import TestClient
@@ -137,7 +138,7 @@ def test_the_review_page_is_rows_with_chips_and_a_bulk_bar(c, setup):
     accounts, _ = setup
     cib = accounts["cib"].id
     batch, rows = _stage(c, cib, "Date,Counterparty,Amount\n2026-09-10,SHOP,-10\n2026-09-11,SHOP,-20\n")
-    page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch}").text
+    page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch}?rows=all").text
     assert page.count('<div class="import-line is-') == 2
     for chip in ("All", "To fix", "Needs you", "Possible duplicates", "Ready"):
         assert f"{chip} " in page
@@ -163,7 +164,7 @@ def test_bulk_bar_writes_into_the_ticked_rows_and_posts(c, setup):
             browser = p.chromium.launch(executable_path=str(chromium))
             page = browser.new_page(viewport={"width": 1500, "height": 900})
             page.goto(host.launch_url)
-            page.goto(f"{host.origin}/accounts/{cib}/import/{batch}")
+            page.goto(f"{host.origin}/accounts/{cib}/import/{batch}?rows=all")
             assert page.locator("#import-bulk").is_hidden()
             page.locator(".import-pick-group").first.check()
             assert page.locator("#import-bulk").is_visible()
@@ -288,3 +289,90 @@ def test_same_named_categories_are_never_guessed_between(c, setup):
     assert c.bank_imports._category_for(exact, c.counterparties.get(party), None, lambda: {}) == work.id
     shown = counterparty_category_map(c, ["Uber Test"])["Uber Test"]
     assert shown == {"id": personal.id, "name": "Personal › Transportation"}
+
+
+def _questions_file(c, cib, cats):
+    """NF-7AB1: 3 rows Lightning can place, 1 unknown name, 1 already imported."""
+    seen = "Date,Counterparty,Amount,Category,Reference\n2026-09-09,Bakery,-5,Food & Groceries,REF9\n"
+    earlier, rows = _stage(c, cib, seen, "earlier.csv")
+    _post(c, cib, earlier, {f"category_{rows[0]['_import_row_id']}": str(cats["EXP.PERSONAL.FOOD"].id)})
+    data = ("Date,Counterparty,Amount,Category,Reference\n"
+            "2026-09-10,Carrefour,-10,Food & Groceries,R1\n2026-09-11,Metro,-20,Food & Groceries,R2\n"
+            "2026-09-12,Seoudi,-30,Food & Groceries,R3\n2026-09-13,Somebody new,-40,,R4\n"
+            "2026-09-09,Bakery,-5,Food & Groceries,REF9\n")
+    return _stage(c, cib, data)
+
+
+def test_the_review_opens_on_its_questions_not_its_rows(c, setup):
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    batch, rows = _questions_file(c, cib, cats)
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    page = client.get(f"/accounts/{cib}/import/{batch}").text
+    assert 'class="import-summary"' in page and '<div class="import-line' not in page
+    found = dict(re.findall(r'data-state="(\w+)">.*?import-question-n">(\d+)<', page, re.S))
+    assert found == {"needs": "1", "dup": "1", "ready": "3"}
+    assert f"/accounts/{cib}/import/{batch}?rows=all" in page and "/post-ready" in page
+    every = client.get(f"/accounts/{cib}/import/{batch}?rows=all").text
+    assert every.count('<div class="import-line is-') == 5
+
+
+def test_a_question_opens_only_its_own_rows(c, setup):
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    batch, rows = _questions_file(c, cib, cats)
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    dup = client.get(f"/accounts/{cib}/import/{batch}/groups?start=0&state=dup").text
+    assert dup.count('<div class="import-line is-') == 1 and "Bakery" in dup and "Carrefour" not in dup
+    needs = client.get(f"/accounts/{cib}/import/{batch}/groups?start=0&state=needs").text
+    assert needs.count('<div class="import-line is-') == 1 and "Somebody new" in needs
+    assert client.get(f"/accounts/{cib}/import/{batch}/groups?state=nonsense").status_code == 404
+
+
+def test_post_them_posts_the_ready_rows_and_keeps_the_questions(c, setup):
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    batch, rows = _questions_file(c, cib, cats)
+    before = c.reporting.account_balance(cib)
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    response = client.post(f"/accounts/{cib}/import/{batch}/post-ready", data={}, follow_redirects=False)
+    assert response.status_code == 200 and "Some rows still need review" in response.text
+    assert c.bank_imports.summary(batch)["posted"] == 3
+    assert c.reporting.account_balance(cib) == before - D("60")
+    _, after = c.bank_imports.preview(batch)
+    assert sum(r["_status"] == "REVIEW" for r in after) == 2
+    assert 'class="import-summary"' in response.text and 'data-state="ready"' not in response.text
+
+
+def test_browser_place_them_loads_the_rows_and_posts_the_answer(c, setup):
+    """Browser (NF-7AB1): open "Needs you", answer its row, post; the ready rows go with it."""
+    import pytest
+    pytest.importorskip("playwright")
+    from playwright.sync_api import sync_playwright
+    from lightning.runtime.http import Host
+
+    chromium = require_chromium()
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    batch, rows = _questions_file(c, cib, cats)
+    host = Host(lambda _: create_app(c)).start()
+    try:
+        with sync_playwright() as p:
+            browser = p.chromium.launch(executable_path=str(chromium))
+            page = browser.new_page(viewport={"width": 1500, "height": 900})
+            page.goto(host.launch_url)
+            page.goto(f"{host.origin}/accounts/{cib}/import/{batch}")
+            assert page.locator(".import-line").count() == 0
+            page.locator(".import-question[data-state=needs] [data-question-open]").click()
+            page.wait_for_selector(".import-question[data-state=needs] .import-line")
+            assert page.locator(".import-line").count() == 1
+            needs = next(r for r in rows if r["Counterparty"] == "Somebody new")["_import_row_id"]
+            page.locator(f"#category-{needs}").evaluate(
+                f"e => {{ e.value = '{cats['EXP.PERSONAL.FOOD'].id}'; e.dispatchEvent(new Event('change', {{bubbles: true}})); }}")
+            page.locator("button.btn.primary", has_text="Post ready rows").first.click()
+            page.wait_for_selector("text=Some rows still need review")
+            assert page.locator(".import-summary").count() == 1
+            browser.close()
+    finally:
+        host.stop()
+    assert c.bank_imports.summary(batch)["posted"] == 4

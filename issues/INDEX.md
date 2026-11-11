@@ -56,11 +56,6 @@ The owner can keep real money in Lightning: nothing is lost on restore, reboot, 
 | IT-2A4 | ↳ Restore screens and docs | | | M | Opus | |
 | IT-2A5 | ↳ Reboot drill on an ordinary PC | | | owner |  | |
 | **IT-2C** | [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidence repair](2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) | improvement, technical | Protect | L | Opus | ready |
-| IT-2C2 | ↳ Legacy import | | | M | Opus | |
-| IT-2C3 | ↳ Restore a backup from anywhere (Windows Open dialog) | | | M | Opus | |
-| IT-2C4 | ↳ Unresolved-evidence repair | | | M | Opus | |
-| IT-2C5 | ↳ Native reminder delivery: test what runs on Windows | | | S | Sonnet | |
-| IT-2C6 | ↳ One ordinary-PC acceptance sheet | | | S | Sonnet | |
 | IT-2C1 | ↳ Owner: run the ordinary-PC sheet | | | owner |  | |
 | **NF-2AJ** | [A failed data check reaches Needs you - today a check that reads ISSUE is visible only to someone who opens Settings › Data checks](2-safe-for-real-money/NF-2AJ-a-failed-data-check-reaches-needs-you.md) | new feature | Protect | M | Opus | ready |
 
@@ -180,7 +175,6 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) ([#490](https://github.com/LightningEg/Lightning/issues/490)) | improvement, visual | Capture | S | Sonnet | ready |
 | **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually uses](7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | improvement, visual | Capture | M | Sonnet | new |
 | **NF-7AB** | [Import review asks the file's few questions instead of showing every row](7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | new feature | Capture | L | Opus | ready |
-| NF-7AB1 | ↳ Summary first, rows last | | | M | Opus | |
 | NF-7AB3 | ↳ Group by the question, not the name | | | M | Opus | |
 | NF-7AB2 | ↳ Post in rounds, continue from the account | | | S | Sonnet | |
 | NF-7AB6 | ↳ Safe to go fast: Undo and the balance on the result | | | S | Sonnet | |

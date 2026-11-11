@@ -98,7 +98,7 @@ def test_import_picker_keeps_same_named_account_and_counterparty_choices_distinc
         with sync_playwright() as pw:
             browser=pw.chromium.launch(executable_path=executable,args=['--no-sandbox'])
             page=browser.new_page(viewport={'width':390 if phone else 1366,'height':900})
-            page.goto(f'{host.origin}/accounts/{bank.id}/import/{batch}')
+            page.goto(f'{host.origin}/accounts/{bank.id}/import/{batch}?rows=all')
             input_=page.locator(f'#cp-{rid}')
             assert page.locator(f'#cp-pick-{rid}').input_value()==''
             input_.fill(wallet.name)

@@ -1,0 +1,25 @@
+{# NF-7AB1: the file's questions first. One line per state of the rows still waiting, worst first, each with its count
+   and one button; the rows load into the line only when it is opened (/groups?state=…). "Post them" posts every
+   ready row with Lightning's own choices. Lines, not cards: they sit inside the review card (A16, no card in a card). #}
+{% set words = {
+  'err': ('To fix', 'Lightning could not read these lines.', 'See why'),
+  'needs': ('Needs you', 'No category or account yet.', 'Place them'),
+  'dup': ('Possible duplicates', 'Same date and amount as an entry you already have.', 'Check them'),
+  'ready': ('Ready', 'Lightning knows where these go.', 'Show them'),
+  'skipped': ('Skipped', 'Balance rows and lines you chose to leave out.', ''),
+} %}
+<div class="import-summary">
+  {% for card in cards %}{% set w = words[card.state] %}
+  <div class="import-question is-{{ card.state }}" data-state="{{ card.state }}">
+    <div class="import-question-head">
+      <span class="import-question-name"><b>{{ w[0]|tr(locale) }}</b><small>{{ w[1]|tr(locale) }}</small></span>
+      <b class="num import-question-n">{{ card.n }}</b>
+      <span class="import-question-actions">{% if card.state == 'ready' %}<button class="btn primary" formaction="/accounts/{{ account.id }}/import/{{ batch.id }}/post-ready">{{ 'Post them'|tr(locale) }}</button>{% endif %}{% if w[2] %}<button type="button" class="btn" data-question-open aria-expanded="false">{{ w[2]|tr(locale) }}</button>{% endif %}</span>
+    </div>
+    {% if w[2] %}<div class="import-question-rows" hidden>
+      <div class="import-head" aria-hidden="true"><span></span><span>{{ 'Date'|tr(locale) }}</span><span>{{ 'Counterparty or account'|tr(locale) }}</span><span>{{ 'Category'|tr(locale) }}</span><span>{{ 'Held for'|tr(locale) }}</span><span>{{ 'Notes'|tr(locale) }}</span><span>{{ 'Amount'|tr(locale) }}</span><span>{{ 'Status'|tr(locale) }}</span></div>
+      <div class="actions import-more" data-more-url="/accounts/{{ account.id }}/import/{{ batch.id }}/groups?state={{ card.state }}" data-next="0" hidden><button type="button" class="btn" data-import-more>{{ 'Show more rows'|tr(locale) }} <span class="muted num"></span></button></div>
+    </div>{% endif %}
+  </div>
+  {% endfor %}
+</div>
