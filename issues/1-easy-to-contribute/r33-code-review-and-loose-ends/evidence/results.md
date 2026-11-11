@@ -74,7 +74,7 @@ load_mohab_2026 extra 4000 identical: True  before 61 ms after 4 ms per period; 
 - Longest: `runtime/app.py:profile_app` 589 lines, `ui/journal.py:create_journal_app` 361, `ui/routes/budget.py:_page` 330.
 - Most complex: `budget._page` 168, `register.page` 132, `bank_import_posting._post_import_row` 101,
   `bank_import_proposals._preview` 77, `investments.portfolio` 72, `settings.settings_page` 62, `restore.resume_interrupted_restore` 62.
-- Unused names: see IT-1Z for the list and how each was confirmed.
+- Unused names: IT-1Z (done) removed the unused names; the test-only list is in the Overview, section 2.
 - `style.css`: 1,486 class names; 378 appear in no template, script or Python file under `lightning/ui/` after
   leaving out every name that starts with a prefix some template builds (`tone-`, `is-`, `surface-`, ...); 941 of 3,823
   rules use only such names. Examples: `.birdview-position-grid`, `.allocation-bar-row`, `.budget-bridge`, `.avatar`.

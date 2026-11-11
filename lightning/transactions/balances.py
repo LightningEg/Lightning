@@ -144,7 +144,9 @@ class BalanceChecks:
                         line.effect == Effect.REVALUATION and line.quantity == ZERO and not line.is_cash and
                         is_certificate):
                     continue
-                if not is_certificate or doc_type not in {DocType.BUY, DocType.SEL}:
+                # NF-12I: a certificate already owned when tracking began is an opening unit line.
+                owned_opening = doc_type == DocType.OPN and line.effect == Effect.OPENING and not line.is_cash
+                if not is_certificate or (doc_type not in {DocType.BUY, DocType.SEL} and not owned_opening):
                     raise ValidationError("Only CD certificates can be traded in a CD portfolio.", "asset")
             elif is_certificate:
                 raise ValidationError("Certificates must be held in a bank-specific CD portfolio.", "account")

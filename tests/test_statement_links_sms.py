@@ -59,5 +59,5 @@ def test_the_review_page_says_the_payment_came_from_an_sms(c, setup):
     sms = _post_sms(c, accounts)
     batch_id, _ = c.bank_imports.stage(accounts["cib"].id, "statement.csv",
                                        f"Date,Counterparty,Amount\n{sms['Date']},UBER,{sms['Amount']}\n".encode())
-    page = TestClient(create_app(c)).get(f"/accounts/{accounts['cib'].id}/import/{batch_id}")
+    page = TestClient(create_app(c)).get(f"/accounts/{accounts['cib'].id}/import/{batch_id}?rows=all")
     assert page.status_code == 200 and "recorded from your SMS" in page.text

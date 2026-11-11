@@ -42,20 +42,24 @@ def _history(c, monkeypatch):
     _years_of_history(c, 2)
 
 
-def test_the_phone_overview_reads_far_less_than_the_pc_one(c, monkeypatch):
+def test_the_phone_home_reads_far_less_than_the_pc_overview(c, monkeypatch):
+    """The phone's own Home asks only for what it shows (IV-3AY: "each screen asks only for what it shows"). The older
+    phone Overview, which skipped work inside the PC route, is no longer the phone's first page (3AY11)."""
+    from lightning.ui.phone.router import mount_phone
     _history(c, monkeypatch)
-    app = web.create_app(c)
-    with TestClient(app) as pc, TestClient(_as_phone(app)) as phone:
+    app, phone_app = web.create_app(c), web.create_app(c)
+    mount_phone(phone_app)
+    with TestClient(app) as pc, TestClient(_as_phone(phone_app)) as phone:
         pc.get("/"), phone.get("/")  # settle first-visit work
         pc_page, pc_reads = _reads(c, monkeypatch, lambda: pc.get("/"))
         phone_page, phone_reads = _reads(c, monkeypatch, lambda: phone.get("/"))
     assert pc_page.status_code == 200 and phone_page.status_code == 200
-    assert 'class="phone-tabbar"' in phone_page.text
-    assert phone_reads <= PHONE_HOME_BUDGET, f"phone Overview ran {phone_reads} SELECT statements"
+    assert 'class="phone-tabbar"' in phone_page.text and "phone-home-hero" in phone_page.text
+    assert phone_reads <= PHONE_HOME_BUDGET, f"phone Home ran {phone_reads} SELECT statements"
     assert phone_reads < pc_reads * 0.8
 
 
-# Measured 2026-10-28: the PC Overview ran 358, the phone 379 before B1 and 244 after (folds load when opened).
+# The budget the older phone Overview met after B1 (244 reads, measured 2026-10-28); Home stays under it.
 PHONE_HOME_BUDGET = 260
 
 
@@ -91,9 +95,11 @@ def test_quick_add_saves_once_however_often_it_is_sent(c, monkeypatch):
 
 def test_an_overview_fold_draws_when_opened(c, monkeypatch):
     _history(c, monkeypatch)
+    from lightning.ui.phone.router import mount_phone
     app = web.create_app(c)
+    mount_phone(app)  # the fold is the phone router's route (3AY18); a period link still reaches the older Overview
     with TestClient(_as_phone(app)) as phone:
-        page = phone.get("/")
+        page = phone.get("/?period=month")
         trend = phone.get("/overview/fold/trend")
         money = phone.get("/overview/fold/money-in?period=month&month=2026-09")
         missing = phone.get("/overview/fold/nope")

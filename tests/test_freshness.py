@@ -6,6 +6,7 @@ import pytest
 
 from lightning.database.currencies import CurrencyRegistry
 from lightning.planning.freshness import NO_PRICE, NO_RATE, STALE_PRICE, STALE_RATE
+from tests.screens import said
 
 
 @pytest.fixture
@@ -72,7 +73,7 @@ def test_the_explanation_popup_lists_them_in_both_languages(held):
     with TestClient(app) as browser:
         page = browser.get("/explain/owned?period=all&month=2026-12")
         assert page.status_code == 200
-        assert "is valued from a price dated 2026-09-10, 112 days ago." in page.text
+        assert said("is valued from a price dated 2026-09-10, 112 days ago.") in page.text
         assert "What this figure leans on" in page.text and 'href="/investments/prices"' in page.text
         browser.post("/settings/locale", data={"locale": "ar"}, follow_redirects=False)
         arabic = browser.get("/explain/owned?period=all&month=2026-12")

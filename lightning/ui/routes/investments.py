@@ -9,6 +9,7 @@ from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
+from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, parse_date, parse_month, today
 from lightning.core.errors import LightningError, NotFoundError, ValidationError
 from lightning.core.refs import DocType
@@ -199,13 +200,13 @@ async def portfolio(request: Request):
                    else kpis.compare("A dated price is missing, so the result is unavailable"))
         ret = p.display_return if not p.has_other_owners else None
         spark, change = extras["value_spark"], extras["hero_change"]
-        six = (f"{fmt(change, 0, True)} since six months ago" + (f", not counting {fmt(spark['added'], 0)} of opening balances"
+        six = (f"{fmt(change, 0, True)} since six months ago" + (f", excluding {fmt(spark['added'], 0)} you already owned"
                                                                   if spark.get("added") else "")) if change is not None else ""
         since = f"Return since purchase {signed_pct(ret.percent)}%" if ret and ret.percent is not None else ""
         if result is not None and not result and current and change is not None:
             # A08.5 (3Q2): nothing has moved yet this period, so the comparison is the last six months, not a dead 0
             compare = kpis.compare("since six months ago", fmt(change, 0, True), "good" if change >= 0 else "bad")
-            six = f"{label('result')} 0" + (f", not counting {fmt(spark['added'], 0)} of opening balances"
+            six = f"{label('result')} 0" + (f", excluding {fmt(spark['added'], 0)} you already owned"
                                                    if spark.get("added") else "")
         lead = kpis.card(label("portfolio_value"), value, compare, tone="hold", key="value", chip_=kpis.chip(chip_text),
                          visual=kpis.segments([("Cost", owned_cost, "neutral"), ("Unrealized gain", owned_unrealized, "in")]),
@@ -233,9 +234,7 @@ async def portfolio(request: Request):
                   owned_positions=owned_positions, max_class_result=max_class_result,
                   allocation_classes=allocation_classes, own_units_by_holding=own_units_by_holding,
                   starting_owned_value=starting_owned_value, period_value_change=owned_value-starting_owned_value,
-                  investment_report=investment_report, base=c.reporting.base_currency,
-                  invest_phone=_phone_parts(c, request, period, extras, current)
-                  if getattr(request.state, "phone", False) else None)
+                  investment_report=investment_report, base=c.reporting.base_currency)
 
 
 def _link(request: Request, **changes) -> str:
@@ -243,70 +242,6 @@ def _link(request: Request, **changes) -> str:
     query = {**dict(request.query_params), **changes}
     query = {k: v for k, v in query.items() if v not in (None, "")}
     return "/investments" + ("?" + urlencode(query) if query else "")
-
-
-PHONE_RANGES = (("month", "Month"), ("ytd", "YTD"), ("all", "All"))
-PHONE_HOLDINGS_SHOWN = 5  # the page lists the biggest five; "See all" lists every holding, grouped
-
-_SENTENCES = {(True, True): "Up {amt} {when} ({pct}).", (True, False): "Up {amt} {when}.",
-              (False, True): "Down {amt} {when} ({pct}).", (False, False): "Down {amt} {when}."}
-
-
-def _signed_percent(value) -> str | None:
-    """+1.9% or −0.4%, one decimal, a real minus sign; a value that rounds to zero reads 0.0% (as the signed_pct filter)."""
-    if value is None:
-        return None
-    return signed_pct(value) + "%"
-
-
-def _when_phrase(period, current: bool, locale: str) -> str:
-    """How the period reads inside the hero sentence: this month, in 2026-09, this year, since your first record."""
-    if period.key == "month":
-        return translate("this month", locale) if current else translate("in {month}", locale, month=period.start_text[:7])
-    return translate({"ytd": "this year", "all": "since your first record"}.get(period.key, "in these dates"), locale)
-
-
-def _phone_hero_line(result, growth, period, current: bool, locale: str) -> dict:
-    """One calm sentence under Portfolio value: "Up 7,956 this month (+1.9%)." When there is no result, the page's own
-    status sentence says why (a missing price) or that nothing moved."""
-    if result is None or result == ZERO:
-        return page_status.investments(result, True, period.key, current)
-    pct = _signed_percent(growth)
-    values = {"amt": fmt(abs(result), 0), "when": _when_phrase(period, current, locale)}
-    if pct is not None:
-        values["pct"] = pct
-    return page_status.sentence(_SENTENCES[(result > ZERO, pct is not None)], **values)
-
-
-def _phone_value_line(c, period, divisor: Decimal) -> tuple[Decimal, dict]:
-    """Portfolio value on the period's last day, and the line of it from the first day to the last: seven dates
-    spread evenly (five or three on a very short period), so the chart can name its first, middle and last."""
-    span = (period.end - period.start).days
-    count = 7 if span >= 6 else 5 if span >= 4 else 3 if span >= 2 else 0
-    days = [period.start + timedelta(days=round(span * i / (count - 1))) for i in range(count)] if count else []
-    values = [c.position.portfolio_value_at(day) / divisor for day in days]
-    series = [{"name": label("portfolio_value"), "tone": "hold", "area": True, "values": values}]
-    end_value = values[-1] if values else c.position.portfolio_value_at(period.end) / divisor
-    return end_value, {**charts.trend([fmt_date(day) for day in days], series), "count": count}
-
-
-def _phone_parts(c, request: Request, period, extras: dict, current: bool) -> dict:
-    """What the phone's Investments page adds to the PC's figures: the hero (Portfolio value at the period's end and
-    one sentence), the value line with its Month / YTD / All links, and the holdings as one flat list, biggest first
-    (the biggest five, or every holding grouped when asked: ?holdings=all)."""
-    value, chart = _phone_value_line(c, period, extras["lens"]["divisor"])
-    rows = [r for g in extras["holding_groups"] for r in g["rows"]]
-    rows.sort(key=lambda r: (r["value"] is None, -(r["value"] or ZERO), (r["h"].asset_name if r["h"] else r["name"]).casefold()))
-    expanded = request.query_params.get("holdings") == "all" and len(rows) > PHONE_HOLDINGS_SHOWN
-    return {"value": value, "chart": chart, "expanded": expanded,
-            "line": _phone_hero_line(extras["hero_result"], extras["growth"], period, current,
-                                     "ar" if c.settings.get("locale") == "ar" else "en"),
-            "rows": rows if expanded else rows[:PHONE_HOLDINGS_SHOWN],
-            "more": len(rows) > PHONE_HOLDINGS_SHOWN,
-            "all_link": _link(request, holdings="all") + "#holdings-heading",
-            "fewer_link": _link(request, holdings=None) + "#holdings-heading",
-            "ranges": [{"key": key, "text": text, "selected": period.key == key,
-                        "href": _link(request, period=key)} for key, text in PHONE_RANGES]}
 
 
 def _view_extras(c, request: Request, extras: dict, report: dict, day: str) -> dict:
@@ -360,7 +295,7 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
     spark = _portfolio_value_spark(c, today())
     breakdown = c.position.investment_breakdown(day, owned_rows, report)
     holding_groups, horizons = breakdown.groups, breakdown.horizons
-    balances, holdings_total = breakdown.balances, breakdown.total
+    holdings_total = breakdown.total
     biggest = charts.bars_with_other([{"label": r["name"], "value": r["value"], "note": f"{r['weight']:.1f}% · {g['name']}",
                             "href": f"/accounts/{r['account_id']}"} if r["h"] is None else
                            {"label": r["h"].asset_name, "value": r["value"], "note": f"{r['weight']:.1f}% · {r['h'].asset_class.split(' › ')[-1]}",
@@ -373,29 +308,18 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
     paid_before = {(x.account_id, x.asset_id): x.owned_dividends for x in before.positions}
     dividends = charts.bars([{"label": x.asset_name, "value": x.owned_dividends - paid_before.get((x.account_id, x.asset_id), ZERO)}
                              for x in current.positions], 8)
-    # The period's flows: money added and taken out, then how each class's value moved.
-    start_values: dict[str, Decimal] = defaultdict(lambda: ZERO)
-    for old in prior.positions:
-        if not old.quantity or old.value is None:
-            continue
-        others = prior_custody.get((old.account_id, old.asset_id), ZERO)
-        held = c.reporting.value_of(old.asset_id, others, before_day).value if others else ZERO
-        start_values[old.asset_class.split(" › ")[-1]] += old.value - (held or ZERO)
-    traded_before = {(x.account_id, x.asset_id) for x in prior.positions if x.quantity}
-    for cls in c.position.at(before_day).classes:   # balance-only assets, as in the table
-        for item in cls.items:
-            if (item.account_id, item.asset_id) not in traded_before and item.value:
-                start_values[cls.name] += item.value
-    # Recording what you already had (an opening balance dated inside the period) is not a change in
-    # its value: count it as part of where the period started (audit 2026-10-05 #14).
-    openings = c.reporting.opening_by_holding(period.start_text, period.end_text)
-    for h, *_ in owned_rows:
-        start_values[h.asset_class.split(" › ")[-1]] += openings.get((h.account_id, h.asset_id), ZERO)
-    for name, item in balances:
-        start_values[name] += openings.get((item.account_id, item.asset_id), ZERO)
-    end_values = {g["name"]: g["value"] for g in holding_groups}
-    class_changes = sorted(((name, end_values.get(name, ZERO) - start_values.get(name, ZERO))
-                            for name in set(start_values) | set(end_values)), key=lambda item: -abs(item[1]))
+    # The period's flows: money added and taken out, then how each class's prices moved.
+    # Price change per class, the report's own part (what a purchase adds is money in, shown beside, never value
+    # gained: r30 N1). Rows are keyed by holding, then folded into the holding's class.
+    class_of = {(h.asset_id, h.account_id): h.asset_class.split(" › ")[-1] for h, *_ in owned_rows}
+    class_of.update({(x.asset_id, x.account_id): x.asset_class.split(" › ")[-1] for x in prior.positions})
+    price_part = next(part for part in explain_period(report, period.start_text, period.end_text)["parts"] if part["key"] == "price")
+    by_class: dict[str, Decimal] = defaultdict(lambda: ZERO)
+    for row in price_part["rows"]:
+        name = class_of.get((row.get("asset_id"), row.get("account_id")))
+        if name:
+            by_class[name] += row["amount"]
+    class_changes = sorted(by_class.items(), key=lambda item: -abs(item[1]))
     flow_rows = ([row for row in ({"label": "Money in", "value": report["new_money"], "group": "money"},
                                   {"label": "Money out", "value": -report["withdrawn"], "group": "money"}) if row["value"]]
                  + [{"label": name, "value": change, "group": "class"} for name, change in class_changes if change])
@@ -424,7 +348,6 @@ async def calculate_planner(request: Request):
         if str(form.get("monthly_goal", "")).strip():
             c.settings.set("investment_monthly_goal", str(to_decimal(str(form.get("monthly_goal")), "monthly_goal")))
     return await _render_planner(request,str(form.get("amount","10000")))
-
 
 
 @router.post("/risk-free-rate")
@@ -628,13 +551,26 @@ async def save_asset_plan(request: Request,asset_id:int):
 
 
 # -- trades -------------------------------------------------------------------
+def _tradable_assets(c, keep: str = ""):
+    """What the trade form can take: not a price reference, a certificate or a physical item (each has its own door)."""
+    return [a for a in c.assets.investments(active_only=True)
+            if str(a.id) == keep or not a.code.startswith(("REF:", "CD:", "OTH:ITEM-"))]
+
+
+def _cash_accounts(c, keep: str = ""):
+    """Where the money comes from or goes to: bank, cash and wallet accounts, never a CD portfolio or gam'eya."""
+    return [a for a in c.accounts.list(active_only=True)
+            if str(a.id) == keep or a.account_type in (AccountType.BANK, AccountType.CASH, AccountType.CASH_AT_HAND)]
+
+
 def _form(request: Request, kind: str, values: dict, txn=None, error: LightningError | None = None, status=200):
     c = container(request)
     return render(request, "investments/form.html", status_code=status, kind=kind, title=KINDS[kind][0],
                   spec=events.form_fields(kind) if kind in events.EVENTS else None,
                   hint=KINDS[kind][1], values=values, txn=txn,
                   holding_accounts=c.investments.investment_accounts(), all_accounts=c.accounts.list(active_only=True),
-                  assets=c.assets.investments(active_only=True),
+                  assets=_tradable_assets(c, values.get("asset_id", "")),
+                  cash_accounts=_cash_accounts(c, values.get("cash_account_id", "")),
                   counterparties=c.counterparties.list_active(), owners=c.counterparties.list_people(),
                   error=error.message if error else "", error_field=(error.field or "") if error else "")
 
@@ -688,6 +624,15 @@ def _save(request: Request, kind: str, v: dict, txn_id: int | None = None):
                               v["notes"], owner)
 
     return txn
+
+
+@router.get("/add")
+async def add_investment(request: Request):
+    """One door (r30 E1-E4): ask what it is, then go to the short form that fits."""
+    c = container(request)
+    cd = next((a for a in c.accounts.list(active_only=True) if a.account_type == AccountType.DEPOSIT), None)
+    return render(request, "investments/add.html",
+                  certificate_href=f"/accounts/{cd.id}" if cd else "/accounts/new?type=DEPOSIT")
 
 
 @router.get("/new")

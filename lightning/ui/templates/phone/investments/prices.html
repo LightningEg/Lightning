@@ -1,0 +1,46 @@
+{# Investment prices on the phone (3AY16): prices still needed first, Update prices, then each investment as a row
+   with its last price and a field for a new one. Spreadsheet, shared files and market.zip sit in sheets. #}
+{% extends "base.html" %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% block title %}Investment prices{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/investments"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Investments'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Prices'|tr(locale) }}</h1>{% endblock %}
+{% block content %}{% set session = request.state.session_token|default('') %}
+{% if pending %}
+<form method="post" class="phone-form phone-section" autocomplete="off" id="missing">
+  <header class="phone-section-head"><h2>{{ 'Prices needed to complete reevaluations'|tr(locale) }}</h2></header>
+  <p class="phone-note">These month-end checkpoints are waiting for a price. Get prices asks the sources again; {% if fails >= 2 and market %}they failed the last {{ fails }} times, so you can use the shared prices instead, or {% else %}or {% endif %}enter each price below. Its account return is then posted to the main ledger.</p>
+  <button class="btn phone-save" formaction="/investments/prices/online" formnovalidate data-busy="Fetching prices…">{{ 'Get prices'|tr(locale) }}</button>{% if fails >= 2 and market %}<button class="btn phone-save" formaction="/investments/prices/market/update" formnovalidate data-busy="Downloading…">{{ 'Use shared prices'|tr(locale) }}</button>{% endif %}
+  <div class="phone-rows">{% for row in pending %}<div class="phone-row"><span>{{ row.asset_name }}<small>{{ row.date }}</small></span><input name="rp_{{ row.asset_id }}_{{ row.date }}" inputmode="decimal" placeholder="{{ 'Price per unit'|tr(locale) }}" aria-label="{{ row.asset_name }} · {{ row.date }}" required data-row-amount></div>{% endfor %}</div>
+  <button class="btn primary phone-save">{{ 'Save missing prices'|tr(locale) }}</button>
+<input type="hidden" name="__session" value="{{ session }}"></form>
+{% endif %}
+<section class="phone-section" aria-labelledby="price-files">
+  <header class="phone-section-head"><h2 id="price-files">{{ 'Update prices'|tr(locale) }}</h2></header>
+  <form method="post" class="phone-form" action="/investments/prices/online"><button class="btn primary phone-save" data-busy="Fetching prices…">{{ 'Update prices'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ session }}"></form>
+  <div class="phone-rows">
+  {% set row %}<span>{{ 'Where prices come from'|tr(locale) }}</span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('Where prices come from'|tr(locale), row) %}<p>{{ 'A price you type wins over the price files and the last trade price for the same day.'|tr(locale) }}</p><p>{{ 'Sources: TradingView and Yahoo Finance for stocks, Mubasher for funds, and for gold an estimate from the world price and the dollar’s rate (Yahoo Finance). Month-end prices make your monthly returns.'|tr(locale) }}</p>{% endcall %}
+  {% set row %}<span>{{ 'Upload prices from a spreadsheet'|tr(locale) }}</span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('Upload prices from a spreadsheet'|tr(locale), row) %}<form method="post" enctype="multipart/form-data" action="/investments/prices/csv" class="phone-form" id="price-csv"><input type="file" name="file" accept=".csv,text/csv" required aria-label="{{ 'CSV file'|tr(locale) }}"><p class="phone-note">{{ 'Columns: Symbol or Name, Date, Price.'|tr(locale) }}</p><button class="btn primary phone-save">{{ 'Upload prices'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ session }}"></form>{% endcall %}
+  {% set row %}<span>{{ 'Shared price files'|tr(locale) }}{% if market %}<small>{{ market|selectattr('have')|list|length }} / {{ market|length }}</small>{% endif %}</span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('Shared price files'|tr(locale), row) %}
+  {% if market %}<div class="phone-rows">{% for m in market %}<div class="phone-row"><span>{{ m.name }}<small>{% if m.have %}{{ m.have.last_date }} · {{ m.have.created_at }}, {{ m.have.origin|tr(locale) }}{% else %}{{ 'Not downloaded yet'|tr(locale) }}{% endif %}</small></span><b>{{ m.have.instruments if m.have else '—' }}</b></div>{% endfor %}</div>
+  {% set cited = market | selectattr('have') | selectattr('source') | map(attribute='source') | unique | list %}
+  <p class="phone-note">{{ "Lightning collects prices every day as a backup. If a source fails for you, download them and fill each investment's month-end and latest prices from them."|tr(locale) }}{% if cited %} {{ 'Source'|tr(locale) }}: {{ cited | map('tr', locale) | join('; ') }}.{% endif %}</p>
+  <form method="post" class="phone-form" action="/investments/prices/market/fill"><button class="btn phone-save" formaction="/investments/prices/market/update" data-busy="Downloading…">{{ 'Download shared prices'|tr(locale) }}</button>{% if market | selectattr('have') | list %}<button class="btn phone-save">{{ 'Fill from price files'|tr(locale) }}</button>{% endif %}<input type="hidden" name="__session" value="{{ session }}"></form>
+  {% else %}<p class="phone-note">{{ 'You follow no markets.'|tr(locale) }}</p>{% endif %}
+  <a class="phone-row" href="/investments/prices/markets"><span>{{ 'Choose markets'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  <form method="post" enctype="multipart/form-data" action="/investments/prices/market/import" class="phone-form"><label for="market-zip">{{ 'Import a file'|tr(locale) }} · market.zip</label><input id="market-zip" type="file" name="file" accept=".zip,application/zip" required><p class="phone-note">{{ 'From a newer Lightning or another device. A pack older than yours is skipped.'|tr(locale) }}</p><button class="btn phone-save">{{ 'Import and fill'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ session }}"></form>
+  {% endcall %}
+  </div>
+</section>
+<form method="post" class="phone-form phone-section" autocomplete="off">
+  <label for="date">{{ 'As of'|tr(locale) }}</label><input type="text" id="date" name="date" value="{{ day }}" placeholder="yyyy-mm-dd" inputmode="numeric" autocomplete="off" data-smart-date required>
+  {% if rows %}<div class="phone-rows">{% for r in rows %}
+    <div class="phone-row" id="asset-{{ r.asset.id }}"><span><a href="/investments/assets/{{ r.asset.id }}/edit">{{ r.asset.name }}</a><small>{% if r.held %}<span>{{ r.held.quantity|units_of(r.asset.unit) }}</span> · {% endif %}{% if r.price is not none %}<bdi class="fig">{{ r.price|units }}{% if r.asset.currency != base %} {{ r.asset.currency }}{% endif %}</bdi> · {{ r.price_date }}{% else %}{{ 'none'|tr(locale) }}{% endif %}</small></span>
+      {% if not r.is_certificate %}<input type="text" name="p_{{ r.asset.id }}" inputmode="decimal" placeholder="{{ r.price|money(False, 4) if r.price is not none else '' }}" aria-label="{{ 'New price per unit'|tr(locale) }} · {{ r.asset.name }}" data-row-amount>{% else %}<b class="muted">{{ 'Set at purchase'|tr(locale) }}</b>{% endif %}</div>{% endfor %}
+  </div>{% else %}<p class="phone-note">{{ 'No investments yet.'|tr(locale) }} <a href="/investments/assets/new">{{ 'Add one'|tr(locale) }}</a>.</p>{% endif %}
+  <button class="btn primary phone-save">{{ 'Save prices'|tr(locale) }}</button>
+<input type="hidden" name="__session" value="{{ session }}"></form>
+{% endblock %}

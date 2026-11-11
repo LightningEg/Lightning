@@ -99,5 +99,5 @@ def test_where_money_in_went_splits_kept_into_invested_and_the_rest(c, setup, mo
     sankey = _visuals.cash_flow_charts(c, _date(2026, 12, 1), _date(2026, 12, 31), False, _date(2026, 12, 31))["money_sankey"]
     targets = {t["label"]: (t["value"], t["tone"]) for t in sankey["targets"]}
     assert targets["Invested"] == (Decimal("2500"), "hold")
-    assert targets["Kept"] == (Decimal("3500"), "in")
+    assert targets["Kept as cash"] == (Decimal("3500"), "in")
     assert sum(v for v, _ in targets.values()) == Decimal("10000")

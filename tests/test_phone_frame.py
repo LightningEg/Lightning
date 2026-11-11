@@ -248,7 +248,7 @@ def test_a_bill_further_than_three_days_off_is_not_named(c, setup, monkeypatch):
 
 
 def test_the_due_line_says_today_tomorrow_days_and_late():
-    from lightning.ui.routes.dashboard import _due_line
+    from lightning.ui.phone.presenters.overview import _due_line
     text = lambda *a: (lambda s: s["text"].format(**s["values"]))(_due_line(*a))
     assert text("Landlord", "12,000", 2, 0) == "Landlord 12,000 in 2 days"
     assert text("Landlord", "12,000", 1, 0) == "Landlord 12,000 tomorrow"
@@ -270,9 +270,9 @@ def test_the_weekly_review_keeps_money_chosen_and_the_old_more_is_gone(phone):
 def test_financial_health_puts_what_needs_you_under_its_lead_and_the_chart_in_its_own_card(phone):
     """Audit 10, F20 (C12: one chart per card): on the phone the savings rate over time leaves the lead card."""
     html = phone.get("/financial-health").text
-    lead = re.search(r'(?s)<section class="card lead-card lead-hero".*?</section>', html).group(0)
-    assert "lead-side" not in lead and "health-over-time-heading" not in lead
-    assert html.index('id="health-limits-heading"') < html.index('class="card phone-card health-side"')
+    lead = re.search(r'(?s)<section class="phone-hero has-seam".*?</section>', html).group(0)
+    assert "health-over-time-heading" not in lead
+    assert html.index('id="hg-1"') < html.index('id="health-over-time-heading"')   # the limits, then the line over time
 
 
 def test_financial_health_holds_the_savings_and_investing_rates_the_overview_gave_up(phone):
@@ -285,7 +285,7 @@ def test_financial_health_holds_the_savings_and_investing_rates_the_overview_gav
 
 def test_needs_you_names_what_is_inside_and_a_match_is_not_a_bill():
     """3AN1 (P6): the payments group holds bills, interest to match and payments to check; each is named as itself."""
-    from lightning.ui.routes.dashboard import _needs_parts
+    from lightning.ui.phone.presenters.overview import _needs_parts
     match = {"label": "CD: 1 interest payment to match", "href": "/deposits/3#interest-receipts"}
     bill = {"label": "Bill due: Internet", "href": "/plan/items/1/pay?due=2026-12-01&back=%2F"}
     early = {"label": "Rent was paid early", "href": "/plan/items/2/pay?due=2026-12-01&back=%2F"}

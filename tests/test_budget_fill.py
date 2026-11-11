@@ -44,6 +44,34 @@ def test_last_month_identifies_repeated_amounts_already_in_use(c, setup):
     assert not row.selected
 
 
+def test_average_source_uses_three_full_months_and_one_month_of_history(c, setup):
+    accounts, _ = setup
+    food = _food(c)
+    for month, amount in (("2026-09", "3000"), ("2026-10", "4000"), ("2026-11", "5200")):
+        c.transactions.record_outflow(f"{month}-12", accounts["cib"].id, amount, food.id)
+    c.budgets.set_budget(food.id, "2026-12", "1000", only_this_month=True, schedule=c.schedules.view())
+
+    row = next(row for row in _proposal(c, "average").rows if row.category_id == food.id)
+
+    assert row.amount == Decimal("4100")  # 4,066.67 shown as a tidy figure
+    assert row.source == "Your average" and row.current_amount == Decimal("1000")
+    assert row.selected and "3 months" in row.note
+
+    # Only one month of history: that month is the figure.
+    other = c.categories.get_by_code("EXP.PERSONAL.TRANSPORT")
+    c.transactions.record_outflow("2026-11-03", accounts["cib"].id, "900", other.id)
+    row = next(row for row in _proposal(c, "average").rows if row.category_id == other.id)
+    assert row.amount == Decimal("900")
+
+
+def test_average_source_skips_one_off_categories(c, setup):
+    accounts, _ = setup
+    food = _food(c)
+    c.transactions.record_outflow("2026-11-12", accounts["cib"].id, "5000", food.id)
+    c.budgets.set_one_off(food.id, True)
+    assert all(row.category_id != food.id for row in _proposal(c, "average").rows)
+
+
 def test_schedule_sums_bills_and_subscriptions_but_excludes_skips_and_loans(c, setup):
     accounts, _ = setup
     food = _food(c)
@@ -149,6 +177,6 @@ def test_budget_fill_screen_reviews_and_posts_month_only_edits(c, setup):
         "source": "last_month", "selected": str(food.id), f"amount_{food.id}": "5200",
     })
 
-    assert "Applied 1 budget for 2026-12 only" in response.text
+    assert "Applied 1 budget for December 2026 only" in response.text
     assert c.budgets.amounts_for("2026-12", loans=False, schedule=c.schedules.view())[food.id][0] == Decimal("5200")
     assert c.budgets.amounts_for("2027-01", loans=False, schedule=c.schedules.view())[food.id][0] == Decimal("4000")

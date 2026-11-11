@@ -1,0 +1,22 @@
+{# A physical item on the phone (3AY17): one column of fields. #}
+{% extends "base.html" %}
+{% block title %}{{ ('Edit item' if item else 'Add physical item')|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ ('Edit ' ~ values.name) if item else 'Add a physical item'|tr(locale) }}</h1><p class="phone-note">{{ "Track one named piece. Weight excludes stones and other non-gold parts."|tr(locale) }}</p>{% endblock %}
+{% block content %}
+<form method="post" class="phone-form phone-fields" {% if item %}data-popup-autosave{% endif %}>
+  {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
+  <div class="phone-fields">
+    <div class="field {{ 'has-error' if error_field == 'name' }}"><label for="name">{{ 'Name'|tr(locale) }}</label><input id="name" name="name" value="{{ values.name }}" placeholder="{{ 'e.g. Gold ring'|tr(locale) }}" required></div>
+    <div class="field {{ 'has-error' if error_field == 'kind' }}"><label for="kind">{{ 'Type'|tr(locale) }}</label><input id="kind" name="kind" value="{{ values.kind }}" placeholder="{{ 'Ring, bar, coin'|tr(locale) }}" required></div>
+  </div>
+  <div class="phone-fields">
+  <div class="field {{ 'has-error' if error_field == 'weight' }}"><label for="weight">{{ 'Net gold weight per piece (g)'|tr(locale) }}</label><input id="weight" name="weight" value="{{ values.weight }}" inputmode="decimal" placeholder="4.2" required><small class="phone-note">{{ "Excludes stones and non-gold components. Changing weight or karat changes the reference estimate; it does not rewrite cost or transactions."|tr(locale) }}</small></div>
+    <div class="field {{ 'has-error' if error_field == 'karat' }}"><label for="karat">{{ 'Karat'|tr(locale) }}</label><select id="karat" name="karat">{% for k in (18,21,22,24) %}<option value="{{ k }}" {{ 'selected' if values.karat == k|string }}>{{ k }}K</option>{% endfor %}</select></div>
+  </div>
+  <div class="field {{ 'has-error' if error_field == 'reference_asset_id' }}"><label for="reference_asset_id">{{ 'Gold price reference'|tr(locale) }}</label><select id="reference_asset_id" name="reference_asset_id" required data-karat-reference data-own-picker><option value="">{{ 'Choose matching-karat price per gram…'|tr(locale) }}</option>{% for a in references %}<option value="{{ a.id }}" data-karat="{{ (a.purity * 24)|int }}" {{ 'selected' if values.reference_asset_id == a.id|string }}>{{ a.name }} · {{ a.unit }} · {{ a.currency }}</option>{% endfor %}</select><small class="phone-note">{{ 'Only references for the selected karat are shown. The quoted price already reflects purity.'|tr(locale) }}</small></div>
+  {% if zakat_on() %}<label class="import-check"><input type="checkbox" name="worn" value="1" {{ 'checked' if values.worn }}>{{ 'I wear this piece'|tr(locale) }}</label>
+  <p class="phone-note">{{ 'Zakat leaves worn gold out unless you count it in Zakat settings.'|tr(locale) }}</p>{% endif %}
+  <div class="field"><label for="details">{{ 'Notes'|tr(locale) }}</label><textarea id="details" name="details" rows="3" placeholder="Stone, workmanship, or identifying details">{{ values.details }}</textarea></div>
+  {% if item %}<span class="inline-save-status" role="status" aria-live="polite"></span><button type="button" class="btn phone-save" data-popup-close>{{ "Close"|tr(locale) }}</button>{% else %}<button class="btn primary phone-save">{{ "Create item"|tr(locale) }}</button><a class="btn phone-save" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a>{% endif %}
+<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+{% endblock %}

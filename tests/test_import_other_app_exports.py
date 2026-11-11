@@ -46,7 +46,7 @@ def test_another_apps_balance_rows_wait_as_skip(c, setup):
     _, batch_id, rows = _staged(c, cib)
     assert rows[4]["_balance_row"] and rows[5]["_balance_row"]
     assert not rows[4]["_ready"] and not rows[2]["_balance_row"]
-    page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch_id}").text
+    page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch_id}?rows=all").text
     rid = rows[5]["_import_row_id"]
     assert f'name="skip_{rid}" checked' in page
     assert "opening balance or balance adjustment" in page
@@ -59,6 +59,25 @@ def test_each_unknown_category_name_is_listed_once_for_all_its_rows(c, setup):
     label = "Usual Expenses › Daily Expenses"
     assert rows[6]["_file_label"] == rows[7]["_file_label"] == label
     assert rows[2]["_file_label"] == "" and rows[4]["_file_label"] == ""
-    page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch_id}").text
+    page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch_id}?rows=all").text
     assert page.count(f'data-file-label-pick="{label}"') == 1
     assert page.count(f'data-file-label="{label}"') == 2
+
+
+def test_the_needs_question_groups_a_file_name_and_one_answer_posts_all_of_it(c, setup):
+    """NF-7AB3: inside "Needs you" the two "Daily Expenses" rows are one group with one category control."""
+    import re
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    _, batch_id, rows = _staged(c, cib)
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    needs = client.get(f"/accounts/{cib}/import/{batch_id}/groups?state=needs").text
+    label = "Usual Expenses › Daily Expenses"
+    assert re.search(r"No category: Usual Expenses › Daily Expenses</b><small>2 rows", needs)
+    assert needs.count(f'data-file-label-pick="{label}"') == 1
+    food = str(cats["EXP.PERSONAL.FOOD"].id)
+    client.post(f"/accounts/{cib}/import/{batch_id}/confirm", data={"labelcat": f'["{label}", "{food}"]'})
+    posted = c.db.all("SELECT r.status, l.category_id FROM bank_import_rows r JOIN ledger_entries l ON "
+                      "l.transaction_id=r.transaction_id WHERE r.batch_id=? AND r.row_number IN (6, 7) "
+                      "AND l.category_id IS NOT NULL", (batch_id,))
+    assert len(posted) == 2 and {str(p["category_id"]) for p in posted} == {food}

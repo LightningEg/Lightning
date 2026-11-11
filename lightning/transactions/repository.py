@@ -167,6 +167,18 @@ class TransactionRepository:
         t.lines = self.lines_for([t.id])[t.id]
         return t
 
+    def get_many(self, txn_ids: list[int]) -> dict[int, Transaction]:
+        """The transactions with these ids, with their lines, in two reads (the ones that do not exist are left out)."""
+        found: dict[int, Transaction] = {}
+        for start in range(0, len(txn_ids), 500):
+            chunk = txn_ids[start : start + 500]
+            marks = ",".join("?" * len(chunk))
+            for row in self.db.all(f"SELECT * FROM transactions WHERE id IN ({marks})", tuple(chunk)):
+                found[row["id"]] = _header(row)
+        for txn_id, lines in self.lines_for(list(found)).items():
+            found[txn_id].lines = lines
+        return found
+
     def get_by_ref(self, ref: str) -> Transaction | None:
         txn_id = self.db.scalar("SELECT id FROM transactions WHERE ref = ?", (ref,))
         return self.get(txn_id) if txn_id else None
@@ -287,6 +299,14 @@ class TransactionRepository:
         finally:
             cursor.close()
 
+
+    def common_categories(self, kind: str, since: str, limit: int) -> list[int]:
+        """The categories most often used on posted entries of one kind (IN or OUT) since a date, most used first."""
+        return [int(row["category_id"]) for row in self.db.all(
+            "SELECT le.category_id, COUNT(DISTINCT t.id) AS n FROM transactions t"
+            " JOIN ledger_entries le ON le.transaction_id = t.id"
+            " WHERE t.status = 'POSTED' AND t.type = ? AND t.date >= ? AND le.category_id IS NOT NULL"
+            " GROUP BY le.category_id ORDER BY n DESC, le.category_id LIMIT ?", (kind, since, limit))]
 
     def recent_categories(self, window: int) -> list:
         """Each counterparty's last ``window`` categorised transactions, newest first, under its saved

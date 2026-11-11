@@ -13,7 +13,7 @@ from lightning.runtime.app import profile_app
 from lightning.runtime.devices import Devices
 from lightning.runtime.http import Credentials, Guard
 from lightning.runtime.session import ProfileError, ProfileSession
-from lightning.ui.web import _phone_template
+from lightning.ui.phone.presenters import phone_template as _phone_template
 
 from test_profile_app import create, token
 
@@ -97,7 +97,7 @@ def test_a_page_with_a_phone_screen_uses_it_and_any_other_page_keeps_its_own():
     for name in phone - {"base.html"}:
         if (templates / name).exists():
             assert _phone_template(name) == f"phone/{name}"
-    assert _phone_template("budget_bridge.html") == "budget_bridge.html"   # a page with no phone screen keeps its own
+    assert _phone_template("profiles.html") == "profiles.html"   # a page with no phone screen keeps its own
 
 
 def test_on_the_phone_home_is_its_phone_screen_and_settings_is_the_phones_own_in_the_phone_frame(tmp_path):

@@ -33,7 +33,7 @@
   <p class="phone-note">{{ "Asked once: Lightning remembers your answers."|tr(locale) }}</p>
   <form method="post" action="/sms/assign" class="phone-form">
     {% for group in waiting %}
-    <div class="field"><label for="account-{{ group.ending }}">{% if group.ending == salary %}{{ 'Your salary'|tr(locale) }}{% else %}{{ 'Card ending {digits}'|tr(locale, digits=group.ending) }}{% endif %}<small class="muted"> · {% if group.banks %}{{ group.banks|join(', ') }} · {% endif %}{{ group.count }} {{ ('message' if group.count == 1 else 'messages')|tr(locale) }}</small></label>
+    <div class="field"><label for="account-{{ group.ending }}">{% if group.ending == salary %}{{ 'Your salary'|tr(locale) }}{% elif group.ending.startswith(wallet_prefix) %}{{ 'Wallet {name}'|tr(locale, name=wallet_name(group.ending)) }}{% else %}{{ 'Card ending {digits}'|tr(locale, digits=group.ending) }}{% endif %}<small class="muted"> · {% if group.banks %}{{ group.banks|join(', ') }} · {% endif %}{{ group.count }} {{ ('message' if group.count == 1 else 'messages')|tr(locale) }}</small></label>
       <select id="account-{{ group.ending }}" name="account_{{ group.ending }}" data-own-picker><option value="">{{ 'Choose an account'|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if group.guess == a.id }}>{{ a.name }}</option>{% endfor %}</select></div>
     {% endfor %}
     {% set total = waiting|sum(attribute='count') %}

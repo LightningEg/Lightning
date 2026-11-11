@@ -22,9 +22,10 @@
     // Compact financial values use the app's k/M suffixes (for example 9.7k).
     const compact = token.match(/^([+\-−±]?\d+(?:[,.]\d+)?)([kM])$/);
     if (compact) return isolate(compact[1].replace(",", "٬").replace(".", "٫").replace(/[0-9]/g, (digit) => digitMap[digit]) + compact[2]);
-    const number = token.match(/^([+\-−±]?)(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?(%?)$/);
+    const number = token.match(/^([+\-−±]?)(\d{1,3}(?:,\d{3})+|\d+)(\.\d+)?([%٪]?)$/);
     if (number) {
-      const localized = number[1] + number[2].replaceAll(",", "٬") + (number[3] || "").replace(".", "٫") + number[4];
+      // The Arabic percent sign follows an Arabic figure (A06.2, IV-3BK7).
+      const localized = number[1] + number[2].replaceAll(",", "٬") + (number[3] || "").replace(".", "٫") + (number[4] ? "٪" : "");
       return isolate(localized.replace(/[0-9]/g, (digit) => digitMap[digit]));
     }
     // Alphanumeric tokens are often tickers, version strings, filenames or transaction references.
@@ -35,7 +36,7 @@
   // A middle dot beside a number reads as the Arabic zero "٠" (Late · 17 days reads as 170): there it is the Arabic
   // comma. The server does the same for the page it sends (lightning/ui/i18n.py arabic_dots); this covers text
   // the browser builds. A dot between two words is left alone.
-  const figureEdge = "[0-9٠-٩%]";
+  const figureEdge = "[0-9٠-٩%٪]";
   const bidiMarks = "[⁦-⁩‪-‮]*";
   const dotAfterFigure = new RegExp("(" + figureEdge + bidiMarks + ")\\s*·\\s*", "g");
   const dotBeforeFigure = new RegExp("\\s*·\\s*(?=" + bidiMarks + "[0-9٠-٩])", "g");

@@ -1,0 +1,92 @@
+{# A transaction's full page on the phone (3AY15): the facts as rows, its actions, then split, reserve, history and the
+   ledger lines one level deep. The row sheet (/transactions/{id}/sheet) is the usual way in; this is "More". #}
+{% extends "base.html" %}
+{% from "partials/macros.html" import amount, category_options with context %}
+{% from "partials/linked.html" import touched_panel, suggested_links with context %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% block title %}{{ txn.ref }}{% endblock %}
+{% block heading %}<h1>{{ ('Refund' if txn.type.value == 'IN' and lines and lines[0].effect == 'OUTFLOW' else summary.type_label)|tr(locale) }}</h1>
+<p class="phone-note"><bdi dir="ltr">{{ txn.ref }}</bdi> · {{ txn.date }}{% if txn.source == 'SYSTEM' %} · {{ 'System-generated'|tr(locale) }}{% endif %}{% if txn.is_void %} · {{ 'deleted'|tr(locale) }}{% endif %}</p>{% endblock %}
+{% block content %}
+{% set session = request.state.session_token|default('') %}
+<section class="phone-section" aria-labelledby="txn-what">
+  <header class="phone-section-head"><h2 id="txn-what">{% if txn.description or summary.counterparty %}{{ txn.description or summary.counterparty }}{% else %}{{ txn.type_label|tr(locale) }}{% endif %}</h2></header>
+  <dl class="phone-facts">
+    <div><dt>{{ 'Amount'|tr(locale) }}</dt><dd>{% if txn.type == 'CNV' %}<bdi class="fig">{{ summary.amount|money }} {{ summary.currency }} → {{ summary.to_amount|money }} {{ summary.to_currency }}</bdi>{% elif txn.type == 'TRF' %}<bdi class="fig">{{ summary.amount|money }} {{ summary.currency }}</bdi>{% else %}{{ amount(summary.amount, summary.currency, True) }}{% endif %}</dd></div>
+    {% if txn.type in ('TRF', 'CNV') %}
+    <div><dt>{{ 'From'|tr(locale) }}</dt><dd>{{ summary.account_label }}</dd></div>
+    <div><dt>{{ 'To'|tr(locale) }}</dt><dd>{{ summary.to_account_label }}</dd></div>
+    {% if conversion %}<div><dt>{{ 'Rate'|tr(locale) }}</dt><dd><bdi class="fig">1 {{ conversion.quote_base }} = {{ conversion.rate }} {{ conversion.quote_quote }}</bdi></dd></div>
+    {% if conversion.fee %}<div><dt>{{ 'Fee'|tr(locale) }}</dt><dd><bdi class="fig">{{ conversion.fee|money }} {{ conversion.sent_currency }}</bdi></dd></div>{% endif %}
+    {% if conversion_spread is not none %}<div><dt>{{ 'Spread paid'|tr(locale) }}</dt><dd><bdi class="fig">{{ conversion_spread|money }} {{ base }}</bdi></dd></div>{% endif %}{% endif %}
+    {% else %}
+    <div><dt>{{ 'Account'|tr(locale) }}</dt><dd>{{ summary.account_label }}</dd></div>
+    {% if summary.category_label %}<div><dt>{{ 'Category'|tr(locale) }}</dt><dd>{{ summary.category_label.split(' › ')|map('tr', locale)|join(' · ') }}</dd></div>{% endif %}
+    {% endif %}
+    {% for effect in cash_effects %}<div><dt>Effect · {{ effect.owner }}</dt><dd>Cash in {{ effect.account }} {{ 'increases' if effect.quantity > 0 else 'decreases' }} by {{ effect.quantity|abs|money }} {{ effect.currency }}</dd></div>{% endfor %}
+    {% if txn.counterparty %}<div><dt>{{ 'Counterparty'|tr(locale) }}</dt><dd>{% if touched.counterparty %}<a href="/counterparties/{{ touched.counterparty.id }}">{{ txn.counterparty }}</a>{% else %}{{ txn.counterparty }}{% endif %}</dd></div>{% endif %}
+    {% for owner in touched.owners %}<div><dt>{{ 'Held for'|tr(locale) }}</dt><dd><a href="/counterparties/{{ owner.id }}">{{ owner.name }}</a></dd></div>{% endfor %}
+    {% if txn.notes %}<div><dt>{{ 'Notes'|tr(locale) }}</dt><dd>{{ txn.notes|tagged }}</dd></div>{% endif %}
+    <div><dt>{{ 'Recorded'|tr(locale) }}</dt><dd><time datetime="{{ txn.created_at }}">{{ recorded_at }}</time>{% if txn.updated_at != txn.created_at %} · {{ 'Updated'|tr(locale) }} <time datetime="{{ txn.updated_at }}">{{ updated_at }}</time>{% endif %}</dd></div>
+  </dl>
+  {% if not txn.is_void %}
+    {% if txn.source == 'SYSTEM' %}<p class="phone-note">{{ 'Deleting this reevaluation removes its effect from the account.'|tr(locale) }}</p>
+    {% elif txn.type == 'CNV' %}<a class="btn primary phone-save" href="/transactions/{{ txn.id }}/convert/edit">{{ 'Edit'|tr(locale) }}</a>
+    {% elif is_ownership %}<a class="btn primary phone-save" data-popup-open href="/transactions/{{ txn.id }}/ownership/edit">{{ 'Edit'|tr(locale) }}</a>
+    {% elif txn.type in ('BUY', 'SEL', 'DIV') or (txn.type == 'OPN' and lines[0].asset != 'CASH:' ~ base) %}<a class="btn primary phone-save" href="/investments/{{ txn.id }}/edit">{{ 'Edit'|tr(locale) }}</a>
+    {% elif txn.type == 'OPN' %}<a class="btn primary phone-save" href="/accounts/{{ lines[0].account_id }}/edit">{{ 'Change opening balance'|tr(locale) }}</a>
+    {% else %}<a class="btn primary phone-save" data-popup-open href="/transactions/{{ txn.id }}/edit-popup">{{ 'Edit'|tr(locale) }}</a>{% endif %}
+    {% if txn.type != 'OPN' %}<form method="post" action="/transactions/{{ txn.id }}/delete" data-confirm-delete class="phone-form"><button class="btn danger phone-save">{{ 'Delete'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ session }}"></form>{% endif %}
+  {% elif replaced_revaluation %}<p class="phone-note">{{ 'Replaced by a newer revaluation; nothing to restore.'|tr(locale) }}</p>
+  {% else %}<form method="post" action="/transactions/{{ txn.id }}/restore" class="phone-form"><button class="btn phone-save">{{ 'Restore'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ session }}"></form>{% endif %}
+</section>
+{{ touched_panel(touched, txn, base) }}
+{% if review and (review.can_recategorize or review.planned_choices or review.reserve_choices) %}{{ suggested_links(review, base) }}{% endif %}
+<div class="phone-rows phone-section">
+{% if can_split and not txn.is_void %}
+  {% set row %}<span>{{ 'Expense categories'|tr(locale) }}<small>{{ split_lines|length or 1 }}</small></span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('Expense categories'|tr(locale), row) %}
+  <p class="phone-note">Split the total across categories. The amounts must add up to {{ abs(summary.amount)|money }} {{ summary.currency }}. Refunds should be entered as money in under the original expense category.</p>
+  <form method="post" action="/transactions/{{ txn.id }}/split" id="expense-split-form" class="phone-form">
+    <input type="hidden" name="revision" value="{{ revision }}">
+    <div id="expense-split-rows">
+      {% for row in split_lines %}<div class="split-row"><select name="split_category_id" aria-label="Expense category" data-own-picker><option value="">{{ 'Choose a category'|tr(locale) }}</option>{{ category_options(category_groups(expense_categories|map(attribute='id')|list), row.category_id) }}</select><input type="text" name="split_amount" value="{{ row.amount }}" placeholder="Amount" inputmode="decimal" aria-label="Split amount"></div>{% endfor %}
+      {% for _ in range(2) %}<div class="split-row"><select name="split_category_id" aria-label="Expense category" data-own-picker><option value="">{{ 'Choose a category'|tr(locale) }}</option>{{ category_options(category_groups(expense_categories|map(attribute='id')|list)) }}</select><input type="text" name="split_amount" placeholder="Amount" inputmode="decimal" aria-label="Split amount"></div>{% endfor %}
+    </div>
+    <button type="button" class="btn phone-save" id="add-expense-split-row">{{ 'Add category'|tr(locale) }}</button><button class="btn primary phone-save">{{ 'Save split'|tr(locale) }}</button>
+  <input type="hidden" name="__session" value="{{ session }}"></form>
+  {% endcall %}
+{% endif %}
+{% if txn.type.value == 'OUT' and not txn.is_void %}
+  {% set row %}<span>{{ 'Assign payment to a reserve'|tr(locale) }}</span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('Assign payment to a reserve'|tr(locale), row) %}
+  <p class="phone-note">{{ 'Link this payment to the plan it covers. Its amount will stop counting as cash still set aside, while the project keeps its progress. Repeating projects advance when linked payments reach the target. Matching payments are suggested for your confirmation in the account transaction list.'|tr(locale) }}</p>
+  {% if reserves %}<form method="post" action="/transactions/{{ txn.id }}/reserve" class="phone-form">
+    <select name="reserve_id" required aria-label="Reserve" data-own-picker>{% for reserve in reserves %}<option value="{{ reserve.id }}">{{ reserve.name }} · {{ reserve.effective_allocated|money }} available</option>{% endfor %}</select>
+    <input type="text" name="amount" value="{{ abs(summary.amount) }}" inputmode="decimal" aria-label="Amount paid from reserve" required>
+    <button class="btn primary phone-save">{{ 'Apply payment'|tr(locale) }}</button>
+  <input type="hidden" name="__session" value="{{ session }}"></form>{% else %}<p class="phone-note">{{ 'Create a reserve before assigning payments to one.'|tr(locale) }}</p>{% endif %}
+  {% endcall %}
+{% endif %}
+  {% set row %}<span>{{ 'History'|tr(locale) }}<small>{{ history|length }}</small></span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('History'|tr(locale), row) %}
+  {% if history %}<div class="phone-rows">{% for h in history %}<div class="phone-row"><span>{{ h.summary or h.action }}<small>{{ h.at }}</small></span></div>{% endfor %}</div>
+  {% else %}<p class="phone-note">{{ 'No changes since it was recorded.'|tr(locale) }}</p>{% endif %}
+  {% endcall %}
+  {% set row %}<span>{{ 'Ledger lines — how this transaction affects balances'|tr(locale) }}</span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('Ledger lines — how this transaction affects balances'|tr(locale), row) %}
+  <div class="phone-rows">{% for l in lines %}<div class="phone-row"><span>{{ l.account }}<small><bdi dir="ltr">{{ l.ref }}</bdi> · {{ {'INFLOW': 'Money in', 'OUTFLOW': 'Money out', 'INTERNAL': 'Internal', 'OPENING': 'Opening', 'REVALUATION': 'Revaluation'}.get(l.effect, l.effect)|tr(locale) }}{% if l.category %} · {{ l.category.split(' › ')|map('tr', locale)|join(' · ') }}{% endif %}</small></span><b><bdi class="fig">{{ l.amount_base|money(True) }}</bdi></b></div>{% endfor %}</div>
+  {% endcall %}
+</div>
+{% if can_split %}<script nonce="{{ request.state.csp_nonce|default('') }}">
+document.getElementById("add-expense-split-row")?.addEventListener("click", () => {
+  const rows = document.getElementById("expense-split-rows");
+  const source = rows.querySelector(".split-row");
+  if (!source) return;
+  const row = source.cloneNode(true);
+  row.querySelector("select").value = "";
+  row.querySelector("input").value = "";
+  rows.append(row);
+});
+</script>{% endif %}
+{% endblock %}

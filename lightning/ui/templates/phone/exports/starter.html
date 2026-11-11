@@ -1,0 +1,34 @@
+{# The starter workbook on the phone (3AY17): download it, upload it, review what will be added, confirm. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Fill in a starter workbook'|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/exports/import"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Back'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Fill in a starter workbook'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+{% if done is defined %}
+<section class="phone-section"><header class="phone-section-head"><h2>{{ 'Your data is in'|tr(locale) }}</h2></header>
+  <p>{{ '{a} accounts, {c} categories and {e} entries were added.'|tr(locale, a=done.accounts|selectattr('status', 'equalto', 'new')|list|length, c=done.categories|selectattr('status', 'equalto', 'new')|list|length, e=done.entries|selectattr('status', 'equalto', 'new')|list|length) }}</p>
+  {% if done.skipped %}<p class="phone-note">{{ '{n} rows could not be placed. They are listed on the Not imported sheet of your file.'|tr(locale, n=done.skipped|length) }}</p>{% endif %}
+  <p class="phone-note">{{ 'Your file now holds every code. Keep it: later you can add rows by code or by name, and uploading it again adds nothing twice.'|tr(locale) }}</p>
+  <a class="btn primary phone-save" href="/exports/starter/result/{{ token }}">{{ 'Download your workbook with codes'|tr(locale) }}</a><a class="btn phone-save" href="/money/accounts">{{ 'Open Accounts'|tr(locale) }}</a></section>
+{% elif preview is defined %}
+<section class="phone-section"><header class="phone-section-head"><h2>{{ 'Review what will be added'|tr(locale) }}</h2></header>
+  <p class="phone-note">{{ 'Nothing has changed yet. Lightning never overwrites or deletes what you already have.'|tr(locale) }}</p>
+  <div class="phone-rows">{% for label, rows in [('Accounts', preview.accounts), ('Categories', preview.categories), ('Entries', preview.entries)] %}<div class="phone-row"><span>{{ label|tr(locale) }}<small>{{ 'Already there'|tr(locale) }} {{ rows|selectattr('status', 'in', ['exists', 'duplicate'])|list|length }} · {{ 'Cannot be placed'|tr(locale) }} {{ rows|selectattr('status', 'equalto', 'error')|list|length }}</small></span><b>{{ rows|selectattr('status', 'equalto', 'new')|list|length }}</b></div>{% endfor %}</div>
+  {% set fresh = preview.entries|selectattr('status', 'equalto', 'new')|list %}
+  {% if fresh %}<header class="phone-section-head phone-section"><h2>{{ 'Entries to add'|tr(locale) }}</h2></header><div class="phone-rows">{% for r in fresh[:shown] %}<div class="phone-row"><span>{{ r.counterparty or r.category }}<small><bdi dir="ltr">{{ r.date }}</bdi> · {{ r.account }} · {{ r.category }}</small></span><b dir="ltr"><bdi class="fig">{{ r.amount|money(True) }} {{ r.currency }}</bdi></b></div>{% endfor %}</div>
+    {% if fresh|length > shown %}<p class="phone-note">{{ 'and {n} more'|tr(locale, n=fresh|length - shown) }}</p>{% endif %}{% endif %}
+  {% if preview.problems %}<header class="phone-section-head phone-section"><h2>{{ 'Rows that cannot be placed'|tr(locale) }}</h2></header><p class="phone-note">{{ 'They are left out. Fix them in your file and upload it again; nothing else is held back.'|tr(locale) }}</p>
+    <div class="phone-rows">{% for r in preview.problems[:shown] %}<div class="phone-row"><span>{{ 'Row {n}'|tr(locale, n=r.line) }}{% if r.raw.get('Name') or r.raw.get('Account') %} · {{ r.raw.get('Name') or r.raw.get('Account') }}{% endif %}<small>{{ r.error|tr(locale) }}</small></span></div>{% endfor %}</div>
+    {% if preview.problems|length > shown %}<p class="phone-note">{{ 'and {n} more'|tr(locale, n=preview.problems|length - shown) }}</p>{% endif %}{% endif %}
+  {% if preview.nothing_to_do %}<p>{{ 'There is nothing new to add.'|tr(locale) }}</p><a class="btn phone-save" href="/exports/starter">{{ 'Back'|tr(locale) }}</a>
+  {% else %}<form method="post" action="/exports/starter" class="phone-form"><input type="hidden" name="action" value="confirm"><input type="hidden" name="token" value="{{ token }}"><input type="hidden" name="payload" value="{{ payload }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    <button class="btn primary phone-save">{{ 'Add them'|tr(locale) }}</button><a class="btn phone-save" href="/exports/starter">{{ 'Cancel'|tr(locale) }}</a></form>{% endif %}</section>
+{% else %}
+<section class="phone-section"><header class="phone-section-head"><h2>{{ 'Fill it in yourself'|tr(locale) }}</h2></header>
+  <p class="phone-note">{{ 'Download a workbook with examples, write your accounts, categories and entries by name, then upload it here. Lightning shows you a preview first, then gives you the codes back.'|tr(locale) }}</p>
+  <a class="btn phone-save" href="/exports/starter/template">{{ 'Download the starter workbook'|tr(locale) }}</a></section>
+<section class="phone-section"><header class="phone-section-head"><h2>{{ 'Upload your workbook'|tr(locale) }}</h2></header>
+  <form method="post" action="/exports/starter" enctype="multipart/form-data" class="phone-form"><label>{{ 'Excel workbook'|tr(locale) }}<input type="file" name="workbook" accept=".xlsx" required></label><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary phone-save">{{ 'Review workbook'|tr(locale) }}</button></form></section>
+{% endif %}
+{% endblock %}

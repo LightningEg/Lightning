@@ -1,0 +1,28 @@
+{# Bought in instalments on the phone (3AY16): the purchase, then a preview of the plan before it is added. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Bought in instalments'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Bought in instalments'|tr(locale) }}</h1>{% endblock %}
+{% block content %}{% macro bad(name) %}{{ 'aria-invalid=true' if error_field == name }}{% endmacro %}
+<form method="post" action="/plan/purchases/new" class="phone-form" data-popup-return="{{ 'response' if quote else 'popup' }}"><input type="hidden" name="submission" value="{{ new_submission() }}">
+<input type="hidden" name="intent" value="{{ 'save' if quote else 'preview' }}">
+{% if quote %}
+  <dl class="phone-facts">
+    <div><dt>{{ 'Each instalment'|tr(locale) }}</dt><dd><bdi class="fig">{{ quote.monthly|money(False,2) }}</bdi></dd></div>
+    {% if quote.final != quote.monthly %}<div><dt>{{ 'Final instalment'|tr(locale) }}</dt><dd><bdi class="fig">{{ quote.final|money(False,2) }}</bdi></dd></div>{% endif %}
+    <div><dt>{{ 'Total to pay'|tr(locale) }}</dt><dd><bdi class="fig">{{ quote.total|money(False,0) }} {{ base }}</bdi></dd></div>
+    <div><dt>{{ 'Last payment'|tr(locale) }}</dt><dd>{{ quote.last_date }}</dd></div>
+  </dl>
+  {% for key,value in values.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+{% else %}
+  <label for="pp-name">{{ 'Name'|tr(locale) }}</label><input id="pp-name" name="name" {{ bad('name') }} value="{{ values.name }}" required class="{{ 'bad' if error_field == 'name' }}">
+  <label for="pp-price">{{ 'Price still to pay'|tr(locale) }} ({{ base }})</label><input id="pp-price" name="price" {{ bad('price') }} value="{{ values.price }}" inputmode="decimal" class="money-input {{ 'bad' if error_field == 'price' }}" required>
+  <label for="pp-months">{{ 'Number of instalments'|tr(locale) }}</label><input id="pp-months" name="months" {{ bad('months') }} type="number" min="1" max="600" value="{{ values.months }}" inputmode="numeric" required class="{{ 'bad' if error_field == 'months' }}">
+  <label for="pp-first">{{ 'First instalment'|tr(locale) }}</label><input id="pp-first" name="first_date" {{ bad('first_date') }} type="date" value="{{ values.first_date }}" required class="{{ 'bad' if error_field == 'first_date' }}">
+  <label for="pp-account">{{ 'Pay from'|tr(locale) }}</label><select id="pp-account" name="account_id" {{ bad('account_id') }} data-own-picker><option value="">{{ 'Choose later'|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if values.account_id == a.id|string }}>{{ a.name }}</option>{% endfor %}</select>
+  <label for="pp-fee">{{ 'Fee included in instalments'|tr(locale) }} ({{ base }})</label><input id="pp-fee" name="fee" {{ bad('fee') }} value="{{ values.fee }}" inputmode="decimal" class="money-input {{ 'bad' if error_field == 'fee' }}" placeholder="0">
+{% endif %}
+  <p class="phone-note">{{ 'This adds a loan plan. It does not record a cash payment today.'|tr(locale) }}</p>
+  <button class="btn primary phone-save">{{ ('Add instalment plan' if quote else 'Preview')|tr(locale) }}</button>
+  <a class="btn phone-save" href="{{ edit_url if quote else '/plan/loans' }}" {{ 'data-popup-open' if quote else 'data-popup-close' }}>{{ ('Edit' if quote else 'Cancel')|tr(locale) }}</a>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+</form>{% endblock %}

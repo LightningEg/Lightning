@@ -1,0 +1,10 @@
+{# A bill that looks off, on the phone (3AY16): the question, the charges to review and the history as rows. #}
+{% extends "base.html" %}{% block title %}{{ alert.label|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ alert.label|tr(locale) }}</h1><p class="phone-note">{{ alert.name }}</p>{% endblock %}
+{% block content %}{% set cur = alert['values'].currency %}
+<p>{{ alert.detail_key|tr(locale, **alert['values']) }}</p><p class="phone-note">{{ 'A warning is a question, not proof of an error. Review the statement before changing a bill or transaction.'|tr(locale) }}</p>
+{% for title, rows in [('Charges to review', alert.evidence), ('Historical charges', alert.history)] %}<section class="phone-section" aria-labelledby="alert-{{ loop.index }}"><header class="phone-section-head"><h2 id="alert-{{ loop.index }}">{{ title|tr(locale) }}</h2></header>
+<div class="phone-rows">{% for row in rows %}<a class="phone-row" href="/transactions/{{ row.id }}/sheet"><span>{{ row.date }}<small><bdi dir="ltr">{{ row.ref }}</bdi></small></span><b><bdi class="fig">{{ row.amount|money }} {{ cur }}</bdi></b></a>{% endfor %}</div></section>{% endfor %}
+<a class="btn primary phone-save" data-popup-open href="/plan/items/{{ alert.plan_id }}/edit">{{ 'Review future payments'|tr(locale) }}</a>
+<a class="btn phone-save" href="/todo">{{ 'To do'|tr(locale) }}</a>
+{% endblock %}

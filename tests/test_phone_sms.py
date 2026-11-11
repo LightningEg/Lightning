@@ -103,5 +103,5 @@ def test_a_statement_import_keeps_its_own_review(month):
                                     b"Date,Amount,Counterparty\n2026-10-04,-50.00,Shop\n")
     from fastapi.testclient import TestClient
     from lightning.ui.web import create_app
-    page = TestClient(create_app(c)).get(f"/accounts/{accounts['cib'].id}/import/{batch}").text
+    page = TestClient(create_app(c)).get(f"/accounts/{accounts['cib'].id}/import/{batch}?rows=all").text
     assert "Review import" in page and "Check bank messages" not in page and page.count("Post ready rows") == 2

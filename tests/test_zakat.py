@@ -240,7 +240,7 @@ def test_the_page_says_it_is_an_estimate_once_and_shows_the_figures(c, gold):
     page = TestClient(create_app(c)).get("/zakat")
     assert page.status_code == 200
     for text in ("Zakatable wealth", "Nisab", "Zakat due", "Paid this zakat year", "Still to pay", "10,000",
-                 "2026-12-31", "lunar year", "scholar"):
+                 "zakat day today", "lunar year", "scholar"):
         assert text in page.text, text
     assert page.text.count("a scholar answers your own case") == 1
 
@@ -289,7 +289,7 @@ def test_the_plan_names_the_zakat_day_and_the_worn_box_reaches_the_service(c, go
     assert "Zakat day" not in client.get("/plan").text        # nothing until a zakat day is set
     c.zakat.save_settings("2027-03-01", "", False, True)
     plan = client.get("/plan").text
-    assert "2027-03-01" in plan and "10,000" in plan and "changes no balance" in plan
+    assert "1 Mar 2027" in plan and "10,000" in plan and "changes no balance" in plan
     home = c.account_flows.open_account("Gold at home", "PHYSICAL_ASSET", "2026-01-01", "0")
     reference = c.assets.get_asset_by_code("REF:GLD-24K")
     made = client.post(f"/accounts/{home.id}/items/new", data={
@@ -345,3 +345,75 @@ def test_zakat_is_off_until_turned_on_in_settings_and_then_shows_everywhere(tmp_
         assert "Zakat is off." in off.text and fresh.zakat.enabled() is False
     finally:
         fresh.db.close()
+
+
+SILVER = D("50")            # EGP a gram of pure silver, so the silver nisab is 595 × 50 = 29,750
+
+
+def test_the_silver_nisab_is_595_grams_and_the_lower_basis_picks_the_smaller(c, gold):
+    """NF-9D6: gold stays the default; silver is 595 g at the typed gram price; the lower basis takes the smaller."""
+    assert c.zakat.settings().nisab_basis == "gold"
+    c.zakat.save_nisab_basis("silver", "50")
+    found = c.zakat.assess("2026-12-31")
+    assert (found.nisab, found.nisab_source, found.nisab_date) == (D("29750"), "silver", "2026-12-31")
+    c.zakat.save_nisab_basis("lower", "50")
+    assert (c.zakat.assess("2026-12-31").nisab, c.zakat.assess("2026-12-31").nisab_source) == (D("29750"), "lower")
+    c.zakat.save_nisab_basis("lower", "500")              # 595 × 500 = 297,500 is above gold's 255,000
+    assert c.zakat.assess("2026-12-31").nisab == NISAB
+    c.zakat.save_nisab_basis("gold", "500")
+    assert c.zakat.assess("2026-12-31").nisab_source == "gold"
+    with pytest.raises(ValidationError):
+        c.zakat.save_nisab_basis("copper", "")
+
+
+def test_a_missing_silver_price_gives_no_estimate_and_says_why(c):
+    _bank(c, "400000")
+    c.zakat.save_nisab_basis("silver", "")
+    found = c.zakat.assess("2026-12-31")
+    assert found.nisab is None and found.zakat_due is None and "silver price" in found.unavailable_reason
+    c.zakat.save_settings(None, "30000", False, True)     # a typed nisab still stands in
+    assert c.zakat.assess("2026-12-31").nisab_source == "typed"
+
+
+def test_the_gear_saves_the_nisab_basis(c, gold):
+    """NF-9D7: three radio choices and the silver price in the gear; the page names the basis, PC, phone, Arabic."""
+    _bank(c, "400000")
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    assert "Silver (595 g)" in client.get("/settings?section=zakat").text
+    client.post("/zakat/settings", data={"zakat_day": "2026-12-31", "nisab_basis": "silver", "typed_silver": "50"})
+    settings = c.zakat.settings()
+    assert (settings.nisab_basis, settings.typed_silver, settings.zakat_day) == ("silver", SILVER, "2026-12-31")
+    for phone in (False, True):
+        app = create_app(c)
+        page = TestClient(_phone(app) if phone else app, base_url="http://127.0.0.1")
+        assert "595 g of silver at the price of today" in page.get("/zakat").text
+        page.post("/settings/locale", data={"locale": "ar"})
+        assert "595 جرام فضة" in page.get("/zakat").text
+        page.post("/settings/locale", data={"locale": "en"})
+
+
+def test_an_older_profile_keeps_its_zakat_settings_and_takes_gold(monkeypatch, tmp_path):
+    """Migration 0077: a profile at schema 76 keeps its day and typed nisab, and gets the gold basis."""
+    import shutil
+
+    from lightning.database import migrator
+    from lightning.database.connection import Database
+
+    old = tmp_path / "migrations_76"
+    old.mkdir()
+    for path in migrator.MIGRATIONS_DIR.glob("*.sql"):
+        if int(path.name[:4]) <= 76:
+            shutil.copy(path, old / path.name)
+    bundled = migrator.MIGRATIONS_DIR
+    monkeypatch.setattr(migrator, "MIGRATIONS_DIR", old)
+    db = Database(tmp_path / "old.db")
+    migrator.migrate(db)
+    db.execute("UPDATE zakat_settings SET zakat_day='2026-03-01',typed_nisab_e6=90000000000 WHERE id=1")
+    monkeypatch.setattr(migrator, "MIGRATIONS_DIR", bundled)
+    migrator.migrate(db)
+    row = db.one("SELECT * FROM zakat_settings WHERE id=1")
+    assert (row["zakat_day"], row["typed_nisab_e6"], row["nisab_basis"], row["typed_silver_e6"]) == (
+        "2026-03-01", 90000000000, "gold", None)
+    migrator.migrate(db)                                   # a second run does nothing
+    assert migrator.inspect_schema(db).current_version == migrator.BUNDLED_LATEST_VERSION
+    db.close()

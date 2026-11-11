@@ -270,8 +270,8 @@ def test_bank_import_preview_has_no_english_system_text_in_arabic(sample):
 
 
 
-NEW_PHONE_SCREENS = ("/", "/home", "/budget", "/activity", "/activity?tab=review", "/money", "/money/accounts", "/money/bills", "/money/report",
-                     "/add/bills", "/pc?for=/checks", "/accounts/add-transaction")
+NEW_PHONE_SCREENS = ("/", "/home", "/catch-up", "/budget", "/activity", "/activity?tab=review", "/money", "/money/accounts", "/money/bills", "/money/report",
+                     "/add/bills", "/todo", "/pc?for=/checks", "/accounts/add-transaction")
 
 
 def test_the_new_phone_screens_have_no_english_system_text(sample):

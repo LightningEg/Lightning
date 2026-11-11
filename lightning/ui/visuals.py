@@ -115,7 +115,7 @@ def money_sankey(c, first: date, last: date, cash_flow, sources_shown: int = 3, 
         if invested > 0:
             targets.append({"label": "Invested", "value": invested, "tone": "hold"})
         if cash_flow.net - invested > 0:
-            targets.append({"label": "Kept", "value": cash_flow.net - invested, "tone": "in"})
+            targets.append({"label": "Kept as cash", "value": cash_flow.net - invested, "tone": "in"})
     # Shown whole: round both columns to the same whole total so the parts add up to it (largest remainder).
     for column in (sources, targets):
         for row, value in zip(column, round_to_total([r["value"] for r in column])):
@@ -144,7 +144,9 @@ def holdings_donut(position, include_cash: bool = False, divisor: Decimal = Deci
         slices.append({"label": cls.name, "value": cls.value, "tone": charts.class_tone(cls.code)})
     if include_cash and position.other_you_own > 0:
         slices.append({"label": "Other you own", "value": position.other_you_own, "tone": "other"})
-    return charts.donut([{**slice_, "value": slice_["value"] / divisor} for slice_ in slices] if divisor != 1 else slices)
+    folded = "Smaller classes" if not include_cash else "Other"   # a real class is named Other Investments (r30 N3)
+    return charts.donut([{**slice_, "value": slice_["value"] / divisor} for slice_ in slices] if divisor != 1 else slices,
+                        folded_label=folded)
 
 
 def forecast_trend(forecast) -> dict:

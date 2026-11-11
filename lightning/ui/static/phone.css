@@ -1122,3 +1122,22 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 :is(.phone-flow-bar i, .phone-key).tone-equity { background: var(--class-equity, #08744A); }
 :is(.phone-flow-bar i, .phone-key).tone-other { background: var(--class-other, #687F8B); }
 .licence-rows .phone-row > b { max-width: 55%; white-space: normal; text-align: end; font-size: 13px; font-weight: 600; }
+
+/* 3AY15-17: the phone's own pages for what the PC templates used to draw. */
+.phone-segment > a { display: flex; text-decoration: none; }
+.phone-segment > a span { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 40px; border-radius: 999px; font-weight: 700; color: var(--c-ink-2); text-align: center; }
+.phone-segment > a[aria-current] span { background: var(--c-nile); color: #fff; }
+.phone-row input[data-row-amount] { width: 8.5em; flex: none; }
+.phone-row > label { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.phone-row > label > span { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
+.phone-form > label:not(.import-check) { display: flex; flex-direction: column; gap: 6px; }
+.phone-fields { display: flex; flex-direction: column; gap: 12px; }
+.phone-fields .field { display: flex; flex-direction: column; gap: 6px; margin: 0; }
+.phone-segment[data-two] { grid-template-columns: repeat(2, 1fr); border: 0; margin: 0; }
+.phone-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.phone-row.needs-item { gap: 4px; }
+.needs-item > .needs-link { flex: 1; min-width: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
+.needs-item > .needs-link > span { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
+.needs-item > .needs-link > b { flex: none; white-space: nowrap; }
+.phone-segment-4 { grid-template-columns: repeat(4, 1fr); }
+html.phone :is(.counterparty-results, .category-results) { min-width: 0; max-width: calc(100vw - 32px); box-sizing: border-box; }

@@ -42,12 +42,13 @@ Never at the cost of a test, a required check, or a read you need.
 - **CI minutes cost money** (2,000/month, Windows ×2): pushes run Linux only; run Windows/Android workflows by hand only when your change needs that evidence now. Push finished steps, not every edit.
 - **The owner reviews milestones, not steps:** ask for a phone/PC check only when a milestone works end to end.
 - **Tell the owner only what helps:** results, decisions, actions, real risks. No narration.
+- **A list of tasks ends with a tally (owner rule, 2026-11-11):** when the owner gives several tasks, end every round with what is done (with its PR or commit) and what is still left (with why: waiting on the owner, CI evidence, or not started). Never stop on "done" while items remain unsaid.
 - **Decisions are the owner's, always as a pick-list (owner rule, 2026-11-03):** when something needs the owner's input (a choice, a risk, a missing fact, a blocked PR), ask in the session's question dialog (the question tool), never as an open question in prose. Give 2-4 distinct options, each with its trade-off, put your recommendation first and mark it "(Recommended)". Do the safe part of the task meanwhile; never wait silently and never decide it yourself. Record the answer where the next AI will read it (the item, `ai/PROJECT_OVERVIEW.md` owner decisions, or `NOW.md`).
 
 ## 3. Every task
 
 1. **Start fresh:** `git pull` on `main`, create your branch (§6), read per §2.
-2. **Claim** work longer than one sitting in `NOW.md` *Claimed* and push that first. Stay out of others' claimed files.
+2. **Claim** work longer than one sitting in `NOW.md` *Claimed* and push that first. Stay out of others' claimed files. A report or more than one new item: write your codes on NOW.md's `Reserved codes:` line and push that commit first; remove them in the pull request that adds the files.
 3. **Small finished steps:** commit and push each once its tests pass.
 4. **Test.** For visible changes also run Mohab (`tests/test_mohab_year.py`) and check A16.
 5. **Record:** end the commit message with `Release-note: <pillar>: one plain sentence a user would understand` (or `Release-note: none`) and `Detail: <what changed, where, why, in one line>`, and name the item's full code (`BV-3C`) in the subject. CI checks the pull request has both; the squash keeps every commit's trailers. Update the §1 files you touched, and run `python tools/status.py` if you changed the plan.

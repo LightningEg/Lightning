@@ -1,0 +1,35 @@
+{# Currencies on the phone (3AY17): the profile currency, search, one row per currency with Add or Set active; the
+   rates tab lists rates and FX reevaluations as rows. #}
+{% from "phone/partials/sheet.html" import sheet with context %}
+<div class="currency-settings">
+  <p class="phone-note">{{ 'Manage the currencies available to this profile and its exchange rates.'|tr(locale) }}</p>
+  <nav class="phone-segment" data-two aria-label="{{ 'Currency settings'|tr(locale) }}">
+    <a {% if currency_tab != 'rates' %}aria-current="page"{% endif %} href="/settings?section=currencies"><span>{{ 'Currencies'|tr(locale) }}</span></a>
+    <a {% if currency_tab == 'rates' %}aria-current="page"{% endif %} href="/settings?section=currencies&amp;tab=rates"><span>{{ 'FX rates and reevaluation'|tr(locale) }}</span></a>
+  </nav>
+  {% if currency_tab != 'rates' %}
+  <dl class="phone-facts"><div><dt>{{ 'Profile currency'|tr(locale) }}</dt><dd dir="ltr">{{ base }}</dd></div></dl>
+  <div class="phone-form"><label>{{ 'Search currencies'|tr(locale) }}<input type="search" data-currency-search placeholder="{{ 'Search by code or currency name'|tr(locale) }}" autocomplete="off"></label></div>
+  {% set registered_codes = currencies|map(attribute='code')|list %}
+  {% macro action(code, kind) %}<form method="post" action="/settings/currency"><input type="hidden" name="action" value="{{ kind }}">{% if kind == 'base' %}<input type="hidden" name="base_currency" value="{{ code }}">{% else %}<input type="hidden" name="code" value="{{ code }}">{% endif %}<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn small" type="submit">{{ ('Set active' if kind == 'base' else 'Add currency')|tr(locale) }}</button></form>{% endmacro %}
+  <div class="phone-rows currency-list" data-currency-list>
+    {% for currency in currency_suggestions %}<div class="phone-row" data-currency-row data-search="{{ (currency.code ~ ' ' ~ currency.name)|lower }}"><span dir="ltr">{{ currency.code }}<small>{{ currency.name|tr(locale) }}</small></span>{% if currency.code == base %}<b>{{ 'Active'|tr(locale) }}</b>{% elif currency.code in registered_codes %}{{ action(currency.code, 'base') }}{% else %}{{ action(currency.code, 'register') }}{% endif %}</div>{% endfor %}
+    {% for currency in currencies if currency.code not in currency_suggestion_codes %}<div class="phone-row" data-currency-row data-search="{{ (currency.code ~ ' ' ~ currency.name)|lower }}"><span dir="ltr">{{ currency.code }}<small>{{ currency.name }}</small></span>{% if currency.code == base %}<b>{{ 'Active'|tr(locale) }}</b>{% else %}{{ action(currency.code, 'base') }}{% endif %}</div>{% endfor %}
+    <p class="phone-note" data-currency-empty hidden>{{ 'No currencies match your search.'|tr(locale) }}</p>
+  </div>
+  <div class="phone-rows">{% set row %}<span>{{ 'Add a custom currency code'|tr(locale) }}</span><b>+</b>{% endset %}{% call sheet('Add a custom currency code'|tr(locale), row) %}<form method="post" action="/settings/currency" class="phone-form"><input type="hidden" name="action" value="register"><label>{{ 'Currency code'|tr(locale) }}<input name="code" maxlength="3" placeholder="XYZ" required></label><label>{{ 'Currency name'|tr(locale) }}<input name="name" required></label><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary phone-save" type="submit">{{ 'Add currency'|tr(locale) }}</button></form>{% endcall %}</div>
+  {% else %}
+  {% set other_currencies = currencies|rejectattr('code', 'equalto', base)|list %}
+  <section class="phone-section" aria-labelledby="fx-rates"><header class="phone-section-head"><h2 id="fx-rates">{{ 'Exchange rates'|tr(locale) }}</h2></header>
+    <p class="phone-note">{{ 'Enter how many {base} one unit of a foreign currency was worth on that date. Rates are used for account values and month end reports.'|tr(locale, base=base) }}</p>
+    {% if other_currencies %}<form method="post" action="/settings/fx-rate" class="phone-form"><label>{{ 'Currency'|tr(locale) }}<input name="currency" list="fx-currencies" autocomplete="off" required><datalist id="fx-currencies">{% for currency in other_currencies %}<option value="{{ currency.code }}">{{ currency.name }}</option>{% endfor %}</datalist></label><label>{{ 'As of'|tr(locale) }}<input name="date" type="date" required></label><label>{{ 'Rate'|tr(locale) }} ({{ base }} {{ 'per unit'|tr(locale) }})<input name="rate" inputmode="decimal" required></label><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary phone-save" type="submit">{{ 'Save rate'|tr(locale) }}</button></form>
+    {% else %}<p class="phone-note">{{ 'Add another currency before entering its rate.'|tr(locale) }}</p>{% endif %}
+    {% if pending_fx %}<p class="phone-note">{{ 'Waiting for a rate:'|tr(locale) }} {% for row in pending_fx %}{{ row.currency }} · {{ row.date }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+    {% if fx_rates %}<div class="phone-rows currency-rate-list">{% for rate in fx_rates %}<div class="phone-row"><span>{{ rate.currency }}<small><bdi>{{ rate.date }}</bdi></small></span><b><bdi>{{ rate.rate }}</bdi> {{ base }}</b></div>{% endfor %}</div>{% endif %}
+  </section>
+  <section class="phone-section currency-history" aria-labelledby="fx-history"><header class="phone-section-head"><h2 id="fx-history">{{ 'FX reevaluation history'|tr(locale) }}</h2></header>
+    <p class="phone-note">{{ 'Changes in value caused by exchange rates, without changing the cash balance.'|tr(locale) }}</p>
+    <div class="phone-rows">{% for row in fx_history %}<div class="phone-row"><span>{{ row.account_name }}<small><span>{{ row.asset_name|tr(locale) }}</span> · <bdi>{{ row.date }}</bdi> · <bdi>{{ row.units_e6|money(False, 2) }} {{ row.currency }}</bdi></small></span><b class="{{ row.return_base_e6|tone if row.return_base_e6 is not none else '' }}"><bdi>{{ row.return_base_e6|money(True) if row.return_base_e6 is not none else '—' }}</bdi> {{ base }}</b></div>{% else %}<p class="phone-note">{{ 'No FX reevaluations yet.'|tr(locale) }}</p>{% endfor %}</div>
+  </section>
+  {% endif %}
+</div>

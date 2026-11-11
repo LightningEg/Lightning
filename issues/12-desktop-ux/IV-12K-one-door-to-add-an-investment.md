@@ -28,3 +28,5 @@ Property · Something else. Each goes to its own short form, creating the holdin
 on the way when none exists. Pickers list only valid choices: no price references, no certificates or items in the
 trade form; Cash account lists bank, cash and wallet accounts only. Tests: each choice reaches a saved holding from
 `/investments` without visiting Accounts; a posted form with a refused asset is still refused by the service.
+
+**Built (2026-11-10):** `/investments/add` (Add investment on the PC Investments page) asks what it is and opens the matching form; the trade form lists no price references, certificates or items, and its Cash account lists bank, cash and wallet accounts only (`tests/test_investment_doors.py`). **Left:** the phone sheet entry, and creating the CD portfolio on the way.

@@ -167,6 +167,48 @@ def test_reminder_ids_are_scoped_to_profile_and_local_day(c, monkeypatch):
     assert {item["id"] for item in other_profile}.isdisjoint(item["id"] for item in other_day)
 
 
+def test_reminder_schedule_has_days_and_kinds_only(c, setup, tmp_path, monkeypatch):
+    """NF-3AU2: a 5,250 EGP "Rent" bill due in 3 days: the schedule holds its reminder day and `payment`, and neither
+    the figure nor the name appears in the file's text. Its id is the one due() gives that reminder on its day."""
+    import json
+    from lightning.workflows import reminder_schedule
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-11-10")
+    path = tmp_path / "reminder-schedule.json"
+    monkeypatch.setenv(reminder_schedule.ENV, str(path))
+    accounts, cats = setup
+    c.planning.create(kind="BILL", name="Rent", amount="5250", frequency="ONCE", start_date="2026-11-13",
+                      account_id=accounts["cib"].id, category_id=cats["EXP.PERSONAL.FOOD"].id)
+    client = TestClient(create_app(c))
+    client.post("/reminders/settings", data={"enabled": "1", "__session": client.get("/review").text.split('name="__session" value="')[1].split('"')[0]})
+    text = path.read_text(encoding="utf-8")
+    data = json.loads(text)
+    assert {"day": "2026-11-12", "kind": "payment"} in [{k: i[k] for k in ("day", "kind")} for i in data["items"]]
+    assert set(data) == {"version", "profile", "written", "items"} and data["written"] == "2026-11-10"
+    assert all(set(i) == {"day", "kind", "id"} and i["kind"] in reminder_schedule.KIND_TEXT for i in data["items"])
+    for secret in ("5250", "5,250", "Rent", str(c.db.path)):
+        assert secret not in text, secret
+    rent = next(i for i in data["items"] if i["day"] == "2026-11-12")
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-11-12")
+    assert rent["id"] in {i["id"] for i in ReminderService(c).due()}
+
+
+def test_turning_reminders_off_removes_the_schedule(c, tmp_path, monkeypatch):
+    """NF-3AU2: off deletes the file; due.json rewrites it at most once a day; read-only leaves it alone."""
+    from lightning.workflows import reminder_schedule
+    path = tmp_path / "reminder-schedule.json"
+    monkeypatch.setenv(reminder_schedule.ENV, str(path))
+    client = TestClient(create_app(c))
+    token = client.get("/review").text.split('name="__session" value="')[1].split('"')[0]
+    client.post("/reminders/settings", data={"enabled": "1", "__session": token})
+    assert path.exists()
+    assert not reminder_schedule.refresh(c)  # already written today
+    client.get("/reminders/due.json")
+    client.post("/reminders/settings", data={"enabled": "0", "__session": token})
+    assert not path.exists()
+    client.get("/reminders/due.json")
+    assert not path.exists()
+
+
 @pytest.mark.parametrize("href", [
     "https://example.com/steal", "//example.com/steal", "/\\\\example.com/steal", "\\\\example.com",
     " /review", "javascript:alert(1)",

@@ -10,6 +10,7 @@ from lightning.budgeting.domain import INCOME_FROM_RECURRING
 from lightning.core.dates import today
 
 from ..sections import SECTIONS
+from .. import status as page_status
 from ..web import build_version, container, redirect, render, settled_save
 from lightning.categories.domain import Movement, CategoryFamily
 from lightning.core.dates import month_of
@@ -85,7 +86,7 @@ async def settings_page(request: Request):
             return_to = "/"
     except Exception:
         return_to = "/"
-    classes = [x for x in c.assets.list_classes() if x.active and x.root_code != "CASH" and x.code not in ("CUSTODY", "GAMEYA")]  # a circle cannot be sold: always 100%
+    classes = [x for x in c.assets.list_classes() if x.active and x.root_code != "CASH" and x.code not in ("CUSTODY", "GAMEYA", "RECEIVABLE")]  # a circle cannot be sold: always 100%; money lent is not sold
     # The same class values and factors as Birdview's "If you sold today".
     position_classes = {row.code: row for row in c.position.class_values(today())[0]}
     sources = c.investments.sale_factor_sources()
@@ -142,13 +143,6 @@ async def settings_page(request: Request):
     if section == "zakat" and not zakat_on:
         return redirect("/settings", "Zakat is off. Turn it on in Settings.")
     zakat_settings = c.zakat.settings() if section == "zakat" else None
-    ai_period = ai_preview = None
-    if section == "general":
-        try:
-            ai_period = parse_period(request.query_params, today(), c.reporting.first_activity_date())
-        except LightningError:
-            ai_period = parse_period({}, today(), c.reporting.first_activity_date())
-        ai_preview = AIAnalysisService(c).preview(ai_period)
     currency_registry = c.currencies
     currency_suggestions = currency_registry.suggestions()
     currency_tab = "rates" if request.query_params.get("tab") == "rates" else "currencies"
@@ -157,7 +151,7 @@ async def settings_page(request: Request):
     play = _play_context(request) if section in ("", "general") else {"play_offers": None, "play_pending": []}
     if play.pop("note", None):  # a purchase just settled: say so once (the next load finds nothing new to settle)
         return redirect("/settings", play["flash"])
-    return render(request, "settings/index.html", **_update_context(request), **play, db_path=c.db.path, backups=[b.name for b in backups], plan=plan,
+    return render(request, "settings/index.html", **_update_context(request), **play, db_path=c.db.path, backups=[b.name for b in backups], backup_count=len(c.backup_files()), plan=plan,
                   classes=c.assets.list_classes(), assets=c.assets.list_assets(), factor_rows=factor_rows, factor_groups=factor_groups,
                   section=request.query_params.get("section", "general"), return_to=return_to,
                   budget_return_to=f"/settings?section=budget&return_to={return_to}",
@@ -168,8 +162,6 @@ async def settings_page(request: Request):
                   emergency_basis=c.budgets.emergency_basis(),
                   manual_income=c.settings.get("budget_manual_monthly_income") or "",
                   income_from_recurring=c.settings.get(INCOME_FROM_RECURRING) == "1",
-                  ai_period=ai_period, ai_preview=ai_preview, ai_presets=PRESETS, ai_sizes=SIZES,
-                  ai_month=month_of(ai_period.end) if ai_period else month_of(today()),
                   current_month=month_of(today()), health_limits=health_limits,
                   health_fund=health_fund, zakat_settings=zakat_settings, zakat_on=zakat_on,
                   currencies=currency_registry.list(),
@@ -375,6 +367,22 @@ async def save_locale(request: Request):
     response.set_cookie("lightning_ui_locale", locale, max_age=60 * 60 * 24 * 365, httponly=False,
                         secure=request.url.scheme == "https", samesite="lax", path="/")
     return response
+
+
+@router.get("/ask-ai")
+async def ask_ai_page(request: Request):
+    """Ask an AI, in one place (IV-12Y5): the period, the question, then Copy or Save. Pages that hand a question
+    over link here with their own period."""
+    c = container(request)
+    try:
+        ai_period = parse_period(request.query_params, today(), c.reporting.first_activity_date())
+    except LightningError:
+        ai_period = parse_period({}, today(), c.reporting.first_activity_date())
+    ai_preview = AIAnalysisService(c).preview(ai_period)
+    return render(request, "settings/ask_ai.html", ai_period=ai_period, ai_preview=ai_preview, ai_presets=PRESETS,
+                  ai_sizes=SIZES, ai_month=month_of(ai_period.end), current_month=month_of(today()),
+                  answer=page_status.count(ai_preview["transactions"], "1 transaction in these dates.",
+                                           "{n} transactions in these dates.", "No transactions in these dates."))
 
 
 @router.post("/ask-ai")

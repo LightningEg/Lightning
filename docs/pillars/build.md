@@ -11,24 +11,17 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **BT-1V** | [The documented install misses four packages](../../issues/1-easy-to-contribute/BT-1V-source-install-misses-four-packages.md) | S | ready |
 | **IT-1E** | [Audit public repositories for personal data and security exposure](../../issues/1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | M | ready |
 | **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](../../issues/1-easy-to-contribute/IT-1H-coordinate-packaged-dependency-refresh.md) | L | blocked on repository Actions allowlist update and native runtime acceptance |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](../../issues/1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | M | ready |
-| **IT-1W** | [Four wheel files (49 MB) sit in the repository root by accident](../../issues/1-easy-to-contribute/IT-1W-stray-wheels-in-the-repository-root.md) | S | ready |
-| **IT-1X** | [Two sessions take the same code](../../issues/1-easy-to-contribute/IT-1X-two-sessions-take-the-same-code.md) | M | ready |
-| **IT-1Y** | [Every page is asked once and measured](../../issues/1-easy-to-contribute/IT-1Y-every-page-asked-once-and-measured.md) | M | ready |
-| **IT-1Z** | [Unused functions and names](../../issues/1-easy-to-contribute/IT-1Z-unused-functions-and-names.md) | S | ready |
-| **IT-9K** | [Structure left](../../issues/9-later/IT-9K-layers-and-copies.md) | M | ready |
+| **IT-9O** | [A slow page makes every other request wait](../../issues/9-later/IT-9O-read-only-pages-block-other-requests.md) | M | new |
 | **IT-12AE** | [A screen cannot work out money](../../issues/12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | L | ready |
 
 ## Reports with open follow-ups here
 
-- [Audit 5: is the backend engine efficient and streamlined?](../../issues/4-edit-journal-and-devices/r3-backend-streamlining/report.md): 9K
 - [Audit 6: open pull request cleanup](../../issues/1-easy-to-contribute/r7-pull-request-cleanup/report.md): 1H
 - [v1.5.0 PR review, theme switching and package preparation](../../issues/10-looks-and-store/r12-v150-release/report.md): 1H
-- [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 1H, 9K
-- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r33-code-review-and-loose-ends/report.md): 1V, 1W, 1X, 1Y, 1Z, 9K
+- [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 1H
 - [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](../../issues/11-phone-ux/r36-figures-one-owner/report.md): 12AE
 <!-- work:end -->
 

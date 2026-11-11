@@ -1,0 +1,18 @@
+{# Budget settings on the phone (3AY17): carryover, the income average, the emergency basis and one-off categories,
+   one column, Save at the foot. #}
+<form class="phone-form phone-fields" method="post" action="/budget/settings/full"><input type="hidden" name="return_to" value="{{ budget_return_to }}">
+  <label class="import-check"><input type="checkbox" name="carryover" value="1" {{ 'checked' if carryover }}> {{ "Carry unused room and overspending into tracked categories"|tr(locale) }}</label>
+  <section class="phone-section" aria-labelledby="bs-income"><header class="phone-section-head"><h2 id="bs-income">{{ fig.average_monthly_income.label }}</h2></header>
+    <label>{{ "Average over"|tr(locale) }}<select name="income_months"><option value="3" {{ 'selected' if income_months=='3' }}>{{ "3 months"|tr(locale) }}</option><option value="6" {{ 'selected' if income_months=='6' }}>{{ "6 months"|tr(locale) }}</option></select></label>
+    <label>{{ "Set by hand (optional)"|tr(locale) }}<input name="manual_income" inputmode="decimal" value="{{ manual_income }}" placeholder="{{ 'Use recorded income'|tr(locale) }}"></label>
+    <input type="hidden" name="income_from_recurring_shown" value="1"><label class="import-check"><input type="checkbox" name="income_from_recurring" value="1" {{ 'checked' if income_from_recurring }}> {{ "Plan with the income in"|tr(locale) }} <a href="/plan/recurring">{{ 'Recurring'|tr(locale) }}</a> {{ "instead of the average"|tr(locale) }}</label>
+    <p class="phone-note">{{ "Recurring income counted in the average · the same as"|tr(locale) }} <a href="/categories">{{ 'Recurring'|tr(locale) }}</a> {{ "on Categories"|tr(locale) }}</p>
+    <div class="phone-rows">{% for category in income_categories %}<label class="phone-row"><span>{{ category.name|tr(locale) }}</span><input type="checkbox" name="income_category" value="{{ category.id }}" {{ 'checked' if category.id in selected_income }}></label>{% else %}<p class="phone-note">{{ "No income categories yet."|tr(locale) }}</p>{% endfor %}</div>
+  </section>
+  <section class="phone-section">{% include 'phone/settings/_emergency_basis.html' %}</section>
+  <section class="phone-section" aria-labelledby="bs-oneoff"><header class="phone-section-head"><h2 id="bs-oneoff">{{ "One-off categories"|tr(locale) }}</h2></header>
+    <p class="phone-note">{{ "Left out of the budget and estimates · the same as"|tr(locale) }} <a href="/categories">{{ 'One-off'|tr(locale) }}</a> {{ "on Categories"|tr(locale) }}</p>
+    <div class="phone-rows">{% for category in expense_categories if category.active %}<label class="phone-row{{ ' is-inner' if category.depth != 1 }}"><span>{% if category.depth == 1 %}<b>{{ category.name|tr(locale) }}</b>{% else %}{{ category.name|tr(locale) }}{% endif %}</span><input type="checkbox" name="exclusion_category" value="{{ category.id }}" {{ 'checked' if category.id in excluded_categories }}></label>{% endfor %}</div>
+  </section>
+  <button class="btn primary phone-save">{{ "Save budget settings"|tr(locale) }}</button>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>

@@ -76,8 +76,12 @@ def test_the_header_reads_start_date_first_from_the_right(arabic, path):
     page = arabic.page
     page.goto(arabic.origin + path)
     page.wait_for_selector(".page-dates bdi")
-    boxes = page.evaluate("[...document.querySelectorAll('.page-dates bdi')].map(e => e.getBoundingClientRect().left)")
-    assert len(boxes) == 2 and boxes[0] > boxes[1], boxes  # the first (start) date is the right-hand one
+    # One range said in words (IV-3BK), read right to left: its start day is the right-hand end of the range.
+    found = page.evaluate("""() => { const b = document.querySelector('.page-dates bdi'); const t = b.firstChild;
+      const r = document.createRange(); r.setStart(t, 0); r.setEnd(t, 1); const first = r.getBoundingClientRect();
+      r.setStart(t, t.length - 1); r.setEnd(t, t.length); const last = r.getBoundingClientRect();
+      return {dir: getComputedStyle(b).direction, text: b.textContent, first: first.left, last: last.left}; }""")
+    assert found["dir"] == "rtl" and found["first"] > found["last"], found
 
 
 @pytest.mark.parametrize("path", ["/", "/budget", "/accounts", "/investments", "/plan"])

@@ -22,7 +22,7 @@
     {% if st in ('idle', 'up_to_date', 'failed') %}<button class="btn small" formaction="/settings/update/check">{{ 'Check for updates'|tr(locale) }}</button>{% endif %}
     {% if st == 'available' %}<button class="btn primary small" formaction="/settings/update/download">{{ 'Download'|tr(locale) }}</button><a class="btn small" href="{{ outside_url('releases', locale) }}" target="_blank" rel="noopener">{{ "What's new"|tr(locale) }}</a>{% endif %}
     {% if st in ('ready', 'refused_lend', 'refused_move') %}<button class="btn primary small" formaction="/settings/update/restart">{{ 'Restart to update'|tr(locale) }}</button>{% endif %}
-    {% if st == 'refused_folder' or (st == 'unavailable' and not phone_mode()) %}<a class="btn small" href="{{ outside_url('download', locale) }}" target="_blank" rel="noopener">{{ 'Download page'|tr(locale) }}</a>{% endif %}
+    {% if st == 'refused_folder' or st == 'unavailable' %}<a class="btn small" href="{{ outside_url('download', locale) }}" target="_blank" rel="noopener">{{ 'Download page'|tr(locale) }}</a>{% endif %}
     {% if st == 'failed' %}<a class="btn small" href="{{ outside_url('download', locale) }}" target="_blank" rel="noopener">{{ 'Download it yourself'|tr(locale) }}</a>{% endif %}
   </form>
 </div>

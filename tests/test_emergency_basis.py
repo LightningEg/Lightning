@@ -82,7 +82,7 @@ def test_the_setting_is_chosen_in_settings_and_read_on_reserves(household):
     page = client.get("/plan/reserves").text
     assert "Emergency fund covers 3.0 months" in page and "Of average monthly spending." in page
     assert "Counted in months of spending" in page and "Towards six months of spending" in page
-    assert "2026-09 to 2026-11 · 3 months with spending" in page
+    assert "Sep – Nov 2026 · 3 months with spending" in page
 
     # a form without the choice leaves it alone
     client.post("/budget/settings/full", data={k: v for k, v in form.items() if k != "emergency_basis"})

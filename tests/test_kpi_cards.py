@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 from lightning.samples import load_mohab_2026
 from lightning.ui import charts, kpis
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 def test_a_card_without_a_comparison_is_refused():
@@ -102,7 +103,7 @@ def test_cash_plannings_free_cash_compares_with_the_last_month_end(mohab, monkey
     assert [card.split(" ")[1] for card in cards[1:]] == ["Free", "Due", "Lowest"]
     then = c.position.at(date(2026, 9, 30)).free_cash
     now = c.forecaster.forecast(date(2026, 10, 19)).free_cash
-    assert f"+{now - then:,.0f} since 2026-09-30" in cards[1]
+    assert said(f"+{now - then:,.0f} since 2026-09-30") in cards[1]
     assert "Due before payday 4 late" in cards[2] and "already late" in cards[2]
     assert "below today" in cards[3] and "months of spending at its lowest" in cards[3]
 

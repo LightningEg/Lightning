@@ -4,11 +4,18 @@
   <form method="post" action="/zakat/settings">
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
     <div class="field"><label for="zakat-day">{{ 'Zakat day'|tr(locale) }}</label>
-      <input id="zakat-day" name="zakat_day" type="date"{% if phone_mode() %} data-native-date{% endif %} value="{{ zakat_settings.zakat_day or '' }}">
+      <input id="zakat-day" name="zakat_day" type="date" value="{{ zakat_settings.zakat_day or '' }}">
       <small class="muted">{{ 'The next zakat day is 354 days after this one: it follows the lunar year.'|tr(locale) }}</small></div>
     <div class="field"><label for="zakat-nisab">{{ 'Nisab you type'|tr(locale) }} ({{ base }})</label>
       <input id="zakat-nisab" name="typed_nisab" inputmode="decimal" value="{{ zakat_settings.typed_nisab or '' }}" placeholder="{{ 'Used only when there is no gold price'|tr(locale) }}">
       {% if zakat_settings.typed_nisab_date %}<small class="muted">{{ 'Typed on {date}'|tr(locale, date=zakat_settings.typed_nisab_date) }}</small>{% endif %}</div>
+    <fieldset class="field"><legend>{{ 'Nisab'|tr(locale) }}</legend>
+      {% for key, label in [('gold', 'Gold (85 g)'), ('silver', 'Silver (595 g)'), ('lower', 'The lower of the two')] %}
+      <label class="sc-check"><input type="radio" name="nisab_basis" value="{{ key }}" {{ 'checked' if zakat_settings.nisab_basis == key }}>{{ label|tr(locale) }}</label>
+      {% endfor %}</fieldset>
+    <div class="field"><label for="zakat-silver">{{ 'Price of a gram of silver'|tr(locale) }} ({{ base }})</label>
+      <input id="zakat-silver" name="typed_silver" inputmode="decimal" value="{{ zakat_settings.typed_silver or '' }}" placeholder="{{ 'Needed for the silver nisab'|tr(locale) }}">
+      {% if zakat_settings.typed_silver_date %}<small class="muted">{{ 'Typed on {date}'|tr(locale, date=zakat_settings.typed_silver_date) }}</small>{% endif %}</div>
     <label class="sc-check"><input type="checkbox" name="count_worn_gold" value="1" {{ 'checked' if zakat_settings.count_worn_gold }}>{{ 'Count the gold I wear'|tr(locale) }}</label>
     <label class="sc-check"><input type="checkbox" name="deduct_debts_due" value="1" {{ 'checked' if zakat_settings.deduct_debts_due }}>{{ 'Take off the debts due now'|tr(locale) }}</label>
     <div class="actions"><button class="btn primary">{{ 'Save'|tr(locale) }}</button></div>

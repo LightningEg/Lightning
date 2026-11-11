@@ -1,0 +1,11 @@
+{# Reevaluation ledger on the phone (3AY16): one row per checkpoint with its return; export stays on the PC table. #}
+{% extends "base.html" %}
+{% block title %}Reevaluation ledger{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/investments"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Investments'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ "Reevaluation ledger"|tr(locale) }}</h1><p class="phone-note">{{ "Monthly investment returns and sale-day adjustments. Each account checkpoint links to one aggregated entry in the main ledger."|tr(locale) }}</p>{% endblock %}
+{% block content %}
+{% if pending %}<a class="phone-row" href="/investments/prices"><span>{{ "Review missing prices"|tr(locale) }}</span><b>{{ pending|length }}</b></a>{% endif %}
+{% if rows %}<div class="phone-rows">{% for row in rows %}{% set href = '/transactions/' ~ row.journal_transaction_id ~ '/sheet' if row.ref else '' %}
+  <{{ 'a' if href else 'div' }} class="phone-row"{% if href %} href="{{ href }}"{% endif %}><span>{{ row.asset_name }}<small>{{ row.date }} · {{ ('Sale-day' if row.reason == 'SALE' else 'Month-end')|tr(locale) }} · {{ row.account_name }}{% if row.owner_name %} · {{ row.owner_name }}{% endif %}{% if row.needs_price %} · {{ "Waiting for price"|tr(locale) }}{% endif %}</small></span><b class="{{ row.return_base_e6|tone if row.return_base_e6 is not none else '' }}">{% if row.return_base_e6 is not none %}<bdi class="fig">{{ row.return_base_e6|money(True) }}</bdi>{% else %}—{% endif %}</b></{{ 'a' if href else 'div' }}>{% endfor %}
+</div>{% else %}<p class="phone-note">{{ "No reevaluations yet. The first monthly checkpoint is created on app start after prices are available."|tr(locale) }}</p>{% endif %}
+{% endblock %}

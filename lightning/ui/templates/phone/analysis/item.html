@@ -1,0 +1,21 @@
+{# One category, counterparty or account over twelve months on the phone (3AY17): this month against last, the
+   month-by-month bars, the biggest payments, then its actions. #}
+{% extends "base.html" %}
+{% block title %}{{ item_name.split(' › ')|map('tr', locale)|join(' · ') }} · {{ 'Item analysis'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ item_name.split(' › ')|map('tr', locale)|join(' · ') }}</h1><p class="phone-note">{{ ({'category':'Category','payee':'Counterparty','account':'Account'}[kind])|tr(locale) }} · {{ data.date_from }} {{ 'to'|tr(locale) }} {{ data.date_to }}</p>{% endblock %}
+{% block content %}
+{% set d = data %}{% set change = d.this_month - d.last_month %}
+<section class="phone-hero has-seam" aria-labelledby="lead-heading"><div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'This month'|tr(locale) }}</div>
+  <div class="phone-lead">{{ d.this_month|whole }} <small>{{ base }}</small></div><p class="phone-hero-line"><b class="{{ 'is-up' if change > 0 else ('is-down' if change < 0 else '') }}">{{ change|money(signed=true) }}</b> {{ 'against last month'|tr(locale) }}</p></section>
+<dl class="phone-facts">
+  <div><dt>{{ '12-month total'|tr(locale) }}</dt><dd><bdi class="fig">{{ d.total|money }}</bdi></dd></div>
+  <div><dt>{{ 'Monthly average'|tr(locale) }}</dt><dd><bdi class="fig">{{ d.average|money }}</bdi></dd></div>
+  <div><dt>{{ 'Payments'|tr(locale) }}</dt><dd>{{ d.count }}</dd></div>
+</dl>
+<section class="phone-section" aria-labelledby="trend-head"><header class="phone-section-head"><h2 id="trend-head">{{ 'Month by month'|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for t in d.trend|reverse %}<div class="phone-row phone-bar-row"><span>{{ t.month }}<span class="phone-bar-track" aria-hidden="true"><i style="width:{{ t.pct }}%"></i></span></span><b><bdi class="fig">{{ t.value|money }}</bdi></b></div>{% endfor %}</div></section>
+<section class="phone-section" aria-labelledby="top-head"><header class="phone-section-head"><h2 id="top-head">{{ 'Biggest payments'|tr(locale) }}</h2></header>
+  {% if not d.top %}<p class="phone-note">{{ 'No spending in the last 12 months.'|tr(locale) }}</p>{% else %}
+  <div class="phone-rows">{% for t in d.top %}<a class="phone-row" href="/transactions/{{ t.id }}/sheet"><span>{{ t.payee if kind != 'payee' else t.ref }}<small>{{ t.date }}</small></span><b><bdi class="fig">{{ t.value|money }}</bdi></b></a>{% endfor %}</div>{% endif %}</section>
+<a class="btn primary phone-save" href="{{ edit_href }}">{{ 'Edit all these transactions'|tr(locale) }}</a><a class="btn phone-save" href="{{ rule_href }}">{{ 'Make a rule'|tr(locale) }}</a>
+{% endblock %}

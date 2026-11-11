@@ -119,7 +119,7 @@ JOURNAL_ADAPTERS = {"areas/automation.py", "areas/workflows.py", "automation.py"
 FINANCIAL = {"bank_imports", "budgeting", "sms_imports", "undo", "workflows", "planning", "accounts", "assets", "categories",
              "transactions", "reporting", "investments", "deposits", "reserves", "fx", "counterparties", "money_from_others",
              "rules", "reimbursements", "reevaluations", "physical_items", "integrity", "reconciliation", "saved_views",
-             "zakat", "ownership_migration", "bootstrap"}
+             "zakat", "ownership_migration", "bootstrap", "people_money"}
 
 
 def _imports_of(path):
