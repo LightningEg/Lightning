@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 10 open items. Each folder holds its reports and its items.
+11 big pictures, 9 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -93,14 +93,12 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **NF-7AK** | [Bank messages beyond CIB and NBE in Arabic: English card messages, wallets, other currencies, and the researched formats](7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | new feature | Capture | L | Opus | new |
-| NF-7AK3 | ↳ Purchases in another currency | | | M | Opus | |
 | **NF-7AQ** | [Search answers a typed question - "food last month" gives the figure, its comparison and the rows, not a link to a filter](7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md) | new feature | Capture | L | Opus | new |
 | NF-7AQ5 | ↳ The owner's Arabic words · S | | | owner |  | |
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md) · [r31](7-planning-import-and-search/r31-logging-entries/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AB, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI, 7AJ, 7AL, 7AM, 7AN, 7AO, 7AP. Next free code: 7AS.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AB, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI, 7AJ, 7AK, 7AL, 7AM, 7AN, 7AO, 7AP, 7AR. Next free code: 7AS.
 
 ## 8 Website
 
@@ -182,7 +180,6 @@ Kept, not planned: nobody works on these until the owner picks one (set its stat
 - **IT-6F** [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history source](6-market-data/IT-6F-london-board-and-gulf-history.md)
 - **NF-6A** [Market data: price packs, collected in the cloud](6-market-data/NF-6A-price-packs.md)
 - **NF-6B** [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](6-market-data/NF-6B-europe-and-gcc-shares.md)
-- **NF-7AR** [An Upcoming tab shows the month's payments on a calendar, with payday and the day cash runs short](7-planning-import-and-search/NF-7AR-upcoming-payments-calendar.md)
 - **IV-8AC** [For Geeks gets two motion moments that are true - a posting that must balance, and a row that becomes ciphertext](8-website/IV-8AC-for-geeks-two-true-motion-moments.md)
 - **IV-8AD** [A guideline rule for an Arabic page that links to an English page - the label says so and it opens in a new tab](8-website/IV-8AD-arabic-pages-that-link-to-english-pages.md)
 - **NF-8AB** [Link the three comparison pages and add a fourth that compares Lightning with an AI assistant](8-website/NF-8AB-link-the-comparisons-and-compare-with-an-ai.md)

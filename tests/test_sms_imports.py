@@ -461,7 +461,8 @@ def test_english_card_messages_read_with_shop_date_and_ending():
     assert (credit.amount, credit.ending, credit.place, credit.when) == (
         Decimal("1250.00"), "5678", "AMAZON.EG", "2026-11-08T20:01")
     assert credit.balance is None  # an available limit is not money held
-    assert parse_sms("Your card ending 1234 was charged USD 12.99 at NETFLIX.COM on 03/11/26", received=R) is None
+    usd = parse_sms("Your card ending 1234 was charged USD 12.99 at NETFLIX.COM on 03/11/26", received=R)
+    assert (usd.currency, usd.amount, usd.place, usd.paid) == ("USD", Decimal("12.99"), "NETFLIX.COM", "")
 
 
 def test_a_wallet_payment_and_receipt_share_one_key_and_stage_in_the_wallet(c, setup):
@@ -535,3 +536,77 @@ def test_stated_balance_gap_is_one_quiet_row_that_clears(c, setup):
     assert len(rows) == 1 and "350" in rows[0]["label"] and str(cib.id) in rows[0]["href"]
     c.settings.set(STATED_KEY, json.dumps({str(cib.id): {"date": "2026-09-30", "balance": "50000.00"}}))  # a later message agrees
     assert c.sms_imports.balance_gaps() == []
+
+
+USD_CARD = "تم خصم مبلغ USD 12.99 من بطاقة الائتمان المنتهية بـ 2093 لدى NETFLIX.COM في 03/11/26 10:05"
+
+
+def test_a_dollar_purchase_is_kept_in_dollars_and_the_banks_pound_debit_settles_it(c, setup):
+    """NF-7AK3 (owner, 2026-11-11): currency, amount in currency, then its pound equivalent: the dated rate until
+    the bank's pound debit arrives, then that debit itself. One expense, never two."""
+    from fastapi.testclient import TestClient
+    from lightning.foreign_amounts import ForeignAmounts
+    from lightning.ui.web import create_app
+    accounts, cats = setup
+    _known(c, setup)
+    found = parse_sms(USD_CARD, received=R)
+    assert (found.kind, found.currency, found.amount, found.ending) == ("purchase", "USD", Decimal("12.99"), "2093")
+    assert not found.sure  # an estimate in pounds never saves itself
+
+    # No rate near the day: kept for the person to enter, never read as 12.99 pounds (IV-7AJ).
+    first = c.sms_imports.read([("CIB", USD_CARD, datetime(2026, 11, 3, 10, 5))])
+    assert first["staged"] == {} and first["unread"] == 1
+
+    c.currencies.register("USD")
+    c.fx.save("USD", "2026-11-01", "48.50")
+    again = USD_CARD.replace("10:05", "10:06")
+    batch = c.sms_imports.read([("CIB", again, datetime(2026, 11, 3, 10, 6))])["staged"][accounts["cib"].id]
+    _, rows = c.bank_imports.preview(batch)
+    (row,) = rows
+    assert Decimal(row["Amount"]) == Decimal("-630.02") and row["_foreign"] == "USD 12.99"
+    assert "USD 12.99" in row["Notes"]
+    c.bank_imports.confirm(batch, {row["_import_row_id"]: {"match": "new", "category_id": cats["EXP.WORK.SOFTWARE"].id}})
+    txn_id = c.db.scalar("SELECT transaction_id FROM bank_import_rows WHERE id=?", (row["_import_row_id"],))
+    held = ForeignAmounts(c.db).get(txn_id)
+    assert (held.label, held.settled) == ("USD 12.99", False)
+    page = TestClient(create_app(c)).get(f"/transactions/{txn_id}").text
+    assert "USD 12.99" in page and "until the bank" in page
+
+    # Five days later the bank's pound debit, with its own rate and card fee: offered as that entry, by default.
+    debit = NBE_BUY.replace("147.87", "655.40").replace("06/10/26", "08/11/26")
+    batch = c.sms_imports.read([("NBE", debit, datetime(2026, 11, 8, 11, 14))])["staged"][accounts["cib"].id]
+    _, rows = c.bank_imports.preview(batch)
+    (row,) = rows
+    (candidate,) = row["_link_candidates"]
+    assert candidate["id"] == txn_id and candidate["settles"] == "USD 12.99"
+    assert row["_default_match"] == f"link:{txn_id}"
+    spent_before = c.db.scalar("SELECT COUNT(*) FROM transactions WHERE type='OUT' AND status='POSTED'")
+    c.bank_imports.confirm(batch, {row["_import_row_id"]: {"match": row["_default_match"]}})
+    txn = c.transactions.get(txn_id)
+    assert sum(line.amount for line in txn.lines if line.account_id == accounts["cib"].id) == Decimal("-655.40")
+    assert {line.category_id for line in txn.lines} == {cats["EXP.WORK.SOFTWARE"].id}
+    assert c.db.scalar("SELECT COUNT(*) FROM transactions WHERE type='OUT' AND status='POSTED'") == spent_before
+    assert ForeignAmounts(c.db).get(txn_id).settled
+    assert "pound debit" in TestClient(create_app(c)).get(f"/transactions/{txn_id}").text
+
+    # Settled once: a later debit of a similar amount is no longer offered as it.
+    other = NBE_BUY.replace("147.87", "650.00").replace("06/10/26", "09/11/26")
+    batch = c.sms_imports.read([("NBE", other, datetime(2026, 11, 9, 11, 14))])["staged"][accounts["cib"].id]
+    _, rows = c.bank_imports.preview(batch)
+    assert not any(cand.get("settles") for cand in rows[0]["_link_candidates"])
+
+
+def test_a_debit_far_from_the_estimate_is_not_offered_as_the_purchase(c, setup):
+    """NF-7AK3: only a debit within 15% of the estimate and 30 days after the purchase may settle it."""
+    from lightning.foreign_amounts import ForeignAmounts
+    accounts, cats = setup
+    c.currencies.register("USD")
+    c.fx.save("USD", "2026-11-01", "48.50")
+    txn = c.transactions.record_outflow("2026-11-03", accounts["cib"].id, Decimal("630.02"), cats["EXP.WORK.SOFTWARE"].id)
+    ForeignAmounts(c.db).record(txn.id, "USD", Decimal("12.99"))
+    near = ForeignAmounts(c.db).open_near
+    assert [f["id"] for f in near(accounts["cib"].id, "2026-11-08", Decimal("-700"))] == [txn.id]
+    assert near(accounts["cib"].id, "2026-11-08", Decimal("-800")) == []
+    assert near(accounts["cib"].id, "2026-12-08", Decimal("-655")) == []
+    assert near(accounts["cib"].id, "2026-11-02", Decimal("-655")) == []
+    assert near(accounts["wallet"].id, "2026-11-08", Decimal("-655")) == []

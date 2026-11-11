@@ -27,7 +27,6 @@ Reserved codes: none
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
 - **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12AB3 rest, 12Z5, 12AE4, 12Q. **Read:** 12AB.
-- **Upcoming (11-11, Claude):** 7AR1-3 built (owner: PC+phone check); 7AR4 .ics later. **Read:** 7AR.
 - **O1:** owner checks Home. **Read:** Overview §7.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
@@ -38,7 +37,7 @@ Reserved codes: none
 
 - **Website (11-09):** owner: Home ends on Download; Marketplace in search (site PR). Analytics host blocked here: unread. **Read:** site README › Search.
 
-- **Import:** 7AB, 7AN, 7AK1-2, 7AK4, 7AO, 7AQ1-5 built (owner: PC+phone, 7AQ5 Arabic). Next 7AK3.**Read:** 7AK.
+- **Import and planning (11-12, Claude):** 7AK closed (7AK3 dollar purchases, settled by the pound debit), 7AR closed (7AR4 .ics); 7AQ closes in #580. Owner checks held in Overview §9. **Read:** Architecture › SMS currency.
 
 
 Plan: `issues/INDEX.md`.

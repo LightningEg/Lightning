@@ -12,7 +12,7 @@ from lightning.core.errors import ValidationError
 from ..codec import stable_json
 from .spec import BYTES, FLAG, JSON, TEXT, Command, optional, ref
 
-TABLES = ("bank_import_batches", "bank_import_rows", "bank_import_column_maps")
+TABLES = ("bank_import_batches", "bank_import_rows", "bank_import_column_maps", "foreign_amounts")
 BATCH = ("bank_import_batches", "batch_id")
 IDS = {"category_id": "categories", "transfer_account_id": "accounts", "counterparty_id": "counterparties"}
 CHOICES = {"counterparty_choice": ("existing:", "counterparties"), "owner_choice": ("existing:", "counterparties"),

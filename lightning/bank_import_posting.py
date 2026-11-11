@@ -8,6 +8,8 @@ from decimal import Decimal
 from lightning.bank_import_rows import _amount, _date, _decimal_amount
 from lightning.categories.domain import Movement
 from lightning.core.errors import ValidationError
+from lightning.core.refs import DocType
+from lightning.foreign_amounts import ForeignAmounts
 from lightning.transactions.domain import TxnSource
 
 
@@ -118,8 +120,26 @@ class ImportPoster:
                           "AND status IN ('POSTED','LINKED')", (txn_id, row["_account_id"], row_id)):
             raise ValidationError(f"CSV row {row['_line']}: another statement row is already linked to that "
                                   "entry in this import. Post this one as new if it is a second payment.", "match")
+        candidate = next(c for c in row["_link_candidates"] if c["id"] == txn_id)
+        if candidate.get("settles"):
+            self._settle(txn_id, row)
         self.db.execute("UPDATE bank_import_rows SET status='LINKED',transaction_id=? WHERE id=?",
                         (txn_id, row_id))
+
+    def _settle(self, txn_id: int, row) -> None:
+        """NF-7AK3: the bank's pound debit for a purchase made in another currency. The entry takes the debit's
+        amount in place of the dated-rate estimate, keeping its category, payee and notes: one expense, not two."""
+        current = self.transactions.get(txn_id)
+        categories = {line.category_id for line in current.lines if line.category_id}
+        if len(categories) != 1:
+            raise ValidationError(f"CSV row {row['_line']}: that purchase is split; set its amount by hand, then "
+                                  "link this row to it.", "match")
+        account_id = int(row["_account_id"])
+        owner = next((line.owner_id for line in current.lines if line.account_id == account_id), None)
+        self.transactions.update_money(txn_id, current.date, account_id, abs(Decimal(str(row["Amount"]))),
+                                       categories.pop(), description=current.description,
+                                       counterparty=current.counterparty, notes=current.notes, owner_id=owner)
+        ForeignAmounts(self.db).settle(txn_id)
 
     def _post_import_row(self, batch, row_id, decision, row, accounts):
         cp_text = str(decision.get("counterparty", row["Counterparty"])).strip()
@@ -261,6 +281,12 @@ class ImportPoster:
             if counterparty_id:
                 self.db.execute("UPDATE transactions SET counterparty_id=? WHERE id=?",
                                 (int(counterparty_id), txn.id))
+        if row.get("_foreign") and amount < 0 and not target and txn.type == DocType.OUT:
+            currency, _, paid = row["_foreign"].partition(" ")
+            try:
+                ForeignAmounts(self.db).record(txn.id, currency, Decimal(paid))
+            except (ArithmeticError, ValueError):
+                pass  # an unreadable note keeps the entry in pounds, as any other
         self.db.execute("UPDATE bank_import_rows SET status='POSTED',transaction_id=? WHERE id=?",
                         (txn.id, row_id))
         if self.reserves:

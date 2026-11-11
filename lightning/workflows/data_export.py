@@ -9,7 +9,7 @@ from lightning.reporting.xlsx import MAX_ROWS, tabular_workbook_bytes
 # Explicit financial-data boundary: passwords, pairing material, licences and runtime configuration
 # are not exported. These are user records, including archived/voided items and unfinished reviews.
 TABLES = ("profile_identity", "accounts", "asset_classes", "financial_assets", "categories", "counterparties",
-          "counterparty_aliases", "institutions", "transactions", "ledger_entries", "registered_currencies", "currency_suggestions",
+          "counterparty_aliases", "institutions", "transactions", "ledger_entries", "foreign_amounts", "registered_currencies", "currency_suggestions",
           "fx_rates", "price_history", "budgets", "budget_carryover", "budget_carryover_resets", "cash_reserves",
           "reserve_allocation_history", "reserve_transaction_links", "planned_items", "planned_payments",
           "loan_extra_payments", "installment_purchases", "cd_terms", "cd_certificates", "cd_redemptions",

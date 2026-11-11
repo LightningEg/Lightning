@@ -170,3 +170,25 @@ def test_money_coming_up_carries_the_two_weeks(c):
     _household(c)
     strip = build(c, TODAY).strip
     assert len(strip) == 14 and strip[0]["today"] and strip[9]["date"] == "2026-11-20" and strip[9]["entries"]
+
+
+def test_the_next_three_months_save_as_a_calendar_file(c):
+    """NF-7AR4: an .ics of the open payments (late ones included), one all-day event each, stable UIDs."""
+    _, ids = _household(c)
+    client = TestClient(create_app(c))
+    assert 'href="/plan/upcoming.ics"' in client.get("/plan/upcoming").text
+    r = client.get("/plan/upcoming.ics")
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/calendar")
+    assert 'attachment; filename="lightning-payments.ics"' == r.headers["content-disposition"]
+    body = r.text
+    assert body.startswith("BEGIN:VCALENDAR\r\n") and body.endswith("END:VCALENDAR\r\n")
+    assert all(len(line.encode()) <= 75 for line in body.split("\r\n"))
+    events = body.split("BEGIN:VEVENT")[1:]
+    starts = sorted(e.split("DTSTART;VALUE=DATE:")[1][:8] for e in events)
+    assert starts[0] == "20261105" and starts[-1] <= "20270131"  # the late loan first; nothing past January
+    assert "20261103" not in starts                                 # rent is paid: no event
+    internet = [e for e in events if "SUMMARY:Internet" in e]
+    assert [e.split("DTSTART;VALUE=DATE:")[1][:8] for e in internet] == ["20261120", "20261220", "20270120"]
+    assert "Internet · 650 EGP" in internet[0] and "DTEND;VALUE=DATE:20261121" in internet[0]
+    assert "SUMMARY:Salary · +45\\,000 EGP" in body                # money in is marked, commas escaped
+    assert client.get("/plan/upcoming.ics").text.split("DTSTAMP")[0] == body.split("DTSTAMP")[0]  # same UIDs again

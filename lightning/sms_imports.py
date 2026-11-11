@@ -25,6 +25,7 @@ from typing import Protocol
 
 from lightning.core.dates import today
 from lightning.core.errors import ValidationError
+from lightning.foreign_amounts import pounds
 
 ENDINGS_KEY = "sms_account_endings"   # {"0285": account_id}
 SEEN_KEY = "sms_seen"                  # messages already read, newest last: "fp" (text only) or "fp@ms" (inbox)
@@ -53,6 +54,8 @@ _CUR = r"(?:EGP|جم|ج\.م\.?|جنيه)"
 _AMOUNT = _CUR + r"?\s*" + _NUM + r"\s*" + _CUR + r"?"
 # Another currency a message may name (a card used abroad): kept for the person, never read as pounds.
 _FOREIGN = r"(?:USD|EUR|GBP|SAR|AED|KWD|QAR|CHF|CAD)"
+# An amount in pounds or in another currency: (currency before, number, currency after); NF-7AK3 card purchases.
+_MONEY = r"(?:(" + _CUR + "|" + _FOREIGN + r")\s*)?" + _NUM + r"\s*(" + _CUR + "|" + _FOREIGN + r")?"
 _ANY_MONEY = (r"(?:(?P<c1>" + _CUR + "|" + _FOREIGN + r")\s*(?P<n1>[\d,]+(?:\.\d{1,2})?)|(?P<n2>[\d,]+(?:\.\d{1,2})?)\s*(?P<c2>"
               + _CUR + "|" + _FOREIGN + "))")
 _ENDING = r"(?:(?:المنتهية|المنتهي)\s*ب[ـ]?|رقم)\s*[*•xX]*\s*(\d{4})"
@@ -75,6 +78,8 @@ class SmsTransaction:
     bank: str = ""
     sure: bool = True    # False when only the general rule read it: the review says to check it
     text: str = ""       # the message itself, shown beside its row on the review (IV-3AU 3AU2)
+    currency: str = ""   # NF-7AK3: the shop's currency when not pounds; `amount` is in it until `read` converts it
+    paid: str = ""       # after conversion: what was paid, "USD 12.99"; `amount` is then its pound equivalent
 
     @property
     def inflow(self) -> bool:
@@ -116,6 +121,11 @@ def _when(day: str | None, clock: str | None, received: datetime, *, month_first
     return received.replace(hour=hour, minute=minute, second=0, microsecond=0).isoformat(timespec="minutes")
 
 
+def _currency(before: str | None, after: str | None) -> str:
+    """The foreign code a card message names around its amount, or "" for pounds."""
+    return next((code.upper() for code in (before, after) if code and re.fullmatch(_FOREIGN, code.upper())), "")
+
+
 def _place(raw: str | None) -> str:
     """A merchant as the bank pads it ("Uber                  Dow"): the name, without the city code."""
     parts = [p for p in re.split(r"\s{2,}", (raw or "").strip(" ,")) if p]
@@ -148,15 +158,18 @@ def parse_sms(text: str, *, sender: str = "", received: datetime | None = None) 
     # A debit card. CIB: "تم سحب مبلغ EGP 5000.00 من بطاقة الخصم المباشر المنتهية بـ **1234 من <ATM> في
     # 04/10/26 19:28" (cash). NBE: "تم خصم 147.87 EGP من بطاقة الخصم المباشر رقم 1234 عند <merchant> يوم
     # 06/10/26 الساعه 11:13 المتاح 3792.36EGP" (a purchase).
-    card = re.search(r"تم\s*(سحب|خصم|شراء)\s*(?:مبلغ)?\s*" + _AMOUNT + r"\s*من\s*بطاقة.*?" + _ENDING +
+    # A card used abroad or online names its own currency ("تم خصم مبلغ USD 12.99 …"): NF-7AK3.
+    card = re.search(r"تم\s*(سحب|خصم|شراء)\s*(?:مبلغ)?\s*" + _MONEY + r"\s*من\s*بطاقة.*?" + _ENDING +
                      r"\s*(?:(?:من|لدى|في|عند)\s+(.+?))?\s*" + on, body, re.S)
     if card:
-        verb, raw, ending, place, day, clock = card.groups()
+        verb, before, raw, after, ending, place, day, clock = card.groups()
         amount = _amount(raw)
         if amount is None:
             return None
-        return SmsTransaction("withdrawal" if verb == "سحب" else "purchase", amount, ending,
-                              _when(day, clock, received), _place(place), balance=balance, bank=bank)
+        currency = _currency(before, after)
+        return SmsTransaction("withdrawal" if verb == "سحب" and not currency else "purchase", amount, ending,
+                              _when(day, clock, received), _place(place), balance=balance, bank=bank,
+                              sure=not currency, currency=currency)
 
     # InstaPay, CIB: "تم تنفيذ تحويل لحظي بمبلغ 2000.00 جم من حسابك المنتهي بـ ****1234 برقم مرجعي ab12 بتاريخ
     # 01-10-2026 11:05" (out), "… إلى حسابك المنتهي بـ ****1234 من <name> برقم مرجعي …" (in).
@@ -189,16 +202,17 @@ def parse_sms(text: str, *, sender: str = "", received: datetime | None = None) 
     # at 21:15", "Your credit card ending 5678 was used for EGP 1,250.00 at AMAZON.EG on 08/11 20:01". Common
     # wordings, not yet checked against a real message: read, but marked to check (sure=False) until a sample is.
     english = re.search(r"(debit|credit)?\s*card\s*(?:ending|no\.?)\s*(?:with|in)?\s*[*xX•]*\s*(\d{4})\s*was\s*"
-                        r"(?:charged|used\s*for|debited(?:\s*with)?)\s*(?:with\s*)?(EGP)\s*" + _NUM +
+                        r"(?:charged|used\s*for|debited(?:\s*with)?)\s*(?:with\s*)?(EGP|" + _FOREIGN + r")\s*" + _NUM +
                         r"\s*(?:at|in)\s+(.+?)\s+on\s+(\d{1,2}/\d{1,2}(?:/\d{2,4})?)(?:\s*(?:at)?\s*(\d{1,2}:\d{2}))?",
                         flat, re.IGNORECASE)
     if english:
-        _card, ending, _cur, raw, place, day, clock = english.groups()
+        _card, ending, cur, raw, place, day, clock = english.groups()
         amount = _amount(raw)
         if amount is None:
             return None
         return SmsTransaction("purchase", amount, ending, _when(day, clock, received), _place(place),
-                              balance=balance if (_card or "").lower() != "credit" else None, bank=bank, sure=False)
+                              balance=balance if (_card or "").lower() != "credit" else None, bank=bank, sure=False,
+                              currency=_currency(cur, None))
 
     # Salary, CIB: "عميلنا العزيز لقد تم تحويل مبلغ EGP19,584.66 على حسابكم لدينا من جهة العمل"
     salary = re.search(r"تحويل\s*مبلغ\s*" + _AMOUNT + r"\s*(?:على|الى|إلى)\s*حساب\S*.*?جهة\s*العمل", flat)
@@ -470,6 +484,11 @@ class SmsImportService:
             found = parse_sms(text, sender=sender, received=received)
             if found is not None:
                 found = replace(found, text=" ".join(text.split())[:MAX_TEXT])
+            if found is not None and found.currency:  # NF-7AK3: pounds at the purchase day's rate, the dollars kept
+                converted = pounds(self.db, found.currency, found.amount, found.when[:10])
+                # No rate near that day: kept for the person to enter, as before (IV-7AJ).
+                found = None if converted is None else replace(
+                    found, amount=converted[0], paid=f"{found.currency} {format(found.amount, 'f')}", sure=False)
             if found is not None and sender:
                 banks.add(sender[:40])
             if found is None:
@@ -758,11 +777,13 @@ class SmsImportService:
     def _stage(self, account_id: int, rows: list[SmsTransaction], transfers: dict[int, str] | None = None) -> int:
         out = io.StringIO()
         writer = csv.writer(out)
-        writer.writerow(["Date", "Amount", "Counterparty", "Category", "Notes", "Reference", "Message", "Read"])
+        writer.writerow(["Date", "Amount", "Counterparty", "Category", "Notes", "Reference", "Message", "Read", "Foreign"])
         cash = self._cash_account_name()
         for row in sorted(rows, key=lambda r: r.when):
             notes = KIND_NOTES[row.kind] + (f" · {row.place}" if row.place and row.kind != "salary" else "")
-            if not row.sure:
+            if row.paid:  # NF-7AK3: the bank's pound debit settles it later; until then the dated rate
+                notes += f" · {row.paid}, in pounds at the day's rate until the bank's debit"
+            elif not row.sure:
                 notes = "Check this: read by the general rule · " + notes
             category, counterparty = "", row.place if row.kind in ("purchase", "transfer_in", "money_out", "money_in") else ""
             if row.kind == "withdrawal":
@@ -774,7 +795,7 @@ class SmsImportService:
             elif row.kind == "salary":
                 category = "Salary"
             writer.writerow([row.when[:10], format(row.signed, "f"), counterparty, category, notes, row.reference, row.text,
-                             "sure" if row.sure else "check"])
+                             "sure" if row.sure else "check", row.paid])
         batch_id, _ = self.bank_imports.stage(account_id, f"SMS {datetime.now():%Y-%m-%d %H:%M}",
                                               out.getvalue().encode("utf-8"))
         return batch_id

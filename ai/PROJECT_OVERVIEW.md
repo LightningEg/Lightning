@@ -267,6 +267,8 @@ Owner, 2026-10-28: owner-only tasks are closed as items and held here. **Bring t
 | [3I](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/3-polish-and-arabic/3I-owner-check-first-run-and-import.md) | First run and import review on PC and phone | |
 | [3AH](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/3-polish-and-arabic/3AH-visual-flow-acceptance.md) | Visual flow on real Windows/Android, English and Arabic, keyboard and screen reader | Browser evidence only so far |
 | [3T](https://github.com/LightningEg/Lightning/blob/e09ddd1/issues/3-polish-and-arabic/3T-phone-guideline-breaks-audit-1.md) | Zakat's date uses the native picker on a real Android phone (shows the date, not mm/dd/yyyy) | Browser evidence only |
+| [7AK](https://github.com/LightningEg/Lightning/blob/da5106b/issues/7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | From SMS on PC and phone: an English card message, a wallet, a dollar purchase and its later pound debit (one expense) | Messages are dummy wordings until a real sample is checked |
+| [7AR](https://github.com/LightningEg/Lightning/blob/da5106b/issues/7-planning-import-and-search/NF-7AR-upcoming-payments-calendar.md) | Upcoming on PC and phone, the Overview's Next 7 days, and the saved .ics opened in the phone's and the PC's calendar | Browser evidence only |
 | [8C](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/8-website/8C-be-found-as-the-all-in-one-tracker.md) | Resubmit the sitemap; Reddit post; re-ask AI search after two weeks | |
 | [8I](https://github.com/LightningEg/Lightning/blob/9ca53bd/issues/8-website/8I-guides-owner-checks.md) | Search Console impressions of the merged guide; read the Arabic topic pages | |
 

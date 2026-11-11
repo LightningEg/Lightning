@@ -50,6 +50,7 @@
       <b class="{{ 'is-in' if e.incoming else ('is-late' if e.state == 'late' else '') }}">{{ ('+' if e.incoming else '') }}{{ e.amount|money(False, 0) }}</b>
     </a>{% endfor %}</div>
   {% else %}<p class="muted">{{ 'Nothing due on this day. Pick a day with a mark to see what it takes.'|tr(locale) }}</p>{% endif %}
+  <p class="small mt-card"><a href="/plan/upcoming.ics" download>{{ 'Save the next three months to your calendar'|tr(locale) }}</a></p>
 </section>
 {% endif %}
 </div>
