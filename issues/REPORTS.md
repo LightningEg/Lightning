@@ -15,13 +15,13 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r12 | [v1.5.0 PR review, theme switching and package preparation](10-looks-and-store/r12-v150-release/report.md) | 2026-10-26 | release | 1H, 10A, 10C |
 | r13 | [Store and community: unlocking themes, the market, rewards and staying in Lightning](10-looks-and-store/r13-store-and-community/report.md) | 2026-10-27 | research | 10C |
 | r14 | [Users' main questions: what each screen must answer, with known gaps](3-polish-and-arabic/r14-users-main-questions/report.md) | 2026-10-27 | reference | none |
-| r17 | [Audit 10: the phone, tab by tab - quick actions and the answer first](11-phone-ux/r17-phone-tab-audit/report.md) | 2026-10-29 | audit | 3AN |
+| r17 | [Audit 10: the phone, tab by tab - quick actions and the answer first](11-phone-ux/r17-phone-tab-audit/report.md) | 2026-10-29 | audit | none |
 | r19 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](12-desktop-ux/r19-desktop-tab-audit/report.md) | 2026-10-30 | audit | 3AM |
-| r20 | [Audit 13: the phone for quick jobs - convenience, taps and the look](11-phone-ux/r20-phone-convenience-audit/report.md) | 2026-11-01 | audit | 3AN |
+| r20 | [Audit 13: the phone for quick jobs - convenience, taps and the look](11-phone-ux/r20-phone-convenience-audit/report.md) | 2026-11-01 | audit | none |
 | r22 | [Code audit: refactoring, loose ends and smart features](9-later/r22-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B, 9A |
 | r23 | [CSV import stress test: where it breaks and how to rebuild it](7-planning-import-and-search/r23-csv-import-stress/report.md) | 2026-11-05 | audit | none |
-| r24 | [Desktop and phone UX: logic, visuals, simpler tasks and connected features](12-desktop-ux/r24-desktop-phone-ux/report.md) | 2026-11-05 | audit | 3H, 3AM, 3AN, 4A, 4B |
-| r25 | [The phone, redesigned: a phone-first architecture, tab by tab](11-phone-ux/r25-phone-ux-architecture/report.md) | 2026-11-06 | research | 3AY, 3AN |
+| r24 | [Desktop and phone UX: logic, visuals, simpler tasks and connected features](12-desktop-ux/r24-desktop-phone-ux/report.md) | 2026-11-05 | audit | 3H, 3AM, 4A, 4B |
+| r25 | [The phone, redesigned: a phone-first architecture, tab by tab](11-phone-ux/r25-phone-ux-architecture/report.md) | 2026-11-06 | research | 3AY |
 | r26 | [Audit 14: using Lightning as a user, on the PC and the phone](12-desktop-ux/r26-user-test-pc-and-phone/report.md) | 2026-11-06 | audit | 12G, 3H |
 | r27 | [User journeys and visual unity](12-desktop-ux/r27-journeys-and-visual-unity/report.md) | 2026-11-08 | audit | 3AY, 3H, 3AM |
 | r28 | [International polish: the small things that make Lightning feel finished](3-polish-and-arabic/r28-international-polish/report.md) | 2026-11-08 | audit | 3BC, 3BD, 3BF, 3BH, 3BI, 3BK |

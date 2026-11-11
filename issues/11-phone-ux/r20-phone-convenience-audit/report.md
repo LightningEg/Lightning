@@ -34,7 +34,7 @@ Pages were captured with Audit 10's [capture.py](../r17-phone-tab-audit/evidence
 ## Findings
 
 The findings (P1-P15), the tap budget for the five jobs and the visual plan are one item, so they are kept in one place:
-[IV-3AN](../IV-3AN-phone-visual-plan-quick-actions.md). Screens are in [evidence/](evidence/),
+IV-3AN (closed 2026-11-11, overtaken by IV-3AY). Screens are in [evidence/](evidence/),
 numbered as the item cites them.
 
 The owner then asked why the app is slow and whether it needs another language than Python. The timing, the
