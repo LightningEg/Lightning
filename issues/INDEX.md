@@ -320,8 +320,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **IV-12Y** | [One page skeleton on the PC, kept by a test - every tab has the same title rule, an answer sentence, its dates, and the same controls in the same order](12-desktop-ux/IV-12Y-one-page-skeleton-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
 | IV-12Y3 | ↳ One header partial, used by every tab | | | L | Opus | |
 | **IV-12Z** | [The answer on one screen, the rest on request - Spending, Cash planning and Investments run 3 to 4 screens and repeat lists](12-desktop-ux/IV-12Z-answer-on-one-screen-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
-| IV-12Z2 | ↳ Cash planning says each thing once | | | M | Sonnet | |
-| IV-12Z3 | ↳ Spending opens on the categories; the other charts open on request | | | M | Opus | |
 | IV-12Z5 | ↳ Overview's tail ([#498](https://github.com/LightningEg/Lightning/issues/498)) | | | S | Sonnet | |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | Opus | building |
 | IV-3AM1 | ↳ Wrong on screen (SA1, SA2, ST1, T3, T4, B4) | | | M | Opus | |

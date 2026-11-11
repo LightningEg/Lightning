@@ -28,8 +28,6 @@ REGISTERS = {"transactions", "categories"}  # long lists by nature (IV-12Z1)
 
 # (rule, tab key) -> the item that fixes it. Remove an entry in the commit that fixes it.
 ALLOWED: dict[tuple[str, str], str] = {
-    ("length", "spending"): "IV-12Z3",
-    ("length", "plan"): "IV-12Z2",
     ("length", "holdings"): "IV-12Z4",
 }
 
