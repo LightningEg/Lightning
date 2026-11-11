@@ -12,11 +12,9 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-7AK** | [Bank messages beyond CIB and NBE in Arabic: English card messages, wallets, other currencies, and t…](../../issues/7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | L | new |
-| **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](../../issues/12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | M | ready |
 
 ## Reports with open follow-ups here
 
-- [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12K
 - [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](../../issues/7-planning-import-and-search/r31-logging-entries/report.md): 7AK
 <!-- work:end -->
 
