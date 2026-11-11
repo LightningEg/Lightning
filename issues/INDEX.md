@@ -146,7 +146,7 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 | NF-6A1 | ↳ Funds, currencies and gold matched to holdings | | | M | Opus | |
 | NF-6A2 | ↳ US stocks and FX revaluation, with multi-currency | | | L | Opus | |
 | NF-6A3 | ↳ Publish the packs | | | owner |  | |
-| **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](6-market-data/NF-6B-europe-and-gcc-shares.md) | new feature | Own | L | Opus | blocked on a source that allows redistribution |
+| **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](6-market-data/NF-6B-europe-and-gcc-shares.md) | new feature | Own | L | Opus | blocked on parked by the owner until after launch (2026-11-11), then a source that allows redistribution |
 | NF-6B1 | ↳ Verify live boards per market | | | M | Opus | |
 | NF-6B2 | ↳ A source that allows redistribution | | | owner |  | |
 | NF-6B3 | ↳ Switch publishing on per market | | | S | Opus | |
@@ -180,6 +180,8 @@ The site is honest, quick and in step with the app.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
+| **IV-8AC** | [For Geeks gets two motion moments that are true - a posting that must balance, and a row that becomes ciphertext](8-website/IV-8AC-for-geeks-two-true-motion-moments.md) | improvement, visual | Reach | M | Opus | ready |
+| **IV-8AD** | [A guideline rule for an Arabic page that links to an English page - the label says so and it opens in a new tab](8-website/IV-8AD-arabic-pages-that-link-to-english-pages.md) | improvement, visual | Reach | S | Opus | ready |
 | **IV-8F** | [Home and Features show the app, not only words](8-website/IV-8F-home-and-features-show-the-app.md) | improvement, visual | Reach | M | Sonnet | ready |
 | IV-8F1 | ↳ Hero: one sentence and the real Overview | | | S | Sonnet | |
 | IV-8F2 | ↳ "Seven places" as seven equal tiles | | | S | Sonnet | |
@@ -187,10 +189,9 @@ The site is honest, quick and in step with the app.
 | IV-8F4 | ↳ Features: the headline and a screen per highlight | | | S | Sonnet | |
 | IV-8F5 | ↳ Features on phones: three lines and "Show all" | | | S | Sonnet | |
 | IV-8F6 | ↳ Home FAQ: one line and a link to the guide | | | S | Sonnet | |
-| **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](8-website/OW-8AA-sign-off-the-comparison-ratings.md) | owner task | Reach |  |  | ready |
-| **OW-8D** | [For Geeks audit ideas left for the owner to choose](8-website/OW-8D-for-geeks-audit-ideas-to-choose.md) | owner task | Reach |  |  | ready |
+| **NF-8AB** | [Link the three comparison pages and add a fourth that compares Lightning with an AI assistant](8-website/NF-8AB-link-the-comparisons-and-compare-with-an-ai.md) | new feature | Reach | M | Sonnet | ready |
 
-Done: 8A, 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z. Next free code: 8AB.
+Done: 8A, 8B, 8C, 8D, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z, 8AA. Next free code: 8AE.
 
 ## 9 Later
 
@@ -221,7 +222,7 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 | NF-10A4 | ↳ Test every screen | | | L | Opus | |
 | NF-10A5 | ↳ Register enabled versions on the store | | | M | Opus | |
 | NF-10A6 | ↳ Checkout, receipts and prices | | | owner |  | |
-| **NF-10B** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel](10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | new feature | Feel | M | Opus | blocked on 10A claiming; owner decision on the beta channel |
+| **NF-10B** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About](10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | new feature | Feel | M | Opus | blocked on 10A claiming |
 | **NF-10C** | [Theme materials, selling themes, owner console - what only the owner can do now](10-looks-and-store/NF-10C-theme-materials-acceptance.md) | new feature | Feel | L | Opus | building |
 | NF-10C1 | ↳ Native theme acceptance | | | L | Opus | |
 | NF-10C2 | ↳ Royal Obsidian & Gold needs a website version | | | M | Opus | |
@@ -242,9 +243,6 @@ The phone is its own product: a few places that each answer one question, quick 
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-3AN** | [Phone visual plan - a thumb-first phone built for five quick jobs, each done in three taps or fewer](11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | improvement, visual | Everywhere | L | Opus | building |
-| IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
-| IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
 | **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](11-phone-ux/IV-3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | Opus | ready |
 | IV-3AY4 | ↳ The phone stylesheet stands alone, and each slot keeps its stack | | | L | Opus | |
 | IV-3AY8 | ↳ Activity: the review cards that are rows, and search | | | M | Opus | |
@@ -258,7 +256,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md) · [r36](11-phone-ux/r36-figures-one-owner/report.md).
 
-Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11K, 11L, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 11L1, 3AY1, 3AY3, 3AY5, 3AY6, 3AY7, 3AY11, 3AY12, 3AY14, 3AY15, 3AY16, 3AY17, 3AY18, IV-3F, BV-11G, BV-11L2, BV-11L3, BV-11L4, IV-11D3. Next free code: 11M.
+Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11K, 11L, 11B1, 11B2, 11B3, 11B4, 3AN, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 11L1, 3AY1, 3AY3, 3AY5, 3AY6, 3AY7, 3AN12, 3AN13, 3AY11, 3AY12, 3AY14, 3AY15, 3AY16, 3AY17, 3AY18, IV-3F, BV-11G, BV-11L2, BV-11L3, BV-11L4, IV-11D3. Next free code: 11M.
 
 ## 12 Desktop UX and smart next steps
 
@@ -292,16 +290,16 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-3AM5 | ↳ Words, visuals and sizes (report follow-up 2026-10-30: P1-P3) | | | M | Opus | |
 | **IV-3H** | [Tab-by-tab review: what a real user needs next](12-desktop-ux/IV-3H-tab-by-tab-review.md) | improvement, visual | Feel | L | Opus | ready |
 | IV-3H4 | ↳ A month-end prices reminder ([#435](https://github.com/LightningEg/Lightning/issues/435)) | | | S | Sonnet | |
-| IV-3H5 | ↳ A missed-salary row in Needs you, and its reminder | | | S | Sonnet | |
-| IV-3H6 | ↳ Zakat: optionally take off the next 12 months' loan instalments | | | M | Opus | |
-| IV-3H7 | ↳ Loans: an optional rate and the cost of the loan | | | M | Opus | |
+| IV-3H5 | ↳ A missed-salary row in Needs you, and its reminder ([#525](https://github.com/LightningEg/Lightning/issues/525)) | | | S | Sonnet | |
+| IV-3H6 | ↳ Zakat: optionally take off the next 12 months' loan instalments ([#526](https://github.com/LightningEg/Lightning/issues/526)) | | | M | Opus | |
+| IV-3H7 | ↳ Loans: an optional rate and the cost of the loan ([#527](https://github.com/LightningEg/Lightning/issues/527)) | | | M | Opus | |
 | IV-3H9 | ↳ Build the chosen analysis | | | M | Opus | |
 | IV-3H10 | ↳ Triage the ids no step names ([#436](https://github.com/LightningEg/Lightning/issues/436)) | | | M | Opus | |
 | **NF-12AB** | [Every headline figure explains itself in place - one gesture and one label instead of "Show the numbers", "How it is worked out", "See details", "See them" and bare chevrons](12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | new feature | Understand | L | Opus | ready |
 | NF-12AB3 | ↳ The PC's Leads and KPIs open their working in place | | | L | Opus | |
 | **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | Opus | ready |
-| NF-12G6 | ↳ Lend, paid back and forgive on the person's page (PC) | | | M | Sonnet | |
-| NF-12G3 | ↳ A cost split with others: the service | | | M | Opus | |
+| NF-12G6 | ↳ Lend, paid back and forgive on the person's page (PC) ([#529](https://github.com/LightningEg/Lightning/issues/529)) | | | M | Sonnet | |
+| NF-12G3 | ↳ A cost split with others: the service ([#528](https://github.com/LightningEg/Lightning/issues/528)) | | | M | Opus | |
 | NF-12G7 | ↳ Split on the Add sheet, PC and phone | | | M | Sonnet | |
 | NF-12G4 | ↳ Who owes what, per person | | | M | Sonnet | |
 | NF-12G5 | ↳ Mohab, Arabic and the guideline | | | M | Sonnet | |
