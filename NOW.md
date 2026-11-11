@@ -20,7 +20,7 @@ Reserved codes: none
 
 - **Plan cut (owner, 11-11):** 29 parked, 3H and 9A dropped; findings go to `issues/INBOX.md`. **Read:** AGENTS §3.
 
-- **r28 (Codex):** Next: 3BD, 3BF (owner order). **Read:** r28.
+- **r28 (Codex):** Next: 3BF (owner order; 3BC and 3BD done). **Read:** r28.
 
 - **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
