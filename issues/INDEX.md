@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 12 open items. Each folder holds its reports and its items.
+11 big pictures, 11 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -113,15 +113,8 @@ The site is honest, quick and in step with the app.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-8F** | [Home and Features show the app, not only words](8-website/IV-8F-home-and-features-show-the-app.md) | improvement, visual | Reach | M | Sonnet | ready |
-| IV-8F1 | ↳ Hero: one sentence and the real Overview | | | S | Sonnet | |
-| IV-8F2 | ↳ "Seven places" as seven equal tiles | | | S | Sonnet | |
-| IV-8F3 | ↳ A download band after "Every Number Shows Its Working" | | | S | Sonnet | |
-| IV-8F4 | ↳ Features: the headline and a screen per highlight | | | S | Sonnet | |
-| IV-8F5 | ↳ Features on phones: three lines and "Show all" | | | S | Sonnet | |
-| IV-8F6 | ↳ Home FAQ: one line and a link to the guide | | | S | Sonnet | |
 
-Done: 8A, 8B, 8C, 8D, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z, 8AA. Next free code: 8AE.
+Done: 8A, 8B, 8C, 8D, 8E, 8F, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z, 8AA. Next free code: 8AE.
 
 ## 9 Later
 
