@@ -37,7 +37,7 @@ from lightning.workflows import live_prices
 from lightning.ui import charts, sections
 from lightning.ui.themes import theme_id
 from lightning.ui.entitlements import marketplace_url, owned as owned_themes, store_themes
-from lightning.ui.i18n import BROWSER_UI, localize_html, localized_figures, translate
+from lightning.ui.i18n import BROWSER_UI, counted, localize_html, localized_figures, translate
 
 UI_DIR = Path(__file__).parent
 templates = Jinja2Templates(directory=str(UI_DIR / "templates"))
@@ -132,6 +132,7 @@ def _tr_filter(text, locale="en", values=None, **kwargs):
 
 
 templates.env.filters["money"] = _money
+templates.env.filters["counted"] = counted
 templates.env.filters["amount_role"] = _amount_role
 templates.env.filters["rate"] = _rate
 templates.env.filters["whole"] = lambda value: fmt(Decimal(value), 0)  # half-up like money, never banker's

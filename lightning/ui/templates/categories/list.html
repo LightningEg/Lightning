@@ -43,7 +43,7 @@
     <button class="btn small danger" form="category-bulk-form" name="action" value="delete">{{ "Delete selected"|tr(locale) }}</button></div>
   {% for l1, rows in table %}
   <section class="cat-group" data-group>
-    <header class="cat-l1"><h3>{{ l1.name }}<small>{{ rows|selectattr('level', 'equalto', 2)|list|length }} categories</small></h3><button type="button" class="btn small" data-add-under="{{ l1.id }}">{{ "Add category"|tr(locale) }}</button></header>
+    <header class="cat-l1"><h3>{{ l1.name }}<small>{{ rows|selectattr('level', 'equalto', 2)|list|length|counted('category', 'categories') }}</small></h3><button type="button" class="btn small" data-add-under="{{ l1.id }}">{{ "Add category"|tr(locale) }}</button></header>
     {{ item(none, 2, add_parent=l1.id) }}
     <div class="cat-grid">
       {% for row in rows if row.level == 2 %}{% set cat = row.category %}

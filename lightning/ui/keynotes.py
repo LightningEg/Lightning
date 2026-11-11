@@ -11,6 +11,8 @@ from decimal import Decimal
 from lightning.core.figures import FIGURES
 from lightning.core.money import ZERO, fmt
 
+from .i18n import counted
+
 
 # Icon by what the note is about (App guideline · Key notes); the first match wins.
 _ICONS = [("over plan", "alert"), ("run short", "alert"), ("safe to spend", "wallet"), ("lowest point", "chart"),
@@ -204,7 +206,7 @@ def loans_summary(loans: list[dict]) -> dict | None:
     paid = sum(entry["progress"]["paid"] for entry in loans)
     total = sum(entry["progress"]["total"] for entry in loans)
     return note("good" if paid else "info", f"Paid off on {ends}" if ends else f"{fmt(left, 0)} still to pay",
-                f"{paid} of {total} payments made.", label="Paid off on" if ends else "Still to pay",
+                f"{paid} of {counted(total, 'payment', 'payments')} made.", label="Paid off on" if ends else "Still to pay",
                 figure=ends or fmt(left, 0))
 
 

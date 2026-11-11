@@ -21,11 +21,6 @@ One helper on both sides: `plural(n, one, other)` in Python/Jinja and `window.li
 
 Each step is one pull request; do them in order. Read only the files a step names. Run the step's test command and `python -m pytest tests/test_arabic_ranges_and_counts.py tests/test_arabic_no_english.py -q`; delete the step's heading in the same commit.
 
-## 3BC1 One English plural helper and the five wrong counts · S · #408
-Files: `lightning/ui/i18n.py` (add the helper next to `translate`, line ~3514), `lightning/ui/web.py` (register it as a Jinja filter next to `templates.env.filters["money"]`, line ~134), `lightning/ui/kpis.py:123`, `lightning/ui/templates/categories/list.html:46`, `lightning/ui/templates/planning/recurring.html:48`, `lightning/ui/keynotes.py:212`.
-Do: add `def counted(n, one: str, other: str) -> str` returning `f"{n} {one}"` when `n == 1` else `f"{n} {other}"`; register `templates.env.filters["counted"]`. Use it at the four Python/Jinja sites: "1 day left"/"{n} days left", "1 category"/"{n} categories", "1 month"/"{n} months", "1 payment"/"{n} payments". Add the singular English strings to `ARABIC_UI` with the same Arabic as the plural key.
-Done when: new `tests/test_counted.py` asserts `counted(1, "day", "days") == "1 day"`, `counted(2, …) == "2 days"`, `counted(0, …) == "0 days"`, and renders `/categories` on the sample household with a group holding one category and finds "1 category", not "1 categories". `python -m pytest tests/test_counted.py -q`.
-
 ## 3BC2 Arabic agrees for every counted noun the UI uses · S
 Needs 3BC1 merged first.
 Files: `lightning/ui/i18n.py` (`_COUNTED`, line ~3485).

@@ -24,6 +24,7 @@ from lightning.core.figures import FIGURES, label as figure_label
 from lightning.core.money import ZERO, fmt, signed_pct
 
 from . import charts
+from .i18n import counted
 
 TONES = {"in", "hold", "out", "over"}
 
@@ -125,7 +126,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
     left_visual = (segments([(spent_label, e.spent, "out"), ("Bills to pay", e.bills_to_pay, "neutral"), ("Everyday", e.everyday_left, "in")])
                    if e.current else segments([(spent_label, min(e.spent, e.planned), "out"), ("Left", max(e.left, ZERO), "in")]))
     cards = [card(figure_label("left_in_plan"), e.left, left_compare, tone="in" if e.left >= 0 else "over", key="left", working=e.left_working,
-                  chip_=chip(f"{e.days_left} days left" if e.current and e.days_left else month),
+                  chip_=chip(counted(e.days_left, "day left", "days left") if e.current and e.days_left else month),
                   visual=left_visual or meter(e.spent, e.planned),
                   line_=line(f"{spent_label} {fmt(e.spent, 0)} of {fmt(e.planned, 0)} planned"), href="#budget-meters")]
 
