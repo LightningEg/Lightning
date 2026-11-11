@@ -38,7 +38,19 @@ def test_every_new_phone_screen_extends_a_base_that_hands_over_to_the_phone_fram
 
 def test_the_phone_stylesheet_is_one_cached_bundle_in_cascade_order():
     parts = [p.replace("{rtl}", "") for p in web.PHONE_CSS]
-    assert parts.index("style.css") < parts.index("phone.css") < parts.index("themes.generated.css")
+    assert "style.css" not in parts   # 3AY4: the phone's bundle no longer carries the whole PC stylesheet
+    assert parts.index("phone-base.css") < parts.index("phone.css") < parts.index("themes.generated.css")
+
+
+def test_phone_base_is_current():
+    """3AY4: phone-base.css holds the style.css rules that can match what reaches the phone. It is generated
+    (tools/build_phone_base_css.py) and must be rebuilt when style.css changes or a phone page starts to use a PC class."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("build_phone_base_css", TEMPLATES.parents[2] / "tools" / "build_phone_base_css.py")
+    tool = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(tool)
+    current = (TEMPLATES.parent / "static" / "phone-base.css").read_text(encoding="utf-8")
+    assert current == tool.render(), "phone-base.css is stale: run python tools/build_phone_base_css.py, then tools/build_rtl_css.js"
 
 
 def test_a_pc_only_page_opens_this_is_on_your_pc(c, monkeypatch):

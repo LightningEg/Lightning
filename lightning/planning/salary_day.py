@@ -34,6 +34,20 @@ def salary_review(db, on):
                        "n": None, "sa": ""}}
 
 
+def payday_to_plan(db, settings, on):
+    """The salary that arrived in ``on``'s month while its payday plan is not saved yet (3AY9, owner 2026-11-11: the
+    strip shows from the salary's day until this month's plan is saved): {amount, date}, or None. Saving the payday
+    allocation marks the salary's review reviewed (PaydayFunding), which ends it."""
+    salary = latest_settled_salary(db, on)
+    if not salary or salary["date"][:7] != fmt_date(on)[:7]:
+        return None
+    item = salary_review(db, on)
+    state = settings.get("review_item_" + review_identity(item)) or ""
+    if '"reviewed"' in state:
+        return None
+    return {"amount": from_e6(salary["amount_e6"]), "date": salary["date"]}
+
+
 def review_identity(item):
     """The inbox identity also used when an accepted payday allocation handles its reminder."""
     facts = {key: item.get(key) for key in ("label", "detail", "href", "priority", "post", "source_version")}

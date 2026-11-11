@@ -1,0 +1,27 @@
+{# Your plan (IV-3AY9): every everyday category under its group, one field each, an amount or a % of income; each
+   field saves through /budget/rule/{id}. Bills and loans are Fixed costs (Recurring), not here. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Your plan'|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/budget?month={{ plan.month }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Budget'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Your plan'|tr(locale) }}</h1><p class="phone-note">{{ plan.month }} · {{ 'Type a limit beside a category: an amount, or a % of income.'|tr(locale) }}</p>{% endblock %}
+{% block content %}
+<a class="phone-row" href="/budget/fill?month={{ plan.month }}"><span>{{ "Fill this month's budget"|tr(locale) }}<small>{{ 'From last month, your schedule or your average'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+{% if plan.first %}<section class="phone-section" aria-labelledby="first-heading">
+  <header class="phone-section-head"><h2 id="first-heading">{{ "Set your first spending limits"|tr(locale) }}</h2></header>
+  <p class="phone-note">{{ "Lightning proposes a limit for each category from what you spent; change any before saving."|tr(locale) }}</p>
+  <form method="post" action="/budget/setup?month={{ plan.month }}" class="phone-form"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  {% for group, items in plan.first %}<div class="phone-rows"><div class="phone-row"><span><b>{{ group|tr(locale) }}</b></span></div>{% for category_id, name, amount in items %}
+    <label class="phone-row phone-limit"><span>{{ name|tr(locale) }}</span><input name="suggest_{{ category_id }}" value="{{ amount|money(False,2) }}" inputmode="decimal" aria-label="{{ 'Budget for {name}: an amount, or a percentage of average monthly income'|tr(locale, name=name) }}" enterkeyhint="done"></label>{% endfor %}</div>{% endfor %}
+  <button class="btn primary phone-save">{{ 'Create plan'|tr(locale) }}</button></form>
+</section>{% endif %}
+{% if not plan.first %}{% for group, rows in plan.groups %}<section class="phone-section" aria-labelledby="plan-g{{ loop.index }}">
+  <header class="phone-section-head"><h2 id="plan-g{{ loop.index }}">{{ group|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for r in rows %}
+    <form class="phone-row phone-limit" method="post" action="/budget/rule/{{ r.category_id }}" data-budget-rule id="limit-{{ r.category_id }}"><input type="hidden" name="month" value="{{ plan.month }}">
+      <span>{{ r.name|tr(locale) }}{% if r.spent %}<small>{{ 'Spent {amt}'|tr(locale, amt=r.spent|money) }}</small>{% endif %}</span>
+      <input name="rule" value="{{ r.value }}" placeholder="{{ r.placeholder or ('Limit'|tr(locale)) }}" inputmode="text" autocomplete="off" aria-label="{{ 'Budget for {name}: an amount, or a percentage of average monthly income'|tr(locale, name=r.name) }}" enterkeyhint="done" data-row-amount><small class="save-state" role="status"></small>
+      <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}</div>
+</section>{% else %}<p class="phone-note">{{ 'No everyday categories yet.'|tr(locale) }} <a href="/categories">{{ 'Categories'|tr(locale) }}</a></p>{% endfor %}{% endif %}
+{# Each field saves as it is left or on Enter (C05: no Save button per row); without script, Enter posts the form. #}
+<script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelectorAll('[data-budget-rule]').forEach(f=>{const input=f.elements.rule,state=f.querySelector('.save-state');let before=input.value,busy=false;const save=()=>{if(busy||input.value.trim()===before.trim())return;busy=true;state.textContent=window.lightningT('Saving…');fetch(f.action,{method:'POST',body:new URLSearchParams(new FormData(f)),headers:{'X-Requested-With':'fetch'}}).then(async r=>{if(!r.ok)throw Error(await r.text());before=input.value;state.textContent=window.lightningT('Saved')}).catch(e=>state.textContent=e.message||window.lightningT('Could not save.')).finally(()=>busy=false)};input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save()}});input.addEventListener('blur',save)});</script>
+{% endblock %}

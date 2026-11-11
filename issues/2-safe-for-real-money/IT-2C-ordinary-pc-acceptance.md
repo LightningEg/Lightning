@@ -22,7 +22,7 @@ What stands between the paired apps beta (1.0.0-beta.1) and real money (AGENTS.m
   (`runtime/file_picker.py`, `desktop/window.py` `_pick_backup`, `POST /profiles/restore/pick`; `tests/test_restore_picker.py`).
 - **Repair (2C4):** "Restore needs checking" lists the kept files and goes back to the copy from before the restore
   (`runtime/restore.py` `go_back_before_restore`, `/profiles/restore/repair`; `tests/test_restore_go_back.py`).
-- **Reminders (2C5):** `tests/test_native_reminders.py`. With the app closed stays [NF-3AU](../3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md).
+- **Reminders (2C5):** `tests/test_native_reminders.py`. With the app closed stays NF-3AU (done, PR #533).
 - **Sheet (2C6):** below. Left: the owner runs it once (2C1).
 
 ## Decided

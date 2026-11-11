@@ -483,12 +483,13 @@ def test_the_demo_has_a_gameya_circle_the_pot_of_which_is_already_taken(demo):
 
 
 def test_the_phone_overview_breaks_what_you_owe_into_bills_loans_and_the_gameya(demo):
-    """BV-5I: the phone Overview's What you owe opens on its parts, the circle among them."""
+    """BV-5I: on the phone, Money's Net worth sheet lists what you owe by part, the circle among them."""
     c, _ = demo
-    from test_gameya_screens import _client
-    page = _client(c, phone=True).get("/")
+    from lightning.ui.phone.router import mount_phone
+    app = create_app(c)
+    mount_phone(app)
+    page = TestClient(app).get("/money")  # 3AY10: Money's net worth sheet holds the parts
     assert page.status_code == 200
-    assert 'data-testid="gameya-owed"' in page.text
     assert "Gam&#39;eya still to pay" in page.text or "Gam'eya still to pay" in page.text
     assert "14,000" in page.text
 

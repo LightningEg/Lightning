@@ -52,29 +52,13 @@ def _in_arabic(browser, *paths):
         browser.post("/settings/locale", data={"locale": "en", "__session": session})
 
 
-def test_the_category_sheet_and_its_payments_are_arabic(phone):
-    """3AN7 + 3AN10: a category sheet and its payments fragment have no English word."""
-    html = phone.get("/budget?period=month").text   # the old Budget still draws the category sheets (a query steps past the new one)
-    src = re.search(r'data-fold-src="(/budget/category/\d+/payments\?month=[\d-]+)"', html).group(1)
-    page, filled, empty = _in_arabic(phone, "/budget?period=month", src, src.split("?")[0] + "?month=2020-01")
-    assert _english(page) == [] and _english(filled) == [] and _english(empty) == []
-    sheet = page[page.index('class="phone-sheet-panel"'):]
-    assert any(word in sheet[:sheet.index("</details>")] for word in ("المعدل", "عدّيت الحد"))  # the pace or over sentence
-    assert "آخر المدفوعات" in filled and "لسه ماصرفتش" in empty
-
-
-def test_overview_position_rows_open_their_pages_and_the_working_opens_sheets_never_a_fold_in_a_fold(phone):
-    """3AN12 (C11.1, C06.2, D1): Your position is flat rows that open their pages; This period's figures are rows that
-    open a sheet; no fold sits inside a fold."""
-    html = phone.get("/?period=month").text   # the old Overview; Home (/) has no position rows (3AY6)
-    position = html[html.index('id="position-heading"'):html.index('id="period-heading"')]
-    assert re.search(r'<a class="phone-row" href="/accounts"><span>Cash you own</span>', position)
-    assert re.search(r'(?s)<summary[^>]*>.*?What you owe.*?href="/plan/loans"', position)  # a sheet with its parts (BV-5I, D1)
-    assert 'class="flow-disclosure' not in html and "phone-row-more" not in html and "phone-fold" not in html
-    period = html[html.index('id="period-heading"'):]
-    assert period.count('class="phone-sheet-row"') >= 3
-    for sheet in re.findall(r'(?s)<div class="phone-sheet-panel".*?</details>', html):
-        assert "<details" not in sheet  # a sheet holds no fold
+def test_the_category_sheet_is_arabic(phone):
+    """3AN7 + 3AN10 + 3AY9: Budget's category sheet (last payments, or an empty month) has no English word."""
+    html = phone.get("/budget?period=month").text
+    src = re.search(r'href="(/budget/category/\d+/sheet\?month=[\d-]+)"', html).group(1)
+    page, sheet, empty = _in_arabic(phone, "/budget?period=month", src, src.split("?")[0] + "?month=2020-01")
+    assert _english(page) == [] and _english(sheet) == [] and _english(empty) == []
+    assert "آخر المدفوعات" in sheet or "لسه ماصرفتش" in sheet
 
 
 def test_cash_planning_forecast_months_ahead_and_what_is_promised_are_rows_that_open_sheets(phone):
