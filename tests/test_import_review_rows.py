@@ -376,3 +376,72 @@ def test_browser_place_them_loads_the_rows_and_posts_the_answer(c, setup):
     finally:
         host.stop()
     assert c.bank_imports.summary(batch)["posted"] == 4
+
+
+def test_rounds_show_progress_and_the_account_offers_to_continue(c, setup):
+    """NF-7AB2: after posting the ready rows, the review counts what is done and the account offers the rest."""
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    batch, rows = _questions_file(c, cib, cats)
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    response = client.post(f"/accounts/{cib}/import/{batch}/post-ready", data={})
+    assert "3 of 5 done" in response.text
+    assert "Continue import (2 left)" in client.get(f"/accounts/{cib}").text
+
+
+def test_the_result_offers_undo_and_keeps_the_balance_check(c, setup):
+    """NF-7AB6: Undo on the result removes what the file created; the statement's balance check stays visible."""
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    data = ("Date,Counterparty,Amount,Category,Balance\n2026-09-10,Carrefour,-10,Food & Groceries,990\n"
+            "2026-09-11,Metro,-20,Food & Groceries,900\n")
+    batch, rows = _stage(c, cib, data)
+    before = c.reporting.account_balance(cib)
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    result = client.post(f"/accounts/{cib}/import/{batch}/post-ready", data={}).text
+    assert "Import complete" in result and f'action="/import/{batch}/undo"' in result
+    assert "does not add up" in result
+    client.post(f"/import/{batch}/undo", data={})
+    assert c.reporting.account_balance(cib) == before
+
+
+def test_all_of_these_is_remembered_so_the_next_file_is_ready(c, setup):
+    """NF-7AB4: answering a name once (category plus remember, what "All of these" writes) makes it Ready next time."""
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    data = "Date,Counterparty,Amount\n2026-09-10,Kiosk Nile,-10\n2026-09-11,Kiosk Nile,-20\n"
+    batch, rows = _stage(c, cib, data)
+    food = str(cats["EXP.PERSONAL.FOOD"].id)
+    answers = {}
+    for r in rows:
+        answers[f"category_{r['_import_row_id']}"] = food
+        answers[f"remember_{r['_import_row_id']}"] = "on"
+    _post(c, cib, batch, answers)
+    assert c.bank_imports.summary(batch)["posted"] == 2
+    _, again = _stage(c, cib, "Date,Counterparty,Amount\n2026-09-20,Kiosk Nile,-30\n2026-09-21,Kiosk Nile,-40\n", "next.csv")
+    assert all(r["_ready"] for r in again)  # so no "Same as last time" button is needed
+
+
+def test_the_needs_question_has_all_of_these_a_rule_link_and_biggest_first(c, setup):
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    batch, rows = _stage(c, cib, "Date,Counterparty,Amount\n2026-09-10,Kiosk Nile,-10\n2026-09-11,Kiosk Nile,-900\n"
+                                 "2026-09-12,Corner Shop,-50\n")
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    needs = client.get(f"/accounts/{cib}/import/{batch}/groups?state=needs").text
+    assert "data-group-all=" in needs and "/rules/new?counterparty=Kiosk%20Nile" in needs
+    biggest = client.get(f"/accounts/{cib}/import/{batch}/groups?state=needs&sort=amount").text
+    assert biggest.index("-900") < biggest.index("-10") and biggest.index("Kiosk Nile") < biggest.index("Corner Shop")
+
+
+def test_the_rest_under_an_amount_go_to_uncategorized_in_one_press(c, setup):
+    """Owner, 7AB7: one button sends every unanswered row under a typed amount to Uncategorized."""
+    accounts, cats = setup
+    cib = accounts["cib"].id
+    batch, rows = _stage(c, cib, "Date,Counterparty,Amount\n2026-09-10,Kiosk Nile,-10\n2026-09-11,Corner Shop,-90\n"
+                                 "2026-09-12,Big Store,-900\n")
+    _post(c, cib, batch, {"small_under": "100", "small_action": "uncategorized"})
+    _, after = c.bank_imports.preview(batch)
+    assert [r["_status"] for r in after] == ["POSTED", "POSTED", "REVIEW"]
+    assert c.db.scalar("SELECT COUNT(*) FROM transactions t JOIN ledger_entries l ON l.transaction_id=t.id JOIN "
+                       "categories c ON c.id=l.category_id WHERE c.code='EXP.UNACCOUNTED' AND t.status='POSTED'") == 2

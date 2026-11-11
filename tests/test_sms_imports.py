@@ -441,3 +441,41 @@ def test_arabic_decimal_and_thousands_marks_read_as_the_right_amount():
     tx = parse_sms("تم خصم ١٤٧٫٨٧ جم من بطاقة الخصم المباشر رقم ١٢٣٤ عند كارفور يوم ٠٦/١١/٢٦")
     assert tx is not None and tx.amount == Decimal("147.87")
     assert prefill("تم خصم ١٬٢٥٠٫٥٠ جم من حسابك")["amount"] == "1250.50"
+
+
+R = datetime(2026, 11, 9, 14, 0)
+# Common English wordings (r31 S5-S8): dummy text, not verified bank messages, so they read but say "check it".
+ENGLISH_DEBIT = ("Your debit card ending with 1234 was charged EGP 250.00 at TALABAT on 08/11/26 at 21:15. "
+                 "Available balance EGP 10,200.50")
+ENGLISH_CREDIT = ("Your credit card ending 5678 was used for EGP 1,250.00 at AMAZON.EG on 08/11 20:01. "
+                  "Available limit EGP 38,750.00")
+
+
+def test_english_card_messages_read_with_shop_date_and_ending():
+    """NF-7AK1."""
+    debit = parse_sms(ENGLISH_DEBIT, sender="CIB", received=R)
+    assert (debit.kind, debit.amount, debit.ending, debit.place, debit.when) == (
+        "purchase", Decimal("250.00"), "1234", "TALABAT", "2026-11-08T21:15")
+    assert debit.balance == Decimal("10200.50") and not debit.sure
+    credit = parse_sms(ENGLISH_CREDIT, sender="CIB", received=R)
+    assert (credit.amount, credit.ending, credit.place, credit.when) == (
+        Decimal("1250.00"), "5678", "AMAZON.EG", "2026-11-08T20:01")
+    assert credit.balance is None  # an available limit is not money held
+    assert parse_sms("Your card ending 1234 was charged USD 12.99 at NETFLIX.COM on 03/11/26", received=R) is None
+
+
+def test_a_wallet_payment_and_receipt_share_one_key_and_stage_in_the_wallet(c, setup):
+    """NF-7AK2: a wallet names no ending; its sender is the key, asked once like an ending."""
+    from lightning.sms_imports import WALLET_PREFIX
+    out = "تم دفع 150 جنيه من محفظتك فودافون كاش الى التاجر Koshary El Tahrir. رصيدك الحالي 3000 جنيه"
+    got = "تم استلام مبلغ 500 جنيه من رقم 01001234567 على محفظتك. رصيدك 3500 جنيه"
+    paid, received = parse_sms(out, sender="VF-Cash", received=R), parse_sms(got, sender="VF-Cash", received=R)
+    assert paid.ending == received.ending == WALLET_PREFIX + "vfcash"
+    assert (paid.signed, paid.place, received.signed) == (Decimal("-150"), "Koshary El Tahrir", Decimal("500"))
+    assert parse_sms(out, received=R).ending == WALLET_PREFIX + "vodafonecash"  # pasted: the brand names it
+    accounts, _ = setup
+    first = c.sms_imports.read([("VF-Cash", out, R), ("VF-Cash", got, R)])
+    assert first["waiting"] == 2 and {g["ending"] for g in c.sms_imports.waiting()} == {WALLET_PREFIX + "vfcash"}
+    batch = c.sms_imports.assign(WALLET_PREFIX + "vfcash", accounts["wallet"].id)
+    _, rows = c.bank_imports.preview(batch)
+    assert sorted(Decimal(r["Amount"]) for r in rows) == [Decimal("-150"), Decimal("500")]

@@ -512,13 +512,15 @@ class ReviewInbox:
         for code, one, many in (("EXP.UNACCOUNTED", "payment has no category", "payments have no category"),
                                 ("INC.UNACCOUNTED", "incoming amount has no category", "incoming amounts have no category")):
             category = self.c.categories.get_by_code(code)
-            _, total = self.c.transactions.find(TxnFilter(category_ids=[category.id], limit=1))
+            rows, total = self.c.transactions.find(TxnFilter(category_ids=[category.id], limit=500))
             if total:
+                # NF-7AN: "3 to sort · 410": what is waiting, in the profile's currency (another currency is its own).
+                waiting = sum((abs(row.amount) for row in rows if row.currency == self.c.base_currency), ZERO)
                 found.append({"label": _plural(total, one, many).capitalize(),
                               "detail": "Choose a category for each, so the budget and reports count it.",
                               "href": f"/transactions?category_id={category.id}",
                               "action": "Sort them out", "priority": 2,
-                              "glance": glance("No category", "Sort", None,
+                              "glance": glance("No category", "Sort", waiting or None,
                                                ("1 payment" if total == 1 else "{n} payments") if code.startswith("EXP")
                                                else ("1 amount in" if total == 1 else "{n} amounts in"), total),
                               "source_version": sha256(json.dumps([tuple(row) for row in self.c.db.all(

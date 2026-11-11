@@ -6,7 +6,11 @@ import json
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
+from lightning.core.dates import today
 from lightning.core.matching import rank_choices
+from lightning.workflows.answers import answer
+
+from ..phone.presenters.search import phone_results
 
 from ..i18n import translate
 from ..search_index import ACTIONS, GROUPS, PAGES, _fold_search_text, _score, entry, fmt_amount, matches  # noqa: F401  (tests and callers read them here)
@@ -26,7 +30,12 @@ async def search(request: Request):
             results = [{**row, "label": translate(row["label"], "ar") if row["kind"] in ("Page", "Action", "Search", "Category") else row["label"],
                         "context": translate(row.get("context", ""), "ar")} for row in results]
         return JSONResponse({"query": query, "results": results})
-    return render(request, "search.html", query=query, results=results if query else [])
+    found = answer(c, query, today()) if query else None
+    # NF-7AQ1: the PC lists the matching payments first, as the phone does: one search, both devices.
+    money = phone_results(c, query, privacy=privacy_on(request)) if query else {}
+    return render(request, "search.html", query=query, results=results if query else [], answer=found,
+                  payments=money.get("payments", []), payments_total=money.get("payments_total", 0),
+                  see_all=money.get("see_all", ""))
 
 
 @router.post("/search/picker")
