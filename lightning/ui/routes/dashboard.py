@@ -177,27 +177,6 @@ async def dashboard(request: Request):
     return response
 
 
-@router.get("/overview/fold/{name}")
-async def overview_fold(request: Request, name: str):
-    """One closed fold of the phone's Overview, drawn when it is opened (backend roadmap B1)."""
-    from fastapi import HTTPException
-    if name not in ("trend", "money-in"):
-        raise HTTPException(404)
-    c = container(request)
-    try:
-        period = parse_period(request.query_params, today(), c.reporting.first_activity_date())
-    except ValidationError:
-        period = parse_period({"period": "month", "month": month_of(today())}, today(), None)
-    first, as_of = period.start, period.end
-    if name == "trend":
-        position = c.position.at(min(as_of, today()))
-        lead = "net_worth" if position.what_you_owe > 0 else "what_you_own"
-        return render(request, "phone/dashboard/fold.html", fold=name, lead=lead,
-                      networth_trend=visuals.net_worth_trend(c, as_of))
-    return render(request, "phone/dashboard/fold.html", fold=name,
-                  **visuals.cash_flow_charts(c, first, as_of, period.key == "month", today()))
-
-
 # The welcome page offers Mohab's year and these three stories; Abdelrahman's stays loadable by route.
 WELCOME_SAMPLES = ("amr", "menna", "fatma")
 
@@ -559,7 +538,7 @@ async def money_from_others(request: Request):
     held_total = c.position.at(today()).held_for_others
     return render(request, "money_from_others.html", accounts=c.accounts.list(active_only=True),
                   counterparties=c.counterparties.list_active(), held_total=held_total,
-                  owners=owners, investments=investments,
+                  owners=owners, investments=investments, today_iso=today().isoformat(),
                   entries=c.reporting.money_from_others_history(),
                   investment_entries=c.money_from_others.investment_history())
 

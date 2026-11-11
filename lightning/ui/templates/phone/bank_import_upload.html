@@ -1,0 +1,41 @@
+{# A statement import step on the phone (3AY17): one column. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Import statement'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Import statement'|tr(locale) }}</h1><p class="phone-note">{{ account.name }}</p>{% endblock %}
+{% block content %}
+{% for w in waiting %}<section class="phone-form phone-fields">
+  <h2>{{ w.file_name }} {{ 'is waiting for you'|tr(locale) }}</h2>
+  <p class="phone-note">{{ w.waiting }} {{ ('row' if w.waiting == 1 else 'rows')|tr(locale) }} {{ 'still to review, started {date}. Finish it or discard it before importing another statement, so no row is posted twice.'|tr(locale, date=w.created_at[:10]) }}</p>
+  <div class="phone-actions"><a class="btn primary phone-save" href="/accounts/{{ account.id }}/import/{{ w.id }}">{{ 'Continue the review'|tr(locale) }}</a>
+  <form method="post" action="/accounts/{{ account.id }}/import/{{ w.id }}/discard" data-confirm-delete="{{ 'Discard this import? Nothing from {filename} is posted. You can import the file again later.'|tr(locale, filename=w.file_name) }}"><button class="btn phone-save">{{ 'Discard it'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
+</section>{% endfor %}
+<section class="phone-form phone-fields">
+  <p>{{ 'Upload this account’s CSV, Excel workbook or text-based CIB PDF. CSV columns are'|tr(locale) }} <b>{{ 'Date'|tr(locale) }}</b>, <b>{{ 'Counterparty'|tr(locale) }}</b>, {{ 'and signed'|tr(locale) }} <b>{{ 'Amount'|tr(locale) }}</b>{{ '; Category, Notes, and Reference are optional.'|tr(locale) }}</p>
+  <p class="phone-note">{{ 'We’ll preview rows before posting. Money out is negative; money in is positive. For investment holdings, use the investment transaction row to record units; this imports account cash movements.'|tr(locale) }}</p>
+  <details class="ai-handoff context-detail">
+    <summary>{{ 'Prepare this CSV with an AI assistant'|tr(locale) }}</summary>
+    <p class="phone-note">{{ 'These prompts give your AI tool context it cannot guess: this account’s name and currency, your categories, your counterparty names and exactly how Lightning reads a file. With that context it matches your names instead of inventing them, and you fix less in the review.'|tr(locale) }}</p>
+    <p class="phone-note">{{ 'Nothing is sent automatically. The prompt and reference include this account’s name and currency plus active counterparty names and pickable categories; no transactions are included.'|tr(locale) }}</p>
+    {% set ai_text = ai_prompt %}<div class="phone-actions">{% include "partials/ai_prompt.html" %}
+      <a class="btn phone-save" href="/accounts/{{ account.id }}/import/ai-template.csv">{{ 'Download CSV template'|tr(locale) }}</a>
+      <a class="btn phone-save" href="/accounts/{{ account.id }}/import/ai-reference.json">{{ 'Download matching reference'|tr(locale) }}</a>
+    </div>
+    {% if category_prompt %}<p class="phone-note">{{ 'First import into this account? This prompt gives your AI tool what it cannot guess: your category names. It matches the bank’s own category words to them, so the review starts with your categories filled in.'|tr(locale) }}</p>
+    {% set ai_text = category_prompt %}<div class="phone-actions">{% include "partials/ai_prompt.html" %}</div>{% endif %}
+  </details>
+  <details class="ai-handoff context-detail">
+    <summary>{{ 'Convert a PDF to CSV with AI'|tr(locale) }}</summary>
+    <p class="phone-note">{{ 'If you cannot select text in the PDF, copy this prompt and attach the file in your AI tool. Check the result against the statement, then import the CSV here for review.'|tr(locale) }}</p>
+    <p class="phone-note">{{ 'Lightning does not upload your statement to an AI tool.'|tr(locale) }}</p>
+    {% set ai_text = pdf_prompt %}{% include "partials/ai_prompt.html" %}
+  </details>
+  {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
+  <form method="post" enctype="multipart/form-data" action="/accounts/{{ account.id }}/import">
+    <div class="field import-file-field"><label for="bank-csv">{{ 'Statement files'|tr(locale) }}</label><input id="bank-csv" type="file" name="file" accept=".csv,.xlsx,.pdf,text/csv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple required>
+    <p class="phone-note">{{ 'CSV up to 5 MB; Excel .xlsx and text-based CIB PDFs up to 8 MB. Every row is reviewed before saving.'|tr(locale) }}</p></div>
+    <div class="field"><label for="csv-encoding">{{ 'CSV encoding'|tr(locale) }}</label><select id="csv-encoding" name="encoding" data-native>
+<option value="auto">{{ 'Automatic (Unicode or Windows Arabic)'|tr(locale) }}</option><option value="cp1256">{{ 'Windows Arabic'|tr(locale) }}</option><option value="cp1252">{{ 'Windows Western'|tr(locale) }}</option><option value="utf-8-sig">UTF-8</option><option value="utf-16">UTF-16</option><option value="utf-16-le">UTF-16 LE</option><option value="utf-16-be">UTF-16 BE</option></select></div>
+    <div class="phone-actions"><button class="btn primary phone-save">{{ 'Review statement'|tr(locale) }}</button></div>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+</section>
+{% endblock %}

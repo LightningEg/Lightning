@@ -29,13 +29,6 @@ certificates page. On `/deposits/<id>` the table leads (name, rate, next payout,
 form opens from a button; the phone page must not cut the table's last five columns.
 **Done when:** no stock word (price, units, average cost, unrealized) is on a certificate's page, PC or phone.
 
-## 12J2 Payouts forecast the way Egyptian banks pay them · M
-A monthly payout is forecast as principal x rate x actual days / 365 (`_certificate_events`): the demo certificate
-expects 1,808.22 then 1,868.49 while the bank pays 1,833.33 every month (principal x rate / 12). Receipt matching hides
-the gap with a 15% tolerance. Forecast a periodic payout as rate x months / 12; keep day-count only for a broken first
-or last period. **Done when:** the demo's expected and received interest agree to the piastre and the tolerance can
-return to 5%.
-
 ## 12J3 A certificate paid at maturity gains value as it earns · M
 A compound or at-maturity certificate stays at its principal for years, then its whole interest lands as *Gain from
 sales* on the redemption day. Value it at principal plus interest earned to date (from its terms, labelled an estimate),
@@ -43,9 +36,8 @@ so net worth and return rise evenly; the redemption then settles the estimate. *
 interest is earned and counts in Holdings value, marked as an estimate.
 **Done when:** Mohab's compound certificate shows a rising value and the period report reconciles.
 
-## 12J4 Maturity and notices · S
-Nothing tells you a certificate matured: the only reminder is "interest expected tomorrow" (`workflows/reminders.py`),
-and Needs you has no row. Add a Needs you row and a reminder for maturity and for the unlock date, with *Record what
-the bank paid* prefilled. Drop "These prices are old ... NBE 3-year certificate (2026-09-01)" for certificates
-(`investments/report.py` `explain_period` treats the purchase as a stale price). A rate change (variable certificates)
-is dated, not a rewrite of the whole schedule.
+## 12J4 A variable rate is dated · S
+Maturity and unlock notices, the prefilled *Record what the bank paid* and the end of "These prices are old" for
+certificates are built (`DepositService.attention`, `tests/test_deposit_certificates.py`). Left: a rate change
+(variable certificates) is dated, not a rewrite of the whole schedule: store dated rates and let
+`_certificate_events` use the rate in force for each period.

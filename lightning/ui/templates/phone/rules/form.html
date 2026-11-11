@@ -1,0 +1,43 @@
+{# A rule on the phone (3AY17): When, then Then, one column; Split in a sheet; Save full width. #}
+{% extends "base.html" %}
+{% from "partials/macros.html" import category_options %}
+{% block title %}{{ ('Edit rule' if rule else 'Add rule')|tr(locale) }} · Settings{% endblock %}
+{% block heading %}<h1>{{ ('Edit rule' if rule else 'Add a rule')|tr(locale) }}</h1><p class="phone-note">{{ "When a transaction fits, the rule files it. Imports still wait for your review."|tr(locale) }}</p>{% endblock %}
+{% block content %}
+{% macro err(name) %}{{ 'has-error' if error_field == name }}{% endmacro %}
+{% macro segment(name, label, choices, chosen) %}<div class="field {{ err(name) }}"><span class="phone-note">{{ label|tr(locale) }}</span><div class="phone-segment" role="radiogroup" aria-label="{{ label|tr(locale) }}"{% if choices|length == 2 %} data-two{% endif %}>{% for value, text in choices %}<label><input type="radio" name="{{ name }}" value="{{ value }}"{% if chosen == value %} checked{% endif %}><span>{{ text|tr(locale) }}</span></label>{% endfor %}</div></div>{% endmacro %}
+{% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+<form method="post" action="{{ '/rules/' ~ rule.id ~ '/edit' if rule else '/rules' }}" class="phone-form phone-fields rule-form" autocomplete="off">
+  <div class="field {{ err('name') }}"><label for="rule-name">{{ 'Rule name'|tr(locale) }} <span class="muted">{{ '(optional)'|tr(locale) }}</span></label><input id="rule-name" name="name" value="{{ values.name }}" maxlength="120" autocomplete="off"></div>
+  <header class="phone-section-head"><h2>{{ "When"|tr(locale) }}</h2></header>
+  {{ segment('match', 'Match', [('all', 'All of these'), ('any', 'Any of these')], values.match) }}
+  <div class="phone-fields">
+    {{ segment('counterparty_op', 'Counterparty', [('contains', 'Contains'), ('is', 'Is'), ('one_of', 'One of')], values.counterparty_op) }}
+    <div class="field {{ err('counterparty') }}"><label for="counterparty">{{ 'Name'|tr(locale) }} <span class="muted small">{{ "optional · for one of, separate with commas"|tr(locale) }}</span></label><input id="counterparty" name="counterparty" value="{{ values.counterparty }}" list="rule-counterparties" data-own-suggestions placeholder="Vodafone"><datalist id="rule-counterparties">{% for p in counterparties %}<option value="{{ p.name }}">{% endfor %}</datalist></div>
+  </div>
+  <div class="phone-fields">
+    <div class="field {{ err('amount_op') }}"><label for="amount_op">{{ 'Amount'|tr(locale) }}</label><select id="amount_op" name="amount_op">{% for value, text in [('', 'Any amount'), ('is', 'Is'), ('about', 'About (within 7.5%)'), ('between', 'Between'), ('more', 'More than'), ('less', 'Less than')] %}<option value="{{ value }}" {{ 'selected' if values.amount_op == value }}>{{ text }}</option>{% endfor %}</select></div>
+    <div class="field {{ err('amount') }}" data-rule-amount{{ ' hidden' if not values.amount_op }}><label for="amount">{{ base }}</label><span class="rule-amounts"><input id="amount" name="amount" value="{{ values.amount }}" inputmode="decimal" class="money-input" placeholder="100"><input name="amount_to" value="{{ values.amount_to }}" inputmode="decimal" class="money-input {{ err('amount_to') }}" placeholder="and 300" aria-label="Up to" data-rule-amount-to{{ ' hidden' if values.amount_op != 'between' }}></span></div>
+  </div>
+  <div class="phone-fields">
+    <div class="field {{ err('notes') }}"><label for="notes">{{ "Notes contain"|tr(locale) }}<span class="muted small">{{ 'optional'|tr(locale) }}</span></label><input id="notes" name="notes" value="{{ values.notes }}" placeholder="internet"></div>
+    <div class="field {{ err('account_id') }}"><label for="account_id">{{ 'Account'|tr(locale) }} <span class="muted small">{{ 'optional'|tr(locale) }}</span></label><select id="account_id" name="account_id" data-own-picker><option value="">{{ "Any account"|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if values.account_id == a.id|string }}>{{ a.name }}</option>{% endfor %}</select></div>
+  </div>
+  {{ segment('direction', 'Direction', [('', 'Either'), ('out', 'Money out'), ('in', 'Money in')], values.direction) }}
+  <header class="phone-section-head"><h2>{{ "Then"|tr(locale) }}</h2></header>
+  <div class="phone-fields">
+    <div class="field {{ err('category_id') }}"><label for="category_id">{{ 'Category'|tr(locale) }}</label><select id="category_id" name="category_id" data-own-picker><option value="">{{ "Keep the usual one"|tr(locale) }}</option>{{ category_options(category_groups(categories), values.category_id) }}</select></div>
+    <div class="field {{ err('tag') }}"><label for="tag">{{ "Add a tag"|tr(locale) }}<span class="muted small">{{ 'optional'|tr(locale) }}</span></label><input id="tag" name="tag" value="{{ values.tag }}" placeholder="#bills"></div>
+  </div>
+  <details class="phone-sheet-row rule-split" {{ 'open' if values.part_category_1 or error_field.startswith('part_') }}><summary class="phone-row phone-sheet-summary"><span>{{ "Split money out"|tr(locale) }}</span><b>{{ chevron() }}</b></summary><div class="phone-sheet-panel" role="dialog" aria-label="{{ 'Split money out'|tr(locale) }}"><span class="phone-grabber" aria-hidden="true"></span><h2 class="phone-sheet-title">{{ "Split money out"|tr(locale) }}</h2>
+    <p class="phone-note">Each part takes a fixed amount, or a percent like 30%. The rest goes to the category above.</p>
+    {% for i in rule_parts %}<div class="phone-fields">
+      <div class="field {{ err('part_category_' ~ i) }}"><label for="part_category_{{ i }}">Part {{ i }}</label><select id="part_category_{{ i }}" name="part_category_{{ i }}" data-own-picker><option value="">{{ "Choose…"|tr(locale) }}</option>{{ category_options(category_groups(spending), values['part_category_' ~ i]) }}</select></div>
+      <div class="field {{ err('part_value_' ~ i) }}"><label for="part_value_{{ i }}">Amount or %</label><input id="part_value_{{ i }}" name="part_value_{{ i }}" value="{{ values['part_value_' ~ i] }}" inputmode="decimal" placeholder="30%"></div>
+    </div>{% endfor %}
+  <button type="button" class="btn phone-save" data-sheet-close>{{ 'Done'|tr(locale) }}</button></div></details>
+  <button class="btn primary phone-save">{{ ('Save' if rule else 'Add rule')|tr(locale) }}</button><a class="btn phone-save" href="/rules" data-popup-close>{{ 'Cancel'|tr(locale) }}</a>
+<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+{% if rule %}<form method="post" action="/rules/{{ rule.id }}/delete" class="phone-form plan-delete" data-confirm-delete="Delete this rule? Transactions it filed keep their category."><button class="btn danger phone-save">{{ 'Delete'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+<script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{const op=document.getElementById('amount_op');if(!op)return;const show=()=>{document.querySelector('[data-rule-amount]').hidden=!op.value;document.querySelector('[data-rule-amount-to]').hidden=op.value!=='between'};op.addEventListener('change',show)})();</script>
+{% endblock %}

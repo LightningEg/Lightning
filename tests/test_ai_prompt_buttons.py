@@ -114,7 +114,7 @@ def test_spending_hands_over_its_categories_and_links_to_ask_an_ai(sample):
     page = client.get("/birdview/expenses?period=month&month=2026-09").text
     window = _is_hand_off(page, "I want to understand my spending from", "Want a second opinion on this period?")
     assert "Money out" in window and "2026-09-01" in window.replace("2026-09-01", "2026-09-01")
-    assert "/settings?section=general&amp;period=month&amp;month=2026-09" in page and "#export-for-ai" in page
+    assert "/settings/ask-ai?period=month&amp;month=2026-09" in page
     assert not re.search(r"\d{1,3}(,\d{3})+", window.split("categories my spending fell into", 1)[1].split("I will attach")[0])
 
 
@@ -123,7 +123,7 @@ def test_budget_hands_over_the_plans_own_words_before_the_question(sample):
     window = _is_hand_off(page, "here is what its words mean", "pace, rolled over, held for")
     for word in ("- Pace:", "Carryover:", "- Held for:", "Left in plan:", "Everyday spending:"):
         assert word in window
-    assert "#export-for-ai" in page
+    assert 'href="/settings/ask-ai"' in page
 
 
 def test_every_prompt_builder_is_free_of_amounts():

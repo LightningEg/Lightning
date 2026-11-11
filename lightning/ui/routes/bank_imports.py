@@ -64,6 +64,22 @@ def _categories(c):
              "label": c.categories.display_name(cat.id)} for cat in c.categories.pickable()]
 
 
+def _quick_picks(c) -> str:
+    """NF-7AB5: three categories for money out and three for money in, the person's most used first, then the
+    first pickable ones of that direction, as JSON for quick mode's 1-3 buttons."""
+    from lightning.categories.domain import Direction
+    pickable = list(c.categories.pickable())
+    names = {cat.id: c.categories.display_name(cat.id) for cat in pickable}
+    common = c.transactions.common_categories(3)
+    picks = {}
+    for kind, direction in (("out", Direction.OUT), ("in", Direction.IN)):
+        ids = [i for i in common[kind] if i in names]
+        ids += [cat.id for cat in pickable if cat.direction in (direction, Direction.BOTH) and cat.id not in ids  # not money
+                and cat.parent_id is not None][:3 - len(ids)]  # not money
+        picks[kind] = [{"id": i, "name": names[i]} for i in ids[:3]]
+    return json.dumps(picks, ensure_ascii=False)
+
+
 def _ai_reference(c):
     return {"counterparties": [party["name"] for party in c.counterparties.list_active()],
             "categories": _categories(c)}
@@ -404,7 +420,24 @@ def _suggestions_json(c, row: dict, account_ids: dict[str, int], party_ids: dict
     return json.dumps(picks, ensure_ascii=False) if picks else ""
 
 
-def _review_groups(c, rows: list[dict], form=None) -> list[dict]:
+_QUESTION_NAMES = {"err": "To fix", "dup": "Possible duplicate", "account": "Which account?"}
+
+
+def _question_key(row: dict) -> str:
+    """NF-7AB3: rows are grouped by the question they ask, so one answer settles the group: what to fix, a possible
+    duplicate, which account an internal row moved to, a category for one of the file's own names; the rest by name."""
+    state = _row_status(row)
+    if row.get("_status") == "REVIEW" and state in ("err", "dup"):
+        return state + ":"
+    if row.get("_status") == "REVIEW" and row.get("_needs_account"):
+        return "account:"
+    if row.get("_status") == "REVIEW" and row.get("_file_label") and not row.get("_category_id"):
+        return "label:" + row["_file_label"]
+    name = " ".join(str(row.get("Counterparty") or "").casefold().split())
+    return "name:" + (name or f"__line_{row['_line']}")
+
+
+def _review_groups(c, rows: list[dict], form=None, sort: str = "") -> list[dict]:
     """Rows grouped by imported name (a header with its total and state, the rows under it). Every row keeps its
     own counterparty, category, held-for, notes and amount; a group is only a place to fold and to tick."""
     all_accounts = c.accounts.list(active_only=True)
@@ -412,8 +445,7 @@ def _review_groups(c, rows: list[dict], form=None) -> list[dict]:
     parties = {p["name"]: p["id"] for p in c.counterparties.list_active()}
     by_key: dict[str, list[dict]] = {}
     for row in rows:
-        key = " ".join(str(row.get("Counterparty") or "").casefold().split())
-        by_key.setdefault(key or f"__line_{row['_line']}", []).append(row)
+        by_key.setdefault(_question_key(row), []).append(row)
     groups = []
     for index, (key, members) in enumerate(by_key.items()):
         for row in members:
@@ -421,13 +453,19 @@ def _review_groups(c, rows: list[dict], form=None) -> list[dict]:
             row["_state"] = _row_status(row)
             row["_suggest"] = _suggestions_json(c, row, accounts, parties)
         status = min((r["_state"] for r in members), key=_STATUS_ORDER.get)
+        kind, _, label = key.partition(":")
         groups.append({
-            "i": index, "key": key, "rows": members, "count": len(members), "status": status,
-            "name": members[0].get("Counterparty") or "No counterparty",
+            "i": index, "key": key, "rows": members, "count": len(members), "status": status, "kind": kind,
+            "label": label if kind == "label" else "",
+            "name": _QUESTION_NAMES.get(kind) or members[0].get("Counterparty") or "No counterparty",
             "total": sum((_amount(r) for r in members), ZERO),
             "errors": sum(1 for r in members if r["_state"] == "err"),
             "duplicates": sum(1 for r in members if r["_state"] == "dup"),
         })
+    if sort == "amount":  # NF-7AB4 "Biggest first": the rows that matter most are answered first
+        for group in groups:
+            group["rows"].sort(key=lambda r: -abs(_amount(r)))
+        return sorted(groups, key=lambda g: -max(abs(_amount(r)) for r in g["rows"]))
     return sorted(groups, key=lambda g: (_STATUS_ORDER[g["status"]], int(g["rows"][0]["_line"])))
 
 
@@ -455,10 +493,26 @@ def _take_page(pieces: list[dict], start: int) -> list[dict]:
     return page
 
 
+def _question_cards(rows: list[dict], summary: dict) -> list[dict]:
+    """NF-7AB1: the file's few questions, one per state of the rows still waiting, worst first; skipped is a count."""
+    waiting = [r for r in rows if r.get("_status") == "REVIEW"]
+    counts = {state: sum(1 for r in waiting if _row_status(r) == state) for state in _STATUS_ORDER}  # not money
+    cards = [{"state": state, "n": counts[state]} for state in ("err", "needs", "dup", "ready") if counts[state]]
+    if summary.get("skipped"):
+        cards.append({"state": "skipped", "n": summary["skipped"]})
+    return cards
+
+
 def _render_review(request, c, account_id: int, batch, rows, *, summary, form=None, msg="", error="", status_code=200,
-                   paged=False):
+                   paged=False, view="rows"):
     account = c.accounts.get(account_id)
-    groups = _review_groups(c, rows, form)
+    if view == "summary" and batch["status"] != "POSTED":
+        # Summary first (NF-7AB1): no rows are drawn; each question card fetches its own rows when opened.
+        paged, form = True, None
+        rows_for_groups = []
+    else:
+        view, rows_for_groups = "rows", rows
+    groups = _review_groups(c, rows_for_groups, form)
     # Rows not drawn post with their suggested choices, as an untouched row does today; names that need the person
     # come first, so a long file's first page is the part that asks something.
     pieces = _review_pieces(groups) if paged else groups
@@ -471,16 +525,15 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
         reject_prompt = _rejected_prompt(
             account, c.bank_imports.source_header(batch["id"]),
             [(str(r["_line"]), str(r.get("_row_error") or " ".join(r.get("_errors") or []))) for r in failing], len(failing))
-    labels: dict[str, int] = {}
-    for row in rows:
-        if row.get("_status") == "REVIEW" and row.get("_file_label"):
-            labels[row["_file_label"]] = labels.get(row["_file_label"], 0) + 1
-    file_labels = sorted(labels.items(), key=lambda item: (-item[1], item[0].casefold()))
     return render(request, "bank_import_preview.html", account=account, batch=batch, rows=rows,
-                  groups=shown, balance_gaps=balance_gaps(rows) if batch["status"] != "POSTED" else [], shown_groups=len(shown),
-                  more_rows=sum(len(p['rows']) for p in pieces[len(shown):]) if paged else 0, counts=counts, categories=_categories(c), file_labels=file_labels,
+                  groups=shown, balance_gaps=balance_gaps(rows), shown_groups=len(shown),
+                  more_rows=sum(len(p['rows']) for p in pieces[len(shown):]) if paged else 0, counts=counts, categories=_categories(c),
                   counterparties=c.counterparties.list_active(), owners=c.counterparties.list_people(), account_choices=accounts_here,
-                  summary=summary, msg=msg, error=error, reject_prompt=reject_prompt, status_code=status_code)
+                  summary=summary, msg=msg, error=error, reject_prompt=reject_prompt, status_code=status_code,
+                  view=view, cards=_question_cards(rows, summary) if view == "summary" else [],
+                  quick_picks=_quick_picks(c) if view == "summary" else "",
+                  done=sum(c.bank_imports.summary(batch["id"]).values()),  # not money
+                  undo_count=len(c.bank_imports.created_transactions(batch["id"])) if batch["status"] == "POSTED" else 0)
 
 
 @router.post("/{account_id:int}/import/counterparty")
@@ -514,22 +567,33 @@ async def preview(request: Request, account_id: int, batch_id: int):
     batch, rows = c.bank_imports.preview(batch_id)
     if batch["account_id"] != account_id:
         return redirect(f"/accounts/{account_id}", "Import batch not found for this account.")
-    return _render_review(request, c, account_id, batch, rows, summary=c.bank_imports.summary(batch_id), paged=True)
+    # A bank-SMS batch is a handful of messages: it keeps its rows. A file opens on its questions; "See every row"
+    # (?rows=all) keeps the full row page one link away (owner, 7AB7).
+    every_row = request.query_params.get("rows") == "all" or str(batch["file_name"]).startswith("SMS ")
+    return _render_review(request, c, account_id, batch, rows, summary=c.bank_imports.summary(batch_id), paged=True,
+                          view="rows" if every_row else "summary")
 
 
 @router.get("/{account_id:int}/import/{batch_id:int}/groups")
-async def more_groups(request: Request, account_id: int, batch_id: int, start: int = 0):
-    """The next names of a long review, as HTML to append to the form (IT-7AA8)."""
+async def more_groups(request: Request, account_id: int, batch_id: int, start: int = 0, state: str = "",
+                      sort: str = ""):
+    """The next names of a long review, as HTML to append to the form (IT-7AA8). With ``state`` (NF-7AB1) only the
+    waiting rows in that state: what one question card shows when it is opened."""
     c = container(request)
     batch, rows = c.bank_imports.preview(batch_id)
     if batch["account_id"] != account_id or batch["status"] == "POSTED":
         return PlainTextResponse("", status_code=404)
-    pieces = _review_pieces(_review_groups(c, rows))
+    if state:
+        if state not in _STATUS_ORDER:
+            return PlainTextResponse("", status_code=404)
+        rows = [r for r in rows if r.get("_status") == "REVIEW" and _row_status(r) == state]
+    pieces = _review_pieces(_review_groups(c, rows, sort=sort))
     start = max(0, start)
     page = _take_page(pieces, start)
     account = c.accounts.get(account_id)
     categories = _categories(c)
     response = render(request, "partials/bank_import_groups.html", account=account, batch=batch, groups=page,
+                      gp=state,
                       sms=batch["file_name"].startswith("SMS "), categories=categories,
                       cat_groups=c.categories.select_groups([cat["id"] for cat in categories]))
     response.headers["X-Next-Start"] = str(start + len(page))
@@ -640,6 +704,17 @@ def _ready_decision(form, row, decision, account_names) -> bool:
     return bool(held_for and _amount({"Amount": decision["amount"]}) > ZERO)
 
 
+def _small_under(form) -> Decimal | None:
+    """The amount typed beside "the rest to Uncategorized", when that button was pressed."""
+    if form.get("small_action") != "uncategorized":
+        return None
+    try:
+        value = Decimal(str(form.get("small_under", "")).replace(",", "").strip())
+    except (InvalidOperation, ValueError):
+        return None
+    return value if value > ZERO else None
+
+
 @router.post("/{account_id:int}/import/{batch_id:int}/confirm")
 async def confirm(request: Request, account_id: int, batch_id: int):
     c = container(request)
@@ -659,13 +734,21 @@ async def confirm(request: Request, account_id: int, batch_id: int):
             label_choice[str(label)] = str(value)
         except (ValueError, TypeError):
             continue
+    small_under = _small_under(form)
     for row in rows:
         decision = _decision(form, row)
         label_pick = label_choice.get(row.get("_file_label") or "")
         if label_pick and f"category_{row['_import_row_id']}" not in form:
             decision["category_id"] = None if label_pick == "__uncategorized__" else label_pick
             decision["force_uncategorized"] = label_pick == "__uncategorized__"
-        if _ready_decision(form, row, decision, account_names):
+        ready = _ready_decision(form, row, decision, account_names)
+        if (not ready and small_under is not None and row["_status"] == "REVIEW" and _row_status(row) == "needs"
+                and not row.get("_needs_account") and not row.get("_identity_ambiguous")
+                and abs(_amount({"Amount": decision["amount"]})) < small_under):
+            # Owner, 7AB7: every row still unanswered under the typed amount goes to Uncategorized in one press.
+            decision["category_id"], decision["force_uncategorized"] = None, True
+            ready = True
+        if ready:
             decisions[row["_import_row_id"]] = decision
     try:
         with settled_save(request, c):
@@ -685,6 +768,11 @@ async def confirm(request: Request, account_id: int, batch_id: int):
                "attention. Fix them below; your other choices are kept.")
         return _render_review(request, c, account_id, batch, review_rows, summary=c.bank_imports.summary(batch_id),
                               form=form, msg=msg)
+    return _posted_result(request, c, account_id, batch_id, count, form, view=str(form.get("view", "rows")))
+
+
+def _posted_result(request, c, account_id: int, batch_id: int, count: dict, form, *, view="rows"):
+    """The page after a post: what posted, the follow-ups it triggered, and the rows (or questions) still waiting."""
     feedback = _budget_import_feedback(c, batch_id)
     if count.get("posted") and c.accounts.get(account_id).account_type.value == "BROKERAGE":
         # A brokerage statement brings holdings: give each the month-end prices it needs from the price files.
@@ -705,7 +793,40 @@ async def confirm(request: Request, account_id: int, batch_id: int):
     if settled:
         feedback += " Settled bills: " + ", ".join(settled) + "."
     return _render_review(request, c, account_id, batch, result_rows, summary=count, form=form if remaining else None,
+                          paged=view == "summary", view=view,
                           msg=f"Import {'updated' if remaining else 'complete'}: {count['posted']} posted, "
                               + (f"{count['linked']} linked to entries you already had, " if count.get("linked") else "")
                               + f"{count['skipped']} skipped, {count['duplicates']} duplicates."
                               + (" Some rows still need review." if remaining else "") + feedback)
+
+
+@router.post("/{account_id:int}/import/{batch_id:int}/post-ready")
+async def post_ready(request: Request, account_id: int, batch_id: int):
+    """NF-7AB1: the summary's "Post them": every waiting row Lightning already placed posts with its suggestions,
+    as an untouched row does from the full page; the rest stay waiting, and the questions come back."""
+    c = container(request)
+    batch, rows = c.bank_imports.preview(batch_id)
+    if batch["account_id"] != account_id:
+        return redirect(f"/accounts/{account_id}", "Import batch not found for this account.")
+    account_names = {a.name.casefold() for a in c.accounts.list(active_only=True) if a.id != account_id}
+    decisions = {}
+    for row in rows:
+        if row.get("_status") != "REVIEW" or _row_status(row) != "ready":
+            continue
+        decision = _decision({}, row)
+        if _ready_decision({}, row, decision, account_names):
+            decisions[row["_import_row_id"]] = decision
+    try:
+        with settled_save(request, c):
+            count = c.bank_imports.confirm(batch_id, decisions)
+    except LightningError as exc:
+        return redirect(f"/accounts/{account_id}/import/{batch_id}", exc.message)
+    if count.get("errors"):
+        batch, review_rows = c.bank_imports.preview(batch_id)
+        for row in review_rows:
+            row["_row_error"] = count["errors"].get(int(row["_import_row_id"]))
+        problems = len(count["errors"])
+        return _render_review(request, c, account_id, batch, review_rows, summary=c.bank_imports.summary(batch_id),
+                              msg=f"Nothing was imported yet: {problems} row{'s' if problems != 1 else ''} "
+                                  f"need{'' if problems != 1 else 's'} attention. Fix them below.")
+    return _posted_result(request, c, account_id, batch_id, count, {}, view="summary")

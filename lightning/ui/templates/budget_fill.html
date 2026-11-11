@@ -7,6 +7,7 @@
   <input type="hidden" name="month" value="{{ month }}">
   <label>{{ "Fill from"|tr(locale) }}<select name="source">
       <option value="last_month" {{ 'selected' if source == 'last_month' }}>{{ "Last month"|tr(locale) }}</option>
+      <option value="average" {{ 'selected' if source == 'average' }}>{{ "Your average"|tr(locale) }}</option>
       <option value="schedule" {{ 'selected' if source == 'schedule' }}>{{ "Schedule"|tr(locale) }}</option>
       <option value="goal" {{ 'selected' if source == 'goal' }}>{{ "Goal"|tr(locale) }}</option>
     </select>
@@ -45,7 +46,7 @@
       </form>
     {% endif %}
   {% else %}
-    <section class="card wide-card"><p class="empty">{% if source == 'last_month' %}No base limits from last month are available to copy.{% else %}No scheduled bills or subscriptions have a spending category this month.{% endif %}</p></section>
+    <section class="card wide-card"><p class="empty">{% if source == 'last_month' %}No base limits from last month are available to copy.{% elif source == 'average' %}No spending in the last three months to average yet.{% else %}No scheduled bills or subscriptions have a spending category this month.{% endif %}</p></section>
   {% endif %}
 {% endif %}
 {% endblock %}

@@ -168,7 +168,7 @@ def test_13_14_a_flat_recorded_this_month_is_a_holding_not_growth(c, monkeypatch
     assert "410,000" in html  # the flat counts in holdings value
     assert "Intended investment horizon" not in html  # all of it unassigned: no section to say so (UX plan 10)
     marker = "Money in and out, and change in value by asset class"
-    flows = html[html.index(marker):html.index(marker) + 3000]
+    flows = html[html.index(marker):html.index(marker) + 3000] if marker in html else ""  # IV-12Z4: no flows, no card
     assert "400,000" not in flows  # the flat's opening balance is not a change in its value
 
 

@@ -1,0 +1,26 @@
+{# A counterparty on the phone (NF-7T2, 3AY17): money with them over twelve months leads, then by month, plans and
+   reserves, what is open between you, names and rules, all as rows. Figures from LinkedSections.counterparty. #}
+{% extends "base.html" %}
+{% from "phone/partials/hero.html" import hero with context %}
+{% block title %}{{ party.name }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="{{ back_url(request) or '/counterparties' }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Back'|tr(locale) }}</span></a>{% endblock %}
+{% set paid_you = page.side == 'money_in' %}
+{% block heading %}<h1>{{ party.name }}</h1>{% if page.months %}<p class="phone-note">{{ '{sa} to {sb}'|tr(locale, sa=page.first_month, sb=page.months[-1].month) }}</p>{% endif %}{% endblock %}
+{% block content %}
+{% set label = ('Money in from them'|tr(locale)) if paid_you else ('Money out to them'|tr(locale)) %}
+{% set usual = ('usual month {amt}'|tr(locale, amt=page.usual_month|money(False, 0))) if page.usual_month is not none else ('no earlier month to compare'|tr(locale)) %}
+{% set shown = page.months|selectattr(page.side)|list|reverse|list %}
+{{ hero(label ~ ' · ' ~ ('last 12 months'|tr(locale)), page.total|round(0), ('This month {amt}'|tr(locale, amt=page.this_month|money(False, 0))) ~ ' · ' ~ usual) }}
+<a class="btn phone-save" href="/transactions?q={{ party.name|urlencode }}">{{ 'Their transactions'|tr(locale) }}</a>
+{% macro section(id, title) %}<section class="phone-section" aria-labelledby="{{ id }}"><header class="phone-section-head"><h2 id="{{ id }}">{{ title|tr(locale) }}</h2></header><div class="phone-rows">{{ caller() }}</div></section>{% endmacro %}
+{% macro row(href, name, sub='', value='') %}<{{ 'a' if href else 'div' }} class="phone-row"{% if href %} href="{{ href }}"{% endif %}><span>{{ name }}{% if sub %}<small>{{ sub }}</small>{% endif %}</span>{% if value %}<b><bdi class="fig">{{ value }}</bdi></b>{% elif href %}<b>{{ chevron() }}</b>{% endif %}</{{ 'a' if href else 'div' }}>{% endmacro %}
+{% if shown %}{% call section('cp-months', 'By month') %}{% for r in shown %}{{ row('', r.month, '', r[page.side]|money(False, 0)) }}{% endfor %}{% endcall %}{% endif %}
+{% if page.plans or page.reserves %}{% call section('cp-plans', 'Plans and reserves') %}
+  {% for item in page.plans %}{{ row(item.href, item.name, item.kind_label|tr(locale) ~ (' · ' ~ ('next {date}'|tr(locale, date=item.next_due)) if item.next_due else ''), item.amount|money(False, 0)) }}{% endfor %}
+  {% for reserve in page.reserves %}{{ row('/reserves/' ~ reserve.id ~ '/payments', reserve.name, 'Reserve'|tr(locale) ~ ' · ' ~ ('{amt} set aside'|tr(locale, amt=reserve.effective_allocated|money(False, 0))), reserve.target|money(False, 0)) }}{% endfor %}{% endcall %}{% endif %}
+{% if page.claims or page.held %}{% call section('cp-open', 'Between you') %}
+  {% for claim in page.claims %}{{ row('/reimbursements', claim.expense.counterparty or claim.expense.description if claim.expense else 'Reimbursement claim'|tr(locale), 'Claimed {amt} · received {amt2}'|tr(locale, amt=claim.expected|money, amt2=claim.received|money), ('{amt} still owed'|tr(locale, amt=claim.outstanding|money) if claim.outstanding else 'Paid back'|tr(locale))) }}{% endfor %}
+  {% for r in page.held %}{{ row('/money-from-others', 'Held for them in {name}'|tr(locale, name=r.account_name), r.currency, r.amount|money) }}{% endfor %}{% endcall %}{% endif %}
+{% call section('cp-names', 'Names') %}{{ row('/counterparties?q=' ~ party.name|urlencode, party.name, 'Suggested category'|tr(locale) ~ ' · ' ~ (page.default_category|tr(locale) if page.default_category else 'No default'|tr(locale))) }}{% for alias in page.aliases %}{{ row('', alias.alias, 'Alias'|tr(locale)) }}{% endfor %}{% endcall %}
+{% call section('cp-rules', 'Rules') %}{% for rule in page.rules %}{{ row('/rules/' ~ rule.id ~ '/edit', rule.then, rule.when) }}{% else %}{{ row('/rules/new', 'Add a rule'|tr(locale), 'No rule looks at this name.'|tr(locale)) }}{% endfor %}{% endcall %}
+{% endblock %}

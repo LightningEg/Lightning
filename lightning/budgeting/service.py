@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import replace
 from decimal import ROUND_HALF_UP, Decimal
 import math
-from datetime import timedelta
+from datetime import date, timedelta
 import json
 
 from lightning.categories.domain import Category, CategoryFamily, Movement, Scope
@@ -150,6 +150,45 @@ class BudgetService:
                          "plan": now[cid].direct, "from_id": donor.category_id if donor else None,
                          "from_name": donor.name if donor else None,
                          "from_plan": now[donor.category_id].direct if donor else None})
+        return rows
+
+    def running_out(self, month: str, on: date, *, schedule: ScheduleView) -> list[dict]:
+        """NF-12S: flexible categories whose pace passes their limit before the month ends. Spent so far / days gone x
+        days in month > the limit, after day 5, in the current month, for a category with a limit of its own that has
+        no scheduled bill, subscription or loan payment (those are paid on their day, not paced) and is not over yet.
+        Each row has the day the limit runs out and, when one exists, a category whose own limit would still have
+        that much left at its own pace to move from."""
+        first, last = parse_month(month)
+        if not first <= on <= last or on.day <= 5:
+            return []
+        days_gone, days = on.day, last.day
+        scheduled = set(self.scheduled_payments(month, schedule=schedule)) | set(schedule.bills(month))
+        lines = [line for section in self.month_view(month, schedule=schedule).sections for line in section.lines]
+        pace = {}
+        for line in lines:
+            if line.depth < 2 or line.direct is None or line.available is None or line.available <= ZERO:
+                continue
+            pace[line.category_id] = line.planned_actual / days_gone * days
+        rows = []
+        for line in lines:
+            cid = line.category_id
+            if cid not in pace or cid in scheduled or line.planned_actual <= ZERO or line.remaining is None:
+                continue
+            if line.remaining < ZERO or pace[cid] <= line.available or line.average_months or line.income_percent is not None:
+                continue
+            short = Decimal(math.ceil((pace[cid] - line.available) / 50) * 50)
+            runs_out = min(days, max(on.day, math.ceil(line.available * days_gone / line.planned_actual)))
+            related = lambda other: other.code.startswith(line.code + ".") or line.code.startswith(other.code + ".")
+            donors = [(other.available - pace[other.category_id], other) for other in lines
+                      if other.category_id in pace and other.category_id != cid and other.category_id not in scheduled
+                      and not related(other) and other.available - pace[other.category_id] >= short
+                      and other.direct >= short]
+            donor = max(donors, key=lambda pair: pair[0])[1] if donors else None
+            rows.append({"category_id": cid, "name": line.name, "limit": line.available, "day": runs_out,
+                         "amount": short, "can_move": line.direct is not None and donor is not None,
+                         "from_id": donor.category_id if donor else None,
+                         "from_name": donor.name if donor else None})
+        rows.sort(key=lambda r: (r["day"], r["name"].casefold()))
         return rows
 
     def move_room(self, month: str, to_id: int, from_id: int, amount: object, *, schedule: ScheduleView) -> None:
@@ -495,8 +534,8 @@ class BudgetService:
     def fill_proposal(self, month: str, source: str, *, schedule: ScheduleView) -> BudgetFillProposal:
         """Build a read-only month-fill preview; all returned amounts are base limits in EGP."""
         first, _ = parse_month(month)
-        if source not in {"last_month", "schedule", "goal"}:
-            raise ValidationError("Choose Last month, Schedule, or Goal as the fill source.", "source")
+        if source not in {"last_month", "average", "schedule", "goal"}:
+            raise ValidationError("Choose Last month, Your average, Schedule, or Goal as the fill source.", "source")
         categories = [c for c in self.categories.tree(Movement.OUTFLOW)
                       if not c.is_root and c.family != CategoryFamily.INVESTMENT]
         by_id = {c.id: c for c in categories}
@@ -511,6 +550,13 @@ class BudgetService:
                     detail = (f"{period}-month average" if period else
                               f"{fmt(percent)}% of income" if percent is not None else "fixed")
                     candidates[category_id] = (amount, f"From {previous} · {detail}")
+        elif source == "average":
+            # NF-12R: what was really spent, averaged over the last three full months (a category with one month of
+            # history uses that month), as a tidy figure; one-off categories are not in plan-funded spending.
+            one_offs = self.one_off_ids()
+            for category_id, amount in self.first_plan_suggestions(month).items():
+                if category_id in by_id and category_id not in one_offs:
+                    candidates[category_id] = (amount, "Your average of the last 3 months")
         elif source == "schedule":
             for category_id, data in schedule.bills(month).items():
                 if category_id in by_id and data["amount"] > ZERO:
@@ -548,13 +594,13 @@ class BudgetService:
             rows.append(BudgetFillRow(
                 category_id=category_id,
                 category_name=self.categories.display_name(category_id),
-                source="Last month" if source == "last_month" else "Schedule",
+                source={"last_month": "Last month", "average": "Your average"}.get(source, "Schedule"),
                 amount=amount,
                 current_amount=current_amount,
                 current_rule=current_rule,
                 conflict=conflict,
                 selectable=amount is not None,
-                selected=amount is not None and rule is None and not auto_loan,
+                selected=amount is not None and not auto_loan and (rule is None or (source == "average" and not same)),
                 already_using_last_month=source == "last_month" and same,
                 note=note,
             ))
@@ -617,6 +663,12 @@ class BudgetService:
         # counts them (cash flow and the Overview still do).
         investment = self._investment_ids()
         return {cid: v for cid, v in self.reporting.money_out_by_category(start, end).items() if cid not in investment}
+
+    def spent_in(self, category_ids, start, end) -> Decimal:
+        """What these categories spent between start and end, one-off purchases left out: a Budget category sheet's
+        "last month" figure when nothing is spent yet this month (3AN9)."""
+        one_offs, wanted = self.one_off_ids(), set(category_ids)
+        return sum((v for cid, v in self.owned_spending(start, end).items() if cid in wanted and cid not in one_offs), ZERO)
 
     def plan_funded_spending(self, start, end) -> dict[int, Decimal]:
         """Gross owned spending less confirmed funding outside this month's plan."""

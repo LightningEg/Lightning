@@ -62,7 +62,7 @@ def test_pc_period_track_submits_months_and_custom_ranges(c, monkeypatch):
                 control.locator('[data-month-shift="-1"]').click()
                 assert 'period=month' in page.url and 'month=2026-09' in page.url
                 c.settings.set('locale', 'en')
-                page.goto(host.origin + '/settings?period=custom&date_from=2026-07&date_to=2026-09')
+                page.goto(host.origin + '/settings/ask-ai?period=custom&date_from=2026-07&date_to=2026-09')
                 ai = page.locator('#export-for-ai .site-period-control')
                 assert ai.get_attribute('data-period-auto-apply') is not None
                 ai.locator('[name=date_from]').click()

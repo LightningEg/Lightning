@@ -169,7 +169,7 @@ def backfill(root: Path, session, keys: list[str], today: str, created_at: str) 
                 if "mubasher" in instrument.sources:
                     found = mubasher.fetch_history(session, key, instrument.sources["mubasher"])
                 else:
-                    found = yahoo.fetch_history(session, key)
+                    found = yahoo.fetch_history(session, key, mic=instrument.mic)
             except SourceError as exc:
                 problems.append(f"{key}: {exc}")
                 continue

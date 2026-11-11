@@ -3130,3 +3130,12 @@ document.addEventListener('change', (event) => {
     }
   } catch (e) {}
 })();
+
+// NF-12I: "I already own it" on the certificate form: no account pays, so "Buy from" stops being required.
+document.querySelectorAll("[data-unrequires]").forEach((box) => {
+  const select = box.form && box.form.querySelector(`select[name="${box.dataset.unrequires}"]`);
+  if (!select) return;
+  const apply = () => (select.setPickerRequired ? select.setPickerRequired(!box.checked) : (select.required = !box.checked));
+  box.addEventListener("change", apply);
+  if (box.checked) apply();
+});

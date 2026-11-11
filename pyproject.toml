@@ -42,6 +42,7 @@ layers = [
     "lightning.bank_import_parsing",
     "lightning.planning",
     "lightning.budgeting",
+    "lightning.people_money",
     "lightning.investments | lightning.deposits | lightning.rules | lightning.reevaluations | lightning.physical_items | lightning.reserves | lightning.reimbursements",
     "lightning.reporting",
     "lightning.transactions | lightning.money_from_others",

@@ -5,6 +5,7 @@ from fastapi.testclient import TestClient
 
 from lightning.core.errors import ValidationError
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 @pytest.fixture
@@ -169,7 +170,7 @@ def test_budget_page(c, b):
     assert page.status_code == 200 and "Personal" in page.text and "Work" in page.text
     r = client.post("/budget?month=2026-09", data={f"b_{ids['EXP.PERSONAL.FOOD']}": "6,000",
                                                    f"b_{ids['EXP.WORK']}": "1500"})
-    assert "Saved 2 budgets from 2026-09 onward" in r.text and 'value="6,000.00"' in r.text
+    assert said("Saved 2 budgets from 2026-09 onward") in r.text and 'value="6,000.00"' in r.text
     r = client.post("/budget?month=2026-09", data={f"b_{ids['EXP.PERSONAL.FOOD']}": "6,000.00"})
     assert "Nothing changed" in r.text
     r = client.post("/budget?month=2026-09", data={f"b_{ids['EXP.PERSONAL.FOOD']}": "abc"})

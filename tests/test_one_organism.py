@@ -31,7 +31,7 @@ def test_since_last_visit_counts_what_was_recorded_after_it(c, setup):
     client.cookies.set("lightning_overview_seen", "2000-01-01T00:00:00+00:00")
     c.transactions.record_outflow(fmt_date(today()), accounts["cib"].id, "40", cats["EXP.PERSONAL.FOOD"].id)
     again = client.get("/").text
-    assert "since your last visit on 2000-01-01" in again
+    assert "since your last visit on 1 Jan 2000" in again
     client.cookies.clear()
     client.cookies.set("lightning_overview_seen", "not a time")
     assert "since your last visit" not in client.get("/").text  # a cookie that is not a time is ignored

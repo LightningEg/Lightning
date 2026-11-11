@@ -58,8 +58,8 @@ async def class_popup(request: Request, class_id: int):
 @router.get("/expenses")
 async def expense_analysis(request: Request):
     c = container(request)
-    f = spending_page.facts(c, request.query_params, early_month=True)
-    selected, error, first, last, so_far, flow, l1, l2, prior, prior_from, prior_to, trend, trend_truncated, category_filter, category_code, category_name, spending_total, prior_spending, prior_label = (f[name] for name in ("selected", "error", "first", "last", "so_far", "flow", "l1", "l2", "prior", "prior_from", "prior_to", "trend", "trend_truncated", "category_filter", "category_code", "category_name", "spending_total", "prior_spending", "prior_label"))
+    f = spending_page.facts(c, request.query_params)
+    selected, error, first, last, flow, l1, l2, prior, prior_from, prior_to, trend, trend_truncated, category_filter, category_code, category_name, spending_total, prior_spending, prior_label = (f[name] for name in ("selected", "error", "first", "last", "flow", "l1", "l2", "prior", "prior_from", "prior_to", "trend", "trend_truncated", "category_filter", "category_code", "category_name", "spending_total", "prior_spending", "prior_label"))
     trend_chart = line_chart([item["outflows"] for item in trend])
     groups = l2 if l2 else l1
     bar_rows = [{"group": g.label.split(" › ")[0], "label": g.label.split(" › ")[-1], "value": g.value,
@@ -84,7 +84,7 @@ async def expense_analysis(request: Request):
     days = visuals.day_calendars(c, first, last, category_code)
     flows = visuals.cash_flow_charts(c, first, last, selected.key == "month", today())
     status = page_status.spending(spending_total, prior_spending, prior_label, selected.key, last >= today())
-    return render(request, "birdview/expenses.html", **flows, status=status, spend_kpis=kpis.spending(stats), so_far=so_far, period_query=urlencode(request.query_params), notes=notes, analysis=analysis, calendar=days, stats=stats, category_bars=category_bars, spend_trend=spend_trend,
+    return render(request, "birdview/expenses.html", **flows, status=status, spend_kpis=kpis.spending(stats), period_query=urlencode(request.query_params), notes=notes, analysis=analysis, calendar=days, stats=stats, category_bars=category_bars, spend_trend=spend_trend,
                   usual=visuals.usual_rows(usual), who_bars=visuals.counterparty_bars(c, first, last),
                   account_bars=visuals.account_bars(c, first, last), largest=largest,
                   period=selected.key, month=last.strftime("%Y-%m"),

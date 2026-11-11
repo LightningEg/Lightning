@@ -12,7 +12,7 @@ ROOT = Path(__file__).parents[1]
 def test_undo_is_a_header_icon_with_a_shortcut():
     """Ticket 101: Undo is an icon in the page header (Ctrl+Z); no text button spills into the page."""
     base = (ROOT / "lightning/ui/templates/base.html").read_text(encoding="utf-8")
-    top = base[base.index('<div class="topbar">'):base.index('{% if phone_mode() %}{% include "partials/section_tabs.html" %}')]
+    top = base[base.index('<div class="topbar">'):base.index('{% block top_actions %}{% endblock %}</div></div>')]
     assert 'partials/history.html' in top and base.count('partials/history.html') == 1
     history = (ROOT / "lightning/ui/templates/partials/history.html").read_text(encoding="utf-8")
     assert 'icon-btn history-btn' in history and "Ctrl+Z" in history and "btn small" not in history
@@ -110,5 +110,5 @@ def test_a_foreign_account_register_reads_in_its_own_currency(c, setup):
                                        opening_balance_date="2026-09-01")
     c.transactions.record_inflow("2026-09-05", usd.id, "50", cats["EXP.WORK.SALARY"].id, "gift")
     page = TestClient(create_app(c)).get(f"/accounts/{usd.id}").text
-    assert "Amount (USD)" in page and "≈ +2,410.00 EGP" in page and "Balance (USD)" in page and 'register-balance-cell">250<' in page
+    assert "Amount (USD)" in page and "≈ +2,410 EGP" in page and "Balance (USD)" in page and 'register-balance-cell">250<' in page
     assert "Amount (EGP)" in TestClient(create_app(c)).get(f"/accounts/{accounts['cib'].id}").text

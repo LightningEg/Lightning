@@ -5,6 +5,7 @@ view's total is Holdings value. Nothing is stored; the USD lens is a display con
 """
 from __future__ import annotations
 
+from datetime import date
 from decimal import Decimal
 
 from lightning.core.money import ZERO
@@ -14,6 +15,10 @@ VIEWS = ("class", "account", "currency", "market", "security")
 VIEW_LABELS = {"class": "By class", "account": "By account", "currency": "By currency", "market": "By market",
                "security": "By security"}
 SHOWN = 4  # guideline A16: four names, then Other
+
+
+def _days_between(start: str, end: str) -> int:
+    return (date.fromisoformat(end) - date.fromisoformat(start)).days
 
 
 def parse_view(text: str | None) -> str:
@@ -160,8 +165,10 @@ def purchase_returns(h, day: str):
              "value": None if h.price is None else lot.quantity * h.price,
              "gain": None if h.price is None else lot.quantity * h.price - lot.cost,
              "roi": None if h.price is None else pct(lot.roi(h.price)),
-             "cagr": None if h.price is None else pct(lot.cagr(h.price, day))} for lot in mine if lot.quantity]
+             # A yearly rate on weeks is a guess dressed as a fact: it shows only once held a full year (r30 N2).
+             "cagr": None if h.price is None or _days_between(lot.opened, day) < 365 else pct(lot.cagr(h.price, day))}
+            for lot in mine if lot.quantity]
     sold = [{"opened": d.lot_opened, "sold": d.sold, "units": d.quantity, "cost": d.cost, "proceeds": d.proceeds,
-             "gain": d.gain, "roi": pct(d.roi), "cagr": pct(d.cagr)}
+             "gain": d.gain, "roi": pct(d.roi), "cagr": pct(d.cagr) if d.days_held >= 365 else None}
             for d in h.disposals if d.owner_id is None and d.quantity]
     return held, sold

@@ -13,10 +13,8 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 |---|---|---|---|
 | **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](../../issues/7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) | S | ready |
 | **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually…](../../issues/7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | M | new |
-| **NF-7AB** | [Import review asks the file's few questions instead of showing every row](../../issues/7-planning-import-and-search/NF-7AB-import-review-as-questions.md) | L | ready |
 | **NF-7AK** | [Bank messages beyond CIB and NBE in Arabic: English card messages, wallets, other currencies, and t…](../../issues/7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | L | new |
 | **NF-7AM** | [Repeat an entry in one tap, and Save and add another](../../issues/7-planning-import-and-search/NF-7AM-repeat-and-add-another.md) | M | ready |
-| **NF-7AN** | [Save now, sort later: an entry with only an amount waits in To sort](../../issues/7-planning-import-and-search/NF-7AN-save-now-sort-later.md) | M | ready |
 | **NF-7AO** | [Bank messages Lightning is sure about save themselves, marked and undoable](../../issues/7-planning-import-and-search/NF-7AO-sure-bank-messages-save-themselves.md) | L | new |
 | **NF-7AP** | [Compare the balance a bank message states with the account, as a quiet To do row](../../issues/7-planning-import-and-search/NF-7AP-bank-message-balance-check.md) | M | ready |
 | **NF-7AQ** | [Search answers a typed question](../../issues/7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md) | L | new |
@@ -26,10 +24,8 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 
 ## Reports with open follow-ups here
 
-- [CSV import stress test: where it breaks and how to rebuild it](../../issues/7-planning-import-and-search/r23-csv-import-stress/report.md): 7AB
-- [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 7AB
 - [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12K
-- [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](../../issues/7-planning-import-and-search/r31-logging-entries/report.md): 7AJ, 7AK, 7AL, 7AM, 7AN, 7AO, 7AP, 7AB
+- [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](../../issues/7-planning-import-and-search/r31-logging-entries/report.md): 7AJ, 7AK, 7AL, 7AM, 7AO, 7AP
 - [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](../../issues/12-desktop-ux/r34-accounts-and-transactions/report.md): 12V, 12W
 - [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 7AQ
 <!-- work:end -->

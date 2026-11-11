@@ -1,0 +1,26 @@
+{# The "Lightning version" block on the phone (NF-9B4, 3AY17): a row with its state; the phone updates through its store. #}
+{% set st = update.state %}
+<div class="phone-row" id="lightning-version" data-update-state="{{ st }}"{% if st in ('checking', 'working') %} data-update-poll="/settings/update/status"{% endif %}>
+  <span>{{ 'Lightning version'|tr(locale) }}</span>
+    <small dir="auto">
+    {%- if update_notice %}{% if update_notice.kind == 'updated' %}{{ 'Updated to {v}.'|tr(locale, v=update_notice.version) }}{% else %}{{ "The update to {v} didn't start, so you're back on {cur}."|tr(locale, v=update_notice.version, cur=update_notice.current) }} <a href="{{ outside_url('download', locale) }}" target="_blank" rel="noopener">{{ 'Download page'|tr(locale) }}</a>{% endif %}<br>{% endif -%}
+    {%- if st == 'up_to_date' %}{{ 'You have the newest version.'|tr(locale) }}
+    {%- elif st == 'checking' %}{{ 'Checking…'|tr(locale) }}
+    {%- elif st == 'available' %}{{ 'Version {v} is ready · {mb} MB'|tr(locale, v=update.version, mb=update.size_mb) }}
+    {%- elif st == 'working' %}{% if update.phase == 'downloading' %}{{ 'Downloading… {pct}%'|tr(locale, pct=update.percent) }}{% else %}{{ 'Checking it works on this PC…'|tr(locale) }}{% endif %}
+    {%- elif st == 'ready' %}{{ 'Lightning will close and open again. Your profiles stay as they are.'|tr(locale) }}
+    {%- elif st == 'refused_lend' %}{{ 'Hand {names} back to your phone first, then update.'|tr(locale, names=update.names|join(', ')) }}
+    {%- elif st == 'refused_move' %}{{ 'Finish moving the home of {names} first, then update.'|tr(locale, names=update.names|join(', ')) }}
+    {%- elif st == 'refused_folder' %}{{ "Lightning can't update itself in this folder. Download the new version instead."|tr(locale) }}
+    {%- elif st == 'failed' %}{{ update.reason|tr(locale) }}
+    {%- else %}{{ 'Version {v}'|tr(locale, v=update.current) }}{% endif %}
+    </small></span>
+  <form method="post">
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    {% if st in ('idle', 'up_to_date', 'failed') %}<button class="btn small" formaction="/settings/update/check">{{ 'Check for updates'|tr(locale) }}</button>{% endif %}
+    {% if st == 'available' %}<button class="btn primary small" formaction="/settings/update/download">{{ 'Download'|tr(locale) }}</button><a class="btn small" href="{{ outside_url('releases', locale) }}" target="_blank" rel="noopener">{{ "What's new"|tr(locale) }}</a>{% endif %}
+    {% if st in ('ready', 'refused_lend', 'refused_move') %}<button class="btn primary small" formaction="/settings/update/restart">{{ 'Restart to update'|tr(locale) }}</button>{% endif %}
+    {% if st == 'refused_folder' %}<a class="btn small" href="{{ outside_url('download', locale) }}" target="_blank" rel="noopener">{{ 'Download page'|tr(locale) }}</a>{% endif %}
+    {% if st == 'failed' %}<a class="btn small" href="{{ outside_url('download', locale) }}" target="_blank" rel="noopener">{{ 'Download it yourself'|tr(locale) }}</a>{% endif %}
+  </form>
+</div>

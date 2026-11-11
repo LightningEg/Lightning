@@ -27,21 +27,15 @@ IV-3AM3 put each tab's answer above the fold; this item is about what follows it
 
 Each tab keeps, open: the header, the Lead, Needs you, the KPI row and the one detail that answers the first follow-up. Every other block is a titled row that opens in place ("Day by day", "Cash flow", "Month by month") and remembers that it was opened. A section with nothing to tell is one line. No list appears twice on a page.
 
+## Built
+
+12Z1: `tests/test_page_skeleton.py` fails a tab taller than 2.5 screens at 1366 x 768 (Transactions and Categories excepted); Spending, Cash planning, Holdings and Your data are listed in its `ALLOWED` with their step.
+
+Built 12Z2: Cash planning lists a late bill in Needs you only, "Can I afford this?" is its own card, Zakat day is a line of the forecast card (`tests/test_plan_says_each_thing_once.py`). Built 12Z3: Spending keeps Where did it go? open; Is this period unusual?, Day by day, Cash flow and Month by month are closed rows that remember being opened, and Spending is within 2.5 screens. Their one-line summaries are still to write. Where is my cash heading? and What is promised? are closed rows that remember being opened, so Cash planning is within 2.5 screens.
+
 ## How to work on this item
 
 One PR per step. After each: `python -m pytest -q tests/test_brand_audit.py tests/test_mohab_year.py` and the step's test. Mohab reads some of these blocks: open them in his steps, never delete what he checks. Delete the step's heading in the same commit.
 
-## 12Z1 A length budget in the skeleton test · S · sonnet · #496
-File: `tests/test_page_skeleton.py` (from IV-12Y2; create it here if this step comes first). On the sample year at 1366 × 768 a tab is at most 2.5 screens as it first opens, registers excepted (Transactions, an account, Categories). Today's long tabs go in the allow-list with this item's code.
-
-## 12Z2 Cash planning says each thing once · M · sonnet
-Files: `lightning/ui/templates/planning/`. Late rows live in Needs you only; "The next 30 days" starts at today. "Can I afford this?" becomes a row or its own card beside the Lead, not a card in it. Zakat day joins the forecast card as one line. Done when a test finds no bill name twice above the forecast and no `.card` inside the Lead card.
-
-## 12Z3 Spending opens on the categories; the other charts open on request · M · opus
-Files: `lightning/ui/templates/birdview/`. Open: Money out as a Lead with its change, then "Where did it go?". Closed rows: Is this period unusual?, Day by day, Cash flow, Month by month, each with a one-line summary of what it would show ("Loan payments and Health are above their usual range"). Done when Spending is within the budget of 12Z1.
-
-## 12Z4 Investments shows nothing as one line · S · sonnet · #497
-Files: `lightning/ui/templates/investments/`, the holdings route. A period with no change says "Nothing changed in your holdings this month." in place of five zero rows and the empty "Money and value by class" card. (The two Cost figures are BT-12AC.) Done when a test with a flat-only month finds one line.
-
 ## 12Z5 Overview's tail · S · sonnet · #498
-Get set up and Your position: once setup is 5 of 5 the heading is gone; Your position opens by default when the page would otherwise end above the fold's end, or moves beside the KPI row. Done when Overview on the sample year has no collapsed heading followed by empty space.
+Built: a finished setup no longer shows its heading; a quiet Investments period is one line (12Z4, `tests/test_investment_explain.py`). Left: Your position still ends the page as a closed heading. Opening it by default takes Overview past 2.5 screens, so it moves beside the KPI row instead. Done when Overview on the sample year has no collapsed heading followed by empty space.

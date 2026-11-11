@@ -3358,7 +3358,6 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 .main .emergency-liquidity-context > summary { cursor:pointer; padding:6px 0; }
 .main .emergency-liquidity-context[open] > summary { margin-bottom:6px; }
 .main .reserve-set b.num { order:-1; }
-.main .so-far-line { margin:0 0 12px; padding:8px 14px; border-radius:14px; background:rgba(10,36,66,.05); font:600 var(--fs-2)/1.4 var(--body); color:var(--ink-2); }
 
 /* IV-3AM3 · fields as wide as their values (A10): the planner's amounts */
 .main .planner-popup-form .money-input { width:200px; max-width:100%; }
@@ -3441,3 +3440,47 @@ label > .field-note { color:var(--muted); font-size:var(--fs-meta, 12px); margin
   .main .topbar > .section-bar .plan-tabs-bar { flex-wrap:nowrap; }
   .main .topbar > .actions { flex:none; }
 }
+/* NF-7AB1: the import review's questions, lines inside the review card (never cards in a card) */
+.main .import-summary { display:grid; margin:4px 0 12px; }
+.main .import-question { border-top:1px solid var(--line); }
+.main .import-question-head { display:grid; grid-template-columns:minmax(0,1fr) auto auto; align-items:center; gap:16px; padding:12px 4px; }
+.main .import-question-name { display:grid; gap:2px; min-width:0; }
+.main .import-question-name small { color:var(--ink-2); font-size:var(--fs-meta); }
+.main .import-question-n { font-size:var(--fs-2); }
+.main .import-question.is-err .import-question-n { color:var(--rose); }
+.main .import-question-actions { display:flex; flex-wrap:wrap; gap:8px; justify-content:flex-end; }
+.main .import-question-rows { padding:0 0 12px; }
+@media (max-width:700px) {
+  .main .import-question-head { grid-template-columns:minmax(0,1fr) auto; }
+  .main .import-question-actions { grid-column:1 / -1; justify-content:stretch; }
+  .main .import-question-actions .btn { flex:1 1 0; min-height:52px; }
+}
+.main .import-question-tools, .main .import-group-tools { display:flex; flex-wrap:wrap; align-items:flex-end; gap:8px; padding:8px 4px; }
+.main .import-small input { max-width:120px; }
+.main .import-progress { margin:0 0 4px; }
+/* NF-7AB5 quick mode: one waiting row at a time */
+.main .import-quick { display:grid; gap:8px; padding:12px 4px; border-top:1px solid var(--line); }
+.main .import-quick-row { margin:0; display:flex; flex-wrap:wrap; gap:8px; align-items:baseline; }
+.main .import-quick-picks, .main .import-quick-actions { display:flex; flex-wrap:wrap; gap:8px; }
+.main .is-quick-mode .import-line:not(.is-quick), .main .is-quick-mode .import-head, .main .is-quick-mode details.import-group:not(:has(.is-quick)) { display:none; }
+@media (max-width:700px) {
+  .main .import-quick-picks .btn, .main .import-quick-actions .btn { flex:1 1 100%; min-height:52px; }
+}
+.main .import-quick[hidden], .main .import-question .import-more[hidden], .main .import-question-rows[hidden] { display:none; }
+/* NF-7AQ3: Search answers a typed question first */
+.search-answer { display:grid; gap:4px; padding:12px 0; border-bottom:1px solid var(--line); margin-bottom:8px; }
+.search-answer p { margin:0; }
+.search-answer-total { font:700 var(--fs-card)/1.1 var(--body); }
+.search-answer-rows { list-style:none; margin:4px 0; padding:0; display:grid; gap:4px; }
+.search-answer-rows li { display:flex; justify-content:space-between; gap:12px; }
+.search-answer .btn { justify-self:start; }
+
+/* NF-12AB3 (A08.1): the headline figure is the control for its working, which opens under it in the same card. */
+.main .fig-open { all:unset; cursor:pointer; border-radius:8px; }
+.main .fig-open:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.main .fig-open:hover .kc-figure, .main .fig-open:hover .lead-figure { text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:4px; }
+.main .working-panel { margin-top:8px; padding-top:8px; border-top:1px solid var(--line); }
+.main .working-panel .working-title { margin:0 0 4px; font:700 var(--fs-meta)/1.4 var(--body); color:var(--ink-2); }
+.main .working-panel table { width:100%; border-collapse:collapse; font:500 var(--fs-2)/1.5 var(--body); color:var(--ink); }
+.main .working-panel td { padding:2px 0; }
+.main .working-panel td.num { text-align:end; font-variant-numeric:tabular-nums; }

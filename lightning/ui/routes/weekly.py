@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 
 from lightning.core.errors import LightningError
 from lightning.workflows.weekly import WeeklyReview
+from lightning.workflows import reminder_schedule
 from lightning.workflows.reminders import ReminderService
 from ..i18n import translate
 from ..web import container, redirect, render, settled_save
@@ -43,6 +44,7 @@ async def reminders_settings(request: Request):
     form = await request.form()
     with settled_save(request, c, undo_label='Reminder preference'):
         c.settings.set("reminders_enabled", "1" if form.get("enabled") == "1" else "0")
+    reminder_schedule.refresh(c, force=True)  # NF-3AU2: on writes the schedule, off removes it
     return redirect("/review", "Reminder preference saved.")
 
 
@@ -52,6 +54,7 @@ async def due_reminders(request: Request):
     if c is None or c.db.closed or c.db.read_only:
         return JSONResponse({"enabled": False, "items": []}, headers={"Cache-Control": "no-store"})
     service = ReminderService(c)
+    reminder_schedule.refresh(c)  # NF-3AU2: the closed-app schedule, rewritten at most once a day
     locale = c.settings.get("locale") or "en"
     items = [{**item, "label": translate(item["label"], locale), "detail": translate(item["detail"], locale)} for item in service.due()]
     return JSONResponse({"enabled": service.enabled, "items": items}, headers={"Cache-Control": "no-store"})

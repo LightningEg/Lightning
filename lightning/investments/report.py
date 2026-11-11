@@ -75,7 +75,8 @@ def explain_period(report: dict, start: str, end: str, stale_days: int = 45) -> 
     ]
     limit = (date.fromisoformat(end) - timedelta(days=stale_days)).isoformat()
     stale = [{"name": h["asset"], "price_date": h["price_date"]} for h in report["holdings"]
-             if h.get("price_source") not in ("BALANCE", "COST") and h.get("price_date") and h["price_date"] < limit]
+             if h.get("price_source") not in ("BALANCE", "COST") and not h.get("certificate")
+             and h.get("price_date") and h["price_date"] < limit]
     return {"parts": parts, "total": sum((p["amount"] for p in parts), ZERO) if known else None,
             "result": report.get("result"), "new_money": report["new_money"], "withdrawn": report["withdrawn"],
             "missing": report.get("missing", []), "at_cost": report.get("at_cost", []), "stale": stale,
@@ -292,7 +293,9 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
                          "realized": b["realized"], "unrealized": None if value is None else value-b["cost"],
                          "price_date": valuation.price_date, "price_source": valuation.source,
                          "currency": asset.currency, "cost_native": b["cost_native"],
-                         "price_part": price_part, "fx_part": fx_part})
+                         "price_part": price_part, "fx_part": fx_part,
+                         # IV-12J4: a certificate is valued from its terms, so it never has an "old price"
+                         "certificate": account_by_id[account_id].account_type == "DEPOSIT"})
     for (account_id, cash_asset_id), quantity in asset_balances.items():
         if quantity == ZERO:
             continue

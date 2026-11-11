@@ -1,0 +1,27 @@
+{# Import on the phone (3AY17): statements waiting first, then choose files and their accounts, then the history with
+   Undo. Same drop script as the PC: the file picker opens the system's own. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Import'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Import'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% if waiting %}<div class="phone-rows">{% for w in waiting %}<a class="phone-row import-waiting" href="/accounts/{{ w.account_id }}/import/{{ w.batch_id }}"><span>{{ w.file_name }} {{ 'is waiting for you'|tr(locale) }}<small>{{ w.waiting }} {{ ('row' if w.waiting == 1 else 'rows')|tr(locale) }}</small></span><b>{{ 'Continue the review'|tr(locale) }} {{ chevron() }}</b></a>{% endfor %}</div>{% endif %}
+{% if not accounts %}<p class="phone-note">{{ 'No bank or cash accounts yet'|tr(locale) }}</p><a class="btn primary phone-save" href="/accounts/new">{{ 'Add an account'|tr(locale) }}</a>{% else %}
+<section class="phone-section import-drop" data-import-drop aria-labelledby="import-choose">
+  <header class="phone-section-head"><h2 id="import-choose">{{ 'Drop statement files here'|tr(locale) }}</h2></header>
+  <p class="phone-note">{{ 'CSV up to 5 MB; Excel .xlsx and text-based CIB PDFs up to 8 MB.'|tr(locale) }}</p>
+  <label class="btn phone-save drop-zone" for="import-files">{{ 'Choose files'|tr(locale) }}</label>
+  <input id="import-files" type="file" accept=".csv,.xlsx,.pdf,text/csv,application/pdf,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" multiple hidden>
+  <div class="phone-form"><label for="drop-encoding">{{ 'CSV encoding'|tr(locale) }}<select id="drop-encoding" data-import-encoding data-native><option value="auto">{{ 'Automatic (Unicode or Windows Arabic)'|tr(locale) }}</option><option value="cp1256">{{ 'Windows Arabic'|tr(locale) }}</option><option value="cp1252">{{ 'Windows Western'|tr(locale) }}</option></select></label></div>
+  <ol class="phone-rows import-files" data-import-list></ol>
+  <template data-import-row><li class="phone-row import-file"><span><span class="import-name"></span><small class="import-state"></small></span><select aria-label="{{ 'Account'|tr(locale) }}"><option value="">{{ 'Choose the account'|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}" data-last4="{{ a.last4 or '' }}" data-words="{{ (a.institution ~ ' ' ~ a.name)|lower }}">{{ a.name }}{% if a.last4 %} ·{{ a.last4 }}{% endif %}</option>{% endfor %}</select></li></template>
+  <button type="button" class="btn primary phone-save" data-import-send disabled>{{ 'Review statements'|tr(locale) }}</button>
+  <input type="hidden" data-session value="{{ request.state.session_token|default('') }}">
+</section>{% endif %}
+<section class="phone-section" aria-labelledby="history-head"><header class="phone-section-head"><h2 id="history-head">{{ 'Import history'|tr(locale) }}</h2></header>
+  <a class="phone-row" href="/sms"><span>{{ 'Bank SMS'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  {% if not batches %}<p class="phone-note">{{ 'No statements imported yet.'|tr(locale) }}</p>{% else %}
+  <div class="phone-rows">{% for b in batches %}<div class="phone-row"><span>{{ b.file_name }}<small><a href="/accounts/{{ b.account_id }}">{{ b.account }}</a> · {{ (b.posted_at or b.created_at)[:10] }} · {{ b.live }} {{ 'Entries'|tr(locale) }}</small></span>
+    {% if b.live %}<form method="post" action="/import/{{ b.id }}/undo" data-confirm-delete="{{ 'Undo this import? {n} entries from {filename} are deleted.'|tr(locale, n=b.live, filename=b.file_name) }}"><button class="btn small">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% elif b.status == 'REVIEW' %}<a class="btn small" href="/accounts/{{ b.account_id }}/import/{{ b.id }}">{{ 'Review'|tr(locale) }}</a>{% else %}<b class="muted">{{ ('Undone' if b.status == 'POSTED' else 'Discarded')|tr(locale) }}</b>{% endif %}</div>{% endfor %}</div>{% endif %}
+</section>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('import-drop.js') }}" defer></script>
+{% endblock %}

@@ -1,0 +1,11 @@
+{# Financial assets on the phone (3AY16): one row each, ticker and class under the name; a row opens its edit page. #}
+{% extends "base.html" %}
+{% block title %}Financial assets{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/investments"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Investments'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Financial assets'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% if rows %}<div class="phone-rows">{% for r in rows %}{% set a = r.asset %}
+  <a class="phone-row{{ ' is-muted' if not a.active }}" href="/investments/assets/{{ a.id }}/edit"><span>{{ a.name }}<small>{{ a.ticker }}{% if a.exchange %} · {{ a.exchange }}{% endif %}{% if r.class %} · {{ r.class.name|tr(locale) }}{% endif %}{% if not a.active %} · {{ 'Hidden'|tr(locale) }}{% endif %}</small></span><b>{{ chevron() }}</b></a>{% endfor %}
+</div>{% else %}<p class="phone-note">{{ "Nothing yet. Add a stock, a fund or gold, or record a trade in a brokerage account."|tr(locale) }}</p>{% endif %}
+<a class="btn primary phone-save" href="/investments/assets/new">{{ "Add an investment"|tr(locale) }}</a>
+{% endblock %}

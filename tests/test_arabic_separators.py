@@ -99,7 +99,8 @@ def test_the_figures_shown_use_one_decimal_mark_and_one_percent_sign(sample):  #
          str(SCRIPT)], input=json.dumps(items), capture_output=True, text=True, check=True).stdout)
     latin_mark = re.compile(rf"[{ARABIC_DIGIT}][.,][{ARABIC_DIGIT}]")
     bad = [(texts[a], s[:90]) for a, s in zip(items, shown)
-           if latin_mark.search(s) or "٪" in s or DOT_BESIDE_DIGIT.search(s)]
+           if latin_mark.search(s) or re.search(rf"[{ARABIC_DIGIT}][\u2069]?%", s) or DOT_BESIDE_DIGIT.search(s)]
+    # One percent sign: the Arabic ٪ after an Arabic figure (owner, 2026-11-08, IV-3BK7).
     assert not bad, bad[:6]
 
 

@@ -7,7 +7,6 @@ import functools
 import hashlib
 import json
 import logging
-from datetime import timedelta
 from contextlib import contextmanager
 
 import re
@@ -29,6 +28,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from lightning import DISPLAY_VERSION
 from lightning.bootstrap import Container
 from lightning.core.dates import fmt_date, month_of, today
+from lightning.ui.date_text import day_text, human_dates, month_short, month_text, range_text
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.figures import FIGURES
 from lightning.core.memo import request_cache
@@ -80,9 +80,9 @@ def _amount_role(value, role: str, signed: bool = False) -> str:
     if role == "total":
         return _money(value, signed, 0)
     if role == "row":
-        # The phone drops ".00" from a whole amount (phone overhaul 2026-10-22); piastres still show when there are any.
+        # A whole amount shows no ".00" and piastres show when there are any, on the PC as on the phone (A06.1, IV-3BK6).
         whole = False
-        if phone_mode() and value is not None:
+        if value is not None:
             try:
                 number = Decimal(str(value).replace(",", "").replace("\u2212", "-"))
                 whole = number == number.to_integral_value()
@@ -181,17 +181,20 @@ templates.env.filters["tone"] = _tone
 
 
 def _day_label(date_text, locale: str = "en") -> str:
-    """A day header on a phone list (guideline C08.1): Today, Yesterday, then the date as yyyy-mm-dd (A06.1)."""
-    now = today()
-    text = str(date_text)
-    if text == fmt_date(now):
-        return translate("Today", locale)
-    if text == fmt_date(now - timedelta(days=1)):
-        return translate("Yesterday", locale)
-    return text
+    """A day header on a phone list (guideline C08.1): Today, Yesterday, then the day as people say it (A06.1)."""
+    return day_text(date_text, locale)
+
+
+def _locale(locale):
+    return locale or ui_locale()
 
 
 templates.env.filters["day_label"] = _day_label
+# Dates read on a screen (A06.1, IV-3BK); fields, files and exports keep yyyy-mm-dd.
+templates.env.filters["day"] = lambda value, locale=None: day_text(value, _locale(locale))
+templates.env.filters["month"] = lambda value, locale=None: month_text(value, _locale(locale))
+templates.env.filters["month_short"] = lambda value, locale=None: month_short(value, _locale(locale))
+templates.env.filters["day_range"] = lambda start, end, locale=None: range_text(start, end, _locale(locale))
 
 
 def _day_nets(rows, show_account: bool = False) -> dict[str, Decimal]:
@@ -532,9 +535,11 @@ def _template_response(request, name, status_code, c, locale, total, owned_total
         },
         status_code=status_code,
     )
+    page = response.body.decode("utf-8")
     if locale == "ar":
-        response.body = localize_html(response.body.decode("utf-8")).encode("utf-8")
-        response.headers["content-length"] = str(len(response.body))
+        page = localize_html(page)
+    response.body = human_dates(page, locale).encode("utf-8")  # dates as people say them (A06.1, IV-3BK)
+    response.headers["content-length"] = str(len(response.body))
     return response
 
 

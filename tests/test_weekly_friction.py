@@ -22,7 +22,7 @@ def test_held_for_others_rows_give_back_and_spend_for_them(c, setup):
     client = TestClient(create_app(c))
     page = client.get("/money-from-others").text
     links = re.findall(r'href="(/accounts/\d+/transaction/new\?[^"]+)"', page)
-    assert len(links) == 2 and "Give back" in page and "Spend for them" in page
+    assert len(links) == 3 and "Give back" in page and "Spend for them" in page and "Receive more" in page
     sheet = client.get(links[0].replace("&amp;", "&")).text
     assert re.search(r'<option value="\d+" selected>Mom', sheet)  # the person is chosen in Held for
     assert 'value="1000.00"' in sheet
@@ -67,8 +67,8 @@ def test_register_has_month_lines_with_the_closing_balance(c, setup):
     c.transactions.record_outflow("2026-09-10", accounts["cib"].id, "100", food.id)
     c.transactions.record_outflow("2026-10-10", accounts["cib"].id, "200", food.id)
     page = TestClient(create_app(c)).get(f"/accounts/{accounts['cib'].id}").text
-    months = re.findall(r'class="register-month"><td colspan="\d+"><b>(\d{4}-\d\d)</b>', page)
-    assert months[:2] == ["2026-10", "2026-09"] and "Closing balance" in page
+    months = re.findall(r'class="register-month"><td colspan="\d+"><b>([A-Z][a-z]+ \d{4})</b>', page)
+    assert months[:2] == ["October 2026", "September 2026"] and "Closing balance" in page
 
 
 def test_an_unpriced_karat_is_priced_from_another_by_purity(c):

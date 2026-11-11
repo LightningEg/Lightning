@@ -233,12 +233,20 @@ def load() -> tuple[list[dict], list[str]]:
     return milestones, problems
 
 
-def next_code(milestone: dict, milestones: list[dict] | None = None) -> str:
+def reserved_codes(now_text: str) -> list[str]:
+    """Codes and ranges on NOW.md's `Reserved codes:` line, e.g. `r34 Claude, 12U-12W Claude` -> ['r34', '12U-12W']."""
+    m = re.search(r"(?m)^Reserved codes:[ \t]*(.*)$", now_text)
+    return [t.split()[0] for t in (m.group(1).split(",") if m else []) if t.split() and t.split()[0].lower() != "none"]
+
+
+def next_code(milestone: dict, milestones: list[dict] | None = None, reserved: list[str] = ()) -> str:
     """The next free code for a new item in this folder: its number and the next letter after every code that starts
     with that number anywhere (codes are opaque and stay with their item when it moves between folders)."""
     n = str(milestone["n"])
     pool = milestones or [milestone]
     every = [c for m in pool for c in [i["code"] for i in m["items"]] + m["done"]]
+    for r in reserved:  # a reserved code or range counts as used, so the next one comes after it
+        every += [c for c in r.split("-") if re.fullmatch(rf"{n}[A-Z]+", c)]
     used = [number(c[len(n):]) for c in every if re.fullmatch(rf"{n}[A-Z]+", c)]
     return f"{milestone['n']}{letters(max(used, default=0) + 1)}"
 
@@ -393,7 +401,8 @@ def main() -> int:
         if not wanted:
             print("usage: python tools/issues.py next <milestone number>")
             return 1
-        print(next_code(wanted[0], milestones))
+        now = ROOT / "NOW.md"
+        print(next_code(wanted[0], milestones, reserved_codes(now.read_text(encoding="utf-8") if now.exists() else "")))
         return 0
     if sys.argv[1:2] == ["tag"]:
         wanted = [i for m in milestones for i in m["items"] if len(sys.argv) > 2 and i["code"] == sys.argv[2].split("-")[-1]]

@@ -172,7 +172,7 @@ def test_the_month_stepper_keeps_what_you_searched_and_ends_at_this_month(month)
     assert 'class="phone-reg-step is-off"' in now
     # The tab opens on this month (IV-3AL3); All time is a choice in the sheet, and then the control has no arrows.
     opened = phone.get(REGISTER).text
-    assert '<summary class="phone-period-now" aria-label="Choose period">2026-12</summary>' in opened
+    assert '<summary class="phone-period-now" aria-label="Choose period">December 2026</summary>' in opened
     assert {"preset": "all_time"} in _queries(opened)
     free = phone.get("/transactions?preset=all_time").text
     assert "All time" in free and 'aria-label="Previous month"' not in free
@@ -189,7 +189,7 @@ def test_the_sheet_offers_the_periods_and_year_to_date_is_the_registers_own_pres
     ytd = phone.get("/transactions?preset=year_to_date").text
     assert "Year to date" in ytd and "ACME Egypt" in ytd
     custom = phone.get("/transactions?preset=custom&date_from=2026-09-03&date_to=2026-09-04").text
-    assert set(_names(custom)) == {"Carrefour", "Figma"} and "2026-09-03 to 2026-09-04" in custom
+    assert set(_names(custom)) == {"Carrefour", "Figma"} and "3–4 Sep" in custom
 
 
 def test_select_value_updates_views_and_activity_are_still_there(month):
@@ -244,7 +244,7 @@ def test_saved_views_are_listed_in_their_sheet_and_open_with_their_summary(month
                         data={"name": "September", "preset": "custom", "date_from": "2026-09-01", "date_to": "2026-09-30"})
     assert opened.status_code == 200 and "Views: September" in opened.text
     assert "Summary and export" in opened.text and "Delete view" in opened.text
-    assert "2026-09-01 to 2026-09-30" in opened.text and "Carrefour" in opened.text and "Seoudi" not in opened.text
+    assert "September 2026" in opened.text and "Carrefour" in opened.text and "Seoudi" not in opened.text
     assert 'class="phone-row is-chosen"' in opened.text      # the open view is ticked in the sheet
     listed = phone.get(REGISTER).text
     assert "<span>September</span>" in listed and "Summary and export" not in listed
@@ -259,5 +259,5 @@ def test_an_empty_month_offers_last_month_with_its_figures(month):
     c, accounts, cats = month
     phone = _phone(c)
     body = phone.get("/transactions?month=2026-11").text.split('<p class="empty">')[0]
-    assert "<small>2026-10</small>" in body and "month=2026-10" in body and "−700" in body
-    assert "<small>2026-08</small>" not in phone.get("/transactions?month=2026-09").text
+    assert "<small>October 2026</small>" in body and "month=2026-10" in body and "−700" in body
+    assert "<small>August 2026</small>" not in phone.get("/transactions?month=2026-09").text

@@ -29,6 +29,8 @@ ZAKAT_CATEGORY = "EXP.SYSTEM.ZAKAT"
 ENABLED_KEY = "zakat_enabled"
 LUNAR_YEAR_DAYS = 354
 NISAB_GRAMS = Decimal(85)
+NISAB_SILVER_GRAMS = Decimal(595)
+NISAB_BASES = ("gold", "silver", "lower")
 ZAKAT_RATE = Decimal("0.025")
 CENT = Decimal("0.01")
 
@@ -40,6 +42,9 @@ class ZakatSettings:
     typed_nisab_date: str | None
     count_worn_gold: bool
     deduct_debts_due: bool
+    nisab_basis: str = "gold"              # NF-9D6: "gold" (85 g), "silver" (595 g) or "lower" (the lower of the two)
+    typed_silver: Decimal | None = None    # the price of a gram of pure silver the user typed
+    typed_silver_date: str | None = None
 
 
 @dataclass(frozen=True)
@@ -68,7 +73,7 @@ class Assessment:
     lines: tuple[ZakatLine, ...]
     zakatable_wealth: Decimal
     nisab: Decimal | None
-    nisab_source: str              # "gold" (85 g at that day's price), "typed" or "" when there is none
+    nisab_source: str              # "gold" (85 g), "silver" (595 g), "lower" (the lower of both), "typed" or ""
     nisab_date: str | None         # the day of the gold price, or the day the nisab was typed
     zakat_due: Decimal | None      # None when the estimate cannot be made; the reason is in `unavailable_reason`
     paid: Decimal | None           # None until a zakat day is set
@@ -122,7 +127,10 @@ class ZakatService:
         if row is None:  # a profile older than migration 0054 cannot reach here, but never fail a page for it
             return ZakatSettings(None, None, None, False, True)
         return ZakatSettings(row["zakat_day"], from_e6(row["typed_nisab_e6"]) if row["typed_nisab_e6"] else None,
-                             row["typed_nisab_date"], bool(row["count_worn_gold"]), bool(row["deduct_debts_due"]))
+                             row["typed_nisab_date"], bool(row["count_worn_gold"]), bool(row["deduct_debts_due"]),
+                             row["nisab_basis"] or "gold",
+                             from_e6(row["typed_silver_e6"]) if row["typed_silver_e6"] else None,
+                             row["typed_silver_date"])
 
     def save_settings(self, zakat_day: str | None, typed_nisab, count_worn_gold: bool, deduct_debts_due: bool) -> None:
         """Save the settings. An empty zakat day or nisab clears it; a typed nisab is kept with today's date
@@ -151,7 +159,36 @@ class ZakatService:
                  int(bool(deduct_debts_due)), now_iso()))
             self.audit.record("zakat_settings", 1, "edit", "Changed zakat settings", before, after)
 
+    def save_nisab_basis(self, nisab_basis: str, typed_silver) -> None:
+        """NF-9D6: which nisab counts (gold, silver or the lower of the two) and the silver gram price the user types,
+        kept with today's date (its old date when unchanged). An empty price clears it."""
+        old = self.settings()
+        basis = str(nisab_basis or "gold").strip().lower()
+        if basis not in NISAB_BASES:
+            raise ValidationError("Choose gold, silver or the lower of the two.", "nisab_basis")
+        text = str(typed_silver if typed_silver is not None else "").strip()
+        price, price_date = None, None
+        if text:
+            price = check_places(to_decimal(text, "silver price"), 2, "typed_silver")
+            if price <= 0:
+                raise ValidationError("Type a silver price above zero, or leave it empty.", "typed_silver")
+            price_date = old.typed_silver_date if old.typed_silver == price and old.typed_silver_date else fmt_date(today())
+        before = {"nisab_basis": old.nisab_basis, "typed_silver": str(old.typed_silver) if old.typed_silver else None,
+                  "typed_silver_date": old.typed_silver_date}
+        after = {"nisab_basis": basis, "typed_silver": str(price) if price else None, "typed_silver_date": price_date}
+        with self.db.transaction():
+            self.db.execute("UPDATE zakat_settings SET nisab_basis=?,typed_silver_e6=?,typed_silver_date=?,updated_at=? "
+                            "WHERE id=1", (basis, to_e6(price) if price else None, price_date, now_iso()))
+            self.audit.record("zakat_settings", 1, "edit", "Changed the nisab basis", before, after)
+
     # ------------------------------------------------------------- the nisab
+    def silver_price(self, day: str, settings: ZakatSettings | None = None) -> tuple[Decimal, str] | None:
+        """The price of a gram of pure silver the user typed, with its date, when it is dated on or before the day."""
+        settings = settings or self.settings()
+        if settings.typed_silver and settings.typed_silver_date and settings.typed_silver_date <= str(day):
+            return settings.typed_silver, settings.typed_silver_date
+        return None
+
     def gold_price_24k(self, day: str) -> tuple[Decimal, str] | None:
         """The price of a gram of 24K gold in the profile currency on or before the day, with its date: the
         24K reference price, else the newest price of another gold reference divided by its purity."""
@@ -168,10 +205,20 @@ class ZakatService:
         return None if best is None else (best[1], best[2])
 
     def nisab(self, day: str, settings: ZakatSettings) -> tuple[Decimal | None, str, str | None]:
-        """(amount, source, date): 85 g of 24K gold at the price of the day, else the nisab the user typed."""
-        found = self.gold_price_24k(day)
-        if found:
-            return (NISAB_GRAMS * found[0]).quantize(CENT, ROUND_HALF_UP), "gold", found[1]
+        """(amount, source, date) on the chosen basis: 85 g of 24K gold, 595 g of pure silver, or the lower of the
+        two (NF-9D6). A basis whose price is missing falls back to the nisab the user typed, else to none."""
+        gold = silver = None
+        if settings.nisab_basis in ("gold", "lower"):
+            found = self.gold_price_24k(day)
+            gold = ((NISAB_GRAMS * found[0]).quantize(CENT, ROUND_HALF_UP), "gold", found[1]) if found else None
+        if settings.nisab_basis in ("silver", "lower"):
+            found = self.silver_price(day, settings)
+            silver = ((NISAB_SILVER_GRAMS * found[0]).quantize(CENT, ROUND_HALF_UP), "silver", found[1]) if found else None
+        if gold and silver:
+            lower = min(gold, silver, key=lambda item: item[0])
+            return lower[0], "lower", lower[2]
+        if gold or silver:
+            return gold or silver
         if settings.typed_nisab:
             return settings.typed_nisab, "typed", settings.typed_nisab_date
         return None, "", None
@@ -217,7 +264,9 @@ class ZakatService:
         if position.unvalued:
             reason = "A price is missing, so Lightning cannot estimate your zakat yet."
         elif nisab is None:
-            reason = "There is no gold price yet. Type the nisab behind the gear, or add a gold price."
+            reason = ("There is no silver price yet. Type the silver gram price or the nisab behind the gear."
+                      if settings.nisab_basis == "silver" else
+                      "There is no gold price yet. Type the nisab behind the gear, or add a gold price.")
         due = None
         if not reason:
             due = (wealth * ZAKAT_RATE).quantize(CENT, ROUND_HALF_UP) if wealth >= nisab else ZERO

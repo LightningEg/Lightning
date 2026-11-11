@@ -7,6 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 @pytest.fixture
@@ -153,6 +154,15 @@ def test_overview_horizons_keep_the_same_status_layout_and_popup_range(client, c
     popup = client.get("/explain/flow?period=custom&date_from=2026-09-10&date_to=2026-09-20")
     assert popup.status_code == 200
     assert "/?period=custom&amp;date_from=2026-09-10&amp;date_to=2026-09-20" in popup.text
+
+
+def test_overview_links_each_figure_to_its_explain_page(client, setup):
+    """IV-12T: What you own, Free cash and Net flow each open the page that shows their parts."""
+    page = client.get("/?period=custom&date_from=2026-09-10&date_to=2026-09-20").text
+    for kind in ("owned", "free-cash", "flow"):
+        href = f"/explain/{kind}?period=custom&amp;date_from=2026-09-10&amp;date_to=2026-09-20"
+        assert f'href="{href}"' in page
+        assert client.get(href.replace("&amp;", "&")).status_code == 200
 
 
 def test_birdview_other_assets_has_no_empty_disclosure(client, setup):
@@ -461,7 +471,7 @@ def test_phone_currency_settings_render_rates_and_fx_history_as_rows(c):
     phone = TestClient(phone_app).get('/settings?section=currencies&tab=rates').text
     desktop = TestClient(app).get('/settings?section=currencies&tab=rates').text
     assert '<table' not in phone and 'currency-rate-list' in phone
-    for value in ('USD', '55', 'Dollar savings', '2026-09-30', '500'):
+    for value in ('USD', '55', 'Dollar savings', said('2026-09-30'), '500'):
         assert value in phone and value in desktop
     assert '<table' in desktop
 

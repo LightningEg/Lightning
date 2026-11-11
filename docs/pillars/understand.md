@@ -11,19 +11,16 @@ The overview, spending, financial health, net worth and reports. They read the l
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](../../issues/3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | L | ready |
+| **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](../../issues/3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | S | ready |
 | **IT-9A** | [Stored month-end figures](../../issues/9-later/IT-9A-stored-month-end-figures.md) | M | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
-| **IV-12N** | [Investments figures that mislead outside stocks: purchases shown as change in value, yearly rates o…](../../issues/12-desktop-ux/IV-12N-investment-figures-beyond-stocks.md) | M | new |
-| **IV-12T** | [The three "explain this figure" pages have no way in](../../issues/12-desktop-ux/IV-12T-explain-pages-have-no-way-in.md) | S | ready |
-| **NF-12AB** | [Every headline figure explains itself in place](../../issues/12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | L | new |
+| **NF-12AB** | [Every headline figure explains itself in place](../../issues/12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | L | ready |
 
 ## Reports with open follow-ups here
 
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 9A
 - [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BK
 - [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](../../issues/11-phone-ux/r29-google-play-readiness/report.md): 3BK
-- [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12N
-- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r33-code-review-and-loose-ends/report.md): 12T, 9A
+- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r33-code-review-and-loose-ends/report.md): 9A
 - [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 12AB
 <!-- work:end -->
 

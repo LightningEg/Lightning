@@ -26,6 +26,10 @@ def _month_name(month: str) -> str:
     return date.fromisoformat(month + "-01").strftime("%B %Y")
 
 
+def _ordinal(day: int) -> str:
+    return f"{day}{'th' if 11 <= day % 100 <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')}"
+
+
 def _plural(count: int, one: str, many: str) -> str:
     return f"{count} {one if count == 1 else many}"
 
@@ -173,6 +177,7 @@ class ReviewInbox:
                                    "fields": {"outcome": "link", "due": payment.due_date,
                                               "transaction_id": str(txn["id"])}}})
         items.extend(c.gameya.attention(on))  # an instalment or payout past its date and not recorded
+        items.extend(c.deposits.attention(on))  # a certificate matured or just unlocked (IV-12J4)
         for changed in c.db.all(
                 "SELECT i.id,i.name,i.amount_e6,i.account_id,p.amount_e6 AS paid_e6,p.due_date "
                 "FROM planned_items i JOIN planned_payments p ON p.planned_item_id=i.id "
@@ -467,6 +472,20 @@ class ReviewInbox:
                               "href": f"/budget?month={month}&open_group=all#limit-{row['category_id']}",
                               "action": "Change the plan", "priority": 2,
                               "glance": glance(row["name"], "Adjust", row["amount"], "over plan 2 months")})
+        for row in c.budgets.running_out(month, on, schedule=c.schedules.view()):  # NF-12S
+            raise_href = f"/budget?month={month}&open_group=all#limit-{row['category_id']}"
+            item = {"label": f"{row['name']} will run out around the {_ordinal(row['day'])}",
+                    "detail": f"At this pace it passes its {fmt(row['limit'], 0)} {cur} limit before the month ends. "
+                              f"It needs about {fmt(row['amount'], 0)} {cur} more.",
+                    "priority": 2, "source_version": f"running-out:{month}:{row['category_id']}"}
+            if row["can_move"]:
+                item.update(href=f"/budget/move?month={month}&to={row['category_id']}&from={row['from_id']}"
+                                 f"&amount={row['amount']}", popup=True, action="Move room",
+                            alt={"label": "Raise", "href": raise_href})
+            else:
+                item.update(href=raise_href, action="Raise")
+            item["glance"] = glance(row["name"], item["action"], row["amount"], "runs out around day {n}", n=row["day"])
+            found.append(item)
         return found
 
     def _sms(self) -> list[dict]:
@@ -511,13 +530,15 @@ class ReviewInbox:
         for code, one, many in (("EXP.UNACCOUNTED", "payment has no category", "payments have no category"),
                                 ("INC.UNACCOUNTED", "incoming amount has no category", "incoming amounts have no category")):
             category = self.c.categories.get_by_code(code)
-            _, total = self.c.transactions.find(TxnFilter(category_ids=[category.id], limit=1))
+            rows, total = self.c.transactions.find(TxnFilter(category_ids=[category.id], limit=500))
             if total:
+                # NF-7AN: "3 to sort · 410": what is waiting, in the profile's currency (another currency is its own).
+                waiting = sum((abs(row.amount) for row in rows if row.currency == self.c.base_currency), ZERO)
                 found.append({"label": _plural(total, one, many).capitalize(),
                               "detail": "Choose a category for each, so the budget and reports count it.",
                               "href": f"/transactions?category_id={category.id}",
                               "action": "Sort them out", "priority": 2,
-                              "glance": glance("No category", "Sort", None,
+                              "glance": glance("No category", "Sort", waiting or None,
                                                ("1 payment" if total == 1 else "{n} payments") if code.startswith("EXP")
                                                else ("1 amount in" if total == 1 else "{n} amounts in"), total),
                               "source_version": sha256(json.dumps([tuple(row) for row in self.c.db.all(

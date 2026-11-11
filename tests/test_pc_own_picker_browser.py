@@ -45,6 +45,10 @@ def test_certificate_and_budget_pickers_preserve_submitted_ids(c, setup):
                 assert page.locator('select[name=funding_account_id]').input_value() == str(accounts['wallet'].id)
                 funding.fill('not an account')
                 assert not funding.evaluate('el => el.checkValidity()')
+                page.locator('input[name=already_owned]').check()  # NF-12I: an owned certificate needs no payer
+                assert funding.evaluate('el => el.checkValidity()')
+                page.locator('input[name=already_owned]').uncheck()
+                assert not funding.evaluate('el => el.checkValidity()')
                 funding.fill('CIB Current')
                 page.get_by_role('option', name='CIB · CIB Current').click()
                 assert funding.evaluate('el => el.checkValidity()')

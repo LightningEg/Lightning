@@ -1,0 +1,13 @@
+{# Export all data on the phone (3AY17): the format, what is in it, Download. The file goes to the phone's Save to. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Export all data'|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Settings'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Export all data'|tr(locale) }}</h1>{% endblock %}
+{% block content %}<form method="get" action="/exports/all" class="phone-form">
+  <fieldset class="phone-rows"><legend class="phone-note">{{ 'File format'|tr(locale) }}</legend>
+    <label class="phone-row"><span>{{ 'Excel workbook'|tr(locale) }}</span><input type="radio" name="format" value="xlsx" {{ 'checked' if chosen != 'csv' }}></label>
+    <label class="phone-row"><span>{{ 'CSV files in a ZIP'|tr(locale) }}</span><input type="radio" name="format" value="csv" {{ 'checked' if chosen == 'csv' }}></label>
+  </fieldset>
+  <p class="phone-note">{{ 'Every financial record, including archived and voided entries, plans and unfinished imports. Files are unencrypted. To restore a profile, use a backup.'|tr(locale) }}</p>
+  <button class="btn primary phone-save">{{ 'Download'|tr(locale) }}</button><a class="btn phone-save" href="/settings" data-popup-close>{{ 'Cancel'|tr(locale) }}</a>
+</form>{% endblock %}

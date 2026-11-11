@@ -258,7 +258,7 @@ def test_a_rate_far_from_the_market_is_asked_once_before_it_is_saved(c, wallets,
     asked = client.post(f"/accounts/{cib}/convert", data=form)
     assert asked.status_code == 400 and count() == 0
     if locale == "en":
-        assert "below the market rate (48.2000 EGP on 2026-09-01)" in asked.text and "swapped" in asked.text
+        assert "below the market rate (48.2000 EGP on 1 Sep)" in asked.text and "swapped" in asked.text
     else:
         assert "أقل من سعر السوق" in asked.text and "swapped" not in asked.text
     checked = re.search(r'name="rate_checked" value="([^"]+)"', asked.text).group(1)

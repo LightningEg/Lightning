@@ -10,7 +10,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from lightning.core.errors import LightningError
-from lightning.sms_imports import MAX_TEXT, SALARY_ENDING, fingerprint, parse_sms, prefill
+from lightning.sms_imports import MAX_TEXT, SALARY_ENDING, WALLET_PREFIX, fingerprint, parse_sms, prefill, wallet_name
 
 from ..web import container, redirect, render, settled_save
 
@@ -62,7 +62,7 @@ def _page(request, c, **context):
     unread = [m | {"enter": _enter_url(m)} for m in c.sms_imports.unread()]
     return render(request, "sms.html", waiting=waiting, accounts=accounts, batches=batches,
                   unread=unread, permission=permission, last_read=c.sms_imports.last_read(),
-                  salary=SALARY_ENDING, **context)
+                  salary=SALARY_ENDING, wallet_prefix=WALLET_PREFIX, wallet_name=wallet_name, **context)
 
 
 @router.get("")
