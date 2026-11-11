@@ -192,6 +192,14 @@ class EmergencyFund:
         return self.set_aside / self.monthly if self.set_aside is not None and self.monthly else None
 
     @property
+    def working(self):
+        """NF-12AB2: months covered is what is set aside over the chosen monthly average."""
+        from lightning.core.working import Working, WorkingRow
+        set_aside = self.set_aside or ZERO
+        return Working("emergency_fund", self.months, (WorkingRow("Set aside", set_aside, "/plan/reserves"),),
+                       home="/plan/reserves", ratio_of=(set_aside, self.monthly or ZERO))
+
+    @property
     def target(self) -> Decimal | None:
         """Six months of the chosen average."""
         return self.monthly * 6 if self.monthly else None

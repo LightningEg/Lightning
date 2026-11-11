@@ -163,6 +163,25 @@ class Position:
         return self.what_you_own - self.what_you_owe
 
     @property
+    def net_worth_working(self):
+        """NF-12AB2: what Net worth is made of, every part signed, adding up to it."""
+        from lightning.core.working import Working, WorkingRow
+        rows = [WorkingRow("Cash you own", self.cash_you_own, "/accounts"),
+                WorkingRow("Holdings", self.holdings_value, "/investments"),
+                WorkingRow("Other you own", self.other_you_own, "/accounts"),
+                WorkingRow("Loans and bills", -self.owe.total, "/plan/loans"),
+                WorkingRow("Gam'eya still to pay", -self.gameya_owed, "/accounts"),
+                WorkingRow("You owe people", -self.you_owe_people, "/money-from-others")]
+        return Working("net_worth", self.net_worth, tuple(r for r in rows if r.amount), home="/")
+
+    @property
+    def portfolio_working(self):
+        """NF-12AB2: Portfolio value by asset class."""
+        from lightning.core.working import Working, WorkingRow
+        return Working("portfolio_value", self.portfolio_value,
+                       tuple(WorkingRow(c.name, c.value, "/investments") for c in self.classes if c.value), home="/investments")
+
+    @property
     def free_cash(self) -> Decimal | None:
         return None if self.reserves is None else self.spendable_cash - self.reserves - self.bills_due + self.bill_reserve_coverage
 

@@ -22,14 +22,11 @@ The working itself exists: Cash planning's "How safe to spend is worked out" and
 
 A headline figure (a Lead, a KPI, a phone hero) is itself the control. Clicking or tapping it opens its working in place: the rows that add up to it, as Cash planning draws them, what changed it since the comparison, and one link, "Open <its home page>" (A09.2: one home per figure). One label for the text link where a link is needed. The rows come from the service that owns the figure; no arithmetic in templates or JavaScript.
 
-Owner, 2026-11-10 (12AB1): on the PC the working opens under the figure in its card; on the phone in a sheet from the bottom; the one label is "How it adds up". Written into A08.1 (PC) and C06.1 (phone) in both repos (2026-11-11). Next: 12AB2.
+Owner, 2026-11-10 (12AB1): on the PC the working opens under the figure in its card; on the phone in a sheet from the bottom; the one label is "How it adds up". Written into A08.1 (PC) and C06.1 (phone) in both repos (2026-11-11). 12AB2 built: `lightning/core/working.py` (Working, WorkingRow); Position.net_worth_working and portfolio_working, CashForecast.safe_to_spend_working, EverydayBudget.left_working, CashFlow.savings_rate_working, EmergencyFund.working; `tests/test_figure_working.py`. Next: 12AB3.
 
 ## How to work on this item
 
 Steps in order. `python tools/guideline.py A08`, `A09`, `C06`. After each: `python -m pytest -q tests/test_brand_audit.py tests/test_mohab_year.py`. Delete the step's heading in the same commit.
-
-## 12AB2 One "working" shape from the services · M · opus
-Each figure's owner service returns its working as rows (name, amount, sign, the row's own home) for Net worth, Safe to spend, Left in plan, Savings rate, Portfolio value and Emergency fund. Most exist in pieces (`ForecastMonth`, the budget summary, `position.at`). Done when a test proves each working's rows sum to the figure on the sample year.
 
 ## 12AB3 The PC's Leads and KPIs open their working in place · L · opus
 One partial and one script behaviour; the six old labels go. Keyboard: Enter opens, Escape closes; the figure has a button role and a name. Done when the skeleton test (IV-12Y2) finds one label for a working on every tab and no KPI that both opens in place and links away from the same control.

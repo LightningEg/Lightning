@@ -209,6 +209,13 @@ class EverydayBudget:
         return self.days_in_month - self.day + 1 if self.current else 0
 
     @property
+    def left_working(self):
+        """NF-12AB2: Left in plan is the plan less what was spent of it."""
+        from lightning.core.working import Working, WorkingRow
+        return Working("left_in_plan", self.left, (WorkingRow("Planned", self.planned, "/budget"),
+                                                   WorkingRow("Spent", -self.spent, "/budget")), home="/budget")
+
+    @property
     def per_day(self) -> Decimal | None:
         """Everyday money left for each day still to come, today included."""
         return (self.everyday_left / self.days_left).quantize(Decimal("0.01")) if self.days_left > 0 else None
@@ -273,6 +280,13 @@ class CashForecast:
     dated: DatedCashForecast | None = None
     # Due before payday: what is still owed on those payments, in the profile currency (the part Safe to spend takes off).
     payments_before_income_total: Decimal = Decimal(0)
+
+    @property
+    def safe_to_spend_working(self):
+        """NF-12AB2: from Free cash to Safe to spend, the forecaster's own steps."""
+        from lightning.core.working import Working, WorkingRow
+        return Working("safe_to_spend", self.safe_to_spend,
+                       tuple(WorkingRow(name, value) for name, value in self.safe_to_spend_parts), home="/plan")
 
     @property
     def first_short_month(self) -> ForecastMonth | None:
