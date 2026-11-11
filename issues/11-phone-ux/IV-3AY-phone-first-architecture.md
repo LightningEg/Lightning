@@ -38,6 +38,8 @@ count everywhere, on a fresh profile and on one left alone for a week; no phone 
 
 **Owner decisions (2026-11-06), all as recommended:** D1 Home · Budget · Add · Activity · Money, Settings behind ⚙ on Money; D2 Home always today, without the stepper or Net worth; D3 old late bills become one catch-up question; D4 Part C is rewritten in both repos first. Recorded in the Project Overview's owner decisions.
 
+**Owner picks (2026-11-11), all as recommended:** 3AY8 each review card's Primary is its kind's own verb (SMS *Looks right*, duplicate *Delete the copy*, interest *Match to deposit*, recurring *Track it*), with *Change* and *Skip* beside it; 3AY9 the payday strip shows from the salary's day until this month's plan is saved; 3AY10 the Net worth sheet is the parts, a small 12-month line, then US dollars and 21K gold as two rows.
+
 `post: no`: the steps share the phone shell and follow one design.
 
 **State (2026-11-10).** The five slots, the one bill state, catch-up and the decoupling are built: no PC route asks who is
