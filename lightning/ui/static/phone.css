@@ -1133,3 +1133,4 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .phone-fields { display: flex; flex-direction: column; gap: 12px; }
 .phone-fields .field { display: flex; flex-direction: column; gap: 6px; margin: 0; }
 .phone-segment[data-two] { grid-template-columns: repeat(2, 1fr); border: 0; margin: 0; }
+.phone-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }

@@ -1,13 +1,6 @@
 # PC templates the phone app still draws inside its frame, because they have no templates/phone/ twin (IV-3AY11).
 # Only shrinks: tests/test_phone_decoupled.py fails when a line could go or a new PC page appears without a phone one.
-accounts/convert.html
-accounts/form.html
-accounts/ownership.html
-bank_import_map.html
 bank_import_preview.html
-bank_import_sheets.html
-bank_import_upload.html
-broker_import.html
 dashboard/welcome.html
 financial_health.html
 reserves.html
