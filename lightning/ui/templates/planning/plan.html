@@ -14,7 +14,9 @@
     {% set budget_part = f.safe_to_spend_parts|selectattr(0, 'equalto', fig.left_in_plan_after_bills.label)|map(attribute=1)|first|default(0) %}
     {% if f.safe_to_spend < 0 and budget_part < 0 and f.safe_to_spend - budget_part >= 0 %}<p class="notice">{{ "What is still planned to spend in your budget is more than your cash allows."|tr(locale) }} <a class="btn small" href="/budget">{{ 'Adjust your budget'|tr(locale) }}</a></p>
     {% elif f.safe_to_spend < 0 %}<p class="notice">{{ "Promised payments are larger than your free cash."|tr(locale) }}</p>{% endif %}
-    <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><tbody>{% for name, value in p.safe_display_parts %}<tr><td>{{ name }}</td><td class="num">{{ value|money(not loop.first) }}</td></tr>{% endfor %}<tr><th>{{ fig.safe_to_spend.label }}</th><th class="num">{{ f.safe_to_spend|money }}</th></tr></tbody></table></details><form method="get" action="/plan" class="afford-box" role="search" aria-labelledby="afford-h">
+    <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><tbody>{% for name, value in p.safe_display_parts %}<tr><td>{{ name }}</td><td class="num">{{ value|money(not loop.first) }}</td></tr>{% endfor %}<tr><th>{{ fig.safe_to_spend.label }}</th><th class="num">{{ f.safe_to_spend|money }}</th></tr></tbody></table></details>{% endcall %}
+{{ needs_rows(needs) }}
+{# IV-12Z2: Can I afford this? is its own card, not a card inside the Lead #}<section class="card wide-card afford-card" aria-labelledby="afford-h"><form method="get" action="/plan" class="afford-box" role="search" aria-labelledby="afford-h">
   <h3 id="afford-h">{{ 'Can I afford this?'|tr(locale) }}</h3>
   <input name="afford" inputmode="decimal" class="money-input" value="{{ afford_amount }}" placeholder="{{ 'Price'|tr(locale) }}" aria-label="{{ 'Price'|tr(locale) }} ({{ base }})">
   <select name="afford_account" aria-label="{{ 'Pay from'|tr(locale) }}"><option value="">{{ 'Any account'|tr(locale) }}</option>{% for a in afford_accounts %}<option value="{{ a.id }}" {{ 'selected' if afford_account_id == a.id|string }}>{{ a.name }}</option>{% endfor %}</select>
@@ -28,8 +30,7 @@
     <p><a class="btn small" href="{{ afford_account.record_url }}">{{ 'Record this purchase'|tr(locale) }}</a> <small class="muted">{{ 'Nothing is recorded until you save it.'|tr(locale) }}</small></p></div>
   {% endif %}
   {% if afford and not afford_account %}<p class="afford-answer is-{{ afford.verdict }}" role="status">{{ afford.headline|tr(locale) }}</p>{% elif afford_error %}<p class="afford-answer is-no" role="status">{{ afford_error|tr(locale) }}</p>{% endif %}
-</form>{% endcall %}
-{{ needs_rows(needs) }}
+</form></section>
 {% else %}{{ stat_tiles(stats, base, 'Your cash') }}{% endif %}
 
 {% if not lead %}<header class="overview-section-head inv-head" id="plan-build"><h2>{{ 'How is safe to spend worked out?'|tr(locale) }}</h2><span>Today to {{ f.next_income_date or 'three months from now' }}</span></header>
@@ -42,12 +43,12 @@
     {% elif f.safe_to_spend < 0 %}<p class="notice">{{ "Promised payments are larger than your free cash."|tr(locale) }}</p>{% endif %}
     <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><tbody>{% for name, value in p.safe_display_parts %}<tr><td>{{ name }}</td><td class="num">{{ value|money(not loop.first) }}</td></tr>{% endfor %}<tr><th>{{ fig.safe_to_spend.label }}</th><th class="num">{{ f.safe_to_spend|money }}</th></tr></tbody></table></details></section>
 {% else %}<section class="card wide-card"><div class="overview-split is-single">
-{% endif %}  <section id="plan-next"><div class="overview-block-head"><div><h3>{{ "The next 30 days"|tr(locale) }}</h3><p>{{ as_of }} to {{ window_end }} · money in above the line, payments below</p></div><a class="quiet-link" href="/plan/recurring">{{ 'Recurring'|tr(locale) }}</a></div>
+{% endif %}  <section id="plan-next"><div class="overview-block-head"><div><h3>{{ "The next 30 days"|tr(locale) }}</h3><p>{{ as_of }} to {{ window_end }} · {{ 'money in above the line, payments below'|tr(locale) }}</p></div><a class="quiet-link" href="/plan/recurring">{{ 'Recurring'|tr(locale) }}</a></div>
     {% if p.marks and not lead %}<div class="timeline{{ ' has-in' if p.marks|selectattr('income')|list }}" role="img" aria-label="Payments in the next 30 days">
       <i class="tl-axis"></i><span class="tl-today" style="left:3%">{{ 'Today'|tr(locale) }}</span><span class="tl-end">{{ "+30 days"|tr(locale) }}</span>
       {% for m in p.marks %}<span class="tl-mark {{ 'is-in' if m.income else 'is-out' }}{{ ' is-late' if m.late }} row-{{ m.row }}" style="left:{{ '%.2f'|format(m.x) }}%" title="{{ m.title }}"><i></i><b>{{ m.name }}{% if m.count > 1 %} +{{ m.count - 1 }}{% endif %}</b><small>{{ '+' if m.income else '−' }}{{ m.amount|money }}</small></span>{% endfor %}
     </div>{% endif %}
-    {% if next_payments or circle_rows %}<div class="compact-list plan-next-list">{% for pay in next_payments[:6] %}{{ payment_row(pay, '/plan', late_days.get((pay.item.id, pay.due_date), 0)) }}{% endfor %}
+    {# IV-12Z2: with a Lead, late bills are Needs you rows only; a gam'eya instalment is not a Needs you row, so it stays #}{% set next_payments = upcoming if lead else next_payments %}{% if next_payments or circle_rows %}<div class="compact-list plan-next-list">{% for pay in next_payments[:6] %}{{ payment_row(pay, '/plan', late_days.get((pay.item.id, pay.due_date), 0)) }}{% endfor %}
       {# CP-3: the gam'eya's instalments and payout are payments like any other #}
       {% for g in circle_rows %}<div class="compact-row plan-payment-row{{ ' is-late' if g.late }}"><span><b>{{ g.name }}</b><small class="muted">{{ g.date }} · {{ "Gam'eya"|tr(locale) }} · {{ g.what|tr(locale) }}</small></span>
         <span class="plan-payment-side">{% if g.late %}<span class="plan-status plan-status-late">{{ 'Late'|tr(locale) }}</span>{% endif %}<b class="{{ 'pos' if g.amount > 0 }}">{{ '+' if g.amount > 0 else '−' }}{{ (g.amount|abs)|money }}</b>
@@ -72,12 +73,14 @@
 </section>
 {% endif %}
 
+{% if zakat and not has_income %}<div class="compact-list" id="plan-zakat"><a class="compact-row" href="/zakat"><span>{{ 'Zakat day'|tr(locale) }}<small>{{ zakat.day }} · {{ 'An estimate at today’s figures. It changes no balance and is not in the forecast above.'|tr(locale) }}</small></span><b>{% if zakat.amount %}{{ zakat.amount|money }} <small>{{ base }}</small>{% else %}{{ 'Nothing due'|tr(locale) }}{% endif %}</b></a></div>{% endif %}
 {% if has_income %}
-<header class="overview-section-head inv-head" id="plan-forecast"><h2>{{ 'Where is my cash heading?'|tr(locale) }}</h2><span>The last {{ p.heading.labels|length - f.months|length if p.heading.labels else 0 }} month ends, then the next {{ f.months|length }}</span></header>
+<details class="flow-disclosure plan-more" id="plan-forecast" data-remember-open><summary class="overview-section-head inv-head"><h2>{{ 'Where is my cash heading?'|tr(locale) }}</h2><span>The last {{ p.heading.labels|length - f.months|length if p.heading.labels else 0 }} month ends, then the next {{ f.months|length }}</span></summary>
 {% set has_circle = f.months|selectattr("circle_in")|list or f.months|selectattr("circle_out")|list %}
 <section class="card wide-card"><div class="overview-split">
   <section><div class="overview-block-head"><div><h3>{{ "Free cash, then the forecast"|tr(locale) }}</h3>{% if f.lowest %}<p>{{ 'lowest {amount} in {month}'|tr(locale, amount=f.lowest.closing|money, month=f.lowest.month) }}</p>{% endif %}</div></div>
-    {{ trend(p.heading, 'Free cash at past month ends, then the forecast', 'Plan', 230) }}</section>
+    {{ trend(p.heading, 'Free cash at past month ends, then the forecast', 'Plan', 230) }}
+    {# IV-12Z2: Zakat day is one line of the forecast card #}{% if zakat %}<div class="compact-list" id="plan-zakat"><a class="compact-row" href="/zakat"><span>{{ 'Zakat day'|tr(locale) }}<small>{{ zakat.day }} · {{ 'An estimate at today’s figures. It changes no balance and is not in the forecast above.'|tr(locale) }}</small></span><b>{% if zakat.amount %}{{ zakat.amount|money }} <small>{{ base }}</small>{% else %}{{ 'Nothing due'|tr(locale) }}{% endif %}</b></a></div>{% endif %}</section>
   <section><div class="overview-block-head"><div><h3>{{ "In and out each month ahead"|tr(locale) }}</h3><p>{{ "Money in includes income, CD proceeds and a gam'eya payout · projected values are estimates"|tr(locale) if has_circle else "Money in includes income and CD proceeds · projected values are estimates"|tr(locale) }}</p></div><span class="bullet-key"><span><i class="k in"></i>In</span><span><i class="k outflow"></i>{{ "Out"|tr(locale) }}</span></span></div>
     <div class="flow-cols">{% for r in p.flows %}<div class="flow-col"><div class="flow-bars"><span class="flow-bar-col"><small>{{ r.in|compact }}</small><i class="in" style="height:{{ '%.1f'|format(r.in_h * 0.84) }}%"></i></span><span class="flow-bar-col"><small>{{ r.out|compact }}</small><i class="out" style="height:{{ '%.1f'|format(r.out_h * 0.84) }}%"></i></span></div><span class="flow-month">{{ ('Rest of ' ~ r.month) if r.rest else r.month }}</span><em class="{{ 'pos' if r.net > 0 else ('neg' if r.net < 0 else '') }}">{{ r.net|money(True) }}</em>{% if r.estimated %}<small class="muted">{{ "income: average"|tr(locale) }}</small>{% endif %}</div>{% endfor %}</div>
     <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><div class="table-scroll"><table class="plan-forecast-table">
@@ -85,17 +88,14 @@
       <thead><tr><th>{{ 'Month'|tr(locale) }}</th><th class="num">{{ "Income (estimate)"|tr(locale) }}</th>{% if has_deposits %}<th class="num">{{ "CD proceeds (estimate)"|tr(locale) }}</th>{% endif %}{% if has_circle %}<th class="num">{{ "Gam'eya payout (estimate)"|tr(locale) }}</th>{% endif %}<th class="num">{{ "Out (estimate)"|tr(locale) }}</th><th class="num">{{ "Ends with (estimate)"|tr(locale) }}</th></tr></thead>
       <tbody>{% for m in f.months %}<tr class="{{ 'plan-low' if f.lowest and m.month == f.lowest.month }}"><td>{{ ('Rest of ' ~ m.month) if loop.first and p.flows and p.flows[0].rest else m.month }}</td><td class="num">{{ m.income|money }}{% if m.income_estimated %} <small class="muted">{{ "average"|tr(locale) }}</small>{% endif %}</td>{% if has_deposits %}<td class="num">{{ m.deposit_cash|money }}</td>{% endif %}{% if has_circle %}<td class="num">{{ m.circle_in|money }}</td>{% endif %}<td class="num"><details><summary>{{ m.money_out|money }}</summary><small>{{ ("Bills and loan payments from Free cash" if m.reserved_bills else "Bills and loan payments")|tr(locale) }} {{ m.commitments|money }}{% if m.reserved_bills %} · {{ "{amount} already covered by reserves"|tr(locale, amount=m.reserved_bills|money) }}{% endif %} · {{ fig.left_in_plan_after_bills.label }} {{ m.budget_spending|money }} · {{ fig.saving_for_goals.label }} {{ m.goal_saving|money }}{% if m.emergency_saving %} · {{ fig.emergency_top_up.label }} {{ m.emergency_saving|money }}{% endif %}{% if m.target_saving %} · {{ fig.savings_target_rest.label }} {{ m.target_saving|money }}{% endif %}{% if m.circle_out %} · {{ "Gam'eya instalments"|tr(locale) }} {{ m.circle_out|money }}{% endif %}</small></details></td><td class="num">{{ m.closing|money }}</td></tr>{% endfor %}</tbody>
     </table></div></details></section>
-</div></section>
+</div></section></details>
 
 {% else %}
 <header class="overview-section-head inv-head" id="plan-forecast"><h2>{{ 'Where is my cash heading?'|tr(locale) }}</h2><span>{{ 'Today'|tr(locale) }}</span></header>
 <section class="card wide-card empty-state"><p>{{ "Add your salary and bills to see where your cash is heading. Lightning forecasts from what you expect to come in and go out; with nothing planned it would only be guessing."|tr(locale) }}</p><div class="actions"><a class="btn primary" href="/plan/recurring">{{ 'Add salary and bills'|tr(locale) }}</a></div></section>
 
 {% endif %}
-{% if zakat %}
-<div class="compact-list" id="plan-zakat"><a class="compact-row" href="/zakat"><span>{{ 'Zakat day'|tr(locale) }}<small>{{ zakat.day }} · {{ 'An estimate at today’s figures. It changes no balance and is not in the forecast above.'|tr(locale) }}</small></span><b>{% if zakat.amount %}{{ zakat.amount|money }} <small>{{ base }}</small>{% else %}{{ 'Nothing due'|tr(locale) }}{% endif %}</b></a></div>
-{% endif %}
-<header class="overview-section-head inv-head"><h2>{{ 'What is promised?'|tr(locale) }}</h2><span>{{ 'Today'|tr(locale) }}</span></header>
+<details class="flow-disclosure plan-more" id="plan-promised" data-remember-open><summary class="overview-section-head inv-head"><h2>{{ 'What is promised?'|tr(locale) }}</h2><span>{{ 'Today'|tr(locale) }}</span></summary>
 {% set by_loan = p.loan_bars.rows|length > 1 %}
 <section class="card wide-card owe-card" id="what-you-owe"><div class="overview-split{{ '' if by_loan else ' is-single' }}">
   <section><div class="overview-block-head"><div><h3>{{ fig.what_you_owe.label }}</h3></div><a class="quiet-link" href="/plan/loans">{{ 'Loans'|tr(locale) }}</a></div>
@@ -106,5 +106,5 @@
       {% if gameya_owed %}<div class="overview-static-row"><span>{{ fig.gameya_still_to_pay.label }}</span><b>{{ gameya_owed|money }}</b></div>{% endif %}</div></section>
   {% if by_loan %}<section><div class="overview-block-head"><div><h3>{{ "By loan"|tr(locale) }}</h3></div></div>
     {{ bars(p.loan_bars, 'spend', 'No loans to pay.') }}</section>{% endif %}
-</div></section>
+</div></section></details>
 {% endblock %}

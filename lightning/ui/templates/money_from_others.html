@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ fig.held_for_others.label }}{% endblock %}
-{% block heading %}<h1>{{ fig.held_for_others.label }}</h1>{% endblock %}
+{% block heading %}<h1>{{ fig.held_for_others.label }}</h1>{% set st = page_status.held_for_others(held_total, owners|length) %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p>{% endblock %}
 {% block top_actions %}<b class="section-total">{{ held_total|money(places=0) }} <small>{{ base }} in all</small></b>{% endblock %}
 {% block content %}
 <section class="card data-panel wide-card">

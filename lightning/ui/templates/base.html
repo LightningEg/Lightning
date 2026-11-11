@@ -97,5 +97,6 @@
 <script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('ai-handoff.js') }}" defer></script>
 <script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{const section=document.getElementById('sidebar-accounts'),mobile=window.matchMedia('(max-width: 900px)');if(!section)return;const sync=()=>{section.open=!mobile.matches};sync();section.querySelector('.side-account.active')?.scrollIntoView({block:'nearest'});mobile.addEventListener('change',sync)})();</script>
 {% if request.state.secure_profiles|default(false) %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('session.js') }}"></script>{% endif %}
+<script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{/* IV-12Z: a row opened on request (details[data-remember-open]) stays open next time */for(const d of document.querySelectorAll('details[data-remember-open]')){const k='lightning.open.'+d.id;try{if(localStorage.getItem(k)==='1')d.open=true}catch(e){}d.addEventListener('toggle',()=>{try{localStorage.setItem(k,d.open?'1':'0')}catch(e){}})}})();</script>
 </body>
 </html>{% endif %}

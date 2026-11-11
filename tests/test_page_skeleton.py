@@ -28,14 +28,7 @@ REGISTERS = {"transactions", "categories"}  # long lists by nature (IV-12Z1)
 
 # (rule, tab key) -> the item that fixes it. Remove an entry in the commit that fixes it.
 ALLOWED: dict[tuple[str, str], str] = {
-    **{("sentence", key): "IV-12Y4" for key in (
-        "categories", "data", "import", "loans", "others", "planner", "prices", "recurring",
-        "reports", "reserves", "rules", "transactions")},
-    ("primary", "currencies"): "IV-12Y5",
-    ("length", "spending"): "IV-12Z3",
-    ("length", "plan"): "IV-12Z2",
     ("length", "holdings"): "IV-12Z4",
-    ("length", "data"): "IV-12Y5",
 }
 
 MEASURE = """() => {

@@ -2,7 +2,7 @@
 {% from "partials/macros.html" import held, period_control, page_header with context %}
 {% from "partials/charts.html" import trend as trend_chart %}
 {% block title %}{{ 'Currencies'|tr(locale) }}{% endblock %}
-{% block heading %}{{ page_header('Currencies'|tr(locale), 'Balances and unrealized gain as of {date}; realized gain and spread from {start} to {end}.'|tr(locale, date=period.end_text, start=period.start_text, end=period.end_text)) }}{% endblock %}
+{% block heading %}{{ page_header('Currencies'|tr(locale), answer|status_text) }}{% endblock %}
 {% block top_actions %}{{ period_control("/accounts/currencies", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }} <a class="btn" href="/accounts">{{ 'Accounts'|tr(locale) }}</a> <a class="btn primary" href="/accounts/new">{{ 'Add account'|tr(locale) }}</a>{% endblock %}
 {% macro gain(value) -%}
 {# A11: a gain is green with +; a loss is ink with −, strong rose is kept for what needs you #}
@@ -39,5 +39,5 @@
     <div class="fx-figure"><div class="metric-label">{{ fig.realized_fx_gain.label }}</div><div class="metric-value">{{ gain(other.realized) }} <small>{{ base }}</small></div></div>
     <div class="fx-figure"><div class="metric-label">{{ fig.spread_paid.label }}</div><div class="metric-value"><span class="num">{{ other.spread|money }}</span> <small>{{ base }}</small></div></div>
   </div></section>{% endif %}
-{% else %}<section class="card"><p>{{ 'No accounts use another currency yet.'|tr(locale) }}</p><a class="btn primary" href="/accounts/new">{{ 'Add an account'|tr(locale) }}</a></section>{% endif %}
+{% else %}<section class="card"><p>{{ 'No accounts use another currency yet.'|tr(locale) }}</p><a class="btn" href="/accounts/new">{{ 'Add an account'|tr(locale) }}</a></section>{% endif %}
 {% endblock %}
