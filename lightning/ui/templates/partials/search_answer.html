@@ -1,0 +1,9 @@
+{# NF-7AQ3: a typed question's answer, first on Search (PC and phone): the total, the period before it, how many
+   payments, the largest few, and the same filter in Transactions. Figures from workflows/answers.py. #}
+{% if answer %}<div class="search-answer" role="region" aria-label="{{ 'Answer'|tr(locale) }}">
+  <p class="muted small">{{ answer.name }} · {{ answer.period }}</p>
+  <p class="search-answer-total num">{{ answer.total|money(False, 0) }}</p>
+  <p class="small">{{ answer.before_label }} <span class="num">{{ answer.before|money(False, 0) }}</span> · {% if answer.count == 1 %}{{ '1 payment'|tr(locale) }}{% else %}{{ '{n} payments'|tr(locale, n=answer.count) }}{% endif %}</p>
+  {% if answer.rows %}<ul class="search-answer-rows">{% for row in answer.rows %}<li><span>{{ row.counterparty or row.description }} <small class="muted">{{ row.date }}</small></span><span class="num">{{ row.amount|abs|money(False, 0) }}</span></li>{% endfor %}</ul>{% endif %}
+  <a class="btn" href="{{ answer.href }}">{{ 'Open in Transactions'|tr(locale) }}</a>
+</div>{% endif %}

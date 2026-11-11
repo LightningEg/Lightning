@@ -23,6 +23,7 @@
 {% endif %}
 {% endblock %}
 {% block content %}
+{% if import_waiting %}<div class="compact-list">{% for w in import_waiting %}<a class="compact-row import-waiting" href="/accounts/{{ w.account_id }}/import/{{ w.batch_id }}"><span>{{ w.file_name }}<small>{{ 'Continue import ({n} left)'|tr(locale, n=w.waiting) }}</small></span><b>{{ 'Continue the review'|tr(locale) }} ›</b></a>{% endfor %}</div>{% endif %}
 {% set selecting = request.query_params.get('select') %}{% set picked = request.query_params.get('pick', '') %}
 {% if account and account.account_type.value == 'OTHER_ASSET' %}<section class="card phone-card" id="estimated-value" aria-labelledby="value-heading"><h2 id="value-heading" class="phone-card-title">{{ "Estimated value"|tr(locale) }}</h2>
 <form method="post" action="/accounts/{{ account.id }}/value" class="phone-form"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">

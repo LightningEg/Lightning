@@ -1818,3 +1818,21 @@ def test_the_starter_workbook_fills_an_empty_lightning_and_hands_the_codes_back(
         assert c.transactions.opening_balance(next(a for a in c.accounts.list() if a.name == "CIB Payroll").id) == D("12500")
     finally:
         c.db.close()
+
+
+def test_mohab_asks_search_three_questions(mohab):
+    # NF-7AQ4: a category with a month, a payee with a year, and a word that matches nothing, on PC and phone.
+    from lightning.workflows.answers import answer
+    c = mohab.c
+    spending = {g.code: g.value for g in c.reporting.spending_by_category("2026-09-01", "2026-09-30")}
+    food = answer(c, "food 2026-09", dates.today())
+    assert food and food["total"] == spending["EXP.PERSONAL.FOOD"]
+    payee = c.reporting.spending_by_counterparty("2026-01-01", "2026-12-31")[0][0]
+    paid = answer(c, f"{payee} 2026", dates.today())
+    assert paid and paid["name"] == payee and paid["total"] > 0
+    from fastapi.testclient import TestClient
+    client = TestClient(create_app(c))
+    pc = client.get("/search", params={"q": "food 2026-09"}).text
+    assert 'class="search-answer"' in pc and "Open in Transactions" in pc
+    nothing = client.get("/search", params={"q": "qqqqzz"}).text
+    assert 'class="search-answer"' not in nothing

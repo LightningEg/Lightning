@@ -4,9 +4,11 @@ from __future__ import annotations
 
 from urllib.parse import urlencode
 
+from lightning.core.dates import today
 from lightning.core.money import ascii_digits
 from lightning.ui.search_index import matches
 from lightning.ui.web import privacy_on
+from lightning.workflows.answers import answer
 
 PAYMENTS_SHOWN = 8  # the phone's Search lists this many payments, newest first, then "See all"
 
@@ -25,7 +27,8 @@ def phone_results(c, query: str, privacy: bool = False) -> dict:
         ordered = c.reporting.newest_first(c.transactions.search_ids(ascii_digits(query)))
         rows = c.reporting.rows_for_transactions(ordered[:PAYMENTS_SHOWN])
         payments, total = [row for row in rows if row.type != "VAL"], len(ordered)
-    return {"query": query, "payments": payments, "payments_total": total, "money": money, "pages": pages,
+    return {"query": query, "answer": answer(c, query, today()) if query else None, "payments": payments,
+            "payments_total": total, "money": money, "pages": pages,
             "see_all": "/transactions?" + urlencode({"q": query})}
 
 

@@ -288,6 +288,14 @@ class TransactionRepository:
             cursor.close()
 
 
+    def common_categories(self, kind: str, since: str, limit: int) -> list[int]:
+        """The categories most often used on posted entries of one kind (IN or OUT) since a date, most used first."""
+        return [int(row["category_id"]) for row in self.db.all(
+            "SELECT le.category_id, COUNT(DISTINCT t.id) AS n FROM transactions t"
+            " JOIN ledger_entries le ON le.transaction_id = t.id"
+            " WHERE t.status = 'POSTED' AND t.type = ? AND t.date >= ? AND le.category_id IS NOT NULL"
+            " GROUP BY le.category_id ORDER BY n DESC, le.category_id LIMIT ?", (kind, since, limit))]
+
     def recent_categories(self, window: int) -> list:
         """Each counterparty's last ``window`` categorised transactions, newest first, under its saved
         name (so aliases count together); one row per transaction and category."""
