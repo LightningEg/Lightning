@@ -1,10 +1,13 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Change limit'|tr(locale) }} · {{ category.name|tr(locale) }}{% endblock %}
-{% block content %}<section class="card"><h2 id="app-popup-title">{{ category.name }}</h2>
-<p class="muted">{{ 'Change the monthly limit for this category only.'|tr(locale) }} {{ month }}</p>
+{% block top_actions %}<a class="btn" href="/budget?month={{ month }}">{{ 'Budget'|tr(locale) }}</a>{% endblock %}
+{% block content %}{# IV-12Q3: a popup on the Budget row; opened on its own it is the same card under the page's title. #}
+<section class="card form-card"><h2 id="app-popup-title">{{ category.name }}</h2>
+<p class="muted">{{ 'Change the monthly limit for this category only.'|tr(locale) }} {{ month|month(locale) }}</p>
+{% include "budget/_limit_spent.html" %}
 <form method="post" action="/budget/rule/{{ category.id }}" class="stack">
 <input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
 <div class="field"><label for="category-limit">{{ 'Amount or %'|tr(locale) }}</label><input id="category-limit" name="rule" value="{{ rule }}" inputmode="decimal" autocomplete="off"></div>
 <p class="muted small">{{ 'An empty value clears this category’s limit.'|tr(locale) }}</p>
 <button class="btn primary">{{ 'Save limit'|tr(locale) }}</button>
-</form><a class="quiet-link" href="/budget?month={{ month }}">{{ 'Back to Budget'|tr(locale) }}</a></section>{% endblock %}
+</form></section>{% endblock %}

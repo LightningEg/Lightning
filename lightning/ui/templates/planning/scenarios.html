@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "partials/macros.html" import page_title %}{% from "partials/charts.html" import lead_card, trend %}
+{% from "partials/macros.html" import page_title %}{% from "partials/charts.html" import lead_card, trend with context %}
 {% block title %}{{ 'Compare scenarios'|tr(locale) }}{% endblock %}
 {% block heading %}{{ page_title('Compare scenarios'|tr(locale), status, day|day(locale) ~ ' – ' ~ end|day(locale), 'nothing is saved') }}{% endblock %}
 {% block top_actions %}<a class="btn" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>{% endblock %}

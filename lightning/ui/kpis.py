@@ -505,12 +505,12 @@ def scenario(result) -> tuple[dict | None, dict | None]:
     value = moved[1] if changed else low.closing
     if changed:
         diff = moved[1] - low.closing
-        comparison = compare(f"on your plan's {fmt(low.closing, 0)}, in {moved[0]}", _signed(diff),
+        comparison = compare("on your plan's lowest point", _signed(diff),
                              "bad" if diff < 0 else "good" if diff > 0 else "plain")
     else:
-        comparison = compare(f"in {low.month}, with your plan as it is")
+        comparison = compare("with your plan as it is")
     lead = card(figure_label("lowest_point_ahead"), value, comparison, tone="over" if value < 0 else "hold",
-                key="scenario")
+                chip_=chip(moved[0] if changed else low.month), key="scenario")
     labels = [m for m, _, _ in result.months]
     series = [{"name": "Your plan", "tone": "reference", "dashed": True, "values": [b for _, b, _ in result.months],
                "mark_low": not changed}]

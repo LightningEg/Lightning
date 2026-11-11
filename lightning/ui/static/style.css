@@ -3556,3 +3556,7 @@ p { text-wrap:pretty; }
     outline:2px solid CanvasText!important;
   }
 }
+
+/* IV-12Q3: an empty Fill source's next steps sit in one row */
+.fill-empty-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.limit-spent { margin:8px 0 16px; }

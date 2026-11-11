@@ -607,8 +607,12 @@ async def one_category_limit(request: Request, category_id: int):
     if line is not None and line.from_loans:
         raise ValidationError("Change loan payments from Loans.")
     rule = (f"{line.income_percent.normalize():f}%" if line and line.income_percent is not None
-            else f"{line.direct:f}" if line and line.direct is not None and not line.average_months else "")
-    return render(request, "budget_category_rule.html", category=category, month=month, rule=rule)
+            else f"{line.direct.normalize():f}" if line and line.direct is not None and not line.average_months else "")
+    # IV-12Q3: the popup says what was spent against the limit, with a small bar, before you change it.
+    from ..charts import meter
+    used = line.planned_actual if line else ZERO
+    return render(request, "budget_category_rule.html", category=category, month=month, rule=rule, line=line,
+                  used=used, bar=meter(used, line.available if line else None))
 
 
 @router.post("/limit/{category_id:int}")
@@ -795,6 +799,9 @@ async def budget_page(request: Request):
     return _page(request, month)
 
 
+FILL_SOURCES = ("last_month", "average", "schedule")
+
+
 @router.get("/fill")
 async def budget_fill_page(request: Request):
     c = container(request)
@@ -804,15 +811,28 @@ async def budget_fill_page(request: Request):
         return redirect("/budget", "That month is invalid. Use YYYY-MM, for example 2026-09.")
     if month > month_of(today()):
         return redirect("/budget", f"{month} has not started yet. Choose a current or past month to fill.")
-    source = request.query_params.get("source", "last_month")
+    source = request.query_params.get("source")
+    tried = []
     try:
-        proposal = c.budgets.fill_proposal(month, source, schedule=c.schedules.view())
+        if source:
+            proposal = c.budgets.fill_proposal(month, source, schedule=c.schedules.view())
+        else:
+            # IV-12Q3: opened without a source (Fill this month, Give it a job), the page opens on the first source
+            # that has something to offer, never on an empty "last month".
+            for source in FILL_SOURCES:
+                proposal = c.budgets.fill_proposal(month, source, schedule=c.schedules.view())
+                if any(row.selectable for row in proposal.rows):
+                    break
+                tried.append(source)
+            else:
+                source, proposal = FILL_SOURCES[0], c.budgets.fill_proposal(month, FILL_SOURCES[0], schedule=c.schedules.view())
     except LightningError as exc:
         return render(request, "budget_fill.html", month=month, source="last_month", proposal=None,
                       error=exc.message, status_code=400)
     proposal, room_left = c.health.fit_fill(proposal)
     return render(request, "budget_fill.html", month=month, source=source, proposal=proposal, error="",
-                  check=c.health.plan_check(month), room_left=room_left)
+                  check=c.health.plan_check(month), room_left=room_left, other_sources=[
+                      key for key in FILL_SOURCES if key != source and key not in tried])
 
 
 @router.post("/fill")

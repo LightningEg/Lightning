@@ -150,6 +150,8 @@ def _kinds(notes):
 
 
 templates.env.filters["kinds"] = _kinds
+# A note of several sentences, one per element, so each is translated on its own (IV-12Q3).
+templates.env.filters["sentences"] = lambda text: [part for part in re.split(r"(?<=\.) (?=[A-Z])", text or "") if part]
 templates.env.filters["typed"] = lambda value: format(Decimal(value).normalize(), "f") if value is not None else ""
 
 

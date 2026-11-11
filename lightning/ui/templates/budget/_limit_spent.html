@@ -1,0 +1,6 @@
+{# IV-12Q3: what was spent this month against the category's plan, with a small bar, above the box that changes it. #}
+{% if line and line.available is not none %}<div class="chart-meter{{ ' is-over' if bar.over }} limit-spent">
+  <span class="chart-meter-head"><b>{{ 'Spent this month'|tr(locale) }}</b>{% if bar.over %}<span class="chart-badge-over">{{ '{amount} over'|tr(locale, amount=bar.over_by|money(places=0)) }}</span>{% else %}<small>{{ '{amount} left'|tr(locale, amount=bar.left|money(places=0)) }}</small>{% endif %}</span>
+  <span class="chart-meter-track"><i style="width:{{ '%.1f'|format(bar.width) }}%"></i></span>
+  <small class="chart-meter-foot">{{ '{used} of {plan}'|tr(locale, used=used|money(places=0), plan=line.available|money(places=0)) }}</small>
+</div>{% elif line %}<p class="muted">{{ 'Spent this month'|tr(locale) }} {{ used|money(places=0) }} {{ base }} · {{ 'No limit yet'|tr(locale) }}</p>{% endif %}
