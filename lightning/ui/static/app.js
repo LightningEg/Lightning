@@ -864,7 +864,7 @@ document.addEventListener("submit", (event) => {
       : null;
   if (confirmHost) {
     const ids = new Set(new FormData(form).getAll("txn_ids"));
-    const options = ids.size ? { title: t("Delete {count} transactions?", {count: ids.size.toLocaleString(document.documentElement.lang)}),
+    const options = ids.size ? { title: (ids.size === 1 ? t("Delete 1 transaction?") : t("Delete {count} transactions?", {count: ids.size})),
       message: t("You can restore them from transaction history."), tone: "danger", ok: t("Delete") }
       : window.askFromOptions(confirmHost.dataset.confirmDelete || "Delete this transaction? You can restore it from its history page.",
         { tone: "danger", ok: t("Delete") });

@@ -16,12 +16,12 @@ def browser_page(c):
     host = Host(lambda _: app).start()
     try:
         with sync_playwright() as pw:
-            browser = pw.chromium.launch(executable_path=chromium, args=['--no-sandbox'])
-            page = browser.new_page(viewport={'width':1366,'height':1000})
-            page.set_default_timeout(5000)
-            page.goto(host.launch_url)
-            yield page, host.origin
-            browser.close()
+            with pw.chromium.launch(executable_path=chromium, args=['--no-sandbox']) as browser:
+                page = browser.new_page(viewport={'width':1366,'height':1000})
+                page.set_default_timeout(5000)
+                # This host serves create_app directly, without Guard's launch handshake.
+                # Each test opens its own screen; /__launch would only load a 404 page.
+                yield page, host.origin
     finally:
         host.stop()
 

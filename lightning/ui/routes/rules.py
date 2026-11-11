@@ -6,6 +6,7 @@ from fastapi import APIRouter, Request
 
 from lightning.categories.domain import Movement
 from lightning.core.errors import LightningError, ValidationError
+from lightning.core.plural import counted
 from lightning.rules.service import MAX_PARTS
 
 from ..web import container, redirect, render, settled_save
@@ -132,7 +133,7 @@ async def accept_offer(request: Request):
     except LightningError as exc:
         return redirect(back, exc.message)
     if token:
-        return redirect(f"/rules?undo={token}", f"Rule saved and {count} past transaction{'s' if count != 1 else ''} refiled.")
+        return redirect(f"/rules?undo={token}", f"Rule saved and {counted(count, 'past transaction', 'past transactions')} refiled.")
     return redirect(back, "Rule saved. It files your next imports and entries.")
 
 
@@ -163,7 +164,7 @@ async def apply_to_past(request: Request, rule_id: int):
         return redirect(f"/rules/{rule_id}/past", getattr(exc, "message", "Choose valid transactions."))
     if not count:
         return redirect("/rules", "Nothing in the past to change.")
-    return redirect(f"/rules?undo={token}", f"{count} past transaction{'s' if count != 1 else ''} refiled.")
+    return redirect(f"/rules?undo={token}", f"{counted(count, 'past transaction', 'past transactions')} refiled.")
 
 
 @router.post("/undo")
@@ -175,4 +176,4 @@ async def undo_apply(request: Request):
             count = c.rules.undo(str(form.get("token", "")))
     except LightningError as exc:
         return redirect("/rules", exc.message)
-    return redirect("/rules", f"Undone: {count} transaction{'s' if count != 1 else ''} back as they were.")
+    return redirect("/rules", f"Undone: {counted(count, 'transaction', 'transactions')} back as they were.")
