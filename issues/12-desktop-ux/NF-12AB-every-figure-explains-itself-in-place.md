@@ -29,6 +29,7 @@ Owner, 2026-11-10 (12AB1): on the PC the working opens under the figure in its c
 Steps in order. `python tools/guideline.py A08`, `A09`, `C06`. After each: `python -m pytest -q tests/test_brand_audit.py tests/test_mohab_year.py`. Delete the step's heading in the same commit.
 
 ## 12AB3 The PC's Leads and KPIs open their working in place · L · opus
+Built (2026-11-11): `kpis.card(working=…)`, `working_panel` in `partials/charts.html`, one script in `base.html`; Safe to spend (Cash planning Lead), Left in plan (Budget) and Savings rate (Overview) open their working, and Cash planning's "Show the numbers" and "How it is worked out" are gone; `tests/test_page_skeleton.py` checks open, Escape, Enter and no card that also links away. Left: Overview's Net worth headline, the Investments Lead (after BT-12AC), Emergency fund, and the remaining old labels on Overview and Limits.
 One partial and one script behaviour; the six old labels go. Keyboard: Enter opens, Escape closes; the figure has a button role and a name. Done when the skeleton test (IV-12Y2) finds one label for a working on every tab and no KPI that both opens in place and links away from the same control.
 
 ## 12AB4 The phone's heroes open their working as a sheet · M · opus

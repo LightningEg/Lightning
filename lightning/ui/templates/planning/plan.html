@@ -14,7 +14,7 @@
     {% set budget_part = f.safe_to_spend_parts|selectattr(0, 'equalto', fig.left_in_plan_after_bills.label)|map(attribute=1)|first|default(0) %}
     {% if f.safe_to_spend < 0 and budget_part < 0 and f.safe_to_spend - budget_part >= 0 %}<p class="notice">{{ "What is still planned to spend in your budget is more than your cash allows."|tr(locale) }} <a class="btn small" href="/budget">{{ 'Adjust your budget'|tr(locale) }}</a></p>
     {% elif f.safe_to_spend < 0 %}<p class="notice">{{ "Promised payments are larger than your free cash."|tr(locale) }}</p>{% endif %}
-    <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><tbody>{% for name, value in p.safe_display_parts %}<tr><td>{{ name }}</td><td class="num">{{ value|money(not loop.first) }}</td></tr>{% endfor %}<tr><th>{{ fig.safe_to_spend.label }}</th><th class="num">{{ f.safe_to_spend|money }}</th></tr></tbody></table></details>{% endcall %}
+{% endcall %}
 {{ needs_rows(needs) }}
 {# IV-12Z2: Can I afford this? is its own card, not a card inside the Lead #}<section class="card wide-card afford-card" aria-labelledby="afford-h"><form method="get" action="/plan" class="afford-box" role="search" aria-labelledby="afford-h">
   <h3 id="afford-h">{{ 'Can I afford this?'|tr(locale) }}</h3>

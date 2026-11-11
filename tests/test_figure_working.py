@@ -32,3 +32,12 @@ def test_every_working_adds_up_to_its_figure_on_the_sample_year(mohab):
         assert working.home.startswith("/"), working.figure
     keys = {w.figure for w in workings}
     assert keys == {"net_worth", "portfolio_value", "safe_to_spend", "savings_rate", "emergency_fund", "left_in_plan"}
+
+
+def test_the_shown_rows_still_add_up_to_the_shown_figure(mohab):
+    """The panel shows whole units; rounding each row alone could make them miss the figure by one."""
+    from lightning.core.money import quantize
+    c, day = mohab
+    for working in (c.position.at(day).net_worth_working, c.forecaster.forecast(day).safe_to_spend_working,
+                    c.forecaster.everyday(month_of(day), day).left_working):
+        assert sum(r.amount for r in working.shown) == quantize(working.total, 0), working.figure
