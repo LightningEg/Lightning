@@ -399,6 +399,25 @@ class TransactionService:
         return search.usual_categories(
             self.repo, window=self.USUAL_WINDOW, minimum=self.USUAL_MIN, days=self.USUAL_DAYS)
 
+    def usual_payees(self, limit: int = 3, days: int = 30) -> list[dict]:
+        """The payees used most in the last ``days`` days, for the Add sheet's first row (NF-7AM): [{name, kind,
+        account_id, category_id}] from each payee's newest entry; a tap fills payee, category and account."""
+        since = fmt_date(today() - timedelta(days=days))
+        count: dict[str, int] = {}
+        newest: dict[str, dict] = {}
+        for row in self.repo.payee_entries_since(since):  # newest first
+            count[row["counterparty"]] = count.get(row["counterparty"], 0) + 1
+            newest.setdefault(row["counterparty"], row)
+        order = sorted(count, key=lambda name: (-count[name], list(newest).index(name)))
+        return [{"name": name, "kind": "in" if newest[name]["effect"] == "INFLOW" else "out",
+                 "account_id": int(newest[name]["account_id"]), "category_id": int(newest[name]["category_id"])}
+                for name in order[:limit]]
+
+    def usual_accounts(self) -> dict[str, int]:
+        """{counterparty name: the account it is usually paid from or into}, by the habit rule of `usual_categories`
+        (IV-7AL): the Add sheet selects it when the payee is chosen."""
+        return search.usual_accounts(self.repo, window=self.USUAL_WINDOW, minimum=self.USUAL_MIN, days=self.USUAL_DAYS)
+
     def common_categories(self, limit: int = 3) -> dict[str, list[int]]:
         """NF-7AB5 quick mode: the categories this person uses most for money out and money in, last 180 days."""
         since = (today() - timedelta(days=self.USUAL_DAYS)).isoformat()

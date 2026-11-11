@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 54 open items. Each folder holds its reports and its items.
+11 big pictures, 48 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -159,24 +159,20 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) ([#490](https://github.com/LightningEg/Lightning/issues/490)) | improvement, visual | Capture | S | Sonnet | ready |
-| **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually uses](7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | improvement, visual | Capture | M | Sonnet | new |
 | **NF-7AK** | [Bank messages beyond CIB and NBE in Arabic: English card messages, wallets, other currencies, and the researched formats](7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | new feature | Capture | L | Opus | new |
 | NF-7AK3 | ↳ Purchases in another currency | | | M | Opus | |
 | NF-7AK4 | ↳ Use the researched formats | | | M | Opus | |
-| **NF-7AM** | [Repeat an entry in one tap, and Save and add another](7-planning-import-and-search/NF-7AM-repeat-and-add-another.md) | new feature | Capture | M | Sonnet | ready |
 | **NF-7AO** | [Bank messages Lightning is sure about save themselves, marked and undoable](7-planning-import-and-search/NF-7AO-sure-bank-messages-save-themselves.md) | new feature | Capture | L | Opus | new |
 | NF-7AO1 | ↳ What "sure" means, and the service | | | M | Opus | |
 | NF-7AO2 | ↳ Seen, marked, undoable | | | M | Opus | |
 | NF-7AO3 | ↳ Not twice | | | M | Opus | |
-| **NF-7AP** | [Compare the balance a bank message states with the account, as a quiet To do row](7-planning-import-and-search/NF-7AP-bank-message-balance-check.md) | new feature | Capture | M | Sonnet | ready |
 | **NF-7AQ** | [Search answers a typed question - "food last month" gives the figure, its comparison and the rows, not a link to a filter](7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md) | new feature | Capture | L | Opus | new |
 | NF-7AQ5 | ↳ Accounts and tags, and the owner's Arabic words | | | S | Sonnet | |
 | **NF-7AR** | [An Upcoming tab shows the month's payments on a calendar, with payday and the day cash runs short](7-planning-import-and-search/NF-7AR-upcoming-payments-calendar.md) | new feature | Plan | L | Opus | ready |
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md) · [r31](7-planning-import-and-search/r31-logging-entries/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AB, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI, 7AN. Next free code: 7AS.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AB, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI, 7AJ, 7AL, 7AM, 7AN, 7AP. Next free code: 7AS.
 
 ## 8 Website
 
@@ -284,8 +280,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-12Q3 | ↳ Change limit, Fill this month, Carryover | | | M | Opus | |
 | IV-12Q4 | ↳ Phone Recurring and the PC's doubled list | | | S | Opus | |
 | IV-12Q5 | ↳ Budget page and Budget settings | | | M | Opus | |
-| **IV-12V** | [Adjust balance: a cash wallet that is far off has no way forward, and the page is one bare form](12-desktop-ux/IV-12V-adjust-balance-for-cash.md) | improvement, visual | Capture | M | Sonnet | ready |
-| **IV-12W** | [Register and search: the forgotten minus, transactions in PC search, and small things on the rows](12-desktop-ux/IV-12W-register-and-search-small-traps.md) | improvement, visual | Capture | M | Sonnet | ready |
 | **IV-12Y** | [One page skeleton on the PC, kept by a test - every tab has the same title rule, an answer sentence, its dates, and the same controls in the same order](12-desktop-ux/IV-12Y-one-page-skeleton-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
 | IV-12Y3 | ↳ One header partial, used by every tab | | | L | Opus | |
 | **IV-12Z** | [The answer on one screen, the rest on request - Spending, Cash planning and Investments run 3 to 4 screens and repeat lists](12-desktop-ux/IV-12Z-answer-on-one-screen-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
@@ -319,4 +313,4 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 12H, 12N, 12U, 12X, 3AZ, BV-12O, IV-12P, IV-12T, NF-12I, NF-12R, NF-12S, BT-12AC, BT-12AD, IV-12AA. Next free code: 12AF.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 12H, 12N, 12U, 12V, 12W, 12X, 3AZ, BV-12O, IV-12P, IV-12T, NF-12I, NF-12R, NF-12S, BT-12AC, BT-12AD, IV-12AA. Next free code: 12AF.

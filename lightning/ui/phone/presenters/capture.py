@@ -21,7 +21,12 @@ def _capture_context(c, account) -> dict:
     from lightning.core.dates import _local_now
     from lightning.planning import bill_state
     hour = _local_now().hour
-    return {"entry_accounts": [{"id": a.id, "name": a.name} for a in _entry_accounts(c)],
+    # From lists accounts money is paid from (cash and bank), plus the one this sheet is already for.
+    spend = [a for a in _entry_accounts(c) if a.account_type.value in ("CASH", "BANK") or a.id == account.id]
+    spend_ids = {a.id for a in spend}
+    return {"entry_accounts": [{"id": a.id, "name": a.name} for a in spend],
+            "usual_payees": [p for p in c.transactions.usual_payees() if p["account_id"] in spend_ids][:3],
+            "usual_accounts": {name: a_id for name, a_id in c.transactions.usual_accounts().items() if a_id in spend_ids},
             "bills_due": len(bill_state.unpaid_bills(c.planning, today(), bill_state.SOON_DAYS)),
             "chips_out": named(c.transactions.usual_capture_categories("out", hour=hour)),
             "chips_in": named(c.transactions.usual_capture_categories("in", hour=hour))}

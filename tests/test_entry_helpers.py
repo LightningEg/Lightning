@@ -33,10 +33,11 @@ def test_results_are_ranked_and_grouped_by_type(c):
 
     assert ("Account", "CIB Current") in _kinds(matches(c, "cib"))
     assert ("Action", "Import CSV · CIB Current") in _kinds(matches(c, "import"))
-    assert _kinds(matches(c, "carref"))[0] == ("Counterparty", "Carrefour & Co")
+    assert [k for k in _kinds(matches(c, "carref")) if k[0] != "Transaction"][0] == ("Counterparty", "Carrefour & Co")  # IV-12W: payments lead
     assert _kinds(matches(c, txn.ref.lower()))[0] == ("Transaction", txn.ref)
     assert _kinds(matches(c, "#e"))[0] == ("Tag", "#eid")
-    assert _kinds(matches(c, "1,500")) == [("Search", "Find transactions with “1,500”")]  # never a near spelling of an amount
+    amount = _kinds(matches(c, "1,500"))  # never a near spelling of an amount: only payments of that amount, then the search
+    assert amount[-1] == ("Search", "Find transactions with “1,500”") and {k for k, _ in amount[:-1]} <= {"Transaction"}
     assert _kinds(matches(c, "lons"))[0] == ("Page", "Loans")  # a near spelling of a name is fine
 
 
