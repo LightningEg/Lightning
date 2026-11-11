@@ -39,7 +39,8 @@ def test_where_money_in_went_parts_add_up_to_the_shown_total(monkeypatch):
     reporting = SimpleNamespace(spending_by_category=lambda a, b, depth=1: [
         SimpleNamespace(code=n, label=n, value=D("100.4")) for n in "xyz"])
     c = SimpleNamespace(reporting=reporting, categories=SimpleNamespace(get_by_code=lambda code: SimpleNamespace(id=1)))
-    flow = SimpleNamespace(inflows=D("301.2"), outflows=D("301.2"), net=D(0))
+    from lightning.reporting.service import CashFlow
+    flow = CashFlow("2026-01-01", "2026-01-31", D("301.2"), D("301.2"), D(0), D("301.2"), D("301.2"), D(0), D(0))
     out = visuals.money_sankey(c, date(2026, 1, 1), date(2026, 1, 31), flow)
     sources = [n["value"] for n in out["sources"]]
     targets = [n["value"] for n in out["targets"]]

@@ -102,7 +102,8 @@ def test_a_sales_list_without_amounts_opens_on_the_phone(tmp_path, monkeypatch):
     load_mohab_2026(c)
     try:
         for phone in (False, True):
-            page = _client(c, phone).get("/investments/report-detail?from=2026-09-01&to=2026-09-30&kind=sales")
-            assert page.status_code == 200
+            for kind in ("sales", "flows", "dividends", "result", "holdings"):
+                page = _client(c, phone).get(f"/investments/report-detail?from=2026-05-01&to=2026-09-30&kind={kind}")
+                assert page.status_code == 200, kind
     finally:
         c.db.close()
