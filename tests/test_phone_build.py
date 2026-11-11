@@ -392,3 +392,12 @@ def test_the_play_bundle_is_refused_when_a_library_needs_pages_smaller_than_16_k
         bundle.writestr("base/lib/arm64-v8a/libbroken.so", b"oops")
     problems = build.page_problems(aab)
     assert len(problems) == 2 and "libold.so" in problems[1] and "0x1000" in problems[1] and "libbroken.so" in problems[0]
+    # Chaquopy keeps Python's extension modules inside asset archives and loads them from there: they count too.
+    inner = io.BytesIO()
+    with zipfile.ZipFile(inner, "w") as packed:
+        packed.writestr("pydantic_core/_core.so", _elf([0x1000]))
+        packed.writestr("cffi/_backend.so", _elf([0x4000]))
+    with zipfile.ZipFile(aab, "a") as bundle:
+        bundle.writestr("base/assets/chaquopy/requirements-arm64-v8a.imy", inner.getvalue())
+    assert [p for p in build.page_problems(aab) if ".imy!" in p] == [
+        "base/assets/chaquopy/requirements-arm64-v8a.imy!pydantic_core/_core.so: a LOAD segment is aligned to 0x1000, not 16 KB (0x4000)"]

@@ -290,17 +290,28 @@ def load_alignments(elf: bytes) -> list[int]:
 
 
 def page_problems(aab: Path) -> list[str]:
-    """Native libraries in the bundle that could not load on a phone with 16 KB memory pages."""
+    """Native libraries in the bundle that could not load on a phone with 16 KB memory pages: the ones in lib/, and the
+    Python extension modules Chaquopy carries inside its asset archives and loads from there."""
+    import io
     problems = []
+
+    def look(label: str, elf: bytes) -> None:
+        try:
+            short = [a for a in load_alignments(elf) if a < PAGE]
+        except (BuildError, struct.error, IndexError) as error:
+            problems.append(f"{label}: cannot read its segments ({error})")
+            return
+        if short:
+            problems.append(f"{label}: a LOAD segment is aligned to {min(short):#x}, not 16 KB ({PAGE:#x})")
+
     with zipfile.ZipFile(aab) as bundle:
-        for name in sorted(n for n in bundle.namelist() if "/lib/" in n and n.endswith(".so")):
-            try:
-                short = [a for a in load_alignments(bundle.read(name)) if a < PAGE]
-            except (BuildError, struct.error) as error:
-                problems.append(f"{name}: cannot read its segments ({error})")
-                continue
-            if short:
-                problems.append(f"{name}: a LOAD segment is aligned to {min(short):#x}, not 16 KB ({PAGE:#x})")
+        for name in sorted(bundle.namelist()):
+            if "/lib/" in name and name.endswith(".so"):
+                look(name, bundle.read(name))
+            elif name.endswith(".imy"):
+                with zipfile.ZipFile(io.BytesIO(bundle.read(name))) as inner:
+                    for module in sorted(n for n in inner.namelist() if n.endswith(".so")):
+                        look(f"{name}!{module}", inner.read(module))
     return problems
 
 
