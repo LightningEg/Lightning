@@ -299,3 +299,16 @@ def test_the_new_phone_screens_have_no_english_system_text(sample):
         if bad:
             problems[path] = sorted(set(bad))[:8]
     assert not problems, problems
+
+
+def test_lockout_message_and_budget_and_categories_are_all_arabic(sample):
+    """IV-3BD3: the lock-out wait, the ledger row message and the categories page carry no Latin words."""
+    c, names = sample
+    for n in (1, 2, 7):
+        text = translate(f"Too many wrong tries. Try again in {n} minutes." if n > 2 else f"Too many wrong tries. Try again in {n} minute{'s' if n == 2 else ''}.", "ar")
+        assert not re.search(r"[A-Za-z]{3}", text), text
+    assert not re.search(r"[A-Za-z]{3}", translate("Row 2: the price and the exchange rate must be above zero.", "ar"))
+    client = _client(c, False)
+    page = client.get("/categories")
+    assert page.status_code == 200 and not _english(page.text, names)
+    assert "r.ref" not in page.text

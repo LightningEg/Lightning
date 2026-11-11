@@ -20,7 +20,7 @@ def test_encrypted_roundtrip_fixture_is_current_and_keeps_its_transactions_out_o
         inspection = inspect_schema(db)
         assert inspection.current_version == BUNDLED_LATEST_VERSION == 78
         assert inspection.pending == ()
-        assert db.scalar("SELECT count(*) FROM transactions") == 68
+        assert db.scalar("SELECT count(*) FROM transactions") == 74
         assert db.scalar("SELECT count(*) FROM ledger_entries") > 0
         assert db.scalar("PRAGMA integrity_check") == "ok"
 
