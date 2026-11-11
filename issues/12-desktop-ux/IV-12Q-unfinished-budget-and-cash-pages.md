@@ -4,7 +4,7 @@ type: polish
 pillar: plan
 size: L
 model: opus
-status: new
+status: parked
 created: 2026-11-09
 by: Claude
 skills: bug-hunt, guideline-audit

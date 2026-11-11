@@ -12,15 +12,5 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](../../issues/1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | M | ready |
-| **IT-1H** | [Refresh packaged dependencies with matching native wheels and lockfiles](../../issues/1-easy-to-contribute/IT-1H-coordinate-packaged-dependency-refresh.md) | L | blocked on repository Actions allowlist update and native runtime acceptance |
-| **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](../../issues/1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | M | ready |
-| **IT-12AE** | [A screen cannot work out money](../../issues/12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | L | ready |
-
-## Reports with open follow-ups here
-
-- [Audit 6: open pull request cleanup](../../issues/1-easy-to-contribute/r7-pull-request-cleanup/report.md): 1H
-- [v1.5.0 PR review, theme switching and package preparation](../../issues/10-looks-and-store/r12-v150-release/report.md): 1H
-- [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 1H
-- [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](../../issues/11-phone-ux/r36-figures-one-owner/report.md): 12AE
 <!-- work:end -->
 

@@ -135,3 +135,22 @@ def test_a_swapped_page_runs_its_own_scripts_and_only_those(phone):
     _go(page, "/plan/reserves")
     assert not phone.same()  # loaded whole
     assert phone.errors == []
+
+
+def test_each_slot_keeps_its_own_stack_and_back_walks_the_slot_then_home(phone):
+    """3AY4 (r25 › Cross-cutting 5): a slot's pages stack above Home; switching slots drops the last slot's pages, tapping
+    the chosen slot returns to its top, and Back walks the slot, then Home."""
+    page = phone.page
+    at = lambda path: page.wait_for_function(  # noqa: E731
+        "(p) => location.pathname === p && !document.querySelector('main[aria-busy]')", arg=path)
+    page.click(".phone-tabbar a[href='/money']"); at("/money")
+    page.click("a[href='/money/accounts']"); at("/money/accounts")
+    page.click(".phone-tabbar a[href='/money']"); at("/money")          # the chosen slot: back to its top
+    page.click("a[href='/money/accounts']"); at("/money/accounts")
+    page.click(".phone-tabbar a[href='/activity']"); at("/activity")    # another slot: Money's pages are dropped
+    page.go_back(); at("/")                                              # Back: Home, not Money's accounts
+    page.click(".phone-tabbar a[href='/money']"); at("/money")
+    page.click("a[href='/money/accounts']"); at("/money/accounts")
+    page.go_back(); at("/money")                                         # Back walks the slot ...
+    page.go_back(); at("/")                                              # ... then Home
+    assert phone.same() and not phone.errors

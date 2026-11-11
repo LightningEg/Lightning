@@ -23,6 +23,19 @@ KIND_TEXT = {
 }
 
 
+# NF-3AU3: what turning reminders on or off also does on this device. The Windows app adds its daily task's
+# register/unregister here at start; the shared route only says that the preference changed.
+ON_SWITCH: list = []
+
+
+def switched(enabled: bool) -> None:
+    for hook in list(ON_SWITCH):
+        try:
+            hook(enabled)
+        except Exception:  # noqa: BLE001 - a closed-app notice is a convenience: the preference still saves
+            pass
+
+
 def default_path() -> Path | None:
     """Where this device keeps the schedule: the path the shell names, else next to ``native-reminders.json`` on
     Windows (``%LOCALAPPDATA%/Lightning``). Elsewhere nothing announces reminders with the app closed: no file."""

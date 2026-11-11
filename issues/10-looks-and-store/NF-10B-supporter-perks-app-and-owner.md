@@ -5,7 +5,7 @@ type: feature
 pillar: feel
 size: M
 model: opus
-status: blocked
+status: parked
 blocked_by: 10A claiming
 created: 2026-10-25
 by: Claude

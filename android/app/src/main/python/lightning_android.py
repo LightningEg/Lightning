@@ -5,6 +5,7 @@ optional fingerprint slots also sit, in `biometric/`, and the stay-signed-in slo
 folder); all are
 excluded from Google backup and device transfer (res/xml/data_extraction_rules.xml). The server keeps running
 while the process lives, so reopening the app does not ask for a new launch link."""
+import os
 from pathlib import Path
 
 _host = None
@@ -35,6 +36,8 @@ def start(files_dir):
         from lightning.security.biometric import FingerprintUnlock
 
         files = Path(files_dir)
+        # NF-3AU4: the closed-app schedule lives in the app's files dir, where ClosedReminderJobService reads it.
+        os.environ.setdefault("LIGHTNING_REMINDER_SCHEDULE", str(files / "reminder-schedule.json"))
         _devices = Devices(files / "appdata")
         fingerprint = FingerprintUnlock(files / "appdata" / "biometric", AndroidBiometric.create())
         stay = FingerprintUnlock(files / "appdata" / "stay", AndroidBiometric.create("StayBridge"))

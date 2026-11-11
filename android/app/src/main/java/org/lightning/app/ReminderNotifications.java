@@ -112,6 +112,34 @@ final class ReminderNotifications {
         }
     }
 
+    /** NF-3AU4: one closed-app notice for today's scheduled items (ClosedReminderJobService). The text is the kind's
+     *  fixed sentence; a tap opens Lightning, which shows its lock. Ids already shown today (here or by the open app)
+     *  are skipped, and these are noted so the open app does not repeat them. */
+    static synchronized void announce(Context context, java.util.List<String> ids, String text) {
+        if (!permitted(context) || ids.isEmpty()) return;
+        NotificationManager manager = context.getSystemService(NotificationManager.class);
+        if (Build.VERSION.SDK_INT >= 26) {
+            manager.createNotificationChannel(new NotificationChannel(CHANNEL, "Lightning reminders",
+                    NotificationManager.IMPORTANCE_DEFAULT));
+        }
+        String today = new SimpleDateFormat("yyyy-MM-dd", Locale.US).format(new Date());
+        android.content.SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        java.util.List<String> fresh = new java.util.ArrayList<>();
+        for (String id : ids) if (!today.equals(prefs.getString("seen:" + id, ""))) fresh.add(id);
+        if (fresh.isEmpty()) return;
+        Intent open = new Intent(context, MainActivity.class).setAction(Intent.ACTION_MAIN);
+        PendingIntent pending = PendingIntent.getActivity(context, 47516, open,
+                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+        Notification.Builder builder = Build.VERSION.SDK_INT >= 26
+                ? new Notification.Builder(context, CHANNEL) : new Notification.Builder(context);
+        builder.setSmallIcon(R.drawable.ic_lightning).setContentTitle("Lightning").setContentText(text)
+                .setVisibility(Notification.VISIBILITY_PRIVATE).setAutoCancel(true).setContentIntent(pending);
+        manager.notify(47516, builder.build());
+        android.content.SharedPreferences.Editor editor = prefs.edit();
+        for (String id : fresh) editor.putString("seen:" + id, today);
+        editor.commit();
+    }
+
     static Uri safeHrefForActivity(String value) {
         if (value == null || !value.startsWith("/") || value.startsWith("//") || value.contains("\\")) return null;
         Uri relative = Uri.parse(value);

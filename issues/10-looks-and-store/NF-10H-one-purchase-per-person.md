@@ -78,3 +78,5 @@ by the profile id, never by Google sign-in (Play never tells us the buyer's Goog
 
 Done when a Play buyer links once on the PC and the website shows the theme Owned, wears it, and issues a code for a
 new PC-only profile.
+Read: `lightning/ui/play_store.py`, `lightning/ui/entitlements.py` (`redeem_play`, `_exchange`), the website's
+`supabase/functions/redeem-play` and `redeem-purchase`, NF-11B (done).

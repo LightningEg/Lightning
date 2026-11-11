@@ -183,8 +183,8 @@ class PhoneMohab(Mohab):
         return screen
 
     def period(self, page, date_from, date_to):
-        """Home is always today (3AY6, owner D2): the year's report is the Overview with a period, opened with its
-        address until the report has a phone home of its own (a known detour, named in DETOURS' neighbour below)."""
+        """Home is always today (3AY6, owner D2): the year's report is Money's report with his own dates (3AY10); an
+        Overview period address leads there (a known detour, named in DETOURS' neighbour below)."""
         if page:
             return super().period(page, date_from, date_to)
         self.b.detours[OVERVIEW_REPORT] += 1

@@ -4,7 +4,7 @@ type: tech
 pillar: build
 size: M
 model: sonnet
-status: ready
+status: parked
 post: no
 created: 2026-10-31
 by: Claude Sonnet 5.5

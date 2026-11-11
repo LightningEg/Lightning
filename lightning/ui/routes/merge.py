@@ -51,6 +51,10 @@ async def confirm_merge(request: Request):
             preview = None
         return render(request, "transactions/merge.html", keep_id=keep_id, drop_id=drop_id,
                       preview=preview, error=str(exc), **(_context(c, preview) if preview else {}), status_code=400)
+    back = str(form.get("return_to", ""))
+    if back:  # a review card's Delete the copy goes back to the queue (3AY8)
+        from lightning.ui.row_sheet import return_to
+        return redirect(return_to(back), "Copy deleted.")
     return redirect(f"/transactions/{merged.id}", f"Merged duplicate into {merged.ref}.")
 
 

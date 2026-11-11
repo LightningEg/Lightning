@@ -63,7 +63,9 @@ def _page(request, c, **context):
     # Every ending not known yet is asked in one form, each with the account it most likely is already chosen.
     waiting = [g | {"guess": c.sms_imports.guess(g["ending"], g.get("banks", []))} for g in c.sms_imports.waiting()]
     unread = [m | {"enter": _enter_url(m)} for m in c.sms_imports.unread()]
-    return render(request, "sms.html", waiting=waiting, accounts=accounts, batches=batches,
+    codes = {a.code: a.name for a in c.accounts.list()}
+    saved = [m | {"amount": Decimal(m["amount"]), "account": codes.get(m.get("account"), "")} for m in c.sms_imports.saved()]
+    return render(request, "sms.html", waiting=waiting, accounts=accounts, batches=batches, saved=saved,
                   unread=unread, permission=permission, last_read=c.sms_imports.last_read(),
                   salary=SALARY_ENDING, wallet_prefix=WALLET_PREFIX, wallet_name=wallet_name, **context)
 
@@ -95,8 +97,11 @@ async def paste(request: Request):
     now = datetime.now()
     with settled_save(request, container(request)):
         result = c.sms_imports.read([("", m, now) for m in messages])
-    found = sum(len(c.bank_imports.preview(batch)[1]) for batch in result["staged"].values())
+    found = sum(row["_status"] == "REVIEW" for batch in result["staged"].values()
+                for row in c.bank_imports.preview(batch)[1])
     parts = []
+    if result.get("saved"):
+        parts.append(f"{result['saved']} saved for you")
     if found:
         parts.append(f"{found} ready to check")
     if result["waiting"]:
@@ -105,7 +110,7 @@ async def paste(request: Request):
         parts.append(f"{result['unread']} kept for you")
     if result["skipped"]:
         parts.append(f"{result['skipped']} skipped")
-    if len(result["staged"]) == 1 and not result["waiting"]:  # one account's rows and nothing to ask: check them now
+    if len(result["staged"]) == 1 and not result["waiting"] and found:  # one account's rows and nothing to ask: check them now
         account_id, batch = next(iter(result["staged"].items()))
         return redirect(f"/accounts/{account_id}/import/{batch}", " · ".join(parts))
     return redirect("/sms", " · ".join(parts) or "Nothing new in these messages.")
@@ -118,6 +123,19 @@ async def dismiss(request: Request):
     with settled_save(request, container(request)):
         c.sms_imports.dismiss(str(form.get("id", "")))
     return redirect("/sms")
+
+
+@router.post("/undo")
+async def undo_saved(request: Request):
+    """NF-7AO2: take back a message that saved itself; it waits on its review like any other."""
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, container(request)):
+            account_id, batch_id = c.sms_imports.undo_saved(str(form.get("ref", ""))[:40])
+    except LightningError as exc:
+        return redirect("/sms", exc.message)
+    return redirect(f"/accounts/{account_id}/import/{batch_id}", "Undone. It waits for your check.")
 
 
 @router.post("/assign")

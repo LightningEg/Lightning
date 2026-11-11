@@ -239,7 +239,7 @@ def test_arabic_pages_use_the_mirrored_stylesheets_and_they_match_their_source(s
     import hashlib
     from pathlib import Path
     static = Path(__file__).resolve().parents[1] / "lightning" / "ui" / "static"
-    for source in ("style", "phone", "profiles"):
+    for source in ("style", "phone", "profiles", "phone-base"):
         head = (static / f"{source}.rtl.css").read_text(encoding="utf-8").split("\n", 1)[0]
         digest = hashlib.sha256((static / f"{source}.css").read_bytes()).hexdigest()[:16]
         assert digest in head, f"{source}.css changed: run tools/build_rtl_css.js"
@@ -247,9 +247,9 @@ def test_arabic_pages_use_the_mirrored_stylesheets_and_they_match_their_source(s
     arabic = _client(c, False).get("/").text
     assert "/static/style.rtl.css" in arabic and "/static/style.css" not in arabic
     phone_client = _client(c, True)
-    assert "/static/phone-bundle.rtl.css" in phone_client.get("/").text  # one bundle: style.rtl, phone.rtl, themes
+    assert "/static/phone-bundle.rtl.css" in phone_client.get("/").text  # one bundle: phone-base.rtl, phone.rtl, themes
     bundle = phone_client.get("/static/phone-bundle.rtl.css").text
-    assert "/* phone.rtl.css */" in bundle and "/* style.rtl.css */" in bundle and "/* phone.css */" not in bundle
+    assert "/* phone.rtl.css */" in bundle and "/* phone-base.rtl.css */" in bundle and "/* phone.css */" not in bundle
     english_client = TestClient(create_app(c))
     english_client.post("/settings/locale", data={"locale": "en"}, follow_redirects=False)
     english = english_client.get("/").text
@@ -299,3 +299,16 @@ def test_the_new_phone_screens_have_no_english_system_text(sample):
         if bad:
             problems[path] = sorted(set(bad))[:8]
     assert not problems, problems
+
+
+def test_lockout_message_and_budget_and_categories_are_all_arabic(sample):
+    """IV-3BD3: the lock-out wait, the ledger row message and the categories page carry no Latin words."""
+    c, names = sample
+    for n in (1, 2, 7):
+        text = translate(f"Too many wrong tries. Try again in {n} minutes." if n > 2 else f"Too many wrong tries. Try again in {n} minute{'s' if n == 2 else ''}.", "ar")
+        assert not re.search(r"[A-Za-z]{3}", text), text
+    assert not re.search(r"[A-Za-z]{3}", translate("Row 2: the price and the exchange rate must be above zero.", "ar"))
+    client = _client(c, False)
+    page = client.get("/categories")
+    assert page.status_code == 200 and not _english(page.text, names)
+    assert "r.ref" not in page.text

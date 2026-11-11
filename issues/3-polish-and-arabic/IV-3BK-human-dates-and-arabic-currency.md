@@ -4,7 +4,7 @@ type: polish
 pillar: understand
 size: S
 model: opus
-status: ready
+status: parked
 created: 2026-11-08
 by: Claude
 ---

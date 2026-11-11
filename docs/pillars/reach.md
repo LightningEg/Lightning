@@ -11,9 +11,6 @@ The website, search, downloads, community and the store. Its own repository is L
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IV-8AC** | [For Geeks gets two motion moments that are true](../../issues/8-website/IV-8AC-for-geeks-two-true-motion-moments.md) | M | ready |
-| **IV-8AD** | [A guideline rule for an Arabic page that links to an English page](../../issues/8-website/IV-8AD-arabic-pages-that-link-to-english-pages.md) | S | ready |
 | **IV-8F** | [Home and Features show the app, not only words](../../issues/8-website/IV-8F-home-and-features-show-the-app.md) | M | ready |
-| **NF-8AB** | [Link the three comparison pages and add a fourth that compares Lightning with an AI assistant](../../issues/8-website/NF-8AB-link-the-comparisons-and-compare-with-an-ai.md) | M | ready |
 <!-- work:end -->
 

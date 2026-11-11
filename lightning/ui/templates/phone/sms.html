@@ -21,7 +21,7 @@
 {% if permission == 'not_granted' %}
 <section class="phone-section" aria-labelledby="allow-heading">
   <header class="phone-section-head"><h2 id="allow-heading">{{ "Read bank SMS by itself"|tr(locale) }}</h2></header>
-  <p class="phone-note">{{ "Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction you check. It reads messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages stay on this phone: nothing is sent anywhere. Nothing is posted until you check it."|tr(locale) }}</p>
+  <p class="phone-note">{{ "Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction. It reads messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages stay on this phone: nothing is sent anywhere. A payment Lightning is sure about saves itself, marked and undoable; the rest wait for your check."|tr(locale) }}</p>
   <form method="post" action="/sms/allow" class="phone-form"><button class="btn phone-save" type="submit">{{ "Allow reading SMS"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 </section>
 {% endif %}
@@ -56,6 +56,16 @@
     <p dir="auto">{{ m.text }}</p><small class="muted">{{ m.sender or 'Pasted' }} · {{ m.received|replace('T', ' ') }}</small>{% if m.reason %}<small class="muted"> · {{ m.reason|tr(locale) }}</small>{% endif %}
     <div class="sms-unread-actions"><a class="btn" href="{{ m.enter }}" data-popup-open>{{ "Enter it"|tr(locale) }}</a>
       <form method="post" action="/sms/dismiss"><input type="hidden" name="id" value="{{ m.id }}"><button class="btn" type="submit">{{ "Dismiss"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
+  </div>{% endfor %}
+</section>
+{% endif %}
+{% if saved %}
+<section class="phone-section" id="saved" aria-labelledby="saved-heading">
+  <header class="phone-section-head"><h2 id="saved-heading">{{ "Saved for you"|tr(locale) }}</h2></header>
+  <p class="phone-note">{{ "Messages Lightning was sure about saved themselves: a bank it knows, your account, and a category from your rules or habits. Undo puts one back for your check."|tr(locale) }}</p>
+  {% for m in saved %}<div class="sms-unread">
+    <p><a href="/t/{{ m.ref }}">{{ m.who or m.account }}</a> · <b>{{ m.amount|money }}</b></p><small class="muted">{{ m.account }} · {{ m.date }}{% if m.linked %} · {{ "linked to your entry"|tr(locale) }}{% endif %}</small>{% if m.text %}<p dir="auto" class="phone-note">{{ m.text }}</p>{% endif %}
+    <div class="sms-unread-actions"><form method="post" action="/sms/undo"><input type="hidden" name="ref" value="{{ m.ref }}"><button class="btn" type="submit">{{ "Undo"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
   </div>{% endfor %}
 </section>
 {% endif %}

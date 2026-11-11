@@ -25,7 +25,7 @@ class ActivityScreen:
     money_in: Decimal
     money_out: Decimal
     review_total: int          # the To review count, on both tabs
-    card: dict | None          # the current card (To review); None when the queue is clear
+    card: object | None        # the current ReviewCard (To review, 3AY8); None when the queue is clear
     index: int                 # 0-based position of the card
     more_rows: bool            # the month holds more rows than are drawn
     in_share: int = 0   # bar lengths (0-100) on one scale: the larger of In and Out is 100 (11D3)
@@ -52,6 +52,8 @@ def build(c, day: date, tab: str = "all", month: str = "", index: int = 0) -> Ac
         start, end = parse_month(this)
     shown = month_of(start)
     items = review_items(c, day)
+    from lightning.ui.phone.screens.review_cards import review_cards
+    items = review_cards(c, day, items)   # one row per card, each with its kind's own verb (3AY8); one count on both tabs
     card = items[min(max(index, 0), len(items) - 1)] if items and tab == "review" else None
     rows: tuple = ()
     money_in = money_out = Decimal(0)

@@ -4,7 +4,7 @@ type: feature
 pillar: own
 size: L
 model: opus
-status: building
+status: parked
 created: 2026-10-05
 by: Claude
 ---

@@ -1,4 +1,4 @@
-// Builds the Arabic stylesheets (style.rtl.css, phone.rtl.css, profiles.rtl.css) from the English ones: the same
+// Builds the Arabic stylesheets (style.rtl.css, phone.rtl.css, profiles.rtl.css, phone-base.rtl.css) from the English ones: the same
 // rules with every physical side swapped (rtlcss), served instead of the English file when the page is Arabic, so
 // English is never touched. What is drawn rather than written stays as drawn (A12: charts do not mirror), and so do
 // transforms, gradients and the few hand-written html[dir="rtl"] rules.
@@ -49,3 +49,4 @@ function build(file, out) {
 build("style.css", "style.rtl.css");
 build("phone.css", "phone.rtl.css");
 build("profiles.css", "profiles.rtl.css");
+build("phone-base.css", "phone-base.rtl.css");   // IV-3AY4: run tools/build_phone_base_css.py first

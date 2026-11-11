@@ -1,7 +1,7 @@
 # Google Play: what to put in the Console
 
 For the owner. Each answer comes from the code, with the file that proves it, so the Console can be filled from this
-page alone. The plan is [NF-11B](../issues/11-phone-ux/NF-11B-ship-the-phone-on-google-play.md); the audit behind it is
+page alone. The plan is NF-11B (done); the audit behind it is
 [r29](../issues/11-phone-ux/r29-google-play-readiness/report.md).
 
 ## SMS: the Permissions Declaration (READ_SMS)
@@ -21,9 +21,10 @@ Owner, 2026-11-09: declare it from the first release.
 
 The disclosure on screen (English; Arabic in `lightning/ui/i18n*`):
 
-> Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction you check. It
-> reads messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages
-> stay on this phone: nothing is sent anywhere. Nothing is posted until you check it.
+> Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction. It reads
+> messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages stay on
+> this phone: nothing is sent anywhere. A payment Lightning is sure about saves itself, marked and undoable; the rest
+> wait for your check.
 
 ## SMS: the demo video (about 60 seconds)
 

@@ -45,6 +45,7 @@ async def reminders_settings(request: Request):
     with settled_save(request, c, undo_label='Reminder preference'):
         c.settings.set("reminders_enabled", "1" if form.get("enabled") == "1" else "0")
     reminder_schedule.refresh(c, force=True)  # NF-3AU2: on writes the schedule, off removes it
+    reminder_schedule.switched(form.get("enabled") == "1")  # NF-3AU3: the Windows app's daily task follows
     return redirect("/review", "Reminder preference saved.")
 
 
