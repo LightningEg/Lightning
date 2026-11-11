@@ -39,7 +39,47 @@ class ActivityReview:
             "AND NOT EXISTS (SELECT 1 FROM ledger_entries own WHERE own.transaction_id=t.id AND own.owner_id IS NOT NULL) "
             "AND NOT EXISTS (SELECT 1 FROM money_from_others mo WHERE mo.transaction_id=t.id) "
             "ORDER BY t.date DESC,t.id DESC LIMIT ?", (limit,))
-        return [self.summary(int(row["id"]), include_choices=False) for row in rows]
+        return self._list_rows([int(row["id"]) for row in rows])
+
+    def _marked(self, sql: str, ids: list[int], count: int = 1) -> set[int]:
+        """The ids (of this list) a read of one column finds, in one query."""
+        marks = ",".join("?" for _ in ids)
+        return {int(row[0]) for row in self.db.all(sql.format(marks=marks), tuple(ids) * count)}
+
+    def _list_rows(self, ids: list[int]) -> list[dict]:
+        """What the Activity list shows for each row, read for all rows at once (IT-9M: ten reads a row before).
+
+        The same keys the list pages read from ``summary``; the three yes/no marks hold a placeholder, not the links."""
+        if not ids:
+            return []
+        headers = self.c.transactions.get_many(ids)
+        from_others = self._marked("SELECT transaction_id FROM money_from_others WHERE transaction_id IN ({marks})", ids)
+        planned = self._marked(
+            "SELECT transaction_id FROM planned_payments WHERE transaction_id IN ({marks}) UNION "
+            "SELECT transaction_id FROM loan_extra_payments WHERE transaction_id IN ({marks})", ids, 2)
+        reserved = self._marked(
+            "SELECT l.transaction_id FROM reserve_transaction_links l JOIN transactions t ON t.id=l.transaction_id "
+            "WHERE l.transaction_id IN ({marks}) AND t.status='POSTED'", ids)
+        claimed = (self._marked("SELECT expense_id FROM reimbursement_claims WHERE expense_id IN ({marks})", ids)
+                   if self.db.has_table("reimbursement_claims") else set())
+        rows = []
+        for txn_id in ids:
+            txn = headers.get(txn_id)
+            if txn is None:
+                self.c.transactions.get(txn_id)  # raises the same not-found the one-row read did
+            info = self._owned_cash(txn, from_others)
+            first = self.c.accounts.get(info["cash_lines"][0].account_id) if info["cash_lines"] else None
+            rows.append({"txn": txn,
+                         "account_names": sorted({self.c.accounts.get(line.account_id).name
+                                                  for line in info["cash_lines"]}),
+                         "currency": first.currency if first else self.c.base_currency,
+                         "amount": info["amount"],
+                         "category_names": [self.c.categories.display_name(line.category_id)
+                                            for line in txn.lines if line.category_id],
+                         "planned_links": [{}] if txn_id in planned else [],
+                         "reserve_links": [{}] if txn_id in reserved else [],
+                         "claim": {"id": txn_id} if txn_id in claimed else None})
+        return rows
 
     def summary(self, transaction_id: int, *, include_choices: bool = True) -> dict:
         transaction_id = self._id(transaction_id)
@@ -79,12 +119,13 @@ class ActivityReview:
                 "reserve_choices": self.c.reserves.suggested_reserves(transaction_id)
                 if include_choices and txn.type.value == "OUT" else []}
 
-    def _owned_cash(self, txn) -> dict:
+    def _owned_cash(self, txn, from_others: set[int] | None = None) -> dict:
         if txn.is_void or txn.type.value not in {"IN", "OUT"}:
             raise ValidationError("This activity is no longer a posted cash income or expense.")
         cash_lines = [line for line in txn.lines if self.c.assets.get_asset(line.asset_id).is_cash]
         if (not cash_lines or any(line.owner_id is not None for line in txn.lines) or
-                self.db.scalar("SELECT 1 FROM money_from_others WHERE transaction_id=?", (txn.id,))):
+                (txn.id in from_others if from_others is not None else
+                 self.db.scalar("SELECT 1 FROM money_from_others WHERE transaction_id=?", (txn.id,)))):
             raise ValidationError("This transaction is not fully owned cash activity.")
         effects = {"IN": "INFLOW", "OUT": "OUTFLOW"}
         owned = [line for line in cash_lines

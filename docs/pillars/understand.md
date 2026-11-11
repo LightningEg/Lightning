@@ -13,8 +13,6 @@ The overview, spending, financial health, net worth and reports. They read the l
 |---|---|---|---|
 | **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](../../issues/3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | S | ready |
 | **IT-9A** | [Stored month-end figures](../../issues/9-later/IT-9A-stored-month-end-figures.md) | M | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
-| **IT-9L** | [The investment report reads the whole ledger four times per Overview](../../issues/9-later/IT-9L-investment-report-reads-the-whole-ledger.md) | M | ready |
-| **IT-9M** | [Activity on the PC asks ten queries for each of its 100 rows](../../issues/9-later/IT-9M-activity-asks-ten-queries-a-row.md) | M | ready |
 | **NF-12AB** | [Every headline figure explains itself in place](../../issues/12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | L | ready |
 
 ## Reports with open follow-ups here
@@ -22,7 +20,7 @@ The overview, spending, financial health, net worth and reports. They read the l
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 9A
 - [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BK
 - [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](../../issues/11-phone-ux/r29-google-play-readiness/report.md): 3BK
-- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r33-code-review-and-loose-ends/report.md): 9L, 9M, 9A
+- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r33-code-review-and-loose-ends/report.md): 9A
 - [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 12AB
 <!-- work:end -->
 

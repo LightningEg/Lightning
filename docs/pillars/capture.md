@@ -18,7 +18,6 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | **NF-7AO** | [Bank messages Lightning is sure about save themselves, marked and undoable](../../issues/7-planning-import-and-search/NF-7AO-sure-bank-messages-save-themselves.md) | L | new |
 | **NF-7AP** | [Compare the balance a bank message states with the account, as a quiet To do row](../../issues/7-planning-import-and-search/NF-7AP-bank-message-balance-check.md) | M | ready |
 | **NF-7AQ** | [Search answers a typed question](../../issues/7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md) | L | new |
-| **IT-9N** | [The import review asks four or more queries for every statement row](../../issues/9-later/IT-9N-import-review-asks-four-queries-a-row.md) | M | ready |
 | **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](../../issues/12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | M | ready |
 | **IV-12V** | [Adjust balance: a cash wallet that is far off has no way forward, and the page is one bare form](../../issues/12-desktop-ux/IV-12V-adjust-balance-for-cash.md) | M | ready |
 | **IV-12W** | [Register and search: the forgotten minus, transactions in PC search, and small things on the rows](../../issues/12-desktop-ux/IV-12W-register-and-search-small-traps.md) | M | ready |
@@ -27,7 +26,6 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 
 - [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12K
 - [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](../../issues/7-planning-import-and-search/r31-logging-entries/report.md): 7AJ, 7AK, 7AL, 7AM, 7AO, 7AP
-- [Code review: what is slow, loose, complicated or cut off from the rest](../../issues/1-easy-to-contribute/r33-code-review-and-loose-ends/report.md): 9N
 - [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](../../issues/12-desktop-ux/r34-accounts-and-transactions/report.md): 12V, 12W
 - [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 7AQ
 <!-- work:end -->

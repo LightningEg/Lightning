@@ -6,17 +6,17 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
-| [Capture](pillars/capture.md) | 11 |  | 7 | 4 |  |  |
+| [Capture](pillars/capture.md) | 10 |  | 6 | 4 |  |  |
 | [Plan](pillars/plan.md) | 4 |  | 2 | 2 |  |  |
-| [Understand](pillars/understand.md) | 5 |  | 4 |  | 1 |  |
+| [Understand](pillars/understand.md) | 3 |  | 2 |  | 1 |  |
 | [Own](pillars/own.md) | 11 | 1 | 6 | 2 | 2 |  |
 | [Protect](pillars/protect.md) | 4 | 1 | 2 |  | 1 |  |
 | [Everywhere](pillars/everywhere.md) | 7 | 3 | 4 |  |  |  |
 | [Feel](pillars/feel.md) | 12 | 3 | 8 |  | 1 | 1 |
-| [Build](pillars/build.md) | 5 |  | 4 |  | 1 |  |
-| [Reach](pillars/reach.md) | 4 |  | 3 | 1 |  | 2 |
+| [Build](pillars/build.md) | 5 |  | 3 | 1 | 1 |  |
+| [Reach](pillars/reach.md) | 3 |  | 3 |  |  | 2 |
 
-63 open items in 11 milestones.
+59 open items in 11 milestones.
 
 ## Being built now
 
@@ -39,14 +39,14 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 
 | Milestone | Open | Goal |
 |---|---|---|
-| 1 Easy to contribute | 4 | Anyone can find how to help in one click and send a first fix the same evening. |
+| 1 Easy to contribute | 3 | Anyone can find how to help in one click and send a first fix the same evening. |
 | 2 Safe for real money | 4 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
 | 3 Polish and Arabic | 8 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
 | 7 Planning, import and search | 7 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 3 | The site is honest, quick and in step with the app. |
-| 9 Later | 6 | Good ideas that wait until the milestones above are done. |
+| 9 Later | 3 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
 | 11 Phone UX | 3 | The phone is its own product: a few places that each answer one question, quick jobs in three taps, and no PC page squeezed into one column. |
 | 12 Desktop UX and smart next steps | 18 | The PC app leads with the answer, works in bulk without surprises, and offers the next step where a figure raises the question. |

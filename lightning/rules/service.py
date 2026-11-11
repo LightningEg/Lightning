@@ -14,6 +14,7 @@ from decimal import Decimal
 
 from lightning.categories.domain import Direction, Movement
 from lightning.core.errors import NotFoundError, ValidationError
+from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, fmt, to_decimal
 from lightning.transactions.tags import normalize as normalize_tag
 
@@ -62,10 +63,14 @@ class RuleService:
         """What the rules say about one transaction. ``counterparty`` may hold several spellings (the bank's
         text and the saved name); a condition holds when any of them fits."""
         names = [counterparty] if isinstance(counterparty, str) else list(counterparty or [])
-        account_code = self.db.scalar("SELECT code FROM accounts WHERE id=?", (account_id,)) if account_id is not None else None
+        account_code = self._account_code(account_id) if account_id is not None else None
         txn = {"counterparty": [n for n in names if n], "notes": notes or "", "amount": amount,
                "account_id": account_id, "account_code": account_code}
         return engine.run(self.repo.rules(), txn)
+
+    @request_cached
+    def _account_code(self, account_id: int) -> str | None:
+        return self.db.scalar("SELECT code FROM accounts WHERE id=?", (account_id,))
 
     def category_for_name(self, name: str) -> int | None:
         """The category rules give a counterparty on its name alone, for filling the register as you type.

@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 63 open items. Each folder holds its reports and its items.
+11 big pictures, 59 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -31,14 +31,10 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1H4 | ↳ Validate | | | M | Opus | |
 | **IT-1N** | [Split the large items into steps and post every contributor-safe step on GitHub with its coins](1-easy-to-contribute/IT-1N-split-large-items-and-post-them.md) | improvement, technical | Build | M | Sonnet | ready |
 | IT-1N2 | ↳ Post the approved batch | | | S | Sonnet | |
-| **IT-1Y** | [Every page is asked once and measured - one test fetches all 130 pages on the PC and the phone, and perf_check times the pages people use](1-easy-to-contribute/IT-1Y-every-page-asked-once-and-measured.md) | improvement, technical | Build | M | Sonnet | ready |
-| IT-1Y1 | ↳ The PC never gets a phone-only sheet ([#488](https://github.com/LightningEg/Lightning/issues/488)) | | | S | Sonnet | |
-| IT-1Y2 | ↳ One test asks every page | | | M | Sonnet | |
-| IT-1Y3 | ↳ perf_check measures the real pages ([#489](https://github.com/LightningEg/Lightning/issues/489)) | | | S | Sonnet | |
 
 Reports: [r7](1-easy-to-contribute/r7-pull-request-cleanup/report.md) · [r33](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md).
 
-Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1R, 1S, 1T, 1U, 1V, 1W, 1X, 1Z. Next free code: 1AA.
+Done: 1A, 1B, 1C, 1D, 1F, 1G, 1I, 1J, 1K, 1L, 1M, 1O, 1P, 1Q, 1R, 1S, 1T, 1U, 1V, 1W, 1X, 1Y, 1Z. Next free code: 1AA.
 
 ## 2 Safe for real money
 
@@ -207,18 +203,7 @@ Good ideas that wait until the milestones above are done.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-9A** | [Stored month-end figures](9-later/IT-9A-stored-month-end-figures.md) | improvement, technical | Understand | M | Opus | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
-| **IT-9F** | [Page speed: a CSS trim](9-later/IT-9F-page-speed-origin-and-css.md) | improvement, technical | Reach | M | Sonnet | new |
-| IT-9F1 | ↳ A tool that lists unreachable CSS rules | | | S | Sonnet | |
-| IT-9F2 | ↳ Delete the unreachable rules from style.css | | | M | Sonnet | |
-| IT-9F3 | ↳ Do async routes with synchronous database work slow anything? | | | S | Opus | |
-| **IT-9L** | [The investment report reads the whole ledger four times per Overview - 426 ms at 4,400 transactions; a narrower query gives the same report twelve times faster](9-later/IT-9L-investment-report-reads-the-whole-ledger.md) | improvement, technical | Understand | M | Sonnet | ready |
-| IT-9L1 | ↳ Read only the transactions the report uses | | | M | Sonnet | |
-| IT-9L2 | ↳ Memo the purity read ([#491](https://github.com/LightningEg/Lightning/issues/491)) | | | S | Sonnet | |
-| IT-9L3 | ↳ One investment period per request | | | S | Sonnet | |
-| **IT-9M** | [Activity on the PC asks ten queries for each of its 100 rows - 1,039 queries where the budget is 400](9-later/IT-9M-activity-asks-ten-queries-a-row.md) | improvement, technical | Understand | M | Sonnet | ready |
-| **IT-9N** | [The import review asks four or more queries for every statement row - 1,136 for a 90-row file, about 12,000 for a year's statement](9-later/IT-9N-import-review-asks-four-queries-a-row.md) | improvement, technical | Capture | M | Sonnet | ready |
-| IT-9N1 | ↳ Ask the account questions once ([#492](https://github.com/LightningEg/Lightning/issues/492)) | | | S | Sonnet | |
-| IT-9N2 | ↳ Ask the "seen before" questions once | | | M | Sonnet | |
+| **IT-9O** | [A slow page makes every other request wait - the routes are async def with synchronous database work, so one 76 ms Overview holds back a 4 ms stylesheet for about 110 ms](9-later/IT-9O-read-only-pages-block-other-requests.md) | improvement, technical | Build | M | Opus | new |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | ready |
 | NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
 | NF-9D4 | ↳ Show the Hijri date beside every zakat day | | | S | Sonnet | |
@@ -226,7 +211,7 @@ Good ideas that wait until the milestones above are done.
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 
-Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J, 9K. Next free code: 9O.
+Done: 9B, 9C, 9E, 9F, 9G, 9H, 9I, 9J, 9K, 9L, 9M, 9N. Next free code: 9P.
 
 ## 10 Looks and store
 

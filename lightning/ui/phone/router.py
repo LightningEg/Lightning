@@ -153,6 +153,13 @@ def phone_router() -> APIRouter:
         return render_phone(request, "phone/activity_home.html", screen=screen.build(
             container(request), today(), asked.get("tab", "all"), asked.get("month", ""), index))
 
+    @router.get("/transactions/sorted")
+    async def transactions_sorted(request: Request):
+        """The end of To sort: nothing left to sort (a PC request is redirected by the shared route)."""
+        from lightning.ui.row_sheet import return_to
+        return render_phone(request, "phone/transactions/sorted.html",
+                            return_to=return_to(request.query_params.get("return_to")))
+
     @router.post("/activity/not-now")
     async def activity_not_now(request: Request):
         """Not now on a review card: it leaves the queue until tomorrow and nothing is posted or changed (3AY8)."""

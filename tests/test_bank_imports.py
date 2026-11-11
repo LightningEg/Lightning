@@ -470,3 +470,52 @@ def test_fractional_accounting_csv_changes_the_ledger_once_by_the_exact_amount(c
     assert duplicates[0]["_reference_duplicate"]
     assert c.bank_imports.confirm(again, {duplicates[0]["_import_row_id"]: {"skip": True}})["duplicates"] == 1
     assert c.reporting.account_balance(account_id) == expected
+
+
+def test_preview_flags_are_the_same_when_read_together_or_row_by_row(c, setup):
+    """IT-9N: the file's "seen before" questions are asked once; each row is marked as when asked alone."""
+    accounts, _ = setup
+    account_id = accounts["cib"].id
+    earlier = (b"Date,Counterparty,Amount,Reference\n2026-09-20,Shop,-5,REF-A\n2026-09-21,Cafe,-7,REF-B\n"
+               b"2026-09-22,Kiosk,-9,REF-C\n2026-09-23,Gym,-11,\n")
+    first_id, _ = c.bank_imports.stage(account_id, "earlier.csv", earlier)
+    _, first_rows = c.bank_imports.preview(first_id)
+    c.bank_imports.confirm(first_id, {row["_import_row_id"]: {} for row in first_rows})
+    voided = c.db.scalar("SELECT transaction_id FROM bank_import_rows WHERE batch_id=? AND bank_reference='REF-C'", (first_id,))
+    c.transactions.void(voided, "test deletion")
+    again = (b"Date,Counterparty,Amount,Reference\n2026-09-20,Shop,-5,REF-A\n2026-09-24,Bakery,-3,REF-NEW\n"
+             b"2026-09-22,Kiosk,-9,REF-C\n2026-09-23,Gym,-11,\n2026-09-25,Other,-2,REF-NEW\n")
+    second_id, _ = c.bank_imports.stage(account_id, "again.csv", again)
+    _, together = c.bank_imports.preview(second_id)
+    proposals = c.bank_imports._proposals
+    original = type(proposals)._read_together
+    type(proposals)._read_together = lambda self, *a, **k: None  # every row asks its own questions again
+    try:
+        _, alone = c.bank_imports.preview(second_id)
+    finally:
+        type(proposals)._read_together = original
+    assert together == alone
+    flags = [(r["_reference_duplicate"], r["_voided_earlier"]) for r in together]
+    assert flags[0][0] and flags[2][1] and flags[4][0]  # a seen reference, a voided one, a repeat inside the file
+
+
+def test_import_review_asks_a_fixed_number_of_queries_however_long_the_file(c, setup):
+    accounts, _ = setup
+    account_id = accounts["cib"].id
+
+    def count(rows: int) -> int:
+        lines = ["Date,Counterparty,Amount,Reference"] + [f"2026-09-{1 + i % 28:02d},Shop {i},-{10 + i},R{rows}-{i}"
+                                                         for i in range(rows)]
+        batch_id, _ = c.bank_imports.stage(account_id, f"f{rows}.csv", ("\n".join(lines) + "\n").encode())
+        seen: list[str] = []
+        c.db.conn.set_trace_callback(seen.append)
+        try:
+            c.bank_imports.preview(batch_id)
+        finally:
+            c.db.conn.set_trace_callback(None)
+        # the reads each row used to ask alone: seen-before, account by name, look-alike, opposite side of a transfer
+        asked = ("SELECT 1 FROM bank_import_rows r JOIN", "SELECT id FROM accounts WHERE active=1",
+                 "SELECT 1 FROM transactions t JOIN ledger_entries l", "SELECT DISTINCT le.account_id")
+        return sum(" ".join(sql.split()).startswith(asked) for sql in seen)
+
+    assert count(10) == count(90)  # the same few questions for any length of file (was four or more a row)
