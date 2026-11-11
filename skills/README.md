@@ -7,6 +7,7 @@ A new skill is written once, here, in plain words with no tool-only commands.
 
 | Skill | Use it when |
 |---|---|
+| [dispatch](dispatch/SKILL.md) | Run the board: start ready launch issues on the right model, release stale claims, merge verified PRs, give the owner one tally; also the rules for taking an issue |
 | [feedback-review](feedback-review/SKILL.md) | New user feedback arrives: preserve sanitized observations, investigate and link implementation work |
 | [bug-hunt](bug-hunt/SKILL.md) | Test the whole app on demo data: pages, forms, figures across tabs (`tools/bug_crawl.py`) |
 | [stale-check](stale-check/SKILL.md) | Find and clean stale notes, links, proposals and branches (`tools/stale_check.py`) |
