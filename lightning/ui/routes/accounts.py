@@ -569,7 +569,7 @@ async def save_transaction_popup(request: Request, account_id: int):
             back = "/accounts/%d/transaction/new?%s" % (account_id, urlencode({
                 "date": values["date"], "return_to": values["return_to"]}))
             response = redirect(back, "Saved. Add the next one.")
-            response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,
+            response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,  # not money
                                 httponly=True, samesite="lax")
             return response
         feedback = register._budget_feedback(c, txn)
