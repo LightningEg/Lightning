@@ -56,6 +56,7 @@ class MoneyScreen:
     working: object = None             # NF-12AB4: Net worth's working, for the hero's sheet
     trend: dict | None = None          # charts.trend of net worth at each month end; the last point is today
     own_split: tuple[dict, ...] = ()   # what you own by asset class family: {key, label, value, share}, A04 order
+    strip: tuple[dict, ...] = ()       # NF-7AR3: today and the next 13 days of payments, each day a way into Upcoming
 
 
 def _goals(c) -> tuple[int, int]:
@@ -101,6 +102,15 @@ def _balances(c, day: date) -> list[AccountRow]:
     return rows
 
 
+def _strip(c, day: date) -> tuple[dict, ...]:
+    """Coming up's two weeks (NF-7AR3), the phone Upcoming tab's own strip; no forecast here, so no short mark."""
+    if not c.planning.items():
+        return ()
+    from lightning.planning.calendar import payment_window
+    from lightning.ui.phone.presenters.upcoming import STRIP_DAYS, strip_days
+    return tuple(strip_days(payment_window(c.planning, c.gameya, day, STRIP_DAYS)))
+
+
 def build(c, day: date) -> MoneyScreen:
     now = c.position.at(day)
     try:  # the Overview's own figure: the day before the month began to today (PositionService, one home)
@@ -118,7 +128,7 @@ def build(c, day: date) -> MoneyScreen:
         late_count=sum(1 for b in bills if b.state in (BillState.LATE, BillState.LATE_STALE)),
         holdings_value=now.holdings_value, has_accounts=bool(c.accounts.list()), zakat=c.zakat.enabled(),
         goals_funded=funded, goals_count=goals, health_watch=_health_watch(c, day),
-        trend=net_worth_trend(c, day), own_split=own_split(now))
+        trend=net_worth_trend(c, day), own_split=own_split(now), strip=_strip(c, day))
 
 
 @dataclass(frozen=True)

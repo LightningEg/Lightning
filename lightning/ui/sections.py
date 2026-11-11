@@ -42,6 +42,7 @@ _I = {  # tab icons
     "health": "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8L12 21.2l8.8-8.8a5.5 5.5 0 0 0 0-7.8z",
     "budget": "M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM3 9h18M16 14h3",
     "plan": "M3 3v16a2 2 0 0 0 2 2h16M7 15l4-4 3 3 6-6",
+    "upcoming": "M3 6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2zM16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01",
     "recurring": "M17 2l4 4-4 4M3 11V9a4 4 0 0 1 4-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 0 1-4 4H3",
     "loans": "M7 3h10a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM9 15l6-6M9.5 9.5h.01M14.5 14.5h.01",  # a bill with a %: not Overview's house (3T6)
     "reserves": "M20 13c0 5-3.5 7.5-7.7 9a1 1 0 0 1-.6 0C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.2-2.7a1.2 1.2 0 0 1 1.6 0C14.5 3.8 17 5 19 5a1 1 0 0 1 1 1z",
@@ -78,6 +79,7 @@ SECTIONS: tuple[Section, ...] = (
     )),
     Section("plan", "Cash planning", "cash", (          # How much can I spend?
         Tab("plan", "Plan", "/plan", _I["plan"], ("=/plan", "/plan/items")),
+        Tab("upcoming", "Upcoming", "/plan/upcoming", _I["upcoming"], ("/plan/upcoming",)),
         Tab("recurring", "Recurring", "/plan/recurring", _I["recurring"], ("/plan/recurring", "/setup/salary", "/plan/from-transaction")),
         Tab("loans", "Loans", "/plan/loans", _I["loans"], ("/plan/loans", "/plan/purchases")),
     )),

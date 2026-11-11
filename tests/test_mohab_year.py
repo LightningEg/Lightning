@@ -447,6 +447,8 @@ def _live_the_year(o: Mohab) -> None:
     o.pay_from_overview("Landlord")
     o.pay_from_overview("Car loan")
     o.ask("paid_from_overview", "Did paying from the Overview move my money?")
+    o.ask("upcoming", "Rent and the car are paid. What is still to pay in October, and on which days?",
+          "Cash planning", "Upcoming")
     o.notes["what_you_own_before_paying"] = before
 
     o.on("2026-10-31")
@@ -1264,6 +1266,16 @@ def test_how_much_of_my_income_is_already_promised(mohab):
     assert route(mohab, "fixed_costs") == ["/", "/plan", "/plan/recurring"]
     assert fixed.figure("Bills and subscriptions") + D("2500") == D("15630")
     assert fixed.shows("Fixed costs to income Good 34.7 % 15,630 a month of 45,000 income Your limit 50%")
+
+
+def test_what_is_left_to_pay_this_month_and_on_which_days(mohab):
+    """Cash planning › Upcoming (NF-7AR), 6 October after paying rent and the car: what is left is the internet
+    and the electricity, the month's total is Recurring's 15,630, and the day list opens on the next bill."""
+    upcoming = mohab.answers["upcoming"]
+    assert route(mohab, "upcoming") == ["/", "/plan", "/plan/upcoming"]
+    assert upcoming.figure("Left to pay in October") == D("1130")    # WE Internet 650 + North Cairo Electricity 480
+    assert upcoming.shows("1,130 left to pay in October, on 2 days.", "14,500 paid of 15,630 due in October",
+                          "Payday 1 Oct", "20 Oct WE Internet Bills · To pay 650")
 
 
 def test_the_emergency_fund_in_months(mohab):

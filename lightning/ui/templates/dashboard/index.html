@@ -48,6 +48,17 @@
   {% if not attention %}<a class="quiet-link" href="/needs-you">{{ 'Reviewed and snoozed'|tr(locale) }}</a>{% endif %}
   {% if attention_handled.reviewed or attention_handled.snoozed %}<p class="muted small" id="needs-handled">{{ '{n} reviewed or snoozed items are still open, not resolved.'|tr(locale, n=attention_handled.reviewed + attention_handled.snoozed) }} <a class="quiet-link" href="/needs-you?tab=handled">{{ 'See them'|tr(locale) }}</a></p>{% endif %}
   {{ kpi_row(kpi_cards, base, 'This period') }}
+  {% if week %}{# NF-7AR2: the next seven days of payments; the month's calendar is its home (Cash planning › Upcoming) #}
+  <section class="overview-week" aria-labelledby="week-heading">
+    <header class="overview-section-head"><h2 id="week-heading">{{ 'Next 7 days'|tr(locale) }}</h2><span>{% if week.left_to_pay %}{{ '{amt} to pay, of {amt2} left this month'|tr(locale, amt=week.left_to_pay|money(False, 0), amt2=week.month.left_to_pay|money(False, 0)) }}{% else %}{{ 'Nothing to pay this week'|tr(locale) }}{% endif %} · <a href="/plan/upcoming">{{ 'Upcoming'|tr(locale) }}</a></span></header>
+    {% if week.empty %}<p class="muted">{% if week.next_after %}{{ 'Next: {name}, {amt} on {date}.'|tr(locale, name=week.next_after.name, amt=week.next_after.amount|money(False, 0), date=week.next_after.date|day) }}{% else %}{{ 'Nothing else is due this month.'|tr(locale) }}{% endif %}</p>
+    {% else %}<div class="week-strip">{% for d in week.days %}<a class="week-day{{ ' is-today' if loop.first }}{{ ' is-payday' if d.payday }}{{ ' is-short' if d.short }}" href="/plan/upcoming?month={{ d.date[:7] }}&amp;day={{ d.date }}">
+      <small>{{ d.date|day }}</small>
+      {% for e in d.entries[:2] %}<span class="week-pay"><b class="pay-mark is-{{ e.state }}{{ ' is-in' if e.incoming }}" aria-hidden="true">{{ e.name[:1] }}</b><span>{{ e.name }}<em>{{ ('+' if e.incoming else '') ~ (e.amount|money(False, 0)) }}</em></span></span>{% endfor %}
+      {% if d.entries|length > 2 %}<small class="muted">{{ '+{n} more'|tr(locale, n=d.entries|length - 2) }}</small>{% endif %}
+      {% if d.payday %}<em class="pay-cal-flag is-in">{{ 'Payday'|tr(locale) }}</em>{% elif d.short %}<em class="pay-cal-flag is-short">{{ 'Short'|tr(locale) }}</em>{% endif %}
+    </a>{% endfor %}</div>{% endif %}
+  </section>{% endif %}
 {% set done = setup|selectattr("done")|list|length if setup else 0 %}{% if setup and done != setup|length %}{# IV-12Z5: a finished setup leaves no heading #}
 <details class="flow-disclosure setup-card"><summary class="overview-section-head"><h2>{{ "Get set up"|tr(locale) }}</h2><span>{{ '{done} of {total} done'|tr(locale, done=done, total=setup|length) }}</span></summary>
   <div class="overview-inline-list">{% for step in setup %}{% if step.done %}<div class="overview-action-row setup-step is-done"><span><b>{{ step.label }}</b><small>{{ step.detail }}</small></span><span class="status-word"><i class="dot dot-in"></i>{{ "Done"|tr(locale) }}</span></div>{% else %}<a class="overview-action-row setup-step" href="{{ step.href }}"><span><b>{{ step.label }}</b><small>{{ step.detail }}</small></span><span>{{ step.action }}</span></a>{% endif %}{% endfor %}</div>

@@ -1140,3 +1140,16 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .needs-item > .needs-link > b { flex: none; white-space: nowrap; }
 .phone-segment-4 { grid-template-columns: repeat(4, 1fr); }
 html.phone :is(.counterparty-results, .category-results) { min-width: 0; max-width: calc(100vw - 32px); box-sizing: border-box; }
+/* Upcoming (NF-7AR3): today and the next 13 days, seven to a row; marks as on the PC (style.css .pay-mark). */
+.phone .phone-strip { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+.phone .phone-strip-day { display: flex; flex-direction: column; align-items: center; gap: 3px; min-height: 64px; padding: 6px 0;
+  border-radius: 12px; background: var(--c-surface); color: var(--c-ink); text-decoration: none; box-shadow: inset 0 0 0 1px var(--c-line); }
+.phone .phone-strip-day small { font-size: 11px; color: var(--c-muted); }
+.phone .phone-strip-day i { font: 700 15px/1 var(--body, inherit); font-style: normal; font-variant-numeric: tabular-nums; }
+.phone .phone-strip-day.is-today i { color: var(--c-nile); text-decoration: underline; text-underline-offset: 3px; }
+.phone .phone-strip-day.is-payday { background: var(--tint-growth, #EAF8F0); }
+.phone .phone-strip-day.is-short { box-shadow: inset 0 0 0 2px #C93D72; }
+.phone .phone-strip-day.is-chosen { box-shadow: inset 0 0 0 2px var(--c-nile); }
+.phone .phone-strip-marks { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }
+.phone .phone-strip-marks .pay-mark { width: 9px; height: 9px; border-radius: 3px; }
+.phone .phone-upcoming + .phone-section .is-short, .phone .phone-rows b.is-late { color: #C93D72; }

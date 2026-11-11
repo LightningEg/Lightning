@@ -54,7 +54,7 @@ _ROUND_MONEY: contextvars.ContextVar[bool] = contextvars.ContextVar("round_money
 REPORTING_TEMPLATES = ("dashboard/", "phone/home.html", "phone/money.html", "phone/money_accounts.html", "phone/money_bills.html", "phone/money_report.html", "phone/add_bills.html", "phone/catch_up.html", "phone/budget_flexible.html", "phone/birdview/", "budget.html", "birdview/", "investments/index.html", "investments/holding.html", "financial_health.html",
                        "investments/_targets.html", "investments/targets.html", "investments/report_detail.html",
                        "planning/plan.html", "reserves.html", "settings/index.html", "accounts/currencies.html", "zakat.html",
-                       "accounts/list.html", "counterparty.html", "tag.html", "analysis/", "planning/loans.html",
+                       "accounts/list.html", "counterparty.html", "tag.html", "analysis/", "planning/loans.html", "planning/upcoming.html", "phone/planning/upcoming.html",
                        "investments/planner.html", "money_from_others.html")
 
 
