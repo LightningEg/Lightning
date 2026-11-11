@@ -82,4 +82,7 @@ def present(request, c, context: dict) -> dict:
     return {"reg": _phone_register(c, account_id, context["base_url"], dict(parse_qsl(context["keep_qs"])), kind,
                                    context["month"], context["preset"], context["date_from"], context["date_to"],
                                    context["matched_flows"], unsorted, date_from, date_to),
-            "matching_ids": None, "import_accounts": []}
+            "matching_ids": None, "import_accounts": [],
+            # 3AY10: an account's page asks first whether the bank agrees (r25 › Money › An account)
+            "checked_through": c.reconciliation.checked_through(account_id) if account_id else None,
+            "today_iso": fmt_date(today())}

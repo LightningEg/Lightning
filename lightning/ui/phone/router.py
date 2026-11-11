@@ -1,6 +1,8 @@
 """The phone router: owns every URL a migrated slot serves, and answers before the old shared routes do."""
 from __future__ import annotations
 
+from urllib.parse import urlencode
+
 from fastapi import APIRouter, FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.routing import APIRoute
@@ -42,6 +44,9 @@ def _plain(*allowed: str, when=None, any_query: bool = False) -> type[APIRoute]:
     return PlainRoute
 
 
+PERIOD_KEYS = ("period", "month", "date_from", "date_to", "as_of")   # what an Overview period link carries
+
+
 def _read_new_sms(request: Request, c) -> None:
     """New bank messages join the review before To do is counted, as the old Overview did on every visit. Never breaks
     the page that asked; a read-only session reads nothing."""
@@ -55,10 +60,9 @@ def _read_new_sms(request: Request, c) -> None:
 
 
 def phone_router() -> APIRouter:
-    """Every phone-owned URL. Home is served at /home while the old Overview keeps /; the slot URLs switch over
-    together with the tab bar (3AY10)."""
+    """Every phone-owned URL. Home answers / for every query: a period link goes to Money's report (3AY10)."""
     router = APIRouter()
-    started = APIRouter(route_class=_plain("msg", when=lambda request: bool(container(request).accounts.list())))
+    started = APIRouter(route_class=_plain(any_query=True, when=lambda request: bool(container(request).accounts.list())))
     slots = APIRouter(route_class=_plain())              # a bare slot URL: no query at all
     months = APIRouter(route_class=_plain("month", "msg"))  # Budget keeps its month stepper; a saved note rides along
     picking = APIRouter(route_class=_plain(any_query=True, when=_picks_account))  # the list, not the sheet
@@ -70,6 +74,9 @@ def phone_router() -> APIRouter:
     async def home(request: Request):
         from lightning.core.dates import today
         from lightning.ui.phone.screens import home as screen
+        asked = request.query_params
+        if request.url.path == "/" and any(asked.get(key) for key in PERIOD_KEYS):   # 3AY10: a period link reads the report
+            return redirect("/money/report?" + urlencode({"period": asked.get("period") or "month"}))
         c = container(request)
         _read_new_sms(request, c)
         return render_phone(request, "phone/home.html", screen=screen.build(c, today()))
@@ -98,7 +105,6 @@ def phone_router() -> APIRouter:
         """The phone's every-account register opens on this month (IV-3AL3, C08.3): the stepper shows and Money in and
         out answer for the month. All time stays a choice (preset=all_time); a search, tag or category still looks
         across every year. The register itself no longer knows who asks (3AY11)."""
-        from urllib.parse import urlencode
         from lightning.core.dates import fmt_date, today
         return redirect("/transactions?" + urlencode([*request.query_params.multi_items(), ("month", fmt_date(today())[:7])]))
 
@@ -215,31 +221,6 @@ def phone_router() -> APIRouter:
         month = request.query_params.get("month") or month_of(today())
         parse_month(month)
         return render_phone(request, "phone/budget_payments.html", **last_payments(container(request), category_id, month))
-
-    @router.get("/overview/fold/{name}")
-    async def overview_fold(request: Request, name: str):
-        """One closed fold of the phone's Overview, drawn when it is opened (backend roadmap B1; moved in 3AY18).
-        Goes with the older Overview in 3AY10."""
-        from fastapi import HTTPException
-        from lightning.core.dates import month_of, today
-        from lightning.core.errors import ValidationError
-        from lightning.ui import visuals
-        from lightning.ui.periods import parse_period
-        if name not in ("trend", "money-in"):
-            raise HTTPException(404)
-        c = container(request)
-        try:
-            period = parse_period(request.query_params, today(), c.reporting.first_activity_date())
-        except ValidationError:
-            period = parse_period({"period": "month", "month": month_of(today())}, today(), None)
-        first, as_of = period.start, period.end
-        if name == "trend":
-            position = c.position.at(min(as_of, today()))
-            lead = "net_worth" if position.what_you_owe > 0 else "what_you_own"
-            return render_phone(request, "phone/dashboard/fold.html", fold=name, lead=lead,
-                                networth_trend=visuals.net_worth_trend(c, as_of))
-        return render_phone(request, "phone/dashboard/fold.html", fold=name,
-                            **visuals.cash_flow_charts(c, first, as_of, period.key == "month", today()))
 
     @picking.get("/accounts/add-transaction")
     async def pick_account(request: Request):

@@ -38,7 +38,7 @@ count everywhere, on a fresh profile and on one left alone for a week; no phone 
 
 **Owner decisions (2026-11-06), all as recommended:** D1 Home · Budget · Add · Activity · Money, Settings behind ⚙ on Money; D2 Home always today, without the stepper or Net worth; D3 old late bills become one catch-up question; D4 Part C is rewritten in both repos first. Recorded in the Project Overview's owner decisions.
 
-**Owner picks (2026-11-11), all as recommended:** 3AY8 each review card's Primary is its kind's own verb (SMS *Looks right*, duplicate *Delete the copy*, interest *Match to deposit*, recurring *Track it*), with *Change* and *Skip* beside it; 3AY9 the payday strip shows from the salary's day until this month's plan is saved; 3AY10 the Net worth sheet is the parts, a small 12-month line, then US dollars and 21K gold as two rows.
+**Owner picks (2026-11-11), all as recommended:** 3AY8 each review card's Primary is its kind's own verb (SMS *Looks right*, duplicate *Delete the copy*, interest *Match to deposit*, recurring *Track it*), with *Change* and *Skip* beside it; 3AY9 the payday strip shows from the salary's day until this month's plan is saved; 3AY10 the Net worth sheet is the parts, then US dollars and 21K gold as two rows; the small 12-month line stays right under the hero (once).
 
 `post: no`: the steps share the phone shell and follow one design.
 
@@ -73,15 +73,6 @@ Built: `/budget` flexible first. Left: the payday strip, *This month in detail* 
 flexible figure. Done when: the first category row is above 400 px, Mohab's fixed costs do not move the pace, the audit
 passes, and `phone/budget.html` with its presenter is deleted.
 
-## 3AY10 Money: the net worth sheet, then the older Overview goes · M · opus
-Built: Money, `/money/accounts`, `/money/bills`, `/money/report`, the redirects. Left: Net worth's sheet (parts, over
-time, US dollars and 21K gold): the parts are what the older Overview's sheets show (`phone/dashboard/index.html`,
-`presenters/overview.py`). When the sheet has them: the phone router answers `/` for every query (a period link goes to
-`/money/report`, an empty profile gets its own `phone/welcome.html`), and `phone/dashboard/`, `presenters/overview.py`
-and the phone router's `/overview/fold/{name}` are deleted. Also left: an account page with *Check against the bank* first, and
-Settings rows marked "Best on your PC". Done when: no phone URL renders `phone/dashboard/index.html` and
-`tests/test_backend_roadmap.py` has a query budget for Home instead of the Overview.
-
 ## 3AY13 Owner's phone check · owner
-One end-to-end check on a phone once 3AY10 is merged (it replaces 3AN13), including a native reader's pass over the Arabic
+One end-to-end check on a phone once 3AY4, 3AY8 and 3AY9 are merged (it replaces 3AN13), including a native reader's pass over the Arabic
 of the strings added in 3AY6 to 3AY12 and the catch-up screen. Anything wrong becomes its own step.

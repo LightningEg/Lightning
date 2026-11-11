@@ -682,7 +682,10 @@ async def close_checked_history(request: Request, account_id: int):
             c.reconciliation.close(account_id, str(form.get("date", "")), str(form.get("balance", "")))
     except LightningError as exc:
         return redirect(f"/accounts/{account_id}/reconcile", exc.message)
-    return redirect(f"/accounts/{account_id}/reconcile", "Checked history is now protected. Unlock it before making corrections.")
+    back = str(form.get("return_to", ""))   # the account page's "Yes, it matches" comes back to it
+    if back != f"/accounts/{account_id}":
+        back = f"/accounts/{account_id}/reconcile"
+    return redirect(back, "Checked history is now protected. Unlock it before making corrections.")
 
 
 @router.post("/{account_id:int}/reconcile/unlock")

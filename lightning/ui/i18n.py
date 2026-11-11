@@ -3607,6 +3607,9 @@ ARABIC_UI = {
     'Record {what}': 'سجّل {what}',
     'Edit rule': 'تعديل القاعدة',
     'Choose files': 'اختار الملفات',
+    'Check against the bank': 'راجع مع البنك',
+    'Does {name} say {amount}?': '{name} بيقول {amount}؟',
+    'Fix it': 'صلّحه',
 }
 
 
