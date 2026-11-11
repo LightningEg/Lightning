@@ -25,7 +25,7 @@ class MoneyFromOthersService:
         if not owner:
             return
         if self.transactions is None:
-            raise ValidationError("Ownership changes must be posted through the transaction service.")
+            raise ValidationError("Record this from the transaction screen.")
         parties = self.counterparties
         party = parties.resolve(owner.strip())
         party_id = party["id"] if party else parties.create(owner.strip())
@@ -45,7 +45,7 @@ class MoneyFromOthersService:
             self.sync_transaction(transaction_id, parsed, owner, account.id, amount, notes)
             return
         if self.transactions is None:
-            raise ValidationError("Ownership changes must be posted through the transaction service.")
+            raise ValidationError("Record this from the transaction screen.")
         parties = self.counterparties
         party = parties.resolve(owner.strip())
         if party and not party["active"]:
