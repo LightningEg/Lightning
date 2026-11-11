@@ -7,6 +7,7 @@ Reserved codes: none
 | Who | Work | Files | Since |
 |---|---|---|---|
 | Claude | O5 | `lightning/deposits/` | 2026-11-10 |
+| Claude | 12Y3: one PC page header | `lightning/ui/templates/base.html`, `partials/page_header.html`, `partials/section_tabs.html`, `tests/test_page_skeleton.py` | 2026-11-11 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
 ## Messages
