@@ -34,7 +34,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 - **NF-7AQ5** (Capture) The owner's Arabic words · S, in [Search answers a typed question](../issues/7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md)
 - **NF-10C4** (Feel) Owner steps 1-6 in order, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
 - **NF-10C5** (Feel) Review prices after 60 days of sales, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
-- **NF-10H4** (Own) Owner: prices, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
+- **NF-10H4** (Own) Owner: set the prices in the Console, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
 - **NF-10H5** (Own) Owner: the extra seats already sold, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
 
 ## By milestone
