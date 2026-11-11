@@ -82,7 +82,7 @@ def _whole_months(start: date, end: date) -> bool:
     return start.day == 1 and end.day == calendar.monthrange(end.year, end.month)[1]
 
 
-def range_text(start, end, locale: str = "en", today: date | None = None) -> str:
+def range_text(start, end, locale: str = "en", today: date | None = None, months: bool = True) -> str:
     """1–8 Nov, 28 Oct – 8 Nov, 28 Dec 2025 – 3 Jan 2026; whole months read as months: November 2026,
     Sep – Nov 2026, Dec 2025 – Jan 2026. yyyy-mm ends count as whole months."""
     if _as_date(start) is None and (m := _as_month(start)):
@@ -95,7 +95,7 @@ def range_text(start, end, locale: str = "en", today: date | None = None) -> str
     now = today or _today()
     if first == last:
         return day_text(first, locale, now)
-    if _whole_months(first, last):
+    if months and _whole_months(first, last):
         if (first.year, first.month) == (last.year, last.month):
             return month_text(first, locale)
         if first.year == last.year:
@@ -104,6 +104,8 @@ def range_text(start, end, locale: str = "en", today: date | None = None) -> str
             text = f"{_short(first.month, locale)} {first.year} – {_short(last.month, locale)} {last.year}"
         return _digits(text, locale)
     year = "" if last.year == now.year else f" {last.year}"
+    if first == last:
+        return day_text(first, locale, now)
     if (first.year, first.month) == (last.year, last.month):
         text = f"{first.day}–{last.day} {_short(last.month, locale)}{year}"
     elif first.year == last.year:
@@ -124,6 +126,23 @@ _TIP = re.compile(r"""(\s(?:title|aria-label|data-tip)=)(["'])(.*?)\2""", re.S |
 _STAMP = r"(?<![\w./-])(\d{4}-(?:0[1-9]|1[0-2])(?:-(?:0[1-9]|[12]\d|3[01]))?)(?![\w/]|-\d|\.\d)"
 _RANGE = re.compile(_STAMP + r"( to | لحد | – |–| - )" + _STAMP)
 _ONE = re.compile(_STAMP)
+# A format example stays as typed ("like 2026-01-31", "e.g. 2026-09", "زي 2026-01-31").
+_EXAMPLE = re.compile(r"(?:\blike|\be\.g\.|\bzay|زي|مثلًا|مثلا|مثل)\s*$")
+# "from 2026-09-01 to 2026-09-30" names its days: "from 1–30 Sep", never "from September 2026" (which reads "since").
+_FROM = re.compile(r"(?:\bfrom|\bbetween|من)\s*$")
+# "2026-09 days 1–14" -> "1–14 Sep"; Arabic "2026-09 من يوم 1 ليوم 14" -> "١–١٤ سبتمبر".
+_MONTH_DAYS = re.compile(r"(?<![\w./-])(\d{4})-(0[1-9]|1[0-2]) (?:days (\d{1,2})–(\d{1,2})|من يوم (\d{1,2}) ليوم (\d{1,2}))")
+
+
+def _month_days(m: re.Match, locale: str, now: date) -> str:
+    first, last = int(m.group(3) or m.group(5)), int(m.group(4) or m.group(6))
+    year, month = int(m.group(1)), int(m.group(2))
+    try:
+        return range_text(date(year, month, first), date(year, month, last), locale, now, months=False)
+    except ValueError:
+        return m.group(0)
+
+
 _ON_DAY = re.compile(r"\bon (today|yesterday)\b")
 _SENTENCE_START = re.compile(r"(?:^|[.:·؟?!\n]\s*|[(«“\"]\s*)$")
 
@@ -143,13 +162,20 @@ def human_text(text: str, locale: str = "en", today: date | None = None) -> str:
     if not text or not any(ch.isdigit() for ch in text):
         return text
     now = today or _today()
-    text = _RANGE.sub(lambda m: range_text(m.group(1), m.group(3), locale, now), text)
-    text = _ONE.sub(lambda m: _one(m, text, locale, now), text)
+    text = _MONTH_DAYS.sub(lambda m: _month_days(m, locale, now), text)
+    text = _RANGE.sub(lambda m: m.group(0) if _EXAMPLE.search(text[:m.start()]) else
+                      range_text(m.group(1), m.group(3), locale, now, months=not _FROM.search(text[:m.start()])), text)
+    text = _ONE.sub(lambda m: m.group(0) if _EXAMPLE.search(text[:m.start()]) else _one(m, text, locale, now), text)
     return _ON_DAY.sub(r"\1", text)  # "reached your account on today" -> "... today"
+
+
+_SPLIT_RANGE = re.compile(r'<bdi dir="ltr">' + _STAMP + r'</bdi>( to | لحد | – )<bdi dir="ltr">' + _STAMP + r'</bdi>')
 
 
 def human_dates(page: str, locale: str = "en", today: date | None = None) -> str:
     now = today or _today()
+    # Two dates each in its own isolate (BV-3BA) are still one range: "1 Oct to 30 Nov" reads "Oct – Nov 2026".
+    page = _SPLIT_RANGE.sub(lambda m: '<bdi dir="ltr">' + range_text(m.group(1), m.group(3), locale, now) + "</bdi>", page)
     out = []
     typed = False  # inside <bdi translate="no">: what the person typed stays as typed
     for piece in _PIECE.findall(page):

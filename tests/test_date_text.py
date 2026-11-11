@@ -55,3 +55,14 @@ def test_a_sentence_says_today_not_on_today():
     from lightning.ui.date_text import human_text
     assert human_text("reached your account on 2026-11-08", "en", NOW) == "reached your account today"
     assert human_text("Due 2026-11-07 · until 2026-12-01", "en", NOW) == "Due yesterday · until 1 Dec"
+
+
+def test_examples_from_ranges_and_month_days_read_right():
+    from lightning.ui.date_text import human_dates, human_text
+    assert human_text("yyyy-mm-dd, like 2026-01-31", "en", NOW) == "yyyy-mm-dd, like 2026-01-31"
+    assert human_text("Use the month format yyyy-mm, e.g. 2026-09.", "en", NOW).endswith("e.g. 2026-09.")
+    assert human_text("سنة-شهر-يوم، زي 2026-01-31", "ar", NOW).endswith("2026-01-31")
+    assert human_text("spread from 2026-09-01 to 2026-09-30.", "en", NOW) == "spread from 1–30 Sep."
+    assert human_text("Against 2026-09 days 1–14", "en", NOW) == "Against 1–14 Sep"
+    page = '<p><bdi dir="ltr">2026-10-01</bdi> to <bdi dir="ltr">2026-11-30</bdi></p>'
+    assert human_dates(page, "en", NOW) == '<p><bdi dir="ltr">Oct – Nov 2026</bdi></p>'
