@@ -156,7 +156,7 @@ jobs:
       - name: Shipped app window check (profile chooser in WebView2)
         shell: pwsh
         run: ./packaging/run_check.ps1 -Exe '${{ steps.shipped.outputs.exe }}' -Report reports/app-window.json -Arguments '--smoke' -TimeoutSeconds 120
-      - name: Closed-app reminders (NF-3AU3: the daily task is created and removed; --remind exits)
+      - name: 'Closed-app reminders (NF-3AU3): the daily task is created and removed, --remind exits'
         shell: pwsh
         run: |
           $exe = '${{ steps.shipped.outputs.exe }}'
