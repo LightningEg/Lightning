@@ -1,6 +1,7 @@
 """Arabic for the plain error sentences (IV-3BD). Keys are the exact English text."""
 
 ERRORS_AR = {
+    "That did not save": "ما اتحفظش",
     "This form came from outside Lightning, so it was not sent.": "الفورم ده جه من برّه لايتنينج، فمتبعتش.",
     "That request was not complete.": "الطلب ده مكانش كامل.",
     "That page cannot do this.": "الصفحة دي مبتعملش ده.",

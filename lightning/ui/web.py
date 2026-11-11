@@ -606,6 +606,14 @@ class RequestCache:
                 await self.app(scope, receive, send)
 
 
+def _back_path(request: Request) -> str:
+    """The page the person came from when it is a page of this app, else Home."""
+    parts = urlsplit(request.headers.get("referer", ""))
+    if parts.netloc.lower() != request.headers.get("host", "").lower() or not parts.path.startswith("/") or parts.path.startswith("//"):
+        return "/"
+    return parts.path + (f"?{parts.query}" if parts.query else "")
+
+
 def create_app(c: Container | None = None) -> FastAPI:
     from .routes import accounts, activity, bank_imports, birdview, budget, categories, counterparties, dashboard, deposits, exports, financial_health, gameya, history, integrity, investments, merge, payday, physical_items, planning, reimbursements, reserves, rules, search, settings, sms, transactions, weekly, zakat, analysis, workbench
 
@@ -680,7 +688,7 @@ def create_app(c: Container | None = None) -> FastAPI:
     async def invalid_request(request: Request, exc: ValidationError):
         if request.url.path.endswith(".json"):
             return JSONResponse({"error": exc.message}, status_code=422)
-        return render(request, "validation_error.html", status_code=422, message=exc.message)
+        return render(request, "validation_error.html", status_code=422, message=exc.message, back_path=_back_path(request))
 
     @app.exception_handler(NotFoundError)
     async def not_found(request: Request, exc: NotFoundError):

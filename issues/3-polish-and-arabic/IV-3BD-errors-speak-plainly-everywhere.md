@@ -42,8 +42,3 @@ Done when: `tests/test_arabic_no_english.py` gains a case that renders the locke
 Files: `lightning/bank_import_rows.py:277`, `lightning/bank_import_posting.py:50,127`, `lightning/investments/events.py:127`, `lightning/money_from_others.py:28`, `lightning/deposits/service.py:296`, `lightning/transactions/service.py:813`.
 Do: replace each `{exc}` with a fixed plain sentence that says what to do ("This file is not a CSV Lightning can read. Save it from your bank as CSV and try again."; "Row {n}: the fee is not a number."), log the exception, and rewrite the developer wording as A14 voice ("Record this from the transaction screen." / "You can take out at most {amount} from this certificate." / "That transaction no longer exists."). Add Arabic for each.
 Done when: `grep -rn "{exc}" lightning --include=*.py` finds none in a message shown to people, and `tests/test_messages_translated.py` (3BD2) still passes. `python -m pytest tests/test_bank_import*.py -q`.
-
-## 3BD5 The validation page names the problem, not "Check your setup" · S · #413
-Files: `lightning/ui/templates/validation_error.html`, `lightning/ui/templates/phone/` (its phone twin if one exists: `ls lightning/ui/templates/phone | grep -i error`).
-Do: title "That did not save" (Arabic: "ما اتحفظش"); the message as the lead line; one Back button to `request.headers.referer` when it is a same-origin path, else Overview/Home; drop the three fixed links. Follows A09 (answer first) and A14.
-Done when: `tests/test_error_pages.py` posts an invalid amount and finds the new title and a Back link, and no "Check your setup". Check A16 by eye on a screenshot.

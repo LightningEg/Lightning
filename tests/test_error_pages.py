@@ -39,3 +39,13 @@ def test_wrong_method_and_empty_export_are_branded_pages(client):
 def test_pc_sorted_sheet_redirects_to_transactions(client):
     r = client.get("/transactions/sorted", follow_redirects=False)
     assert r.status_code == 303 and r.headers["location"] == "/transactions"
+
+
+def test_validation_page_names_the_problem_and_goes_back(client):
+    r = client.post("/exports/reevaluations", data={}, headers={"Referer": "http://testserver/investments?x=1"})
+    assert r.status_code == 422
+    assert "That did not save" in r.text and "Check your setup" not in r.text
+    assert "Select between 1 and 10,000 records" in r.text
+    assert 'href="/investments?x=1"' in r.text
+    r = client.post("/exports/reevaluations", data={})  # no Referer: Home
+    assert 'class="btn primary" href="/"' in r.text
