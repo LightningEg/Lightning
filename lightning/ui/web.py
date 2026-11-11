@@ -381,6 +381,10 @@ def render(request: Request, name: str, status_code: int = 200, **context) -> HT
         _ROUND_MONEY.reset(token)
 
 
+_HTTP_MESSAGES = {400: "That request was not complete.",
+                  403: "This form came from outside Lightning, so it was not sent.",
+                  405: "That page cannot do this."}
+
 _BARE_ERROR_PAGE = ("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
                     "<title>Something went wrong</title><body style='font:16px system-ui;margin:12vh auto;max-width:28rem;"
                     "padding:0 24px;color:#0D2233;background:#F5F8F7'><h1>Something went wrong</h1>"
@@ -487,7 +491,7 @@ ARABIC_UI_SRC = "/static/ui-ar.js?v=" + hashlib.sha256(_ARABIC_UI_JS).hexdigest(
 
 # The phone's stylesheets as one cached file (phone roadmap M8): one request instead of six, in this order, which is
 # the cascade the shells rely on (style, then phone, then the theme layers). fonts.css stays apart (relative urls).
-PHONE_CSS = ("style{rtl}.css", "phone{rtl}.css", "themes.generated.css", "theme-surfaces.css",
+PHONE_CSS = ("phone-base{rtl}.css", "phone{rtl}.css", "themes.generated.css", "theme-surfaces.css",
              "theme-materials.css", "visual-flow.css")
 
 
@@ -602,6 +606,14 @@ class RequestCache:
                 await self.app(scope, receive, send)
 
 
+def _back_path(request: Request) -> str:
+    """The page the person came from when it is a page of this app, else Home."""
+    parts = urlsplit(request.headers.get("referer", ""))
+    if parts.netloc.lower() != request.headers.get("host", "").lower() or not parts.path.startswith("/") or parts.path.startswith("//"):
+        return "/"
+    return parts.path + (f"?{parts.query}" if parts.query else "")  # not money
+
+
 def create_app(c: Container | None = None) -> FastAPI:
     from .routes import accounts, activity, bank_imports, birdview, budget, categories, counterparties, dashboard, deposits, exports, financial_health, gameya, history, integrity, investments, merge, payday, physical_items, planning, reimbursements, reserves, rules, search, settings, sms, transactions, weekly, zakat, analysis, workbench
 
@@ -617,7 +629,7 @@ def create_app(c: Container | None = None) -> FastAPI:
             for header in ("origin", "referer"):
                 value = request.headers.get(header)
                 if value and urlsplit(value).netloc.lower() != host:
-                    return PlainTextResponse("Cross-origin form submission blocked.", status_code=403)
+                    return render(request, "error.html", status_code=403, message="This form came from outside Lightning, so it was not sent.")
         return await call_next(request)
 
     @app.middleware("http")
@@ -676,7 +688,7 @@ def create_app(c: Container | None = None) -> FastAPI:
     async def invalid_request(request: Request, exc: ValidationError):
         if request.url.path.endswith(".json"):
             return JSONResponse({"error": exc.message}, status_code=422)
-        return render(request, "validation_error.html", status_code=422, message=exc.message)
+        return render(request, "validation_error.html", status_code=422, message=exc.message, back_path=_back_path(request))
 
     @app.exception_handler(NotFoundError)
     async def not_found(request: Request, exc: NotFoundError):
@@ -684,10 +696,13 @@ def create_app(c: Container | None = None) -> FastAPI:
 
     @app.exception_handler(StarletteHTTPException)
     async def http_problem(request: Request, exc: StarletteHTTPException):
-        """An unknown address gets the Not found page; other HTTP errors keep their own answer."""
-        if exc.status_code == 404 and not request.url.path.startswith("/static/"):
+        """An unknown address gets the Not found page; every other HTTP error gets the branded page too."""
+        if request.url.path.startswith("/static/"):
+            return await http_exception_handler(request, exc)
+        if exc.status_code == 404:
             return render(request, "not_found.html", status_code=404, message="That page does not exist.")
-        return await http_exception_handler(request, exc)
+        message = _HTTP_MESSAGES.get(exc.status_code, "That request could not be completed.")
+        return render(request, "error.html", status_code=exc.status_code, message=message)
 
     @app.exception_handler(Exception)
     async def unexpected(request: Request, exc: Exception):

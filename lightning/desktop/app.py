@@ -25,7 +25,13 @@ def run(argv=None) -> int:
     parser.add_argument("--from", dest="from_version", help=argparse.SUPPRESS)
     parser.add_argument("--after-update", metavar="OLD_VERSION", help=argparse.SUPPRESS)
     parser.add_argument("--update-failed", metavar="NEW_VERSION", help=argparse.SUPPRESS)
+    # NF-3AU3: the daily scheduled task's own launch: announce today's reminders and exit, no window, no profile.
+    parser.add_argument("--remind", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args(argv)
+    if args.remind:
+        from lightning.desktop.reminder_task import remind
+        remind()
+        return 0
     if args.finish_update:
         if not (args.install and args.old_pid and args.from_version):
             parser.error("--finish-update needs --install, --old-pid and --from")
@@ -49,6 +55,9 @@ def run(argv=None) -> int:
             from lightning.runtime.http import Host
             from lightning.desktop.window import run_window
             stage = "local-server"
+            from lightning.desktop.reminder_task import switch as reminder_switch
+            from lightning.workflows import reminder_schedule
+            reminder_schedule.ON_SWITCH.append(reminder_switch)   # NF-3AU3: reminders on/off adds or removes the daily task
             with ExitStack() as stack:
                 root = args.profile_root
                 if args.smoke:

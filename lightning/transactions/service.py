@@ -832,7 +832,7 @@ class TransactionService:
     def get_by_ref(self, ref: str) -> Transaction:
         found = self.repo.get_by_ref((ref or "").strip().upper())
         if not found:
-            raise NotFoundError(f"Transaction {ref} not found.")
+            raise NotFoundError("That transaction no longer exists.")
         return found
 
     def recorded_since(self, moment: str) -> int:

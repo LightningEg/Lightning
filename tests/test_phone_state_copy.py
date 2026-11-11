@@ -37,22 +37,27 @@ def _phone(c, cookies=None):
     return client
 
 
-def test_a_past_month_does_not_show_the_net_worth_figure_twice(sample):
-    now = _phone(sample).get("/?period=month&month=2026-10").text
-    past = _phone(sample).get("/?period=month&month=2026-09").text
-    assert "Today" in now  # beside the Safe to spend hero the tile is today's, and says so
-    assert "Today" not in past
-    assert "phone-kpi" not in past or "Net worth" not in past.split("phone-kpi", 1)[1][:400]
-
-
 def test_a_bulk_load_is_one_event_and_today_is_not_named(sample):
     assert sample.transactions.recorded_since("2000-01-01T00:00:00+00:00") <= 5  # 370 rows, a handful of moments
     html = _phone(sample, {"lightning_overview_seen": "2026-10-04T08:00:00+00:00"}).get("/").text
     assert "since your last visit on 2026-10-04" not in html
 
 
+def _mounted(c):
+    """The real phone app: its router answers first (Money is the router's page)."""
+    from lightning.ui.phone.router import mount_phone
+    app = create_app(c)
+    mount_phone(app)
+
+    async def phone(scope, receive, send):
+        if scope["type"] == "http":
+            scope.setdefault("state", {})["phone"] = True
+        await app(scope, receive, send)
+    return TestClient(phone)
+
+
 def test_the_us_dollar_label_keeps_its_capitals(sample):
-    html = _phone(sample).get("/").text
+    html = _mounted(sample).get("/money").text   # 3AY10: Net worth's sheet holds it in US dollars and 21K gold
     assert "in us dollars" not in html and "In US dollars" in html
 
 

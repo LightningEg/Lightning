@@ -43,8 +43,12 @@ def test_to_review_is_one_card_and_not_now_moves_it_out_until_tomorrow(client):
     if not before:
         assert "All sorted" in page
         return
-    assert f"1 of {len(before)}" in page and "Not now" in page and page.count('id="card-heading"') == 1
-    first = before[0]
+    from lightning.ui.phone.screens.review_cards import review_cards
+    cards = review_cards(c, date(2026, 10, 4), before)   # 3AY8: one row per card; inbox items keep Not now
+    assert f"1 of {len(cards)}" in page and page.count('id="card-heading"') == 1
+    at = next(n for n, card in enumerate(cards) if card.review_id)
+    assert "Not now" in http.get(f"/activity?tab=review&i={at}").text
+    first = next(i for i in before if i["review_id"] == cards[at].review_id)
     done = http.post("/activity/not-now", data={"identity": first["review_id"]}, follow_redirects=False)
     assert done.status_code in (302, 303)
     after = screen.review_items(c, date(2026, 10, 4))

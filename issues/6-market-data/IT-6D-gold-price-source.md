@@ -4,7 +4,7 @@ type: tech
 pillar: own
 size: S
 model: sonnet
-status: blocked
+status: parked
 blocked_by: a test from a home connection
 created: 2026-10-19
 by: Claude

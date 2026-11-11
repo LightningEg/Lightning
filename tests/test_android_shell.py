@@ -100,3 +100,21 @@ def test_reminders_never_start_the_data_sync_service():
     manifest = (JAVA.parents[3] / 'AndroidManifest.xml').read_text()
     assert '<service android:name=".ReminderJobService" android:exported="false"' in manifest
     assert 'android.permission.BIND_JOB_SERVICE' in manifest.split('.ReminderJobService')[1].split('/>')[0]
+
+
+def test_the_closed_app_reminder_job_reads_only_the_schedule_file():
+    """NF-3AU4: a daily job posts today's scheduled reminders with Lightning closed. It reads files/reminder-schedule.json
+    (days, kinds, opaque ids), never the server or a session; its words come from the kind; the open app's poll schedules
+    and cancels it; the Python side writes the schedule where the job reads it."""
+    job = (JAVA / 'ClosedReminderJobService.java').read_text()
+    assert 'reminder-schedule.json' in job and 'getFilesDir()' in job
+    assert '/reminders/due.json' not in job and 'Cookie' not in job and 'reminderCookie' not in job and 'HttpURLConnection' not in job
+    assert 'textFor(item.optString("kind"' in job and '"A payment is due tomorrow."' in job
+    assert 'setRequiredNetworkType' not in job and 'java.nio.file' not in job   # a file on the phone; API 24
+    assert 'ReminderNotifications.announce(' in job
+    manifest = (JAVA.parents[3] / 'AndroidManifest.xml').read_text()
+    assert '<service android:name=".ClosedReminderJobService" android:exported="false"' in manifest
+    assert 'android.permission.BIND_JOB_SERVICE' in manifest.split('.ClosedReminderJobService')[1].split('/>')[0]
+    assert 'ClosedReminderJobService.schedule(this)' in MAIN and 'ClosedReminderJobService.cancel(this)' in MAIN
+    android_py = (JAVA.parents[3] / 'python' / 'lightning_android.py').read_text()
+    assert 'LIGHTNING_REMINDER_SCHEDULE' in android_py and 'reminder-schedule.json' in android_py

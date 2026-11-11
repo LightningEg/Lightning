@@ -22,6 +22,7 @@ import hashlib
 import json
 import os
 import re
+import struct
 import subprocess
 import sys
 import zipfile
@@ -270,6 +271,50 @@ def manifest_problems(manifest: str, code: str, name: str) -> list[str]:
     return problems
 
 
+PAGE = 0x4000  # 16 KB: Play refuses a bundle targeting Android 15 or later whose native libraries need smaller pages
+
+
+def load_alignments(elf: bytes) -> list[int]:
+    """The alignment of each LOAD segment of a native library (ELF, 32 or 64 bit, little endian)."""
+    if elf[:4] != b"\x7fELF" or elf[5] != 1:
+        raise BuildError("not a little-endian ELF library")
+    wide = elf[4] == 2
+    phoff, = struct.unpack_from("<Q" if wide else "<I", elf, 32 if wide else 28)
+    size, count = struct.unpack_from("<HH", elf, 54 if wide else 42)
+    found = []
+    for n in range(count):
+        at = phoff + n * size
+        if struct.unpack_from("<I", elf, at)[0] == 1:  # PT_LOAD
+            found.append(struct.unpack_from("<Q" if wide else "<I", elf, at + (48 if wide else 28))[0])
+    return found
+
+
+def page_problems(aab: Path) -> list[str]:
+    """Native libraries in the bundle that could not load on a phone with 16 KB memory pages: the ones in lib/, and the
+    Python extension modules Chaquopy carries inside its asset archives and loads from there."""
+    import io
+    problems = []
+
+    def look(label: str, elf: bytes) -> None:
+        try:
+            short = [a for a in load_alignments(elf) if a < PAGE]
+        except (BuildError, struct.error, IndexError) as error:
+            problems.append(f"{label}: cannot read its segments ({error})")
+            return
+        if short:
+            problems.append(f"{label}: a LOAD segment is aligned to {min(short):#x}, not 16 KB ({PAGE:#x})")
+
+    with zipfile.ZipFile(aab) as bundle:
+        for name in sorted(bundle.namelist()):
+            if "/lib/" in name and name.endswith(".so"):
+                look(name, bundle.read(name))
+            elif name.endswith(".imy"):
+                with zipfile.ZipFile(io.BytesIO(bundle.read(name))) as inner:
+                    for module in sorted(n for n in inner.namelist() if n.endswith(".so")):
+                        look(f"{name}!{module}", inner.read(module))
+    return problems
+
+
 def check_aab(aab: Path, bundletool: Path, code: str, name: str) -> dict:
     def run(*args: str) -> str:
         result = subprocess.run(["java", "-jar", str(bundletool), *args], capture_output=True, text=True)
@@ -277,7 +322,7 @@ def check_aab(aab: Path, bundletool: Path, code: str, name: str) -> dict:
             raise BuildError(f"bundletool {args[0]} failed: {result.stderr.strip() or result.stdout.strip()}")
         return result.stdout
     run("validate", f"--bundle={aab}")
-    problems = manifest_problems(run("dump", "manifest", f"--bundle={aab}"), code, name)
+    problems = manifest_problems(run("dump", "manifest", f"--bundle={aab}"), code, name) + page_problems(aab)
     if problems:
         raise BuildError("The Play bundle is not the build it should be:\n- " + "\n- ".join(problems))
     return {"file": aab.name, "size": aab.stat().st_size, "sha256": sha256(aab), "application_id": APP_ID,

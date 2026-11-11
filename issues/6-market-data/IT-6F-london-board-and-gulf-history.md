@@ -4,7 +4,7 @@ type: tech
 pillar: own
 size: S
 model: opus
-status: ready
+status: parked
 created: 2026-11-04
 by: Claude
 ---

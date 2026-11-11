@@ -3,7 +3,7 @@ was: 6E
 title: Additional broker and institution logos still needed
 type: owner
 pillar: feel
-status: ready
+status: parked
 created: 2026-10-19
 by: Claude
 ---

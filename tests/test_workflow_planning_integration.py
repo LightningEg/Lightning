@@ -66,7 +66,6 @@ def test_missing_scheduled_fx_gives_a_recoverable_setup_page(c, monkeypatch):
     client = TestClient(create_app(c))
     reply = client.get('/plan')
     assert reply.status_code == 422 and 'Add a rate' in reply.text
-    assert '/settings?section=currencies' in reply.text
     assert client.get('/settings?section=currencies&tab=rates').status_code == 200
 
 

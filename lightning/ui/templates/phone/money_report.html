@@ -5,7 +5,10 @@
 {% block heading %}<h1>{{ 'Report'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
 {% set s = screen %}
-<div class="phone-chips" role="tablist">{% for key, name in s.keys %}<a class="phone-chip{{ ' is-chosen' if s.key == key }}" role="tab" aria-selected="{{ 'true' if s.key == key else 'false' }}" href="/money/report?period={{ key }}">{{ name|tr(locale) }}</a>{% endfor %}</div>
+<form class="phone-chips" method="get" action="/money/report" role="group" aria-label="{{ 'Period'|tr(locale) }}">{% for key, name in s.keys %}<button class="phone-chip{{ ' is-chosen' if s.key == key }}" type="submit" name="period" value="{{ key }}" aria-pressed="{{ 'true' if s.key == key else 'false' }}">{{ name|tr(locale) }}</button>{% endfor %}</form>
+<form class="phone-form phone-report-custom" method="get" action="/money/report"><input type="hidden" name="period" value="custom">
+  <label>{{ 'From'|tr(locale) }}<input type="date" name="date_from" value="{{ s.start }}" required></label><label>{{ 'To'|tr(locale) }}<input type="date" name="date_to" value="{{ s.end }}" required></label>
+  <button class="btn phone-save">{{ 'Custom'|tr(locale) }}</button></form>
 <section class="phone-hero has-seam" aria-labelledby="change-heading">
   <div id="change-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Change in what you own'|tr(locale) }}</div>
   {% if s.change is not none %}<div class="phone-lead{{ ' is-negative' if s.change < 0 }}">{{ s.change|money(True) }} <small>{{ base }}</small></div>

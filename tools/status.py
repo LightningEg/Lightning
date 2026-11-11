@@ -99,7 +99,7 @@ def items():
     milestones, problems = ISSUES.load()
     if problems:
         raise SystemExit("\n".join(problems))
-    return [i for m in milestones for i in m["items"]], milestones
+    return [i for m in milestones for i in m["items"] if i["status"] != "parked"], milestones
 
 
 def short(title: str, limit: int = 100) -> str:
@@ -177,10 +177,14 @@ def status_page(all_items, milestones) -> str:
     lines += ["", f"{len(all_items)} open items in {len(milestones)} milestones.", "", "## Being built now", ""]
     lines += [f"- **{i['tag']}-{i['code']}** ({PILLARS[i['pillar']]}) {link(i, '../')}" for i in building] or ["Nothing."]
     lines += ["", "## Waiting for the owner", ""]
-    lines += [f"- **{i['tag']}-{i['code']}** ({PILLARS[i['pillar']]}) {link(i, '../')}: {i['status']}" for i in owner] or ["Nothing."]
+    steps = [f"- **{i['tag']}-{s['code']}** ({PILLARS[i['pillar']]}) {s['title']}, in {link(i, '../')}"
+             for i in all_items for s in i["steps"] if s["size"] == "owner"]
+    lines += [f"- **{i['tag']}-{i['code']}** ({PILLARS[i['pillar']]}) {link(i, '../')}: {i['status']}" for i in owner] + steps or ["Nothing."]
     lines += ["", "## By milestone", "", "| Milestone | Open | Goal |", "|---|---|---|"]
     for m in milestones:
-        lines.append(f"| {m['n']} {m['title']} | {len(m['items'])} | {m['goal']} |")
+        lines.append(f"| {m['n']} {m['title']} | {sum(1 for i in m['items'] if i['status'] != 'parked')} | {m['goal']} |")
+    parked = sum(1 for m in milestones for i in m["items"] if i["status"] == "parked")
+    lines += ["", f"{parked} more are parked: kept, not planned, listed at the end of the plan."] if parked else []
     lines += ["", f"{len(big)} large items still need splitting into steps before they are posted for contributors "
                   f"(size L: {COINS['L']} coins or more).", "",
               "The full plan is [issues/INDEX.md](../issues/INDEX.md); the pillars are explained in [the map](README.md)."]

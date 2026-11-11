@@ -125,7 +125,7 @@ Not checked: online prices, Gam'eya writes (no circle in either dataset, 5I), CS
 - Needs you, the one inbox, carries none of these. Neither does it show a category over plan this month, or Health's own "Needs you" bands: the emergency fund at 0.8 months is flagged on Health and missing from the list.
 - The fix is wiring: [7L2](https://github.com/LightningEg/Lightning/blob/6a88ed6c8079747595a91f5918741a0807de5b84/issues/7-planning-import-and-search/7L-needs-you-as-the-smart-inbox.md).
 
-**Redundancy, already filed and still open in [3G](https://github.com/LightningEg/Lightning/blob/40f27d7/issues/3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) and [3H](../IV-3H-tab-by-tab-review.md):**
+**Redundancy, already filed and still open in [3G](https://github.com/LightningEg/Lightning/blob/40f27d7/issues/3-polish-and-arabic/3G-one-organism-review-of-every-tab.md) and [3H](https://github.com/LightningEg/Lightning/blob/6e4d540/issues/12-desktop-ux/IV-3H-tab-by-tab-review.md):**
 
 - **Two pages for one transaction:** `/transactions/<id>` and `/activity/<id>`, under different tab bars.
 - **One word, two values:**

@@ -20,7 +20,7 @@ PHONE_TEMPLATES = "phone/"
 PRESENTERS: dict[str, str] = {
     "budget.html": "budget",
     "register.html": "register",
-    "dashboard/index.html": "overview",
+    "dashboard/index.html": "home",
     "search.html": "search",
     "planning/plan.html": "cash_planning",
     "planning/upcoming.html": "upcoming",
