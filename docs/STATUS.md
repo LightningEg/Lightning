@@ -14,9 +14,9 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | [Everywhere](pillars/everywhere.md) | 6 | 2 | 4 |  |  |  |
 | [Feel](pillars/feel.md) | 12 | 3 | 8 |  | 1 | 1 |
 | [Build](pillars/build.md) | 4 |  | 3 |  | 1 |  |
-| [Reach](pillars/reach.md) | 3 |  | 3 |  |  | 1 |
+| [Reach](pillars/reach.md) | 4 |  | 4 |  |  |  |
 
-47 open items in 11 milestones.
+48 open items in 11 milestones.
 
 ## Being built now
 
@@ -31,7 +31,6 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 ## Waiting for the owner
 
 - **OW-3AI** (Feel) [Additional broker and institution logos still needed](../issues/3-polish-and-arabic/OW-3AI-institution-logos.md): ready
-- **OW-8D** (Reach) [For Geeks audit ideas left for the owner to choose](../issues/8-website/OW-8D-for-geeks-audit-ideas-to-choose.md): ready
 
 ## By milestone
 
@@ -43,7 +42,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 6 Market data | 4 | Prices arrive by themselves, from sources Lightning may redistribute. |
 | 7 Planning, import and search | 4 | Getting a month in takes minutes: any bank file, any old app, one search box. |
-| 8 Website | 3 | The site is honest, quick and in step with the app. |
+| 8 Website | 4 | The site is honest, quick and in step with the app. |
 | 9 Later | 2 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 4 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
 | 11 Phone UX | 2 | The phone is its own product: a few places that each answer one question, quick jobs in three taps, and no PC page squeezed into one column. |
