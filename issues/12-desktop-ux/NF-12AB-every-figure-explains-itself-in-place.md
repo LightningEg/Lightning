@@ -22,7 +22,7 @@ The working itself exists: Cash planning's "How safe to spend is worked out" and
 
 A headline figure (a Lead, a KPI, a phone hero) is itself the control. Clicking or tapping it opens its working in place: the rows that add up to it, as Cash planning draws them, what changed it since the comparison, and one link, "Open <its home page>" (A09.2: one home per figure). One label for the text link where a link is needed. The rows come from the service that owns the figure; no arithmetic in templates or JavaScript.
 
-Owner, 2026-11-10 (12AB1): on the PC the working opens under the figure in its card; on the phone in a sheet from the bottom; the one label is "How it adds up". Next: write it into A08 and C06 in both repos, then 12AB2.
+Owner, 2026-11-10 (12AB1): on the PC the working opens under the figure in its card; on the phone in a sheet from the bottom; the one label is "How it adds up". Written into A08.1 (PC) and C06.1 (phone) in both repos (2026-11-11). Next: 12AB2.
 
 ## How to work on this item
 
