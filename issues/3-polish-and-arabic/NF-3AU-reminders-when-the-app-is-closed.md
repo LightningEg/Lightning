@@ -27,14 +27,6 @@ The owner picks the approach (3AU1). Then: a small reminder schedule written whi
 
 Each step is one pull request. Read only the files a step names. Run the step's test command, then `python -m pytest tests/test_workflow_views_review.py tests/test_review_decisions.py -q`; delete the step's heading in the same commit. 3AU3 and 3AU4 need a real Windows / Android run as evidence: run the Windows or Android workflow by hand only for those steps (AGENTS.md §2).
 
-## 3AU3 Windows: the evidence run · S · opus
-Built (2026-11-11): `lightning/desktop/reminder_task.py` (`register`/`unregister` run the per-user `schtasks` lines;
-`remind()` shows one notice for today's items, notes their ids in `native-reminders.json`, ignores a missing or stale
-schedule), the exe's hidden `--remind`, and `reminder_schedule.ON_SWITCH`, which the Windows app fills so turning
-reminders on or off adds or removes the task (`tests/test_reminder_task.py`). The Windows job in
-`.github/workflows/desktop-probe.yml` creates the task for the shipped exe, runs `--remind` and deletes it.
-Left: one hand-run of that workflow (Windows minutes) showing the step green; then delete this step.
-
 ## 3AU4 Android: the evidence run · S · opus
 Built (2026-11-11): `ClosedReminderJobService.java` (a daily job; reads only `files/reminder-schedule.json`; today's
 items as one notice with the kind's fixed sentence, English or Arabic by the phone's language; ids shared with the open
@@ -42,5 +34,6 @@ app through `ReminderNotifications.announce`), declared with `BIND_JOB_SERVICE`;
 it while reminders are on and cancels it when off; `lightning_android.start` sets `LIGHTNING_REMINDER_SCHEDULE`
 (`tests/test_android_shell.py`). The name `ReminderJobService` was taken by IT-11J's session job. Not persisted across a
 reboot: that needs `RECEIVE_BOOT_COMPLETED`, outside `android/permissions` (an owner choice); opening Lightning
-schedules it again. Left: one Android workflow run by hand builds the APK, then a device check (app swiped away, a
-fixture schedule for today) shows one notification with no figure.
+schedules it again. The APK builds and passes its permission check (Phone app run 43062171133, PR #533). 3AU3's Windows
+run passed the same day (run 43062231933: task created, `--remind` exits 0, task removed). Left: the device check, done
+with the owner's phone check (3AY13): app swiped away, a fixture schedule for today, one notification with no figure.
