@@ -95,7 +95,10 @@ def test_home_leads_with_left_for_everyday_and_cash_planning_with_safe_to_spend(
     everyday = c.forecaster.everyday("2026-11", day)
     phone = _client(c, True)
     home = _tokens(phone.get("/home").text)
-    assert home[home.index("Left for everyday") + 1] == f"{everyday.everyday_left:,.0f}"
+    hero = home[home.index("Left for everyday") + 1:]
+    if hero[0].startswith("Safe to spend"):   # the note on the label's right opens Cash planning
+        hero = hero[1:]
+    assert hero[0] == f"{everyday.everyday_left:,.0f}"
     assert any(t.startswith(f"About {everyday.per_day:,.0f} a day") for t in home)   # the line is the hero's own idea
     plan = _tokens(phone.get("/plan").text)
     pc_plan = _tokens(_client(c, False).get("/plan").text)
