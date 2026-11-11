@@ -55,7 +55,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BC3 | ↳ Counts built in English before translation | | | M | Sonnet | |
 | IV-3BC4 | ↳ Counts built in the browser | | | S | Sonnet | |
 | **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page - no JSON, plain text, raw exceptions or half-English](3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | improvement, visual | Feel | M | Sonnet | ready |
-| IV-3BD1 | ↳ No raw responses: 403, 400 and plain text get the branded page ([#409](https://github.com/LightningEg/Lightning/issues/409)) | | | S | Sonnet | |
 | IV-3BD2 | ↳ Every validation message has Arabic ([#410](https://github.com/LightningEg/Lightning/issues/410)) | | | M | Sonnet | |
 | IV-3BD3 | ↳ Half-English sentences and internal codes ([#411](https://github.com/LightningEg/Lightning/issues/411)) | | | S | Sonnet | |
 | IV-3BD4 | ↳ Import errors never show Python's text ([#412](https://github.com/LightningEg/Lightning/issues/412)) | | | S | Sonnet | |

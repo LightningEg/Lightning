@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Request
 from fastapi import Response
 
-from lightning.core.errors import LightningError
+from lightning.core.errors import LightningError, ValidationError
 from lightning.investments.domain import DEFAULT_SALE_FACTOR
 from lightning.core.money import ZERO
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
@@ -427,8 +427,10 @@ async def save_liquidation_factor(request: Request, asset_class_id: int):
         form = await request.form()
         with settled_save(request, container(request)):
             c.investments.set_liquidation_factor(asset_class_id, str(form.get("factor", "")))
-    except (LightningError, ValueError) as exc:
-        return Response(exc.message if isinstance(exc, LightningError) else "Invalid value.", status_code=400, media_type="text/plain")
+    except LightningError as exc:
+        return Response(exc.message, status_code=400, media_type="text/plain")
+    except ValueError:
+        raise ValidationError("Enter a number for this value.")
     return Response(status_code=204)
 
 
