@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1] / "lightning"
 CALLS = {"ValidationError", "NotFoundError", "ProfileError"}
 ALLOWED: dict[str, str] = {  # message -> reason (keep under 10)
     "changed": "internal marker: restore.py catches it and never shows it",
+    "{n}: {n}": "a record reference plus an already-translated message: the UI translates each side of the colon",
     "damaged": "internal marker: session.py catches it and never shows it",
 }
 

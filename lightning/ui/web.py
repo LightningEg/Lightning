@@ -611,7 +611,7 @@ def _back_path(request: Request) -> str:
     parts = urlsplit(request.headers.get("referer", ""))
     if parts.netloc.lower() != request.headers.get("host", "").lower() or not parts.path.startswith("/") or parts.path.startswith("//"):
         return "/"
-    return parts.path + (f"?{parts.query}" if parts.query else "")
+    return parts.path + (f"?{parts.query}" if parts.query else "")  # not money
 
 
 def create_app(c: Container | None = None) -> FastAPI:
