@@ -35,8 +35,12 @@ reminders on or off adds or removes the task (`tests/test_reminder_task.py`). Th
 `.github/workflows/desktop-probe.yml` creates the task for the shipped exe, runs `--remind` and deletes it.
 Left: one hand-run of that workflow (Windows minutes) showing the step green; then delete this step.
 
-## 3AU4 Android: a daily job shows the schedule with the app closed · M · opus
-3AU2 is built: `lightning/workflows/reminder_schedule.py` (`read`, `KIND_TEXT`, `default_path()`), written by `ReminderService.upcoming()` on turning reminders on, on the daily `/reminders/due.json` poll and on lock.
-Files: `android/app/src/main/java/org/lightning/app/ReminderNotifications.java` (`deliver`, `safeHrefForActivity`), `JournalSyncScheduler.java` and `JournalSyncJobService.java` (copy their JobScheduler pattern), new `ReminderJobService.java`, `android/app/src/main/AndroidManifest.xml` (a `<service ... android:permission="android.permission.BIND_JOB_SERVICE">` like `.JournalSyncJobService`), `android/app/src/main/python/lightning_android.py` (set `LIGHTNING_REMINDER_SCHEDULE` to a file under the app's files dir; without it nothing is written on Android), `tests/test_android_shell.py`.
-Do: a periodic job (once a day, `setPersisted(true)`, no network needed) that reads the schedule file, posts today's items on the existing `native-reminders` channel through `deliver`'s notification code (generic text from the kind; tap opens `MainActivity`, which shows the lock screen), and does nothing when the file is missing, stale or `POST_NOTIFICATIONS` is not granted. Schedule it when reminders are turned on, cancel it when off. No new library (no WorkManager; see skill dependency-change if one seems needed).
-Done when: `tests/test_android_shell.py` gains a static test that the manifest declares `.ReminderJobService` with `BIND_JOB_SERVICE`, that `ReminderJobService.java` reads only the schedule file (no `/reminders/due.json`, no cookie) and that its notification text comes from the kind; `python -m pytest tests/test_android_shell.py tests/test_journal_android.py -q`; then one Android workflow run by hand builds the APK, and a device check (app swiped away, a fixture schedule for today) shows one notification with no figure.
+## 3AU4 Android: the evidence run · S · opus
+Built (2026-11-11): `ClosedReminderJobService.java` (a daily job; reads only `files/reminder-schedule.json`; today's
+items as one notice with the kind's fixed sentence, English or Arabic by the phone's language; ids shared with the open
+app through `ReminderNotifications.announce`), declared with `BIND_JOB_SERVICE`; `MainActivity.checkReminders` schedules
+it while reminders are on and cancels it when off; `lightning_android.start` sets `LIGHTNING_REMINDER_SCHEDULE`
+(`tests/test_android_shell.py`). The name `ReminderJobService` was taken by IT-11J's session job. Not persisted across a
+reboot: that needs `RECEIVE_BOOT_COMPLETED`, outside `android/permissions` (an owner choice); opening Lightning
+schedules it again. Left: one Android workflow run by hand builds the APK, then a device check (app swiped away, a
+fixture schedule for today) shows one notification with no figure.
