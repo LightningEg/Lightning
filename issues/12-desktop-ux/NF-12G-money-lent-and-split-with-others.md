@@ -40,7 +40,7 @@ Each step is one pull request. Read only the files a step names; money rules are
 `^## `). Run the step's test command, then `python -m pytest tests/test_issues.py -q`; for a visible change also
 `python -m pytest tests/test_mohab_year.py -q`. Delete the step's heading in the same commit (AGENTS.md §3).
 
-## 12G6 Lend, paid back and forgive on the person's page (PC) · M · sonnet
+## 12G6 Lend, paid back and forgive on the person's page (PC) · M · sonnet · #529
 Needs 12G2 merged first.
 Files: `lightning/ui/routes/counterparties.py` (`counterparty_page`, line ~139; add three POST routes),
 `lightning/workflows/linked.py` (`counterparty`, line ~168: add `owed` = `PeopleMoneyService.balance`),
@@ -53,7 +53,7 @@ Done when: new `tests/test_people_money_screens.py` (TestClient as in `tests/tes
 5,000, repay 3,000, forgive 2,000 and reads 5,000, 2,000 and nothing owed on the page; the Arabic page has no English
 (`python -m pytest tests/test_people_money_screens.py tests/test_arabic_no_english.py -q`).
 
-## 12G3 A cost split with others: the service · M · opus
+## 12G3 A cost split with others: the service · M · opus · #528
 Needs 12G2 merged first.
 Files: `lightning/people_money.py`, `lightning/transactions/service.py` (`post` line ~421, `record_outflow` ~83).
 Do: `PeopleMoneyService.split(day, account_id, total, category_id, shares: list[tuple[person, Decimal]], notes="")`
