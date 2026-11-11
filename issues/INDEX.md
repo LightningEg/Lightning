@@ -180,17 +180,10 @@ The site is honest, quick and in step with the app.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-8F** | [Home and Features show the app, not only words](8-website/IV-8F-home-and-features-show-the-app.md) | improvement, visual | Reach | M | Sonnet | ready |
-| IV-8F1 | ↳ Hero: one sentence and the real Overview | | | S | Sonnet | |
-| IV-8F2 | ↳ "Seven places" as seven equal tiles | | | S | Sonnet | |
-| IV-8F3 | ↳ A download band after "Every Number Shows Its Working" | | | S | Sonnet | |
-| IV-8F4 | ↳ Features: the headline and a screen per highlight | | | S | Sonnet | |
-| IV-8F5 | ↳ Features on phones: three lines and "Show all" | | | S | Sonnet | |
-| IV-8F6 | ↳ Home FAQ: one line and a link to the guide | | | S | Sonnet | |
 | **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](8-website/OW-8AA-sign-off-the-comparison-ratings.md) | owner task | Reach |  |  | ready |
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](8-website/OW-8D-for-geeks-audit-ideas-to-choose.md) | owner task | Reach |  |  | ready |
 
-Done: 8A, 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z. Next free code: 8AB.
+Done: 8A, 8B, 8C, 8E, 8F, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z. Next free code: 8AB.
 
 ## 9 Later
 
