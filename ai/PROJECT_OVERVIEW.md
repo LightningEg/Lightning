@@ -229,6 +229,8 @@ From the full UX review of 2026-10-03 (Mohab's year at 1,366 × 768) and the tab
 
 **Owner decisions (2026-11-10, O1 "Figures must add up"):** Refill's filled button offers the plan's monthly Emergency fund top-up, the full safe amount under "Move more" (IV-12AA1/2); the emergency aim is six months on Reserves and Limits alike (three is only the Needs you warning). Cash available to assign is stated before the bills due outside the funds, and the payday proposal's Bills protected, To your plan, Emergency and goals and Left unassigned add up to it (BT-12AD).
 
+**Owner decisions (2026-11-11):** phone Home keeps Safe to spend beside the Left for everyday label (a full row only when more is promised than free cash), so Home stays within 1.2 screens (IV-12P). No beta channel for supporters; Play's closed test covers early builds (NF-10B step 3 dropped). The three comparison pages are approved as written, to be linked from the menu and Home, and a fourth compares an AI assistant: you do not own your data, it can be powerful but expensive (OW-8AA, NF-8AB). Shares in Europe and the Gulf are parked until after launch (NF-6B).
+
 **Still open:** import button says "Post ready rows" while undecided rows post as Unaccounted; bulk counterparty edit.
 
 <a id="upcoming-projects"></a>

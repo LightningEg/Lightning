@@ -14,7 +14,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | [Everywhere](pillars/everywhere.md) | 6 | 2 | 4 |  |  |  |
 | [Feel](pillars/feel.md) | 12 | 3 | 8 |  | 1 | 1 |
 | [Build](pillars/build.md) | 4 |  | 3 |  | 1 |  |
-| [Reach](pillars/reach.md) | 3 |  | 3 |  |  | 2 |
+| [Reach](pillars/reach.md) | 3 |  | 3 |  |  | 1 |
 
 47 open items in 11 milestones.
 
@@ -31,7 +31,6 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 ## Waiting for the owner
 
 - **OW-3AI** (Feel) [Additional broker and institution logos still needed](../issues/3-polish-and-arabic/OW-3AI-institution-logos.md): ready
-- **OW-8AA** (Reach) [Sign off the Low, Medium and High ratings on the comparison pages](../issues/8-website/OW-8AA-sign-off-the-comparison-ratings.md): ready
 - **OW-8D** (Reach) [For Geeks audit ideas left for the owner to choose](../issues/8-website/OW-8D-for-geeks-audit-ideas-to-choose.md): ready
 
 ## By milestone

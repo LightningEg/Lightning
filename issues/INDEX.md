@@ -146,7 +146,7 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 | NF-6A1 | ↳ Funds, currencies and gold matched to holdings | | | M | Opus | |
 | NF-6A2 | ↳ US stocks and FX revaluation, with multi-currency | | | L | Opus | |
 | NF-6A3 | ↳ Publish the packs | | | owner |  | |
-| **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](6-market-data/NF-6B-europe-and-gcc-shares.md) | new feature | Own | L | Opus | blocked on a source that allows redistribution |
+| **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](6-market-data/NF-6B-europe-and-gcc-shares.md) | new feature | Own | L | Opus | blocked on parked by the owner until after launch (2026-11-11), then a source that allows redistribution |
 | NF-6B1 | ↳ Verify live boards per market | | | M | Opus | |
 | NF-6B2 | ↳ A source that allows redistribution | | | owner |  | |
 | NF-6B3 | ↳ Switch publishing on per market | | | S | Opus | |
@@ -187,10 +187,10 @@ The site is honest, quick and in step with the app.
 | IV-8F4 | ↳ Features: the headline and a screen per highlight | | | S | Sonnet | |
 | IV-8F5 | ↳ Features on phones: three lines and "Show all" | | | S | Sonnet | |
 | IV-8F6 | ↳ Home FAQ: one line and a link to the guide | | | S | Sonnet | |
-| **OW-8AA** | [Sign off the Low, Medium and High ratings on the comparison pages](8-website/OW-8AA-sign-off-the-comparison-ratings.md) | owner task | Reach |  |  | ready |
+| **NF-8AB** | [Link the three comparison pages and add a fourth that compares Lightning with an AI assistant](8-website/NF-8AB-link-the-comparisons-and-compare-with-an-ai.md) | new feature | Reach | M | Sonnet | ready |
 | **OW-8D** | [For Geeks audit ideas left for the owner to choose](8-website/OW-8D-for-geeks-audit-ideas-to-choose.md) | owner task | Reach |  |  | ready |
 
-Done: 8A, 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z. Next free code: 8AB.
+Done: 8A, 8B, 8C, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z, 8AA. Next free code: 8AC.
 
 ## 9 Later
 
@@ -221,7 +221,7 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 | NF-10A4 | ↳ Test every screen | | | L | Opus | |
 | NF-10A5 | ↳ Register enabled versions on the store | | | M | Opus | |
 | NF-10A6 | ↳ Checkout, receipts and prices | | | owner |  | |
-| **NF-10B** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About, a beta channel](10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | new feature | Feel | M | Opus | blocked on 10A claiming; owner decision on the beta channel |
+| **NF-10B** | [Supporter perks still waiting on the app or the owner - app themes for sale, names on About](10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | new feature | Feel | M | Opus | blocked on 10A claiming |
 | **NF-10C** | [Theme materials, selling themes, owner console - what only the owner can do now](10-looks-and-store/NF-10C-theme-materials-acceptance.md) | new feature | Feel | L | Opus | building |
 | NF-10C1 | ↳ Native theme acceptance | | | L | Opus | |
 | NF-10C2 | ↳ Royal Obsidian & Gold needs a website version | | | M | Opus | |

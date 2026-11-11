@@ -17,7 +17,7 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 | **IV-3BH** | [One name per thing and no accounting jargon](../../issues/3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md) | M | ready |
 | **OW-3AI** | [Additional broker and institution logos still needed](../../issues/3-polish-and-arabic/OW-3AI-institution-logos.md) | owner | ready |
 | **NF-10A** | [Cosmetic parts, account-wide claiming and native acceptance](../../issues/10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md) | L | building |
-| **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming; owner decision on the beta channel |
+| **NF-10B** | [Supporter perks still waiting on the app or the owner](../../issues/10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md) | M | blocked on 10A claiming |
 | **NF-10C** | [Theme materials, selling themes, owner console](../../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md) | L | building |
 | **IV-12Y** | [One page skeleton on the PC, kept by a test](../../issues/12-desktop-ux/IV-12Y-one-page-skeleton-on-the-pc.md) | L | ready |
 | **IV-12Z** | [The answer on one screen, the rest on request](../../issues/12-desktop-ux/IV-12Z-answer-on-one-screen-on-the-pc.md) | L | ready |
