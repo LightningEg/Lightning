@@ -3545,6 +3545,10 @@ ARABIC_UI = {
     'Investment revaluation · month_end': 'إعادة تقييم الاستثمارات · نهاية الشهر',
     'Investment revaluation · sale': 'إعادة تقييم الاستثمارات · بيع',
     'open the counterparty list and choose it to confirm.': 'افتح قايمة الأطراف واختاره عشان تأكد.',
+    # 3AY15-17: the phone's own pages.
+    'Borrowed {amt} {cur}': 'مبلغ القرض {amt} {cur}',
+    'Edit category': 'تعديل الفئة',
+    'e.g. Pets': 'مثال: حيوانات أليفة',
 }
 
 

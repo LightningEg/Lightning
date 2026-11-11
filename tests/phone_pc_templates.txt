@@ -15,15 +15,8 @@ bank_import_upload.html
 birdview/class_popup.html
 birdview/factor_popup.html
 broker_import.html
-budget/category_sheet.html
 budget_bridge.html
-budget_category_rule.html
-budget_fill.html
-budget_move.html
-budget_raise.html
 budget_reset_popup.html
-categories/form.html
-categories/list.html
 counterparties.html
 counterparty.html
 dashboard/explanation.html
@@ -54,14 +47,8 @@ not_found.html
 physical_account.html
 physical_item_form.html
 planning/bill_alert.html
-planning/early_payment.html
 planning/inputs.html
 planning/item_form.html
-planning/item_sheet.html
-planning/loans.html
-planning/pay.html
-planning/purchase.html
-planning/scenarios.html
 read_only.html
 reserve_payments.html
 reserves.html
@@ -76,5 +63,3 @@ settings/financial_health_section.html
 settings/licences.html
 settings/zakat_section.html
 tag.html
-transactions/deleted.html
-transactions/detail.html

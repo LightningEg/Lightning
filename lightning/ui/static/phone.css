@@ -1121,3 +1121,12 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 :is(.phone-flow-bar i, .phone-key).tone-equity { background: var(--class-equity, #08744A); }
 :is(.phone-flow-bar i, .phone-key).tone-other { background: var(--class-other, #687F8B); }
 .licence-rows .phone-row > b { max-width: 55%; white-space: normal; text-align: end; font-size: 13px; font-weight: 600; }
+
+/* 3AY15-17: the phone's own pages for what the PC templates used to draw. */
+.phone-segment > a { display: flex; text-decoration: none; }
+.phone-segment > a span { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 40px; border-radius: 999px; font-weight: 700; color: var(--c-ink-2); text-align: center; }
+.phone-segment > a[aria-current] span { background: var(--c-nile); color: #fff; }
+.phone-row input[data-row-amount] { width: 8.5em; flex: none; }
+.phone-row > label { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.phone-row > label > span { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
+.phone-form > label:not(.import-check) { display: flex; flex-direction: column; gap: 6px; }

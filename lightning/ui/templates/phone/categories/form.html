@@ -1,0 +1,40 @@
+{# Add or edit a category on the phone (3AY15). #}
+{% extends "base.html" %}
+{% from "partials/macros.html" import field with context %}
+{% block title %}{{ ('Edit category' if category else 'New category')|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/categories"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Categories'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ ('Edit ' ~ category.name) if category else 'New L2 category' }}</h1>
+{% if parent_name %}<p class="phone-note">In {{ parent_name.split(' › ')|join(' · ') }}{% if not category %} · the new category goes under it{% endif %}</p>{% endif %}{% endblock %}
+{% block content %}
+{% set session = request.state.session_token|default('') %}
+{% if review_required and similar_categories %}
+<section class="phone-section" aria-labelledby="category-review-title">
+  <header class="phone-section-head"><h2 id="category-review-title">{{ 'Check for a similar category'|tr(locale) }}</h2></header>
+  <p class="phone-note">Before adding “{{ values.name }}”, check whether one of these broad categories already means the same thing.</p>
+  <div class="phone-rows">{% for match in similar_categories %}<a class="phone-row" href="/categories/{{ match.id }}/edit"><span>Use {{ match.name }}{% if ' › ' in match.display_name %}<small>in {{ match.display_name.split(' › ')[:-1]|join(' · ') }}</small>{% endif %}</span><b>{{ chevron() }}</b></a>{% endfor %}</div>
+  <form method="post" action="/categories/new?parent={{ parent.id }}" class="phone-form">
+    <input type="hidden" name="name" value="{{ values.name }}"><input type="hidden" name="code" value="{{ values.code }}"><input type="hidden" name="default_reimbursable" value="{{ values.default_reimbursable }}">
+    <button class="btn primary phone-save" name="confirm_similar" value="1">{{ 'Create a separate category anyway'|tr(locale) }}</button>
+    <a class="btn phone-save" href="/categories">{{ 'Cancel'|tr(locale) }}</a>
+  <input type="hidden" name="__session" value="{{ session }}"></form>
+</section>
+{% else %}
+<form method="post" class="phone-form">
+  {{ field('name', 'Name', values, error_field, placeholder='e.g. Pets', attrs='required autofocus') }}
+  {% if (category and category.movement == 'OUTFLOW') or (not category and parent and parent.movement == 'OUTFLOW') %}
+  <label class="import-check"><input type="checkbox" name="default_reimbursable" value="1" {{ 'checked' if values.default_reimbursable }}> {{ 'Usually paid back by an employer (used from M5)'|tr(locale) }}</label>
+  {% endif %}
+  {{ field('code', 'Code', values, error_field, help=('Created from the name if left empty. Needed when the name is not in Latin letters.'), placeholder='created for you') }}
+  <button class="btn primary phone-save">{{ 'Save'|tr(locale) }}</button>
+  {% if category and not category.is_system and category.depth >= 2 %}
+  {% if category.active %}<button class="btn phone-save" name="active" value="0" formnovalidate>{{ 'Archive'|tr(locale) }}</button>
+  {% else %}<button class="btn phone-save" name="active" value="1" formnovalidate>{{ 'Activate'|tr(locale) }}</button>{% endif %}
+  {% endif %}
+<input type="hidden" name="__session" value="{{ session }}"></form>
+{% if category and not category.is_system and category.depth >= 2 %}
+<form method="post" action="/categories/{{ category.id }}/delete" class="phone-form" data-confirm-delete="Delete this category? If it has transactions or is otherwise in use, it will be archived instead.">
+  <button class="btn danger phone-save">{{ 'Delete'|tr(locale) }}</button>
+<input type="hidden" name="__session" value="{{ session }}"></form>
+{% endif %}
+{% endif %}
+{% endblock %}

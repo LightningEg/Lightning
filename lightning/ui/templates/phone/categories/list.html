@@ -1,0 +1,56 @@
+{# Categories on the phone (3AY15): find one, then each group is a list; a category opens its sheet (name, + / − / ±,
+   recurring or one-off, Save, Archive, Delete). Posts the same row form as the PC table, without script. #}
+{% extends "base.html" %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% block title %}Categories{% endblock %}
+{% block heading %}<h1>{{ 'Categories'|tr(locale) }}</h1><p class="phone-note">{{ 'Categories · why money moved'|tr(locale) }}</p>{% endblock %}
+{% block content %}
+{% set session = request.state.session_token|default('') %}
+{% macro fields(cat, level) %}
+  <label>{{ 'Name'|tr(locale) }}<input name="name" value="{{ cat.name if cat else '' }}" placeholder="{{ ('New detail' if level == 3 else 'New category')|tr(locale) }}" required autocomplete="off"></label>
+  <label>{{ 'Income or expense'|tr(locale) }}<select name="direction" {{ 'disabled' if cat and cat.code == 'EXP.SYSTEM.CUSTODY' }}>{% for value, text in (('OUT', '− Expense'), ('IN', '+ Income'), ('BOTH', '± Both')) %}<option value="{{ value }}" {{ 'selected' if (cat and cat.direction.value == value) or (not cat and value == 'OUT') }}>{{ text|tr(locale) }}</option>{% endfor %}</select></label>
+  {% if not cat or cat.direction.value in ('IN', 'BOTH') %}<label class="import-check"><input type="checkbox" name="recurring" value="1" {{ 'checked' if cat and cat.id in recurring }}> {{ 'Recurring'|tr(locale) }} · {{ 'Counted in the income average and the forecast'|tr(locale) }}</label>{% endif %}
+  {% if not cat or cat.direction.value in ('OUT', 'BOTH') %}<label class="import-check"><input type="checkbox" name="one_off" value="1" {{ 'checked' if cat and cat.id in one_offs }}> {{ 'One-off'|tr(locale) }} · {{ 'In cash flow, left out of the budget'|tr(locale) }}</label>{% endif %}
+{% endmacro %}
+{% macro category(cat, level, children=0) %}
+  {% set row %}<span>{{ cat.name|tr(locale) }}{% if cat.id in recurring or cat.id in one_offs or children %}<small>{% if cat.id in recurring %}{{ 'Recurring'|tr(locale) }}{% elif cat.id in one_offs %}{{ 'One-off'|tr(locale) }}{% endif %}{% if children %}{% if cat.id in recurring or cat.id in one_offs %} · {% endif %}{{ children }}{% endif %}</small>{% endif %}</span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet(cat.name|tr(locale), row, 'level-' ~ level) %}
+  <form class="phone-form" method="post" action="/categories/{{ cat.id }}/row"><input type="hidden" name="__session" value="{{ session }}">
+    {{ fields(cat, level) }}
+    <button class="btn primary phone-save" name="action" value="save">{{ 'Save'|tr(locale) }}</button>
+    {% if level == 2 %}<a class="btn phone-save" href="/categories/new?parent={{ cat.id }}">{{ 'Add detail under {name}'|tr(locale, name=cat.name|tr(locale)) }}</a>{% endif %}
+    {% if not cat.is_system %}<button class="btn phone-save" name="action" value="archive" formnovalidate>{{ 'Archive'|tr(locale) }}</button>
+    <button class="btn danger phone-save" name="action" value="delete" formnovalidate data-confirm-delete="Delete this category? If it has history or is in use, it is archived instead.">{{ 'Delete'|tr(locale) }}</button>{% endif %}
+  </form>
+  {% endcall %}
+{% endmacro %}
+<div class="phone-form" role="search"><input type="search" id="category-search" placeholder="{{ 'Find a category'|tr(locale) }}" aria-label="{{ 'Find a category'|tr(locale) }}"></div>
+{% for l1, rows in table %}
+<section class="phone-section" data-group aria-labelledby="cat-{{ l1.id }}">
+  <header class="phone-section-head"><h2 id="cat-{{ l1.id }}">{{ l1.name|tr(locale) }}</h2><span>{{ rows|selectattr('level', 'equalto', 2)|list|length }}</span></header>
+  <div class="phone-rows">
+    {% for r in rows if r.level == 2 %}{% set kids = rows|selectattr('level', 'equalto', 3)|selectattr('parent.id', 'equalto', r.category.id)|list %}
+    <div data-category-name="{{ (r.category.name|tr(locale))|lower }} {{ kids|map(attribute='category.name')|join(' ')|lower }}">{{ category(r.category, 2, kids|length) }}
+      {% if kids %}<div class="phone-rows is-inner">{% for d in kids %}{{ category(d.category, 3) }}{% endfor %}</div>{% endif %}</div>{% endfor %}
+    {% set row %}<span>{{ 'Add category'|tr(locale) }}</span><b>+</b>{% endset %}
+    {% call sheet('Add category'|tr(locale), row) %}
+    <form class="phone-form" method="post" action="/categories/add-row"><input type="hidden" name="__session" value="{{ session }}"><input type="hidden" name="parent_id" value="{{ l1.id }}">
+      {{ fields(none, 2) }}<button class="btn primary phone-save">{{ 'Add'|tr(locale) }}</button></form>
+    {% endcall %}
+  </div>
+</section>
+{% endfor %}
+{% if archived %}<section class="phone-section" aria-labelledby="cat-archived">
+  <header class="phone-section-head"><h2 id="cat-archived">{{ 'Archived'|tr(locale) }}</h2><span>{{ 'Not offered when you record a transaction'|tr(locale) }}</span></header>
+  {% if show_archived %}<div class="phone-rows">{% for cat in archived %}<form class="phone-row" method="post" action="/categories/{{ cat.id }}/row"><input type="hidden" name="__session" value="{{ session }}"><span>{{ cat.name|tr(locale) }}</span><button class="btn small" name="action" value="activate">{{ 'Activate'|tr(locale) }}</button></form>{% endfor %}</div>
+  <a class="phone-row" href="/categories"><span>{{ 'Hide archived'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  {% else %}<a class="phone-row" href="/categories?archived=1"><span>{{ 'Archived'|tr(locale) }}<small>{{ archived|length }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
+</section>{% endif %}
+<script nonce="{{ request.state.csp_nonce|default('') }}">
+(() => { const search = document.getElementById('category-search'); if (!search) return;
+  search.addEventListener('input', () => { const q = search.value.trim().toLocaleLowerCase();
+    document.querySelectorAll('[data-group]').forEach((g) => { let n = 0;
+      g.querySelectorAll('[data-category-name]').forEach((r) => { const ok = !q || r.dataset.categoryName.includes(q); r.hidden = !ok; if (ok) n++; });
+      g.hidden = q && n === 0; }); }); })();
+</script>
+{% endblock %}
