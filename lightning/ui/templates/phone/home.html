@@ -1,5 +1,6 @@
-{# Home (IV-3AY6, IV-11E, guideline C11.1, C13): always today. The Safe to spend hero with its working in a sheet and
-   about how much a day, To do (three rows: name, figure, when, one verb; See all), Latest five, This month. First run replaces the hero with three steps; catch-up,
+{# Home (IV-3AY6, IV-11E, guideline C11.1, C13): always today. With a plan the hero is Left for everyday and about how
+   much a day, Safe to spend one row that opens Cash planning (IV-12P); without one, the Safe to spend hero with its working
+   in a sheet, To do (three rows: name, figure, when, one verb; See all), Latest five, This month. First run replaces the hero with three steps; catch-up,
    payday and overspent change the hero's sentence and what To do leads with. #}
 {% extends "base.html" %}
 {% from "phone/partials/working.html" import working_rows with context %}
@@ -27,6 +28,19 @@
 {% elif s.per_day is not none %}{% set line = 'About {amt} a day for {n} days.'|tr(locale, amt=s.per_day|money, n=s.per_day_days) %}
 {% elif s.until %}{% set line = 'On top of your plan until {sa}.'|tr(locale, sa=s.until) %}
 {% else %}{% set line = 'From free cash, after what is promised over the next 3 months.'|tr(locale) %}{% endif %}
+{% if s.everyday_left is not none %}
+{# IV-12P (owner, 2026-11-09): Home leads with the everyday budget, Left for everyday and about how much a day: the line
+   and the figure are one idea. Safe to spend is Cash planning's lead; here it is one row that opens it. #}
+{% if s.per_day is not none and s.per_day_to_payday %}{% set everyday_line = 'About {amt} a day until payday on {sa}.'|tr(locale, amt=s.per_day|money, sa=s.until) %}
+{% elif s.per_day is not none %}{% set everyday_line = 'About {amt} a day for {n} days.'|tr(locale, amt=s.per_day|money, n=s.per_day_days) %}
+{% else %}{% set everyday_line = '' %}{% endif %}
+{# Safe to spend sits on the label's right (the hero's note) so Home still ends within 1.2 screens; when more is
+   promised than free cash it is a full row with the sentence that says so. #}
+<div class="phone-hero has-seam phone-home-hero"><div id="home-hero" class="phone-hero-label" role="heading" aria-level="2"><a href="/budget/flexible">{{ fig.everyday_left.label }} <span aria-hidden="true">{{ chevron() }}</span></a>{% if s.state != 'overspent' %} <a class="phone-hero-note" id="home-safe" href="/plan">{{ fig.safe_to_spend.label }} {{ s.safe|money }} <span aria-hidden="true">{{ chevron() }}</span></a>{% endif %}</div>
+  <a class="phone-home-lead" href="/budget/flexible"><div class="phone-lead">{{ s.everyday_left|money }} <small>{{ base }}</small></div>{% if everyday_line %}<p class="phone-hero-line">{{ everyday_line|keep_dates }}</p>{% endif %}
+  {% if s.meter %}<span class="phone-pay-meter{{ ' is-ahead' if s.meter.ahead }}" role="img" aria-label="{{ '{spent}% of everyday money spent; the pace is at {pace}% today.'|tr(locale, spent=s.meter.spent|round|int, pace=s.meter.pace|round|int) }}"><i style="width:{{ '%.1f'|format(s.meter.spent) }}%"></i><b style="inset-inline-start:{{ '%.1f'|format(s.meter.pace) }}%"></b></span>{% endif %}</a></div>
+{% if s.state == 'overspent' %}<div class="phone-rows"><a class="phone-row" id="home-safe" href="/plan"><span>{{ fig.safe_to_spend.label }}<small class="neg">{{ '{amt} more is promised than your free cash.'|tr(locale, amt=(-s.safe)|money) }}</small></span><b class="neg">{{ s.safe|money }} {{ chevron() }}</b></a></div>{% endif %}
+{% else %}
 {# The hero is the way into its working (C11.1): one tap opens the sheet, so no row of its own is needed. #}
 {% set lead %}<div class="phone-hero has-seam"><div id="home-hero" class="phone-hero-label" role="heading" aria-level="2">{{ fig.safe_to_spend.label }} <span aria-hidden="true">{{ chevron() }}</span></div>
   <div class="phone-lead" data-fig="safe_to_spend">{{ s.safe|money }} <small>{{ base }}</small></div><p class="phone-hero-line">{{ line|keep_dates }}</p>
@@ -35,6 +49,7 @@
 {% call sheet(fig.safe_to_spend.label, lead, 'phone-home-hero') %}
   {{ working_rows(s.working) }}
 {% endcall %}
+{% endif %}
 {% if s.todo %}
 <section class="phone-section phone-todo" aria-labelledby="todo-heading">
   <header class="phone-section-head"><h2 id="todo-heading">{{ 'To do'|tr(locale) }}</h2>{% if s.todo_total > s.todo|length %}<a class="phone-quiet" href="/todo">{{ 'See all {n}'|tr(locale, n=s.todo_total) }}</a>{% endif %}</header>

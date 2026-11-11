@@ -2,8 +2,9 @@
 
 `parse_sms` reads one bank message into a proposed transaction, or None when it is not one (a one-time code, a
 declined payment, an offer). `SmsImportService.read` turns new messages into rows of the reviewed bank import
-(`bank_imports.BankImportService.stage`), one batch per account, so the owner confirms every row on the same
-review screen as a CSV statement, with its duplicate checks. Nothing is posted without that review.
+(`bank_imports.BankImportService.stage`), one batch per account, on the same review screen as a CSV statement, with
+its duplicate checks. A message Lightning is sure about saves itself through that review's own post (NF-7AO, owner
+2026-11-09), marked and undoable; everything else waits for the owner there.
 
 An account is found by the last four digits the bank names ("…0285"); the first time, the owner says which
 account they belong to and Lightning remembers. Messages read before are skipped by their fingerprint. The
@@ -31,7 +32,10 @@ WAITING_KEY = "sms_waiting"            # parsed messages whose account ending is
 UNREAD_KEY = "sms_unread"              # messages with an amount that no rule could read: never dropped unseen
 LAST_READ_KEY = "sms_last_read_ms"     # the phone's inbox is read from here on
 QUIET_KEY = "sms_quiet_senders"        # {"Vodafone365": dismissals}: senders whose unreadable messages are offers
+STATED_KEY = "sms_stated_balances"     # {account_id: {"date", "balance"}}: the newest balance a bank message stated
 BANK_SENDERS_KEY = "sms_bank_senders"  # senders that sent a message a rule read: never made quiet
+SAVED_KEY = "sms_saved"                # the last MAX_SAVED messages that saved themselves (NF-7AO2), newest last
+MAX_SAVED = 30
 QUIET_AFTER = 2                        # dismissing this many of a sender's unreadable messages quiets it
 MAX_UNREAD = 200
 OVERLAP_MS = 10 * 60 * 1000            # the inbox is re-read this far before the cursor: late arrivals are not lost
@@ -47,6 +51,10 @@ _DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹٫٬", "0123456
 _NUM = r"([\d,]+(?:\.\d{1,2})?)"
 _CUR = r"(?:EGP|جم|ج\.م\.?|جنيه)"
 _AMOUNT = _CUR + r"?\s*" + _NUM + r"\s*" + _CUR + r"?"
+# Another currency a message may name (a card used abroad): kept for the person, never read as pounds.
+_FOREIGN = r"(?:USD|EUR|GBP|SAR|AED|KWD|QAR|CHF|CAD)"
+_ANY_MONEY = (r"(?:(?P<c1>" + _CUR + "|" + _FOREIGN + r")\s*(?P<n1>[\d,]+(?:\.\d{1,2})?)|(?P<n2>[\d,]+(?:\.\d{1,2})?)\s*(?P<c2>"
+              + _CUR + "|" + _FOREIGN + "))")
 _ENDING = r"(?:(?:المنتهية|المنتهي)\s*ب[ـ]?|رقم)\s*[*•xX]*\s*(\d{4})"
 _CLOCK = r"(?:\s*(?:الساع[هة])?\s*(\d{1,2}:\d{2}))?"
 _IGNORE = re.compile(r"(OTP|one[- ]time|رمز\s*(?:التحقق|التفعيل|المرور)|كلمة\s*(?:السر|المرور)|"
@@ -226,23 +234,35 @@ def looks_like_money(text: str) -> bool:
     """A message the owner should see even when no rule reads it: an amount with a currency, said about an account,
     a card or a wallet, and not an offer. Codes, declined payments, adverts and bundles are not money."""
     flat = _clean(text or "")
-    return (bool(re.search(_CUR + r"\s*" + _NUM + r"|" + _NUM + r"\s*" + _CUR, flat)) and not _IGNORE.search(flat)
+    return (bool(re.search(_ANY_MONEY, flat)) and not _IGNORE.search(flat)
             and bool(_ACCOUNTISH.search(flat)) and not _PROMO.search(flat))
 
 
 def prefill(text: str) -> dict:
-    """What a kept message (one no rule read) can still fill on the Add sheet: its first amount with a currency and
-    which way the money went, when the words say. The person checks the rest; nothing is saved here."""
+    """What a kept message (one no rule read) can still fill on the Add sheet: its first amount with a currency,
+    which way the money went when the words say, the message's own date and the shop after "at / عند / لدى". The
+    currency is "" for pounds and its code for another known one. The person checks the rest; nothing is saved."""
     flat = _clean(text or "")
-    money = re.search(_CUR + r"\s*" + _NUM + r"|" + _NUM + r"\s*" + _CUR, flat)
-    amount = ""
+    money = re.search(_ANY_MONEY, flat)
+    amount = currency = ""
     if money:
         try:
-            amount = format(Decimal((money.group(1) or money.group(2)).replace(",", "")), "f")
+            amount = format(Decimal((money.group("n1") or money.group("n2")).replace(",", "")), "f")
         except (InvalidOperation, AttributeError):
             amount = ""
+        code = (money.group("c1") or money.group("c2") or "").upper()
+        currency = code if re.fullmatch(_FOREIGN, code) else ""
     inflow = bool(re.search(_IN_WORDS, flat, re.IGNORECASE)) and not re.search(_OUT_WORDS, flat, re.IGNORECASE)
-    return {"amount": amount, "kind": "in" if inflow else "out"}
+    day = re.search(r"(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})(?:\D{0,12}?(\d{1,2}:\d{2}))?", flat)
+    date = ""
+    if day:
+        try:
+            date = _when(day.group(1), day.group(2), datetime.now())[:10]
+        except ValueError:
+            date = ""
+    place = re.search(r"(?:عند|لدى|\bat)\s+(.+?)(?=\s+(?:يوم|في|on|بتاريخ|\d)|$)", flat)
+    return {"amount": amount, "kind": "in" if inflow else "out", "currency": currency, "date": date,
+            "counterparty": _place(place.group(1)) if place else ""}
 
 
 WALLET_PREFIX = "wallet-"
@@ -314,8 +334,9 @@ class SmsSource(Protocol):
 class SmsImportService:
     """Reads bank messages into the bank import's review, one batch per account."""
 
-    def __init__(self, db, settings, accounts, bank_imports):
+    def __init__(self, db, settings, accounts, bank_imports, transactions=None):
         self.db, self.settings, self.accounts, self.bank_imports = db, settings, accounts, bank_imports
+        self.transactions = transactions
 
     def _json(self, key: str, empty):
         try:
@@ -391,6 +412,31 @@ class SmsImportService:
             return of_bank[0] if len(of_bank) == 1 else None  # another bank's card is never guessed as this one
         return bank_accounts[0].id if len(bank_accounts) == 1 else None
 
+    def balance_gaps(self) -> list[dict]:
+        """Accounts whose ledger balance, on the day of the newest bank message that stated one, differs from it by
+        more than a piastre: [{account_id, name, date, stated, ledger, difference}] (NF-7AP). Nothing is adjusted. An
+        account with rows still waiting in a statement review is left out: the gap may be those rows."""
+        waiting = {int(b["account_id"]) for b in self.bank_imports.waiting_all()}
+        names = {a.id: a.name for a in self.accounts.list(active_only=True)}
+        found = []
+        for key, value in self._json(STATED_KEY, {}).items():
+            if not str(key).isdigit() or int(key) not in names or int(key) in waiting or not isinstance(value, dict):
+                continue
+            try:
+                stated = Decimal(str(value["balance"]))
+                day = str(value["date"])
+            except (KeyError, InvalidOperation):
+                continue
+            total = self.db.scalar(
+                "SELECT COALESCE(SUM(le.quantity_e6),0) FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id "
+                "WHERE le.account_id=? AND le.date<=? AND t.status='POSTED' "
+                "AND le.asset_id IN (SELECT id FROM financial_assets WHERE is_cash=1)", (int(key), day))
+            ledger = Decimal(total or 0) / Decimal(1_000_000)
+            if abs(stated - ledger) > Decimal("0.01"):
+                found.append({"account_id": int(key), "name": names[int(key)], "date": day, "stated": stated,
+                              "ledger": ledger, "difference": stated - ledger})
+        return found
+
     def read(self, messages: list[tuple], cursor_ms: int | None = None) -> dict:
         """New messages (sender, text, received[, inbox ms]) into review. Returns counts: staged rows by account,
         waiting, skipped (not money, or read before). A pasted or shared message is known by its text; an inbox
@@ -407,6 +453,7 @@ class SmsImportService:
         endings = {ending: account_id for ending, account_id in endings.items() if account_id in usable}
         waiting = self._json(WAITING_KEY, [])
         by_account: dict[int, list[SmsTransaction]] = {}
+        stated = self._json(STATED_KEY, {})
         skipped = 0
         unread = self._json(UNREAD_KEY, [])
         banks = set(self._json(BANK_SENDERS_KEY, []))
@@ -433,6 +480,10 @@ class SmsImportService:
                     skipped += 1
                 continue
             account_id = endings.get(found.ending)  # never guessed: the first message of an ending asks once
+            if account_id is not None and found.balance is not None and found.kind != "salary" \
+                    and not re.search(r"limit|الحد", text, re.IGNORECASE):  # a card's available limit is not a balance
+                if found.when[:10] >= stated.get(str(account_id), {}).get("date", ""):
+                    stated[str(account_id)] = {"date": found.when[:10], "balance": format(found.balance, "f")}
             if account_id is None:
                 waiting.append(_to_json(found))
             else:
@@ -441,13 +492,15 @@ class SmsImportService:
             transfers = self._pair_transfers(by_account, unread)
             staged = {account_id: self._stage(account_id, rows, transfers) for account_id, rows in by_account.items()
                       if rows}
+            saved = self._save_sure(staged)
             self.settings.set(SEEN_KEY, json.dumps(seen[-MAX_SEEN:]))
             self.settings.set(WAITING_KEY, json.dumps(waiting))
+            self.settings.set(STATED_KEY, json.dumps(stated))
             self.settings.set(UNREAD_KEY, json.dumps(unread[-MAX_UNREAD:]))
             self.settings.set(BANK_SENDERS_KEY, json.dumps(sorted(banks)[:200]))
             if cursor_ms is not None:
                 self.settings.set(LAST_READ_KEY, str(cursor_ms))
-        return {"staged": staged, "waiting": len(waiting), "skipped": skipped, "unread": len(unread)}
+        return {"staged": staged, "waiting": len(waiting), "skipped": skipped, "unread": len(unread), "saved": saved}
 
     def read_source(self, source: SmsSource, now: datetime | None = None) -> dict | None:
         """New messages from the phone: shared ones, and the inbox since the last read when allowed (from
@@ -520,6 +573,91 @@ class SmsImportService:
             self.settings.set(UNREAD_KEY, json.dumps([m for m in kept if m.get("id") != message_id]))
             if sender:
                 self.settings.set(QUIET_KEY, json.dumps(dict(sorted(counts.items(), key=lambda kv: -kv[1])[:200])))
+
+    def _save_sure(self, staged: dict[int, int]) -> int:
+        """NF-7AO1/3: the staged rows Lightning is sure about post themselves through the review's own post
+        (`bank_imports.confirm`, as "Post them" does); the rest wait for the owner. Sure means all of: a named bank
+        pattern read it (never the general rule); its ending was already assigned (only those reach `staged`);
+        the review placed it (`_ready`: a category by rule, the payee's habit, or its kind for salary and
+        transfers; no new payee to name; no possible duplicate); it was never voided before. A sure message that
+        matches one entry already typed by hand (same account and amount within the link window) is linked to
+        it instead of posted (7AO3). A synchronized profile reads messages only on its home (`sms_imports.read`
+        is a journal command), so this posts once. Returns how many saved themselves."""
+        count = 0
+        for account_id, batch_id in staged.items():
+            sure = {row["id"] for row in self.db.all("SELECT id, raw_json FROM bank_import_rows WHERE batch_id=?",
+                                                      (batch_id,))
+                    if (json.loads(row["raw_json"]).get("raw") or {}).get("Read") == "sure"}
+            _, rows = self.bank_imports.preview(batch_id)
+            decisions = {}
+            for row in rows:
+                if row["_import_row_id"] not in sure or row["_status"] != "REVIEW" or row.get("_errors") \
+                        or row.get("_voided_earlier") or row.get("_balance_row"):
+                    continue
+                if row["_ready"]:
+                    decisions[row["_import_row_id"]] = {"match": "new"}
+                elif _typed_by_hand(row):
+                    decisions[row["_import_row_id"]] = {"match": row["_default_match"]}
+            if not decisions:
+                continue
+            result = self.bank_imports.confirm(batch_id, decisions)
+            if result.get("errors"):  # one refused row rolls the batch back: post the others, it waits for the owner
+                decisions = {k: v for k, v in decisions.items() if k not in result["errors"]}
+                if not decisions or self.bank_imports.confirm(batch_id, decisions).get("errors"):
+                    continue
+            by_id = {row["_import_row_id"]: row for row in rows}
+            records = self._json(SAVED_KEY, [])
+            for row_id in decisions:
+                done = self.db.one("SELECT r.status, r.transaction_id, t.ref FROM bank_import_rows r "
+                                   "LEFT JOIN transactions t ON t.id=r.transaction_id WHERE r.id=?", (row_id,))
+                if not done or done["status"] not in ("POSTED", "LINKED"):
+                    continue
+                row = by_id[row_id]
+                # Keyed by the entry's ref: row ids differ between synchronized devices, refs do not.
+                records.append({"ref": done["ref"], "account": self.accounts.get(account_id).code,
+                                "linked": done["status"] == "LINKED",
+                                "date": row["Date"], "amount": str(row["Amount"]),
+                                "who": row["Counterparty"] or row["Notes"], "text": row.get("_message", "")[:MAX_TEXT],
+                                "at": today().isoformat()})
+                count += 1
+            self.settings.set(SAVED_KEY, json.dumps(records[-MAX_SAVED:], ensure_ascii=False))
+        return count
+
+    def saved(self) -> list[dict]:
+        """The messages that saved themselves, newest first, with what became of each (NF-7AO2)."""
+        return list(reversed(self._json(SAVED_KEY, [])))
+
+    def saved_recently(self, on, days: int = 7) -> int:
+        """How many saved themselves in the last `days` days: Home's "saved from SMS" line (marked as reviewed, it
+        comes back only when the count changes)."""
+        since = (on - timedelta(days=days)).isoformat()
+        return sum(1 for item in self._json(SAVED_KEY, []) if str(item.get("at", "")) > since)
+
+    def undo_saved(self, ref: str) -> tuple[int, int]:
+        """Take back one message that saved itself: its entry is deleted (a link to an entry typed by hand is
+        only undone; that entry stays), and the message waits on its review like any other. Returns (account,
+        batch) for the review."""
+        records = self._json(SAVED_KEY, [])
+        record = next((item for item in records if item.get("ref") == ref), None)
+        row = record and self.db.one(
+            "SELECT r.id, r.batch_id, r.account_id, r.status, r.transaction_id FROM bank_import_rows r "
+            "JOIN bank_import_batches b ON b.id=r.batch_id AND b.file_name LIKE 'SMS %' "
+            "JOIN transactions t ON t.id=r.transaction_id WHERE t.ref=? AND r.status IN ('POSTED','LINKED') "
+            "ORDER BY r.id DESC LIMIT 1", (ref,))
+        if record is None or row is None:
+            with self.db.transaction():
+                self.settings.set(SAVED_KEY, json.dumps([item for item in records if item.get("ref") != ref],
+                                                        ensure_ascii=False))
+            raise ValidationError("That message is no longer in the saved list.", "ref")
+        with self.db.transaction():
+            if row["status"] == "POSTED" and self.transactions is not None:
+                self.transactions.void(int(row["transaction_id"]), "Undone: saved from a bank SMS")
+            self.db.execute("UPDATE bank_import_rows SET status='REVIEW', transaction_id=NULL WHERE id=?", (row["id"],))
+            self.db.execute("UPDATE bank_import_batches SET status='REVIEW', posted_at=NULL WHERE id=?",
+                            (row["batch_id"],))
+            self.settings.set(SAVED_KEY, json.dumps([item for item in records if item is not record],
+                                                    ensure_ascii=False))
+        return int(row["account_id"]), int(row["batch_id"])
 
     def assign(self, ending: str, account_id: int) -> int | None:
         """The owner says which account an ending is: remember it and send its waiting messages to review."""
@@ -620,7 +758,7 @@ class SmsImportService:
     def _stage(self, account_id: int, rows: list[SmsTransaction], transfers: dict[int, str] | None = None) -> int:
         out = io.StringIO()
         writer = csv.writer(out)
-        writer.writerow(["Date", "Amount", "Counterparty", "Category", "Notes", "Reference", "Message"])
+        writer.writerow(["Date", "Amount", "Counterparty", "Category", "Notes", "Reference", "Message", "Read"])
         cash = self._cash_account_name()
         for row in sorted(rows, key=lambda r: r.when):
             notes = KIND_NOTES[row.kind] + (f" · {row.place}" if row.place and row.kind != "salary" else "")
@@ -635,10 +773,21 @@ class SmsImportService:
                 notes += f" · transfer to {transfers[id(row)]}"
             elif row.kind == "salary":
                 category = "Salary"
-            writer.writerow([row.when[:10], format(row.signed, "f"), counterparty, category, notes, row.reference, row.text])
+            writer.writerow([row.when[:10], format(row.signed, "f"), counterparty, category, notes, row.reference, row.text,
+                             "sure" if row.sure else "check"])
         batch_id, _ = self.bank_imports.stage(account_id, f"SMS {datetime.now():%Y-%m-%d %H:%M}",
                                               out.getvalue().encode("utf-8"))
         return batch_id
+
+
+def _typed_by_hand(row: dict) -> bool:
+    """NF-7AO3: the message's only possible duplicate is one entry typed by hand (no statement or message behind it)
+    on this account, same amount, within the review's link window: the review already offers it as the default link."""
+    candidates = row.get("_link_candidates") or []
+    return (len(candidates) == 1 and not candidates[0].get("source_count")
+            and row.get("_default_match") == f"link:{candidates[0]['id']}"
+            and not row.get("_reference_duplicate") and not row.get("_repeat_import") and not row.get("_pending_elsewhere")
+            and not row.get("_suggestions") and not row.get("_needs_account") and not row.get("_identity_ambiguous"))
 
 
 def _to_json(found: SmsTransaction) -> dict:

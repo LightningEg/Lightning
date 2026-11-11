@@ -15,6 +15,7 @@ from lightning.core.figures import label
 from lightning.core.money import ZERO, fmt, to_decimal
 from lightning.planning.domain import (FREQUENCY_LABELS, KIND_LABELS, RECURRING_KINDS, WEEKEND_MOVE_LABELS, Frequency,
                                        PaymentStatus, PlanKind, WeekendMove, per_year)
+from lightning.planning.bill_state import CATCH_UP_FROM, late_payments
 from lightning.planning.schedule import describe
 from lightning.planning.service import LOAN_CATEGORY
 
@@ -151,6 +152,11 @@ async def plan_page(request: Request):
     needs = [{"label": f"{p.item.name} is late", "detail": f"Due {p.due_date} · {fmt(p.still_owed, 0)} · {p.days_late(day)} days late",
               "href": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fplan", "popup": True, "action": "Mark paid"}
              for p in late]
+    if len(late) >= CATCH_UP_FROM:
+        # IV-12AA5: many late payments are one Catch up, each in turn, not a row and a Mark paid each.
+        names = ", ".join(p.item.name for p in late[:2]) + (f" and {len(late) - 2} more" if len(late) > 2 else "")  # not money: counts and keys
+        needs = [{"label": f"{len(late)} payments are late", "detail": names, "href": "/plan/catch-up",
+                  "action": "Catch up"}]
     status = page_status.cash_plan(forecast.safe_to_spend, forecast.next_income_date, has_income)
     afford, afford_error = None, ""
     raw_afford = request.query_params.get("afford", "").replace(",", "").strip()
@@ -762,8 +768,59 @@ async def settle_payment(request: Request, item_id: int):
             else:
                 raise LightningError("Choose how this payment was settled.")
     except LightningError as exc:
-        return redirect(f"/plan/items/{item_id}/pay?due={due}&back={back}", exc.message)
+        return redirect(f"/plan/items/{item_id}/pay?" + urlencode({"due": due, "back": back}), exc.message)
     return redirect(back, message)
+
+
+def _catch_key(payment) -> str:
+    return f"{payment.item.id}:{payment.due_date}"
+
+
+@router.get("/catch-up")
+async def catch_up(request: Request):
+    """IV-12AA5: each late payment in turn, paid (on the pay page: a matching payment first, then the day and the
+    account) or not yet, then a summary of what this catch-up changed, with Undo. The list is fixed when it
+    starts (``start``), so a bill paid along the way stays in the summary; ``later`` holds the ones left for now."""
+    c = container(request)
+    day = today()
+    q = request.query_params
+    if not q.get("start"):
+        late = late_payments(c.planning, day)
+        if not late:
+            return redirect("/plan", "Nothing is late.")
+        return redirect("/plan/catch-up?" + urlencode({"start": ",".join(_catch_key(p) for p in late)}))
+    start = [key for key in str(q.get("start", "")).split(",") if key]
+    later = [key for key in str(q.get("later", "")).split(",") if key in start]
+    here = "/plan/catch-up?" + urlencode({"start": ",".join(start), **({"later": ",".join(later)} if later else {})})
+    rows = []
+    for key in start:
+        item_id, _, due = key.partition(":")
+        try:
+            item = c.planning.get(int(item_id))
+        except (LightningError, ValueError):
+            continue
+        payment = next((p for p in c.planning.payments(item, due, day) if p.due_date == due), None)
+        if payment is not None:
+            rows.append({"key": key, "item": item, "payment": payment, "later": key in later})
+    waiting = [r for r in rows if r["payment"].outstanding and not r["later"]]
+    if waiting:
+        current = waiting[0]
+        p = current["payment"]
+        currency = c.accounts.get(p.item.account_id).currency if p.item.account_id else c.base_currency
+        return render(request, "planning/catch_up.html", step=current, number=rows.index(current) + 1, total=len(rows),  # not money: counts and keys
+                      amount=p.still_owed, currency=currency, late_days=p.days_late(day),
+                      pay_href=f"/plan/items/{p.item.id}/pay?" + urlencode({"due": p.due_date, "back": here}),
+                      later_href="/plan/catch-up?" + urlencode({"start": ",".join(start),
+                                                                "later": ",".join(later + [current["key"]])}),  # not money: counts and keys
+                      summary=None, here=here)
+    summary = {"paid": [r for r in rows if r["payment"].status == PaymentStatus.PAID],
+               "skipped": [r for r in rows if r["payment"].status == PaymentStatus.SKIPPED],
+               "not_yet": [r for r in rows if r["payment"].outstanding]}
+    for r in summary["paid"]:
+        p = r["payment"]
+        r["paid"] = c.planning.amount_in_base(p, p.paid_amount if p.paid_amount is not None else p.amount, day)
+    summary["paid_total"] = sum((r["paid"] for r in summary["paid"]), ZERO)
+    return render(request, "planning/catch_up.html", step=None, summary=summary, total=len(rows), here=here)
 
 
 @router.get("/inputs")

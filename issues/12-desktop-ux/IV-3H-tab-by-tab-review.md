@@ -551,7 +551,7 @@ Done when: a new test `test_month_end_prices_reminder_only_on_the_last_day` buil
 `lightning.workflows.reminders.today` to the month's last day (reminder present) and to the day before (absent).
 `python -m pytest tests/test_workflow_views_review.py -q`.
 
-## 3H5 A missed-salary row in Needs you, and its reminder · S · sonnet
+## 3H5 A missed-salary row in Needs you, and its reminder · S · sonnet · #525
 Needs 3H3 agreed first (question 1 answered yes).
 Files: `lightning/workflows/review.py` (`ReviewInbox.items`, the "Payments that are due and unpaid" loop at ~149),
 `lightning/planning/service.py:249` (`all_payments(until, as_of, kinds)`), `lightning/planning/domain.py`
@@ -568,7 +568,7 @@ Done when: a test in `tests/test_salary_day_review.py`: with the salary item due
 `ReviewInbox(c).items(D + 1 day)` has no such row, `items(D + 2 days)` has one, and after recording it through
 `/plan/items/{id}/pay` the row is gone. `python -m pytest tests/test_salary_day_review.py tests/test_workflow_views_review.py -q`.
 
-## 3H6 Zakat: optionally take off the next 12 months' loan instalments · M · opus
+## 3H6 Zakat: optionally take off the next 12 months' loan instalments · M · opus · #526
 Needs 3H3 agreed first (question 2 answered yes).
 Files: `lightning/zakat.py` (settings dataclass at ~42, `save_settings` ~127, lines ~205-215 `ZakatLine("debts", ...)`),
 `lightning/ui/templates/settings/zakat_section.html:13` and the phone zakat settings template
@@ -581,7 +581,7 @@ Done when: `tests/test_zakat.py` gains a test like `test_debts_due_now_are_taken
 new switch (off: unchanged; on: zakat base falls by exactly the 12 months' instalments, none counted twice), and a
 migration test upgrades an older profile. `python -m pytest tests/test_zakat.py -q`, then skill `number-audit`.
 
-## 3H7 Loans: an optional rate and the cost of the loan · M · opus
+## 3H7 Loans: an optional rate and the cost of the loan · M · opus · #527
 Needs 3H3 agreed first (question 3 answered yes).
 Files: `lightning/planning/` (the LOAN plan item; find the model with `grep -n "LOAN" lightning/planning/domain.py`),
 `lightning/ui/templates/planning/loans.html` and its phone twin, a new migration (skill `add-migration`), a new

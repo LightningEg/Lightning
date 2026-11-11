@@ -21,9 +21,10 @@ Owner, 2026-11-09: declare it from the first release.
 
 The disclosure on screen (English; Arabic in `lightning/ui/i18n*`):
 
-> Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction you check. It
-> reads messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages
-> stay on this phone: nothing is sent anywhere. Nothing is posted until you check it.
+> Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction. It reads
+> messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages stay on
+> this phone: nothing is sent anywhere. A payment Lightning is sure about saves itself, marked and undoable; the rest
+> wait for your check.
 
 ## SMS: the demo video (about 60 seconds)
 

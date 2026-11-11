@@ -28,14 +28,14 @@ Status is `new`: the grammar's period words need the owner's eye in Arabic.
 
 2026-11-10: 7AQ1 (the PC lists payments first through the phone's `phone_results`), 7AQ2 (`lightning/core/periods.py`, `tests/test_periods.py`) and 7AQ3 (`lightning/workflows/answers.py`,
 `partials/search_answer.html` on PC and phone, `tests/test_search_answers.py`: "food 2026-09" answers 5,044, Spending's
-own figure), 7AQ4 (Mohab asks three questions). Categories and payees are answered; accounts and tags not yet. The owner still checks the Arabic period
+own figure), 7AQ4 (Mohab asks three questions). 2026-11-11: 7AQ5 code: accounts ("CIB last month": its money out,
+Spending's per-account figure) and tags ("#eid 2026"; the # makes it a tag) are answered too. The owner still checks the Arabic period
 words (`_RELATIVE` and the month names in `core/periods.py`).
 
 ## How to work on this item
 
 Steps in order; one PR each. Read `lightning/ui/routes/` search route and its template only. After each: the step's test, `python -m pytest -q tests/test_mohab_year.py`, and `arabic-check` for new words. Delete the step's heading in the same commit.
 
-## 7AQ5 Accounts and tags, and the owner's Arabic words · S · sonnet
-The answer resolves categories and payees (`workflows/answers.py`); add an account ("CIB last month": its money out)
-and a tag the same way, each with a test on the sample year. The owner reads the Arabic period words in
-`core/periods.py` and says which to add or drop.
+## 7AQ5 The owner's Arabic words · S · owner
+The owner reads the Arabic period words in `core/periods.py` (`_RELATIVE`, the month names) and says which to add or
+drop; then this item closes.

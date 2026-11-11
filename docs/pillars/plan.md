@@ -12,15 +12,10 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-7AR** | [An Upcoming tab shows the month's payments on a calendar, with payday and the day cash runs short](../../issues/7-planning-import-and-search/NF-7AR-upcoming-payments-calendar.md) | L | ready |
-| **BT-12AD** | [The payday proposal's lines do not add up to the cash they share out, and "Everyday spending" there…](../../issues/12-desktop-ux/BT-12AD-payday-proposal-lines-overlap.md) | M | ready |
-| **IV-12AA** | [Suggestions with sensible defaults and honest counts](../../issues/12-desktop-ux/IV-12AA-suggestions-with-sensible-defaults.md) | M | ready |
-| **IV-12P** | [One name, one figure across Budget, Cash planning and Home](../../issues/12-desktop-ux/IV-12P-one-name-one-figure-budget-and-cash.md) | M | new |
 | **IV-12Q** | [The unfinished pages of Budget and Cash planning get the page pattern: a lead figure, a visual, car…](../../issues/12-desktop-ux/IV-12Q-unfinished-budget-and-cash-pages.md) | L | new |
 
 ## Reports with open follow-ups here
 
-- [Audit 18: Budget and Cash planning, every tab and sub-page](../../issues/12-desktop-ux/r32-budget-and-cash-planning/report.md): 12P, 12Q
-- [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 12AA
-- [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](../../issues/11-phone-ux/r36-figures-one-owner/report.md): 12AD
+- [Audit 18: Budget and Cash planning, every tab and sub-page](../../issues/12-desktop-ux/r32-budget-and-cash-planning/report.md): 12Q
 <!-- work:end -->
 

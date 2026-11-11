@@ -19,7 +19,7 @@ def phone_results(c, query: str, privacy: bool = False) -> dict:
     categories, accounts, tags, holdings); then pages and actions under their own heading. The matching is `matches`
     and the transactions' own search; nothing here changes anything."""
     query = " ".join(str(query or "").split())
-    found = matches(c, query, privacy=privacy, per_group=5)
+    found = matches(c, query, privacy=privacy, per_group=5, payments=0)
     pages = [row for row in found if row["kind"] in ("Page", "Action")]
     money = [row for row in found if row["kind"] in ("Person", "Counterparty", "Category", "Account", "Reserve", "Tag", "Investment")]
     payments, total = [], 0

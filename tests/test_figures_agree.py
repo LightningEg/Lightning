@@ -13,7 +13,7 @@ from lightning.core.money import fmt
 from lightning.ui.web import create_app
 
 PC = ["/", "/plan", "/budget", "/accounts", "/investments"]
-PHONE = ["/home", "/money", "/budget"]
+PHONE = ["/home", "/money", "/budget", "/plan"]  # Safe to spend leads Cash planning on both (IV-12P)
 FIG = re.compile(r'data-fig="([a-z_]+)"[^>]*>(.*?)</', re.S)
 
 OWNERS = {  # registry key -> the owner function, on the pinned day
@@ -111,20 +111,16 @@ def test_safe_to_spend_rows_add_up_to_it(household):
     assert sum(value for _, value in rows) == quantize(forecast.safe_to_spend, 0)
 
 
-def test_the_investments_lead_parts_add_up_to_portfolio_value(household, request):
+def test_the_investments_lead_parts_add_up_to_portfolio_value(household):
     c, _ = household
-    if request.node.callspec.id == "mohab":
-        request.applymarker(pytest.mark.xfail(strict=True, reason="BT-12AC: the Lead leaves out the flat's cost"))
     text = _main_text(_client(c, False), "/investments")
     value = _n(re.search(r"Portfolio value (?:[A-Z][a-z]+ \d{4} )?([\d,]+) EGP", text).group(1))
-    cost, gain = re.search(r"Cost ([\d,]+) · Unrealized gain ([+-]?[\d,]+)", text).groups()
-    assert abs(_n(cost) + _n(gain) - value) <= 1
+    cost, gain, valued = re.search(r"Cost ([\d,]+) · Unrealized gain ([+-]?[\d,]+)(?: · Valued by you ([\d,]+))?", text).groups()
+    assert abs(_n(cost) + _n(gain) + _n(valued or "0") - value) <= 1  # BT-12AC: what has no cost or price is its own part
 
 
-def test_the_payday_proposal_lines_add_up_to_the_cash_they_share(household, request):
+def test_the_payday_proposal_lines_add_up_to_the_cash_they_share(household):
     c, _ = household
-    if request.node.callspec.id == "mohab":
-        request.applymarker(pytest.mark.xfail(strict=True, reason="BT-12AD: protected bills sit inside the spending line too"))
     text = _main_text(_client(c, False), "/payday")
     lines = re.search(r"Bills protected ([\d,]+) EGP .*? ([\d,]+) EGP Emergency and goals ([\d,]+) EGP Left unassigned ([\d,]+) EGP", text)
     available = _n(re.search(r"Cash available to assign ([\d,]+)", text).group(1))

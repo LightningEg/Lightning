@@ -14,7 +14,6 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 | **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](../../issues/3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | M | ready |
 | **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md) | L | building |
 | **NF-4B** | [Multiple devices: implementation plan](../../issues/4-edit-journal-and-devices/NF-4B-multiple-devices.md) | L | building |
-| **IV-3AN** | [Phone visual plan](../../issues/11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md) | L | building |
 
 ## Reports with open follow-ups here
 
@@ -23,11 +22,8 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 - [Audit 3: is the edit journal (multi-device sync) solid?](../../issues/4-edit-journal-and-devices/r4-edit-journal/report.md): 4A
 - [Audit 4: backend correctness and failure boundaries](../../issues/2-safe-for-real-money/r5-backend-correctness/report.md): 4A
 - [Pairing backend hardening and security review](../../issues/4-edit-journal-and-devices/r11-pairing-hardening/report.md): 4A
-- [Audit 10: the phone, tab by tab - quick actions and the answer first](../../issues/11-phone-ux/r17-phone-tab-audit/report.md): 3AN
-- [Audit 13: the phone for quick jobs - convenience, taps and the look](../../issues/11-phone-ux/r20-phone-convenience-audit/report.md): 3AN
 - [Code audit: refactoring, loose ends and smart features](../../issues/9-later/r22-code-quality-and-smart-features/report.md): 4A, 4B
-- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 3AN, 4A, 4B
-- [The phone, redesigned: a phone-first architecture, tab by tab](../../issues/11-phone-ux/r25-phone-ux-architecture/report.md): 3AN
+- [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 4A, 4B
 - [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BI
 <!-- work:end -->
 

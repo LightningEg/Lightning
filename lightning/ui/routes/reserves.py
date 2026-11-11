@@ -70,16 +70,20 @@ def _context(request: Request, error: str = ""):
     if fund.target and set_aside < fund.target and position.free_cash and position.free_cash > ZERO:
         room = min(fund.target - set_aside, position.free_cash)
         # BT-2AH: the suggestion keeps Safe to spend at or above zero; moving all of it is a separate, explicit choice.
-        options = c.forecaster.refill_options(today(), room)
-        move = options["safe"]
+        # IV-12AA2 (owner, 2026-11-10): the filled button offers the plan's monthly top-up, the modest amount; the
+        # largest safe amount stays under "Move more". Both say what Safe to spend (Home's lead) is afterwards.
+        options = c.forecaster.refill_options(today(), room, top_up=fund.top_up)
+        safe, move = options["safe"], options["first"]
         refill = {"move": move, "to": set_aside + move, "full": set_aside + move >= fund.target,
-                  "after": options["safe_after"], "until": options["until"], "before": options["before"],
+                  "after": options["first_after"], "until": options["until"], "before": options["before"],
+                  "is_top_up": ZERO < move < safe,
+                  "safe": safe, "safe_to": set_aside + safe, "safe_after": options["safe_after"],
                   "all": room, "all_to": set_aside + room, "all_after": options["all_after"],
                   "all_is_safe": options["all_after"] >= ZERO}
     if refill is not None:
         gap = fund.target - set_aside
         # NF-3AZ7: when one move now does not fill the fund, the same refill as instalments after the upcoming needs.
-        refill["schedule"] = c.forecaster.refill_schedule(today(), gap, options) if refill["move"] < gap else []
+        refill["schedule"] = c.forecaster.refill_schedule(today(), gap, options) if refill["safe"] < gap else []
         # Or the person's own amount, previewed with the same forecast before anything moves.
         raw = str(request.query_params.get("refill_amount", "")).replace(",", "").strip()
         refill["manual"] = None

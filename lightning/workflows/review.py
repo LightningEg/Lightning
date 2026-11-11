@@ -43,7 +43,8 @@ def glance(name: str, verb: str, amount=None, when: str = "", n=None, sa: str = 
 
 # Needs you groups its items by what they are about (feedback ticket 84): one row per group on the Overview,
 # and each group opens its own page. First match on the item's link wins; the order is the order shown.
-GROUPS = (("payments", "Bills and payments", ("/plan/items/", "/plan/bill-alerts/", "/gameya/", "/deposits/")),
+GROUPS = (("checks", "Data checks", ("/checks",)),
+          ("payments", "Bills and payments", ("/plan/items/", "/plan/bill-alerts/", "/gameya/", "/deposits/")),
           ("activity", "Activity to sort out", ("/rules", "/sms", "/accounts/", "/transactions", "/activity", "/reimbursements")),
           ("budget", "Budget and saving", ("/budget", "/financial-health")),
           ("cash", "Cash and goals", ("/plan", "/payday")),
@@ -129,8 +130,17 @@ class ReviewInbox:
                   # a missing exchange rate is typed in Settings; a missing price on the prices page
                   "href": "/settings?section=currencies&tab=rates" if " rate within " in item else "/investments/prices"}
                  for item in c.reporting.net_worth(on).unvalued]
+        # NF-2AJ: a data check that does not add up says so here, one tap from Home (INCOMPLETE is already the
+        # Missing valuation rows above). The checks are request-cached, so /checks on the same request reuses them.
+        integrity = getattr(c, "integrity", None)
+        if integrity is not None:
+            items.extend({"label": "A data check does not add up", "detail": check.name, "priority": 0,
+                          "href": "/checks", "action": "Review", "consequence": "risk",
+                          "glance": glance("Data checks", "Review", None, "does not add up")}
+                         for check in integrity.checks(on) if check.status == "ISSUE")
         items.extend(self._statements())
-        items.extend(self._sms())
+        items.extend(self._sms(on))
+        items.extend(self._sms_balances())
         items.extend(self._uncategorized())
         items.extend(self._smart_suggestions(on))
         from lightning.workflows.bill_alerts import bill_alerts
@@ -488,7 +498,7 @@ class ReviewInbox:
             found.append(item)
         return found
 
-    def _sms(self) -> list[dict]:
+    def _sms(self, on: date) -> list[dict]:
         """Bank SMS waiting on the owner before they reach a review: an account to choose, or words to read."""
         found = []
         count, unread = self.c.sms_imports.pending()
@@ -502,6 +512,30 @@ class ReviewInbox:
                           "detail": f"{_plural(unread, 'message waits', 'messages wait')}: unread, or the other side "
                                     "of a transfer. Enter or dismiss.", "href": "/sms", "action": "Look at them", "priority": 2,
                           "glance": glance("Bank SMS", "Enter", None, "1 kept for you" if unread == 1 else "{n} kept for you", unread)})
+        saved = self.c.sms_imports.saved_recently(on)
+        if saved:  # NF-7AO2: what saved itself is seen and can be undone; marked as reviewed, it returns with the next one
+            found.append({"label": "Saved from SMS",
+                          "detail": f"{_plural(saved, 'bank message', 'bank messages')} Lightning was sure about "
+                                    "saved themselves this week. Look at them, or undo any.",
+                          "href": "/sms#saved", "action": "Undo", "priority": 2, "consequence": "cleanup",
+                          "glance": glance("Bank SMS", "Undo", None, "1 saved from SMS" if saved == 1 else "{n} saved from SMS", saved)})
+        return found
+
+    def _sms_balances(self) -> list[dict]:
+        """One quiet row per account whose balance a bank message stated and the ledger does not match (NF-7AP). It
+        clears when a later message agrees or when marked as reviewed; it never changes an entry."""
+        found = []
+        for gap in self.c.sms_imports.balance_gaps():
+            day = gap["date"]
+            when = date.fromisoformat(day).strftime("%d %b").lstrip("0")
+            amount = abs(gap["difference"])
+            found.append({"label": f"{gap['name']} is {fmt(amount, 0)} off the bank's balance",
+                          "detail": f"The bank's message of {when} said {fmt(gap['stated'], 2)}; Lightning has {fmt(gap['ledger'], 2)}. "
+                                    "A pending hold can make the bank's figure lag.",
+                          "href": f"/accounts/{gap['account_id']}?date_from={day}&date_to={day}", "action": "Look at that day",
+                          "priority": 2,
+                          "glance": glance(gap["name"], "Look", amount, "off the bank's balance since {sa}", sa=when),
+                          "source_version": {"account": gap["account_id"], "date": day, "stated": str(gap["stated"])}})
         return found
 
     def _statements(self) -> list[dict]:

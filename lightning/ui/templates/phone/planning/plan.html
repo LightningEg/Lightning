@@ -1,7 +1,8 @@
-{# Cash planning on a phone (phone overhaul 2026-10-22, "What leaves before payday, and am I covered?"): the Due before
-   payday hero with its coverage sentences, the worded tabs, then Coming up: a dated list of what leaves before payday,
+{# Cash planning on a phone (phone overhaul 2026-10-22, "What leaves before payday, and am I covered?"): the Safe to spend
+   hero, as on the PC (IV-12P), the worded tabs, then Coming up: Due before payday with its coverage sentences and a
+   dated list of what leaves before payday,
    late ones first, ending with payday so the gap is plain; Free cash and Reserves as two tiles. Below, the figure's
-   home (Safe to spend and its working), then the forecast, the months ahead and what is promised, each one row that opens
+   working (how Safe to spend is worked out), then the forecast, the months ahead and what is promised, each one row that opens
    a sheet (D1, 3AN12), and Zakat. Same figures as the PC; the sentences and the list are worked out in the route
    (planning.py, _phone_cash). #}
 {% extends "base.html" %}
@@ -13,7 +14,7 @@
 {% block title %}Cash planning{% endblock %}
 {# The hero sits in the heading so the tabs come right under its sentence, as the design shows. #}
 {% block heading %}<h1>{{ 'Cash planning'|tr(locale) }}</h1>{% if cash and (has_accounts or cash.due) %}
-<div class="phone-plan-hero">{% set line %}{% for s in cash.lines %}{{ s.text|tr(locale, **s['values'])|keep_dates }}{{ ' ' if not loop.last }}{% endfor %}{% endset %}{{ hero(fig.payments_before_next_income.label, cash.due, line, note="As of {date}"|tr(locale, date=as_of)) }}</div>{% endif %}{% endblock %}
+<div class="phone-plan-hero">{% set line %}{% if status %}{{ status.text|tr(locale, **status['values']) }}{% endif %}{% endset %}{{ hero(fig.safe_to_spend.label, forecast.safe_to_spend, line, note="As of {date}"|tr(locale, date=as_of), href='#plan-build' if has_accounts else '', fig='safe_to_spend') }}</div>{% endif %}{% endblock %}
 {% macro plan_row(r) %}
 <a class="phone-row phone-plan-row{{ ' is-late' if r.late }}"{% if r.popup %} data-popup-open{% endif %} href="{{ r.href }}"><span>{{ r.name }}<small>{{ r.kind|tr(locale) }}{% if r.estimated %} · {{ 'Estimated'|tr(locale) }}{% endif %} · {% if r.late_text %}<span class="nowrap">{{ r.date }}</span> · <span class="plan-status plan-status-late">{{ r.late_text.text|tr(locale, **r.late_text['values']) }}</span>{% else %}{{ r.when.text|tr(locale, **r.when['values']) }} · <span class="nowrap">{{ r.date }}</span>{% endif %}</small></span><b class="{{ 'pos' if r.income }}">{{ '+' if r.income else '−' }}{{ r.amount|money }}</b>{{ arrow('in' if r.income else 'out') }}</a>
 {% endmacro %}
@@ -27,6 +28,7 @@
 
 <section class="phone-section phone-plan-coming" id="plan-next" aria-labelledby="coming-section">
   <header class="phone-section-head"><h2 id="coming-section">{{ 'Coming up'|tr(locale) }}</h2></header>
+  {% if cash.due or cash.lines %}<p class="phone-note" id="plan-due">{{ fig.payments_before_next_income.label }} <b>{{ cash.due|money }} {{ base }}</b>{% for s in cash.lines %} {{ s.text|tr(locale, **s['values'])|keep_dates }}{% endfor %}</p>{% endif %}
   {% if cash.now or cash.ahead or cash.payday %}
   <div class="phone-rows">
     {% for r in cash.now %}{{ plan_row(r) }}{% endfor %}
@@ -71,11 +73,9 @@
 
 {% if has_accounts %}
 <section class="phone-section" aria-labelledby="safe-section">
-  <header class="phone-section-head"><h2 id="safe-section">{{ 'Safe to spend'|tr(locale) }}</h2><span>To {{ f.next_income_date or 'three months from now' }}</span></header>
+  <header class="phone-section-head"><h2 id="safe-section">{{ 'How safe to spend is worked out'|tr(locale) }}</h2><span>To {{ f.next_income_date or 'three months from now' }}</span></header>
   <article class="card phone-card" id="plan-build" aria-labelledby="safe-section">
     <p class="phone-note">{{ "From free cash, after what is promised"|tr(locale) }}</p>
-    <div class="phone-lead{{ ' is-negative' if f.safe_to_spend < 0 }}">{{ f.safe_to_spend|money }} <small>{{ base }}</small></div>
-    {% if status %}<p class="phone-note phone-plan-safe-line{{ ' is-short' if f.safe_to_spend < 0 }}">{{ status.text|tr(locale, **status['values']) }}</p>{% endif %}
     {% if p.build %}{{ bar_rows(p.build.rows, 'From free cash to safe to spend') }}{% endif %}
   </article>
 </section>

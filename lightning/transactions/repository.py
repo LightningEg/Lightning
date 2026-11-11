@@ -323,6 +323,35 @@ class TransactionRepository:
             (window,),
         )
 
+    def payee_entries_since(self, since: str) -> list:
+        """Money in/out with a payee since a day, newest first, one row per transaction: [{counterparty, account_id,
+        category_id, effect, date, id}] under the saved name. The account and category are the first money line's."""
+        return self.db.all(
+            "SELECT COALESCE(cp.name, t.counterparty) AS counterparty, le.account_id, le.category_id, le.effect, t.date, t.id"
+            " FROM transactions t JOIN ledger_entries le ON le.transaction_id = t.id"
+            " LEFT JOIN counterparties cp ON cp.id = t.counterparty_id"
+            " WHERE t.status = 'POSTED' AND t.type IN ('IN','OUT') AND t.counterparty != '' AND t.date >= ?"
+            "  AND le.effect IN ('INFLOW','OUTFLOW') AND le.category_id IS NOT NULL"
+            " GROUP BY t.id ORDER BY t.date DESC, t.id DESC",
+            (since,),
+        )
+
+    def recent_accounts(self, window: int) -> list:
+        """Each counterparty's last ``window`` money in/out transactions with the account each used, newest first,
+        under its saved name: [{counterparty, account_id, date, id}] (one row per transaction)."""
+        return self.db.all(
+            "SELECT counterparty, account_id, date, id FROM ("
+            " SELECT COALESCE(cp.name, t.counterparty) AS counterparty, le.account_id, t.date, t.id,"
+            "  DENSE_RANK() OVER (PARTITION BY COALESCE(cp.name, t.counterparty) ORDER BY t.date DESC, t.id DESC) AS n"
+            " FROM transactions t JOIN ledger_entries le ON le.transaction_id = t.id"
+            " LEFT JOIN counterparties cp ON cp.id = t.counterparty_id"
+            " WHERE t.status = 'POSTED' AND t.type IN ('IN','OUT') AND t.counterparty != ''"
+            "  AND le.effect IN ('INFLOW','OUTFLOW')"
+            " GROUP BY t.id"
+            ") WHERE n <= ? ORDER BY counterparty, date DESC, id DESC",
+            (window,),
+        )
+
     def last_accounts(self) -> list:
         """Each counterparty's most recent account (money in or out), under its saved name: [{counterparty, account_id}]."""
         return self.db.all(

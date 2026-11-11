@@ -98,7 +98,8 @@ def test_home_has_at_most_eight_figures(sample):
              html.split('id="month-heading"', 1)[1].split("</section>", 1)[0]]
     text = re.sub(r'<div class="phone-sheet-panel".*?</details>', " ", " ".join(parts), flags=re.S)  # the working is a sheet, not on the screen
     text = re.sub(r"<[^>]+>", " ", text)
-    text = re.sub(r"\d{4}-\d\d-\d\d|See all \d+", " ", text)  # dates and the count on "See all" are not figures
+    months = "Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec"
+    text = re.sub(rf"\d{{4}}-\d\d-\d\d|\b\d{{1,2}} (?:{months})\b(?: \d{{4}})?|See all \d+", " ", text)  # dates (1 Nov) and "See all" are not figures
     figures = re.findall(r"\d[\d,]*(?:\.\d+)?(?!\d)(?!\s*(?:days?|bills?|more|items?))", text)  # amounts, not counts of days
     assert len(figures) <= 8 and not any("." in f for f in figures), (figures, text)  # whole EGP
 

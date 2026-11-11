@@ -243,6 +243,11 @@ def phone_router() -> APIRouter:
         return render_phone(request, "phone/catch_up.html", screen=screen.build(
             c, today(), has_sms=getattr(request.app.state, "sms_source", None) is not None))
 
+    @router.get("/plan/catch-up")
+    async def plan_catch_up(request: Request):
+        """The PC's Catch up on late bills (IV-12AA5) is the phone's own Catch up, never PC markup."""
+        return redirect("/catch-up")
+
     @router.get("/todo")
     async def todo(request: Request):
         """To do's See all (3AY14): every row Home's To do would show, in the same order."""

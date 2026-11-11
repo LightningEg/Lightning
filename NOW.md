@@ -26,6 +26,7 @@ Reserved codes: none
 
 - **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12AB3 rest, 12Z5, 12AE4, 12Q. **Read:** 12AB.
 - **Upcoming (11-11, Claude):** 7AR1-3 built (owner: PC+phone check); 7AR4 .ics later. **Read:** 7AR.
+- **O1:** owner checks Home. **Read:** Overview §7.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 
@@ -35,7 +36,7 @@ Reserved codes: none
 
 - **Website (11-09):** owner: Home ends on Download; Marketplace in search (site PR). Analytics host blocked here: unread. **Read:** site README › Search.
 
-- **Import:** 7AB, 7AN, 7AK1-2, 7AQ1-4 built (owner: PC+phone check). Next 7AO, 7AQ5, 7AK3-4. **Read:** each item.
+- **Import:** 7AB, 7AN, 7AK1-2, 7AK4, 7AO, 7AQ1-5 built (owner: PC+phone, 7AQ5 Arabic). Next 7AK3.**Read:** 7AK.
 
 
 Plan: `issues/INDEX.md`.

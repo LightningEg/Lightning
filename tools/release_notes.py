@@ -35,7 +35,9 @@ CODE = re.compile(r"\b((?:B[VT]|I[VT]|NF|OW)-\d+[A-Z]+\d*)\b")
 PR = re.compile(r"\(#(\d+)\)\s*$")
 # A merged commit whose note lacks its pillar cannot be amended; the corrected note is kept here by full SHA.
 NOTE_FIXES = {"bc2e08de239e0a35e6bf4c8ceb83c813bd5059cd":
-              ["understand: Investment pages use shared read models for class and currency figures."]}
+              ["understand: Investment pages use shared read models for class and currency figures."],
+              "c3e13ba75a86a2a6290de73326f60af974a715de":
+              ["capture: The phone Add sheet's date picker no longer closes itself the moment it opens."]}
 
 
 def _pillars() -> dict[str, str]:
