@@ -8,6 +8,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from lightning.core.errors import LightningError
+from lightning.core.plural import counted
 from lightning.transactions.domain import TxnFilter
 
 from ..web import container, redirect, render, settled_save
@@ -105,7 +106,7 @@ async def find_replace(request: Request):
                 changed, skipped = changed + len(done), skipped + len(left)
     except LightningError as exc:
         return redirect(destination, exc.message)
-    message = f"Replaced “{find}” on {changed} row{'s' if changed != 1 else ''}."
+    message = f"Replaced “{find}” on {counted(changed, 'row', 'rows')}."
     if skipped:
         message += f" {skipped} left as they were (transfers and investment rows)."
     return redirect(destination, message)

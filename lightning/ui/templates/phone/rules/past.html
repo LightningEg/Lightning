@@ -3,7 +3,7 @@
 {% block heading %}<div><h1>{{ 'Settings'|tr(locale) }}</h1></div>{% endblock %}
 {% block content %}
 <section class="card phone-card stack" aria-labelledby="rule-past">
-  <h2 id="rule-past">This rule would change {{ total }} past transaction{{ 's' if total != 1 }}</h2>
+  <h2 id="rule-past">This rule would change {{ total|counted('past transaction', 'past transactions') }}</h2>
   <p class="muted small">{{ words.when }} · {{ words.then }}. Only the category changes; splits and tags apply to new rows.</p>
   <p>{{ 'Choose the transactions to refile. Unchecked rows stay unchanged.'|tr(locale) }}</p>
   <form class="phone-form" method="post" action="/rules/{{ rule.id }}/apply"><input type="hidden" name="fingerprint" value="{{ fingerprint }}">

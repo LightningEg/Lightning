@@ -21,7 +21,7 @@ def test_a_group_with_one_category_says_category(c):
     assert "1 category" in sizes and "1 categories" not in html
 
 
-@pytest.mark.parametrize("n, ar", [(1, "فاضل يوم واحد"), (5, "فاضل 5 يوم")])
+@pytest.mark.parametrize("n, ar", [(1, "فاضل يوم واحد"), (5, "فاضل 5 أيام")])
 def test_days_left_in_arabic(n, ar):
     assert translate(counted(n, "day left", "days left"), "ar") == ar
 
@@ -46,3 +46,48 @@ def test_arabic_agrees_for_every_counted_noun(key, one, two, few, many, n):
     if "{n}" not in want:
         want = want if n in (1, 2) else f"{n} {want}"
     assert out.replace("كل ", "").endswith(want.replace("كل ", "").replace("{n}", str(n)))
+
+
+def test_no_hand_built_plurals_in_the_ui_or_workflows():
+    """3BC3: a count goes through counted(); an `'s' if` or a `row(s)` in the UI code is a wrong plural waiting to happen."""
+    from pathlib import Path
+    pattern = re.compile(r"""'s' if|"s" if|(?<![\w.])[a-z]+\(s\)""")
+    root = Path(__file__).resolve().parent.parent / "lightning"
+    hits = [f"{path.relative_to(root)}:{n}" for folder in ("ui", "workflows") for path in (root / folder).rglob("*")
+            if path.suffix in (".py", ".html") for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1)
+            if pattern.search(line)]
+    assert not hits, hits
+
+
+@pytest.mark.parametrize("english, arabic", [
+    ("Replaced “x” on 1 row.", "اتغيرت “x” في صف واحد."),
+    ("Replaced “x” on 3 rows.", "اتغيرت “x” في 3 صفوف."),
+    ("Across 1 account", "في حساب واحد"),
+    ("Across 2 accounts", "في حسابين"),
+    ("2 transactions", "معاملتين"),
+    ("11 transactions", "11 معاملة"),
+])
+def test_a_count_built_in_english_still_agrees_in_arabic(english, arabic):
+    assert translate(english, "ar") == arabic
+
+
+def test_a_unit_the_person_typed_is_never_pluralised():
+    from lightning.ui.web import _units_of
+    assert _units_of(3, "gram") == "3 gram" and _units_of(3, "piece") == "3 piece" and _units_of(1, "piece") == "1 piece"
+
+
+def test_the_browser_agrees_counts_like_the_server():
+    """3BC4: lightning-t.js ports _agree_counts; the Node test runs it with a small Arabic table."""
+    import shutil
+    import subprocess
+    from pathlib import Path
+    node = shutil.which("node")
+    if not node:
+        pytest.skip("node is not installed")
+    result = subprocess.run([node, "--test", str(Path(__file__).parent / "plural-runtime.test.cjs")], capture_output=True, text=True, timeout=120)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_the_browser_gets_the_counted_table():
+    from lightning.ui.web import _ARABIC_UI_JS
+    assert b"window.LIGHTNING_COUNTED=" in _ARABIC_UI_JS and "معاملة واحدة".encode() in _ARABIC_UI_JS

@@ -24,7 +24,7 @@ from lightning.core.figures import FIGURES, label as figure_label
 from lightning.core.money import ZERO, fmt, signed_pct
 
 from . import charts
-from .i18n import counted
+from lightning.core.plural import counted
 
 TONES = {"in", "hold", "out", "over"}
 
@@ -244,9 +244,9 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
         due_compare = compare("already late", fmt(late_total, 0), "bad")
         due_chip = chip(f"{len(late)} late", "bad")
     else:
-        due_compare = compare(f"payment{'s' if len(before) != 1 else ''} before payday" if until else "payments in the next 3 months",
+        due_compare = compare(("payment before payday" if len(before) == 1 else "payments before payday") if until else "payments in the next 3 months",
                               str(len(before)))
-        due_chip = chip(f"{len(before)} payment{'s' if len(before) != 1 else ''}")
+        due_chip = chip(f"{counted(len(before), 'payment', 'payments')}")
     nxt = before[0] if before else None
     due_line = (line(f"Next: {nxt.item.name} · {nxt.due_date}", "See late ones" if late else "", "#plan-next" if late else "")
                 if nxt else line("Nothing else is due before then", "See late ones" if late else "", "#plan-next" if late else ""))
@@ -444,7 +444,7 @@ def recurring(*, monthly_out: Decimal, fixed, limit: Decimal | None, band: str |
         cards.append(card("Subscriptions", subscriptions_per_year / 12, compare(f"{fmt(subscriptions_per_year, 0)} a year"),
                           tone="out", line_=line("a month"), key="subscriptions"))
     if due_count:
-        cards.append(card("Due now", due_total, compare(f"in {due_count} payment{'s' if due_count != 1 else ''}"),
+        cards.append(card("Due now", due_total, compare(f"in {counted(due_count, 'payment', 'payments')}"),
                           tone="over", chip_=chip("Needs you", "over"), needs=True, href="#recurring-list", key="due"))
     return row(cards)
 

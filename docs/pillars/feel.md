@@ -11,7 +11,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IV-3BC** | [Counts read right in English and Arabic](../../issues/3-polish-and-arabic/IV-3BC-counts-read-right-in-both-languages.md) | M | ready |
 | **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page](../../issues/3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | M | ready |
 | **NF-10C** | [Theme materials, selling themes, owner console](../../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md) | L | building |
 
@@ -19,6 +18,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 
 - [v1.5.0 PR review, theme switching and package preparation](../../issues/10-looks-and-store/r12-v150-release/report.md): 10C
 - [Store and community: unlocking themes, the market, rewards and staying in Lightning](../../issues/10-looks-and-store/r13-store-and-community/report.md): 10C
-- [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BC, 3BD
+- [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BD
 <!-- work:end -->
 
