@@ -2,5 +2,4 @@
 # Only shrinks: tests/test_phone_decoupled.py fails when a line could go or a new PC page appears without a phone one.
 bank_import_preview.html
 dashboard/welcome.html
-financial_health.html
 reserves.html

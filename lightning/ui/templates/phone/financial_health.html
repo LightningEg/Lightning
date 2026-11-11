@@ -1,0 +1,40 @@
+{# Financial health on the phone (3AY17): how many figures are within your limits leads, what needs you as rows, then
+   every figure against its limit (a row; its sheet holds the numbers), then the savings rate over time. The presenter
+   (phone/presenters/health.py) adds the investing rate to Saving. #}
+{% extends "base.html" %}
+{% from 'partials/charts.html' import sparkline %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% block title %}{{ 'Financial health'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Limits'|tr(locale) }}</h1><p class="phone-note">{{ 'Balances as of {date} · savings rate from {month}'|tr(locale, date=as_of, month=savings_month) }}</p>{% endblock %}
+{% block content %}
+{% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+<form class="phone-as-of" method="get" action="/financial-health"><label class="phone-chip is-chosen">{{ 'As of'|tr(locale) }} {{ as_of_iso }}<input type="date" data-native-date name="as_of" value="{{ as_of_iso }}" max="{{ today_iso }}" aria-label="{{ 'As of'|tr(locale) }}"></label><noscript><button class="btn">{{ 'Show'|tr(locale) }}</button></noscript></form>
+{% if lead %}<section class="phone-hero has-seam" aria-labelledby="lead-heading"><div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ lead.label }}</div>
+  <div class="phone-lead">{% if lead.value is none %}—{% elif lead.kind == 'count' %}{{ lead.value }}{% else %}{{ lead.value|money }}{% endif %}</div>
+  <p class="phone-hero-line">{% if lead.compare.figure %}<b>{{ lead.compare.figure }}</b> {% endif %}<span>{{ lead.compare.text }}</span></p></section>{% endif %}
+{% if needs %}<section class="phone-section" aria-labelledby="hn-head"><header class="phone-section-head"><h2 id="hn-head">{{ 'Needs you'|tr(locale) }}</h2><span>{{ needs|length }}</span></header>
+  <div class="phone-rows">{% for r in needs %}<a class="phone-row" href="{{ r.href }}"{% if r.popup %} data-popup-open{% endif %}><span>{{ r.label }}<small>{{ r.detail }}</small></span><b>{{ (r.action or 'Review')|tr(locale) }} {{ chevron() }}</b></a>{% endfor %}</div></section>{% endif %}
+{% macro value(item) %}{% if item.gap %}—{% elif item.value is none %}{{ 'Unavailable'|tr(locale) }}{% elif item.unit == '%' %}{{ '%.1f'|format(item.value) }}%{% elif item.unit == 'months' %}{{ '%.1f'|format(item.value) }} {{ 'months'|tr(locale) }}{% else %}<bdi class="fig">{{ item.value|money }}</bdi>{% endif %}{% endmacro %}
+{% macro limit(v, unit) %}{% if unit == '%' %}{{ '%.1f'|format(v) }}%{% else %}{{ '%.0f'|format(v) }} {{ 'months'|tr(locale) }}{% endif %}{% endmacro %}
+{% for group in groups %}<section class="phone-section" aria-labelledby="hg-{{ loop.index }}"><header class="phone-section-head"><h2 id="hg-{{ loop.index }}">{{ group.title|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for row in group['items'] %}{% set item = row.item %}{% set label = labels.get(item.key, item.key)|tr(locale) %}
+    {% set r %}<span id="health-{{ item.key }}">{{ label }}<small>{% if item.band %}{{ {'good': 'Good', 'watch': 'Watch', 'alert': 'Needs you'}[item.band]|tr(locale) }}{% elif item.limit is none %}{{ 'No limit'|tr(locale) }}{% else %}{{ 'No comparison available'|tr(locale) }}{% endif %}{% if item.period %} · {{ item.period }}{% endif %}{% if item.key == 'emergency_fund' and cash_months is not none %} · {{ '{n} months in cash you own'|tr(locale, n='%.1f'|format(cash_months)) }}{% endif %}</small>{% if row.meter %}<span class="phone-bar-track health-meter-track" aria-hidden="true"><i class="tone-{{ row.meter.tone }}" style="width:{{ '%.1f'|format(row.meter.fill) }}%"></i></span>{% endif %}</span><b class="{{ 'neg' if item.band == 'alert' }}">{{ value(item) }}</b>{% endset %}
+    {% call sheet(label, r, 'health-outside' if item.band == 'alert' else ('health-within' if item.band == 'good' else '')) %}
+    {% if item.gap %}<p class="phone-note">{{ item.gap }}</p>{% endif %}
+    <dl class="phone-facts">
+      {% for name, v in item.support %}<div><dt>{{ name|tr(locale) }}</dt><dd>{% if v is not none %}<bdi class="fig">{{ v|money }} {{ base }}</bdi>{% else %}{{ 'Unavailable'|tr(locale) }}{% endif %}</dd></div>{% endfor %}
+      {% if item.limit is not none %}<div><dt>{{ 'Good from'|tr(locale) }}</dt><dd>{{ ('At least' if item.direction == 'minimum' else 'At most')|tr(locale) }} {{ limit(item.limit, item.unit) }}</dd></div>{% if item.alert is not none %}<div><dt>{{ 'Needs you from'|tr(locale) }}</dt><dd>{{ ('Below' if item.direction == 'minimum' else 'Above')|tr(locale) }} {{ limit(item.alert, item.unit) }}</dd></div>{% endif %}{% else %}<div><dt>{{ 'Your limit'|tr(locale) }}</dt><dd>{{ 'No limit'|tr(locale) }}</dd></div>{% endif %}
+      {% if item.key == 'emergency_fund' %}<div><dt>{{ 'Target'|tr(locale) }}</dt><dd>{% if fund.target is not none %}<bdi class="fig">{{ fund.target|money }} {{ base }}</bdi>{% else %}{{ 'Unavailable'|tr(locale) }}{% endif %}</dd></div>{% endif %}
+    </dl>
+    {% if item.key == 'emergency_fund' %}{% include "partials/emergency_liquidity_context.html" %}{% endif %}
+    <a class="btn phone-save" href="{{ item.href }}">{{ 'See details'|tr(locale) }}</a>
+    {% endcall %}{% endfor %}</div>
+</section>{% endfor %}
+{% set sm = savings_summary %}{% set values = trends|map(attribute='savings_rate')|list %}
+<section class="phone-section" aria-labelledby="health-over-time-heading"><header class="phone-section-head"><h2 id="health-over-time-heading">{{ fig.savings_rate.label }} {{ 'over time'|tr(locale) }}</h2><span>{{ trends[0].month }} · {{ savings_month }}</span></header>
+  {% if sm %}<p><b>{{ '%.1f'|format(sm.last) }}%</b> <span class="phone-note">{{ 'in {month}'|tr(locale, month=sm.last_month) }} · {{ 'lowest {value}% in {month}'|tr(locale, value='%.1f'|format(sm.low), month=sm.low_month) }}</span></p>{% endif %}
+  {% if savings_spark.points and values|reject('none')|list|length >= 2 %}<div class="health-spark">{{ sparkline(savings_spark, 'in', fig.savings_rate.label ~ ' ' ~ 'over six completed months'|tr(locale)) }}</div>{% else %}<p class="phone-note">{{ 'Not enough completed months to draw a line yet.'|tr(locale) }}</p>{% endif %}
+  <div class="phone-rows">{% for month in trends|reverse %}<div class="phone-row"><span>{{ month.month }}</span><b>{% if month.gap %}{{ month.gap }}{% elif month.savings_rate is none %}{{ 'Unavailable'|tr(locale) }}{% else %}{{ '%.1f'|format(month.savings_rate) }}%{% endif %}</b></div>{% endfor %}</div>
+</section>
+<p class="phone-note health-limit-note">{{ 'Limits only compare figures you already have; they change no transactions, plans or reports. Change them behind the gear.'|tr(locale) }}</p>
+{% endblock %}
