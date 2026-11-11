@@ -67,11 +67,13 @@ recurring) instead of grouped items; search and filters on `/activity` (today th
 offered from the sheet. Needs a choice of what each card's one action is. Done when: one tap per reviewed item for every
 kind, and `tools/phone_check.py` shows the first row above 330 px.
 
-## 3AY9 Budget: the payday strip and This month in detail · M · opus
-Built: `/budget` flexible first. Left: the payday strip, *This month in detail* (what replaces the older
-`phone/budget.html`, which *Edit your plan* still opens through `presenters/budget.py`), then skill `number-audit` on the
-flexible figure. Done when: the first category row is above 400 px, Mohab's fixed costs do not move the pace, the audit
-passes, and `phone/budget.html` with its presenter is deleted.
+## 3AY9 Budget: the plan list as its own screen · M · opus
+Built (2026-11-11): `/budget` flexible first; the payday strip (`planning/salary_day.payday_to_plan`: from the salary's
+day until the payday plan is saved, `tests/test_phone_payday_strip.py`); *This month in detail* opens the month's Spending
+page. Left: *Edit your plan* and *Make my plan* still open the older `phone/budget.html` (its `open_group` list of
+`/budget/rule/{id}` fields, which Mohab's `plan_category` types into). Give that list its own phone screen
+(`phone/screens/`, one field per flexible category, amount or %), point both links at it, then delete `phone/budget.html`'s
+other parts and `presenters/budget.py`. Done when: the older page and its presenter are gone and Mohab's phone year passes.
 
 ## 3AY13 Owner's phone check · owner
 One end-to-end check on a phone once 3AY4, 3AY8 and 3AY9 are merged (it replaces 3AN13), including a native reader's pass over the Arabic

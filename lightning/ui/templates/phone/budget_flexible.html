@@ -11,6 +11,8 @@
 {% block content %}
 {% set s = screen %}
 <div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/budget?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">{{ chevron(back=True) }}</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/budget?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">{{ chevron() }}</a>{% else %}<span class="phone-month-end" aria-hidden="true">&nbsp;</span>{% endif %}</span></div>
+{# 3AY9 (owner 2026-11-11): from the salary's day until this month's plan is saved, a strip at the top opens payday #}
+{% if s.payday %}<a class="phone-row phone-payday-strip" href="/payday"><span>{{ "Plan this month's {amt}"|tr(locale, amt=s.payday.amount|money) }}<small>{{ 'Salary arrived'|tr(locale) }} · {{ s.payday.date }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
 {% if s.state == 'no_plan' %}
 <section class="phone-section" aria-labelledby="plan-heading">
   <header class="phone-section-head"><h2 id="plan-heading">{{ 'Make my plan'|tr(locale) }}</h2></header>
@@ -55,5 +57,7 @@
 </section>
 <a class="phone-row" href="/budget?month={{ s.month }}&amp;open_group=all"><span>{{ 'Edit your plan'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
 {% if s.fixed_count %}<a class="phone-row phone-fixed-costs" href="/money/bills"><span>{{ 'Fixed costs'|tr(locale) }}<small>{{ '{paid} of {planned} paid'|tr(locale, paid=s.fixed_paid|money, planned=s.fixed_planned|money) }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
+{# 3AY9: This month in detail is the month's Spending page: the four biggest categories then Other, against the same days usually #}
+{% if s.state != 'no_plan' %}<a class="phone-row" href="/birdview/expenses?period=month&amp;month={{ s.month }}"><span>{{ 'This month in detail'|tr(locale) }}</span><b>{{ chevron() }}</b></a>{% endif %}
 {% endif %}
 {% endblock %}
