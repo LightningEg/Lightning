@@ -14,6 +14,7 @@ from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.figures import label
 from lightning.core.money import ZERO, fmt, to_decimal
+from lightning.core.plural import counted
 
 from . import register
 from .. import charts, kpis, status as page_status
@@ -132,7 +133,7 @@ async def list_accounts(request: Request):
         lead = kpis.card(label("what_you_own"), net_worth.what_you_own,
                          kpis.compare("is held for others, not yours", fmt(held, 0), "hold") if held
                          else kpis.compare("All of it is yours"), tone="hold", key="own",
-                         line_=kpis.line(f"Across {len(active)} account{'s' if len(active) != 1 else ''}"))
+                         line_=kpis.line(f"Across {counted(len(active), 'account', 'accounts')}"))
     groups: dict[str, dict] = {}
     for row in rows:
         group = groups.setdefault(SIDEBAR_GROUPS[row[0].account_type], {"rows": [], "balance": ZERO, "owned": ZERO})

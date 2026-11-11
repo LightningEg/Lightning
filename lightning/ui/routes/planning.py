@@ -13,6 +13,7 @@ from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, to
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.figures import label
 from lightning.core.money import ZERO, fmt, to_decimal
+from lightning.core.plural import counted
 from lightning.planning.domain import (FREQUENCY_LABELS, KIND_LABELS, RECURRING_KINDS, WEEKEND_MOVE_LABELS, Frequency,
                                        PaymentStatus, PlanKind, WeekendMove, per_year)
 from lightning.planning.bill_state import CATCH_UP_FROM, late_payments
@@ -202,7 +203,7 @@ def _plan_stats(f, plan, day, has_income: bool = True) -> list[dict]:
         {"key": "free", "surface": "hold", "label": label("free_cash"), "value": f.free_cash, "kind": "money",
          "sub": "", "href": "/"},
         {"key": "before", "surface": "out", "label": label("payments_before_next_income"), "value": plan["before_total"], "kind": "money",
-         "badge": {"tone": "flat", "text": f"{len(plan['before_income'])} payment{'s' if len(plan['before_income']) != 1 else ''}"},
+         "badge": {"tone": "flat", "text": f"{counted(len(plan['before_income']), 'payment', 'payments')}"},
          "sub": f"Next: {nxt.item.name} · {nxt.due_date}" if nxt else "Nothing is due before then",
          "href": "#plan-next"},
         {"key": "low", "surface": "over" if low and low.closing < 0 else "hold", "label": "Lowest point ahead", "value": low.closing if low else None, "kind": "money",
@@ -363,7 +364,7 @@ async def loans_page(request: Request):
     borrowed = sum((e["progress"]["total_amount"] for e in loans), ZERO)
     # The page's answer is a Lead (A07): what is left to pay, against what was borrowed, paid and left as its picture.
     lead = kpis.card("Loans still to pay", still_to_pay,
-                     kpis.compare(f"of {fmt(borrowed, 0)} in {len(loans)} loan{'s' if len(loans) != 1 else ''}",
+                     kpis.compare(f"of {fmt(borrowed, 0)} in {counted(len(loans), 'loan', 'loans')}",
                                   f"{fmt(paid, 0)} paid", "good"),
                      tone="out", visual=kpis.segments([("Paid", paid, "hold"), ("Left", borrowed - paid, "out")]),
                      line_=kpis.line(summary["title"] if summary else ""),  # "Paid off on …" or "2 loan payments due now"

@@ -48,15 +48,10 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-3BC** | [Counts read right in English and Arabic - "1 days left", "Delete 1 transactions?", "2 معاملة"](3-polish-and-arabic/IV-3BC-counts-read-right-in-both-languages.md) | improvement, visual | Feel | M | Sonnet | ready |
-| IV-3BC1 | ↳ One English plural helper and the five wrong counts ([#408](https://github.com/LightningEg/Lightning/issues/408)) | | | S | Sonnet | |
-| IV-3BC2 | ↳ Arabic agrees for every counted noun the UI uses | | | S | Sonnet | |
-| IV-3BC3 | ↳ Counts built in English before translation | | | M | Sonnet | |
-| IV-3BC4 | ↳ Counts built in the browser | | | S | Sonnet | |
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BD, 3BE, 3BG, 3BJ, 3AU2, 3AU3, 3AU4, 3BD1, 3BD2, 3BD3, 3BD4, 3BD5, NF-3AU. Next free code: 3BL.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BC, 3BD, 3BE, 3BG, 3BJ, 3AU2, 3AU3, 3AU4, 3BC1, 3BC2, 3BC3, 3BC4, 3BD1, 3BD2, 3BD3, 3BD4, 3BD5, NF-3AU. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 
