@@ -156,6 +156,20 @@ jobs:
       - name: Shipped app window check (profile chooser in WebView2)
         shell: pwsh
         run: ./packaging/run_check.ps1 -Exe '${{ steps.shipped.outputs.exe }}' -Report reports/app-window.json -Arguments '--smoke' -TimeoutSeconds 120
+      - name: Closed-app reminders (NF-3AU3: the daily task is created and removed; --remind exits)
+        shell: pwsh
+        run: |
+          $exe = '${{ steps.shipped.outputs.exe }}'
+          python -c "import sys; from lightning.desktop.reminder_task import register; sys.exit(0 if register(sys.argv[1]) else 1)" $exe
+          if ($LASTEXITCODE -ne 0) { throw "schtasks /Create failed" }
+          schtasks /Query /TN "Lightning reminders" /V /FO LIST | Select-String "Task To Run"
+          $run = Start-Process -FilePath $exe -ArgumentList '--remind' -PassThru -Wait -NoNewWindow
+          if ($run.ExitCode -ne 0) { throw "--remind exited $($run.ExitCode)" }
+          python -c "import sys; from lightning.desktop.reminder_task import unregister; sys.exit(0 if unregister() else 1)"
+          if ($LASTEXITCODE -ne 0) { throw "schtasks /Delete failed" }
+          schtasks /Query /TN "Lightning reminders" 2>$null
+          if ($LASTEXITCODE -eq 0) { throw "The task is still there after /Delete" }
+          exit 0
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
           name: ${{ steps.package.outputs.artifact }}
