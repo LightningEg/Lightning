@@ -20,4 +20,10 @@ ERRORS_AR = {
     "Active: {kind}": "الشغّال: {kind}",
     "Edit in this list": "عدّل من القايمة دي",
     "View details": "شوف التفاصيل",
+    "Row {n}: the fee is not a number.": "الصف {n}: الرسوم مش رقم.",
+    "Row {n}: the date or the amount is not valid.": "الصف {n}: التاريخ أو المبلغ مش صحيح.",
+    "This file is not a CSV Lightning can read. Save it from your bank as CSV and try again.": "الملف ده مش CSV يقدر لايتنينج يقراه. احفظه من البنك بصيغة CSV وجرّب تاني.",
+    "That investment action is not available.": "إجراء الاستثمار ده مش متاح.",
+    "Record this from the transaction screen.": "سجّل ده من شاشة المعاملة.",
+    "That transaction no longer exists.": "المعاملة دي مبقتش موجودة.",
 }
