@@ -7,18 +7,18 @@
 {% block title %}{{ account.name }}{% endblock %}
 {% block heading %}<h1>{{ account.name }}</h1><p class="phone-note">{{ account.currency }} · {{ account.type_label|tr(locale) }}</p>{% endblock %}
 {% block content %}{% set session = request.state.session_token|default('') %}
-{{ hero('In this account'|tr(locale), total, (fig.what_you_own.label ~ ' ' ~ owned|money) if held else '', unit=account.currency) }}
-{% if held %}<p class="phone-note">{{ 'Held for others'|tr(locale) }} <bdi class="fig">{{ held|money }}</bdi></p>{% endif %}
+{{ hero('In this account'|tr(locale), total, (fig.what_you_own.label ~ ' ' ~ owned|money(False,0)) if held else '', unit=account.currency) }}
+{% if held %}<p class="phone-note">{{ 'Held for others'|tr(locale) }} <bdi class="fig">{{ held|money(False,0) }}</bdi></p>{% endif %}
 <a class="btn primary phone-save" href="/investments/gold/new">{{ 'Add gold'|tr(locale) }}</a>
 <section class="phone-section" id="physical-items" aria-labelledby="pa-items"><header class="phone-section-head"><h2 id="pa-items">{{ 'Physical items'|tr(locale) }}</h2></header>
   <p class="phone-note">{{ 'Value uses matching-karat price per gram or a dated manual valuation.'|tr(locale) }}</p>
   {% if items %}<div class="phone-rows">{% for item in items %}
-    {% set r %}<span>{{ item.name }}<small>{{ item.held|money(False,0) }} × {{ item.karat }}K · <bdi class="fig">{{ (item.gold_weight * item.held)|money(False,3) }} g</bdi></small></span><b><bdi class="fig">{{ item.value|money if item.position and item.position.value is not none else '—' }}</bdi></b>{% endset %}
+    {% set r %}<span>{{ item.name }}<small>{{ item.held|money(False,0) }} × {{ item.karat }}K · <bdi class="fig">{{ (item.gold_weight * item.held)|money(False,3) }} g</bdi></small></span><b><bdi class="fig">{{ item.value|money(False,0) if item.position and item.position.value is not none else '—' }}</bdi></b>{% endset %}
     {% call sheet(item.name, r) %}
     <p class="phone-note">{{ item.item_kind }}{% if item.details %} · {{ item.details }}{% endif %}</p>
     <dl class="phone-facts">
       <div><dt>{{ 'Fine gold'|tr(locale) }}</dt><dd><bdi class="fig">{{ item.fine_gold|money(False,3) }} g</bdi></dd></div>
-      <div><dt>{{ 'Cost'|tr(locale) }}</dt><dd><bdi class="fig">{{ item.position.cost_basis|money if item.position else '—' }}</bdi></dd></div>
+      <div><dt>{{ 'Cost'|tr(locale) }}</dt><dd><bdi class="fig">{{ item.position.cost_basis|money(False,0) if item.position else '—' }}</bdi></dd></div>
       <div><dt>{{ 'Valuation'|tr(locale) }}</dt><dd>{% if item.position %}{{ valuation_text(item.valuation, item.karat) }}{% else %}{{ 'No pieces held'|tr(locale) }}{% endif %}</dd></div>
     </dl>
     <a class="btn phone-save" data-popup-open href="/accounts/{{ account.id }}/items/{{ item.asset_id }}/edit">{{ 'Edit'|tr(locale) }}</a>
