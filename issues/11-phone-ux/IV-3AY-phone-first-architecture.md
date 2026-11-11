@@ -51,9 +51,10 @@ frame) is in Architecture › UI contract › *The phone is its own layer*; read
 ## 3AY4 The phone stylesheet stands alone, and each slot keeps its stack · L · opus
 Built: the router, `phone/base.html`, the status bar colour, "This is on your PC" (`BEST_ON_PC` empty on purpose, owner
 2026-11-08). Left, in this order:
-(a) `phone.css` standalone on the theme tokens. The bundle (`PHONE_CSS` in `ui/web.py`) still starts with `style.css`,
-because the 78 pages in `tests/phone_pc_templates.txt` are PC markup in the phone frame. Do it after 3AY15 to 3AY17 empty
-that list: then drop `style{rtl}.css` from `PHONE_CSS` and move into `phone.css` only the rules the phone templates use.
+(a) `phone.css` standalone on the theme tokens. 3AY15-17 are built (2026-11-11): `tests/phone_pc_templates.txt` is empty and no
+PC template asks `phone_mode()`. Now drop `style{rtl}.css` from `PHONE_CSS` (`ui/web.py`) and move into `phone.css` only the
+rules the phone templates still use (they keep some shared classes: `field`, `import-check`, `category-sheet*`, `money-input`,
+the import review's and reserves' own classes).
 (b) A stack per slot: tapping the chosen slot returns to its top; Android back pops within the slot, then Home, then
 leaves (`static/phone-nav.js`; report r25 › Cross-cutting 5).
 Done when: `PHONE_CSS` has no `style` entry, `tools/phone_check.py` and `tools/phone_check.py --arabic` pass, and
@@ -80,26 +81,6 @@ time, US dollars and 21K gold): the parts are what the older Overview's sheets s
 and the phone router's `/overview/fold/{name}` are deleted. Also left: an account page with *Check against the bank* first, and
 Settings rows marked "Best on your PC". Done when: no phone URL renders `phone/dashboard/index.html` and
 `tests/test_backend_roadmap.py` has a query budget for Home instead of the Overview.
-
-## 3AY15 Phone templates: the sheets the slots open · M · sonnet
-Give each a `templates/phone/<same name>` that extends `phone/base.html` and uses the phone parts (`phone-section`,
-`phone-rows`, `phone-row`, `partials/sheet.html`): `planning/pay.html` (the bill's pay sheet; Add and Catch up open it),
-`budget/category_sheet.html`, `planning/early_payment.html`, and the popups under `transactions/` and `categories/` in
-`tests/phone_pc_templates.txt`. The route does not change: `presenters.phone_template` picks the phone file by its
-name. Delete each finished line from the list. Done when: `tests/test_phone_decoupled.py` and `tests/test_phone_own_base.py`
-pass, and `tools/phone_check.py` (English and `--arabic`) passes with the sheet's address added to `PAGES`.
-
-## 3AY16 Phone templates: Investments and Cash planning pages · M · sonnet
-The same as 3AY15 for the `investments/` (12) and `planning/` (8 left) lines of `tests/phone_pc_templates.txt`. Follow
-`phone/investments/index.html` and `phone/planning/plan.html`. A page that is only practical on a PC (price files, the
-planner's bulk grid) is not given a template: list it for the owner in a GitHub issue as a `BEST_ON_PC` candidate and
-leave its line. Done when: as 3AY15.
-
-## 3AY17 Phone templates: Settings, rules, exports and the top-level pages · L · sonnet
-The same as 3AY15 for the `settings/` (7), `rules/`, `exports/`, `analysis/`, `accounts/`, `birdview/`, `dashboard/` and
-top-level (27) lines. `financial_health.html` is one of them: its phone template replaces the `phone_mode()` tests inside
-it (`presenters/health.py` stays). Done when: as 3AY15, and `grep -rn "phone_mode()" lightning/ui/templates --include=*.html`
-finds nothing outside `templates/phone/` and `partials/`.
 
 ## 3AY13 Owner's phone check · owner
 One end-to-end check on a phone once 3AY10 is merged (it replaces 3AN13), including a native reader's pass over the Arabic

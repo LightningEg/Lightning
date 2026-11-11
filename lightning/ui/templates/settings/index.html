@@ -2,7 +2,7 @@
 {% from 'partials/macros.html' import period_control with context %}
 {% block title %}{{ 'Settings'|tr(locale) }}{% endblock %}
 {% block heading %}<div><h1>{{ ('Currencies' if section == 'currencies' else 'Your data' if section in ('', 'general', none) else 'Settings')|tr(locale) }}</h1></div>{% endblock %}
-{% block top_actions %}{% if not phone_mode() %}<button class="cat-icon fullscreen-toggle" type="button" data-fullscreen-toggle aria-label="{{ 'Full screen'|tr(locale) }}" title="{{ 'Full screen'|tr(locale) }}"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5M3 8l6-6M21 8l-6-6M3 16l6 6M21 16l-6 6"/></svg><span class="sr-only" data-fullscreen-label>{{ 'Full screen'|tr(locale) }}</span></button>{% endif %}{% endblock %}
+{% block top_actions %}<button class="cat-icon fullscreen-toggle" type="button" data-fullscreen-toggle aria-label="{{ 'Full screen'|tr(locale) }}" title="{{ 'Full screen'|tr(locale) }}"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5M3 8l6-6M21 8l-6-6M3 16l6 6M21 16l-6 6"/></svg><span class="sr-only" data-fullscreen-label>{{ 'Full screen'|tr(locale) }}</span></button>{% endblock %}
 
 {% block content %}
 {% if section in ('', 'general') %}
@@ -43,27 +43,9 @@
 {% endif %}
 {% if section == 'general' %}<div class="data-settings">{% endif %}
 {% set settings_section = 'valuations' if section in ('valuations', 'assets-valuations') else section %}
-{% if phone_mode() and section in ('', 'general') %}{# the phone's way to Devices, SMS and the profile: its app bar has only Settings #}
-<section class="card phone-card" aria-labelledby="this-phone-heading">
-  <h2 id="this-phone-heading" class="phone-card-title">{{ 'This phone'|tr(locale) }}</h2>
-  <div class="phone-rows">
-    <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}<small>{{ 'Pair your phone or PC'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
-    <a class="phone-row" href="/sms"><span>{{ 'Bank SMS'|tr(locale) }}<small>{{ 'Read bank messages into transactions'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
-    {% if request.state.fingerprint_row|default('') %}<a class="phone-row" href="/profiles/fingerprint"><span>{{ 'Unlock with fingerprint'|tr(locale) }}<small>{{ ('On' if request.state.fingerprint_row == 'on' else 'Off')|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
-    <a class="phone-row" href="/profiles"><span>{{ 'Profile and lock'|tr(locale) }}<small>{{ 'Password, recovery key, backups, lock'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
-  </div>
-  {% if request.state.recents_row|default('') %}<form method="post" action="/profiles/recents" class="settings-row"><div><label for="recents-hidden">{{ 'Hide in recent apps'|tr(locale) }}</label><small>{{ 'Your amounts do not show when you switch apps.'|tr(locale) }}</small></div>
-    <div class="settings-control"><input type="hidden" name="csrf" value="{{ request.state.csrf|default('') }}"><input type="hidden" name="on" value="0"><label class="switch"><input id="recents-hidden" type="checkbox" name="on" value="1" {{ 'checked' if request.state.recents_row == 'on' }} data-autosubmit><span class="sr-only">{{ 'Hide in recent apps'|tr(locale) }}</span></label><noscript><button class="btn small">{{ 'Save'|tr(locale) }}</button></noscript></div></form>{% endif %}
-</section>
-{% endif %}
 
-{% if section in ('valuations','assets-valuations') %}<section id="assets-valuations" class="card data-panel"><div class="section-head"><div><h2>{{ 'Sale factors'|tr(locale) }}</h2><p class="muted small">{{ "The share of each class's value you would expect to get if you sold today. Used for {after_sale} and {sold_today}."|tr(locale, after_sale=fig.holdings_after_sale.label|lower, sold_today=fig.if_you_sold_today.label|lower) }}</p></div></div>{% if phone_mode() %}
-<div class="phone-rows factor-phone-rows">{% for g in factor_groups %}{% for row in [g.root] + g.children %}
-  <div class="phone-row"><span><b>{{ row.name }}</b><small>{{ 'Value you own'|tr(locale) }}: {{ (g.value if loop.first else row.value)|money }}</small><small>{{ 'After sale (estimate)'|tr(locale) }}: {{ (g.estimate if loop.first else row.estimate)|money }}</small>
-    {% if loop.first %}{% for child in [g.root] + g.children %}{% for item in child.locked %}<small>{{ item.asset }} · {{ item.value|money }} · {{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small>{% endfor %}{% endfor %}{% else %}{% for item in row.locked %}<small>{{ item.asset }} · {{ item.value|money }} · {{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small>{% endfor %}{% endif %}</span>
-    <form class="factor-form" action="/settings/liquidation-factor/{{ row.id }}"><label class="sr-only" for="factor-{{ row.id }}">{{ '{name} sale factor'|tr(locale, name=row.name) }}</label><span class="row-field-unit"><input class="row-field" id="factor-{{ row.id }}" name="factor" type="number" min="0" max="100" step="1" value="{{ '%g'|format(row.own) if row.own is not none }}" placeholder="{{ '%g'|format(row.factor) }}"><i>%</i></span>{% if not loop.first and row.own is none %}<small class="factor-from">{{ 'from'|tr(locale) }} {{ row.from|tr(locale) }}</small>{% endif %}<small class="inline-save-status" role="status"></small></form></div>
-{% endfor %}{% else %}<p class="phone-note">{{ "No investment classes are configured."|tr(locale) }}</p>{% endfor %}</div>
-{% else %}<table class="factor-table"><colgroup><col><col class="c-num"><col class="c-factor"><col class="c-num"></colgroup>
+
+{% if section in ('valuations','assets-valuations') %}<section id="assets-valuations" class="card data-panel"><div class="section-head"><div><h2>{{ 'Sale factors'|tr(locale) }}</h2><p class="muted small">{{ "The share of each class's value you would expect to get if you sold today. Used for {after_sale} and {sold_today}."|tr(locale, after_sale=fig.holdings_after_sale.label|lower, sold_today=fig.if_you_sold_today.label|lower) }}</p></div></div>{% block factor_list %}<table class="factor-table"><colgroup><col><col class="c-num"><col class="c-factor"><col class="c-num"></colgroup>
 <thead><tr><th>{{ 'Class'|tr(locale) }}</th><th class="num">{{ 'Value you own'|tr(locale) }}</th><th>{{ 'Sale factor'|tr(locale) }}</th><th class="num">{{ 'After sale (estimate)'|tr(locale) }}</th></tr></thead>
 {% for g in factor_groups %}{% set r = g.root %}<tbody class="factor-group">
 <tr class="factor-head"><th data-label="{{ 'Class'|tr(locale) }}">{{ r.name }}</th><td class="num" data-label="{{ 'Value you own'|tr(locale) }}">{{ g.value|money }}</td>
@@ -73,8 +55,8 @@
   <td data-label="{{ 'Sale factor'|tr(locale) }}"><form class="factor-form" action="/settings/liquidation-factor/{{ row.id }}"><label class="sr-only" for="factor-{{ row.id }}">{{ '{name} sale factor'|tr(locale, name=row.name) }}</label><span class="row-field-unit"><input class="row-field" id="factor-{{ row.id }}" name="factor" type="number" min="0" max="100" step="1" value="{{ '%g'|format(row.own) if row.own is not none }}" placeholder="{{ '%g'|format(row.factor) }}"><i>%</i></span>{% if row.own is none %}<small class="factor-from">from {{ row.from }}</small>{% endif %}<small class="inline-save-status" role="status"></small></form></td>
   <td class="num" data-label="{{ 'After sale (estimate)'|tr(locale) }}">{{ row.estimate|money }}{% for item in row.locked %}<small class="muted">{{ item.asset }} · {{ item.value|money }} · {{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small>{% endfor %}</td></tr>{% endfor %}
 </tbody>{% else %}<tbody><tr><td colspan="4">{{ "No investment classes are configured."|tr(locale) }}</td></tr></tbody>{% endfor %}
-</table>{% endif %}<p class="muted small">{{ 'Leave a kind empty to use its class’s factor. Clear a class to use the 95% default.'|tr(locale) }}</p>
-<details><summary>{{ 'View configured classes and assets'|tr(locale) }}</summary>{% if phone_mode() %}<div class="phone-rows">{% for c in classes %}<div class="phone-row"><span>{{ c.name }}</span></div>{% endfor %}</div><h3>{{ 'Financial assets'|tr(locale) }}</h3><div class="phone-rows">{% for a in assets %}<div class="phone-row"><span>{{ a.name }}</span></div>{% endfor %}</div>{% else %}<table>{% for c in classes %}<tr><td class="indent-{{ c.depth }}">{{ c.name }}</td></tr>{% endfor %}</table><h3>{{ 'Financial assets'|tr(locale) }}</h3><table>{% for a in assets %}<tr><td>{{ a.name }}</td></tr>{% endfor %}</table>{% endif %}</details></section>
+</table>{% endblock %}<p class="muted small">{{ 'Leave a kind empty to use its class’s factor. Clear a class to use the 95% default.'|tr(locale) }}</p>
+<details><summary>{{ 'View configured classes and assets'|tr(locale) }}</summary>{% block configured_list %}<table>{% for c in classes %}<tr><td class="indent-{{ c.depth }}">{{ c.name }}</td></tr>{% endfor %}</table><h3>{{ 'Financial assets'|tr(locale) }}</h3><table>{% for a in assets %}<tr><td>{{ a.name }}</td></tr>{% endfor %}</table>{% endblock %}</details></section>
 {% elif section=='budget' %}{% include 'settings/budget_section.html' %}
 {% elif section=='financial-health' %}{% include 'settings/financial_health_section.html' %}
 {% elif section=='zakat' %}{% include 'settings/zakat_section.html' %}
@@ -82,7 +64,7 @@
 {% elif section=='currencies' %}{% include 'settings/currencies.html' %}
 {% elif section=='general' %}<section class="card settings-list" id="tab-settings" aria-labelledby="tab-settings-heading"><h2 id="tab-settings-heading">{{ 'Settings in each tab'|tr(locale) }}</h2>{% for t in tab_settings %}<div class="settings-row"><div><a class="settings-name" href="{{ t.href }}" data-popup-open>{{ t.label|tr(locale) }}</a></div><div class="settings-control"><small>{{ t.where|tr(locale) }}</small></div></div>{% endfor %}</section>
 <section class="card settings-list" aria-labelledby="data-heading"><h2 id="data-heading">{{ 'Your data'|tr(locale) }}</h2>
-  <div class="settings-row"><div><span class="settings-name">{{ 'Backup'|tr(locale) }}</span><small>{{ 'One is made each time the app starts.'|tr(locale) }}{% if backups and not phone_mode() %} <details class="settings-more"><summary>{{ 'Recent backups'|tr(locale) }} ({{ backups|length }})</summary><ul class="small code">{% for b in backups %}<li>{{ b }}</li>{% endfor %}</ul></details>{% endif %}</small></div>
+  <div class="settings-row"><div><span class="settings-name">{{ 'Backup'|tr(locale) }}</span><small>{{ 'One is made each time the app starts.'|tr(locale) }}{% if backups %} <details class="settings-more"><summary>{{ 'Recent backups'|tr(locale) }} ({{ backups|length }})</summary><ul class="small code">{% for b in backups %}<li>{{ b }}</li>{% endfor %}</ul></details>{% endif %}</small></div>
     <form method="post" action="/settings/backup" class="settings-control"><button class="btn primary small">{{ 'Back up now'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">{% if backups %}<a class="btn small" href="/settings/backup/latest">{{ 'Save a copy'|tr(locale) }}</a>{% endif %}</form></div>
   <div class="settings-row" id="privacy-notice"><div><span class="settings-name">{{ 'Privacy'|tr(locale) }}</span><small>{{ 'What the app sends, to whom, and how to delete it.'|tr(locale) }}</small></div>
     <div class="settings-control"><a class="btn small" href="{{ outside_url('privacy', locale) }}#app" target="_blank" rel="noopener">{{ 'Read the privacy notice'|tr(locale) }}</a></div></div>
@@ -91,7 +73,7 @@
   <div class="settings-row"><div><span class="settings-name">{{ 'Base currency'|tr(locale) }}</span></div><div class="settings-control"><b dir="ltr">{{ base }}</b><a class="btn small" href="/settings?section=currencies">{{ 'Manage currencies'|tr(locale) }}</a></div></div>
   <div class="settings-row settings-facts"><div><span class="settings-name">{{ 'App version'|tr(locale) }}</span></div><div class="settings-control" dir="ltr">v{{ app_version }}</div></div>
   {% include "settings/_update.html" %}
-  {% if phone_mode() %}{% for href, label in [('/rules', 'Rules'), ('/categories', 'Categories'), ('/counterparties', 'Counterparties'), ('/checks', 'Data checks')] %}<div class="settings-row"><a class="settings-name" href="{{ href }}">{{ label|tr(locale) }}</a></div>{% endfor %}{% endif %}
+  
 </section>
 <section class="card settings-list" id="zakat-switch" aria-labelledby="features-heading"><h2 id="features-heading">{{ 'Features'|tr(locale) }}</h2>
   <form method="post" action="/zakat/enabled" class="settings-row"><div><label for="zakat-on">{{ 'Show zakat'|tr(locale) }}</label><small>{{ 'A zakat estimate under Transactions.'|tr(locale) }}</small></div>
@@ -126,7 +108,7 @@
   <p class="small muted" role="status" data-ai-status></p></details>
 {% endif %}</section>
 <details class="card settings-list settings-advanced start-fresh"><summary><h2>{{ 'Advanced'|tr(locale) }}</h2></summary>
-  {% if not phone_mode() %}<div class="settings-row settings-facts"><div><span class="settings-name">{{ 'Database file'|tr(locale) }}</span><small dir="ltr" class="code">{{ db_path }}</small></div></div>{% endif %}
+  <div class="settings-row settings-facts"><div><span class="settings-name">{{ 'Database file'|tr(locale) }}</span><small dir="ltr" class="code">{{ db_path }}</small></div></div>
   <div class="settings-row"><div><span class="settings-name">{{ 'Start fresh'|tr(locale) }}</span>
 {% if request.state.secure_profiles|default(false) %}<small>{{ 'Opens a new, empty profile. This one stays in Profiles.'|tr(locale) }}</small></div>
   <form method="post" action="/settings/fresh" class="settings-control"><button class="btn small">{{ 'Start a new profile'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>

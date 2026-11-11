@@ -32,7 +32,7 @@
   <div class="cp-list cp-table">
     {% for party in parties %}{% set aliases = aliases_by_id.get(party.id, []) %}{% set edit_form = 'counterparty-edit-' ~ party.id %}
     {% set learned = (usual or {}).get(party.name) %}{% set learned_label = category_labels.get(learned.category_id) if learned else none %}{% set own_label = category_labels.get(party.default_category_id) if party.default_category_id else none %}
-    <details class="cp-row{{ ' muted' if not party.active }}"{{ ' open' if phone_mode() }}><summary><b>{{ party.name }}</b><span class="muted small">{% if party.kind == 'PERSON' %}{{ 'Person'|tr(locale) }}{% elif party.kind == 'BUSINESS' %}{{ 'Business'|tr(locale) }}{% endif %}{% if not party.active %} · {{ "Archived"|tr(locale) }}{% endif %}</span><span class="cp-cat">{{ own_label.split(' › ')[-1] if own_label else (('Learned: ' ~ learned_label.split(' › ')[-1]) if learned_label else '') }}</span></summary>
+    <details class="cp-row{{ ' muted' if not party.active }}"><summary><b>{{ party.name }}</b><span class="muted small">{% if party.kind == 'PERSON' %}{{ 'Person'|tr(locale) }}{% elif party.kind == 'BUSINESS' %}{{ 'Business'|tr(locale) }}{% endif %}{% if not party.active %} · {{ "Archived"|tr(locale) }}{% endif %}</span><span class="cp-cat">{{ own_label.split(' › ')[-1] if own_label else (('Learned: ' ~ learned_label.split(' › ')[-1]) if learned_label else '') }}</span></summary>
     <div class="cp-edit"><div class="counterparty-one-line">
       <form id="{{ edit_form }}" method="post" action="/counterparties" class="counterparty-name-edit" data-counterparty-autosave>
         <input type="hidden" name="counterparty_action" value="rename">

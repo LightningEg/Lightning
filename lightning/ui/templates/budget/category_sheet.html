@@ -4,9 +4,9 @@
 {% block title %}{{ category.name }}{% endblock %}
 {% block heading %}{% endblock %}
 {% block content %}
-{% set phone = phone_mode() %}
-<section class="app-popup-content category-sheet{{ ' phone-txn-sheet' if phone }}">
-  <h2 data-popup-title id="app-popup-title"{% if phone %} class="phone-sheet-title"{% endif %}>{{ category.name }}</h2>
+
+<section class="app-popup-content category-sheet">
+  <h2 data-popup-title id="app-popup-title">{{ category.name }}</h2>
   <p class="muted small">{% if group %}{{ group }} · {% endif %}{{ month }}</p>
   {% if r %}
   <p class="category-sheet-figure{{ ' is-over' if r.over }}"><b>{{ spent|money(False, 0) }}</b> <small>{{ 'of'|tr(locale) }} {{ planned|money(False, 0) }} {{ base }}</small></p>
@@ -18,7 +18,7 @@
   <p class="muted small">{{ 'No limit for this category this month.'|tr(locale) }}</p>
   {% endif %}
   {% if rows %}<h3 class="category-sheet-sub">{{ 'Last payments'|tr(locale) }}</h3>
-  <div class="{{ 'phone-rows' if phone else 'compact-list' }}">{% for t in rows %}<a class="{{ 'phone-row' if phone else 'compact-row' }}" href="/transactions/{{ t.id }}"><span>{{ t.counterparty or t.description or t.type_label }}<small>{{ t.date }}</small></span><b>{{ t.amount|amount_role('row', True) }}</b></a>{% endfor %}</div>
+  <div class="compact-list">{% for t in rows %}<a class="compact-row" href="/transactions/{{ t.id }}"><span>{{ t.counterparty or t.description or t.type_label }}<small>{{ t.date }}</small></span><b>{{ t.amount|amount_role('row', True) }}</b></a>{% endfor %}</div>
   {% elif earlier %}<p class="muted small"><a href="{{ see_last }}">{{ 'Last month'|tr(locale) }} {{ last_month }}</a> · {{ earlier|money(False, 0) }} {{ base }}</p>
   {% else %}<p class="muted small">{{ 'Nothing spent here yet this month.'|tr(locale) }}</p>{% endif %}
   <div class="category-sheet-actions">

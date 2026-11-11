@@ -6,7 +6,7 @@
 {% from "partials/charts.html" import key_notes, key_note, bars, trend, sparkline, stat_tiles %}
 {% if error %}<div class="flash error">{{ error|tr(locale) }}</div>{% endif %}
 {% if category_filter %}<p class="muted small"><a href="/birdview/expenses?period={{ period }}&amp;month={{ month }}&amp;date_from={{ custom_from }}&amp;date_to={{ custom_to }}">{{ 'All spending'|tr(locale) }}</a> / {{ category_name }}</p>{% endif %}
-{% set summary = stats[:1] if stats and stats[0].payment_count == 1 else stats %}{% if phone_mode() %}{% from "phone/partials/charts.html" import stat_rows with context %}{{ stat_rows(summary, base) }}{% else %}{% from "partials/charts.html" import kpi_row %}{% if spend_kpis|length > 1 and stats[0].payment_count != 1 %}{{ kpi_row(spend_kpis, base, 'Spending summary'|tr(locale)) }}{% else %}{{ stat_tiles(summary, base, 'Spending summary') }}{% endif %}{% endif %}
+{% set summary = stats[:1] if stats and stats[0].payment_count == 1 else stats %}{% from "partials/charts.html" import kpi_row %}{% if spend_kpis|length > 1 and stats[0].payment_count != 1 %}{{ kpi_row(spend_kpis, base, 'Spending summary'|tr(locale)) }}{% else %}{{ stat_tiles(summary, base, 'Spending summary') }}{% endif %}
 {% set a = analysis %}
 {% if spending_total == 0 and not a.rows %}
 <section class="card empty"><h2>{{ 'No spending in this period'|tr(locale) }}</h2><p>{{ 'Try a longer period, or review the transactions recorded for these dates.'|tr(locale) }}</p><a class="btn" href="/transactions?date_from={{ date_from }}&amp;date_to={{ date_to }}">{{ 'View transactions'|tr(locale) }}</a></section>

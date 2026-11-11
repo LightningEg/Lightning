@@ -33,7 +33,7 @@
         <input id="opening_balance" name="opening_balance" type="text" inputmode="decimal" value="{{ values.opening_balance or '' }}" placeholder="0.00">
       </div>
       <div class="field {{ 'has-error' if error_field == 'opening_balance_date' }}">
-        <label for="opening_balance_date">{{ 'As of'|tr(locale) }} {% if not phone_mode() %}<span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span>{% endif %}</label>
+        <label for="opening_balance_date">{{ 'As of'|tr(locale) }} <span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span></label>
         <span class="iso-date-control">
           <input id="opening_balance_date" name="opening_balance_date" type="text" value="{{ values.opening_balance_date or today }}" placeholder="yyyy-mm-dd" inputmode="numeric" data-smart-date required>
           <input class="date-picker-native" type="date" data-date-picker-for="opening_balance_date" tabindex="-1" aria-hidden="true">

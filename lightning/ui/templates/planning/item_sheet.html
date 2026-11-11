@@ -4,16 +4,16 @@
 {% block title %}{{ r.item.name }}{% endblock %}
 {% block heading %}{% endblock %}
 {% block content %}
-{% set phone = phone_mode() %}{% set i = r.item %}{% set inc = i.is_income %}
-<section class="app-popup-content category-sheet bill-sheet{{ ' phone-txn-sheet' if phone }}">
-  <h2 data-popup-title id="app-popup-title"{% if phone %} class="phone-sheet-title"{% endif %}>{{ i.name }}</h2>
+{% set i = r.item %}{% set inc = i.is_income %}
+<section class="app-popup-content category-sheet bill-sheet">
+  <h2 data-popup-title id="app-popup-title">{{ i.name }}</h2>
   <p class="muted small">{{ i.kind_label|tr(locale) }} · {{ r.schedule }}{% if r.category %} · {{ r.category }}{% endif %}{% if r.account %} · {{ r.account }}{% endif %}</p>
   <p class="category-sheet-figure"><b class="{{ 'pos' if inc }}">{{ '+' if inc else '−' }}{{ i.amount|money(False, 0) }}</b> <small>{% if r.per_year %} · {{ '{amt} a year'|tr(locale, amt=r.per_year|money(False, 0)) }}{% endif %}</small></p>
-  {% if r.due %}<div class="{{ 'phone-rows' if phone else 'compact-list' }}">{% for p in r.due %}<div class="{{ 'phone-row' if phone else 'compact-row' }} is-late"><span>{{ 'Due'|tr(locale) }} {{ p.due_date }}<small>{{ ('Late · {n} days'|tr(locale, n=late[p.due_date])) if late[p.due_date] else ('Due today'|tr(locale)) }}</small></span><a class="btn small primary" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ p.due_date }}&amp;back={{ back|urlencode }}">{{ ('Mark received' if inc else 'Mark paid')|tr(locale) }}</a></div>{% endfor %}</div>
+  {% if r.due %}<div class="compact-list">{% for p in r.due %}<div class="compact-row is-late"><span>{{ 'Due'|tr(locale) }} {{ p.due_date }}<small>{{ ('Late · {n} days'|tr(locale, n=late[p.due_date])) if late[p.due_date] else ('Due today'|tr(locale)) }}</small></span><a class="btn small primary" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ p.due_date }}&amp;back={{ back|urlencode }}">{{ ('Mark received' if inc else 'Mark paid')|tr(locale) }}</a></div>{% endfor %}</div>
   {% elif r.next %}<p class="category-sheet-left">{{ 'Next'|tr(locale) }} <b>{{ r.next.due_date }}</b></p>{% endif %}
   {% if r.bill_reserve %}<p class="muted small">{{ "Saved for this bill: {amount} {currency} in {name}."|tr(locale, amount=r.bill_reserve.effective_allocated|money(places=0), currency=base, name=r.bill_reserve.name) }}</p>{% endif %}
   {% if paid %}<h3 class="category-sheet-sub">{{ 'Last payments'|tr(locale) }}</h3>
-  <div class="{{ 'phone-rows' if phone else 'compact-list' }}">{% for p in paid %}{% set tag = 'a' if p.transaction_id else 'div' %}<{{ tag }} class="{{ 'phone-row' if phone else 'compact-row' }}"{% if p.transaction_id %} href="/transactions/{{ p.transaction_id }}"{% endif %}><span>{{ p.due_date }}<small>{{ 'Paid'|tr(locale) if not inc else 'Received'|tr(locale) }}</small></span><b>{{ (p.paid_amount if p.paid_amount is not none else p.amount)|money(False, 0) }}</b></{{ tag }}>{% endfor %}</div>
+  <div class="compact-list">{% for p in paid %}{% set tag = 'a' if p.transaction_id else 'div' %}<{{ tag }} class="compact-row"{% if p.transaction_id %} href="/transactions/{{ p.transaction_id }}"{% endif %}><span>{{ p.due_date }}<small>{{ 'Paid'|tr(locale) if not inc else 'Received'|tr(locale) }}</small></span><b>{{ (p.paid_amount if p.paid_amount is not none else p.amount)|money(False, 0) }}</b></{{ tag }}>{% endfor %}</div>
   {% else %}<p class="muted small">{{ 'No payment recorded yet.'|tr(locale) }}</p>{% endif %}
   <div class="category-sheet-actions">
     {% if r.next and not r.due %}<a class="btn" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ r.next.due_date }}&amp;back={{ back|urlencode }}">{{ ('Mark received' if inc else 'Mark paid')|tr(locale) }}</a>{% endif %}
