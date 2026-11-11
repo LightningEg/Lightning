@@ -78,6 +78,12 @@ def month_text(value, locale: str = "en") -> str:
     return _digits(f"{_full(month[1], locale)} {month[0]}", locale)
 
 
+def month_short(value, locale: str = "en") -> str:
+    """Oct for 2026-10: a chart's end label, where the axis already says the year (A12). Other text is kept."""
+    month = _as_month(value)
+    return _short(month[1], locale) if month else ("" if value is None else str(value))
+
+
 def _whole_months(start: date, end: date) -> bool:
     return start.day == 1 and end.day == calendar.monthrange(end.year, end.month)[1]
 
@@ -164,7 +170,8 @@ def human_text(text: str, locale: str = "en", today: date | None = None) -> str:
     now = today or _today()
     text = _MONTH_DAYS.sub(lambda m: _month_days(m, locale, now), text)
     text = _RANGE.sub(lambda m: m.group(0) if _EXAMPLE.search(text[:m.start()]) else
-                      range_text(m.group(1), m.group(3), locale, now, months=not _FROM.search(text[:m.start()])), text)
+                      range_text(m.group(1), m.group(3), locale, now,
+                                 months=not (_FROM.search(text[:m.start()]) and m.group(1)[:7] == m.group(3)[:7])), text)
     text = _ONE.sub(lambda m: m.group(0) if _EXAMPLE.search(text[:m.start()]) else _one(m, text, locale, now), text)
     return _ON_DAY.sub(r"\1", text)  # "reached your account on today" -> "... today"
 
@@ -172,10 +179,18 @@ def human_text(text: str, locale: str = "en", today: date | None = None) -> str:
 _SPLIT_RANGE = re.compile(r'<bdi dir="ltr">' + _STAMP + r'</bdi>( to | لحد | – )<bdi dir="ltr">' + _STAMP + r'</bdi>')  # not money: dates and text
 
 
+_LTR_DATE = re.compile(r'<bdi dir="ltr">' + _STAMP + r"</bdi>")
+
+
 def human_dates(page: str, locale: str = "en", today: date | None = None) -> str:
     now = today or _today()
     # Two dates each in its own isolate (BV-3BA) are still one range: "1 Oct to 30 Nov" reads "Oct – Nov 2026".
-    page = _SPLIT_RANGE.sub(lambda m: '<bdi dir="ltr">' + range_text(m.group(1), m.group(3), locale, now) + "</bdi>", page)
+    # In Arabic a date said in words reads right to left: "٨ نوفمبر" inside a left-to-right isolate would read backwards.
+    isolate = '<bdi dir="rtl">' if _arabic(locale) else '<bdi dir="ltr">'
+    page = _SPLIT_RANGE.sub(lambda m: isolate + range_text(m.group(1), m.group(3), locale, now) + "</bdi>", page)  # not money: dates and text
+    if _arabic(locale):
+        page = _LTR_DATE.sub(lambda m: m.group(0) if _EXAMPLE.search(page[max(0, m.start() - 12):m.start()])  # not money: dates and text
+                             else '<bdi dir="rtl">' + m.group(1) + "</bdi>", page)
     out = []
     typed = False  # inside <bdi translate="no">: what the person typed stays as typed
     for piece in _PIECE.findall(page):

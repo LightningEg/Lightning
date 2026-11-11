@@ -66,3 +66,11 @@ def test_examples_from_ranges_and_month_days_read_right():
     assert human_text("Against 2026-09 days 1–14", "en", NOW) == "Against 1–14 Sep"
     page = '<p><bdi dir="ltr">2026-10-01</bdi> to <bdi dir="ltr">2026-11-30</bdi></p>'
     assert human_dates(page, "en", NOW) == '<p><bdi dir="ltr">Oct – Nov 2026</bdi></p>'
+    assert human_dates(page, "ar", NOW) == '<p><bdi dir="rtl">أكتوبر – نوفمبر ٢٠٢٦</bdi></p>'
+    assert human_dates('<b><bdi dir="ltr">2026-11-05</bdi></b>', "ar", NOW) == '<b><bdi dir="rtl">٥ نوفمبر</bdi></b>'
+    assert human_text("spread from 2026-01-01 to 2026-12-31.", "en", NOW) == "spread from Jan – Dec 2026."
+
+
+def test_a_chart_end_label_names_the_month_short():
+    from lightning.ui.date_text import month_short
+    assert month_short("2026-10") == "Oct" and month_short("2026-10", "ar") == "أكتوبر" and month_short("Last year") == "Last year"

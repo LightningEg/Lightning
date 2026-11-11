@@ -28,7 +28,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from lightning import DISPLAY_VERSION
 from lightning.bootstrap import Container
 from lightning.core.dates import fmt_date, month_of, today
-from lightning.ui.date_text import day_text, human_dates, month_text, range_text
+from lightning.ui.date_text import day_text, human_dates, month_short, month_text, range_text
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.figures import FIGURES
 from lightning.core.memo import request_cache
@@ -193,6 +193,7 @@ templates.env.filters["day_label"] = _day_label
 # Dates read on a screen (A06.1, IV-3BK); fields, files and exports keep yyyy-mm-dd.
 templates.env.filters["day"] = lambda value, locale=None: day_text(value, _locale(locale))
 templates.env.filters["month"] = lambda value, locale=None: month_text(value, _locale(locale))
+templates.env.filters["month_short"] = lambda value, locale=None: month_short(value, _locale(locale))
 templates.env.filters["day_range"] = lambda start, end, locale=None: range_text(start, end, _locale(locale))
 
 
