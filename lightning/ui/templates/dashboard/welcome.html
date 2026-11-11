@@ -1,3 +1,4 @@
+{% from "partials/icons.html" import icon_close with context %}
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
 {% block title %}{{ 'Welcome to Lightning'|tr(locale) }}{% endblock %}
@@ -20,7 +21,7 @@
         <option value="">{{ 'Add a currency'|tr(locale) }}</option>
         {% for code, label in currency_choices %}<option value="{{ code }}">{{ code }} — {{ label }}</option>{% endfor %}
       </select>
-      <div id="welcome-chips" class="chips chip-picks">{% for code in extra_currencies %}<span class="chip">{{ code }} <button type="button" class="chip-x" data-chip-remove aria-label="{{ 'Remove'|tr(locale) }}">×</button><input type="hidden" name="extra" value="{{ code }}"></span>{% endfor %}</div>
+      <div id="welcome-chips" class="chips chip-picks">{% for code in extra_currencies %}<span class="chip">{{ code }} <button type="button" class="chip-x" data-chip-remove aria-label="{{ 'Remove'|tr(locale) }}">{{ icon_close() }}</button><input type="hidden" name="extra" value="{{ code }}"></span>{% endfor %}</div>
     </div>
     <button class="btn small" type="submit">{{ 'Save currencies'|tr(locale) }}</button>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">

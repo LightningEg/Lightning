@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 10 open items. Each folder holds its reports and its items.
+11 big pictures, 9 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -49,7 +49,7 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BC, 3BD, 3BE, 3BG, 3BJ, 3AU2, 3AU3, 3AU4, 3BC1, 3BC2, 3BC3, 3BC4, 3BD1, 3BD2, 3BD3, 3BD4, 3BD5, NF-3AU. Next free code: 3BL.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BC, 3BD, 3BE, 3BF, 3BG, 3BJ, 3AU2, 3AU3, 3AU4, 3BC1, 3BC2, 3BC3, 3BC4, 3BD1, 3BD2, 3BD3, 3BD4, 3BD5, 3BF1, 3BF2, 3BF3, 3BF4, 3BF5, 3BF6, 3BF7, NF-3AU. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 
@@ -104,15 +104,8 @@ The site is honest, quick and in step with the app.
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-8F** | [Home and Features show the app, not only words](8-website/IV-8F-home-and-features-show-the-app.md) | improvement, visual | Reach | M | Sonnet | ready |
-| IV-8F1 | ↳ Hero: one sentence and the real Overview | | | S | Sonnet | |
-| IV-8F2 | ↳ "Seven places" as seven equal tiles | | | S | Sonnet | |
-| IV-8F3 | ↳ A download band after "Every Number Shows Its Working" | | | S | Sonnet | |
-| IV-8F4 | ↳ Features: the headline and a screen per highlight | | | S | Sonnet | |
-| IV-8F5 | ↳ Features on phones: three lines and "Show all" | | | S | Sonnet | |
-| IV-8F6 | ↳ Home FAQ: one line and a link to the guide | | | S | Sonnet | |
 
-Done: 8A, 8B, 8C, 8D, 8E, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z, 8AA. Next free code: 8AE.
+Done: 8A, 8B, 8C, 8D, 8E, 8F, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z, 8AA. Next free code: 8AE.
 
 ## 9 Later
 
@@ -177,7 +170,6 @@ Kept, not planned: nobody works on these until the owner picks one (set its stat
 - **IT-2A** [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic repair](2-safe-for-real-money/IT-2A-restore-safety.md)
 - **IT-2C** [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidence repair](2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md)
 - **IT-3BI** [Arabic search and sorting in the register, one week start, one clock](3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md)
-- **IV-3BF** [PC finish - one focus ring, branded validation, only the brand's fonts, styled scrollbars, amount-first Add and fewer one-off styles](3-polish-and-arabic/IV-3BF-pc-finish.md)
 - **IV-3BH** [One name per thing and no accounting jargon - ledger, counterparty, reevaluation, Title Case categories, three names for planning](3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md)
 - **IV-3BK** [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md)
 - **OW-3AI** [Additional broker and institution logos still needed](3-polish-and-arabic/OW-3AI-institution-logos.md)

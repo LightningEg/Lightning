@@ -96,7 +96,7 @@
 
       <div class="reserve-foot small">{% for payment in reserve.payments %}<a href="/transactions/{{ payment.id }}">{{ payment.ref }} · {{ payment.date }} · {{ payment.amount|money }}</a> {% endfor %}<a href="/reserves/{{ reserve.id }}/payments" data-popup-open>{{ "Link or review a payment"|tr(locale) }}</a><details class="reserve-edit"><summary>{{ "Edit"|tr(locale) }}</summary>
         <form method="post" action="/reserves/{{ reserve.id }}/edit" class="stack" data-reserve-autosave>
-          <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ reserve.name }}" required></label>
+          <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ reserve.name }}" required spellcheck="false" autocomplete="off"></label>
           <label>{{ "Target amount"|tr(locale) }}<input class="money-input" type="text" name="target" value="{{ reserve.target|money(False, 2) }}" inputmode="decimal" required></label>
           <label>Due date{{ date_control('due_date', reserve.due_date, 'reserve-due-' ~ reserve.id) }}</label>
           {{ repeat_seg(reserve.recurrence or 'NONE') }}
@@ -125,7 +125,7 @@
   <summary><b>{{ "Add a reserve"|tr(locale) }}</b></summary>
   
   <form method="post" action="/reserves" class="reserve-create-form">
-    <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" placeholder="e.g. Rent" required></label>
+    <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" placeholder="e.g. Rent" required spellcheck="false" autocomplete="off"></label>
     <label>{{ "Target amount"|tr(locale) }}<input class="money-input" type="text" name="target" inputmode="decimal" placeholder="e.g. 20,000" required></label>
     <label>Due date{{ date_control('due_date', '', 'reserve-due-new') }}</label>
     {{ repeat_seg('NONE') }}

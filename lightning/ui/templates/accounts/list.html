@@ -1,8 +1,9 @@
+{% from "partials/icons.html" import icon_more with context %}
 {% extends "base.html" %}
 {% from "partials/macros.html" import amount, held, inst_tile, page_header with context %}
 {% block title %}Accounts{% endblock %}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Accounts'|tr(locale), status) }}{% endblock %}
-{% block top_actions %}<a class="btn primary" href="/accounts/new">{{ 'Add account'|tr(locale) }}</a> <details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">⋯</summary><div><a href="/accounts/currencies">{{ 'Other currencies'|tr(locale) }}</a><a href="/sms">{{ "From SMS"|tr(locale) }}</a></div></details>{% endblock %}
+{% block top_actions %}<a class="btn primary" href="/accounts/new">{{ 'Add account'|tr(locale) }}</a> <details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">{{ icon_more() }}</summary><div><a href="/accounts/currencies">{{ 'Other currencies'|tr(locale) }}</a><a href="/sms">{{ "From SMS"|tr(locale) }}</a></div></details>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import lead_card %}
 {% if lead %}{% call lead_card(lead, base) %}<div class="lead-side-head"><div><h3>{{ 'How it adds up'|tr(locale) }}</h3><p>{{ 'Today'|tr(locale) }}</p></div></div>

@@ -3,6 +3,10 @@
 :root {
   --c-nile: #0A2442; --c-ink: #0D2233; --c-ink-2: #304A5C; --c-muted: #566E7E;
   --c-track: #E6EFEC; --c-well: var(--field, #EAF3EE); --c-surface: #FFFFFF; --c-line: #E3ECE9;
+  --phone-picked-wash:#E3F4EA; --phone-in-wash:#DDF3E8; --phone-out-wash:#FBE4EC;
+  --phone-rose-pale:#F6CFDB; --phone-rose-mid:#EDA3BB; --phone-rose-deep:#D4567F;
+  --phone-rose-rank-2:#F0B0C4; --phone-rose-rank-3:#F6CCD9; --phone-rose-text:#A8325F;
+  --phone-green-pale:#C5E8D3; --phone-neutral-wash:#F1F5F4;
   --c-appbar: 56px; --c-tabbar: 64px; --c-side: 16px;
 }
 html.phone { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
@@ -15,7 +19,7 @@ html.phone, .phone-body { max-width: 100%; overflow-x: clip; }
 .phone-body { margin: 0; min-height: 100vh; background: var(--bg); color: var(--c-ink); font-size: 15px; }
 
 /* C02 frame: one bar fixed on top, one at the bottom, content scrolls between them. */
-.phone-appbar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 8px;
+.phone-appbar { position: sticky; top: 0; z-index: var(--z-sticky); display: flex; align-items: center; gap: 8px;
   height: var(--c-appbar); padding: env(safe-area-inset-top) var(--c-side) 0; box-sizing: content-box;
   background: var(--c-well); border-bottom: 1px solid var(--c-line); }
 .phone-mark { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin-left: -8px; }
@@ -33,7 +37,7 @@ html.phone, .phone-body { max-width: 100%; overflow-x: clip; }
   calc(var(--c-tabbar) + env(safe-area-inset-bottom) + 24px); overflow-x: clip; }
 .phone-content > * { max-width: 100%; }
 
-.phone-tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; display: grid; grid-template-columns: repeat(5, 1fr);
+.phone-tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: var(--z-sticky); display: grid; grid-template-columns: repeat(5, 1fr);
   height: var(--c-tabbar); padding-bottom: env(safe-area-inset-bottom); box-sizing: content-box;
   background: var(--c-surface); border-top: 1px solid var(--c-line); }
 .phone-tabbar a.phone-tab, .phone-tabbar a.phone-tab:visited { color: var(--c-muted); }
@@ -208,19 +212,19 @@ html.phone .main :is(input, select, textarea):not([type=hidden], [type=checkbox]
 .phone-txn-head .phone-note { margin: 2px 0 0; }
 .phone-txn-sheet-amount { margin: 14px 0 4px; font: 800 30px/1.1 var(--display, inherit); font-variant-numeric: tabular-nums; }
 .phone-txn-sheet-amount small { font-size: 14px; font-weight: 700; color: var(--c-muted); }
-.phone-txn-sheet-amount.is-in { color: #097852; }
+.phone-txn-sheet-amount.is-in { color: var(--positive); }
 .phone-sheet-sub { margin: 16px 0 8px; font-size: 15px; }
 .phone-facts { margin: 8px 0 0; }
 .phone-facts > div { display: flex; justify-content: space-between; gap: 16px; padding: 12px 0; border-top: 1px solid var(--c-line); }
 .phone-facts dt { color: var(--c-muted); font-weight: 600; }
 .phone-facts dd { margin: 0; min-width: 0; font-weight: 700; text-align: end; overflow-wrap: anywhere; }
-.phone-facts .is-over { color: #C93D72; }
+.phone-facts .is-over { color: var(--rose); }
 .phone-sheet-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 8px; margin: 16px 0 8px; }
 .phone-sheet-actions .btn, .phone-txn-sheet > .btn { width: 100%; min-height: 48px; justify-content: center; }
 .fig { direction: ltr; unicode-bidi: isolate; }
 .phone-money-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 8px; margin: 10px 0 0; color: var(--c-ink-2); font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
 .phone-money-line b { color: var(--c-ink); font-weight: 700; }
-.phone-money-line b.is-in { color: #097852; }
+.phone-money-line b.is-in { color: var(--positive); }
 .phone-money-sep { color: var(--c-muted); }
 .phone-reg-views > .phone-period-now:not(#_) { display: block; height: 0; min-height: 0; margin: 0; padding: 0; border: 0; background: none; font-size: 0; line-height: 0; overflow: hidden; }
 .phone-live-search { margin: 12px 0 8px; }
@@ -238,7 +242,7 @@ html.phone .main :is(input, select, textarea):not([type=hidden], [type=checkbox]
 .phone-card-title { margin: 0; font-size: 16px; color: var(--c-ink); }
 .phone-lead { margin: 10px 0 8px; font: 800 40px/1.1 var(--display, inherit); color: var(--c-ink); font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .phone-lead small { font-size: 15px; font-weight: 600; color: var(--c-muted); }
-.phone-lead.is-negative { color: #C93D72; }
+.phone-lead.is-negative { color: var(--rose); }
 .phone-rows { display: flex; flex-direction: column; margin: 4px 0 0; }
 .phone-rows.is-inner { margin: 0 0 0 12px; }
 .phone-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 48px; padding: 6px 0;
@@ -280,17 +284,17 @@ html.phone .main :is(input, select, textarea):not([type=hidden], [type=checkbox]
 .phone-bar-value { font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 15px; }
 .phone-flow-bars { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 6px; }
 .phone-flow-bars i { display: block; height: 8px; min-width: 2px; border-radius: 99px; }
-.phone-flow-bars i.is-in { background: #14A874; }
-.phone-flow-bars i.is-out { background: #E68CA8; }
+.phone-flow-bars i.is-in { background: var(--meadow); }
+.phone-flow-bars i.is-out { background: var(--tone-spend); }
 .phone-bar-track { grid-column: 1 / -1; height: 8px; border-radius: 99px; background: var(--c-track); overflow: hidden; }
 .phone-budget-cat .phone-bar-track { display: block; margin-top: 6px; }
-.phone-budget-cat.is-over .phone-bar-track i { background: #C93D72; }
-.phone-bar-track i { display: block; height: 100%; border-radius: 99px; background: #0B6DD6; }
-.phone-bar-row.is-up .phone-bar-track i { background: #14A874; }
-.phone-bar-row.is-down .phone-bar-track i { background: #E68CA8; }
-.phone-bar-row.is-short .phone-bar-track i { background: #C93D72; }
-.scheme-cash .is-end .phone-bar-track i { background: #097852; }
-.scheme-flow .is-total .phone-bar-track i, .scheme-flow .is-end .phone-bar-track i { background: #14A874; }
+.phone-budget-cat.is-over .phone-bar-track i { background: var(--rose); }
+.phone-bar-track i { display: block; height: 100%; border-radius: 99px; background: var(--azure); }
+.phone-bar-row.is-up .phone-bar-track i { background: var(--meadow); }
+.phone-bar-row.is-down .phone-bar-track i { background: var(--tone-spend); }
+.phone-bar-row.is-short .phone-bar-track i { background: var(--rose); }
+.scheme-cash .is-end .phone-bar-track i { background: var(--positive); }
+.scheme-flow .is-total .phone-bar-track i, .scheme-flow .is-end .phone-bar-track i { background: var(--meadow); }
 .phone-bar-row.is-end .phone-bar-name, .phone-bar-row.is-end .phone-bar-value { font-weight: 700; }
 
 /* C07.3.3: in, and out and kept, on one scale. */
@@ -300,10 +304,10 @@ html.phone .main :is(input, select, textarea):not([type=hidden], [type=checkbox]
 .phone-flow-bar i { display: block; height: 100%; border-right: 2px solid var(--c-surface); }
 .phone-flow-bar i:last-child { border-right: 0; }
 /* Only the flow bar's parts and their keys: a chart or meter elsewhere with a tone class keeps its own look. */
-:is(.phone-flow-bar i, .phone-key).tone-in { background: #14A874; }
-:is(.phone-flow-bar i, .phone-key):is(.tone-out, .tone-spend) { background: #E68CA8; }
-:is(.phone-flow-bar i, .phone-key):is(.tone-kept, .tone-save) { background: #14A874; }
-:is(.phone-flow-bar i, .phone-key).tone-hold { background: #0B6DD6; }
+:is(.phone-flow-bar i, .phone-key).tone-in { background: var(--meadow); }
+:is(.phone-flow-bar i, .phone-key):is(.tone-out, .tone-spend) { background: var(--tone-spend); }
+:is(.phone-flow-bar i, .phone-key):is(.tone-kept, .tone-save) { background: var(--meadow); }
+:is(.phone-flow-bar i, .phone-key).tone-hold { background: var(--azure); }
 
 /* C07.3.4: the year as 4 × 3 month tiles. */
 .phone-months { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 10px 0; }
@@ -324,15 +328,15 @@ html.phone .main :is(input, select, textarea):not([type=hidden], [type=checkbox]
 .phone .chart-grid > span { display: none; }
 .phone .chart-grid:not(.chart-grid-zero) { border-color: transparent; }
 /* The month tiles and their scale use the calendar steps of A12 (rose for more out, green for more kept). */
-.phone :is(.phone-month, .phone-scale i).heat-0 { background: #F1F5F4; }
-.phone :is(.phone-month, .phone-scale i):is(.heat-1, .flow-out-1) { background: #FCEEF3; }
-.phone :is(.phone-month, .phone-scale i):is(.heat-2, .flow-out-2) { background: #F6CFDB; }
-.phone :is(.phone-month, .phone-scale i):is(.heat-3, .flow-out-3) { background: #EDA3BB; }
-.phone :is(.phone-month, .phone-scale i):is(.heat-4, .flow-out-4) { background: #D4567F; color: #fff; }
-.phone :is(.phone-month, .phone-scale i).flow-in-1 { background: #E3F4EA; }
-.phone :is(.phone-month, .phone-scale i).flow-in-2 { background: #C5E8D3; }
-.phone :is(.phone-month, .phone-scale i).flow-in-3 { background: #8FD1AC; }
-.phone :is(.phone-month, .phone-scale i).flow-in-4 { background: #0B8A5F; color: #fff; }
+.phone :is(.phone-month, .phone-scale i).heat-0 { background: var(--phone-neutral-wash); }
+.phone :is(.phone-month, .phone-scale i):is(.heat-1, .flow-out-1) { background: var(--rose-soft); }
+.phone :is(.phone-month, .phone-scale i):is(.heat-2, .flow-out-2) { background: var(--phone-rose-pale); }
+.phone :is(.phone-month, .phone-scale i):is(.heat-3, .flow-out-3) { background: var(--phone-rose-mid); }
+.phone :is(.phone-month, .phone-scale i):is(.heat-4, .flow-out-4) { background: var(--phone-rose-deep); color: #fff; }
+.phone :is(.phone-month, .phone-scale i).flow-in-1 { background: var(--phone-picked-wash); }
+.phone :is(.phone-month, .phone-scale i).flow-in-2 { background: var(--phone-green-pale); }
+.phone :is(.phone-month, .phone-scale i).flow-in-3 { background: var(--mint-300); }
+.phone :is(.phone-month, .phone-scale i).flow-in-4 { background: var(--meadow-dark); color: #fff; }
 .phone .phone-month:is(.heat-4, .flow-out-4, .flow-in-4) small { color: #fff; }
 .phone .phone-row-more > summary.phone-row { display: flex !important; justify-content: space-between; }
 .phone .phone-row-more > summary.phone-row::after { display: none !important; }
@@ -359,13 +363,13 @@ html[dir="rtl"].phone .chevron.chevron-back:has(> path) { transform: none; }
 .phone-txn:hover { text-decoration: none; }
 .phone-txn-av { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%;
   background: var(--c-track); color: var(--c-ink-2); font-size: 15px; font-weight: 700; line-height: 1; font-family: var(--display); }
-.phone-txn-av.is-in { background: #DDF3E8; color: #097852; }
+.phone-txn-av.is-in { background: var(--phone-in-wash); color: var(--positive); }
 .phone-txn-who { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .phone-txn-who b { font-weight: 600; font-size: 15px; overflow-wrap: anywhere; }
 .phone-txn-who small, .phone-txn-amount small { color: var(--c-muted); font-size: 12.5px; }
 .phone-txn-amount { display: flex; flex-direction: column; align-items: flex-end; flex: none; font-variant-numeric: tabular-nums; }
 .phone-txn-amount b { font-size: 15px; font-weight: 700; white-space: nowrap; }
-.phone-txn-amount b.pos { color: #097852; }
+.phone-txn-amount b.pos { color: var(--positive); }
 /* C11.1 hero: the one figure that leads the Overview, on the page and not in a card; then Latest. */
 .phone-hero { margin: 4px 0 0; }
 .phone-hero-label { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; margin: 0; font-size: 13px; font-weight: 600; line-height: 1.3; color: var(--c-ink-2); }
@@ -389,7 +393,7 @@ html[dir="rtl"].phone .chevron.chevron-back:has(> path) { transform: none; }
 .phone-segment input { position: absolute; opacity: 0; pointer-events: none; }
 .phone-segment span { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 40px; border-radius: 999px; font-weight: 700; color: var(--c-ink-2); }
 .phone-segment input:checked + span { background: var(--c-nile); color: #fff; }
-.phone-segment input:focus-visible + span { outline: 2px solid #14A874; outline-offset: 1px; }
+.phone-segment input:focus-visible + span { outline: 2px solid var(--meadow); outline-offset: 1px; }
 .phone-more > summary { min-height: 44px; display: flex; align-items: center; font-weight: 700; color: var(--c-nile); cursor: pointer; }
 .phone-save { width: 100%; min-height: 48px; margin-top: 4px; justify-content: center; }
 .phone-rows.is-list { margin: 0; }
@@ -410,15 +414,15 @@ html[dir="rtl"].phone .chevron.chevron-back:has(> path) { transform: none; }
 
 /* Devices in the phone frame: a confirming tick beside its words, not a well. */
 .phone-form .check-row { display: flex; align-items: flex-start; gap: 10px; font-weight: 600; color: var(--c-ink); }
-.phone-form .check-row input { width: 20px; min-height: 20px; height: 20px; flex: none; margin: 2px 0 0; padding: 0; accent-color: #14A874; }
+.phone-form .check-row input { width: 20px; min-height: 20px; height: 20px; flex: none; margin: 2px 0 0; padding: 0; accent-color: var(--meadow); }
 .phone-row form { margin: 0; }
 .phone-row form .btn { min-height: 40px; }
 
 /* Budget on a phone: the plan meter (Spent Azure, over plan Rose) and one row per group with its meter. */
 .phone-plan-bar { display: flex; height: 12px; margin: 4px 0 12px; border-radius: 99px; overflow: hidden; background: var(--c-track); }
 .phone-plan-bar i { display: block; height: 100%; }
-.phone-plan-bar .spent { background: #0B6DD6; }
-.phone-plan-bar .over { background: #C93D72; }
+.phone-plan-bar .spent { background: var(--azure); }
+.phone-plan-bar .over { background: var(--rose); }
 .phone-group { border-top: 1px solid var(--c-line, rgba(10,36,66,.08)); }
 .phone-group:first-child { border-top: 0; }
 .phone-group > summary { display: block; width: 100%; list-style: none; cursor: pointer; }
@@ -430,13 +434,13 @@ html[dir="rtl"].phone .chevron.chevron-back:has(> path) { transform: none; }
 .phone-group-name small, .phone-row small { color: var(--c-muted); font-size: 13px; font-weight: 500; }
 .phone-group-left { font-variant-numeric: tabular-nums; white-space: nowrap; }
 .phone-group-head .phone-bar-track { grid-column: 1 / -1; height: 8px; }
-.phone-plan-bar + .phone-rows .phone-row:first-child b { color: #0B6DD6; } /* Spent: the bar's colour */
-.phone-group-head .phone-bar-track.is-over i { background: #C93D72; }
-.phone-group-left.pos, .phone-row b.pos { color: #097852; } /* left in plan: good */
-.phone-group-left.neg, .phone-row b.neg { color: #C93D72; } /* over plan: bad */
+.phone-plan-bar + .phone-rows .phone-row:first-child b { color: var(--azure); } /* Spent: the bar's colour */
+.phone-group-head .phone-bar-track.is-over i { background: var(--rose); }
+.phone-group-left.pos, .phone-row b.pos { color: var(--positive); } /* left in plan: good */
+.phone-group-left.neg, .phone-row b.neg { color: var(--rose); } /* over plan: bad */
 /* C06.3: a change in spending is green when down and rose when up (Expense analysis' rows and More analysis). */
-.phone-row b small.pos { color: #097852; }
-.phone-row b small.neg { color: #C93D72; }
+.phone-row b small.pos { color: var(--positive); }
+.phone-row b small.neg { color: var(--rose); }
 /* 3T5: small multiples inside a sheet are flat, a hairline above each, never a box in a box (A16). */
 html.phone .main .multiples .multiple, html.phone .multiples .multiple { padding: 8px 0 0; border: 0; border-top: 1px solid var(--c-line); border-radius: 0; background: none; box-shadow: none; }
 a.phone-bar-row, a.phone-group-head { color: inherit; text-decoration: none; } /* names stay Ink; the row is the link */
@@ -468,10 +472,10 @@ a.phone-bar-row, a.phone-group-head { color: inherit; text-decoration: none; } /
 main.phone-content { counter-reset: picked; }
 .phone-txn.is-pick { cursor: pointer; position: relative; margin: 0 -14px; padding-left: 14px; padding-right: 14px; }
 .phone-txn.is-pick input { position: absolute; opacity: 0; width: 1px; height: 1px; }
-.phone-txn.is-pick:has(input:checked) { background: #E3F4EA; box-shadow: inset 4px 0 0 #14A874; counter-increment: picked; }
-.phone-txn.is-pick:has(input:focus-visible) { outline: 2px solid #14A874; outline-offset: -2px; }
+.phone-txn.is-pick:has(input:checked) { background: var(--phone-picked-wash); box-shadow: inset 4px 0 0 var(--meadow); counter-increment: picked; }
+.phone-txn.is-pick:has(input:focus-visible) { outline: 2px solid var(--meadow); outline-offset: -2px; }
 .phone-body:has(.phone-select-bar) .phone-tabbar { display: none; }
-.phone-select-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 21; display: grid; gap: 8px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+.phone-select-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: calc(var(--z-sticky) + 1); display: grid; gap: 8px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
   background: var(--c-surface); border-top: 1px solid var(--c-line); box-shadow: 0 -6px 18px rgba(10, 36, 66, .08); }
 .phone-select-count { font-weight: 700; }
 .phone-select-count::before { content: counter(picked); }
@@ -533,13 +537,13 @@ html.phone[dir="rtl"] .period-buttons:has(.period-month-seg) .period-button:not(
 html.phone[dir="rtl"] .period-buttons:has(.period-month-seg) .period-month-seg { min-width: max-content; }
 html.phone[dir="rtl"] .period-month-seg .period-step:not(#_):not(.x_) { flex: none; width: 22px; }
 
-.info-tooltip { position:fixed; z-index:10000; width:260px; max-width:calc(100vw - 24px); max-height:calc(100vh - 24px); overflow:auto; box-sizing:border-box; padding:10px 12px; border-radius:12px; background:var(--action); color:#fff; font:500 13px/1.45 var(--body); text-align:start; box-shadow:var(--shadow-float); white-space:normal; overflow-wrap:anywhere; }
+.info-tooltip { position:fixed; z-index:var(--z-tooltip); width:260px; max-width:calc(100vw - 24px); max-height:calc(100vh - 24px); overflow:auto; box-sizing:border-box; padding:10px 12px; border-radius:12px; background:var(--action); color:#fff; font:500 13px/1.45 var(--body); text-align:start; box-shadow:var(--shadow-float); white-space:normal; overflow-wrap:anywhere; }
 
 /* C06.3: headline figures as a lead and rows; a change that is down in spending is good (green), up is rose (A03). */
 .phone-hero .phone-rows { margin-top: 8px; }
 .phone-delta { font-weight: 600; }
-.phone-delta.is-down { color: #097852; }
-.phone-delta.is-up { color: #C93D72; }
+.phone-delta.is-down { color: var(--positive); }
+.phone-delta.is-up { color: var(--rose); }
 .phone-stat-rows { margin-top: 8px; }
 
 /* Quiet chrome (C01.1): on a phone no tile has a coloured edge, an icon box or a gradient; the chip and the figure carry the meaning. */
@@ -554,8 +558,8 @@ html.phone[dir="rtl"] .period-month-seg .period-step:not(#_):not(.x_) { flex: no
 .phone .main .key-note .kn-head { display: flex; align-items: center; gap: 10px; }
 .phone .main .key-note .key-note-icon { width: 10px !important; height: 10px !important; flex: none; border-radius: 50% !important; background: var(--c-muted) !important; padding: 0; box-shadow: none !important; }
 .phone .main .key-note .key-note-icon svg { display: none !important; }
-.phone .main .key-note.tone-attention .key-note-icon { background: #C93D72 !important; }
-.phone .main .key-note.tone-good .key-note-icon { background: #14A874 !important; }
+.phone .main .key-note.tone-attention .key-note-icon { background: var(--rose) !important; }
+.phone .main .key-note.tone-good .key-note-icon { background: var(--meadow) !important; }
 .phone .main .key-note .kn-label { font-size: 15px; font-weight: 700; color: var(--c-ink); }
 .phone .main .key-note .kn-figure { display: block; margin: 4px 0 0 20px; font-size: 22px !important; line-height: 1.2; color: var(--c-ink) !important; }
 .phone .main .key-note p { margin: 4px 0 0 20px; font-size: 13.5px; color: var(--c-ink-2); }
@@ -618,10 +622,10 @@ html.phone .iso-date-control:not(#_) { grid-template-columns: minmax(0, 1fr) 48p
 
 
 .locked-row b { font-weight:400; opacity:.75; }
-.plan-status-late { background:var(--rose-soft, #FCEEF3); color:var(--rose-strong, #C93D72); display:inline-flex; padding:0 8px; border-radius:999px; font-size:12px; font-weight:700; }
+.plan-status-late { background:var(--rose-soft); color:var(--rose-strong, var(--rose)); display:inline-flex; padding:0 8px; border-radius:999px; font-size:12px; font-weight:700; }
 /* Answer first (guideline 3.33, C04.1): the status sentence under the title, then the seam; Needs you bullets are the mark. */
-.phone-header p.phone-status { margin: 4px 0 0; color: var(--c-ink-2, #304A5C); font-size: 14px; font-weight: 600; line-height: 1.4; }
-.phone-header::after { content: ""; display: block; width: 32px; height: 3px; margin-top: 8px; border-radius: 2px; background: linear-gradient(90deg, #0B6DD6 50%, #14A874 50%); }
+.phone-header p.phone-status { margin: 4px 0 0; color: var(--c-ink-2, var(--ink-2)); font-size: 14px; font-weight: 600; line-height: 1.4; }
+.phone-header::after { content: ""; display: block; width: 32px; height: 3px; margin-top: 8px; border-radius: 2px; background: linear-gradient(90deg, var(--azure) 50%, var(--meadow) 50%); }
 .phone-needs .needs-you-dot { width: 12px; height: 17px; border-radius: 0; background: url(/static/lightning-mark-flat.svg) no-repeat center / contain; }
 .phone-needs.is-empty .needs-you-dot { background: var(--meadow); width: 10px; height: 10px; border-radius: 50%; }
 
@@ -665,7 +669,7 @@ html.phone .iso-date-control:not(#_) { grid-template-columns: minmax(0, 1fr) 48p
 
 /* The hero: label, the figure with EGP once, one calm sentence, then the seam (A02.3). */
 .phone-hero-line { margin: 4px 0 0; color: var(--c-ink-2); font-size: 14px; line-height: 1.4; }
-.phone-hero.has-seam::after { content: ""; display: block; width: 32px; height: 3px; margin-top: 10px; border-radius: 2px; background: linear-gradient(90deg, #0B6DD6 50%, #14A874 50%); }
+.phone-hero.has-seam::after { content: ""; display: block; width: 32px; height: 3px; margin-top: 10px; border-radius: 2px; background: linear-gradient(90deg, var(--azure) 50%, var(--meadow) 50%); }
 a.phone-hero { display: block; color: inherit; text-decoration: none; }
 /* Home with a plan (IV-12P): the label opens the everyday budget, the note on its right (Muted, as the hero's note)
    opens Cash planning, and the figure below opens the everyday budget too. */
@@ -675,10 +679,10 @@ a.phone-home-lead { display: block; }
 
 /* Arrow chips: what the money did, by its colour's meaning (A03). The sign or the word beside it always speaks too. */
 .phone-txn-av svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
-.phone-txn-av.is-in { background: #DDF3E8; color: #097852; }
-.phone-txn-av.is-out { background: #FBE4EC; color: #A8325F; }
+.phone-txn-av.is-in { background: var(--phone-in-wash); color: var(--positive); }
+.phone-txn-av.is-out { background: var(--phone-out-wash); color: var(--phone-rose-text); }
 .phone-txn-av.is-move, .phone-txn-av.is-flat { background: var(--c-track); color: var(--c-ink-2); }
-.phone-txn-av.is-invest { background: #E1EEFB; color: #0B6DD6; }
+.phone-txn-av.is-invest { background: var(--canvas-end); color: var(--azure); }
 /* IV-11D6 (C08.2): a built-in category's mark, 24px at stroke 1.75, in the chip's in or out colour. */
 .phone-txn-av.has-mark svg { width: 24px; height: 24px; stroke-width: 1.75; }
 .phone-content .phone-day-net { color: var(--c-ink-2); font-weight: 700; }
@@ -692,21 +696,21 @@ a.phone-home-lead { display: block; }
 .phone-period-now { display: inline-flex; align-items: center; min-height: 40px; padding: 0 12px; border-radius: 999px; list-style: none; cursor: pointer;
   font: 700 14px/1 var(--body); color: var(--c-ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .phone-period-now::-webkit-details-marker { display: none; }
-.phone-period-sheet[open] > .phone-period-now::before { content: ""; position: fixed; inset: 0; z-index: 40; background: rgba(13, 34, 51, .35); }
-.phone-period-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-height: 85vh; overflow-y: auto; box-sizing: border-box;
+.phone-period-sheet[open] > .phone-period-now::before { content: ""; position: fixed; inset: 0; z-index: calc(var(--z-sticky) + 20); background: rgba(13, 34, 51, .35); }
+.phone-period-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: calc(var(--z-sticky) + 21); max-height: 85vh; overflow-y: auto; box-sizing: border-box;
   padding: 8px var(--c-side) calc(16px + env(safe-area-inset-bottom)); border-radius: 20px 20px 0 0; background: var(--c-surface); box-shadow: 0 -8px 24px rgba(10, 36, 66, .18); }
 .phone-period-panel .phone-grabber { display: block; width: 36px; height: 4px; margin: 0 auto 12px; border-radius: 2px; background: var(--c-line); }
 .phone-period-panel .phone-row:not(#_) { width: 100%; min-height: 52px; border: 0; border-top: 1px solid var(--c-line); border-radius: 0; background: none; box-shadow: none;
   color: var(--c-ink); font: 600 15px/1.3 var(--body); text-align: start; text-decoration: none; }
 .phone-period-panel .phone-row b { color: var(--c-muted); font-weight: 600; font-size: 13px; }
 .phone-period-panel .phone-row.is-chosen b, .phone-period-panel .phone-row.is-chosen > span:first-child { color: var(--c-ink); font-weight: 700; }
-.phone-period-panel .phone-row.is-chosen > b::before { content: "✓ "; color: #097852; }
+.phone-period-panel .phone-row.is-chosen > b::before { content: "✓ "; color: var(--positive); }
 .phone-period-custom:not(#_) { flex-wrap: wrap; padding: 10px 0; }
 .phone-period-range { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; margin-top: 8px; }
 .phone-period-range label { display: flex; flex-direction: column; gap: 4px; color: var(--c-muted); font-size: 12.5px; font-weight: 600; }
 html.phone:has(.phone-period-sheet[open]) .phone-tabbar { display: none; }
 /* A month box on a phone opens its picker as a sheet from the bottom, above everything (C09). */
-html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !important; right: 16px; top: auto !important; bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; z-index: 70; }
+html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !important; right: 16px; top: auto !important; bottom: calc(16px + env(safe-area-inset-bottom)); width: auto; z-index: calc(var(--z-popover) - 30); }
 
 /* A hero in the header carries the seam itself; the header adds none (the tabs follow the hero, C03.3). */
 .phone-header:has(.phone-hero)::after { display: none; }
@@ -725,7 +729,7 @@ html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !import
 .phone-needs > summary { padding: 8px 0; }
 /* 3AN4: the next bill due within three days, by payee, amount and days; it opens the bill's pay sheet (J3). */
 .phone-needs-bill { display: flex; align-items: center; min-height: 44px; color: var(--c-ink); font-size: 14px; font-weight: 700; text-decoration: underline; overflow-wrap: anywhere; }
-.phone-needs-bill.is-late { color: #C93D72; }
+.phone-needs-bill.is-late { color: var(--rose); }
 .phone-needs-open { flex: none; color: var(--c-ink); font-weight: 700; text-decoration: underline; }
 .phone-needs[open] .phone-needs-open { visibility: hidden; }
 .phone-needs .needs-you-count { flex: none; }
@@ -756,8 +760,8 @@ html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !import
 .phone-budget-ring svg { display: block; width: 100%; height: 100%; }
 .phone-budget-ring circle { fill: none; stroke-width: 10; }
 .phone-budget-ring .ring-track { stroke: var(--c-track); }
-.phone-budget-ring .ring-arc { stroke: #14A874; stroke-linecap: round; }
-.phone-budget-ring.is-over .ring-arc { stroke: #C93D72; }
+.phone-budget-ring .ring-arc { stroke: var(--meadow); stroke-linecap: round; }
+.phone-budget-ring.is-over .ring-arc { stroke: var(--rose); }
 .phone-budget-ring .ring-text { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1.1; }
 .phone-budget-ring .ring-text b { font: 800 22px/1.1 var(--display, inherit); color: var(--c-ink); font-variant-numeric: tabular-nums; }
 .phone-budget-ring .ring-text small { font-size: 12px; font-weight: 600; color: var(--c-muted); }
@@ -794,12 +798,12 @@ html.phone .month-popup:not(#_) { position: fixed !important; left: 16px !import
 .phone-cat-main > b { font-size: 15px; font-weight: 700; line-height: 1.3; }
 .phone-cat-main > small { font-size: 12.5px; }
 .phone-cat .phone-plan-bar { display: block; grid-column: 1 / -1; height: 6px; margin: 6px 0 0; border-radius: 99px; background: var(--c-track); overflow: hidden; }
-.phone-cat .phone-plan-bar i { display: block; height: 100%; border-radius: 99px; background: #14A874; }
-.phone-cat .phone-plan-bar.is-over i { background: #C93D72; }
+.phone-cat .phone-plan-bar i { display: block; height: 100%; border-radius: 99px; background: var(--meadow); }
+.phone-cat .phone-plan-bar.is-over i { background: var(--rose); }
 .phone-cat-left { align-items: flex-end; text-align: end; }
-.phone-cat-left > b { font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; color: #097852; }
+.phone-cat-left > b { font-size: 15px; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--positive); }
 .phone-cat-left > small { font-size: 12.5px; }
-.phone-cat.is-over .phone-cat-left > b, .phone-cat.is-over .phone-cat-left > small { color: #C93D72; }
+.phone-cat.is-over .phone-cat-left > b, .phone-cat.is-over .phone-cat-left > small { color: var(--rose); }
 .phone-cat.is-over .phone-cat-left > small { font-weight: 600; }
 /* == end 3AC Budget tab == */
 
@@ -814,7 +818,7 @@ html.phone .phone-kpi-head .stat-chip { white-space: nowrap; }  /* a tile's chip
 /* == 3AN sheets == a row that opens a sheet from the foot of the screen (D1, C06.2); phone/partials/sheet.html */
 .phone-sheet-row > summary { list-style: none; cursor: pointer; }
 .phone-sheet-row > summary::-webkit-details-marker { display: none; }
-.phone-sheet-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: 41; max-height: 85vh; overflow-y: auto; box-sizing: border-box;
+.phone-sheet-panel { position: fixed; left: 0; right: 0; bottom: 0; z-index: calc(var(--z-sticky) + 21); max-height: 85vh; overflow-y: auto; box-sizing: border-box;
   padding: 8px var(--c-side) calc(16px + env(safe-area-inset-bottom)); border-radius: 20px 20px 0 0; background: var(--c-surface);
   box-shadow: 0 0 0 100vmax rgba(13, 34, 51, .35); } /* the shadow dims the page behind; a tap outside closes (phone-gestures.js) */
 .phone-sheet-panel .phone-grabber { width: 36px; margin: 0 auto 12px; background: var(--c-line); }
@@ -828,8 +832,8 @@ html.phone:has(.phone-sheet-row[open]) .phone-tabbar { display: none; }
 .phone-sheet-panel .phone-form { margin-top: 16px; }
 .phone-sheet-panel .btn:not(.phone-save), .phone-sheet-panel a.btn { display: flex; align-items: center; justify-content: center; min-height: 48px; margin-top: 10px; }
 .phone-sheet-bar { position: relative; display: block; height: 6px; margin: 10px 0 0; background: var(--c-track); }
-.phone-sheet-bar i { background: #14A874; border-radius: 99px; }
-.phone-sheet-bar.is-over i { background: #C93D72; }
+.phone-sheet-bar i { background: var(--meadow); border-radius: 99px; }
+.phone-sheet-bar.is-over i { background: var(--rose); }
 /* Budget rows: 64 tall, the 4 px meter inside the row (3AN7). */
 .phone-sheet-row > summary::after { display: none !important; }
 .phone-sheet-row > summary.phone-cat:not(#_) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: start; gap: 2px 16px; min-height: 64px; padding: 8px 0 9px; align-content: center; }
@@ -866,7 +870,7 @@ html.phone .main .key-notes .key-note { display: block !important; }
 .phone-plan-row > b { font-size: 15px; font-weight: 700; }
 .phone-plan-row .plan-status-late { margin-left: 2px; padding: 1px 8px; line-height: 1.3; white-space: nowrap; vertical-align: baseline; }
 /* The rest of the next 30 days folds under the list: one row that opens in place. */
-.phone-plan-safe-line.is-short { color: #C93D72; font-weight: 600; }
+.phone-plan-safe-line.is-short { color: var(--rose); font-weight: 600; }
 .phone-plan-more { margin: 0; }
 .phone-plan-more > summary.phone-row { list-style: none; cursor: pointer; }
 .phone-plan-more > summary.phone-row > span { flex: 1 1 auto; }
@@ -962,7 +966,7 @@ html[dir="rtl"] .phone-reg-step svg { transform: scaleX(-1); }
 .phone-period-custom .phone-save { width: 100%; margin-top: 10px; }
 /* This period: two tiles, Money in in Meadow text, Money out in Ink (Soft rose is for marks, never text). */
 .phone-reg-kpis { margin-top: 12px; }
-.phone-reg-kpis .phone-kpi-value.is-in { color: #097852; }
+.phone-reg-kpis .phone-kpi-value.is-in { color: var(--positive); }
 /* Quiet: Views and the value updates, small, one line; the views open in a sheet like the period. */
 .phone-reg-quiet { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px 12px; margin: 4px 0 0; }
 .phone-reg-quiet .phone-quiet, .phone-reg-views > .phone-period-now { min-height: 44px; padding: 0; font: 700 13px/1.3 var(--body); color: var(--c-ink-2); }
@@ -995,34 +999,34 @@ html[dir="rtl"] .phone-reg-step svg { transform: scaleX(-1); }
 
 /* Phone roadmap M5: pace marker, at risk and Cover it on budget rows */
 .phone-cat .phone-plan-bar { position: relative; }
-.phone-pace-tick { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--c-text, #0D2233); opacity: .45; text-decoration: none; }
-.phone-cat.is-risk .phone-plan-bar i { background: #E68CA8; }  /* soft rose: spent of plan (A03) */
-.phone-risk { font-style: normal; font-weight: 600; color: #C93D72; }  /* strong rose: needs you */
+.phone-pace-tick { position: absolute; top: -2px; bottom: -2px; width: 2px; background: var(--c-text, var(--ink)); opacity: .45; text-decoration: none; }
+.phone-cat.is-risk .phone-plan-bar i { background: var(--tone-spend); }  /* soft rose: spent of plan (A03) */
+.phone-risk { font-style: normal; font-weight: 600; color: var(--rose); }  /* strong rose: needs you */
 .phone-cat-wrap { display: flex; flex-direction: column; }
-.phone-cover { align-self: flex-end; min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; margin: -6px 0 6px; font-weight: 700; color: var(--c-nile, #0A2442); text-decoration: none; }
+.phone-cover { align-self: flex-end; min-height: 44px; display: inline-flex; align-items: center; padding: 0 12px; margin: -6px 0 6px; font-weight: 700; color: var(--c-nile, var(--action)); text-decoration: none; }
 
 /* Phone roadmap M6: swipe a transaction row */
 .phone-txn { transition: transform .18s ease, opacity .18s ease; touch-action: pan-y; }
-.phone-txn.is-swipe-reveal { box-shadow: inset -4px 0 0 #0A2442; }
+.phone-txn.is-swipe-reveal { box-shadow: inset -4px 0 0 var(--action); }
 /* 3AD3: the actions a swipe toward the start reveals, at the row's end, the row's full height (C05.1: 48 px and more) */
 .phone-swipe-actions { position: absolute; right: 0; display: flex; z-index: 1; }
-.phone-swipe-actions > a, .phone-swipe-actions > button { width: 96px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; border: 0; font: 700 14px/1.2 var(--body, inherit); text-align: center; text-decoration: none; color: #FFFFFF; cursor: pointer; }
-.phone-swipe-cat { background: #0A2442; }  /* Nile: press this (A03) */
-.phone-swipe-delete { background: #C93D72; }  /* strong rose: a delete needs you */
-.phone-txn.is-swipe-open { box-shadow: inset 4px 0 0 #0A2442; }
+.phone-swipe-actions > a, .phone-swipe-actions > button { width: 96px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center; padding: 0 8px; border: 0; font: 700 14px/1.2 var(--body, inherit); text-align: center; text-decoration: none; color: var(--surface); cursor: pointer; }
+.phone-swipe-cat { background: var(--action); }  /* Nile: press this (A03) */
+.phone-swipe-delete { background: var(--rose); }  /* strong rose: a delete needs you */
+.phone-txn.is-swipe-open { box-shadow: inset 4px 0 0 var(--action); }
 .phone-txn.is-gone { opacity: 0; height: 0; padding-top: 0; padding-bottom: 0; overflow: hidden; }
-.phone-toast { position: fixed; inset-inline: 16px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 60; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 12px; background: #0D2233; color: #FFFFFF; font-size: 15px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
+.phone-toast { position: fixed; inset-inline: 16px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: calc(var(--z-popover) - 40); display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 12px; background: var(--ink); color: var(--surface); font-size: 15px; box-shadow: 0 6px 24px rgba(0,0,0,.25); }
 .phone-toast[hidden] { display: none; }
-.phone-toast button { min-height: 44px; padding: 0 12px; border: 0; background: transparent; color: #FFFFFF; font: inherit; font-weight: 700; text-decoration: underline; }
+.phone-toast button { min-height: 44px; padding: 0 12px; border: 0; background: transparent; color: var(--surface); font: inherit; font-weight: 700; text-decoration: underline; }
 
 /* Phone roadmap M7: Hub bills */
-.phone-hub-bill.is-late small { color: #C93D72; font-weight: 600; }
+.phone-hub-bill.is-late small { color: var(--rose); font-weight: 600; }
 
 /* Phone roadmap M8: busy Save, pull to refresh, readable figures */
 button.is-busy { opacity: .6; pointer-events: none; }
 button.is-busy::after { content: ""; display: inline-block; width: 14px; height: 14px; margin-inline-start: 8px; vertical-align: -2px; border: 2px solid currentColor; border-inline-end-color: transparent; border-radius: 50%; animation: phone-spin .7s linear infinite; }
 @keyframes phone-spin { to { transform: rotate(360deg); } }
-.phone-pull { position: fixed; top: 0; inset-inline: 0; z-index: 55; height: var(--pull, 0px); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--c-muted, #566E7E); pointer-events: none; overflow: hidden; }
+.phone-pull { position: fixed; top: 0; inset-inline: 0; z-index: calc(var(--z-popover) - 45); height: var(--pull, 0px); display: flex; align-items: flex-end; justify-content: center; padding-bottom: 8px; font-size: 13px; font-weight: 600; color: var(--c-muted, var(--muted)); pointer-events: none; overflow: hidden; }
 .phone-lead, .phone-txn-amount, .phone-cat-left, .phone-row > b, .phone-day-net { font-variant-numeric: tabular-nums; }
 #app-popup .app-popup-frame { transition: transform .15s ease; }
 @media (prefers-reduced-motion: reduce) {
@@ -1033,7 +1037,7 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 /* IV-3AL: the weekly review's rows; a late payment in the Needs you strip */
 .phone-review-action { flex: none; white-space: nowrap; }  /* a decision's action word is never cut (C12) */
 .phone-card > .phone-rows:first-child > .phone-row:first-child { border-top: 0; }
-.phone-needs .phone-row.is-late > span { color: #C93D72; }  /* a payment already late: the words say it; no coloured edge (C01) */
+.phone-needs .phone-row.is-late > span { color: var(--rose); }  /* a payment already late: the words say it; no coloured edge (C01) */
 
 /* Link the sections (NF-7T) */
 .phone .linked-actions { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 12px 0 0; }
@@ -1043,10 +1047,10 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 /* 3G6: the one category sheet on the phone */
 .category-sheet-figure { margin: 10px 0 6px; font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; }
 .category-sheet-figure small { font-size: 14px; font-weight: 600; color: var(--c-muted); }
-.category-sheet-bar { position: relative; display: block; height: 10px; border-radius: 5px; background: #E6EFEC; }
-.category-sheet-bar i { display: block; height: 100%; border-radius: 5px; background: #E68CA8; }
-.category-sheet-bar.is-over i { background: #C93D72; }
-.category-sheet-bar s { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #0D2233; opacity: .45; }
+.category-sheet-bar { position: relative; display: block; height: 10px; border-radius: 5px; background: var(--track); }
+.category-sheet-bar i { display: block; height: 100%; border-radius: 5px; background: var(--tone-spend); }
+.category-sheet-bar.is-over i { background: var(--rose); }
+.category-sheet-bar s { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--ink); opacity: .45; }
 .category-sheet-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
 .category-sheet-actions .btn { width: 100%; min-height: 48px; justify-content: center; }
 .category-sheet-actions > a:not(.btn) { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; }
@@ -1057,15 +1061,15 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 
 /* BV-11F, IV-11D2, IV-11D5: Budget's bars take state colours (within plan Meadow, ahead of pace soft rose, over strong
    rose: A03), one segmented bar for the month, and the spending donut (soft rose steps; the rows name each slice). */
-.phone-budget-cat .phone-bar-track i { background: #14A874; }
-.phone-budget-cat.is-ahead .phone-bar-track i { background: #E68CA8; }
-.phone-budget-cat.is-over .phone-bar-track i { background: #C93D72; }
-.phone-done { color: var(--c-muted, #566E7E); }
+.phone-budget-cat .phone-bar-track i { background: var(--meadow); }
+.phone-budget-cat.is-ahead .phone-bar-track i { background: var(--tone-spend); }
+.phone-budget-cat.is-over .phone-bar-track i { background: var(--rose); }
+.phone-done { color: var(--c-muted, var(--muted)); }
 .phone-month-bar { display: flex; height: 12px; margin: 12px 0 0; border-radius: 99px; overflow: hidden; background: var(--c-track); }
 .phone-month-bar i { display: block; height: 100%; }
-.phone-month-bar .is-spent { background: #E68CA8; }
-.phone-month-bar .is-left { background: #14A874; }
-.phone-month-bar .is-over { background: #C93D72; }
+.phone-month-bar .is-spent { background: var(--tone-spend); }
+.phone-month-bar .is-left { background: var(--meadow); }
+.phone-month-bar .is-over { background: var(--rose); }
 .phone-donut { margin: 0; }
 .phone-donut-ring { position: relative; width: 168px; height: 168px; margin: 8px auto 12px; }
 .phone-donut-ring svg { width: 100%; height: 100%; }
@@ -1073,14 +1077,14 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .phone-donut-seg { fill: none; stroke-width: 6; }
 .phone-donut-hole { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; }
 .phone-donut-hole b { font-size: 17px; font-variant-numeric: tabular-nums; }
-.phone-donut-hole small { font-size: 12px; color: var(--c-muted, #566E7E); }
-.phone-donut-seg.is-rank-0, .phone-key.is-rank-0 { stroke: #C93D72; background: #C93D72; }
-.phone-donut-seg.is-rank-1, .phone-key.is-rank-1 { stroke: #E68CA8; background: #E68CA8; }
-.phone-donut-seg.is-rank-2, .phone-key.is-rank-2 { stroke: #F0B0C4; background: #F0B0C4; }
-.phone-donut-seg.is-rank-3, .phone-key.is-rank-3 { stroke: #F6CCD9; background: #F6CCD9; }
-.phone-donut-seg.is-rank-4, .phone-key.is-rank-4 { stroke: #566E7E; background: #566E7E; }
+.phone-donut-hole small { font-size: 12px; color: var(--c-muted, var(--muted)); }
+.phone-donut-seg.is-rank-0, .phone-key.is-rank-0 { stroke: var(--rose); background: var(--rose); }
+.phone-donut-seg.is-rank-1, .phone-key.is-rank-1 { stroke: var(--tone-spend); background: var(--tone-spend); }
+.phone-donut-seg.is-rank-2, .phone-key.is-rank-2 { stroke: var(--phone-rose-rank-2); background: var(--phone-rose-rank-2); }
+.phone-donut-seg.is-rank-3, .phone-key.is-rank-3 { stroke: var(--phone-rose-rank-3); background: var(--phone-rose-rank-3); }
+.phone-donut-seg.is-rank-4, .phone-key.is-rank-4 { stroke: var(--muted); background: var(--muted); }
 .phone-key { display: inline-block; width: 10px; height: 10px; margin-inline-end: 8px; border-radius: 3px; }
-.phone-donut-row small { color: var(--c-muted, #566E7E); }
+.phone-donut-row small { color: var(--c-muted, var(--muted)); }
 @media (prefers-reduced-motion: no-preference) { .phone-donut-seg { animation: phone-donut-in 400ms ease-out; } }
 @keyframes phone-donut-in { from { opacity: 0; } to { opacity: 1; } }
 /* Home keeps its first screen to one and a fifth (test_phone_home): the bar is a thin line right under the row. */
@@ -1088,8 +1092,8 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 /* IV-11D1, C06.1 / A08.4: Home's payday meter under Safe to spend. Fill: everyday money gone; tick: the pace today. */
 .phone-pay-meter { position: relative; display: block; height: 8px; margin: 4px 0 0; border-radius: 99px; background: var(--c-track); }
 .phone-hero.has-seam:has(.phone-pay-meter)::after { display: none; }  /* on Home the meter takes the seam's place (owner, 2026-11-09) */
-.phone-pay-meter i { position: absolute; top: 0; bottom: 0; inset-inline-start: 0; border-radius: 99px; background: var(--azure, #0B6DD6); }
-.phone-pay-meter.is-ahead i { background: var(--rose, #C93D72); }
+.phone-pay-meter i { position: absolute; top: 0; bottom: 0; inset-inline-start: 0; border-radius: 99px; background: var(--azure); }
+.phone-pay-meter.is-ahead i { background: var(--rose); }
 .phone-pay-meter b { position: absolute; top: -4px; width: 2px; height: 16px; margin-inline-start: -1px; border-radius: 1px; background: var(--action); }
 @media (prefers-reduced-motion: no-preference) {
   .phone-pay-meter i { animation: phone-meter-in 400ms ease-out; transform-origin: left center; }
@@ -1100,11 +1104,11 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .phone-chart-trend { margin: 4px 0 12px; }
 .phone-chart-trend-plot { position: relative; margin-right: 64px; }
 .phone-chart-trend-plot svg { display: block; width: 100%; height: 100%; overflow: visible; }
-.phone-chart-trend-area { fill: #0B6DD6; fill-opacity: .12; stroke: none; }
-.phone-chart-trend-line { fill: none; stroke: #0B6DD6; stroke-width: 2; stroke-linejoin: round; }
+.phone-chart-trend-area { fill: var(--azure); fill-opacity: .12; stroke: none; }
+.phone-chart-trend-line { fill: none; stroke: var(--azure); stroke-width: 2; stroke-linejoin: round; }
 .phone-chart-trend-zero { stroke: var(--c-muted); stroke-width: 1; }
 .phone-chart-trend-dot { position: absolute; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%; }
-.phone-chart-trend-dot::after { content: ""; position: absolute; inset: 10px; border-radius: 50%; background: #0B6DD6; opacity: 0; }
+.phone-chart-trend-dot::after { content: ""; position: absolute; inset: 10px; border-radius: 50%; background: var(--azure); opacity: 0; }
 .phone-chart-trend-dot:is(:focus-visible, :hover, .is-last)::after { opacity: 1; }
 .phone-chart-trend-end { position: absolute; left: 100%; transform: translate(8px, -50%); font-size: 13px; white-space: nowrap; font-variant-numeric: tabular-nums; }
 /* A12: chart geometry stays left to right in Arabic; its month labels follow the same axis. */
@@ -1122,11 +1126,11 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .phone-parts-keys li { display: inline-flex; align-items: center; gap: 4px; }
 .phone-parts-keys .phone-key { margin-right: 2px; }
 .phone-parts-keys small { color: var(--c-muted); }
-:is(.phone-flow-bar i, .phone-key).tone-cash { background: var(--class-cash, #0B6DD6); }
-:is(.phone-flow-bar i, .phone-key).tone-deposits { background: var(--class-deposits, #00907F); }
-:is(.phone-flow-bar i, .phone-key).tone-gold { background: var(--class-gold, #9A6708); }
-:is(.phone-flow-bar i, .phone-key).tone-equity { background: var(--class-equity, #08744A); }
-:is(.phone-flow-bar i, .phone-key).tone-other { background: var(--class-other, #687F8B); }
+:is(.phone-flow-bar i, .phone-key).tone-cash { background: var(--class-cash, var(--azure)); }
+:is(.phone-flow-bar i, .phone-key).tone-deposits { background: var(--class-deposits); }
+:is(.phone-flow-bar i, .phone-key).tone-gold { background: var(--class-gold); }
+:is(.phone-flow-bar i, .phone-key).tone-equity { background: var(--class-equity); }
+:is(.phone-flow-bar i, .phone-key).tone-other { background: var(--class-other); }
 .licence-rows .phone-row > b { max-width: 55%; white-space: normal; text-align: end; font-size: 13px; font-weight: 600; }
 
 /* 3AY15-17: the phone's own pages for what the PC templates used to draw. */
@@ -1154,10 +1158,10 @@ html.phone :is(.counterparty-results, .category-results) { min-width: 0; max-wid
 .phone .phone-strip-day small { font-size: 11px; color: var(--c-muted); }
 .phone .phone-strip-day i { font: 700 15px/1 var(--body, inherit); font-style: normal; font-variant-numeric: tabular-nums; }
 .phone .phone-strip-day.is-today i { color: var(--c-nile); text-decoration: underline; text-underline-offset: 3px; }
-.phone .phone-strip-day.is-payday { background: var(--tint-growth, #EAF8F0); }
-.phone .phone-strip-day.is-short { box-shadow: inset 0 0 0 2px #C93D72; }
+.phone .phone-strip-day.is-payday { background: var(--tint-growth); }
+.phone .phone-strip-day.is-short { box-shadow: inset 0 0 0 2px var(--rose); }
 .phone .phone-strip-day.is-chosen { box-shadow: inset 0 0 0 2px var(--c-nile); }
 .phone .phone-strip-marks { display: flex; flex-wrap: wrap; justify-content: center; gap: 3px; }
 .phone .phone-strip-marks .pay-mark { width: 9px; height: 9px; border-radius: 3px; }
-.phone .phone-upcoming + .phone-section .is-short, .phone .phone-rows b.is-late { color: #C93D72; }
+.phone .phone-upcoming + .phone-section .is-short, .phone .phone-rows b.is-late { color: var(--rose); }
 .phone-payday-strip { margin: 12px 0 0; padding: 10px 14px; border-radius: 14px; background: var(--c-well); }

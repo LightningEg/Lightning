@@ -1,3 +1,4 @@
+{% from "partials/chevron.html" import chevron with context %}
 <!doctype html>
 {% set on_phone = request.state.phone|default(false) %}<html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}"{% if on_phone %} class="phone"{% endif %}>
 <head>
@@ -79,7 +80,7 @@
           {% if profiles %}
             <ul class="profile-list">
               {% for profile in profiles %}
-                <li><a class="profile-choice" href="/profiles/unlock?db={{ profile.db_path|urlencode }}"><span class="profile-mark" aria-hidden="true">{{ profile.name[:1]|upper }}</span><span class="profile-copy"><strong>{{ profile.name }}</strong>{% if not on_phone %}<small>{{ profile.path }}</small>{% endif %}</span><span class="choice-arrow" aria-hidden="true">›</span></a></li>
+                <li><a class="profile-choice" href="/profiles/unlock?db={{ profile.db_path|urlencode }}"><span class="profile-mark" aria-hidden="true">{{ profile.name[:1]|upper }}</span><span class="profile-copy"><strong>{{ profile.name }}</strong>{% if not on_phone %}<small>{{ profile.path }}</small>{% endif %}</span><span class="choice-arrow" aria-hidden="true">{{ chevron() }}</span></a></li>
               {% endfor %}
             </ul>
           {% else %}
@@ -109,7 +110,7 @@
             <ul class="profile-list">
               {% for item in borrowed %}
                 {% set where = {'BORROWING': 'On this PC', 'SEALED': 'On this PC, not handed back', 'RETURNING': 'Going home', 'NEEDS_REPAIR': 'Taken back by the phone'}.get(item.state.value, 'On ' ~ item.home_name) %}
-                <li><a class="profile-choice" href="/profiles/borrowed?id={{ item.profile_id|urlencode }}"><span class="profile-mark" aria-hidden="true">{{ item.name[:1]|upper }}</span><span class="profile-copy"><strong>{{ item.name }}</strong><small>{{ where }}</small></span><span class="choice-arrow" aria-hidden="true">›</span></a></li>
+                <li><a class="profile-choice" href="/profiles/borrowed?id={{ item.profile_id|urlencode }}"><span class="profile-mark" aria-hidden="true">{{ item.name[:1]|upper }}</span><span class="profile-copy"><strong>{{ item.name }}</strong><small>{{ where }}</small></span><span class="choice-arrow" aria-hidden="true">{{ chevron() }}</span></a></li>
               {% endfor %}
             </ul>
           {% else %}
@@ -144,7 +145,7 @@
           <form method="post" action="/profiles/new" class="form-stack">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             {% if legacy %}<input type="hidden" name="legacy" value="{{ legacy }}"><p>{{ 'Your old data becomes this new profile, locked with the password you choose. The old file is not changed.'|tr(locale) }}</p>{% endif %}
-            <div class="field"><label for="profile-name">{{ 'Profile name'|tr(locale) }}</label><input id="profile-name" name="name" type="text" value="{{ name }}" required autocomplete="off" maxlength="80"></div>
+            <div class="field"><label for="profile-name">{{ 'Profile name'|tr(locale) }}</label><input id="profile-name" name="name" type="text" value="{{ name }}" required autocomplete="off" maxlength="80" spellcheck="false"></div>
             {% if not legacy %}<div class="field"><label for="profile-currency">{{ 'Profile currency'|tr(locale) }}</label><select id="profile-currency" name="currency" data-own-picker>{% for code, label in profile_currencies %}<option value="{{ code }}"{% if currency == code %} selected{% endif %}>{{ code }} — {{ label }}</option>{% endfor %}</select><small>{{ 'Choose the currency used for totals. You can change it before recording money or exchange rates.'|tr(locale) }}</small></div>{% endif %}
             <input type="hidden" name="suggestion" value="{{ suggestion }}">
             <div class="suggestion" aria-labelledby="suggestion-label">

@@ -1,10 +1,11 @@
+{% from "partials/icons.html" import icon_more with context %}
 {% extends "base.html" %}
 {% from "planning/_macros.html" import payment_row %}
 {% block title %}Cash planning{% endblock %}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Cash planning'|tr(locale), status, as_of ~ ' to ' ~ (forecast.next_income_date or window_end), 'until payday' if forecast.next_income_date else 'the next 3 months') }}{% endblock %}
 
 {# 3AM3: the two links are page actions, in the header's More actions (A05), not two rows above the Lead #}
-{% block top_actions %}<details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">⋯</summary><div><a href="/plan/scenarios">{{ 'Compare scenarios'|tr(locale) }}</a><a href="/plan/inputs" data-popup-open>{{ 'Forecast inputs'|tr(locale) }}</a></div></details>{% endblock %}
+{% block top_actions %}<details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">{{ icon_more() }}</summary><div><a href="/plan/scenarios">{{ 'Compare scenarios'|tr(locale) }}</a><a href="/plan/inputs" data-popup-open>{{ 'Forecast inputs'|tr(locale) }}</a></div></details>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import stat_tiles, kpi_row, trend, waterfall, bars, lead_card %}{% from "partials/macros.html" import needs_rows %}
 {% set f = forecast %}{% set p = plan %}
