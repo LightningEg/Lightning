@@ -9,6 +9,7 @@ from datetime import date, timedelta
 from decimal import ROUND_CEILING, Decimal
 
 from lightning.core.dates import month_of, parse_month
+from lightning.planning.salary_day import payday_to_plan
 from lightning.ui.charts import ranked_donut
 
 ZERO = Decimal(0)
@@ -49,6 +50,7 @@ class BudgetScreen:
     month_bar: dict | None = None     # IV-11D2: the everyday plan as one bar: spent, left, over (amounts add to the plan)
     spend: dict | None = None         # IV-11D5: where the month went: a donut of four categories then Other, and its rows
     working: object = None            # NF-12AB4: the hero's working, for its sheet
+    payday: dict | None = None        # 3AY9: {amount, date} from the salary's day until this month's plan is saved
 
 
 def _shift(month: str, step: int) -> str:
@@ -107,7 +109,8 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
                         shown_needs, max(len(needs) - ATTENTION, 0), listed, planned, paid, count,
                         move, c.health.raise_offer(shown) if state == "current" else None,
                         month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, e.everyday_spent),
-                        working=e.everyday_left_working)
+                        working=e.everyday_left_working,
+                        payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None)
 
 
 def month_bar(plan: Decimal, spent: Decimal) -> dict | None:

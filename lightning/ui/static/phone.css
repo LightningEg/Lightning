@@ -1140,3 +1140,4 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .needs-item > .needs-link > b { flex: none; white-space: nowrap; }
 .phone-segment-4 { grid-template-columns: repeat(4, 1fr); }
 html.phone :is(.counterparty-results, .category-results) { min-width: 0; max-width: calc(100vw - 32px); box-sizing: border-box; }
+.phone-payday-strip { margin: 12px 0 0; padding: 10px 14px; border-radius: 14px; background: var(--c-well); }

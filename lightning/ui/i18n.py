@@ -3610,6 +3610,8 @@ ARABIC_UI = {
     'Check against the bank': 'راجع مع البنك',
     'Does {name} say {amount}?': '{name} بيقول {amount}؟',
     'Fix it': 'صلّحه',
+    "Plan this month's {amt}": 'خطط لـ {amt} الشهر ده',
+    'This month in detail': 'الشهر ده بالتفصيل',
 }
 
 
