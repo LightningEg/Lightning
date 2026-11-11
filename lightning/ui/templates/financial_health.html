@@ -17,7 +17,7 @@
 {% block title %}{{ 'Financial health'|tr(locale) }}{% endblock %}
 {# Answers "Am I financially healthy?": four headline figures, how saving and net worth moved, then every figure
    against the limit you set (grouped as cushion, saving, then debt). Limits sit behind the gear. #}
-{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Financial health'|tr(locale), status, 'Balances as of {date} · savings rate from {month}'|tr(locale, date=as_of, month=savings_month)) }}{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Limits'|tr(locale), status, 'Balances as of {date} · savings rate from {month}'|tr(locale, date=as_of, month=savings_month)) }}{% endblock %}
 {% block top_actions %}{% if phone_mode() %}<form class="phone-as-of" method="get" action="/financial-health"><label class="phone-chip is-chosen">As of {{ as_of_iso }}<input type="date" data-native-date name="as_of" value="{{ as_of_iso }}" max="{{ today_iso }}" aria-label="As of"></label><noscript><button class="btn">{{ 'Show'|tr(locale) }}</button></noscript></form>{% else %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/financial-health", period.key, month, this_month, period.start_text, period.end_text) }}{% endif %}{% endblock %}
 {% block content %}
 {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}

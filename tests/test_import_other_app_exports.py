@@ -46,7 +46,7 @@ def test_another_apps_balance_rows_wait_as_skip(c, setup):
     _, batch_id, rows = _staged(c, cib)
     assert rows[4]["_balance_row"] and rows[5]["_balance_row"]
     assert not rows[4]["_ready"] and not rows[2]["_balance_row"]
-    page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch_id}").text
+    page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch_id}?rows=all").text
     rid = rows[5]["_import_row_id"]
     assert f'name="skip_{rid}" checked' in page
     assert "opening balance or balance adjustment" in page
@@ -59,6 +59,6 @@ def test_each_unknown_category_name_is_listed_once_for_all_its_rows(c, setup):
     label = "Usual Expenses › Daily Expenses"
     assert rows[6]["_file_label"] == rows[7]["_file_label"] == label
     assert rows[2]["_file_label"] == "" and rows[4]["_file_label"] == ""
-    page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch_id}").text
+    page = TestClient(create_app(c), base_url="http://127.0.0.1").get(f"/accounts/{cib}/import/{batch_id}?rows=all").text
     assert page.count(f'data-file-label-pick="{label}"') == 1
     assert page.count(f'data-file-label="{label}"') == 2

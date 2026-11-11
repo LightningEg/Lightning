@@ -19,9 +19,29 @@ from lightning.ui.entitlements import use_folder as use_licence_folder
 from lightning.ui.i18n import BROWSER_UI, localize_html
 from lightning.ui.web import templates
 
-from .paths import choose_data_root, discover_profiles, resolve_profile
+from .paths import choose_data_root, discover_profiles, legacy_database_candidates, resolve_profile
 from .roles import SessionRole
 from .session import ProfileError
+
+
+LEGACY_GONE = "That old database is no longer there. Go back to profiles and choose again."
+
+
+def legacy_databases() -> tuple[Path, ...]:
+    """Old ``data/lightning.db`` files from running ``python -m lightning`` before profiles were encrypted (IT-2C2).
+    Pages name one by its index in this list, never by a path taken from the request."""
+    return legacy_database_candidates(project_root=Path(__file__).resolve().parents[2], cwd=Path.cwd())
+
+
+def legacy_choice(value: object) -> Path | None:
+    """The old database an index from the request names; None for no index; ProfileError for a bad one."""
+    text = str(value or "")
+    if not text:
+        return None
+    found = legacy_databases()
+    if not text.isdigit() or int(text) >= len(found):
+        raise ProfileError(LEGACY_GONE)
+    return found[int(text)]
 
 
 @dataclass
@@ -49,10 +69,10 @@ def register(app, screens: ProfileScreens) -> ProfileScreens:
         values = dict(mode=mode, csrf=session.csrf, error=error, root=str(session.root), borrowed=[],
                       journal_enabled=session.journal is not None,
                       is_borrowed=session.borrowed is not None, writable=session.role.writable,
-                      profiles=[], backups=[], selected="", backup="", name="", recovery="",
+                      profiles=[], backups=[], evidence=[], selected="", backup="", name="", recovery="",
                       active_name=session.name, notice="", suggestion="", chosen_password="",
                       questions=SUGGESTED_QUESTIONS, question="", new_recovery="", locale=locale,
-                      profile_currencies=CASH_ASSETS, currency="EGP",
+                      profile_currencies=CASH_ASSETS, currency="EGP", legacy="", legacy_found=[],
                       arabic_translations=BROWSER_UI if locale == "ar" else {})
         if mode == "setup" and not context.get("suggestion"):
             values["suggestion"] = suggest_password()
@@ -61,6 +81,8 @@ def register(app, screens: ProfileScreens) -> ProfileScreens:
         if mode == "unlock":
             values["fingerprint"] = fingerprint_offered(str(context.get("selected", "")))
             values["stay_offered"] = kept is not None and kept.available()
+        from lightning.runtime import file_picker
+        values["can_pick"] = file_picker.current() is not None and not getattr(request.state, "phone", False)
         values.update(context)
         values["journal_restore"] = (mode == "restore" and bool(values["backup"])
             and Path(values["backup"]).with_suffix(".journal-manifest.json").is_file())
@@ -103,7 +125,8 @@ def register(app, screens: ProfileScreens) -> ProfileScreens:
                 backups.extend({"path": str(item.path), "label": item.path.name,
                                 "db": str(paths.db_path)}
                                for item in list_backups(paths.backups_dir, paths.db_path))
-            return page(request, "choose", profiles=found, backups=backups, borrowed=devices.borrowed())
+            return page(request, "choose", profiles=found, backups=backups, borrowed=devices.borrowed(),
+                        legacy_found=[str(path) for path in legacy_databases()])
         except (OSError, ValueError):
             return page(request, "choose", error="That folder could not be read. Choose another location.", status=400)
 
@@ -125,7 +148,12 @@ def register(app, screens: ProfileScreens) -> ProfileScreens:
     async def new(request: Request):
         if session.container:
             return RedirectResponse("/profiles", 303)
-        return page(request, "setup")
+        legacy = request.query_params.get("legacy", "")
+        try:
+            legacy_choice(legacy)
+        except ProfileError as exc:
+            return page(request, "setup", error=str(exc), status=400)
+        return page(request, "setup", legacy=legacy)
 
     @app.post("/profiles/new")
     async def prepare(request: Request):
@@ -136,13 +164,15 @@ def register(app, screens: ProfileScreens) -> ProfileScreens:
         password = chosen or str(form.get("password", ""))
         confirm = chosen or str(form.get("confirm", ""))
         currency = str(form.get("currency", "EGP"))
+        legacy = str(form.get("legacy", ""))
         def operation():
             pending = session.prepare(str(form.get("name", "")), password, confirm,
-                                      str(form.get("question", "")), str(form.get("answer", "")), currency)
+                                      str(form.get("question", "")), str(form.get("answer", "")), currency,
+                                      legacy_source=legacy_choice(legacy))
             return page(request, "recovery-key", recovery=pending.recovery, name=pending.paths.profile.name,
                         chosen_password=chosen, notice="Will create: " + str(pending.paths.db_path))
         return await action(request, "setup", operation, name=str(form.get("name", "")), suggestion=suggestion,
-                            question=str(form.get("question", "")), currency=currency)
+                            question=str(form.get("question", "")), currency=currency, legacy=legacy)
 
     @app.post("/profiles/confirm")
     async def confirm(request: Request):

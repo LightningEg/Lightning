@@ -24,8 +24,10 @@
 <datalist id="import-owners"><option value="{{ 'You'|tr(locale) }}" data-pick="self">{% for cp in owners %}<option value="{{ cp.name }}" data-pick="counterparty:{{ cp.id }}">{% endfor %}</datalist>
 <form method="post" action="/accounts/{{ account.id }}/import/{{ batch.id }}/confirm" id="import-review-form"><section class="card import-review">
   {% if sms %}<div class="card-heading"><div><h2>{% if rows|length == 1 %}{{ '1 message'|tr(locale) }}{% else %}{{ '{n} messages'|tr(locale, n=rows|length) }}{% endif %}</h2></div></div>
-  {% else %}<div class="card-heading"><div><h2>{{ rows|length }} row{{ 's' if rows|length != 1 }} · {{ groups|length }} name{{ 's' if groups|length != 1 }}</h2></div><button class="btn primary">{{ 'Post ready rows'|tr(locale) }}</button></div>{% endif %}
-  <div class="import-chips" role="group" aria-label="{{ 'Show'|tr(locale) }}"{{ ' hidden' if sms and groups|length < 5 }}>
+  {% elif view == 'summary' %}<div class="card-heading"><div><h2>{{ rows|length }} row{{ 's' if rows|length != 1 }}</h2></div><a class="btn" href="/accounts/{{ account.id }}/import/{{ batch.id }}?rows=all">{{ 'See every row'|tr(locale) }}</a></div><input type="hidden" name="view" value="summary">
+  {% include "partials/bank_import_summary.html" %}
+  {% else %}<div class="card-heading"><div><h2>{{ rows|length }} row{{ 's' if rows|length != 1 }} · {{ groups|length }} name{{ 's' if groups|length != 1 }}</h2></div><a class="btn" href="/accounts/{{ account.id }}/import/{{ batch.id }}">{{ 'Back to the questions'|tr(locale) }}</a><button class="btn primary">{{ 'Post ready rows'|tr(locale) }}</button></div>{% endif %}
+  <div class="import-chips" role="group" aria-label="{{ 'Show'|tr(locale) }}"{{ ' hidden' if view == 'summary' or (sms and groups|length < 5) }}>
     <button type="button" class="chip is-on" data-filter="all">{{ 'All'|tr(locale) }} {{ counts.all }}</button>
     <button type="button" class="chip" data-filter="err">{{ 'To fix'|tr(locale) }} {{ counts.err }}</button>
     <button type="button" class="chip" data-filter="needs">{{ 'Needs you'|tr(locale) }} {{ counts.needs }}</button>
@@ -49,9 +51,9 @@
   </details>{% endif %}
   {% if balance_gaps %}<div class="flash error" role="note"><b>{{ 'The statement’s balance does not add up'|tr(locale) }}</b>
     <ul>{% for g in balance_gaps %}<li>{{ 'Line'|tr(locale) }} {{ g.line }}: {{ 'the balance moved by'|tr(locale) }} <span class="num">{{ g.moved|money }}</span> {{ 'since line'|tr(locale) }} {{ g.previous_line }}, {{ 'but the line says'|tr(locale) }} <span class="num">{{ g.added|money }}</span>. {{ 'A row may be missing, or counted twice.'|tr(locale) }}</li>{% endfor %}</ul></div>{% endif %}
-  <div class="import-head" aria-hidden="true"><span></span><span>{{ 'Date'|tr(locale) }}</span><span>{{ 'Counterparty or account'|tr(locale) }}</span><span>{{ 'Category'|tr(locale) }}</span><span>{{ 'Held for'|tr(locale) }}</span><span>{{ 'Notes'|tr(locale) }}</span><span>{{ 'Amount'|tr(locale) }}</span><span>{{ 'Status'|tr(locale) }}</span></div>
-  {% include "partials/bank_import_groups.html" %}
-  {% if more_rows %}<div class="actions import-more" data-more-url="/accounts/{{ account.id }}/import/{{ batch.id }}/groups" data-next="{{ shown_groups }}"><button type="button" class="btn" data-import-more>{{ 'Show more rows'|tr(locale) }} <span class="muted num">({{ more_rows }})</span></button></div>{% endif %}
+  {% if view != 'summary' %}<div class="import-head" aria-hidden="true"><span></span><span>{{ 'Date'|tr(locale) }}</span><span>{{ 'Counterparty or account'|tr(locale) }}</span><span>{{ 'Category'|tr(locale) }}</span><span>{{ 'Held for'|tr(locale) }}</span><span>{{ 'Notes'|tr(locale) }}</span><span>{{ 'Amount'|tr(locale) }}</span><span>{{ 'Status'|tr(locale) }}</span></div>
+  {% include "partials/bank_import_groups.html" %}{% endif %}
+  {% if more_rows and view != 'summary' %}<div class="actions import-more" data-more-url="/accounts/{{ account.id }}/import/{{ batch.id }}/groups" data-next="{{ shown_groups }}"><button type="button" class="btn" data-import-more>{{ 'Show more rows'|tr(locale) }} <span class="muted num">({{ more_rows }})</span></button></div>{% endif %}
   <div class="actions"><button class="btn primary">{{ 'Post ready rows'|tr(locale) }}</button><a class="btn" href="{{ '/sms' if sms else '/accounts/' ~ account.id }}">{{ 'Finish later'|tr(locale) }}</a></div>
 </section><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 <form method="post" action="/accounts/{{ account.id }}/import/{{ batch.id }}/discard" class="import-discard" data-confirm-delete="{% if sms %}{{ 'Discard these messages? Nothing from them is posted.'|tr(locale) }}{% else %}Discard this import? Nothing from {{ batch.file_name }} is posted. You can import the file again later.{% endif %}">
@@ -80,28 +82,37 @@
     if (event.target.closest('.import-pick, .import-pick-group')) sync();
   });
   // Long files: the next names are fetched into this same form, so nothing typed so far is lost.
-  const more = form.querySelector('.import-more');
-  const loadMore = async () => {
+  // A question line (NF-7AB1) has its own loader, for its state's rows only.
+  const loadMore = async (more) => {
     const button = more?.querySelector('[data-import-more]');
     if (!more || !more.isConnected || !button || button.disabled) return false;
     button.disabled = true;
     try {
-      const response = await fetch(`${more.dataset.moreUrl}?start=${more.dataset.next}`, {credentials: 'same-origin'});
+      const url = more.dataset.moreUrl;
+      const response = await fetch(`${url}${url.includes('?') ? '&' : '?'}start=${more.dataset.next}`, {credentials: 'same-origin'});
       if (!response.ok) throw new Error('failed');
       more.insertAdjacentHTML('beforebegin', await response.text());
       more.dataset.next = response.headers.get('X-Next-Start');
       const left = Number(response.headers.get('X-Remaining'));
-      if (left > 0) { button.querySelector('.num').textContent = `(${left})`; button.disabled = false; } else { more.remove(); }
+      if (left > 0) { button.querySelector('.num').textContent = `(${left})`; button.disabled = false; more.hidden = false; } else { more.remove(); }
       return true;
     } catch (error) { button.disabled = false; return false; }
   };
-  more?.querySelector('[data-import-more]').addEventListener('click', loadMore);
+  form.querySelectorAll('.import-more').forEach((more) => more.querySelector('[data-import-more]').addEventListener('click', () => loadMore(more)));
+  form.querySelectorAll('[data-question-open]').forEach((button) => button.addEventListener('click', async () => {
+    const question = button.closest('.import-question'), box = question.querySelector('.import-question-rows');
+    const opening = box.hidden;
+    box.hidden = !opening;
+    button.setAttribute('aria-expanded', String(opening));
+    if (opening && !question.dataset.loaded) { question.dataset.loaded = '1'; await loadMore(box.querySelector('.import-more')); }
+  }));
   // Ticking a name means all its rows, drawn or not: load the rest of that name first, then tick them.
   form.addEventListener('change', async (event) => {
     const box = event.target.closest('.import-pick-group');
     if (!box || !box.checked) return;
     const want = Number(box.dataset.count || 0), group = box.dataset.group;
-    while (form.querySelectorAll(`.import-line[data-group="${group}"]`).length < want && await loadMore()) { /* next page */ }
+    const more = () => (box.closest('.import-question') || form).querySelector('.import-more');
+    while (form.querySelectorAll(`.import-line[data-group="${group}"]`).length < want && await loadMore(more())) { /* next page */ }
     const picks = form.querySelectorAll(`.import-line[data-group="${group}"] .import-pick`);
     picks.forEach((pick) => { pick.checked = true; });
     picks[0]?.dispatchEvent(new Event('change', {bubbles: true}));
