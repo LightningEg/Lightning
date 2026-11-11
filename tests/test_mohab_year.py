@@ -108,11 +108,17 @@ class Mohab:
         return self.b.submit({"name": name, "account_type": Choose(kind), "institution": bank,
                               "opening_balance": balance, "opening_balance_date": when}, button="Add account")
 
-    def enter(self, account: str, when: str, party: str, category: str, amount: str, **more) -> Screen:
+    def enter(self, account: str, when: str, party: str, category: str, amount: str, refund: bool = False, **more) -> Screen:
         """Type one row into an account's register and press Add."""
         self.b.go(account)
-        return self.b.submit({"date": when, "counterparty": party, "category": category, "amount": amount} | more,
-                             button="Add")
+        values = {"date": when, "counterparty": party, "category": category, "amount": amount} | more
+        if refund:  # IV-12W: money in on a spending category asks once; he means it, so he presses Add again
+            asked = self.b.submit(values, button="Add", expect=400)
+            assert asked.shows("Refund of", "or a payment?")
+            return self.b.submit(None, button="Add", page=asked)
+        if not amount.startswith("-"):  # money in he has already confirmed as such (the question is asked once, above)
+            values["sign_checked"] = amount
+        return self.b.submit(values, button="Add")
 
     def trade(self, action: str, when: str, find: str, **values) -> Screen:
         """Buy, sell or record a dividend in THNDR, picking the investment from the search results."""
@@ -459,7 +465,7 @@ def _live_the_year(o: Mohab) -> None:
     o.fix_amount("CIB Payroll", "Carrefour", "-4,060")
     o.enter("CIB Payroll", "2026-10-10", "Cash wallet", "", "-2,000")          # ATM
     o.enter("CIB Payroll", "2026-10-10", "CIB", "Fees & Charges", "-25")      # and its fee
-    o.enter("CIB Payroll", "2026-10-15", "Amazon", "Shopping", "1,299")        # August's purchase returned
+    o.enter("CIB Payroll", "2026-10-15", "Amazon", "Shopping", "1,299", refund=True)        # August's purchase returned
     o.enter("CIB Payroll", "2026-10-18", "Al Mansour Service", "Personal › Transportation", "-6,500")
     o.to_reserve("CIB Payroll", "Al Mansour Service", "Emergency Fund")                         # paid from the emergency fund
 
@@ -1519,7 +1525,7 @@ def test_a_small_difference_from_the_bank_is_one_adjustment(mohab):
     check = mohab.notes["wallet_check"]
     assert check.shows("A small difference", "Lightning is 30.00 EGP above your bank", "Post adjustment of −30.00")
     assert mohab.notes["wallet_adjusted"].shows("Balance adjustment", "The account now matches your bank")
-    assert mohab.notes["wallet_adjusted"].shows("2027-09-30 Balance adjustment Other Personal Bank showed",
+    assert mohab.notes["wallet_adjusted"].shows("2027-09-30 Balance adjustment Unaccounted Spending Bank showed",
                                                 "−30 Edit 42,950")
     assert mohab.notes["wallet_rechecked"].shows("It matches")
 

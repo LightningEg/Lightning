@@ -100,7 +100,7 @@ def fmt_amount(amount: str) -> str:
     return _money(amount, places=2).removesuffix(".00")
 
 
-def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[dict]:
+def matches(c, query: str, privacy: bool = False, per_group: int = 6, payments: int = 5) -> list[dict]:
     """Ranked results grouped by type: {label, href, kind, context}; an action may carry "action"."""
     query = " ".join(str(query or "").split())
     needle = _fold_search_text(query)
@@ -165,9 +165,22 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6) -> list[di
         add(_score(tag_needle, tag, False) or (0.7 if needle == "#" else 0), f"#{tag}", f"/transactions?tag={quote(tag)}", "Tag",
             f"{count} transaction{'s' if count != 1 else ''}")
     results: list[dict] = [e for e in (entry(c, query),) if e]  # a typed entry comes first (3G7)
+    paid: list[dict] = []
+    if payments and len(needle) >= 2 and not needle.startswith("#"):  # the first matching payments, newest first, above the other groups (IV-12W)
+        ordered = c.reporting.newest_first(c.transactions.search_ids(ascii_digits(query)))
+        shown: set[int] = set()
+        for row in c.reporting.rows_for_transactions(ordered[:payments * 2]):  # not money
+            if row.type == "VAL" or row.txn_id in shown or len(shown) >= payments:
+                continue
+            shown.add(row.txn_id)
+            paid.append({"label": row.counterparty or row.description or row.type_label, "href": f"/transactions/{row.txn_id}",
+                         "kind": "Transaction", "context": f"{row.date} · {fmt_amount(str(abs(row.amount)))} · {row.account_label}",
+                         "entity_id": row.ref, "rank": 0.5, "match_reason": "payment"})
     for group in GROUPS:
         ranked = sorted((pair for pair in found if pair[1]["kind"] == group), key=lambda p: (-p[0], p[1]["label"].casefold()))
         results += [row for _, row in ranked[:per_group]]
+        if group == "Transaction":  # an exact reference first, then the payments that match the words
+            results += [row for row in paid if row["href"] not in {r["href"] for r in results}]  # not money
     results.append({"label": f"Find transactions with “{query}”", "href": "/transactions?" + urlencode({"q": query}),
                     "kind": "Search", "context": "Search every account's register", "entity_id": "history", "rank": 0, "match_reason": "literal history query"})
     return results

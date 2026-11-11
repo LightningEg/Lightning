@@ -131,6 +131,7 @@ class ReviewInbox:
                  for item in c.reporting.net_worth(on).unvalued]
         items.extend(self._statements())
         items.extend(self._sms())
+        items.extend(self._sms_balances())
         items.extend(self._uncategorized())
         items.extend(self._smart_suggestions(on))
         from lightning.workflows.bill_alerts import bill_alerts
@@ -502,6 +503,23 @@ class ReviewInbox:
                           "detail": f"{_plural(unread, 'message waits', 'messages wait')}: unread, or the other side "
                                     "of a transfer. Enter or dismiss.", "href": "/sms", "action": "Look at them", "priority": 2,
                           "glance": glance("Bank SMS", "Enter", None, "1 kept for you" if unread == 1 else "{n} kept for you", unread)})
+        return found
+
+    def _sms_balances(self) -> list[dict]:
+        """One quiet row per account whose balance a bank message stated and the ledger does not match (NF-7AP). It
+        clears when a later message agrees or when marked as reviewed; it never changes an entry."""
+        found = []
+        for gap in self.c.sms_imports.balance_gaps():
+            day = gap["date"]
+            when = date.fromisoformat(day).strftime("%d %b").lstrip("0")
+            amount = abs(gap["difference"])
+            found.append({"label": f"{gap['name']} is {fmt(amount, 0)} off the bank's balance",
+                          "detail": f"The bank's message of {when} said {fmt(gap['stated'], 2)}; Lightning has {fmt(gap['ledger'], 2)}. "
+                                    "A pending hold can make the bank's figure lag.",
+                          "href": f"/accounts/{gap['account_id']}?date_from={day}&date_to={day}", "action": "Look at that day",
+                          "priority": 2,
+                          "glance": glance(gap["name"], "Look", amount, "off the bank's balance since {sa}", sa=when),
+                          "source_version": {"account": gap["account_id"], "date": day, "stated": str(gap["stated"])}})
         return found
 
     def _statements(self) -> list[dict]:
