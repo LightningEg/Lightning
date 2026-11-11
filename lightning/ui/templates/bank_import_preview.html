@@ -28,9 +28,9 @@
 <datalist id="import-owners"><option value="{{ 'You'|tr(locale) }}" data-pick="self">{% for cp in owners %}<option value="{{ cp.name }}" data-pick="counterparty:{{ cp.id }}">{% endfor %}</datalist>
 <form method="post" action="/accounts/{{ account.id }}/import/{{ batch.id }}/confirm" id="import-review-form"><section class="card import-review">
   {% if sms %}<div class="card-heading"><div><h2>{% if rows|length == 1 %}{{ '1 message'|tr(locale) }}{% else %}{{ '{n} messages'|tr(locale, n=rows|length) }}{% endif %}</h2></div></div>
-  {% elif view == 'summary' %}<div class="card-heading"><div><h2>{{ rows|length }} row{{ 's' if rows|length != 1 }}</h2></div><a class="btn" href="/accounts/{{ account.id }}/import/{{ batch.id }}?rows=all">{{ 'See every row'|tr(locale) }}</a></div><input type="hidden" name="view" value="summary">
+  {% elif view == 'summary' %}<div class="card-heading"><div><h2>{{ rows|length|counted('row', 'rows') }}</h2></div><a class="btn" href="/accounts/{{ account.id }}/import/{{ batch.id }}?rows=all">{{ 'See every row'|tr(locale) }}</a></div><input type="hidden" name="view" value="summary">
   {% include "partials/bank_import_summary.html" %}
-  {% else %}<div class="card-heading"><div><h2>{{ rows|length }} row{{ 's' if rows|length != 1 }} · {{ groups|length }} name{{ 's' if groups|length != 1 }}</h2></div><a class="btn" href="/accounts/{{ account.id }}/import/{{ batch.id }}">{{ 'Back to the questions'|tr(locale) }}</a><button class="btn primary">{{ 'Post ready rows'|tr(locale) }}</button></div>{% endif %}
+  {% else %}<div class="card-heading"><div><h2>{{ rows|length|counted('row', 'rows') }} · {{ groups|length|counted('name', 'names') }}</h2></div><a class="btn" href="/accounts/{{ account.id }}/import/{{ batch.id }}">{{ 'Back to the questions'|tr(locale) }}</a><button class="btn primary">{{ 'Post ready rows'|tr(locale) }}</button></div>{% endif %}
   <div class="import-chips" role="group" aria-label="{{ 'Show'|tr(locale) }}"{{ ' hidden' if view == 'summary' or (sms and groups|length < 5) }}>
     <button type="button" class="chip is-on" data-filter="all">{{ 'All'|tr(locale) }} {{ counts.all }}</button>
     <button type="button" class="chip" data-filter="err">{{ 'To fix'|tr(locale) }} {{ counts.err }}</button>

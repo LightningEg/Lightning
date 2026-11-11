@@ -17,6 +17,7 @@ from datetime import date
 from pathlib import Path
 
 from lightning.core.dates import fmt_date
+from lightning.core.plural import counted
 from lightning.fx import save_rate
 from lightning.market.bundle import MarketFile, MarketFileError
 from lightning.market.iso import venue_name
@@ -39,10 +40,10 @@ class FillReport:
     rates: int = 0                                                    # exchange rates filled from the fx file
 
     def summary(self) -> str:
-        parts = [f"Filled {self.added} price{'s' if self.added != 1 else ''} for {len(self.matched)} "
-                 f"investment{'s' if len(self.matched) != 1 else ''} from the price files of {self.file_date[:10]}."]
+        parts = [f"Filled {counted(self.added, 'price', 'prices')} for {len(self.matched)} "
+                 f"{'investment' if len(self.matched) == 1 else 'investments'} from the price files of {self.file_date[:10]}."]
         if self.rates:
-            parts.append(f"{self.rates} exchange rate{'s' if self.rates != 1 else ''} filled.")
+            parts.append(f"{counted(self.rates, 'exchange rate', 'exchange rates')} filled.")
         if self.missing:
             shown = ", ".join(f"{name} {day}" for name, day in self.missing[:3])
             parts.append(f"{len(self.missing)} still missing: {shown}{' and more' if len(self.missing) > 3 else ''}.")
