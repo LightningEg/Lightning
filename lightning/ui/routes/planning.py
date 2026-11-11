@@ -254,6 +254,7 @@ async def recurring_page(request: Request):
                               "note": r["item"].kind_label + (" · " + r["category"] if r["category"] else "")}
                              for r in rows if not r["item"].is_income])
     return render(request, "planning/recurring.html", tabs=TABS, plan_tab="recurring", rows=rows, stopped=stopped,
+                  answer=page_status.recurring(monthly_out, fixed.percent),
                   bill_bars=bill_bars, fixed_tiles=fixed_tiles,
                   recurring_kpis=kpis.recurring(
                       monthly_out=monthly_out, fixed=fixed, limit=c.health.limit_values().get(fixed.key),
@@ -290,6 +291,7 @@ async def loans_page(request: Request):
                      needs=bool(summary and summary["tone"] == "attention")) if loans else None
     health = c.health
     return render(request, "planning/loans.html", tabs=TABS, plan_tab="loans", loans=loans, lead=lead,
+                  answer=page_status.loans(still_to_pay, len(loans)),
                   debt_tiles=_debt_tiles(health.at(day), fmt_date(day)),
                   debt_kpis=kpis.debt(health.at(day), limits=health.limit_values(), band=health.band, as_of=fmt_date(day)),
                   still_to_pay=still_to_pay, as_of=fmt_date(day))

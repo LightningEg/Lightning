@@ -91,11 +91,11 @@
 </section>
 
 <section class="card wide-card inv-flows" aria-label="Dividends and flows">
-  <div class="overview-split">
+  <div class="overview-split{{ ' is-single' if not flows.rows }}">
     <section><div class="overview-block-head"><div><h3>{{ "Income collected (dividends and interest)"|tr(locale) }}</h3><p>Year to date · {{ ytd_year }}-01-01 to today</p></div><a class="quiet-link" data-popup-open href="/investments/report-detail?kind=dividends&amp;from={{ ytd_year }}-01-01&amp;to={{ today }}">{{ "See them"|tr(locale) }}</a></div>
       {{ bars(ytd_dividends, 'in', 'No dividends collected this year yet.') }}</section>
-    <section><div class="overview-block-head"><div><h3>{{ "Money and value by class"|tr(locale) }}</h3><p>{{ period.start_text }} to {{ period.end_text }} · money in and out, and how each class's value moved</p></div></div>
-      {{ diverging(flows, 'Money in and out, and change in value by asset class') }}</section>
+{% if flows.rows %}    <section><div class="overview-block-head"><div><h3>{{ "Money and value by class"|tr(locale) }}</h3><p>{{ period.start_text }} to {{ period.end_text }} · money in and out, and how each class's value moved</p></div></div>
+      {{ diverging(flows, 'Money in and out, and change in value by asset class') }}</section>{% endif %}
   </div>
 </section>
 

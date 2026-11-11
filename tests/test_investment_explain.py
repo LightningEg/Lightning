@@ -64,3 +64,17 @@ def test_on_the_demo_profile_the_parts_still_add_to_the_result(tmp_path, monkeyp
         explained = explain_period(report, start, "2026-11-05")
         if explained["result"] is not None:
             assert explained["total"] == explained["result"], start
+
+
+def test_a_month_where_nothing_changed_is_one_line(c, setup, monkeypatch):
+    """IV-12Z4: holdings that did not move, and no money in or out, read as one line, not five rows of 0."""
+    accounts, _ = setup
+    thndr = accounts["thndr"]
+    monkeypatch.setenv("LIGHTNING_TODAY", "2027-01-31")
+    c.transactions.record_transfer("2026-12-01", accounts["cib"].id, thndr.id, "20000")
+    client = TestClient(create_app(c), base_url="http://127.0.0.1")
+    entry = {"price_basis": "total", "fees": "", "fees_included": "1", "instrument_key": "catalog:COMI", "units": "100"}
+    client.post(f"/accounts/{thndr.id}/investment-entry", data={**entry, "date": "2026-12-02", "total": "7000", "trade_action": "buy"})
+    page = client.get("/investments?period=month&month=2027-01").text
+    assert "Nothing changed in your holdings this month." in page
+    assert 'id="what-changed-h"' not in page and "Money and value by class" not in page

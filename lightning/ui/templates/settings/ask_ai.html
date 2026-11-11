@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{# IV-12Y5: Ask an AI has one home, reached from Settings › Your data and from the pages that hand a question over. #}
+{% from 'partials/macros.html' import period_control, page_title with context %}
+{% block title %}{{ 'Ask an AI'|tr(locale) }}{% endblock %}
+{% block heading %}{{ page_title('Ask an AI'|tr(locale), answer, ai_period.start_text ~ ' to ' ~ ai_period.end_text) }}{% endblock %}
+{% block content %}
+<section class="card settings-list" id="export-for-ai" data-ask-ai aria-labelledby="ask-ai-heading"><p class="muted small">{{ 'Lightning prepares one file on this device. You decide where to paste or upload it; Lightning sends nothing.'|tr(locale) }}</p>
+{% if ai_period %}{{ period_control('/settings/ask-ai', ai_period.key, ai_month, current_month, ai_period.start_text, ai_period.end_text, auto_apply=true) }}
+<p class="small muted">{{ ai_period.start_text }} to {{ ai_period.end_text }} · {{ ai_preview.transactions }} {{ 'transactions'|tr(locale) }}</p>
+<form action="/settings/ask-ai" method="post" class="stack" data-ask-form>
+  <input type="hidden" name="period" value="{{ ai_period.key }}"><input type="hidden" name="month" value="{{ ai_month }}">
+  <input type="hidden" name="date_from" value="{{ ai_period.start_text }}"><input type="hidden" name="date_to" value="{{ ai_period.end_text }}">
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  <label class="field"><span class="field-label">{{ 'What do you want to know?'|tr(locale) }}</span><select name="preset">{% for key, preset in ai_presets.items() %}<option value="{{ key }}">{{ preset[0]|tr(locale) }}</option>{% endfor %}</select></label>
+  <div class="planner-mode" role="radiogroup" aria-label="{{ 'How much detail'|tr(locale) }}"><span class="planner-mode-label">{{ 'How much detail'|tr(locale) }}</span><span class="planner-mode-seg">{% for key, size in ai_sizes.items() %}<label><input type="radio" name="size" value="{{ key }}" {{ 'checked' if key == 'standard' }}><span>{{ size[0]|tr(locale) }}</span></label>{% endfor %}</span>
+    <ul class="small muted ask-ai-sizes">{% for key, size in ai_sizes.items() %}<li><b>{{ size[0]|tr(locale) }}:</b> {{ size[1]|tr(locale) }}</li>{% endfor %}</ul></div>
+  <label class="field"><span class="field-label">{{ 'Your question (optional)'|tr(locale) }}</span><textarea name="question" rows="2" maxlength="800"></textarea></label>
+  <label class="field-check"><input type="checkbox" name="hide_names" value="1"> <span>{{ 'Hide names'|tr(locale) }}</span></label>
+  <p class="small muted">{{ 'Names of people, accounts and holdings become labels such as Counterparty 1. Notes are never included.'|tr(locale) }}</p>
+  <div class="actions"><button class="btn primary" type="button" data-ask-copy>{{ 'Copy for AI'|tr(locale) }}</button><button class="btn" type="button" data-ask-save>{{ 'Save as a file'|tr(locale) }}</button></div>
+  <p class="small muted" role="status" aria-live="polite" data-ask-status></p>
+</form>
+<details class="settings-more"><summary>{{ 'Other formats'|tr(locale) }}</summary>
+  <p class="small muted">{{ 'An Excel workbook, for tools that read spreadsheets. The file above is easier for most tools.'|tr(locale) }}</p>
+  <form action="/settings/ai-analysis" method="post" data-ai-export-form>
+    <input type="hidden" name="period" value="{{ ai_period.key }}"><input type="hidden" name="month" value="{{ ai_month }}">
+    <input type="hidden" name="date_from" value="{{ ai_period.start_text }}"><input type="hidden" name="date_to" value="{{ ai_period.end_text }}">
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    <button class="btn small" type="submit">{{ 'Export for AI analysis'|tr(locale) }}</button>
+  </form>
+  <p class="small muted" role="status" data-ai-status></p></details>
+{% endif %}</section>
+<script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{
+const exportForm=document.querySelector('[data-ai-export-form]'),status=document.querySelector('[data-ai-status]');
+exportForm?.addEventListener('submit',async event=>{event.preventDefault();status.textContent=window.lightningT('Preparing workbook…');try{const response=await fetch(exportForm.action,{method:'POST',body:new URLSearchParams(new FormData(exportForm)),headers:{'X-Requested-With':'fetch'}});if(!response.ok)throw Error(await response.text());if(response.headers.get('X-Lightning-Offered')){status.textContent=window.lightningT('Choose where to save the workbook.');return}const blob=await response.blob(),url=URL.createObjectURL(blob),anchor=document.createElement('a'),disposition=response.headers.get('Content-Disposition')||'',match=disposition.match(/filename="?([^";]+)"?/i);anchor.href=url;anchor.download=match?.[1]||'lightning-analysis.xlsx';anchor.click();window.setTimeout(()=>URL.revokeObjectURL(url),1000);status.textContent=window.lightningT('Workbook downloaded.')}catch(error){status.textContent=window.lightningT(error.message||'Could not prepare the workbook.')}})})();</script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('ask-ai.js') }}" defer></script>
+{% endblock %}

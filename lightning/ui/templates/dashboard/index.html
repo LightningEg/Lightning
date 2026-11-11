@@ -47,7 +47,7 @@
   {% if not attention %}<a class="quiet-link" href="/needs-you">{{ 'Reviewed and snoozed'|tr(locale) }}</a>{% endif %}
   {% if attention_handled.reviewed or attention_handled.snoozed %}<p class="muted small" id="needs-handled">{{ '{n} reviewed or snoozed items are still open, not resolved.'|tr(locale, n=attention_handled.reviewed + attention_handled.snoozed) }} <a class="quiet-link" href="/needs-you?tab=handled">{{ 'See them'|tr(locale) }}</a></p>{% endif %}
   {{ kpi_row(kpi_cards, base, 'This period') }}
-{% if setup %}{% set done = setup|selectattr("done")|list|length %}
+{% set done = setup|selectattr("done")|list|length if setup else 0 %}{% if setup and done != setup|length %}{# IV-12Z5: a finished setup leaves no heading #}
 <details class="flow-disclosure setup-card"><summary class="overview-section-head"><h2>{{ "Get set up"|tr(locale) }}</h2><span>{{ '{done} of {total} done'|tr(locale, done=done, total=setup|length) }}</span></summary>
   <div class="overview-inline-list">{% for step in setup %}{% if step.done %}<div class="overview-action-row setup-step is-done"><span><b>{{ step.label }}</b><small>{{ step.detail }}</small></span><span class="status-word"><i class="dot dot-in"></i>{{ "Done"|tr(locale) }}</span></div>{% else %}<a class="overview-action-row setup-step" href="{{ step.href }}"><span><b>{{ step.label }}</b><small>{{ step.detail }}</small></span><span>{{ step.action }}</span></a>{% endif %}{% endfor %}</div>
 <form method="post" action="/setup/guide"><input type="hidden" name="action" value="dismiss"><button class="btn small">{{ "Done with setup"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>

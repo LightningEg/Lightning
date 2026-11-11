@@ -31,7 +31,7 @@ One header partial renders every tab: the title, the answer sentence, the dates 
 
 ## Decided and built
 
-Owner, 2026-11-10 (12Y1): a tab's title is the tab's own name (a section's first tab may carry the section's name: Overview, Cash planning, Investments); Spending opens on this month like every other tab. Both are in guideline A05. Built: `tests/test_page_skeleton.py` (12Y2) with its `ALLOWED` list; the titles of Recurring, Loans, Reserves, Limits, Prices, Import, Your data, Categories, Counterparties and Data checks; Spending's early-month "so far" strip is gone.
+Owner, 2026-11-10 (12Y1): a tab's title is the tab's own name (a section's first tab may carry the section's name: Overview, Cash planning, Investments); Spending opens on this month like every other tab. Both are in guideline A05. Built: `tests/test_page_skeleton.py` (12Y2) with its `ALLOWED` list; the titles of Recurring, Loans, Reserves, Limits, Prices, Import, Your data, Categories, Counterparties and Data checks; Spending's early-month "so far" strip is gone. 12Y4: a status sentence on every tab (`lightning/ui/status.py`: recurring, loans, reserves, held_for_others, currencies; counts elsewhere). 12Y5: Currencies has one filled button; Ask an AI has one page, `/settings/ask-ai`, linked from Your data, Spending and Budget (Budget's paragraph itself goes with IV-12Q5).
 
 ## How to work on this item
 
@@ -39,9 +39,3 @@ Steps in order; each is one PR. `python tools/guideline.py A05` and `A09` print 
 
 ## 12Y3 One header partial, used by every tab · L · opus
 Files: `lightning/ui/templates/partials/` (the page header), `lightning/ui/static/style.css` (then rebuild `style.rtl.css`), each section's templates. Titles follow 12Y1; Undo, the period bar, the gear and the filled action sit in one order on one row (two rows only when the width needs it, always the same two). Currencies uses the standard period bar. Done when the skeleton test's `ALLOWED` has no Undo or period entries and Currencies uses the standard period bar.
-
-## 12Y4 An answer sentence on the 13 tabs that have none · M · sonnet
-Files: `lightning/ui/status.py` (the sentences live in Python, not templates), the tab routes. One plain sentence each, from figures the page already has: Recurring ("Your bills take 14,610 a month, 38% of your income."), Loans ("52,500 left on 2 loans; the last ends 2027-12."), Reserves ("Your emergency fund covers 0.5 months; your limit is 3."), Transactions ("309 transactions; 3 wait to be sorted."), and so on; Arabic for each (`arabic-check`). Done when the allow-list has no sentence entries and Mohab's steps read the new sentences where they assert a header.
-
-## 12Y5 One filled action a tab, and one home for Ask an AI · M · sonnet
-Transactions' filled button is Add transaction (Choose an account becomes a quiet control). Ask an AI gets one home (a tab's "more" menu opens it with that tab's period; Settings links to it) instead of a form in Your data and a paragraph on Budget. Done when the skeleton test finds one filled button on Transactions and no Ask an AI form inside Settings › Your data.
