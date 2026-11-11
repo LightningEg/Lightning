@@ -473,3 +473,21 @@ def currencies(totals: dict, *, start: str, end: str) -> list[dict]:
         cards.append(card(labels["spread"], totals["spread"], compare(f"{start} to {end}"), tone="out",
                           line_=line("Beyond the market rate, on conversions."), key="spread"))
     return row(cards)
+
+
+# ── Fund your payday plan (IV-12Q1) ───────────────────────────────────────────────────────────────────────────
+def payday(allocation: dict) -> tuple[dict, dict | None]:
+    """The Lead (Cash available to assign, against what stays unassigned) and the bar that splits it in four."""
+    pr = allocation["proposal"]
+    available, left = pr["available_before"], pr["unassigned"]
+    if available is None:
+        comparison = compare("Add current exchange rates to work it out.")
+    elif left is not None and left < ZERO:
+        comparison = compare("more than the cash you have", fmt(-left, 0), "bad")
+    else:
+        comparison = compare("stays unassigned after you confirm", fmt(left, 0), "plain")
+    split = None if available is None else segments([
+        ("Bills protected", pr["bills"], "out"), ("To your plan", pr["to_plan"], "hold"),
+        ("Emergency and goals", pr["reserves"], "in"), ("Left unassigned", max(left, ZERO), "neutral")])
+    lead = card(figure_label("cash_available_to_assign"), available, comparison, tone="hold", key="payday")
+    return lead, split

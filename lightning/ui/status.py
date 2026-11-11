@@ -189,3 +189,15 @@ def currencies(n: int, value: Decimal, unrealized: Decimal, complete: bool) -> d
     if unrealized < ZERO:
         return sentence("Your foreign money is worth {amt}, {gain} less than it cost.", amt=fmt(value, 0), gain=fmt(-unrealized, 0))
     return sentence("Your foreign money is worth {amt}.", amt=fmt(value, 0))
+
+
+def payday(available: Decimal | None, unassigned: Decimal | None, enabled: bool) -> dict:
+    """How do I share out the cash I already have? (IV-12Q1)"""
+    if available is None:
+        return sentence("Add current exchange rates to share out your cash.")
+    if not enabled:
+        return sentence("Turn on cash funding to share out {amt}.", amt=fmt(available, 0))
+    if unassigned is not None and unassigned < ZERO:
+        return sentence("This plan needs {amt} more than the cash you have.", amt=fmt(-unassigned, 0))
+    return sentence("Confirm to give {amt} a job; {left} stays unassigned.", amt=fmt(available - (unassigned or ZERO), 0),
+                    left=fmt(unassigned or ZERO, 0))

@@ -1,12 +1,17 @@
-{# One payday proposal for PC and phone (NF-3AZ1): posted cash only, nothing assigned until Confirm. The four lines
-   are disjoint and add up to Cash available to assign (BT-12AD); the service returns them, nothing is added here. #}
+{# One payday proposal for PC and phone (NF-3AZ1, IV-12Q1): posted cash only, nothing assigned until Confirm. The four
+   parts are disjoint and add up to Cash available to assign (BT-12AD); the service returns them, nothing is added here.
+   One bar shows the split (classes seg-out seg-hold seg-in seg-neutral), then the four rows, then the one Confirm;
+   the per-category boxes sit behind Customize, below. #}
 {% set pr = allocation.proposal %}
-<section class="card{{ ' phone-card' if phone }}" id="payday-proposal"><h2>{{ 'Your payday proposal'|tr(locale) }}</h2>
+<{{ 'section' if phone else 'div' }} class="{{ 'card phone-card' if phone else 'payday-proposal' }}" id="payday-proposal" aria-labelledby="payday-proposal-h"><h{{ 2 if phone else 3 }} id="payday-proposal-h">{{ 'Your payday proposal'|tr(locale) }}</h{{ 2 if phone else 3 }}>
+{% if split %}<div class="lead-visual kc-visual tone-hold"><span class="kc-segments" role="img" aria-label="{% for p in split.parts %}{{ p.name|tr(locale) }} {{ p.value|money(places=0) }}{{ ' · ' if not loop.last }}{% endfor %}">{% for p in split.parts %}<i class="seg-{{ p.tone }}" style="width:{{ '%.2f'|format(p.share) }}%"></i>{% endfor %}</span><span class="kc-key">{% for p in split.parts %}<span class="seg-{{ p.tone }}">{{ p.name|tr(locale) }}</span>{% endfor %}</span></div>{% endif %}
 <div class="asset-rows">
   <div class="compact-row"><span>{{ 'Bills protected'|tr(locale) }}</span><b>{{ pr.bills|money(places=0) }} {{ base }}</b></div>
   <div class="compact-row"><span>{{ 'To your plan'|tr(locale) }}</span><b>{{ pr.to_plan|money(places=0) }} {{ base }}</b></div>
   <div class="compact-row"><span>{{ 'Emergency and goals'|tr(locale) }}</span><b>{{ pr.reserves|money(places=0) }} {{ base }}</b></div>
   <div class="compact-row"><span>{{ 'Left unassigned'|tr(locale) }}</span><b class="{{ 'neg' if pr.unassigned < 0 else '' }}">{{ pr.unassigned|money(places=0) }} {{ base }}</b></div>
 </div>
-<p>{{ fig.cash_available_to_assign.label }}: {{ pr.available_before|money(places=0) }} {{ base }} → {{ 'after you confirm'|tr(locale) }} {{ pr.unassigned|money(places=0) }} {{ base }}</p>
-<p class="muted">{{ 'Counted from cash already posted; expected salary is not counted. Nothing is assigned until you confirm.'|tr(locale) }} {{ 'No bank transfer will be made. Safe to spend stays at {amount}.'|tr(locale, amount=forecast.safe_to_spend|money(places=0) ~ ' ' ~ base) }}</p></section>
+{% if allocation.ready is not none and allocation.ready < 0 %}<p class="notice">{{ 'Funded spending and obligations exceed owned cash. Reduce assignments before adding more.'|tr(locale) }}</p>{% endif %}
+<form method="post" action="/payday/apply" id="payday-confirm" class="payday-confirm"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="fingerprint" value="{{ allocation.token }}">
+{% if enabled %}<button class="btn primary{{ ' phone-save' if phone }}" type="submit">{{ 'Confirm cash assignments'|tr(locale) }}</button>{% else %}<p>{{ 'Turn on cash funding to confirm this proposal.'|tr(locale) }}</p>{% endif %}</form>
+<p class="muted">{{ 'Counted from cash already posted; expected salary is not counted. Nothing is assigned until you confirm.'|tr(locale) }} {{ 'No bank transfer will be made. Safe to spend stays at {amount}.'|tr(locale, amount=forecast.safe_to_spend|money(places=0) ~ ' ' ~ base) }}</p></{{ 'section' if phone else 'div' }}>

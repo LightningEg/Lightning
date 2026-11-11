@@ -13,6 +13,9 @@ from lightning.database.portable_ids import portable_ids
 from lightning.planning.salary_day import review_identity, salary_review
 
 
+WHOLE = Decimal("1")
+
+
 class CashFundingService:
     def __init__(self, db, budgets, reporting, reserves, planning, categories, settings, schedules):
         self.db, self.budgets, self.reporting = db, budgets, reporting
@@ -85,19 +88,25 @@ class CashFundingService:
             # Unfunded bills already protect part of this category outside envelopes.
             protected = max(row["due"] - row["remaining"], ZERO)
             add = min(max(row["target"] - row["remaining"], ZERO), pool + protected)
-            add = add.quantize(Decimal("0.01"), rounding=ROUND_DOWN)  # a typed amount, never 60420.110000
+            # A typed amount in whole pounds (IV-12Q1), never 60420.110000: the box shows what is suggested.
+            add = max((row["remaining"] + add).quantize(WHOLE, rounding=ROUND_DOWN) - row["remaining"], ZERO)
             row["suggested"] = row["remaining"] + add
             # The part of this addition that covers its protected bills is already in Bills protected
             # (BT-12AD): only the rest is new money to the plan.
             pool -= max(add - protected, ZERO)
             to_plan += max(add - protected, ZERO)
         reserve_rows = []
+        monthly = self._monthly_needs(reserves, month, day)
         for reserve in reserves:
             gap = max(reserve["target"] - reserve["allocated"], ZERO)
-            add = ZERO if reserve.get("planned_item_id") else min(gap, pool).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
+            # IV-12Q1 (owner, 2026-11-09): a reserve is topped up by what it needs this month (the emergency
+            # top-up, a dated goal's monthly share), less what it was given this month, never with all free cash.
+            need = monthly.get(reserve["id"], ZERO)
+            add = ZERO if reserve.get("planned_item_id") else min(gap, need, pool).quantize(WHOLE, rounding=ROUND_DOWN)
             pool -= add
             reserve_rows.append({"id": reserve["id"], "name": reserve["name"], "allocated": reserve["allocated"],
-                                 "effective": reserve["effective_allocated"], "gap": gap, "suggested": add})
+                                 "effective": reserve["effective_allocated"], "gap": gap, "monthly": need,
+                                 "suggested": add})
         ids = portable_ids(self.db, {"categories": [r["id"] for r in rows],
                                      "cash_reserves": [r["id"] for r in reserve_rows]})
         salary = salary_review(self.db, day)
@@ -125,6 +134,31 @@ class CashFundingService:
                 # spending, before the bills due outside those funds, which are one of its parts.
                 "available": available,
                 "proposal": proposal}
+
+    def _monthly_needs(self, reserves, month, day):
+        """What each reserve asks of this month, less what it was already given since the month began: the
+        Emergency fund top-up for the emergency fund, Saving for goals for a dated goal; an undated goal asks nothing."""
+        from lightning.planning.schedule_view import reserve_goal_needs
+        needs = {row["id"]: row["amount"] for row in reserve_goal_needs(self.reserves, month, day)}
+        emergency = next((r for r in reserves if r["kind"] == "EMERGENCY"), None)
+        if emergency:
+            fund = self.budgets.emergency_fund(month, emergency["effective_allocated"], schedule=self.schedules.view())
+            needs[emergency["id"]] = fund.top_up
+        start, _ = parse_month(month)
+        for reserve in reserves:
+            if reserve["id"] not in needs:
+                continue
+            before = self.db.scalar("SELECT allocated_e6 FROM reserve_allocation_history WHERE reserve_id=? AND "
+                                    "effective_date<? ORDER BY effective_date DESC,id DESC LIMIT 1",
+                                    (reserve["id"], start.isoformat()))
+            if before is None:   # set up this month: what it started with is not a top-up
+                before = self.db.scalar(
+                    "SELECT allocated_e6 FROM reserve_allocation_history WHERE reserve_id=? AND effective_date=("
+                    "SELECT MIN(effective_date) FROM reserve_allocation_history WHERE reserve_id=?) "
+                    "ORDER BY id DESC LIMIT 1", (reserve["id"], reserve["id"]))
+            given = max(reserve["allocated"] - from_e6(before or 0), ZERO)
+            needs[reserve["id"]] = max(needs[reserve["id"]] - given, ZERO)
+        return needs
 
     def apply(self, fingerprint, amounts, reserve_additions):
         if not self.enabled:

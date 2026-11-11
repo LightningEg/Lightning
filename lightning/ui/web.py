@@ -55,7 +55,7 @@ REPORTING_TEMPLATES = ("dashboard/", "phone/home.html", "phone/money.html", "pho
                        "investments/_targets.html", "investments/targets.html", "investments/report_detail.html",
                        "planning/plan.html", "reserves.html", "settings/index.html", "accounts/currencies.html", "zakat.html",
                        "accounts/list.html", "counterparty.html", "tag.html", "analysis/", "planning/loans.html", "planning/upcoming.html", "phone/planning/upcoming.html",
-                       "investments/planner.html", "money_from_others.html")
+                       "investments/planner.html", "money_from_others.html", "planning/payday.html", "phone/planning/payday.html")
 
 
 def _money(value, signed: bool = False, places: int | None = None) -> str:
@@ -137,6 +137,8 @@ templates.env.filters["amount_role"] = _amount_role
 templates.env.filters["rate"] = _rate
 templates.env.filters["whole"] = lambda value: fmt(Decimal(value), 0)  # half-up like money, never banker's
 templates.env.filters["tr"] = _tr_filter
+# A typed amount in a box (IV-12Q1): "12000", never "12000.000000"; parsing it back gives the same value.
+templates.env.filters["typed"] = lambda value: format(Decimal(value).normalize(), "f") if value is not None else ""
 
 
 def _status_text(status: dict) -> str:
