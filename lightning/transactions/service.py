@@ -8,6 +8,7 @@ Search reads transactions, accounts and categories directly, so nothing derived 
 from __future__ import annotations
 
 from dataclasses import asdict, replace
+from datetime import timedelta
 from decimal import Decimal
 
 from lightning.accounts.domain import Account, AccountType
@@ -397,6 +398,11 @@ class TransactionService:
         2 to 4. {name: {category_id, count, total}}."""
         return search.usual_categories(
             self.repo, window=self.USUAL_WINDOW, minimum=self.USUAL_MIN, days=self.USUAL_DAYS)
+
+    def common_categories(self, limit: int = 3) -> dict[str, list[int]]:
+        """NF-7AB5 quick mode: the categories this person uses most for money out and money in, last 180 days."""
+        since = (today() - timedelta(days=self.USUAL_DAYS)).isoformat()
+        return {kind.lower(): self.repo.common_categories(kind, since, limit) for kind in ("OUT", "IN")}
 
     def last_accounts(self) -> dict[str, int]:
         """{counterparty name: the account its newest money in or out used}; quick add fills it in (IV-12C)."""
