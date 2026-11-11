@@ -11,6 +11,7 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
+| **NF-7AR** | [An Upcoming tab shows the month's payments on a calendar, with payday and the day cash runs short](../../issues/7-planning-import-and-search/NF-7AR-upcoming-payments-calendar.md) | L | ready |
 | **BT-12AD** | [The payday proposal's lines do not add up to the cash they share out, and "Everyday spending" there…](../../issues/12-desktop-ux/BT-12AD-payday-proposal-lines-overlap.md) | M | ready |
 | **IV-12AA** | [Suggestions with sensible defaults and honest counts](../../issues/12-desktop-ux/IV-12AA-suggestions-with-sensible-defaults.md) | M | ready |
 | **IV-12P** | [One name, one figure across Budget, Cash planning and Home](../../issues/12-desktop-ux/IV-12P-one-name-one-figure-budget-and-cash.md) | M | new |

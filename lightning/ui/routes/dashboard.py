@@ -24,6 +24,7 @@ from ..periods import Period, parse_period
 from .. import keynotes, kpis, status as page_status, visuals
 from .sms import read_phone_sms
 
+WEEK_DAYS = 7  # the Overview's Next 7 days (NF-7AR2)
 router = APIRouter()
 
 _ACCOUNT_TYPE_LABELS = {
@@ -155,9 +156,14 @@ async def dashboard(request: Request):
         added = c.transactions.recorded_since(seen)
         # Today is never named: "since your last visit on 2026-11-06" read on 2026-11-06 says nothing.
         since = {"count": added, "at": "" if seen[:10] == today().isoformat() else seen[:10]} if added else None
+    # NF-7AR2: the next seven days of payments, one line under the KPIs; the calendar is its home (Upcoming).
+    week = None
+    if position_is_today and c.planning.items():
+        from lightning.planning.calendar import payment_window
+        week = payment_window(c.planning, c.gameya, today(), WEEK_DAYS, forecast=inbox.forecast)
     response = render(
         request,
-        "dashboard/index.html", since=since,
+        "dashboard/index.html", since=since, week=week,
         stats=stats, recent_rows=recent_rows,
         flow_columns=visuals.cash_flow_columns(c, first, as_of, cash_flow),
         money_in_rows=visuals.money_in_groups(c, first, as_of),
