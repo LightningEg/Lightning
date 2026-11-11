@@ -81,8 +81,11 @@ class AttemptGuard:
         left = self.wait_left()
         if left:
             minutes = (left + 59) // 60
-            wait = "1 hour" if minutes >= 60 else f"{minutes} minute{'s' if minutes != 1 else ''}"
-            raise ProfileError(f"Too many wrong tries. Try again in {wait}.")
+            if minutes >= 60:
+                raise ProfileError("Too many wrong tries. Try again in 1 hour.")
+            raise ProfileError("Too many wrong tries. Try again in 1 minute." if minutes == 1 else
+                               "Too many wrong tries. Try again in 2 minutes." if minutes == 2 else
+                               f"Too many wrong tries. Try again in {minutes} minutes.")
 
     def failed(self) -> None:
         failures, _ = self._read()
