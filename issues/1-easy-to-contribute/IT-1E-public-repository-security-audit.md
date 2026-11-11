@@ -96,11 +96,6 @@ Done when: the owner has the pass/fail list, and this file has one dated line "1
 ## 1E5 Owner: apply the repository protections · owner
 Run `python tools/security_setup.py` (it only previews) and read its planned writes; then (a) *(Recommended)* `python tools/security_setup.py --apply` with your own `gh` login, and add yourself as reviewer of the `production-release` environment when it asks; (b) apply it later: the downloads, market-data and website `main` branches stay unprotected until then, and the public Windows ZIP can be replaced by any account with write access. (`--app-actions-only` changes only the app's allowed-actions list; it is not a partial setup.) Afterwards turn on GitHub *Secret scanning* and *Push protection* for all four repositories (Settings › Code security). Tell the AI the date it was applied.
 
-## 1E6 Prove the committed encrypted fixture is the demo household · S · sonnet
-Files: `lightning/runtime/roundtrip.py` (`make`, `run`, `expected`), `tests/test_device_roundtrip.py`.
-Do: add `test_the_committed_fixture_is_the_generated_demo_household(tmp_path)` to `tests/test_device_roundtrip.py`: call `roundtrip.make(tmp_path)` (it builds the demo household up to `AS_OF` with fresh keys), then assert `expected(tmp_path)` equals `expected(FIXTURE)` line for line and that `run(FIXTURE)[0]` equals `run(tmp_path)[0]`. The fixture's own recovery key and password are dummy (`PASSWORD` in `roundtrip.py`); never print `recovery.txt`. If the lines differ only because the demo or schema changed since the fixture was made, rebuild with `python -m lightning.runtime.roundtrip --make tests/fixtures/roundtrip` in the same pull request and say so in `Detail:`.
-Done when: `python -m pytest tests/test_device_roundtrip.py -q` passes with the new test.
-
 ## 1E7 Scan every repository's full history for secrets · M · opus
 Needs 1E5 done first (secret scanning on), so GitHub's own alerts can be compared.
 Files: none changed in the repositories; the scan runs in the scratchpad.
@@ -118,7 +113,7 @@ Do: list open alerts with `gh api repos/LightningEg/Lightning/dependabot/alerts 
 Done when: the alert list is empty or every open alert has a dismissal reason, and `cd cloudflare/journal && npm ci --ignore-scripts && npm audit --audit-level=high` is clean.
 
 ## 1E10 Close the item · S · sonnet
-Needs 1E4, 1E6, 1E7, 1E8 and 1E9 done first.
+Needs 1E4, 1E7, 1E8 and 1E9 done first.
 Files: this file; `SECURITY.md` (only if a step changed what it says is checked); `issues/1-easy-to-contribute/README.md` (`done:` line).
 Do: check that every finding in the Report is either fixed (name the commit or the owner's dated answer), filed privately (say only that), or accepted by the owner. Then delete this file and add `1E` to `done:` (AGENTS.md §3).
 Done when: `python -m pytest tests/test_issues.py tests/test_docs_structure.py -q` passes.
