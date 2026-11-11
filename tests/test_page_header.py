@@ -19,8 +19,8 @@ def test_the_account_header_has_a_tile_a_figure_strip_two_secondaries_and_a_menu
     accounts, _ = setup
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
     page = client.get(f"/accounts/{accounts['cib'].id}").text
-    head = page[page.index('<div class="topbar">'):page.index('<div class="actions">')]
-    start = page.index('<div class="actions">')
+    head = page[page.index('<div class="topbar">'):page.index('<div class="actions page-controls">')]
+    start = page.index('<div class="actions page-controls">')
     actions = page[start:page.index("</details>", page.index("More actions", start))]
     assert 'class="inst-tile"' in head and "CIB Current" in head
     assert "Bank account · CIB · EGP" in head

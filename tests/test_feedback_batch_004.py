@@ -12,8 +12,10 @@ ROOT = Path(__file__).parents[1]
 def test_undo_is_a_header_icon_with_a_shortcut():
     """Ticket 101: Undo is an icon in the page header (Ctrl+Z); no text button spills into the page."""
     base = (ROOT / "lightning/ui/templates/base.html").read_text(encoding="utf-8")
-    top = base[base.index('<div class="topbar">'):base.index('{% block top_actions %}{% endblock %}</div></div>')]
-    assert 'partials/history.html' in top and base.count('partials/history.html') == 1
+    header = (ROOT / "lightning/ui/templates/partials/page_header.html").read_text(encoding="utf-8")  # IV-12Y3
+    assert '{% include "partials/page_header.html" %}' in base and 'partials/history.html' not in base
+    top = header[header.index('<div class="topbar">'):header.index('{{ header_actions }}')]
+    assert 'partials/history.html' in top and header.count('partials/history.html') == 1
     history = (ROOT / "lightning/ui/templates/partials/history.html").read_text(encoding="utf-8")
     assert 'icon-btn history-btn' in history and "Ctrl+Z" in history and "btn small" not in history
     js = (ROOT / "lightning/ui/static/app.js").read_text(encoding="utf-8")
