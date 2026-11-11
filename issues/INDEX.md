@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 11 open items. Each folder holds its reports and its items.
+11 big pictures, 10 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -19,7 +19,6 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1E3 | ↳ Owner: deploy the website receiver and rotate the analytics key | | | owner |  | |
 | IT-1E4 | ↳ Check the live website receivers against formula injection and key leaks | | | S | Opus | |
 | IT-1E5 | ↳ Owner: apply the repository protections | | | owner |  | |
-| IT-1E6 | ↳ Prove the committed encrypted fixture is the demo household | | | S | Sonnet | |
 | IT-1E7 | ↳ Scan every repository's full history for secrets | | | M | Opus | |
 | IT-1E8 | ↳ Inspect the published Windows ZIP and Android APK | | | S | Opus | |
 | IT-1E9 | ↳ Triage the open dependency alerts | | | S | Opus | |
@@ -54,16 +53,10 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BC2 | ↳ Arabic agrees for every counted noun the UI uses | | | S | Sonnet | |
 | IV-3BC3 | ↳ Counts built in English before translation | | | M | Sonnet | |
 | IV-3BC4 | ↳ Counts built in the browser | | | S | Sonnet | |
-| **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page - no JSON, plain text, raw exceptions or half-English](3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | improvement, visual | Feel | M | Sonnet | ready |
-| IV-3BD1 | ↳ No raw responses: 403, 400 and plain text get the branded page ([#409](https://github.com/LightningEg/Lightning/issues/409)) | | | S | Sonnet | |
-| IV-3BD2 | ↳ Every validation message has Arabic ([#410](https://github.com/LightningEg/Lightning/issues/410)) | | | M | Sonnet | |
-| IV-3BD3 | ↳ Half-English sentences and internal codes ([#411](https://github.com/LightningEg/Lightning/issues/411)) | | | S | Sonnet | |
-| IV-3BD4 | ↳ Import errors never show Python's text ([#412](https://github.com/LightningEg/Lightning/issues/412)) | | | S | Sonnet | |
-| IV-3BD5 | ↳ The validation page names the problem, not "Check your setup" ([#413](https://github.com/LightningEg/Lightning/issues/413)) | | | S | Sonnet | |
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BE, 3BG, 3BJ, 3AU2, 3AU3, 3AU4, NF-3AU. Next free code: 3BL.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BD, 3BE, 3BG, 3BJ, 3AU2, 3AU3, 3AU4, 3BD1, 3BD2, 3BD3, 3BD4, 3BD5, NF-3AU. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 

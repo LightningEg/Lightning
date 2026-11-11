@@ -1,6 +1,8 @@
 """Post or link one reviewed bank-import row inside its caller's transaction."""
 from __future__ import annotations
 
+import logging
+
 from decimal import Decimal
 
 from lightning.bank_import_rows import _amount, _date, _decimal_amount
@@ -47,7 +49,8 @@ class ImportPoster:
         try:
             fee = _decimal_amount(text)
         except ValueError as exc:
-            raise ValidationError(f"CSV row {row['_line']}: fee: {exc}", "fee") from None
+            logging.getLogger("lightning").info("fee not read on CSV row %s: %s", row["_line"], exc)
+            raise ValidationError(f"Row {row['_line']}: the fee is not a number.", "fee") from None
         if fee == 0:
             return Decimal(0)
         if fee < 0 or fee >= abs(amount):
@@ -124,7 +127,8 @@ class ImportPoster:
             day = _date(str(decision.get("date", row["Date"])))
             amount = Decimal(_amount(str(decision.get("amount", row["Amount"]))))
         except ValueError as exc:
-            raise ValidationError(f"CSV row {row['_line']}: {exc}", "row") from None
+            logging.getLogger("lightning").info("date or amount not read on CSV row %s: %s", row["_line"], exc)
+            raise ValidationError(f"Row {row['_line']}: the date or the amount is not valid.", "row") from None
         notes = str(decision.get("notes", row["Notes"])).strip()
         selected_target = str(decision.get("transfer_account_id", "")).strip()
         choice = str(decision.get("counterparty_choice", ""))

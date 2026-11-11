@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Check your setup'|tr(locale) }}{% endblock %}
-{% block heading %}<h1>{{ 'Check your setup'|tr(locale) }}</h1>{% endblock %}
+{% block title %}{{ 'That did not save'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'That did not save'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
-<section class="card"><p>{{ message|tr(locale) }}</p><div class="actions"><a class="btn" href="/settings?section=currencies&amp;tab=rates">{{ 'Exchange rates'|tr(locale) }}</a><a class="btn" href="/plan">{{ 'Recurring'|tr(locale) }}</a><a class="btn" href="/accounts">{{ 'Accounts'|tr(locale) }}</a></div></section>
+<section class="card"><p>{{ message|tr(locale) }}</p><div class="actions"><a class="btn primary" href="{{ back_path or '/' }}">{{ 'Back'|tr(locale) }}</a></div></section>
 {% endblock %}
