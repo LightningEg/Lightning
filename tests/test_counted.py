@@ -24,3 +24,25 @@ def test_a_group_with_one_category_says_category(c):
 @pytest.mark.parametrize("n, ar", [(1, "فاضل يوم واحد"), (5, "فاضل 5 يوم")])
 def test_days_left_in_arabic(n, ar):
     assert translate(counted(n, "day left", "days left"), "ar") == ar
+
+
+_NOUNS = [  # (English key with {n}, singular, two, 3-10, 11+) for every counted noun the UI uses
+    ("{n} accounts", "حساب واحد", "حسابين", "حسابات", "حساب"),
+    ("{n} categories", "فئة واحدة", "فئتين", "فئات", "فئة"),
+    ("{n} rows", "صف واحد", "صفين", "صفوف", "صف"),
+    ("{n} bills", "فاتورة واحدة", "فاتورتين", "فواتير", "فاتورة"),
+    ("{n} rules", "قاعدة واحدة", "قاعدتين", "قواعد", "قاعدة"),
+    ("{n} items", "عنصر واحد", "عنصرين", "عناصر", "عنصر"),
+    ("Every {n} years", "كل سنة واحدة", "كل سنتين", "كل {n} سنين", "كل {n} سنة"),
+    ("{n} transactions", "معاملة واحدة", "معاملتين", "{n} معاملات", "{n} معاملة"),
+]
+
+
+@pytest.mark.parametrize("key, one, two, few, many", _NOUNS)
+@pytest.mark.parametrize("n", [1, 2, 3, 11])
+def test_arabic_agrees_for_every_counted_noun(key, one, two, few, many, n):
+    out = translate(key, "ar", n=n)
+    want = {1: one, 2: two, 3: few, 11: many}[n]
+    if "{n}" not in want:
+        want = want if n in (1, 2) else f"{n} {want}"
+    assert out.replace("كل ", "").endswith(want.replace("كل ", "").replace("{n}", str(n)))

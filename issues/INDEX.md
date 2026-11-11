@@ -50,7 +50,6 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IV-3BC** | [Counts read right in English and Arabic - "1 days left", "Delete 1 transactions?", "2 معاملة"](3-polish-and-arabic/IV-3BC-counts-read-right-in-both-languages.md) | improvement, visual | Feel | M | Sonnet | ready |
-| IV-3BC2 | ↳ Arabic agrees for every counted noun the UI uses | | | S | Sonnet | |
 | IV-3BC3 | ↳ Counts built in English before translation | | | M | Sonnet | |
 | IV-3BC4 | ↳ Counts built in the browser | | | S | Sonnet | |
 | **IV-3BD** | [Every error speaks plainly, in the person's language, on a branded page - no JSON, plain text, raw exceptions or half-English](3-polish-and-arabic/IV-3BD-errors-speak-plainly-everywhere.md) | improvement, visual | Feel | M | Sonnet | ready |
