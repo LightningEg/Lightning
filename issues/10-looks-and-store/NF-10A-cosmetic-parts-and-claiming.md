@@ -5,7 +5,7 @@ type: feature
 pillar: feel
 size: L
 model: opus
-status: building
+status: parked
 created: 2026-10-24
 by: Codex
 skills: none

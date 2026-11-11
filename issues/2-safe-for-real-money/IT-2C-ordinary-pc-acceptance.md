@@ -4,7 +4,7 @@ type: tech
 pillar: protect
 size: L
 model: opus
-status: ready
+status: parked
 post: no
 created: 2026-10-19
 by: Claude

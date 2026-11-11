@@ -79,7 +79,7 @@ Line counts below were measured from the snapshot. Size alone is not a bug; thes
 | 6 | Financial read models | `reporting/service.py` has 1,037 lines; `register.page` remains 144 after its recent extraction. | Continue moving reusable figures to services and give pages small typed view models. Avoid changing money rules during structural work. | IT-9J, IT-9K |
 | 7 | Shared policies | Existing plan records three balance-floor implementations and a remaining duplicate pairing client. | Consolidate policies behind contract tests after active restore/journal work clears. Keep caller-specific validation messages. | IT-9K, IT-4K (finished 2026-11-02: `lightning/runtime/journal_pairing_driver.py`, `tests/test_one_pairing_driver.py`) |
 
-Do these as narrow extractions with invariant tests, not a rewrite. There is no evidence here that microservices, a new database or moving financial calculations into JavaScript would improve Lightning. Retain the Python services, integer storage and local-first model. Performance changes should follow measured query/time budgets; [IT-9A](../IT-9A-stored-month-end-figures.md) already gates caching on actual scale/latency evidence.
+Do these as narrow extractions with invariant tests, not a rewrite. There is no evidence here that microservices, a new database or moving financial calculations into JavaScript would improve Lightning. Retain the Python services, integer storage and local-first model. Performance changes should follow measured query/time budgets; [IT-9A](https://github.com/LightningEg/Lightning/blob/6e4d540/issues/9-later/IT-9A-stored-month-end-figures.md) already gates caching on actual scale/latency evidence.
 
 ## Known loose ends that still matter
 

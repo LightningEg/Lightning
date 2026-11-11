@@ -4,7 +4,7 @@ type: feature
 pillar: reach
 size: M
 model: sonnet
-status: ready
+status: parked
 created: 2026-11-11
 by: Claude
 skills: none

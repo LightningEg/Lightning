@@ -11,7 +11,6 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IT-3BI** | [Arabic search and sorting in the register, one week start, one clock](../../issues/3-polish-and-arabic/IT-3BI-arabic-search-sort-and-calendar.md) | M | ready |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](../../issues/3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | M | ready |
 | **NF-4A** | [Edit journal: edit anywhere, one home confirms](../../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md) | L | building |
 | **NF-4B** | [Multiple devices: implementation plan](../../issues/4-edit-journal-and-devices/NF-4B-multiple-devices.md) | L | building |
@@ -29,7 +28,6 @@ The Windows app, the Android app, pairing over your own Wi-Fi and the edit journ
 - [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 4A, 4B
 - [The phone, redesigned: a phone-first architecture, tab by tab](../../issues/11-phone-ux/r25-phone-ux-architecture/report.md): 3AY
 - [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 3AY
-- [International polish: the small things that make Lightning feel finished](../../issues/3-polish-and-arabic/r28-international-polish/report.md): 3BI
 - [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](../../issues/11-phone-ux/r29-google-play-readiness/report.md): 11B
 - [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 3AY
 <!-- work:end -->

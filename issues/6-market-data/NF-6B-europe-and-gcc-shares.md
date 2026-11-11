@@ -4,7 +4,7 @@ type: feature
 pillar: own
 size: L
 model: opus
-status: blocked
+status: parked
 blocked_by: parked by the owner until after launch (2026-11-11), then a source that allows redistribution
 created: 2026-10-19
 by: Claude

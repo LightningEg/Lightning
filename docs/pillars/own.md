@@ -11,20 +11,11 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](../../issues/6-market-data/IT-6D-gold-price-source.md) | S | blocked on a test from a home connection |
-| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history so…](../../issues/6-market-data/IT-6F-london-board-and-gulf-history.md) | S | ready |
-| **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/NF-6A-price-packs.md) | L | building |
-| **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](../../issues/6-market-data/NF-6B-europe-and-gcc-shares.md) | L | blocked on parked by the owner until after launch (2026-11-11), then a source that allows redistribution |
-| **NF-9D** | [Hijri dates, and the silver nisab for zakat](../../issues/9-later/NF-9D-hijri-dates-and-silver-nisab.md) | M | ready |
 | **NF-10H** | [One purchase per person](../../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md) | L | ready |
-| **IV-12J** | [Certificates read as certificates: their own holding page, payouts as the bank pays them, value tha…](../../issues/12-desktop-ux/IV-12J-certificates-read-as-certificates.md) | L | new |
 | **IV-12L** | [Gold: add a piece and its purchase in one step, pick the price by karat, and show bars with the jew…](../../issues/12-desktop-ux/IV-12L-gold-one-step-and-one-table.md) | M | ready |
-| **NF-12G** | [Money lent to others and costs split with others](../../issues/12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | L | ready |
-| **NF-12M** | [Property as an investment: its own kind, gain from what you paid, instalments, rent and costs](../../issues/12-desktop-ux/NF-12M-property-as-an-investment.md) | L | new |
 
 ## Reports with open follow-ups here
 
-- [Audit 14: using Lightning as a user, on the PC and the phone](../../issues/12-desktop-ux/r26-user-test-pc-and-phone/report.md): 12G
-- [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12J, 12L, 12M, 6D
+- [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12L
 <!-- work:end -->
 
