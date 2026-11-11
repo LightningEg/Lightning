@@ -197,7 +197,7 @@ def test_a_category_row_opens_its_sheet_and_see_transactions_keeps_budget_and_th
     page = phone.get(link.group(1).replace("&amp;", "&")).text
     assert re.search(r'class="phone-tab is-chosen" href="/budget" aria-current="page"', page)
     assert not re.search(r'class="phone-tab is-chosen" href="/transactions"', page)
-    assert re.search(r'<summary class="phone-period-now"[^>]*>\d{4}-\d{2}</summary>', page)  # the month, not a range
+    assert re.search(r'<summary class="phone-period-now"[^>]*>[A-Z][a-z]+ \d{4}</summary>', page)  # the month, not a range
     assert re.search(r'class="phone-back" href="/budget\?month=\d{4}-\d{2}"', page) and ">Budget<" in page
 
 

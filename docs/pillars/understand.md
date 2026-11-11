@@ -11,7 +11,7 @@ The overview, spending, financial health, net worth and reports. They read the l
 
 | Code | Item | Size | Status |
 |---|---|---|---|
-| **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](../../issues/3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | L | ready |
+| **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](../../issues/3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | S | ready |
 | **IT-9A** | [Stored month-end figures](../../issues/9-later/IT-9A-stored-month-end-figures.md) | M | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
 | **IT-9L** | [The investment report reads the whole ledger four times per Overview](../../issues/9-later/IT-9L-investment-report-reads-the-whole-ledger.md) | M | ready |
 | **IT-9M** | [Activity on the PC asks ten queries for each of its 100 rows](../../issues/9-later/IT-9M-activity-asks-ten-queries-a-row.md) | M | ready |

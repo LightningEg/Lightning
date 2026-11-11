@@ -11,6 +11,7 @@ from fastapi.testclient import TestClient
 
 from lightning.core.errors import ValidationError
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 def _buy(c, accounts, *, name="CIB 1-year certificate", principal="5000", lockup="2026-11-01",
@@ -200,7 +201,7 @@ def test_locked_certificate_has_a_separate_value_and_settings_use_the_same_sale_
     client = TestClient(create_app(c))
     for path in ("/", "/investments", "/settings?section=assets-valuations"):
         page = client.get(path).text
-        assert "not counted until 2026-11-01" in page and "5,000" in page
+        assert said("not counted until 2026-11-01") in page and "5,000" in page
     assert not c.position.at("2026-11-01").locked_holdings
 
 

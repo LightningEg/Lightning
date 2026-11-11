@@ -234,6 +234,15 @@ class Screen:
         self.url = str(response.url)
         self.path = urlsplit(self.url).path + (f"?{urlsplit(self.url).query}" if urlsplit(self.url).query else "")
         self.html = response.text
+        # The day the screen was drawn: an expectation's yyyy-mm-dd reads as the screen says it (A06.1, IV-3BK).
+        from lightning.core.dates import today
+        self.today = today()
+        self.locale = "ar" if '<html lang="ar"' in self.html[:400] else "en"
+
+    def said(self, text: str) -> str:
+        """``text`` with its dates as this screen says them: "Due 2026-10-03" -> "Due 3 Oct"."""
+        from lightning.ui.date_text import human_text
+        return human_text(" ".join(text.split()), self.locale, self.today)
 
     # Parsed when first read: most pages after a save are never looked at.
     @functools.cached_property
@@ -256,11 +265,14 @@ class Screen:
         return self._parsed.forms
 
     def shows(self, *texts: str) -> bool:
-        return all(" ".join(t.split()) in self.text for t in texts)
+        return all(" ".join(t.split()) in self.text or self.said(t).casefold() in self.text.casefold() for t in texts)
 
     def after(self, label: str, length: int = 120) -> str:
         """The text that follows ``label`` on the page: where its figure is."""
         at = self.text.find(label)
+        if at < 0:
+            label = self.said(label)
+            at = self.text.find(label)
         assert at >= 0, f"{label!r} is not on {self.path}"
         return self.text[at + len(label): at + len(label) + length].strip()
 
@@ -292,6 +304,8 @@ class Screen:
 
     def link(self, text: str) -> Link:
         wanted = " ".join(text.split()).casefold()
+        if not any(wanted in l.text.casefold() for l in self.links):
+            wanted = self.said(text).casefold()
         # An icon link (the gear, a row's delete) is found by its accessible name, as a screen reader would.
         found = [l for l in self.links if l.text.casefold() == wanted] or \
                 [l for l in self.links if not l.text and str(l.attrs.get("aria-label", "")).casefold() == wanted] or \
@@ -389,3 +403,11 @@ class Browser:
             f"{error_message(response.text) or visible_text(response.text)[:400]} · typed {values}")
         self.page = Screen(response)
         return self.page
+
+
+def said(text: str, locale: str = "en") -> str:
+    """``text`` with its dates as a screen drawn today says them (A06.1, IV-3BK): "until 2026-11-01" -> "until 1 Nov".
+    For a test that looks in a page's HTML rather than through a Screen."""
+    from lightning.core.dates import today
+    from lightning.ui.date_text import human_dates
+    return human_dates(text, locale, today())

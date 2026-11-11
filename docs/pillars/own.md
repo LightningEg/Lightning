@@ -12,7 +12,7 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](../../issues/6-market-data/IT-6D-gold-price-source.md) | S | blocked on a test from a home connection |
-| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history so…](../../issues/6-market-data/IT-6F-london-board-and-gulf-history.md) | M | ready |
+| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history so…](../../issues/6-market-data/IT-6F-london-board-and-gulf-history.md) | S | ready |
 | **NF-6A** | [Market data: price packs, collected in the cloud](../../issues/6-market-data/NF-6A-price-packs.md) | L | building |
 | **NF-6B** | [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](../../issues/6-market-data/NF-6B-europe-and-gcc-shares.md) | L | blocked on a source that allows redistribution |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](../../issues/9-later/NF-9D-hijri-dates-and-silver-nisab.md) | M | ready |

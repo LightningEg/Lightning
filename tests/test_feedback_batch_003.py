@@ -5,6 +5,7 @@ from pathlib import Path
 from fastapi.testclient import TestClient
 
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 def test_what_you_owe_rows_open_like_free_cash(c, setup, monkeypatch):
@@ -40,7 +41,7 @@ def test_a_month_shows_where_money_went_beside_the_last_six_months(c, setup):
     client = TestClient(create_app(c))
     month = client.get("/birdview/expenses?period=month&month=2026-10").text  # Spending since 2026-10-21 (owner)
     assert "overview-sankey-card is-pair" in month and "The last six months" in month
-    assert "2026-08 to 2026-10" in month
+    assert said("2026-08 to 2026-10") in month
     year = client.get("/birdview/expenses?period=custom&date_from=2026-08-01&date_to=2026-10-31").text
     assert "is-pair" not in year
 

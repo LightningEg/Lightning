@@ -5,6 +5,8 @@ from types import SimpleNamespace
 
 import pytest
 
+from lightning.ui.date_text import month_text
+
 from lightning.runtime.app import SessionGate
 from lightning.runtime.http import Guard, Host
 from lightning.runtime.roles import SessionRole
@@ -62,13 +64,13 @@ def test_tabs_links_and_the_month_stepper_swap_the_page_and_keep_working(phone):
     page.wait_for_function("() => new URLSearchParams(location.search).get('month')")
     earlier = page.evaluate("() => new URLSearchParams(location.search).get('month')")
     page.wait_for_function(arrived, arg=earlier)
-    assert shown() == earlier != now and phone.same()
+    assert shown() == month_text(earlier) != now and phone.same()  # the chip says the month in words (IV-3BK)
     page.click(".phone-month-chip a[aria-label='Later month']")  # the stepper of the swapped page works too
     page.wait_for_function("(m) => new URLSearchParams(location.search).get('month') > m", arg=earlier)
     assert phone.same() and shown() == now
 
     page.go_back()
-    page.wait_for_function("(m) => document.querySelector('.phone-month-chip > span')?.textContent.trim() === m", arg=earlier)
+    page.wait_for_function("(m) => document.querySelector('.phone-month-chip > span')?.textContent.trim() === m", arg=month_text(earlier))
     assert phone.same()
 
     page.click(".phone-tabbar a[href='/activity']")

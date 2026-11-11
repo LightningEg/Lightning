@@ -33,7 +33,7 @@ A salaried person in Egypt, phone first, counting in EGP. Money sits in a bank, 
 
 **Headings and buttons.** Site headings are Title Case (B02); app headings are sentence case (A05). Buttons and labels are sentence case and start with a verb (A10.1). Labels are two to five words.
 
-**Numbers.** Whole EGP on big figures with EGP once, rows are bare numbers, a true minus, dates as yyyy-mm-dd (A06.1).
+**Numbers.** Whole EGP on big figures with EGP once, rows are bare numbers with piastres only when there are any, a true minus, dates as people say them on screens (8 Nov, 1–8 Nov, Today) and yyyy-mm-dd in fields and files (A06.1).
 
 **Promise.** Describe only what the app does today. Show what Lightning does well. Compare only with a kind of tool (a spreadsheet, a traditional expense tracker, a cloud budgeting app), never a named product, and only as Low, Medium or High with a line of evidence; where another way is better, say so (B10).
 
@@ -67,7 +67,7 @@ One per page at most, from Buffett, Housel or Clear, with the wording checked be
 
 ## Arabic
 
-The Arabic pages are not a translation of the English ones: the same facts and screens, but the order, the examples and the words are shaped for an Egyptian reader. Polite Egyptian colloquial, short sentences, one idea each. No stiff fusha («يتيح لك»، «قم بـ»), no exaggeration, no exclamation marks. Fixed words: «التنزيل»، «جرّب ببلاش»، «المتاح للصرف»، «صافي ثروتك»، «الفلوس اللي خرجت»، «السجل»، «مهاب». App names come from the Arabic glossary.
+The Arabic pages are not a translation of the English ones: the same facts and screens, but the order, the examples and the words are shaped for an Egyptian reader. Polite Egyptian colloquial, short sentences, one idea each. No stiff fusha («يتيح لك»، «قم بـ»), no exaggeration, no exclamation marks. Fixed words: «التنزيل»، «جرّب ببلاش»، «المتاح للصرف»، «صافي ثروتك»، «الفلوس اللي خرجت»، «السجل»، «مهاب». App names come from the Arabic glossary. Speak to the person in neutral forms where a sentence allows: a verbal noun («اختيار الحساب»، «كتابة المبلغ») or a sentence without "you", not the masculine imperative («اختار»، «اكتب»); keep one spelling, and leave a form as it is when no neutral wording reads naturally. Money is «ج.م» after a figure in the app, ٪ after a percent.
 
 ## Two taglines, two jobs
 

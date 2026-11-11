@@ -1,0 +1,33 @@
+{
+ "chart": {
+  "result": [
+   {
+    "meta": {
+     "currency": "AED",
+     "symbol": "EMAAR.AE",
+     "exchangeName": "DFM",
+     "fullExchangeName": "Dubai",
+     "instrumentType": "EQUITY",
+     "exchangeTimezoneName": "Asia/Dubai"
+    },
+    "timestamp": [
+     1794117600,
+     1794204000,
+     1794290400
+    ],
+    "indicators": {
+     "quote": [
+      {
+       "close": [
+        null,
+        12.800000190734863,
+        12.899999618530273
+       ]
+      }
+     ]
+    }
+   }
+  ],
+  "error": null
+ }
+}

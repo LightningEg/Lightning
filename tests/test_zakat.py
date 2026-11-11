@@ -240,7 +240,7 @@ def test_the_page_says_it_is_an_estimate_once_and_shows_the_figures(c, gold):
     page = TestClient(create_app(c)).get("/zakat")
     assert page.status_code == 200
     for text in ("Zakatable wealth", "Nisab", "Zakat due", "Paid this zakat year", "Still to pay", "10,000",
-                 "2026-12-31", "lunar year", "scholar"):
+                 "zakat day today", "lunar year", "scholar"):
         assert text in page.text, text
     assert page.text.count("a scholar answers your own case") == 1
 
@@ -289,7 +289,7 @@ def test_the_plan_names_the_zakat_day_and_the_worn_box_reaches_the_service(c, go
     assert "Zakat day" not in client.get("/plan").text        # nothing until a zakat day is set
     c.zakat.save_settings("2027-03-01", "", False, True)
     plan = client.get("/plan").text
-    assert "2027-03-01" in plan and "10,000" in plan and "changes no balance" in plan
+    assert "1 Mar 2027" in plan and "10,000" in plan and "changes no balance" in plan
     home = c.account_flows.open_account("Gold at home", "PHYSICAL_ASSET", "2026-01-01", "0")
     reference = c.assets.get_asset_by_code("REF:GLD-24K")
     made = client.post(f"/accounts/{home.id}/items/new", data={
@@ -386,7 +386,7 @@ def test_the_gear_saves_the_nisab_basis(c, gold):
     for phone in (False, True):
         app = create_app(c)
         page = TestClient(_phone(app) if phone else app, base_url="http://127.0.0.1")
-        assert "595 g of silver at the price of 2026-12-31" in page.get("/zakat").text
+        assert "595 g of silver at the price of today" in page.get("/zakat").text
         page.post("/settings/locale", data={"locale": "ar"})
         assert "595 جرام فضة" in page.get("/zakat").text
         page.post("/settings/locale", data={"locale": "en"})
