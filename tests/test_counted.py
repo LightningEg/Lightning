@@ -35,17 +35,26 @@ _NOUNS = [  # (English key with {n}, singular, two, 3-10, 11+) for every counted
     ("{n} items", "عنصر واحد", "عنصرين", "عناصر", "عنصر"),
     ("Every {n} years", "كل سنة واحدة", "كل سنتين", "كل {n} سنين", "كل {n} سنة"),
     ("{n} transactions", "معاملة واحدة", "معاملتين", "{n} معاملات", "{n} معاملة"),
+    ("{n} days left", "فاضل يوم واحد", "فاضل يومين", "فاضل {n} أيام", "فاضل {n} يوم"),
+    ("{n} months", "شهر واحد", "شهرين", "{n} شهور", "{n} شهر"),
+    ("{n} payments", "دفعة واحدة", "دفعتين", "{n} دفعات", "{n} دفعة"),
 ]
 
 
 @pytest.mark.parametrize("key, one, two, few, many", _NOUNS)
-@pytest.mark.parametrize("n", [1, 2, 3, 11])
+@pytest.mark.parametrize("n", [0, 1, 2, 3, 10, 11])
 def test_arabic_agrees_for_every_counted_noun(key, one, two, few, many, n):
     out = translate(key, "ar", n=n)
-    want = {1: one, 2: two, 3: few, 11: many}[n]
+    want = one if n == 1 else two if n == 2 else few if 3 <= n <= 10 else many
     if "{n}" not in want:
         want = want if n in (1, 2) else f"{n} {want}"
-    assert out.replace("كل ", "").endswith(want.replace("كل ", "").replace("{n}", str(n)))
+    assert out == want.replace("{n}", str(n))
+
+
+@pytest.mark.parametrize("n, expected", [(0, "0 بند ميزانية"), (1, "بند واحد ميزانية"),
+                                         (2, "بندين ميزانية"), (3, "3 بنود ميزانية"), (11, "11 بند ميزانية")])
+def test_budget_line_items_agree(n, expected):
+    assert translate("Updated carryover for {n} budget lines.", "ar", n=n) == f"اتحدّث المبلغ المرحّل لـ {expected}."
 
 
 def test_no_hand_built_plurals_in_the_ui_or_workflows():

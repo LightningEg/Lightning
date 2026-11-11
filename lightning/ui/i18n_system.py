@@ -400,7 +400,6 @@ SENTENCES = {
     "{n} entries": "{n} قيد",
     "{n} more": "{n} كمان",
     "{n} months": "{n} شهور",
-    "{n} month": "شهر واحد",
     "{n} accounts": "{n} حسابات",
     "{n} account": "{n} حساب",
     "{n} items": "{n} عناصر",
