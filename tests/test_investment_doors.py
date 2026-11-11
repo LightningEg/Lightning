@@ -71,3 +71,29 @@ def test_bars_and_coins_are_rows_valued_by_the_karat_price(client, c, setup):
     assert position.value == D("53140") and position.price_source != "COST"
     html = client.get(f"/accounts/{gold.id}").text
     assert "10g bar" in html and "53,140" in html and "53,140.00" not in html and "24K price, 1 Sep" in html
+
+
+def test_certificate_door_opens_the_cd_portfolio_on_the_way(client, c):
+    """IV-12K: with no CD portfolio the certificate door asks for the bank and opens one; with one it opens it."""
+    page = client.get("/investments/certificate")
+    assert page.status_code == 200 and 'name="bank"' in page.text
+    assert client.post("/investments/certificate", data={"bank": ""}).status_code == 400
+    r = client.post("/investments/certificate", data={"bank": "NBE"})
+    assert r.status_code in (302, 303), r.text[:300]
+    cd = next(a for a in c.accounts.list() if a.account_type.value == "DEPOSIT" and a.name == "NBE CD")
+    assert r.headers["location"].startswith(f"/accounts/{cd.id}")
+    again = client.get("/investments/certificate")
+    assert again.status_code in (302, 303) and again.headers["location"].startswith("/accounts/")
+
+
+def test_gold_bars_and_coins_are_rows_of_the_item_table_at_the_karat_price(client, c, setup):
+    """IV-12L: a gram-bought bar is a row of the item table, valued by the dated karat price, plain words, whole EGP."""
+    from lightning.core.dates import today
+    gold = c.account_flows.open_account("Gold", "PHYSICAL_ASSET", "2026-01-01", "0")
+    bar = c.assets.create_investment("Kilo bar", "GOLD", karat="24")
+    reference = next(a for a in c.assets.investments(active_only=True) if a.code.startswith("REF:") and a.purity == D(1))
+    c.assets.set_price(reference.id, today().isoformat(), "5314")
+    c.investments.add_holding(gold.id, bar.id, "10", "62000", "2026-09-01")
+    html = client.get(f"/accounts/{gold.id}").text
+    assert "Kilo bar" in html and "53,140" in html and "24K price" in html
+    assert "62,000.00" not in html.split("physical-items-table", 1)[1].split("</table>", 1)[0] and "reference" not in html.split("physical-items-table", 1)[1].split("</table>", 1)[0]

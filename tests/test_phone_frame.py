@@ -459,3 +459,13 @@ def test_the_phone_app_bar_is_a_soft_well_not_near_white():
         css = (static / name).read_text(encoding="utf-8")
         bar = css.split(".phone-appbar {", 1)[1].split("}", 1)[0]
         assert "background: var(--c-well)" in bar and "244, 248, 252" not in bar, name
+
+
+def test_the_phone_investments_page_opens_the_add_investment_sheet(phone):
+    """IV-12K: one row on the phone opens a sheet with the five kinds of investment."""
+    html = phone.get("/investments").text
+    assert 'aria-label="Add investment"' in html
+    sheet = html.split('aria-label="Add investment"', 1)[1].split("</details>", 1)[0]
+    for door in ("Stock or fund", "Certificate", "Gold", "Property", "Something else"):
+        assert door in sheet
+    assert 'href="/investments/certificate"' in sheet

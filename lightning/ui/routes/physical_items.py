@@ -37,19 +37,25 @@ def _references(c, account, karat=None):
     return unique
 
 
-def valuation_label(position, karat=None, item=False) -> tuple[str, dict]:
-    """IV-12L: a plain label for where a value comes from, with its fill-ins ("21K price, 9 Nov")."""
-    when = str(position.price_date or "")[:10]
-    source = position.price_source or ""
-    if source == "COST":
-        return "At cost", {}
-    if item and source == "MANUAL":
-        return "Your estimate, {date}", {"date": when}
-    if karat is None and position.asset_code.startswith("GLD:"):
-        karat = position.asset_code[4:].rstrip("K")
-    if karat is not None and source:
-        return "{karat}K price, {date}", {"karat": karat, "date": when}
-    return "Missing", {}
+def _valuation(source: str, price_date) -> dict:
+    """Plain valuation words: the karat price, your estimate, what you paid, the last trade. The date is shown by the `day` filter."""
+    text = str(source or "")
+    key = ("cost" if text == "COST" else "estimate" if text == "MANUAL" else "ref" if "reference" in text
+           else "trade" if text == "TRADE" else "missing")
+    return {"key": key, "date": str(price_date or "")}
+
+
+def _gram_row(c, position, day: str):
+    """A gold bar or coin bought by the gram is a row of the item table, valued by the same dated karat price."""
+    asset = c.assets.get_asset(position.asset_id)
+    if asset.exposure.value != "GOLD" or asset.purity is None or asset.unit != "gram":
+        return None
+    karat = int((asset.purity * 24).to_integral_value())  # not money
+    valuation = _valuation(position.price_source, position.price_date)
+    if valuation["key"] == "missing" and position.price_source:
+        valuation["key"] = "ref"
+    return {"name": asset.name, "karat": karat, "grams": position.quantity, "cost": position.cost_basis,
+            "value": position.value, "valuation": valuation, "kind": "Bar or coin"}
 
 
 def account_page(request: Request, account_id: int):
@@ -69,19 +75,23 @@ def account_page(request: Request, account_id: int):
                     fine_gold=(Decimal(item["net_gold_grams_e6"]) / Decimal(1_000_000)
                                * Decimal(item["karat"]) / Decimal(24)
                                * (position.quantity if position else ZERO)),
+                    valuation=_valuation(position.price_source, position.price_date) if position else None,
                     history=c.physical_items.valuations(item["asset_id"]))
-        item["label"] = valuation_label(position, item["karat"], True) if position else ("No pieces held", {})
         items.append(item)
     item_ids = {item["asset_id"] for item in items}
-    other_holdings = [{"position": position, "label": valuation_label(position)}
-                      for position in portfolio.open if position.asset_id not in item_ids]
+    other_holdings, gram_rows = [], []
+    for position in portfolio.open:
+        if position.asset_id in item_ids:
+            continue
+        row = _gram_row(c, position, day)
+        (gram_rows if row else other_holdings).append(row or position)
     total = c.reporting.account_value(account_id, today())
     owned = c.reporting.owned_account_value(account_id, today())
     rows = c.reporting.register(account_id, "1900-01-01", "9999-12-31")
     trade_details = {row["transaction_id"]: row | {
         "workmanship_cost": from_e6(row["workmanship_cost_e6"])}
         for row in c.physical_items.trade_details_for_account(account_id)}
-    return render(request, "physical_account.html", account=account, items=items,
+    return render(request, "physical_account.html", account=account, items=items, gram_rows=gram_rows,
                   other_holdings=other_holdings, total=total, owned=owned, held=total-owned,
                   account_asset_breakdown=c.reporting.account_asset_class_breakdown(account_id, today()),
                   rows=rows, trade_details=trade_details, counterparties=c.counterparties.list_active(),
@@ -239,6 +249,7 @@ def _price_reference(c, karat: int):
     rows = [a for a in c.assets.investments(active_only=True)
             if a.exposure.value == "GOLD" and a.purity is not None and a.currency == c.base_currency
             and a.code.startswith(("REF:", "GLD:")) and not a.code.startswith("OTH:")]
+    rows.sort(key=lambda a: not a.code.startswith("REF:"))  # a price reference first, never a bar that happens to share the karat
     own = next((a for a in rows if a.purity == Decimal(karat) / Decimal(24)), None)
     return own or next((a for a in rows if a.purity == Decimal(1)), None)
 

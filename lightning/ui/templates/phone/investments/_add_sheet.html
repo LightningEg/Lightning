@@ -1,0 +1,4 @@
+{# IV-12K: the phone's door to every kind of investment: one row that opens a sheet with the five choices (C06.2). #}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% set row %}<span>{{ 'Add investment'|tr(locale) }}<small>{{ 'What is it?'|tr(locale) }}</small></span><b>{{ chevron() }}</b>{% endset %}
+{% call sheet('Add investment'|tr(locale), row) %}{% include "partials/invest_doors.html" %}{% endcall %}
