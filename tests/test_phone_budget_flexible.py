@@ -47,7 +47,7 @@ def test_everyday_allowance_has_its_own_name_while_home_keeps_the_whole_plan(moh
     budget_page = client.get("/budget/flexible")
     assert home_page.status_code == budget_page.status_code == 200
     assert f'Left in plan {_money(e.left, places=0)}' in home_page.text
-    assert f'>{FIGURES["everyday_left"].label}</div>' in budget_page.text
+    assert f'>{FIGURES["everyday_left"].label} <span aria-hidden="true">' in budget_page.text  # NF-12AB4: the hero opens its working
     assert f'>{_money(e.everyday_left, places=0)} <small>' in budget_page.text
     assert 'Left in plan' not in budget_page.text
     assert client.post("/settings/locale", data={"locale": "ar"}, follow_redirects=False).status_code == 303

@@ -289,8 +289,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **BT-12AC** | [The Investments Lead's Cost and Unrealized gain do not add up to its Portfolio value - 325,088 and 27,399 under 752,486](12-desktop-ux/BT-12AC-investments-lead-parts-do-not-add-up.md) | bug, technical · medium | Own | M | Opus | ready |
 | **BT-12AD** | [The payday proposal's lines do not add up to the cash they share out, and "Everyday spending" there is not the figure of that name](12-desktop-ux/BT-12AD-payday-proposal-lines-overlap.md) | bug, technical · medium | Plan | M | Opus | ready |
 | **IT-12AE** | [A screen cannot work out money - derived figures move to their owners, a ratchet test counts arithmetic in the UI, and the PC and phone are compared on one household](12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | improvement, technical | Build | L | Opus | ready |
-| IT-12AE1 | ↳ The PC and the phone are compared on one household | | | M | Opus | |
-| IT-12AE2 | ↳ Parts add up to their whole | | | S | Sonnet | |
 | IT-12AE4 | ↳ Derived figures move to their owners | | | L | Opus | |
 | **IV-12AA** | [Suggestions with sensible defaults and honest counts - Refill offers to empty Safe to spend, Needs you counts three ways, a year is compared with nothing](12-desktop-ux/IV-12AA-suggestions-with-sensible-defaults.md) | improvement, visual | Plan | M | Opus | ready |
 | IV-12AA1 | ↳ Owner: what Refill offers first | | | owner |  | |
@@ -332,9 +330,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-3H9 | ↳ Build the chosen analysis | | | M | Opus | |
 | IV-3H10 | ↳ Triage the ids no step names ([#436](https://github.com/LightningEg/Lightning/issues/436)) | | | M | Opus | |
 | **NF-12AB** | [Every headline figure explains itself in place - one gesture and one label instead of "Show the numbers", "How it is worked out", "See details", "See them" and bare chevrons](12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md) | new feature | Understand | L | Opus | ready |
-| NF-12AB2 | ↳ One "working" shape from the services | | | M | Opus | |
 | NF-12AB3 | ↳ The PC's Leads and KPIs open their working in place | | | L | Opus | |
-| NF-12AB4 | ↳ The phone's heroes open their working as a sheet | | | M | Opus | |
 | **NF-12G** | [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md) | new feature | Own | L | Opus | ready |
 | NF-12G6 | ↳ Lend, paid back and forgive on the person's page (PC) | | | M | Sonnet | |
 | NF-12G3 | ↳ A cost split with others: the service | | | M | Opus | |

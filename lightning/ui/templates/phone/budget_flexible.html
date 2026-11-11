@@ -2,6 +2,9 @@
    flexible categories with left as the figure and no fields; Fixed costs as one row. No plan: the Make my plan step. #}
 {% extends "base.html" %}
 {% from "phone/partials/charts.html" import month_bar with context %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% from "phone/partials/working.html" import working_rows with context %}
+{% from "partials/chevron.html" import chevron %}
 {% block title %}Budget{% endblock %}
 {% block heading %}<h1>{{ 'Budget'|tr(locale) }}</h1>{% endblock %}
 {% macro cat_row(r) %}<a class="phone-row phone-budget-cat is-{{ r.state }}" data-popup-open href="/budget/category/{{ r.category_id }}/sheet?month={{ screen.month }}"><span>{{ r.name }}<small>{{ '{spent} of {limit}'|tr(locale, spent=r.spent|money, limit=r.limit|money) }}</small><span class="phone-bar-track" aria-hidden="true"><i style="width: {{ r.share }}%"></i></span></span><b class="{{ 'neg' if r.left < 0 }}">{% if r.state == 'done' %}<span class="phone-done" aria-label="{{ 'Nothing left'|tr(locale) }}">—</span>{% else %}<bdi class="fig">{{ r.left|money }}</bdi>{% endif %}</b></a>{% endmacro %}
@@ -15,13 +18,13 @@
   <a class="btn primary" href="/budget?month={{ s.month }}&amp;make=1">{{ 'Make my plan'|tr(locale) }}</a>
 </section>
 {% else %}
-<section class="phone-hero has-seam" aria-labelledby="lead-heading">
-  <div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Over plan'|tr(locale) if s.left < 0 else fig.everyday_left.label }}</div>
-  <div class="phone-lead{{ ' is-negative' if s.left < 0 }}">{{ (s.left|abs)|money }} <small>{{ base }}</small></div>
+{% set lead %}<div class="phone-hero has-seam"><div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Over plan'|tr(locale) if s.left < 0 else fig.everyday_left.label }} <span aria-hidden="true">{{ chevron() }}</span></div>
+  <div class="phone-lead{{ ' is-negative' if s.left < 0 }}"{% if s.left >= 0 %} data-fig="everyday_left"{% endif %}>{{ (s.left|abs)|money }} <small>{{ base }}</small></div>
   {% if s.pace_gap is not none %}<p class="phone-hero-line">{% if s.pace_gap <= 0 %}{{ '{amt} under your pace for {m}.'|tr(locale, amt=(-s.pace_gap)|money, m=s.month) }}{% else %}{{ '{amt} over your pace for {m}.'|tr(locale, amt=s.pace_gap|money, m=s.month) }}{% endif %}{% if s.per_day %} {{ 'About {amt} a day.'|tr(locale, amt=s.per_day|money) }}{% endif %}</p>
   {% elif s.state == 'past' and s.used_pct is not none %}<p class="phone-hero-line">{{ '{pct}% of the plan was spent.'|tr(locale, pct=s.used_pct) }}</p>{% endif %}
   {% if s.month_bar %}{{ month_bar(s.month_bar) }}{% endif %}
-</section>
+</div>{% endset %}
+{# NF-12AB4: the hero is the way into its working (C06.1) #}{% if s.working %}{% call sheet(fig.everyday_left.label, lead, 'phone-home-hero') %}{{ working_rows(s.working) }}{% endcall %}{% else %}{{ lead }}{% endif %}
 {% if s.raise_offer %}<section class="phone-section" aria-labelledby="raise-heading">
   <header class="phone-section-head"><h2 id="raise-heading">{{ 'Your income went up'|tr(locale) }}</h2></header>
   <p class="phone-note">{{ 'Recurring expects {recurring}, {raise} more than your average.'|tr(locale, recurring=s.raise_offer.recurring|money(False, 0) ~ ' ' ~ base, raise=s.raise_offer.raise|money(False, 0)) }}</p>

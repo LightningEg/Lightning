@@ -16,7 +16,7 @@
       <div class="overview-split">
         <section>
           <div class="overview-block-head"><div><h3 id="owned-heading">{{ fig[lead].label }}</h3><p>{{ "Excludes money held for others"|tr(locale) }}</p></div></div>
-          <div class="overview-headline">{{ (pos.net_worth if owes else pos.what_you_own)|money }} <small>{{ base }}</small>{% if pos.unvalued %}<span>{{ "Known subtotal"|tr(locale) }}</span>{% endif %}</div>
+          <div class="overview-headline" data-fig="{{ lead }}">{{ (pos.net_worth if owes else pos.what_you_own)|money }} <small>{{ base }}</small>{% if pos.unvalued %}<span>{{ "Known subtotal"|tr(locale) }}</span>{% endif %}</div>
           {% if lead_change %}<p class="lead-compare"><b class="is-{{ lead_change.tone }}">{{ lead_change.figure }}</b> {{ lead_change.text|tr(locale) }}</p>{% endif %}
           {% if worth_units %}{# OV-8: the lead in dollars and 21K gold, at the stored dated prices; one line (3AM3) #}<p class="lead-line">{% for u in worth_units %}<span title="{{ 'at {price} on {date}'|tr(locale, price=u.price|money, date=u.date) }}">{{ ('In ' ~ u.unit)|tr(locale) }} <b>{{ u.value|money }}</b></span>{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
           {% if bridge %}{# OV-3: why it changed, worked out in planning/position.py net_worth_bridge #}<details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><tbody>

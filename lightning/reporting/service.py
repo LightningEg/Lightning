@@ -122,6 +122,14 @@ class CashFlow:
         return self.net / self.inflows * 100 if self.inflows > ZERO else None
 
     @property
+    def savings_rate_working(self):
+        """NF-12AB2: Savings rate is Net flow over Money in; the rows add up to Net flow."""
+        from lightning.core.working import Working, WorkingRow
+        return Working("savings_rate", self.savings_rate, (WorkingRow("Money in", self.inflows),
+                                                           WorkingRow("Money out", -self.outflows)),
+                       home="/birdview/expenses", ratio_of=(self.net, self.inflows))
+
+    @property
     def rate_says_nothing(self) -> bool:
         """Money out more than twice money in (a rate below −100%, such as a month whose pay came early):
         screens say the gap in words instead of a rate like −1,177% (guideline A01)."""

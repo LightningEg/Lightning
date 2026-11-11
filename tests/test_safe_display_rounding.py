@@ -45,8 +45,9 @@ def test_pc_safe_to_spend_waterfall_and_table_use_the_same_display_parts(c, setu
     assert [name for name, _ in rows] == [name for name, _ in parts] + ['Safe to spend']
     assert values[0] == 312505 and values[-1] == 297688
     assert sum(values[:-1]) == values[-1]
+    panel = response.text.split('id="working-safe"', 1)[1].split('</table>', 1)[0]  # NF-12AB3: How it adds up
     for name, value in rows[:-1]:
-        assert f'<td>{name}</td><td class="num">{value}</td>' in section
+        assert f'<td>{name}</td><td class="num">{value}</td>' in panel
     assert f.free_cash == D('312504.51') and f.safe_to_spend == D('297687.98')
 
 
