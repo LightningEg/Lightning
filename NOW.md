@@ -32,7 +32,7 @@ Reserved codes: none
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 
-- **Store (11-10, Claude):** 10D sets built (site #189: Papyrus 1,320, Dendera 1,280); owner runs migration 20261110200000 live. 10H3 built (site #186). Left: owner 10H4 prices (at launch). **Read:** 10H.
+- **Store (11-10, Claude):** 10D sets built (site #189: Papyrus 1,320, Dendera 1,280); migration 20261110200000 applied live 2026-11-11 (8 items, 8 set parts). 10H3 built (site #186). Left: owner 10H4 prices (at launch). **Read:** 10H.
 
 - **10A/10C app themes:** ready to sell, Dendera included; owner steps in 10C4. Dendera's premium pass (10F) is built; the site's demo shots are current (site #159). New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md`.
 
