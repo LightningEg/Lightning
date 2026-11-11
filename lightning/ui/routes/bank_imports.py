@@ -74,8 +74,8 @@ def _quick_picks(c) -> str:
     picks = {}
     for kind, direction in (("out", Direction.OUT), ("in", Direction.IN)):
         ids = [i for i in common[kind] if i in names]
-        ids += [cat.id for cat in pickable if cat.direction in (direction, Direction.BOTH) and cat.id not in ids
-                and cat.parent_id is not None][:3 - len(ids)]
+        ids += [cat.id for cat in pickable if cat.direction in (direction, Direction.BOTH) and cat.id not in ids  # not money
+                and cat.parent_id is not None][:3 - len(ids)]  # not money
         picks[kind] = [{"id": i, "name": names[i]} for i in ids[:3]]
     return json.dumps(picks, ensure_ascii=False)
 
@@ -496,7 +496,7 @@ def _take_page(pieces: list[dict], start: int) -> list[dict]:
 def _question_cards(rows: list[dict], summary: dict) -> list[dict]:
     """NF-7AB1: the file's few questions, one per state of the rows still waiting, worst first; skipped is a count."""
     waiting = [r for r in rows if r.get("_status") == "REVIEW"]
-    counts = {state: sum(1 for r in waiting if _row_status(r) == state) for state in _STATUS_ORDER}
+    counts = {state: sum(1 for r in waiting if _row_status(r) == state) for state in _STATUS_ORDER}  # not money
     cards = [{"state": state, "n": counts[state]} for state in ("err", "needs", "dup", "ready") if counts[state]]
     if summary.get("skipped"):
         cards.append({"state": "skipped", "n": summary["skipped"]})
@@ -532,7 +532,7 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
                   summary=summary, msg=msg, error=error, reject_prompt=reject_prompt, status_code=status_code,
                   view=view, cards=_question_cards(rows, summary) if view == "summary" else [],
                   quick_picks=_quick_picks(c) if view == "summary" else "",
-                  done=sum(c.bank_imports.summary(batch["id"]).values()),
+                  done=sum(c.bank_imports.summary(batch["id"]).values()),  # not money
                   undo_count=len(c.bank_imports.created_transactions(batch["id"])) if batch["status"] == "POSTED" else 0)
 
 
