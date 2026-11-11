@@ -11,6 +11,7 @@ A budget by category, bills and loan payments, reserves for what is coming, and 
 
 | Code | Item | Size | Status |
 |---|---|---|---|
+| **NF-7AR** | [An Upcoming tab shows the month's payments on a calendar, with payday and the day cash runs short](../../issues/7-planning-import-and-search/NF-7AR-upcoming-payments-calendar.md) | L | ready |
 | **IV-12Q** | [The unfinished pages of Budget and Cash planning get the page pattern: a lead figure, a visual, car…](../../issues/12-desktop-ux/IV-12Q-unfinished-budget-and-cash-pages.md) | L | new |
 
 ## Reports with open follow-ups here
