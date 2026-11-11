@@ -116,7 +116,8 @@ class Valuer:
             if found:
                 derived = Decimal(found["price_e6"]) * Decimal(target) / Decimal(other["purity_e6"])
                 karat = round(Decimal(other["purity_e6"]) * 24 / Decimal(1_000_000))
-                return {"price_e6": int(derived), "date": found["date"], "source": f"{karat}K by purity"}
+                return {"price_e6": int(derived), "date": found["date"], "source": f"{karat}K by purity",
+                        "currency": found.get("currency", self.base)}
         return None
 
     def _gold_price(self, asset: FinancialAsset, day: str) -> tuple[Decimal, str, str] | None:
@@ -125,7 +126,16 @@ class Valuer:
         if asset.exposure.value != "GOLD" or asset.unit != "gram" or asset.purity is None:
             return None
         found = self.reference_price(asset.id, day)
-        return (from_e6(found["price_e6"]), found["date"], found["source"]) if found else None
+        if not found:
+            return None
+        price = from_e6(found["price_e6"])
+        currency = found.get("currency", self.base)
+        if currency != asset.currency:
+            reference_rate, asset_rate = self.fx(currency, day), self.fx(asset.currency, day)
+            if reference_rate is None or asset_rate is None:
+                return None
+            price = price * reference_rate.rate / asset_rate.rate
+        return price, found["date"], found["source"]
 
     def _price(self, asset: FinancialAsset, day: str) -> tuple[Decimal, str, str] | None:
         """Newest price wins; on one day the order is ``SOURCE_RANK`` (a price you typed, then a buy or sell, then the

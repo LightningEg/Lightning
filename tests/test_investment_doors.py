@@ -71,3 +71,16 @@ def test_bars_and_coins_are_rows_valued_by_the_karat_price(client, c, setup):
     assert position.value == D("53140") and position.price_source != "COST"
     html = client.get(f"/accounts/{gold.id}").text
     assert "10g bar" in html and "53,140" in html and "53,140.00" not in html and "24K price, 1 Sep" in html
+
+
+def test_a_gold_reference_is_converted_to_the_holdings_currency(c):
+    """An EGP karat reference is not a USD price: 10 grams at 5,314 EGP are 53,140 EGP."""
+    from lightning.fx import save_rate
+    bar = c.assets.create_investment("USD bar", "GOLD", karat="24", currency="USD")
+    reference = next(a for a in c.assets.investments(active_only=True)
+                     if a.code.startswith("REF:") and a.purity == D(1))
+    c.assets.set_price(reference.id, "2026-09-01", "5314")
+    save_rate(c.db, "2026-09-01", "USD", "EGP", D("50"), "MANUAL")
+    valuation = c.reporting.value_of(bar.id, D("10"), "2026-09-01")
+    assert valuation.value == D("53140")
+    assert valuation.price == D("106.28")
