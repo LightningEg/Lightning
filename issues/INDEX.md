@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 8 open items. Each folder holds its reports and its items.
+11 big pictures, 7 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -16,9 +16,7 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | improvement, technical | Build | M | Opus | ready |
-| IT-1E3 | ↳ Owner: deploy the website receiver and rotate the analytics key | | | owner |  | |
 | IT-1E4 | ↳ Check the live website receivers against formula injection and key leaks | | | S | Opus | |
-| IT-1E5 | ↳ Owner: apply the repository protections | | | owner |  | |
 | IT-1E7 | ↳ Scan every repository's full history for secrets | | | M | Opus | |
 | IT-1E8 | ↳ Inspect the published Windows ZIP and Android APK | | | S | Opus | |
 | IT-1E9 | ↳ Triage the open dependency alerts | | | S | Opus | |
@@ -95,12 +93,10 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 |---|---|---|---|---|---|---|
 | **NF-7AK** | [Bank messages beyond CIB and NBE in Arabic: English card messages, wallets, other currencies, and the researched formats](7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | new feature | Capture | L | Opus | new |
 | NF-7AK3 | ↳ Purchases in another currency | | | M | Opus | |
-| **NF-7AQ** | [Search answers a typed question - "food last month" gives the figure, its comparison and the rows, not a link to a filter](7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md) | new feature | Capture | L | Opus | new |
-| NF-7AQ5 | ↳ The owner's Arabic words · S | | | owner |  | |
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md) · [r31](7-planning-import-and-search/r31-logging-entries/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AB, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI, 7AJ, 7AL, 7AM, 7AN, 7AO, 7AP. Next free code: 7AS.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AB, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI, 7AJ, 7AL, 7AM, 7AN, 7AO, 7AP, NF-7AQ. Next free code: 7AS.
 
 ## 8 Website
 
@@ -109,7 +105,7 @@ The site is honest, quick and in step with the app.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 
-Done: 8A, 8B, 8C, 8D, 8E, 8F, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z, 8AA. Next free code: 8AE.
+Done: 8A, 8B, 8C, 8D, 8E, 8F, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z, 8AA, 8AB. Next free code: 8AE.
 
 ## 9 Later
 
@@ -184,7 +180,6 @@ Kept, not planned: nobody works on these until the owner picks one (set its stat
 - **NF-7AR** [An Upcoming tab shows the month's payments on a calendar, with payday and the day cash runs short](7-planning-import-and-search/NF-7AR-upcoming-payments-calendar.md)
 - **IV-8AC** [For Geeks gets two motion moments that are true - a posting that must balance, and a row that becomes ciphertext](8-website/IV-8AC-for-geeks-two-true-motion-moments.md)
 - **IV-8AD** [A guideline rule for an Arabic page that links to an English page - the label says so and it opens in a new tab](8-website/IV-8AD-arabic-pages-that-link-to-english-pages.md)
-- **NF-8AB** [Link the three comparison pages and add a fourth that compares Lightning with an AI assistant](8-website/NF-8AB-link-the-comparisons-and-compare-with-an-ai.md)
 - **NF-9D** [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md)
 - **NF-10A** [Cosmetic parts, account-wide claiming and native acceptance](10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md)
 - **NF-10B** [Supporter perks still waiting on the app or the owner - app themes for sale, names on About](10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md)

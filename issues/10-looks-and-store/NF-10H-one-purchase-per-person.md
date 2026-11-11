@@ -55,7 +55,7 @@ Steps, in order; each is one pull request. Built: 10H1, 10H2 (app and `redeem-pl
 
 ## 10H4 Owner: set the prices in the Console · owner
 Prices decided (above). Create the four Play products (`nile` 60, `cotton` 120, `papyrus` 200, `dendera` 200 EGP), set
-Egypt's price by hand, confirm the 15% service fee tier. Steps: [docs/google-play.md](../../docs/google-play.md) › In-app products.
+Egypt's price by hand, confirm the 15% service fee tier. Waits for launch (owner, 2026-11-11): the Console cannot be set up before it; do not ask again before launch. Steps: [docs/google-play.md](../../docs/google-play.md) › In-app products.
 
 ## 10H5 Owner: the extra seats already sold · owner
 Credit their coins back (recommended) or leave them.
