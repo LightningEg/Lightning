@@ -105,14 +105,13 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | improvement, visual | Understand | S | Opus | ready |
 | IV-3BK9 | ↳ The website's copy of guideline 3.41, and a native reader ([#429](https://github.com/LightningEg/Lightning/issues/429)) | | | S | Sonnet | |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | Opus | ready |
-| NF-3AU2 | ↳ Write the reminder schedule while the profile is open | | | M | Opus | |
 | NF-3AU3 | ↳ Windows: a daily task shows the schedule with the app closed | | | M | Opus | |
 | NF-3AU4 | ↳ Android: a daily job shows the schedule with the app closed | | | M | Opus | |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/OW-3AI-institution-logos.md) | owner task | Feel |  |  | ready |
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BE, 3BG, 3BJ. Next free code: 3BL.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BE, 3BG, 3BJ, 3AU2. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 
@@ -271,11 +270,9 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AY8 | ↳ Activity: the review cards that are rows, and search | | | M | Opus | |
 | IV-3AY9 | ↳ Budget: the payday strip and This month in detail | | | M | Opus | |
 | IV-3AY10 | ↳ Money: the net worth sheet, then the older Overview goes | | | M | Opus | |
-| IV-3AY14 | ↳ To do's "See all" page | | | S | Sonnet | |
 | IV-3AY15 | ↳ Phone templates: the sheets the slots open | | | M | Sonnet | |
 | IV-3AY16 | ↳ Phone templates: Investments and Cash planning pages | | | M | Sonnet | |
 | IV-3AY17 | ↳ Phone templates: Settings, rules, exports and the top-level pages | | | L | Sonnet | |
-| IV-3AY18 | ↳ The last phone routes leave the PC files | | | S | Sonnet | |
 | IV-3AY13 | ↳ Owner's phone check | | | owner |  | |
 | **NF-11B** | [Ship the phone on Google Play - a release bundle at API 36, the SMS and payments policies, the app's own privacy notice and the Console declarations](11-phone-ux/NF-11B-ship-the-phone-on-google-play.md) | new feature | Everywhere | L | Opus | ready |
 | NF-11B7 | ↳ Owner: the developer account and the listing | | | owner |  | |
@@ -284,7 +281,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md) · [r36](11-phone-ux/r36-figures-one-owner/report.md).
 
-Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11K, 11L, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 11L1, 3AY1, 3AY3, 3AY5, 3AY6, 3AY7, 3AY11, 3AY12, IV-3F, BV-11G, BV-11L2, BV-11L3, BV-11L4, IV-11D3. Next free code: 11M.
+Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11K, 11L, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 11L1, 3AY1, 3AY3, 3AY5, 3AY6, 3AY7, 3AY11, 3AY12, 3AY14, 3AY18, IV-3F, BV-11G, BV-11L2, BV-11L3, BV-11L4, IV-11D3. Next free code: 11M.
 
 ## 12 Desktop UX and smart next steps
 

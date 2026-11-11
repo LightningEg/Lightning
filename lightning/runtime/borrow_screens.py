@@ -39,6 +39,9 @@ def register(app, screens: BorrowScreens) -> None:
             return await hand_back(request)
         if kept is not None and open_profile_id():
             kept.disable(open_profile_id())  # Lock is signing out: the next open asks for the password
+        if session.container is not None:  # NF-3AU2: what is due while locked is announced from the schedule
+            from lightning.workflows import reminder_schedule
+            reminder_schedule.refresh(session.container, force=True)
         return await action(request, "manage", session.close)
 
     # ------------------------------------------------------------ multiple devices: the PC's side

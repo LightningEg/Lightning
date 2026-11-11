@@ -8,7 +8,9 @@ from math import pi
 from urllib.parse import quote
 
 from lightning.core.money import ZERO, fmt, quantize
-from lightning.core.dates import month_of, parse_month, today
+from lightning.core.dates import fmt_date, month_of, parse_month, today
+from lightning.categories.domain import Movement
+from lightning.transactions.domain import TxnFilter
 
 from . import status as page_status
 
@@ -96,3 +98,32 @@ def cover_from(c, month: str, target: dict, room: dict[int, Decimal]) -> dict | 
         return None
     return {"name": c.categories.get(best[1]).name, "amount": amount,
             "href": f"/budget/move?month={month}&to={target['category_id']}&from={best[1]}&amount={amount}"}
+
+
+def tree_ids(c, category_id: int) -> set[int]:
+    """A category and every category below it."""
+    children: dict[int, list[int]] = {}
+    for item in c.categories.tree(Movement.OUTFLOW):
+        if item.parent_id:
+            children.setdefault(item.parent_id, []).append(item.id)
+    found, pending = {category_id}, [category_id]
+    while pending:
+        for child in children.get(pending.pop(), []):
+            if child not in found:
+                found.add(child)
+                pending.append(child)
+    return found
+
+
+def last_payments(c, category_id: int, month: str) -> dict:
+    """A category's last three payments in a month, or last month's total when there are none (3AN9)."""
+    first, last = parse_month(month)
+    rows, total = c.transactions.find(TxnFilter(category_ids=sorted(tree_ids(c, category_id)),
+                                                date_from=fmt_date(first), date_to=fmt_date(last), limit=3))
+    before = neighbours(month)[0]
+    earlier = ZERO
+    if not rows:
+        start, end = parse_month(before)
+        earlier = c.budgets.spent_in(tree_ids(c, category_id), start, end)
+    return {"rows": rows, "total": total, "month": month, "last_month": before, "earlier": earlier,
+            "see_all": see_all(category_id, month), "see_last": see_all(category_id, before)}

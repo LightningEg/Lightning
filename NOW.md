@@ -25,7 +25,7 @@ Reserved codes: none
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
 - **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12Y4, 12Z2-5, 12AE1-2. **Read:** 12Y.
-- **Phone (11-10, Claude):** IV-3AY: 3AY11 and catch-up built. Sonnet: 3AY14-18; Opus: 3AY4, 8-10; then owner 3AY13. **Read:** 3AY; Architecture › UI contract.
+- **Phone (11-10, Claude):** 3AY14, 18, 3AU2 built. Sonnet: 3AY15-17; Opus: 3AY4, 8-10; owner 3AY13. Then 3AU3-4. **Read:** 3AY; 3AU.
 - **Play (Claude, 11-09):** NF-11B done; owner: 10H3, shots, 11B7-9. **Read:** NF-11B.
 - **r33 (Claude):** 1Y, 9L. **Read:** r33.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
