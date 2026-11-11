@@ -528,7 +528,7 @@ async def quick_add(request: Request):
         return JSONResponse({"ok": False, "error": message}, 422)
     response = JSONResponse({"ok": True, "id": txn.id, "ref": txn.ref, "account_id": account_id,
                              "repeat": earlier is not None})
-    response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600, httponly=True, samesite="lax")
+    response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600, httponly=True, samesite="lax")  # not money
     return response
 
 
@@ -679,7 +679,7 @@ def _bank_check_page(request, c, account_id: int, through: str, raw_balance: str
     dated = len(through) == 10 and through[4] == "-"
     recent = []
     if dated:  # the account's last rows beside the form: what to compare the bank's figure with
-        first = (parse_date(through) - timedelta(days=60)).isoformat()
+        first = (parse_date(through) - timedelta(days=60)).isoformat()  # not money
         recent = list(reversed(c.reporting.statement(account_id, first, through).rows))[:6]
     return render(request, "accounts/reconcile.html", account=account, recent=recent, through=through, balance_input=raw_balance,
                   lightning_balance=c.reconciliation.balance(account_id, through) if dated else None,
