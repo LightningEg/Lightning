@@ -89,11 +89,6 @@ Files: the website repository's `apps-script/` (read-only), its tests named in w
 Do: with the deployed receiver, send one benign formula-shaped value (`=1+1`) through each public form (feedback, UX tests, survey, signup) and check the sheet stores it as text. The dashboard half is dropped: analytics now live in the owner console on Supabase (owner, 2026-11-11) and `analytics/dashboard.html` only redirects, so no read key travels through a page. Report pass/fail per form to the owner in the question tool; a failure goes to a private advisory.
 Done when: the owner has the pass/fail list, and this file has one dated line "1E4 checked, N findings filed privately".
 
-## 1E6 Prove the committed encrypted fixture is the demo household · S · sonnet
-Files: `lightning/runtime/roundtrip.py` (`make`, `run`, `expected`), `tests/test_device_roundtrip.py`.
-Do: add `test_the_committed_fixture_is_the_generated_demo_household(tmp_path)` to `tests/test_device_roundtrip.py`: call `roundtrip.make(tmp_path)` (it builds the demo household up to `AS_OF` with fresh keys), then assert `expected(tmp_path)` equals `expected(FIXTURE)` line for line and that `run(FIXTURE)[0]` equals `run(tmp_path)[0]`. The fixture's own recovery key and password are dummy (`PASSWORD` in `roundtrip.py`); never print `recovery.txt`. If the lines differ only because the demo or schema changed since the fixture was made, rebuild with `python -m lightning.runtime.roundtrip --make tests/fixtures/roundtrip` in the same pull request and say so in `Detail:`.
-Done when: `python -m pytest tests/test_device_roundtrip.py -q` passes with the new test.
-
 ## 1E7 Scan every repository's full history for secrets · M · opus
 1E5 done 2026-11-11 (owner: protections applied, secret scanning and push protection on). GitHub's own alerts can be compared.
 Files: none changed in the repositories; the scan runs in the scratchpad.
@@ -111,7 +106,7 @@ Do: list open alerts with `gh api repos/LightningEg/Lightning/dependabot/alerts 
 Done when: the alert list is empty or every open alert has a dismissal reason, and `cd cloudflare/journal && npm ci --ignore-scripts && npm audit --audit-level=high` is clean.
 
 ## 1E10 Close the item · S · sonnet
-Needs 1E4, 1E6, 1E7, 1E8 and 1E9 done first.
+Needs 1E4, 1E7, 1E8 and 1E9 done first.
 Files: this file; `SECURITY.md` (only if a step changed what it says is checked); `issues/1-easy-to-contribute/README.md` (`done:` line).
 Do: check that every finding in the Report is either fixed (name the commit or the owner's dated answer), filed privately (say only that), or accepted by the owner. Then delete this file and add `1E` to `done:` (AGENTS.md §3).
 Done when: `python -m pytest tests/test_issues.py tests/test_docs_structure.py -q` passes.
