@@ -12,7 +12,7 @@
   <title>{% block title %}Lightning{% endblock %} · Lightning</title>
   <link rel="icon" type="image/svg+xml" href="/static/lightning-mark.svg">
   <link rel="stylesheet" href="{{ static_url('fonts/fonts.css') }}">
-  {# one cached file: web.PHONE_CSS lists its parts in cascade order (style, phone, themes, theme-surfaces, theme-materials, visual-flow) #}
+  {# one cached file: web.PHONE_CSS lists its parts in cascade order (phone-base: the PC rules the phone uses, then phone, themes, theme-surfaces, theme-materials, visual-flow; 3AY4) #}
   <link rel="stylesheet" href="{{ phone_css_src }}">
 {% if arabic_ui_src %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ arabic_ui_src }}"></script>{% endif %}
 <script nonce="{{ request.state.csp_nonce|default('') }}">window.LIGHTNING_UI=window.LIGHTNING_UI||{{ arabic_translations|default({})|tojson }};</script>
