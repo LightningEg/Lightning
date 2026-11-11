@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from 'partials/macros.html' import period_control with context %}
 {% block title %}{{ 'Settings'|tr(locale) }}{% endblock %}
-{% block heading %}<div><h1>{{ ('Currencies' if section == 'currencies' else 'Settings')|tr(locale) }}</h1></div>{% endblock %}
+{% block heading %}<div><h1>{{ ('Currencies' if section == 'currencies' else 'Your data' if section in ('', 'general', none) else 'Settings')|tr(locale) }}</h1></div>{% endblock %}
 {% block top_actions %}{% if not phone_mode() %}<button class="cat-icon fullscreen-toggle" type="button" data-fullscreen-toggle aria-label="{{ 'Full screen'|tr(locale) }}" title="{{ 'Full screen'|tr(locale) }}"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5M3 8l6-6M21 8l-6-6M3 16l6 6M21 16l-6 6"/></svg><span class="sr-only" data-fullscreen-label>{{ 'Full screen'|tr(locale) }}</span></button>{% endif %}{% endblock %}
 
 {% block content %}

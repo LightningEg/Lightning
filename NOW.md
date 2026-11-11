@@ -24,9 +24,10 @@ Reserved codes: none
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Phone (11-10, Claude):** IV-3AY: PC routes no longer know the phone (3AY11), catch-up built. Sonnet: 3AY14-18; Opus: 3AY4, 8, 9, 10; then owner 3AY13. **Read:** 3AY; Architecture › UI contract.
-- **Play (Claude, 11-09):** NF-11B code done; bundle signs. Before submitting (owner): 10H3, then shots, 11B7-9 (11A and 11D built). **Read:** NF-11B.
-- **r33 review (Claude, 11-09):** first 1Y, 9L. **Read:** r33.
+- **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12Y4, 12Z2-5, 12AE1-2. **Read:** 12Y.
+- **Phone (11-10, Claude):** IV-3AY: 3AY11 and catch-up built. Sonnet: 3AY14-18; Opus: 3AY4, 8-10; then owner 3AY13. **Read:** 3AY; Architecture › UI contract.
+- **Play (Claude, 11-09):** NF-11B done; owner: 10H3, shots, 11B7-9. **Read:** NF-11B.
+- **r33 (Claude):** 1Y, 9L. **Read:** r33.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 

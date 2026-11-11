@@ -4,7 +4,7 @@ type: feature
 pillar: understand
 size: L
 model: opus
-status: new
+status: ready
 created: 2026-11-09
 by: Claude
 skills: guideline-audit, bug-hunt
@@ -22,14 +22,11 @@ The working itself exists: Cash planning's "How safe to spend is worked out" and
 
 A headline figure (a Lead, a KPI, a phone hero) is itself the control. Clicking or tapping it opens its working in place: the rows that add up to it, as Cash planning draws them, what changed it since the comparison, and one link, "Open <its home page>" (A09.2: one home per figure). One label for the text link where a link is needed. The rows come from the service that owns the figure; no arithmetic in templates or JavaScript.
 
-Status is `new`: the pattern needs a guideline rule (A08 and C06) before it is built, in both repos.
+Owner, 2026-11-10 (12AB1): on the PC the working opens under the figure in its card; on the phone in a sheet from the bottom; the one label is "How it adds up". Next: write it into A08 and C06 in both repos, then 12AB2.
 
 ## How to work on this item
 
 Steps in order. `python tools/guideline.py A08`, `A09`, `C06`. After each: `python -m pytest -q tests/test_brand_audit.py tests/test_mohab_year.py`. Delete the step's heading in the same commit.
-
-## 12AB1 Owner: the pattern and its one label · owner
-A pick-list with a drawn example of each: the working opens under the figure in its card (recommended on the PC), in a sheet from the bottom (recommended on the phone), or in a side panel; and the label, "How it adds up" (recommended, already on Accounts) or "Show the numbers". The answer becomes a guideline rule (A08, C06) in both repos.
 
 ## 12AB2 One "working" shape from the services · M · opus
 Each figure's owner service returns its working as rows (name, amount, sign, the row's own home) for Net worth, Safe to spend, Left in plan, Savings rate, Portfolio value and Emergency fund. Most exist in pieces (`ForecastMonth`, the budget summary, `position.at`). Done when a test proves each working's rows sum to the figure on the sample year.
