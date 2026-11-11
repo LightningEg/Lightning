@@ -31,7 +31,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 - **NF-4A6** (Everywhere) Real-device evidence, in [Edit journal: edit anywhere, one home confirms](../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md)
 - **NF-10C4** (Feel) Owner steps 1-6 in order, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
 - **NF-10C5** (Feel) Review prices after 60 days of sales, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
-- **NF-10H4** (Own) Owner: prices, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
+- **NF-10H4** (Own) Owner: set the prices in the Console, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
 
 ## By milestone
 
