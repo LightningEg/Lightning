@@ -3,6 +3,8 @@ turn what a bank prints into what the review shows. Pure functions, no database;
 capture both read rows through here. Moved unchanged out of `bank_imports`, which still exports every name."""
 from __future__ import annotations
 
+import logging
+
 import csv
 import io
 import re
@@ -314,4 +316,5 @@ def decode_csv(data: bytes) -> tuple[list[str], list[dict[str, str]]]:
             rows.append({h: str(row.get(h, "") or "").strip() for h in headers} | {"__line__": str(line)})
         return headers, rows
     except csv.Error as exc:
-        raise ValidationError(f"Could not read this CSV: {exc}", "file") from None
+        logging.getLogger("lightning").info("CSV not read: %s", exc)
+        raise ValidationError("This file is not a CSV Lightning can read. Save it from your bank as CSV and try again.", "file") from None
