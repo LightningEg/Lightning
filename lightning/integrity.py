@@ -9,6 +9,7 @@ from decimal import Decimal
 from lightning.accounts.domain import AccountType
 from lightning.categories.domain import CategoryFamily
 from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
+from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, from_e6
 from lightning.reporting.service import ReportingService
 
@@ -36,6 +37,7 @@ class IntegrityService:
         self.position = position
         self.investments = investments
 
+    @request_cached(deep=True)
     def checks(self, as_of: date | str) -> list[IntegrityCheck]:
         # Each check compares two separate computations. Checks that rebuilt a figure from the very parts they then
         # compared against (gross vs asset classes, classes vs owned net worth, owned + held vs gross, the

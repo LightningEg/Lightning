@@ -33,10 +33,10 @@ Severity: high = a wrong figure; medium = a contradiction or an unfinished page;
 | ID | Severity | Observation and expected behavior | Follow-up |
 | --- | --- | --- | --- |
 | N1 | high | Phone Budget, *Where the month went*: 33,851 Spent. The month's spending is 19,001; the donut adds fixed costs paid (14,850) on top of the categories that already hold them. [Screenshot](evidence/phone-budget.png). | BV-12O |
-| N2 | medium | *Left in plan* is 6,598 on the PC and on Home, 5,468 on the phone Budget (the everyday part). | IV-12P |
-| N3 | medium | Home: "Safe to spend 51,420 · About 249 a day until payday". 249 a day belongs to the budget's 5,468, not to 51,420. Two answers to "how much can I spend?" in one line. | IV-12P |
-| N4 | medium | "Lowest point ahead 51,420" (Plan) against "Lowest scheduled cash 86,288" (Scenarios) for the same months. | IV-12P |
-| N5 | low | "Plan leaves to save 19,401" and "Not yet given a job 13,997" two rows apart; the lead figure of Cash planning differs between PC (Safe to spend) and phone (Due before payday). | IV-12P |
+| N2 | medium | *Left in plan* is 6,598 on the PC and on Home, 5,468 on the phone Budget (the everyday part). | IV-12P fixed; [one name, one figure](../../../tests/test_one_name_one_figure.py) |
+| N3 | medium | Home: "Safe to spend 51,420 · About 249 a day until payday". 249 a day belongs to the budget's 5,468, not to 51,420. Two answers to "how much can I spend?" in one line. | IV-12P fixed; [one name, one figure](../../../tests/test_one_name_one_figure.py) |
+| N4 | medium | "Lowest point ahead 51,420" (Plan) against "Lowest scheduled cash 86,288" (Scenarios) for the same months. | IV-12P fixed; [one name, one figure](../../../tests/test_one_name_one_figure.py) |
+| N5 | low | "Plan leaves to save 19,401" and "Not yet given a job 13,997" two rows apart; the lead figure of Cash planning differs between PC (Safe to spend) and phone (Due before payday). | IV-12P fixed; [one name, one figure](../../../tests/test_one_name_one_figure.py) |
 
 ### Unfinished pages
 

@@ -423,9 +423,11 @@ def _confirm_payday_proposal(o: Mohab) -> None:
     o.c.settings.set("cash_funding_enabled", "1")
     screen = o.ask("payday_proposal", "My salary just landed. Does Lightning offer one plan for it?", "Salary received",
                    start="/needs-you")
-    for line in ("Your payday proposal", "Bills protected", "Everyday spending", "Emergency and goals",
+    for line in ("Your payday proposal", "Bills protected", "To your plan", "Emergency and goals",
                  "Left unassigned", "after you confirm", "expected salary is not counted"):
         assert screen.shows(line), f"The payday proposal lacks {line!r}"
+    pr = o.c.funding.preview()["proposal"]   # BT-12AD: four disjoint lines that add up to the cash they share out
+    assert pr["bills"] + pr["to_plan"] + pr["reserves"] + pr["unassigned"] == pr["available_before"]
     assert o.c.db.scalar("SELECT count(*) FROM cash_funding") == 0   # looking assigns nothing
     if getattr(o.c, "is_journal", False):   # a journal profile confirms through its own commands: test_salary_day_portability
         o.c.settings.set("cash_funding_enabled", "0")

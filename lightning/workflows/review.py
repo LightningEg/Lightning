@@ -43,7 +43,8 @@ def glance(name: str, verb: str, amount=None, when: str = "", n=None, sa: str = 
 
 # Needs you groups its items by what they are about (feedback ticket 84): one row per group on the Overview,
 # and each group opens its own page. First match on the item's link wins; the order is the order shown.
-GROUPS = (("payments", "Bills and payments", ("/plan/items/", "/plan/bill-alerts/", "/gameya/", "/deposits/")),
+GROUPS = (("checks", "Data checks", ("/checks",)),
+          ("payments", "Bills and payments", ("/plan/items/", "/plan/bill-alerts/", "/gameya/", "/deposits/")),
           ("activity", "Activity to sort out", ("/rules", "/sms", "/accounts/", "/transactions", "/activity", "/reimbursements")),
           ("budget", "Budget and saving", ("/budget", "/financial-health")),
           ("cash", "Cash and goals", ("/plan", "/payday")),
@@ -129,6 +130,14 @@ class ReviewInbox:
                   # a missing exchange rate is typed in Settings; a missing price on the prices page
                   "href": "/settings?section=currencies&tab=rates" if " rate within " in item else "/investments/prices"}
                  for item in c.reporting.net_worth(on).unvalued]
+        # NF-2AJ: a data check that does not add up says so here, one tap from Home (INCOMPLETE is already the
+        # Missing valuation rows above). The checks are request-cached, so /checks on the same request reuses them.
+        integrity = getattr(c, "integrity", None)
+        if integrity is not None:
+            items.extend({"label": "A data check does not add up", "detail": check.name, "priority": 0,
+                          "href": "/checks", "action": "Review", "consequence": "risk",
+                          "glance": glance("Data checks", "Review", None, "does not add up")}
+                         for check in integrity.checks(on) if check.status == "ISSUE")
         items.extend(self._statements())
         items.extend(self._sms())
         items.extend(self._sms_balances())

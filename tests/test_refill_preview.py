@@ -42,5 +42,7 @@ def test_the_suggested_refill_keeps_safe_to_spend_and_all_of_it_is_a_choice(tmp_
     suggested = re.search(r'refill-prompt.*?name="allocated" value="([\d,.]+)"', page, re.S).group(1)
     emergency = next((r for r in c.reserves.list_active() if r["kind"] == "EMERGENCY"), None)
     base = emergency["effective_allocated"] if emergency else D(0)
-    assert D(suggested.replace(",", "")) == base + options["safe"]
-    assert "After this, Safe to spend is" in page and "Move more anyway" in page and "anyway</button>" in page
+    first = c.forecaster.refill_options(today(), free, top_up=c.budgets.emergency_fund(
+        "2026-11", base, schedule=c.schedules.view()).top_up)["first"]
+    assert D(suggested.replace(",", "")) == base + first                  # IV-12AA2: the modest amount is filled
+    assert "Safe to spend after:" in page and "Move more" in page and "anyway</button>" in page

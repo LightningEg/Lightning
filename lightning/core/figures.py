@@ -47,7 +47,7 @@ _TABLE = [
     ("lowest_scheduled_cash", "Lowest scheduled cash",
      "The lowest projected day-end owned cash balance from confirmed cash and scheduled payments. Excludes variable spending and savings goals; reserves remain in cash. Missing FX makes it unavailable."),
     ("cash_available_to_assign", "Cash available to assign",
-     "Actual owned liquid cash left after reserves, funded spending and bills due outside those funds. Missing FX makes it unavailable; expected income never contributes.",
+     "Actual owned liquid cash left after reserves and funded spending. The payday proposal shares it out in four parts that add up to it: Bills protected (bills due outside those funds), To your plan, Emergency and goals, Left unassigned. Missing FX makes it unavailable; expected income never contributes.",
      ""),
     ("funded_spending_left", "Funded spending left",
      "This month's assigned category cash after owned spending and refunds, floored at zero. Unused funding does not carry automatically.",
@@ -108,6 +108,9 @@ _TABLE = [
     ("portfolio_value", "Portfolio value", "Holdings value under the name the Investments tab uses: everything "
      "you own that is not cash. Cash waiting in a brokerage account counts in Cash you own (owner decisions "
      "2026-10-04).", "Holdings value"),
+    ("valued_by_you", "Valued by you", "The part of Portfolio value known only by its balance, with no cost or "
+     "market price (a share of a flat). The Investments Lead is Cost + Unrealized gain + Valued by you (BT-12AC).",
+     "Portfolio value − Cost − Unrealized gain"),
     ("holdings_after_sale", "Holdings after sale (estimate)",
      "What your holdings, deposits included, might fetch if sold or cashed in today, after each class's sale "
      "factor. CDs before their earliest withdrawal count 0; early-redeemable CDs count their balance × the CD "
@@ -183,7 +186,8 @@ _TABLE = [
     ("left_in_plan", "Left in plan", "What is left of the plan; the Overview and Budget show the same month "
      "figure, and a negative one reads \"Over plan\". One-off categories are left out of Spent.", "Planned − Spent"),
     ("everyday_left", "Left for everyday", "The plan's remaining money after unpaid planned bills and loans, "
-     "floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance."),
+     "floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance and "
+     "the phone Home's lead (owner, 2026-11-09); Safe to spend leads Cash planning on both apps (IV-12P)."),
     ("plan_leaves_to_save", "Plan leaves to save", "What this month's plan leaves of average monthly income.",
      "Average monthly income − Planned"),
     ("not_yet_given_a_job", "Not yet given a job", "Income no plan, goal or emergency top-up has claimed this "
@@ -248,6 +252,9 @@ _TABLE = [
      "instalments is settled (Upcoming)."),
     ("payments_before_next_income", "Due before payday",
      "Scheduled bills, subscriptions and loan payments that are not due yet, up to your next income."),
+    ("lowest_point_ahead", "Lowest point ahead", "The lowest month-end free cash in the cash forecast, everyday "
+     "spending and savings included. Compare scenarios shows the same figure and moves it by what a scenario changes "
+     "in scheduled cash (IV-12P)."),
     ("saving_for_goals", "Saving for goals", "What dated reserve goals still need this month, spread over the months left."),
     ("savings_target_rest", "Rest of savings target", "What the Savings target asks a month beyond Saving for goals and "
      "Emergency fund top-up (never below zero), so Safe to spend never counts what you mean to save (owner "
@@ -289,6 +296,7 @@ _SOURCES = {
     "bill_reserve_coverage": (PLAN, "lightning.planning.service.PlanningService.bill_reserve_coverage"),
     "free_cash": (BOTH, f"{P}.free_cash"),
     "portfolio_value": (LEDGER, f"{P}.portfolio_value"),
+    "valued_by_you": (LEDGER, "lightning.planning.investment_figures.LeadParts"),
     "holdings_after_sale": (BOTH, f"{P}.holdings_after_sale"),
     "if_you_sold_today": (BOTH, f"{P}.if_you_sold_today"),
     "shares_and_funds": (LEDGER, "lightning.zakat.ZakatService.assess"),
@@ -355,6 +363,7 @@ _SOURCES = {
     "left_to_pay_in_month": (PLAN, "lightning.planning.calendar.PaymentMonth.left_to_pay"),
     "already_paid_in_month": (PLAN, "lightning.planning.calendar.PaymentMonth.already_paid"),
     "payments_before_next_income": (PLAN, f"{FC}._safe_to_spend"),
+    "lowest_point_ahead": (PLAN, "lightning.planning.domain.CashForecast.lowest"),
     "saving_for_goals": (PLAN, f"{FC}._goal_need"),
     "savings_target_rest": (PLAN, f"{FC}.forecast"),
 }

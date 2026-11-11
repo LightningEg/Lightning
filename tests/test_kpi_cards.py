@@ -143,7 +143,10 @@ def test_neighbouring_figures_no_longer_disagree_or_read_wrong(mohab, monkeypatc
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-19")
     c, client = mohab
     scen = _page(client, "/plan/scenarios")                                    # (b) whole EGP and a note, (c) no "None None"
-    assert "None None" not in scen and "No shortfall" in scen and "usual everyday spending" in scen
+    assert "None None" not in scen and "No shortfall" in scen and "Cash planning’s, month by month" in scen
+    low = c.forecaster.forecast(date(2026, 10, 19)).lowest              # IV-12P: the plan's own Lowest point ahead
+    from lightning.ui.date_text import month_text
+    assert f"Lowest point ahead {low.closing:,.0f} EGP · {month_text(low.month)}" in scen and "Lowest scheduled cash" not in scen
     assert not re.search(r"\d,\d{3}\.\d\d EGP", scen)
     health = _page(client, "/financial-health")                                # (d) only figures with a limit count
     judged = re.search(r"of the (\d+) figures you set a limit for", health)

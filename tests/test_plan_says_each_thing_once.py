@@ -14,8 +14,12 @@ def test_a_late_bill_is_listed_once_and_the_lead_holds_no_card(c, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-20")
     load_mohab_2026(c)
     page = TestClient(create_app(c)).get("/plan").text
-    late = set(re.findall(r"([\w'& ]+) is late", page))
+    from lightning.core.dates import today
+    from lightning.planning.bill_state import late_payments
+    late = {p.item.name for p in late_payments(c.planning, today())}
     assert late, "the sample has late bills on this day"
+    # IV-12AA5: four late bills are one Needs you row that opens Catch up, not a row each.
+    assert f"{len(late)} payments are late" in page and 'href="/plan/catch-up"' in page
     nxt = page.split('id="plan-next"', 1)[1].split("</section>", 1)[0]
     assert "20 Oct – 19 Nov" in nxt  # the list starts at today
     # A late planned bill is not listed again (a later instalment of it may be); a gam'eya instalment is not a Needs you
