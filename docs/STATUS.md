@@ -32,7 +32,6 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 - **NF-10C4** (Feel) Owner steps 1-6 in order, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
 - **NF-10C5** (Feel) Review prices after 60 days of sales, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
 - **NF-10H4** (Own) Owner: prices, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
-- **NF-10H5** (Own) Owner: the extra seats already sold, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
 
 ## By milestone
 

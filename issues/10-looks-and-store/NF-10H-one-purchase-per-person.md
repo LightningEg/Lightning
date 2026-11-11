@@ -46,7 +46,7 @@ changes is how many licences one purchase may mint. "Profile" is the profile's s
 | 10 | Pending payment (Play cash or slow method) | Unchanged: "It unlocks when Google Play confirms it"; settled on the next Settings load. |
 | 11 | Refund or chargeback on Play | `redeem-play` checks the order (and Google's voided purchases); refused purchases mint no new licences (410). Existing licences stay. |
 | 12 | Eleventh profile on one purchase | Refused with a message naming the cap; the owner can free a profile in the console (existing Members › Free a profile). |
-| 13 | Already sold extra seats (25%) | Owner decides in 10H5 (credit the coins back is the fair default). |
+| 13 | Already sold extra seats (25%) | None sold (owner, 2026-11-11): nothing to credit. |
 
 ## Fix
 
@@ -56,9 +56,6 @@ Steps, in order; each is one pull request. Built: 10H1, 10H2 (app and `redeem-pl
 One EGP price per theme on a Play price step, the same coins on the website; set the four Play products (`cotton`,
 `dendera`, `nile`, `papyrus`) to it; confirm the Play service fee tier in the Console.
 Waits for launch (owner, 2026-11-11): the Console cannot be set up before it. Prices are decided; do not ask again before launch.
-
-## 10H5 Owner: the extra seats already sold · owner
-Credit their coins back (recommended) or leave them.
 
 Read: `lightning/ui/play_store.py`, `lightning/ui/entitlements.py` (`redeem_play`, `_exchange`), the website's
 `supabase/functions/redeem-play` and `redeem-purchase`, NF-11B (done).

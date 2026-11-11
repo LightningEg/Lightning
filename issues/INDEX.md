@@ -151,7 +151,6 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 | NF-10C5 | ↳ Review prices after 60 days of sales | | | owner |  | |
 | **NF-10H** | [One purchase per person - a theme bought on Google Play or the website unlocks every profile of that buyer, on every surface](10-looks-and-store/NF-10H-one-purchase-per-person.md) | new feature | Own | L | Opus | ready |
 | NF-10H4 | ↳ Owner: prices | | | owner |  | |
-| NF-10H5 | ↳ Owner: the extra seats already sold | | | owner |  | |
 
 Reports: [r12](10-looks-and-store/r12-v150-release/report.md) · [r13](10-looks-and-store/r13-store-and-community/report.md).
 
