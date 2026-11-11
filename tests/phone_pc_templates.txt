@@ -8,8 +8,6 @@ bank_import_preview.html
 bank_import_sheets.html
 bank_import_upload.html
 broker_import.html
-counterparties.html
-counterparty.html
 dashboard/welcome.html
 financial_health.html
 money_from_others.html
