@@ -18,7 +18,7 @@
  "phone/screens/money.py": 14,
  "phone/screens/report.py": 2,
  "phone/screens/spending.py": 11,
- "routes/accounts.py": 12,
+ "routes/accounts.py": 10,
  "routes/analysis.py": 37,
  "routes/bank_imports.py": 26,
  "routes/birdview.py": 11,
