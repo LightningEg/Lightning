@@ -14,7 +14,8 @@ async def list_categories(request: Request):
     c = container(request)
     show_archived = request.query_params.get("archived") == "1"
     table = c.categories.table()
-    return render(request, "categories/list.html", table=table, category_count=sum(len(rows) for _, rows in table),  # not money archived=c.categories.archived(),
+    category_count = sum(len(rows) for _, rows in table)  # not money
+    return render(request, "categories/list.html", table=table, category_count=category_count, archived=c.categories.archived(),
                   show_archived=show_archived, recurring=c.budgets.recurring_income_ids(),
                   one_offs=c.budgets.one_off_ids(with_children=False), root=c.categories.get_by_code("EXP"))
 

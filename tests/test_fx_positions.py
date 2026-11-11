@@ -124,7 +124,7 @@ def test_the_currencies_tab_shows_the_figures_with_their_names(c, dollars):
         assert text in page.text, text
     assert "+1,733" in page.text and "Unavailable" not in page.text
     month = client.get("/accounts/currencies", params={"period": "month", "month": "2026-09"})
-    assert "Balances and unrealized gain as of 2026-09-30; realized gain and spread from 2026-09-01 to 2026-09-30." in month.text
+    assert "Your foreign money is worth" in month.text  # IV-12Y4: one plain sentence, not the definitions
     assert "at today’s rates" not in month.text
     assert month.status_code == 200 and "+167" in month.text                    # realized in September
     c.settings.set("locale", "ar")
