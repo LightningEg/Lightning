@@ -26,11 +26,11 @@ def _digits(text: str, locale: str) -> str:
 
 
 def _short(month: int, locale: str) -> str:
-    return _AR[month - 1] if _arabic(locale) else calendar.month_abbr[month]
+    return _AR[month - 1] if _arabic(locale) else calendar.month_abbr[month]  # not money: dates and text
 
 
 def _full(month: int, locale: str) -> str:
-    return _AR[month - 1] if _arabic(locale) else _FULL[month - 1]
+    return _AR[month - 1] if _arabic(locale) else _FULL[month - 1]  # not money: dates and text
 
 
 def _as_date(value) -> date | None:
@@ -64,7 +64,7 @@ def day_text(value, locale: str = "en", today: date | None = None) -> str:
     words = _WORDS["ar" if _arabic(locale) else "en"]
     if day == now:
         return words[0]
-    if day == now - timedelta(days=1):
+    if day == now - timedelta(days=1):  # not money: dates and text
         return words[1]
     text = f"{day.day} {_short(day.month, locale)}" + ("" if day.year == now.year else f" {day.year}")
     return _digits(text, locale)
@@ -124,7 +124,7 @@ _PIECE = re.compile(r"(<script\b.*?</script>|<style\b.*?</style>|<textarea\b.*?<
                     r"<!--.*?-->|<[^>]+>|[^<]+)", re.S | re.I)
 _TIP = re.compile(r"""(\s(?:title|aria-label|data-tip)=)(["'])(.*?)\2""", re.S | re.I)
 _STAMP = r"(?<![\w./-])(\d{4}-(?:0[1-9]|1[0-2])(?:-(?:0[1-9]|[12]\d|3[01]))?)(?![\w/]|-\d|\.\d)"
-_RANGE = re.compile(_STAMP + r"( to | لحد | – |–| - )" + _STAMP)
+_RANGE = re.compile(_STAMP + r"( to | لحد | – |–| - )" + _STAMP)  # not money: dates and text
 _ONE = re.compile(_STAMP)
 # A format example stays as typed ("like 2026-01-31", "e.g. 2026-09", "زي 2026-01-31").
 _EXAMPLE = re.compile(r"(?:\blike|\be\.g\.|\bzay|زي|مثلًا|مثلا|مثل)\s*$")
@@ -169,7 +169,7 @@ def human_text(text: str, locale: str = "en", today: date | None = None) -> str:
     return _ON_DAY.sub(r"\1", text)  # "reached your account on today" -> "... today"
 
 
-_SPLIT_RANGE = re.compile(r'<bdi dir="ltr">' + _STAMP + r'</bdi>( to | لحد | – )<bdi dir="ltr">' + _STAMP + r'</bdi>')
+_SPLIT_RANGE = re.compile(r'<bdi dir="ltr">' + _STAMP + r'</bdi>( to | لحد | – )<bdi dir="ltr">' + _STAMP + r'</bdi>')  # not money: dates and text
 
 
 def human_dates(page: str, locale: str = "en", today: date | None = None) -> str:
@@ -186,7 +186,7 @@ def human_dates(page: str, locale: str = "en", today: date | None = None) -> str
             elif lower == "</bdi":
                 typed = False
             if not piece.startswith(("<!", "</")) and lower not in ("<scri", "<styl", "<text", "<svg ", "<svg>"):
-                piece = _TIP.sub(lambda m: m.group(1) + m.group(2) + human_text(m.group(3), locale, now) + m.group(2), piece)
+                piece = _TIP.sub(lambda m: m.group(1) + m.group(2) + human_text(m.group(3), locale, now) + m.group(2), piece)  # not money: dates and text
             out.append(piece)
         else:
             out.append(piece if typed else human_text(piece, locale, now))
