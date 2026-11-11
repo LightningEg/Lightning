@@ -31,12 +31,11 @@ Each tab keeps, open: the header, the Lead, Needs you, the KPI row and the one d
 
 12Z1: `tests/test_page_skeleton.py` fails a tab taller than 2.5 screens at 1366 x 768 (Transactions and Categories excepted); Spending, Cash planning, Holdings and Your data are listed in its `ALLOWED` with their step.
 
+Built 12Z2: Cash planning lists a late bill in Needs you only, "Can I afford this?" is its own card, Zakat day is a line of the forecast card (`tests/test_plan_says_each_thing_once.py`). Cash planning is still over 2.5 screens; 12Z3's pattern (closed rows) applies to its lower cards.
+
 ## How to work on this item
 
 One PR per step. After each: `python -m pytest -q tests/test_brand_audit.py tests/test_mohab_year.py` and the step's test. Mohab reads some of these blocks: open them in his steps, never delete what he checks. Delete the step's heading in the same commit.
-
-## 12Z2 Cash planning says each thing once · M · sonnet
-Files: `lightning/ui/templates/planning/`. Late rows live in Needs you only; "The next 30 days" starts at today. "Can I afford this?" becomes a row or its own card beside the Lead, not a card in it. Zakat day joins the forecast card as one line. Done when a test finds no bill name twice above the forecast and no `.card` inside the Lead card.
 
 ## 12Z3 Spending opens on the categories; the other charts open on request · M · opus
 Files: `lightning/ui/templates/birdview/`. Open: Money out as a Lead with its change, then "Where did it go?". Closed rows: Is this period unusual?, Day by day, Cash flow, Month by month, each with a one-line summary of what it would show ("Loan payments and Health are above their usual range"). Done when Spending is within the budget of 12Z1.
