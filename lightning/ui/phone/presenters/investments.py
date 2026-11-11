@@ -61,12 +61,12 @@ def _phone_hero_line(result, growth, period, current: bool, locale: str) -> dict
 def _phone_value_line(c, period, divisor: Decimal) -> tuple[Decimal, dict]:
     """Portfolio value on the period's last day, and the line of it from the first day to the last: seven dates
     spread evenly (five or three on a very short period), so the chart can name its first, middle and last."""
-    span = (period.end - period.start).days
+    span = (period.end - period.start).days  # not money
     count = 7 if span >= 6 else 5 if span >= 4 else 3 if span >= 2 else 0
-    days = [period.start + timedelta(days=round(span * i / (count - 1))) for i in range(count)] if count else []
-    values = [c.position.portfolio_value_at(day) / divisor for day in days]
+    days = [period.start + timedelta(days=round(span * i / (count - 1))) for i in range(count)] if count else []  # not money
+    values = [c.position.portfolio_value_in(day, divisor) for day in days]
     series = [{"name": label("portfolio_value"), "tone": "hold", "area": True, "values": values}]
-    end_value = values[-1] if values else c.position.portfolio_value_at(period.end) / divisor
+    end_value = values[-1] if values else c.position.portfolio_value_in(period.end, divisor)
     return end_value, {**charts.trend([fmt_date(day) for day in days], series), "count": count}
 
 

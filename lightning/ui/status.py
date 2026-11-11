@@ -9,7 +9,9 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from lightning.budgeting.domain import over_plan_by
 from lightning.core.money import ZERO, fmt
+from lightning.reporting.spending import change as spending_change
 
 
 def sentence(text: str, **values: object) -> dict:
@@ -53,7 +55,7 @@ def budget(e, has_plan: bool, period_key: str, spent: Decimal, planned: Decimal)
         return sentence("Set a plan to see what is left to spend.")
     if period_key != "month" or e is None:
         if spent > planned:
-            return sentence("You spent {amt} more than planned in these months.", amt=fmt(spent - planned, 0))
+            return sentence("You spent {amt} more than planned in these months.", amt=fmt(over_plan_by(spent, planned), 0))
         return sentence("You spent {amt} of the {x} planned.", amt=fmt(spent, 0), x=fmt(planned, 0))
     if e.left < ZERO:
         return sentence("You are {amt} over the plan this month." if e.current else "You went {amt} over the plan that month.",
@@ -119,9 +121,9 @@ def spending(total: Decimal, prior: Decimal | None, prior_label: str, period_key
     if not total:
         return sentence("No money went out " + when + ".")
     if prior:
-        gap = total - prior
+        gap = spending_change(total, prior)
         if abs(gap) >= 1:
-            return sentence("You spent {amt} " + when + ", {gap} " + ("more" if gap > 0 else "less") + " than {label}.",
+            return sentence("You spent {amt} " + when + ", {gap} " + ("more" if gap > 0 else "less") + " than {label}.",  # not money
                             amt=fmt(total, 0), gap=fmt(abs(gap), 0), label=prior_label)
     return sentence("You spent {amt} " + when + ".", amt=fmt(total, 0))
 

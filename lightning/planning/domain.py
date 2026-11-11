@@ -271,6 +271,55 @@ class EverydayBudget:
             return None
         return self.last_month_by_day[min(self.day, len(self.last_month_by_day)) - 1]
 
+    # IT-12AE4: the Budget screens' derived figures, here beside their inputs so no screen works them out.
+    @property
+    def spent_percent(self) -> Decimal | None:
+        """Spent as a percentage of Planned (0 to 100 and past it); None without a plan."""
+        return self.spent / self.planned * 100 if self.planned else None
+
+    @property
+    def everyday_used_percent(self) -> Decimal | None:
+        """Everyday spending as a percentage of the everyday plan; None when that plan is not above zero."""
+        return self.everyday_spent / self.everyday_plan * 100 if self.everyday_plan > 0 else None
+
+    @property
+    def spent_less_pace(self) -> Decimal:
+        """Everyday spending less the pace, as it stands (pace_gap forgives a usual month's spending; this does not)."""
+        return self.everyday_spent - self.pace
+
+    @property
+    def against_last_month_same_day(self) -> Decimal | None:
+        """Everyday spending less the month before's by the same day; None without that month."""
+        before = self.last_month_same_day
+        return None if before is None else self.everyday_spent - before
+
+    @property
+    def against_last_month(self) -> Decimal | None:
+        """Everyday spending less the whole month before's; None without that month."""
+        before = self.last_month_by_day[-1] if self.last_month_by_day else None
+        return None if before is None else self.everyday_spent - before
+
+    @property
+    def everyday_parts(self) -> tuple[Decimal, Decimal, Decimal]:
+        """The everyday plan as spent, left and over (spent past the plan): plan_parts of the two."""
+        return plan_parts(self.everyday_plan, self.everyday_spent)
+
+
+def plan_parts(plan: Decimal, spent: Decimal) -> tuple[Decimal, Decimal, Decimal]:
+    """A plan split for one bar (IV-11D2): what was spent of it, what is left of it and what went past it.
+    ``spent + left`` is the plan while within it; ``over`` is spending past it."""
+    return min(spent, plan), max(plan - spent, ZERO), max(spent - plan, ZERO)
+
+
+def a_year(monthly: Decimal) -> Decimal:
+    """A monthly amount over twelve months."""
+    return monthly * 12
+
+
+def a_month(yearly: Decimal) -> Decimal:
+    """A yearly amount spread over twelve months."""
+    return yearly / 12
+
 
 @dataclass(frozen=True)
 class CashForecast:
@@ -305,3 +354,44 @@ class CashForecast:
     @property
     def lowest(self) -> ForecastMonth | None:
         return min(self.months, key=lambda m: m.closing) if self.months else None
+
+    # IT-12AE4: the Cash planning screens' derived figures, beside Free cash and Safe to spend.
+    @property
+    def safe_percent_of_free_cash(self) -> Decimal | None:
+        """Safe to spend as a percentage of Free cash; None without free cash."""
+        return self.safe_to_spend / self.free_cash * 100 if self.free_cash > 0 else None
+
+    @property
+    def promised(self) -> Decimal:
+        """Free cash already promised to bills, the plan and savings: Free cash less Safe to spend, never below zero."""
+        return max(self.free_cash - self.safe_to_spend, ZERO)
+
+    def taken_off(self, *labels: str) -> Decimal:
+        """What the named Safe to spend steps take off Free cash, added up as a positive amount."""
+        parts = dict(self.safe_to_spend_parts)
+        return sum((-parts.get(name, ZERO) for name in labels), ZERO)
+
+    def free_cash_change(self, before: Decimal) -> Decimal:
+        """Free cash today less what it was at an earlier date."""
+        return self.free_cash - before
+
+    def free_cash_after(self, due: Decimal) -> Decimal:
+        """Free cash left once ``due`` is paid (below zero when it is short)."""
+        return self.free_cash - due
+
+    def free_cash_short_of(self, due: Decimal) -> Decimal:
+        """How much ``due`` is above Free cash."""
+        return due - self.free_cash
+
+    @property
+    def drop_to_lowest(self) -> Decimal | None:
+        """Free cash today less the lowest month-end ahead; None without a forecast month."""
+        low = self.lowest
+        return None if low is None else self.free_cash - low.closing
+
+    def lowest_in_months(self, monthly_spending: Decimal) -> Decimal | None:
+        """The lowest month-end ahead in months of spending; None without either, or when that point is not above zero."""
+        low = self.lowest
+        if low is None or not monthly_spending or low.closing <= 0:
+            return None
+        return low.closing / monthly_spending

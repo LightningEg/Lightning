@@ -28,7 +28,7 @@ class Period:
         """The period in the fewest words, to sit beside a figure: '2026-10 so far', '2026-09', 'Year to date'."""
         if self.key == "month":
             last = calendar.monthrange(self.start.year, self.start.month)[1]
-            return self.start_text[:7] + (" so far" if self.end.day < last or self.end.month != self.start.month else "")
+            return self.start_text[:7] + (" so far" if self.end.day < last or self.end.month != self.start.month else "")  # not money
         if self.key == "ytd":
             return "Year to date"
         if self.key == "all":
