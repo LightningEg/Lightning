@@ -26,7 +26,7 @@ ISSUES = ROOT / "issues"
 TYPES = ("bug", "polish", "feature", "tech", "owner")
 STATUSES = ("new", "ready", "building", "blocked", "parked")
 # The caps (AGENTS.md section 3, owner 2026-11-11): more open work than this is a warning, never a failure.
-MAX_BUILDING, MAX_OPEN = 3, 20
+MAX_BUILDING, MAX_OPEN = 10, 20
 SEVERITIES = ("high", "medium", "low")  # bugs only: high is wrong money or lost data
 # The pillar is what part of the product an item serves. One list for issues, reports, feedback, docs and GitHub
 # labels; see docs/README.md. Add one only when no existing pillar fits, and say so in issues/README.md.

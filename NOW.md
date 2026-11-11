@@ -50,5 +50,4 @@ Plan: `issues/INDEX.md`.
 5. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `issues/4-edit-journal-and-devices/r11-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
 6. **Website recapture** (Sonnet M3 session, last) for 3W, 3AG, 7Q, 3Q, 3S, 3T, 3G.  Fix the `a-kpis` caption. **Read:** `skills/site-recapture/SKILL.md`.
 8. **O9 (Claude, 11-10):** 3BK, 9K done; 6F1 and Dubai done. Left: 3BK9 website guideline copy (repo access was denied here), 6F2 Abu Dhabi and Bahrain suffixes. **Read:** 3BK, 6F.
-9. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
 10. **6B, 6D, 3AI:** shares, gold and institution logos remain as their items describe. **Read:** each item in `issues/INDEX.md`.
