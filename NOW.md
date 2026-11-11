@@ -6,6 +6,7 @@ Reserved codes: none
 
 | Who | Work | Files | Since |
 |---|---|---|---|
+| Codex | IV-3BF PC finish, steps 1-7. | `lightning/ui/static/`, `lightning/ui/templates/`, `tests/test_*browser.py`, `issues/3-polish-and-arabic/` | 2026-11-11 |
 | Claude | O5 | `lightning/deposits/` | 2026-11-10 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
