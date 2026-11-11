@@ -638,7 +638,6 @@ def _save(request: Request, kind: str, v: dict, txn_id: int | None = None):
 @router.get("/add")
 async def add_investment(request: Request):
     """One door (r30 E1-E4): ask what it is, then go to the short form that fits."""
-    c = container(request)
     return render(request, "investments/add.html")
 
 
