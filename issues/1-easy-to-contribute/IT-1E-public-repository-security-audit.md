@@ -89,16 +89,13 @@ Files: the website repository's `apps-script/` (read-only), its tests named in w
 Do: with the deployed receiver, send one benign formula-shaped value (`=1+1`) through each public form (feedback, UX tests, survey, signup) and check the sheet stores it as text. The dashboard half is dropped: analytics now live in the owner console on Supabase (owner, 2026-11-11) and `analytics/dashboard.html` only redirects, so no read key travels through a page. Report pass/fail per form to the owner in the question tool; a failure goes to a private advisory.
 Done when: the owner has the pass/fail list, and this file has one dated line "1E4 checked, N findings filed privately".
 
-## 1E5 Owner: apply the repository protections · owner
-Run `python tools/security_setup.py` (it only previews) and read its planned writes; then (a) *(Recommended)* `python tools/security_setup.py --apply` with your own `gh` login, and add yourself as reviewer of the `production-release` environment when it asks; (b) apply it later: the downloads, market-data and website `main` branches stay unprotected until then, and the public Windows ZIP can be replaced by any account with write access. (`--app-actions-only` changes only the app's allowed-actions list; it is not a partial setup.) Afterwards turn on GitHub *Secret scanning* and *Push protection* for all four repositories (Settings › Code security). Tell the AI the date it was applied.
-
 ## 1E6 Prove the committed encrypted fixture is the demo household · S · sonnet
 Files: `lightning/runtime/roundtrip.py` (`make`, `run`, `expected`), `tests/test_device_roundtrip.py`.
 Do: add `test_the_committed_fixture_is_the_generated_demo_household(tmp_path)` to `tests/test_device_roundtrip.py`: call `roundtrip.make(tmp_path)` (it builds the demo household up to `AS_OF` with fresh keys), then assert `expected(tmp_path)` equals `expected(FIXTURE)` line for line and that `run(FIXTURE)[0]` equals `run(tmp_path)[0]`. The fixture's own recovery key and password are dummy (`PASSWORD` in `roundtrip.py`); never print `recovery.txt`. If the lines differ only because the demo or schema changed since the fixture was made, rebuild with `python -m lightning.runtime.roundtrip --make tests/fixtures/roundtrip` in the same pull request and say so in `Detail:`.
 Done when: `python -m pytest tests/test_device_roundtrip.py -q` passes with the new test.
 
 ## 1E7 Scan every repository's full history for secrets · M · opus
-Needs 1E5 done first (secret scanning on), so GitHub's own alerts can be compared.
+1E5 done 2026-11-11 (owner: protections applied, secret scanning and push protection on). GitHub's own alerts can be compared.
 Files: none changed in the repositories; the scan runs in the scratchpad.
 Do: clone each of the four repositories with all refs (`git clone --mirror`), run `gitleaks detect --source <mirror> --log-opts="--all"` (install the pinned release binary in the scratchpad; do not add it to the repository), plus `git log --all -p | grep -nE "(BEGIN [A-Z ]*PRIVATE KEY|ghp_|github_pat_|AKIA[0-9A-Z]{16})"`. Triage each hit as test/dummy, public-by-design (IndexNow token, public update and store keys in `lightning/security/*.json`), or real. Real ones: rotate first (owner, through the question tool), then a private advisory.
 Done when: this file has one dated line per repository: "history scanned, N real findings filed privately"; nothing else about them is public.
