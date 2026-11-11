@@ -513,7 +513,7 @@ Beyond the open gaps already listed in the Project Overview, ranked by how often
 
 Checked against the code on 2026-11-08 (Claude). Step 3 of §14 is built except the owner's choices:
 FR-2 (`workflows/salary_setup.py`), X-11 reminders while the app runs (`workflows/reminders.py`, `desktop/window.py`,
-`ReminderNotifications.java`; with the app closed is [NF-3AU](../3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md)),
+`ReminderNotifications.java`; with the app closed is NF-3AU (done, PR #533)),
 OV-3 and OV-8 (f36311ed), BU-8 (Budget's "not yet given a job" line, `ui/kpis.py:164`), LO-2, LO-3 and SE-2
 (milestone 1). The "optional reminders and confirmations" milestone (Overview §2) is built: the Weekly review's
 Optional reminders card and the grouped certificate-interest "match all" in Needs you (`workflows/review.py:199`).
@@ -523,7 +523,7 @@ profile (`ui/routes/dashboard.py:528`).
 Left: the owner's open choices in §12 (3H3), two missing reminders (3H4, 3H5), what the owner approves (3H6, 3H7),
 the "deeper analytics" milestone (3H8, 3H9), and a triage of the P2/P3 ids above that no step names (3H10).
 Out of scope here: the PC tab declutter is [IV-3AM](IV-3AM-pc-declutter-tab-by-tab.md), the phone is
-[IV-3AY](../11-phone-ux/IV-3AY-phone-first-architecture.md); never change their screens' layout from this item.
+IV-3AY (done, PR #533); never change their screens' layout from this item.
 
 ## Decided
 

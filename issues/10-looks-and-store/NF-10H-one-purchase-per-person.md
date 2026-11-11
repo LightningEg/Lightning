@@ -60,4 +60,4 @@ One EGP price per theme on a Play price step, the same coins on the website; set
 Credit their coins back (recommended) or leave them.
 
 Read: `lightning/ui/play_store.py`, `lightning/ui/entitlements.py` (`redeem_play`, `_exchange`), the website's
-`supabase/functions/redeem-play` and `redeem-purchase`, [NF-11B](../11-phone-ux/NF-11B-ship-the-phone-on-google-play.md).
+`supabase/functions/redeem-play` and `redeem-purchase`, NF-11B (done).

@@ -1,7 +1,7 @@
 # Google Play: what to put in the Console
 
 For the owner. Each answer comes from the code, with the file that proves it, so the Console can be filled from this
-page alone. The plan is [NF-11B](../issues/11-phone-ux/NF-11B-ship-the-phone-on-google-play.md); the audit behind it is
+page alone. The plan is NF-11B (done); the audit behind it is
 [r29](../issues/11-phone-ux/r29-google-play-readiness/report.md).
 
 ## SMS: the Permissions Declaration (READ_SMS)
