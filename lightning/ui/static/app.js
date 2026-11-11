@@ -741,7 +741,7 @@ const openCalendar = (text, button) => {
 document.addEventListener("mousedown", (e) => {
   if (openCal && !openCal.panel.contains(e.target) && !e.target.closest("[data-open-date-picker]")) closeCalendar();
 });
-document.addEventListener("scroll", (e) => { if (openCal && !openCal.panel.contains(e.target)) closeCalendar(); }, true);
+document.addEventListener("scroll", (e) => { if (openCal && !openCal.panel.contains(e.target) && !openCal.panel.contains(document.activeElement)) closeCalendar(); }, true);  // focusing a day can scroll a tall sheet: that is not the person leaving
 window.addEventListener("resize", closeCalendar);
 // Alt+Down in a date field opens the calendar, as in the browser's own.
 document.addEventListener("keydown", (e) => {
