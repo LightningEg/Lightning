@@ -33,7 +33,7 @@ class ReviewCard:
 
 
 def _sort_cards(c, day: date) -> list[ReviewCard]:
-    ids = c.reporting.unsorted_in_order(None, day - timedelta(days=SORT_DAYS), day)[:SORT_CARDS]
+    ids = c.reporting.unsorted_in_order(None, day - timedelta(days=SORT_DAYS), day)[:SORT_CARDS]  # not money
     if not ids:
         return []
     usual = c.transactions.usual_categories()

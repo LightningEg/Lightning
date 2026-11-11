@@ -101,8 +101,8 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | improvement, visual | Understand | S | Opus | ready |
 | IV-3BK9 | ↳ The website's copy of guideline 3.41, and a native reader ([#429](https://github.com/LightningEg/Lightning/issues/429)) | | | S | Sonnet | |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | Opus | ready |
-| NF-3AU3 | ↳ Windows: a daily task shows the schedule with the app closed | | | M | Opus | |
-| NF-3AU4 | ↳ Android: a daily job shows the schedule with the app closed | | | M | Opus | |
+| NF-3AU3 | ↳ Windows: the evidence run | | | S | Opus | |
+| NF-3AU4 | ↳ Android: the evidence run | | | S | Opus | |
 | **OW-3AI** | [Additional broker and institution logos still needed](3-polish-and-arabic/OW-3AI-institution-logos.md) | owner task | Feel |  |  | ready |
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
@@ -251,9 +251,7 @@ The phone is its own product: a few places that each answer one question, quick 
 | IV-3AN12 | ↳ Left from IV-3AL | | | S | Opus | |
 | IV-3AN13 | ↳ Owner's phone check | | | owner |  | |
 | **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](11-phone-ux/IV-3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | Opus | ready |
-| IV-3AY4 | ↳ The phone stylesheet stands alone, and each slot keeps its stack | | | L | Opus | |
-| IV-3AY8 | ↳ Activity: the review cards that are rows, and search | | | M | Opus | |
-| IV-3AY9 | ↳ Budget: the payday strip and This month in detail | | | M | Opus | |
+| IV-3AY8 | ↳ Activity: a card for possible duplicates | | | S | Opus | |
 | IV-3AY13 | ↳ Owner's phone check | | | owner |  | |
 | **NF-11B** | [Ship the phone on Google Play - a release bundle at API 36, the SMS and payments policies, the app's own privacy notice and the Console declarations](11-phone-ux/NF-11B-ship-the-phone-on-google-play.md) | new feature | Everywhere | L | Opus | ready |
 | NF-11B7 | ↳ Owner: the developer account and the listing | | | owner |  | |
@@ -262,7 +260,7 @@ The phone is its own product: a few places that each answer one question, quick 
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md) · [r36](11-phone-ux/r36-figures-one-owner/report.md).
 
-Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11K, 11L, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 11L1, 3AY1, 3AY3, 3AY5, 3AY6, 3AY7, 3AY10, 3AY11, 3AY12, 3AY14, 3AY15, 3AY16, 3AY17, 3AY18, IV-3F, BV-11G, BV-11L2, BV-11L3, BV-11L4, IV-11D3. Next free code: 11M.
+Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11K, 11L, 11B1, 11B2, 11B3, 11B4, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 11L1, 3AY1, 3AY3, 3AY4, 3AY5, 3AY6, 3AY7, 3AY9, 3AY10, 3AY11, 3AY12, 3AY14, 3AY15, 3AY16, 3AY17, 3AY18, IV-3F, BV-11G, BV-11L2, BV-11L3, BV-11L4, IV-11D3. Next free code: 11M.
 
 ## 12 Desktop UX and smart next steps
 

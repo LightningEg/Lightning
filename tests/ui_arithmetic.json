@@ -5,7 +5,6 @@
  "keynotes.py": 18,
  "kpis.py": 54,
  "periods.py": 1,
- "phone/presenters/budget.py": 22,
  "phone/presenters/cash_planning.py": 4,
  "phone/presenters/health.py": 1,
  "phone/presenters/investments.py": 7,

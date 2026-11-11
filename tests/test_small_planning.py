@@ -72,12 +72,15 @@ def test_one_budget_category_changes_without_resubmitting_the_grid(c, setup, pho
     c.budgets.set_budget(food,'2026-12','1000',schedule=c.schedules.view())
     c.budgets.set_budget(software,'2026-12','2000',schedule=c.schedules.view())
     app = create_app(c)
+    if phone:  # the plan list is the phone's own screen (3AY9)
+        from lightning.ui.phone.router import mount_phone
+        mount_phone(app)
     @app.middleware('http')
     async def frame(request, call_next):
         request.state.phone = phone
         return await call_next(request)
     with TestClient(app) as client:
-        page = client.get('/budget?month=2026-12').text
+        page = client.get('/budget/plan?month=2026-12' if phone else '/budget?month=2026-12').text
         if phone:
             assert f'action="/budget/rule/{food}"' in page
         else:

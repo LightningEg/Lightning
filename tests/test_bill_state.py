@@ -12,7 +12,6 @@ from lightning.bootstrap import build
 from lightning.core.figures import label
 from lightning.planning import bill_state as bs
 from lightning.samples import load_mohab_2026
-from lightning.ui.phone.presenters import overview as dashboard
 from lightning.ui.web import create_app
 from lightning.workflows.review import ReviewInbox
 
@@ -39,10 +38,11 @@ def test_every_surface_reads_the_same_bills(sample, today):
     # What you owe: everything due today or late.
     owed = {(r.payment.item.id, r.due_date) for r in rows if r.due_date <= today}
     assert owed == {(p.item.id, p.due_date) for p in c.planning.what_you_owe(day).bills_due_items}
-    # Needs you: late, stale or due within three days.
-    soon = dashboard._due_soon(c)
-    wanted = [r for r in rows if r.state in bs.NEEDS_ACTION]
-    assert (soon["count"] if soon else 0) == len(wanted)
+    # Home's To do: a Pay row per late or due-soon bill; a stale one is counted by Catch up instead (3AY10).
+    from lightning.ui.phone.screens import todo
+    todo_rows = todo.build(c, day).rows
+    wanted = [r for r in rows if r.state in (bs.BillState.LATE, bs.BillState.DUE_SOON)]
+    assert len([r for r in todo_rows if r.kind == "bill"]) == len(wanted)
     # The forecast's "payments before next income": the rows after today and before the next income.
     inbox = ReviewInbox(c)
     inbox.items(day)

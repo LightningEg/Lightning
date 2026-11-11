@@ -52,15 +52,13 @@ def _in_arabic(browser, *paths):
         browser.post("/settings/locale", data={"locale": "en", "__session": session})
 
 
-def test_the_category_sheet_and_its_payments_are_arabic(phone):
-    """3AN7 + 3AN10: a category sheet and its payments fragment have no English word."""
-    html = phone.get("/budget?period=month").text   # the old Budget still draws the category sheets (a query steps past the new one)
-    src = re.search(r'data-fold-src="(/budget/category/\d+/payments\?month=[\d-]+)"', html).group(1)
-    page, filled, empty = _in_arabic(phone, "/budget?period=month", src, src.split("?")[0] + "?month=2020-01")
-    assert _english(page) == [] and _english(filled) == [] and _english(empty) == []
-    sheet = page[page.index('class="phone-sheet-panel"'):]
-    assert any(word in sheet[:sheet.index("</details>")] for word in ("المعدل", "عدّيت الحد"))  # the pace or over sentence
-    assert "آخر المدفوعات" in filled and "لسه ماصرفتش" in empty
+def test_the_category_sheet_is_arabic(phone):
+    """3AN7 + 3AN10 + 3AY9: Budget's category sheet (last payments, or an empty month) has no English word."""
+    html = phone.get("/budget?period=month").text
+    src = re.search(r'href="(/budget/category/\d+/sheet\?month=[\d-]+)"', html).group(1)
+    page, sheet, empty = _in_arabic(phone, "/budget?period=month", src, src.split("?")[0] + "?month=2020-01")
+    assert _english(page) == [] and _english(sheet) == [] and _english(empty) == []
+    assert "آخر المدفوعات" in sheet or "لسه ماصرفتش" in sheet
 
 
 def test_cash_planning_forecast_months_ahead_and_what_is_promised_are_rows_that_open_sheets(phone):

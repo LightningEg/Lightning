@@ -64,7 +64,7 @@ def phone_router() -> APIRouter:
     router = APIRouter()
     started = APIRouter(route_class=_plain(any_query=True, when=lambda request: bool(container(request).accounts.list())))
     slots = APIRouter(route_class=_plain())              # a bare slot URL: no query at all
-    months = APIRouter(route_class=_plain("month", "msg"))  # Budget keeps its month stepper; a saved note rides along
+    months = APIRouter(route_class=_plain(any_query=True))   # Budget answers every query (3AY9): the older page is gone
     picking = APIRouter(route_class=_plain(any_query=True, when=_picks_account))  # the list, not the sheet
     unnarrowed = APIRouter(route_class=_plain(any_query=True, when=lambda request: not any(
         request.query_params.get(key) for key in NARROWS)))  # a register address that names no period or search
@@ -85,11 +85,26 @@ def phone_router() -> APIRouter:
     @router.get("/budget/flexible")
     @months.get("/budget")
     async def budget_flexible(request: Request):
-        """Budget, flexible first (3AY9). Served beside the old Budget until the tab bar switches (3AY10)."""
+        """Budget, flexible first (3AY9). The older page's addresses land here; its plan list is /budget/plan."""
         from lightning.core.dates import today
         from lightning.ui.phone.screens import budget as screen
+        asked = request.query_params
+        if asked.get("open_group") or asked.get("make"):
+            return redirect("/budget/plan?" + urlencode({"month": asked.get("month", "")} if asked.get("month") else {}))
         return render_phone(request, "phone/budget_flexible.html",
                             screen=screen.build(container(request), today(), request.query_params.get("month", "")))
+
+    @router.get("/budget/plan")
+    async def budget_plan(request: Request):
+        """Your plan (3AY9): one field per everyday category; Make, Edit and Change the plan open it."""
+        from lightning.core.dates import month_of, today
+        from lightning.ui.phone.screens import budget as screen
+        month = request.query_params.get("month") or month_of(today())
+        try:
+            plan = screen.plan_list(container(request), month)
+        except Exception:   # a malformed month: this month's plan
+            plan = screen.plan_list(container(request), month_of(today()))
+        return render_phone(request, "phone/budget_plan.html", plan=plan)
 
     @router.get("/more")
     @slots.get("/accounts")
@@ -220,16 +235,6 @@ def phone_router() -> APIRouter:
         from lightning.core.dates import today
         from lightning.ui.phone.screens import todo as screen
         return render_phone(request, "phone/todo.html", screen=screen.build(container(request), today()))
-
-    @router.get("/budget/category/{category_id:int}/payments")
-    async def category_payments(request: Request, category_id: int):
-        """A category sheet's last three payments this month, drawn when the sheet opens (3AN7, moved in 3AY18).
-        Nothing yet this month: last month's figure and a way to it, never a wall of zeros (3AN9)."""
-        from lightning.core.dates import month_of, parse_month, today
-        from lightning.ui.budget_rows import last_payments
-        month = request.query_params.get("month") or month_of(today())
-        parse_month(month)
-        return render_phone(request, "phone/budget_payments.html", **last_payments(container(request), category_id, month))
 
     @picking.get("/accounts/add-transaction")
     async def pick_account(request: Request):

@@ -3649,6 +3649,10 @@ ARABIC_UI = {
     'A payment with no category': 'دفعة من غير فئة',
     'Search payments': 'دوّر في المدفوعات',
     'Period': 'الفترة',
+    'Type a limit beside a category: an amount, or a % of income.': 'اكتب حد جنب كل فئة: مبلغ، أو نسبة من الدخل.',
+    'From last month, your schedule or your average': 'من الشهر اللي فات، أو جدولك، أو متوسطك',
+    'Spent {amt}': 'اتصرف {amt}',
+    'No everyday categories yet.': 'مفيش فئات يومية لسه.',
 }
 
 

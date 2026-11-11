@@ -27,7 +27,7 @@ Reserved codes: none
 
 - **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12AB3 rest, 12Z5, 12AE4, 12Q. **Read:** 12AB.
 - **Upcoming (11-11, Claude):** 7AR1-3 built (owner: PC+phone check); 7AR4 .ics later. **Read:** 7AR.
-- **Phone (11-10, Claude):** 3AY14, 18, 3AU2 built. Sonnet: 3AY15-17; Opus: 3AY4, 8-10; owner 3AY13. Then 3AU3-4. **Read:** 3AY; 3AU.
+- **Phone (11-11, Claude):** 3AY4/9/10/14-18, 3AU2-4 built. Left: 3AY8 duplicates card (needs a finder); owner 3AY13. **Read:** 3AY; 3AU.
 - **Play (Claude, 11-09):** NF-11B done; owner: 10H3, shots, 11B7-9. **Read:** NF-11B.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.

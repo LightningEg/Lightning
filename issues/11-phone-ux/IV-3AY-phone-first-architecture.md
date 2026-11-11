@@ -48,18 +48,6 @@ frame) is in Architecture › UI contract › *The phone is its own layer*; read
 `sonnet` name their files and their proof; the `opus` ones still need a design choice.
 
 
-## 3AY4 The phone stylesheet stands alone, and each slot keeps its stack · L · opus
-Built: the router, `phone/base.html`, the status bar colour, "This is on your PC" (`BEST_ON_PC` empty on purpose, owner
-2026-11-08). Left, in this order:
-(a) `phone.css` standalone on the theme tokens. 3AY15-17 are built (2026-11-11): `tests/phone_pc_templates.txt` is empty and no
-PC template asks `phone_mode()`. Now drop `style{rtl}.css` from `PHONE_CSS` (`ui/web.py`) and move into `phone.css` only the
-rules the phone templates still use (they keep some shared classes: `field`, `import-check`, `category-sheet*`, `money-input`,
-the import review's and reserves' own classes).
-(b) A stack per slot: tapping the chosen slot returns to its top; Android back pops within the slot, then Home, then
-leaves (`static/phone-nav.js`; report r25 › Cross-cutting 5).
-Done when: `PHONE_CSS` has no `style` entry, `tools/phone_check.py` and `tools/phone_check.py --arabic` pass, and
-`tests/test_phone_nav_browser.py` proves the back order.
-
 ## 3AY8 Activity: a card for possible duplicates · S · opus
 Built (2026-11-11): To review is one row per card (`phone/screens/review_cards.py`), each with its kind's own verb (owner
 pick): a row to sort *Looks right* (its payee's usual category, one tap) or *Choose a category*; a payment that looks
@@ -68,14 +56,6 @@ on inbox items (`tests/test_phone_review_cards.py`). Activity has search and Out
 duplicates have no card, because no service lists them (they are merged from the register). Add a duplicate finder in
 `lightning/transactions/`, then a card whose Primary is *Delete the copy* (the merge, with Keep both beside it).
 
-## 3AY9 Budget: the plan list as its own screen · M · opus
-Built (2026-11-11): `/budget` flexible first; the payday strip (`planning/salary_day.payday_to_plan`: from the salary's
-day until the payday plan is saved, `tests/test_phone_payday_strip.py`); *This month in detail* opens the month's Spending
-page. Left: *Edit your plan* and *Make my plan* still open the older `phone/budget.html` (its `open_group` list of
-`/budget/rule/{id}` fields, which Mohab's `plan_category` types into). Give that list its own phone screen
-(`phone/screens/`, one field per flexible category, amount or %), point both links at it, then delete `phone/budget.html`'s
-other parts and `presenters/budget.py`. Done when: the older page and its presenter are gone and Mohab's phone year passes.
-
 ## 3AY13 Owner's phone check · owner
-One end-to-end check on a phone once 3AY4, 3AY8 and 3AY9 are merged (it replaces 3AN13), including a native reader's pass over the Arabic
+One end-to-end check on a phone once 3AY4, 3AY8 and 3AY9 are merged (3AY9: commit on `claude/o7-phone-slots`, `tests/test_phone_budget_flexible.py`) (it replaces 3AN13), including a native reader's pass over the Arabic
 of the strings added in 3AY6 to 3AY12 and the catch-up screen. Anything wrong becomes its own step.

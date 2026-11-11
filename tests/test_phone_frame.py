@@ -66,7 +66,7 @@ def test_the_pc_keeps_its_own_frame(tmp_path):
     assert 'class="shell"' in html and "phone-tabbar" not in html and "phone.css" not in html
 
 
-@pytest.mark.parametrize("path, marker", [("/budget?period=month", 'class="phone-plan-bar'), ("/plan", 'id="plan-build"'),
+@pytest.mark.parametrize("path, marker", [("/budget?period=month", 'class="phone-row phone-budget-cat'), ("/plan", 'id="plan-build"'),
                                           ("/investments", 'id="holdings-heading"')])
 def test_budget_cash_and_investments_have_phone_designs(phone, path, marker):
     html = phone.get(path).text
@@ -310,8 +310,9 @@ def test_phone_settings_use_more_instead_of_five_tabs(phone):
 def test_budget_category_returns_to_budget_and_leads_with_register(phone):
     from html import unescape
 
-    budget = phone.get('/budget?period=month').text  # the older Budget carries the category links
-    match = re.search(r'href="(/transactions\?category_id=[^"]+)"', budget)
+    budget = phone.get('/budget?period=month').text  # a category row opens its sheet, whose See transactions this is
+    sheet = re.search(r'href="(/budget/category/\d+/sheet\?month=[\d-]+)"', budget).group(1)
+    match = re.search(r'href="(/transactions\?category_id=[^"]+)"', phone.get(sheet).text)
     assert match, 'the demo budget has a category link'
     page = phone.get(unescape(match.group(1)), headers={'referer': 'http://127.0.0.1:9861/budget'}).text
     assert re.search(r'class="phone-back" href="/budget(?:\?[^"]*)?"', page)
