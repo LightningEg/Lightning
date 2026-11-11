@@ -7,7 +7,6 @@ Reserved codes: none
 | Who | Work | Files | Since |
 |---|---|---|---|
 | Claude | O5 | `lightning/deposits/` | 2026-11-10 |
-| Claude | 12Y3: one PC page header | `lightning/ui/templates/base.html`, `partials/page_header.html`, `partials/section_tabs.html`, `tests/test_page_skeleton.py` | 2026-11-11 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
 ## Messages
@@ -27,7 +26,7 @@ Reserved codes: none
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **O6 (Claude):** owner 11-11: 3AM, 12Y, 12Z, 12Q, 12AB, 12AE unparked (ready). Order: 12Y3 header first, then 12AB3 rest, 12Z5, 12Q, 3AM C2/O2; 12AE4 alongside. **Read:** 12Y.
+- **O6 (Claude):** owner 11-11: 3AM, 12Y, 12Z, 12Q, 12AB, 12AE unparked (ready). 12Y done (one header). Next: 12AB3 rest, 12Z5, 12Q, 3AM C2/O2; 12AE4 alongside. **Read:** 12AB.
 - **Upcoming (11-11, Claude):** 7AR1-3 built (owner: PC+phone check); 7AR4 .ics later. **Read:** 7AR.
 - **O1:** owner checks Home. **Read:** Overview §7.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26

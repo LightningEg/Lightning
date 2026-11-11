@@ -12,7 +12,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-10C** | [Theme materials, selling themes, owner console](../../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md) | L | building |
-| **IV-12Y** | [One page skeleton on the PC, kept by a test](../../issues/12-desktop-ux/IV-12Y-one-page-skeleton-on-the-pc.md) | L | ready |
 | **IV-12Z** | [The answer on one screen, the rest on request](../../issues/12-desktop-ux/IV-12Z-answer-on-one-screen-on-the-pc.md) | L | ready |
 | **IV-3AM** | [PC declutter, tab by tab](../../issues/12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | L | ready |
 
@@ -23,6 +22,6 @@ Arabic and right-to-left, themes, the layout of every screen on PC and phone, th
 - [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](../../issues/12-desktop-ux/r19-desktop-tab-audit/report.md): 3AM
 - [Desktop and phone UX: logic, visuals, simpler tasks and connected features](../../issues/12-desktop-ux/r24-desktop-phone-ux/report.md): 3AM
 - [User journeys and visual unity](../../issues/12-desktop-ux/r27-journeys-and-visual-unity/report.md): 3AM
-- [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 12Y, 12Z
+- [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 12Z
 <!-- work:end -->
 

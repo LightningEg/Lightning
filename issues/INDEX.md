@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 16 open items. Each folder holds its reports and its items.
+11 big pictures, 15 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -169,8 +169,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-12Q3 | ↳ Change limit, Fill this month, Carryover | | | M | Opus | |
 | IV-12Q4 | ↳ Phone Recurring and the PC's doubled list | | | S | Opus | |
 | IV-12Q5 | ↳ Budget page and Budget settings | | | M | Opus | |
-| **IV-12Y** | [One page skeleton on the PC, kept by a test - every tab has the same title rule, an answer sentence, its dates, and the same controls in the same order](12-desktop-ux/IV-12Y-one-page-skeleton-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
-| IV-12Y3 | ↳ One header partial, used by every tab | | | L | Opus | |
 | **IV-12Z** | [The answer on one screen, the rest on request - Spending, Cash planning and Investments run 3 to 4 screens and repeat lists](12-desktop-ux/IV-12Z-answer-on-one-screen-on-the-pc.md) | improvement, visual | Feel | L | Opus | ready |
 | IV-12Z5 | ↳ Overview's tail ([#498](https://github.com/LightningEg/Lightning/issues/498)) | | | S | Sonnet | |
 | **IV-3AM** | [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md) | improvement, visual | Feel | L | Opus | ready |
@@ -184,7 +182,7 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 12H, 12N, 12U, 12V, 12W, 12X, 3AZ, IV-3H, BV-12O, IV-12P, IV-12T, NF-12I, NF-12R, NF-12S, BT-12AC, BT-12AD, IV-12AA. Next free code: 12AF.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 12H, 12N, 12U, 12V, 12W, 12X, 3AZ, IV-3H, BV-12O, IV-12P, IV-12T, IV-12Y, NF-12I, NF-12R, NF-12S, BT-12AC, BT-12AD, IV-12AA. Next free code: 12AF.
 
 ## Parked
 

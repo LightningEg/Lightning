@@ -5,6 +5,8 @@ Every tab in `sections.SECTIONS` is opened on the sample household at 1366 x 768
 - one H1, equal to the tab's own name (owner, 2026-11-10: the sidebar already names the section); a section's first
   tab is the section's front page and may carry the section's name (Overview, Cash planning, Investments);
 - an answer sentence (`.page-status`) of at most 16 words that does not repeat the title (A05, A09);
+- the title block is the shared `page_title` (IV-12Y3), and the header's controls sit in one group in one order:
+  the period control, Undo, the page's action, the gear (A05), none of them outside that group;
 - Undo, when shown, in the header row (`.topbar`), never on a second row inside the page;
 - at most one filled (primary) button on the first screen;
 - at most 2.5 screens tall as it first opens, registers excepted (IV-12Z: the rest opens on request).
@@ -25,6 +27,7 @@ CHROMIUM = chromium_executable()
 MAX_WORDS = 16
 MAX_SCREENS = 2.5
 REGISTERS = {"transactions", "categories"}  # long lists by nature (IV-12Z1)
+ORDER = ("period", "undo", "action", "gear")  # A05 · IV-12Y3: the header's controls, left to right
 
 # (rule, tab key) -> the item that fixes it. Remove an entry in the commit that fixes it.
 ALLOWED: dict[tuple[str, str], str] = {
@@ -41,7 +44,14 @@ MEASURE = """() => {
   const primaries = [...document.querySelectorAll('.main .btn.primary, .main button.primary, .topbar .btn.primary, .topbar button.primary')]
     .filter(b => { const r = b.getBoundingClientRect(); return r.width && r.height && r.top < innerHeight && getComputedStyle(b).visibility !== 'hidden'; })
     .map(b => b.textContent.trim());
+  const kind = e => e.matches('.site-period-control') ? 'period' : e.matches('.history-form') ? 'undo'
+    : e.matches('.section-gear') ? 'gear' : 'action';
+  const controls = top ? [...top.querySelectorAll('.page-controls > *')].filter(e => e.offsetParent !== null).map(kind) : [];
+  const stray = top ? [...top.querySelectorAll('.site-period-control, [data-history], .section-gear')]
+    .filter(e => !e.closest('.page-controls') && e.offsetParent !== null).length : 0;
   return {
+    titleBlock: !!(top && top.querySelector('.topbar-main > .page-title > h1')),
+    controls, stray,
     h1: h1s.map(h => h.textContent.trim()),
     status: status ? status.textContent.trim() : '',
     undoTop, undoAll,
@@ -139,6 +149,11 @@ def _failures(measured) -> dict[tuple[str, str], str]:
             found[("sentence", key)] = f"a label, not a sentence: {m['status']!r}"
         elif words > MAX_WORDS or m["status"].rstrip(".").casefold() in {x.casefold() for x in m["titles"]}:
             found[("sentence", key)] = f"sentence of {words} words: {m['status']!r}"
+        if not m["titleBlock"]:
+            found[("header", key)] = "the title is not the shared page_title block"
+        rank = [ORDER.index(k) for k in m["controls"]]
+        if m["stray"] or rank != sorted(rank) or m["controls"].count("period") > 1 or m["controls"].count("gear") > 1:
+            found[("order", key)] = f"header controls {m['controls']} (+{m['stray']} outside the group)"
         if m["undoAll"] and not m["undoTop"]:
             found[("undo", key)] = "Undo sits inside the page, not in the header row"
         if len(m["primaries"]) > 1:
@@ -161,7 +176,7 @@ def test_the_allow_list_is_not_stale(measured):
 def test_the_allow_list_names_real_tabs_and_items():
     keys = {key for key, _, _ in _tabs()}
     for (rule, key), item in ALLOWED.items():
-        assert rule in {"title", "sentence", "undo", "primary", "length", "working"}, rule
+        assert rule in {"title", "header", "order", "sentence", "undo", "primary", "length", "working"}, rule
         assert key in keys, key
         assert re.fullmatch(r"(IV|BV|IT|BT|NF)-\d+[A-Z]+\d*", item), item
 

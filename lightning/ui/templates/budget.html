@@ -1,7 +1,8 @@
 {% from "partials/chevron.html" import chevron with context %}
 {% extends "base.html" %}
 {% block title %}Budget{% endblock %}
-{% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/budget", period.key, month, this_month, period.start_text, period.end_text) }} <a class="btn small" href="/budget/fill?month={{ month }}">{{ "Fill this month"|tr(locale) }}</a>{% endblock %}
+{% block period %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/budget", period.key, month, this_month, period.start_text, period.end_text) }}{% endblock %}
+{% block top_actions %}<a class="btn small" href="/budget/fill?month={{ month }}">{{ "Fill this month"|tr(locale) }}</a>{% endblock %}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Budget'|tr(locale), status, period.start_text ~ ' to ' ~ period.end_text, 'so far' if everyday and everyday.current else '') }}{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import key_notes, meter, bullet_row, kpi_row, pace_chart, lead_card %}{% from "partials/macros.html" import needs_rows %}

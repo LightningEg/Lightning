@@ -123,10 +123,11 @@
 </div>
 {%- endmacro %}
 
-{# The page header's words (guideline 3.33, A05): the title, the answer in one sentence (lightning/ui/status.py), then
-   the exact dates the figures use and their Muted note. The seam under it is CSS (.topbar::after). #}
-{% macro page_title(title, status=none, dates='', note='') -%}
-<div class="page-title"><h1>{{ title }}</h1>{% if status %}<p class="page-status">{{ status.text|tr(ui_locale(), **status['values']) }}</p>{% endif %}{% if dates %}<p class="page-dates"><b>{{ dates|isolate_dates }}</b>{% if note %} <span>· {{ note|tr(ui_locale()) }}</span>{% endif %}</p>{% endif %}</div>
+{# The page header's words (guideline 3.33, A05), the same on every tab (IV-12Y3): the title, the answer in one sentence
+   (lightning/ui/status.py, or a sentence already in words), an optional Muted line naming a filter, then the exact
+   dates the figures use and their Muted note. The seam under it is CSS (.topbar::after). #}
+{% macro page_title(title, status=none, dates='', note='', sub='') -%}
+<div class="page-title"><h1>{{ title }}</h1>{% if status %}<p class="page-status">{% if status is string %}{{ status|tr(ui_locale()) }}{% else %}{{ status.text|tr(ui_locale(), **status['values']) }}{% endif %}</p>{% endif %}{% if sub %}<p class="page-sub">{{ sub }}</p>{% endif %}{% if dates %}<p class="page-dates"><b>{{ dates|isolate_dates }}</b>{% if note %} <span>· {{ note|tr(ui_locale()) }}</span>{% endif %}</p>{% endif %}</div>
 {%- endmacro %}
 
 {# Needs you (A09): the page's own items under its Lead, one row each with the mark as the bullet, most urgent first.

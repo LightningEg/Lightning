@@ -1,9 +1,10 @@
 {% extends "base.html" %}
-{% from "partials/macros.html" import held, period_control, page_header with context %}
+{% from "partials/macros.html" import held, period_control, page_title with context %}
 {% from "partials/charts.html" import trend as trend_chart %}
 {% block title %}{{ 'Currencies'|tr(locale) }}{% endblock %}
-{% block heading %}{{ page_header('Currencies'|tr(locale), answer|status_text) }}{% endblock %}
-{% block top_actions %}{{ period_control("/accounts/currencies", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }} <a class="btn" href="/accounts">{{ 'Accounts'|tr(locale) }}</a> <a class="btn primary" href="/accounts/new">{{ 'Add account'|tr(locale) }}</a>{% endblock %}
+{% block heading %}{{ page_title('Currencies'|tr(locale), answer, period.start_text ~ ' to ' ~ period.end_text) }}{% endblock %}
+{% block period %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/accounts/currencies", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}{% endblock %}
+{% block top_actions %}<a class="btn" href="/accounts/new">{{ 'Add account'|tr(locale) }}</a>{% endblock %}
 {% macro gain(value) -%}
 {# A11: a gain is green with +; a loss is ink with −, strong rose is kept for what needs you #}
 {%- if value is none -%}<span class="muted">{{ 'Unavailable'|tr(locale) }}</span>{%- else -%}<span class="num {{ 'pos' if value > 0 }}">{{ value|money(True) }}</span>{%- endif -%}
