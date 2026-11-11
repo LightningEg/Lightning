@@ -10,6 +10,7 @@ from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
 
+from lightning.core.dates import fmt_date
 from lightning.planning import bill_state
 from lightning.planning.bill_state import BillRow, BillState
 from lightning.ui import charts
@@ -57,6 +58,7 @@ class MoneyScreen:
     trend: dict | None = None          # charts.trend of net worth at each month end; the last point is today
     own_split: tuple[dict, ...] = ()   # what you own by asset class family: {key, label, value, share}, A04 order
     strip: tuple[dict, ...] = ()       # NF-7AR3: today and the next 13 days of payments, each day a way into Upcoming
+    units: tuple[dict, ...] = ()       # 3AY10 (owner 2026-11-11): Net worth in US dollars and grams of 21K gold, dated
 
 
 def _goals(c) -> tuple[int, int]:
@@ -128,7 +130,8 @@ def build(c, day: date) -> MoneyScreen:
         late_count=sum(1 for b in bills if b.state in (BillState.LATE, BillState.LATE_STALE)),
         holdings_value=now.holdings_value, has_accounts=bool(c.accounts.list()), zakat=c.zakat.enabled(),
         goals_funded=funded, goals_count=goals, health_watch=_health_watch(c, day),
-        trend=net_worth_trend(c, day), own_split=own_split(now), strip=_strip(c, day))
+        trend=net_worth_trend(c, day), own_split=own_split(now), strip=_strip(c, day),
+        units=tuple(c.position.in_other_units(now.net_worth, day, c.zakat.gold_price_24k(fmt_date(day)))))
 
 
 @dataclass(frozen=True)

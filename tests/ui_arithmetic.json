@@ -9,7 +9,6 @@
  "phone/presenters/cash_planning.py": 4,
  "phone/presenters/health.py": 1,
  "phone/presenters/investments.py": 7,
- "phone/presenters/overview.py": 8,
  "phone/presenters/register.py": 1,
  "phone/router.py": 3,
  "phone/screens/activity.py": 7,
