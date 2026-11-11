@@ -69,7 +69,8 @@ def test_an_overspent_day_has_a_negative_hero_and_says_so(sample, monkeypatch):
         def items(self, on, **kw):
             out = super().items(on, **kw)
             self.forecast = SimpleNamespace(safe_to_spend=-1200, next_income_date=self.forecast.next_income_date,
-                                            safe_to_spend_parts=self.forecast.safe_to_spend_parts)
+                                            safe_to_spend_parts=self.forecast.safe_to_spend_parts,
+                                            safe_to_spend_working=self.forecast.safe_to_spend_working)
             return out
     monkeypatch.setattr(home, "ReviewInbox", Short)
     screen = home.build(c, day)

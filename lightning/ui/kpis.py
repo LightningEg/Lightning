@@ -20,7 +20,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from lightning.core.dates import month_of, parse_date, parse_month
-from lightning.core.figures import label as figure_label
+from lightning.core.figures import FIGURES, label as figure_label
 from lightning.core.money import ZERO, fmt, signed_pct
 
 from . import charts
@@ -40,16 +40,22 @@ def line(text: str = "", action: str = "", href: str = "", popup: bool = False) 
     return {"text": text, "action": action, "href": href, "popup": popup}
 
 
+# A card whose label is a registry figure carries that figure's key, read by tests through data-fig (IT-12AE1).
+FIGURE_KEY_OF = {f.label: key for key, f in FIGURES.items()}
+
+
 def card(label: str, value: Decimal | None, comparison: dict, *, tone: str, chip_: dict | None = None,
          visual: dict | None = None, line_: dict | None = None, href: str = "", kind: str = "money",
-         signed: bool = False, needs: bool = False, key: str = "") -> dict:
-    """One KPI card. The comparison is what makes it a KPI (A08.1, A16 "A figure alone")."""
+         signed: bool = False, needs: bool = False, key: str = "", working=None) -> dict:
+    """One KPI card. The comparison is what makes it a KPI (A08.1, A16 "A figure alone"). With a ``working``
+    (lightning.core.working) the figure itself opens How it adds up in place (NF-12AB3), so the card links nowhere else."""
     if not comparison or not (comparison.get("text") or comparison.get("figure")):
         raise ValueError(f"KPI card {label!r} has no comparison")
     if tone not in TONES:
         raise ValueError(f"KPI card {label!r}: tone {tone!r} is not one of {sorted(TONES)}")
-    return {"key": key, "label": label, "value": value, "kind": kind, "signed": signed, "tone": tone, "needs": needs,
-            "chip": chip_, "compare": comparison, "visual": visual, "line": line_ or line(), "href": href}
+    return {"key": key, "fig": FIGURE_KEY_OF.get(label, ""), "label": label, "value": value, "kind": kind, "signed": signed, "tone": tone, "needs": needs,
+            "chip": chip_, "compare": comparison, "visual": visual, "line": line_ or line(),
+            "href": "" if working is not None else href, "working": working}
 
 
 def row(cards: list[dict | None]) -> list[dict]:
@@ -118,7 +124,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
     spent_label = "From monthly plan" if funded_elsewhere else "Spent"
     left_visual = (segments([(spent_label, e.spent, "out"), ("Bills to pay", e.bills_to_pay, "neutral"), ("Everyday", e.everyday_left, "in")])
                    if e.current else segments([(spent_label, min(e.spent, e.planned), "out"), ("Left", max(e.left, ZERO), "in")]))
-    cards = [card(figure_label("left_in_plan"), e.left, left_compare, tone="in" if e.left >= 0 else "over", key="left",
+    cards = [card(figure_label("left_in_plan"), e.left, left_compare, tone="in" if e.left >= 0 else "over", key="left", working=e.left_working,
                   chip_=chip(f"{e.days_left} days left" if e.current and e.days_left else month),
                   visual=left_visual or meter(e.spent, e.planned),
                   line_=line(f"{spent_label} {fmt(e.spent, 0)} of {fmt(e.planned, 0)} planned"), href="#budget-meters")]
@@ -216,7 +222,7 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
                   visual=segments([("Safe", max(f.safe_to_spend, ZERO), "hold"),
                                    ("Budget", -parts.get(figure_label("left_in_plan_after_bills"), ZERO), "out"),
                                    ("Savings", saving, "in"), ("Due", due, "over")]),
-                  line_=line("On top of your plan", "How it is worked out", "#plan-build"), href="#plan-build")]
+                  line_=line("On top of your plan"), working=f.safe_to_spend_working)]
 
     if free_then is not None:
         change = f.free_cash - free_then
@@ -296,7 +302,7 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
         else:
             savings_compare, savings_chip = compare("Your first month: nothing to compare yet"), chip(period_chip)
         cards.append(card(figure_label("savings_rate"), rate, savings_compare, tone="in", key="savings", kind="rate",
-                          chip_=savings_chip, visual=spark(rates), href=savings_href,
+                          chip_=savings_chip, visual=spark(rates), href=savings_href, working=flow.savings_rate_working,
                           line_=line(f"{fmt(flow.net, 0)} kept of {fmt(flow.inflows, 0)} money in")))
 
     cards.append(_investing(flow, invest, invest_before, before_label, money_added, period_chip, invest_href))

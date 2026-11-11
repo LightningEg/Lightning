@@ -104,6 +104,19 @@ def measured(tmp_path_factory):
                 page.mouse.move(1, 1)
                 page.evaluate("async () => { await document.fonts.ready; }")
                 out[key] = {"titles": titles, **page.evaluate(MEASURE)}
+                out[key]["both_ways"] = page.locator(".kpi-card:has(.fig-open) .kc-open").count()
+            page.goto(host.origin + "/plan")  # NF-12AB3: the figure opens its working in place; Escape closes it
+            figure = page.locator(".lead-card .fig-open").first
+            panel = page.locator("#" + figure.get_attribute("aria-controls"))
+            opened = [panel.is_visible()]
+            figure.click()
+            opened.append(panel.is_visible())
+            page.keyboard.press("Escape")
+            opened.append(panel.is_visible())
+            figure.focus()
+            page.keyboard.press("Enter")
+            opened.append(panel.is_visible())
+            out["_working"] = opened
             browser.close()
     finally:
         host.stop()
@@ -113,6 +126,10 @@ def measured(tmp_path_factory):
 def _failures(measured) -> dict[tuple[str, str], str]:
     found = {}
     for key, m in measured.items():
+        if key.startswith("_"):
+            continue
+        if m.get("both_ways"):
+            found[("working", key)] = "a KPI both opens its working and links away"
         if len(m["h1"]) != 1 or m["h1"][0] not in m["titles"]:
             found[("title", key)] = f"H1 {m['h1']} is not the tab's name {m['titles'][0]!r}"
         words = len(m["status"].split())
@@ -144,6 +161,11 @@ def test_the_allow_list_is_not_stale(measured):
 def test_the_allow_list_names_real_tabs_and_items():
     keys = {key for key, _, _ in _tabs()}
     for (rule, key), item in ALLOWED.items():
-        assert rule in {"title", "sentence", "undo", "primary", "length"}, rule
+        assert rule in {"title", "sentence", "undo", "primary", "length", "working"}, rule
         assert key in keys, key
         assert re.fullmatch(r"(IV|BV|IT|BT|NF)-\d+[A-Z]+\d*", item), item
+
+
+def test_a_headline_figure_opens_its_working_in_place(measured):
+    """NF-12AB3 (A08.1): closed, then open on a click, closed by Escape, open again with Enter."""
+    assert measured["_working"] == [False, True, False, True]

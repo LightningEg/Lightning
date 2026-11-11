@@ -2,6 +2,7 @@
    about how much a day, To do (three rows: name, figure, when, one verb; See all), Latest five, This month. First run replaces the hero with three steps; catch-up,
    payday and overspent change the hero's sentence and what To do leads with. #}
 {% extends "base.html" %}
+{% from "phone/partials/working.html" import working_rows with context %}
 {% from "phone/partials/sheet.html" import sheet with context %}
 {% from "phone/partials/charts.html" import month_bar with context %}
 {% from "phone/partials/txn.html" import txn_list with context %}
@@ -28,11 +29,11 @@
 {% else %}{% set line = 'From free cash, after what is promised over the next 3 months.'|tr(locale) %}{% endif %}
 {# The hero is the way into its working (C11.1): one tap opens the sheet, so no row of its own is needed. #}
 {% set lead %}<div class="phone-hero has-seam"><div id="home-hero" class="phone-hero-label" role="heading" aria-level="2">{{ fig.safe_to_spend.label }} <span aria-hidden="true">{{ chevron() }}</span></div>
-  <div class="phone-lead">{{ s.safe|money }} <small>{{ base }}</small></div><p class="phone-hero-line">{{ line|keep_dates }}</p>
+  <div class="phone-lead" data-fig="safe_to_spend">{{ s.safe|money }} <small>{{ base }}</small></div><p class="phone-hero-line">{{ line|keep_dates }}</p>
   {# IV-11D1, C06.1: everyday money gone (fill) against the pace by today (tick); rose when spending is ahead. #}
   {% if s.meter %}<span class="phone-pay-meter{{ ' is-ahead' if s.meter.ahead }}" role="img" aria-label="{{ '{spent}% of everyday money spent; the pace is at {pace}% today.'|tr(locale, spent=s.meter.spent|round|int, pace=s.meter.pace|round|int) }}"><i style="width:{{ '%.1f'|format(s.meter.spent) }}%"></i><b style="inset-inline-start:{{ '%.1f'|format(s.meter.pace) }}%"></b></span>{% endif %}</div>{% endset %}
 {% call sheet(fig.safe_to_spend.label, lead, 'phone-home-hero') %}
-  <div class="phone-rows">{% for name, value in s.working %}<div class="phone-row"><span>{{ name|tr(locale) }}</span><b>{{ value|money(True) }}</b></div>{% endfor %}</div>
+  {{ working_rows(s.working) }}
 {% endcall %}
 {% if s.todo %}
 <section class="phone-section phone-todo" aria-labelledby="todo-heading">

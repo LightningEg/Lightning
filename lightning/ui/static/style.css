@@ -3984,3 +3984,13 @@ label > .field-note { color:var(--muted); font-size:var(--fs-meta, 12px); margin
 .search-answer-rows { list-style:none; margin:4px 0; padding:0; display:grid; gap:4px; }
 .search-answer-rows li { display:flex; justify-content:space-between; gap:12px; }
 .search-answer .btn { justify-self:start; }
+
+/* NF-12AB3 (A08.1): the headline figure is the control for its working, which opens under it in the same card. */
+.main .fig-open { all:unset; cursor:pointer; border-radius:8px; }
+.main .fig-open:focus-visible { outline:2px solid var(--accent); outline-offset:3px; }
+.main .fig-open:hover .kc-figure, .main .fig-open:hover .lead-figure { text-decoration:underline; text-decoration-thickness:1px; text-underline-offset:4px; }
+.main .working-panel { margin-top:8px; padding-top:8px; border-top:1px solid var(--line); }
+.main .working-panel .working-title { margin:0 0 4px; font:700 var(--fs-meta)/1.4 var(--body); color:var(--ink-2); }
+.main .working-panel table { width:100%; border-collapse:collapse; font:500 var(--fs-2)/1.5 var(--body); color:var(--ink); }
+.main .working-panel td { padding:2px 0; }
+.main .working-panel td.num { text-align:end; font-variant-numeric:tabular-nums; }
