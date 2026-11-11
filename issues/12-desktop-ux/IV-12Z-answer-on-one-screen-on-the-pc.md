@@ -31,14 +31,11 @@ Each tab keeps, open: the header, the Lead, Needs you, the KPI row and the one d
 
 12Z1: `tests/test_page_skeleton.py` fails a tab taller than 2.5 screens at 1366 x 768 (Transactions and Categories excepted); Spending, Cash planning, Holdings and Your data are listed in its `ALLOWED` with their step.
 
-Built 12Z2: Cash planning lists a late bill in Needs you only, "Can I afford this?" is its own card, Zakat day is a line of the forecast card (`tests/test_plan_says_each_thing_once.py`). Cash planning is still over 2.5 screens; 12Z3's pattern (closed rows) applies to its lower cards.
+Built 12Z2: Cash planning lists a late bill in Needs you only, "Can I afford this?" is its own card, Zakat day is a line of the forecast card (`tests/test_plan_says_each_thing_once.py`). Built 12Z3: Spending keeps Where did it go? open; Is this period unusual?, Day by day, Cash flow and Month by month are closed rows that remember being opened, and Spending is within 2.5 screens. Their one-line summaries are still to write. Cash planning is still over 2.5 screens; 12Z3's pattern (closed rows) applies to its lower cards.
 
 ## How to work on this item
 
 One PR per step. After each: `python -m pytest -q tests/test_brand_audit.py tests/test_mohab_year.py` and the step's test. Mohab reads some of these blocks: open them in his steps, never delete what he checks. Delete the step's heading in the same commit.
-
-## 12Z3 Spending opens on the categories; the other charts open on request · M · opus
-Files: `lightning/ui/templates/birdview/`. Open: Money out as a Lead with its change, then "Where did it go?". Closed rows: Is this period unusual?, Day by day, Cash flow, Month by month, each with a one-line summary of what it would show ("Loan payments and Health are above their usual range"). Done when Spending is within the budget of 12Z1.
 
 ## 12Z5 Overview's tail · S · sonnet · #498
 Built: a finished setup no longer shows its heading; a quiet Investments period is one line (12Z4, `tests/test_investment_explain.py`). Left: Your position still ends the page as a closed heading. Opening it by default takes Overview past 2.5 screens, so it moves beside the KPI row instead. Done when Overview on the sample year has no collapsed heading followed by empty space.
