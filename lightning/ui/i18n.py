@@ -3550,6 +3550,7 @@ ARABIC_UI = {
     'Edit category': 'تعديل الفئة',
     'e.g. Pets': 'مثال: حيوانات أليفة',
     'Record {what}': 'سجّل {what}',
+    'Edit rule': 'تعديل القاعدة',
 }
 
 

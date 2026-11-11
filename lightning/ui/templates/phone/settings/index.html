@@ -1,6 +1,6 @@
 {# Phone Settings (IV-11H, guideline C11.3): what a phone needs, in rows (Appearance, Language, This phone, Bank SMS,
    Backup, Privacy, About and licences, Delete this profile), then what is best on a PC. Every other section
-   (?section=budget, currencies, …) is the shared page. #}
+   (?section=budget, currencies, zakat, targets, financial-health) is its phone part; the rest is the shared page. #}
 {% extends "settings/index.html" %}
 {% block content %}
 {% if section in ('', 'general') %}
@@ -88,5 +88,10 @@
   <p class="phone-note">{{ 'Ask an AI, sale factors, target allocation, price files and each tab’s settings.'|tr(locale) }}</p>
 </section>
 <script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelectorAll('[data-autosubmit],[data-locale-auto]').forEach(control=>control.addEventListener('change',()=>control.form?.requestSubmit()));</script>
+{% elif section == 'budget' %}{% include 'phone/settings/budget_section.html' %}
+{% elif section == 'financial-health' %}{% include 'phone/settings/financial_health_section.html' %}
+{% elif section == 'zakat' %}{% include 'phone/settings/zakat_section.html' %}
+{% elif section == 'targets' %}{% include 'phone/investments/_targets.html' %}
+{% elif section == 'currencies' %}{% include 'phone/settings/currencies.html' %}
 {% else %}{{ super() }}{% endif %}
 {% endblock %}

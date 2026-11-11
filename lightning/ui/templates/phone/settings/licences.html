@@ -1,0 +1,15 @@
+{# About and licences on the phone (IV-11H, 3AY17): Lightning's own licence, then each part this build is made from. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Licences'|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Settings'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Licences'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<section class="phone-section" aria-labelledby="own-licence-heading">
+  <header class="phone-section-head"><h2 id="own-licence-heading">Lightning <span dir="ltr">v{{ app_version }}</span></h2></header>
+  <p class="phone-note" dir="ltr">Copyright 2026 elfekimuhammed. PolyForm Noncommercial License 1.0.0.</p>
+</section>
+<section class="phone-section" aria-labelledby="parts-heading">
+  <header class="phone-section-head"><h2 id="parts-heading">{{ 'Built with'|tr(locale) }}</h2></header>
+  <div class="phone-rows licence-rows">{% for p in licence_rows %}<div class="phone-row"><span dir="ltr">{{ p.name }}<small>{{ p.version }}</small></span><b dir="ltr">{{ p.licence }}</b></div>{% endfor %}</div>
+</section>
+{% endblock %}

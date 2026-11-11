@@ -23,9 +23,6 @@ dashboard/explanation.html
 dashboard/salary_setup.html
 dashboard/welcome.html
 error.html
-exports/all.html
-exports/import.html
-exports/starter.html
 financial_health.html
 import.html
 integrity.html
@@ -37,14 +34,4 @@ physical_item_form.html
 read_only.html
 reserve_payments.html
 reserves.html
-rules/form.html
-rules/index.html
-rules/offer.html
-settings/_emergency_basis.html
-settings/_update.html
-settings/budget_section.html
-settings/currencies.html
-settings/financial_health_section.html
-settings/licences.html
-settings/zakat_section.html
 tag.html
