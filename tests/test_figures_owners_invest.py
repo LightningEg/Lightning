@@ -88,3 +88,21 @@ def test_account_totals_roll_pockets_into_their_broker():
 def test_gameya_pot_is_every_members_instalment():
     terms = GameyaTerms(1, "Aunt", 10, D(1000), list(GameyaFrequency)[0], "2026-01-01", 3, D(10000), D(0), 2, 2)
     assert terms.pot == D(10000)
+
+
+def test_a_sales_list_without_amounts_opens_on_the_phone(tmp_path, monkeypatch):
+    """The crawl found /investments/report-detail?kind=sales failing on the phone: a sale has no base amount and the
+    template divided it anyway. The route now hands every row its amount (None when there is none)."""
+    from lightning.bootstrap import build
+    from lightning.samples import load_mohab_2026
+    from tests.test_figures_agree import _client
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-20")
+    monkeypatch.setenv("LIGHTNING_PRICES_OFFLINE", "1")
+    c = build(tmp_path / "sales.db")
+    load_mohab_2026(c)
+    try:
+        for phone in (False, True):
+            page = _client(c, phone).get("/investments/report-detail?from=2026-09-01&to=2026-09-30&kind=sales")
+            assert page.status_code == 200
+    finally:
+        c.db.close()

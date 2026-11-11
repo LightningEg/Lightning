@@ -49,8 +49,7 @@ async def investment_report_detail(request: Request):
         return render(request, "investments/report_detail.html", title="Owned holdings",
                       rows=report["holdings"], holdings=True, show_popup=True)
     rows = c.investments.report_transactions(kind, start, end)
-    if kind == "dividends":
-        rows = [{**row, "amount": from_e6(row["amount_base_e6"])} for row in rows]
+    rows = [{**row, "amount": from_e6(row["amount_base_e6"]) if row["amount_base_e6"] is not None else None} for row in rows]
     return render(request, "investments/report_detail.html", title={"dividends": label("dividends_and_interest"), "sales": label("realized_gain"),
                   "flows": label("new_money_in")}.get(kind, "Investment transactions"),
                   rows=rows, show_amount=kind in {"flows", "dividends"}, show_popup=True)
