@@ -41,12 +41,11 @@ def test_saved_views_are_one_menu_with_the_name_field_inside(c, setup):
 
 
 def test_phone_latest_hides_value_updates(c):
+    """Home's Latest (phone/screens/home.py) leaves value updates out; this small profile still shows the first run,
+    so the rows are read from the screen itself."""
+    from lightning.core.dates import today
+    from lightning.ui.phone.screens import home
     _brokerage_with_updates(c)
-    app = create_app(c)
-    async def phone_app(scope, receive, send):
-        scope.setdefault("state", {})["phone"] = True
-        await app(scope, receive, send)
-    client = TestClient(phone_app)
-    latest = client.get('/').text.split('class="phone-section phone-latest"', 1)[1].split('</section>', 1)[0]
-    assert 'Investment revaluation' not in latest
-    assert 'THNDR' in latest
+    latest = home.build(c, today()).latest
+    assert latest and all("revaluation" not in (r.description or "").lower() for r in latest)
+    assert any("THNDR" in f"{r.description} {r.counterparty} {getattr(r, 'account_name', '')}" for r in latest)

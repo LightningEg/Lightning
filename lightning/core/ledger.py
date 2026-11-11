@@ -161,7 +161,7 @@ def validate_posting(lines: list[PostingLine]) -> None:
             if decimal_places(getattr(line, name)) > places:
                 raise ValidationError(f"Line {i}: {name} has more than {places} decimal places.")
         if line.unit_price < ZERO or line.fx_rate <= ZERO:
-            raise ValidationError(f"Line {i}: price and exchange rate must be positive.")
+            raise ValidationError(f"Row {i}: the price and the exchange rate must be above zero.")
         if line.is_cash and line.effect != Effect.REVALUATION and (line.unit_price != ONE or line.amount != line.quantity):
             raise ValidationError(f"Line {i}: a cash line's amount must equal its quantity.")
         if (not line.is_cash and line.effect != Effect.REVALUATION and line.amount != ZERO and

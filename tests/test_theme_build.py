@@ -285,7 +285,7 @@ class ThemeBuildTests(unittest.TestCase):
         phone = (ROOT / 'lightning/ui/templates/phone/base.html').read_text()
         self.assertLess(phone.index('partials/theme_head.html'), phone.index('phone_css_src'))
         from lightning.ui.web import PHONE_CSS
-        self.assertLess(PHONE_CSS.index('style{rtl}.css'), PHONE_CSS.index('themes.generated.css'))
+        self.assertLess(PHONE_CSS.index('phone-base{rtl}.css'), PHONE_CSS.index('themes.generated.css'))  # 3AY4: the phone's own base
 
 
 def test_profile_preference_survives_new_app_and_rejects_unknown_theme(c):

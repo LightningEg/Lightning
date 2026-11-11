@@ -4,7 +4,7 @@ type: tech
 pillar: build
 size: L
 model: opus
-status: blocked
+status: parked
 blocked_by: repository Actions allowlist update and native runtime acceptance
 created: 2026-10-23
 by: Codex

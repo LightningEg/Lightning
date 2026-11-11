@@ -12,7 +12,7 @@ from lightning.core.errors import LightningError
 from lightning.investments.report import investment_period
 from lightning.ui.periods import parse_period
 
-KEYS = ("month", "last", "ytd", "all")
+KEYS = ("month", "last", "ytd", "all", "custom")
 
 
 @dataclass(frozen=True)
@@ -31,18 +31,20 @@ class ReportScreen:
     keys: tuple[tuple[str, str], ...]
 
 
-def _period(c, day: date, key: str):
+def _period(c, day: date, key: str, date_from: str = "", date_to: str = ""):
     first = c.reporting.first_activity_date()
+    if key == "custom":   # 3AY10: the report takes your own dates, as the older Overview's Custom did
+        return parse_period({"period": "custom", "date_from": date_from, "date_to": date_to}, day, first)
     if key == "last":
         before = date(day.year - 1, 12, 1) if day.month == 1 else date(day.year, day.month - 1, 1)
         return parse_period({"period": "month", "month": month_of(before)}, day, first)
     return parse_period({"period": key if key in ("ytd", "all") else "month"}, day, first)
 
 
-def build(c, day: date, key: str = "month") -> ReportScreen:
+def build(c, day: date, key: str = "month", date_from: str = "", date_to: str = "") -> ReportScreen:
     key = key if key in KEYS else "month"
     try:
-        period = _period(c, day, key)
+        period = _period(c, day, key, date_from, date_to)
     except LightningError:
         key = "month"
         period = _period(c, day, key)
@@ -50,7 +52,8 @@ def build(c, day: date, key: str = "month") -> ReportScreen:
     flow = c.reporting.cash_flow(start, end)
     change, reason = c.position.change_in_what_you_own(start, end, since_first_record=key == "all")
     investing = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(start), fmt_date(end))
-    label = month_of(start) if key in ("month", "last") else period.label
+    label = (month_of(start) if key in ("month", "last") else
+             f"{fmt_date(start)} – {fmt_date(end)}" if key == "custom" else period.label)
     return ReportScreen(key=key, label=label, start=fmt_date(start), end=fmt_date(end), change=change,
                         change_reason=reason, money_in=flow.inflows, money_out=flow.outflows, net=flow.net,
                         savings_rate=flow.savings_rate, investing_result=investing["result"],

@@ -86,6 +86,12 @@ cannot be done), `low` (it reads or looks off). INDEX shows it after the kind.
 `new` (found, not looked at) · `ready` (understood; anyone can build it) · `building` (someone has it: a claim in `NOW.md`
 naming its code, or a `/take` on GitHub; `--check` warns about one with no claim, without failing) · `blocked` (say what it waits for in `blocked_by`). Finished is never a status: delete the file.
 
+`parked` (kept, not planned: the owner set it aside; it leaves the tables and the counts and is listed once at the end of
+`INDEX.md`; nobody works on it until the owner sets it back to `ready`).
+
+**The caps (owner, 2026-11-11).** At most 3 items `building` and 20 open (parked ones do not count); `python tools/issues.py --check`
+warns above either. A finding is a line in [INBOX.md](INBOX.md), not an item, until work on it starts.
+
 ## Front matter (required, between two `---` lines, first in the file)
 
 ```

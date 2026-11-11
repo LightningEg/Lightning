@@ -4,7 +4,7 @@ type: feature
 pillar: plan
 size: L
 model: opus
-status: ready
+status: parked
 created: 2026-11-11
 by: Claude
 skills: add-screen

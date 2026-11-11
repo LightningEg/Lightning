@@ -93,20 +93,17 @@ def test_quick_add_saves_once_however_often_it_is_sent(c, monkeypatch):
     assert refused.status_code == 422 and not refused.json()["ok"]
 
 
-def test_an_overview_fold_draws_when_opened(c, monkeypatch):
+def test_an_overview_period_link_reads_money_s_report(c, monkeypatch):
+    """3AY10: the older phone Overview and its folds are gone. A period link to / goes to Money's report."""
     _history(c, monkeypatch)
     from lightning.ui.phone.router import mount_phone
     app = web.create_app(c)
-    mount_phone(app)  # the fold is the phone router's route (3AY18); a period link still reaches the older Overview
+    mount_phone(app)
     with TestClient(_as_phone(app)) as phone:
-        page = phone.get("/?period=month")
-        trend = phone.get("/overview/fold/trend")
-        money = phone.get("/overview/fold/money-in?period=month&month=2026-09")
-        missing = phone.get("/overview/fold/nope")
-    assert 'data-fold-src="/overview/fold/trend' in page.text and 'data-fold-src="/overview/fold/money-in' in page.text
-    assert trend.status_code == 200 and "<svg" in trend.text and "phone-tabbar" not in trend.text
-    assert money.status_code == 200 and "phone-tabbar" not in money.text
-    assert missing.status_code == 404
+        moved = phone.get("/?period=ytd", follow_redirects=False)
+        fold = phone.get("/overview/fold/trend")
+    assert moved.status_code in (302, 303) and moved.headers["location"] == "/money/report?period=ytd"
+    assert fold.status_code == 404
 
 
 def test_swipe_delete_hears_a_refusal_instead_of_following_the_redirect(c):

@@ -12,12 +12,11 @@ Add an entry, import a bank CSV and settle every row yourself, read bank SMS on 
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-7AK** | [Bank messages beyond CIB and NBE in Arabic: English card messages, wallets, other currencies, and t…](../../issues/7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | L | new |
-| **NF-7AO** | [Bank messages Lightning is sure about save themselves, marked and undoable](../../issues/7-planning-import-and-search/NF-7AO-sure-bank-messages-save-themselves.md) | L | new |
 | **NF-7AQ** | [Search answers a typed question](../../issues/7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md) | L | new |
 
 ## Reports with open follow-ups here
 
-- [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](../../issues/7-planning-import-and-search/r31-logging-entries/report.md): 7AK, 7AO
+- [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](../../issues/7-planning-import-and-search/r31-logging-entries/report.md): 7AK
 - [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](../../issues/12-desktop-ux/r35-ux-against-users-questions/report.md): 7AQ
 <!-- work:end -->
 

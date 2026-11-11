@@ -882,7 +882,7 @@ ARABIC_UI = {
     'Messages': 'الرسائل',
     'Read them': 'اقرأها',
     'Read bank SMS by itself': 'قراءة رسائل البنك مباشرة',
-    'Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction you check. It reads messages from senders with a name or a short code, like CIB or NBE, never from people\'s numbers. The messages stay on this phone: nothing is sent anywhere. Nothing is posted until you check it.': 'Lightning بيقرأ رسائل البنك وبيحوّل كل دفعة وتحويل ومرتب لمعاملة تراجعها. بيقرأ الرسائل اللي جاية من اسم أو رمز قصير زي CIB أو NBE، ومش بيقرأ رسائل أرقام الأشخاص. الرسائل بتفضل على الموبايل ومش بتتبعت لأي مكان. مفيش حاجة بتتسجل غير بعد مراجعتك.',
+    "Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction. It reads messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages stay on this phone: nothing is sent anywhere. A payment Lightning is sure about saves itself, marked and undoable; the rest wait for your check.": 'Lightning بيقرأ رسائل البنك وبيحوّل كل دفعة وتحويل ومرتب لمعاملة. بيقرأ الرسائل اللي جاية من اسم أو رمز قصير زي CIB أو NBE، ومش بيقرأ رسائل أرقام الأشخاص. الرسائل بتفضل على الموبايل ومش بتتبعت لأي مكان. الدفعة اللي Lightning متأكد منها بتتسجل لوحدها، وعليها علامة وتقدر تلغيها؛ والباقي بيستنى مراجعتك.',
     'Allow reading SMS': 'اسمح بقراءة الرسائل',
     'Reads new bank messages when you open Overview or this page': 'بيقرأ رسائل البنك الجديدة لما تفتح نظرة عامة أو الصفحة دي',
     'Enter it': 'سجّلها',
@@ -3674,12 +3674,39 @@ ARABIC_UI = {
     'Record {what}': 'سجّل {what}',
     'Edit rule': 'تعديل القاعدة',
     'Choose files': 'اختار الملفات',
+    'Check against the bank': 'راجع مع البنك',
+    'Does {name} say {amount}?': '{name} بيقول {amount}؟',
+    'Fix it': 'صلّحه',
+    "Plan this month's {amt}": 'خطط لـ {amt} الشهر ده',
+    'This month in detail': 'الشهر ده بالتفصيل',
+    'Looks right': 'تمام كده',
+    'Track it': 'تابعه',
+    'Match to deposit': 'طابقه مع الشهادة',
+    'Looks monthly. Track it so the plan expects it.': 'شكله شهري. تابعه عشان الخطة تتوقعه.',
+    'A payment with no category': 'دفعة من غير فئة',
+    'Search payments': 'دوّر في المدفوعات',
+    'Period': 'الفترة',
+    'Type a limit beside a category: an amount, or a % of income.': 'اكتب حد جنب كل فئة: مبلغ، أو نسبة من الدخل.',
+    'From last month, your schedule or your average': 'من الشهر اللي فات، أو جدولك، أو متوسطك',
+    'Spent {amt}': 'اتصرف {amt}',
+    'No everyday categories yet.': 'مفيش فئات يومية لسه.',
+    'Delete the copy': 'امسح النسخة المكررة',
+    'Keep both': 'سيب الاتنين',
+    'Both kept.': 'سبنا الاتنين.',
+    'Copy deleted.': 'اتمسحت النسخة المكررة.',
+    'Recorded twice? The copy goes; the first one stays, with both notes.': 'اتسجلت مرتين؟ النسخة المكررة هتتمسح، والأولى هتفضل ومعاها ملاحظات الاتنين.',
+    'A payment': 'دفعة',
+    'These two are no longer offered as possible duplicates.': 'الاتنين دول مبقوش معروضين كتكرار محتمل.',
+    'These two are no longer offered.': 'الاتنين دول مبقوش معروضين.',
 }
 
 
 from lightning.ui.i18n_phone_reading import PHONE_READING as _PHONE_READING  # noqa: E402
 
 ARABIC_UI.update(_PHONE_READING)
+from lightning.ui.i18n_errors import ERRORS_AR as _ERRORS_AR  # noqa: E402
+
+ARABIC_UI.update(_ERRORS_AR)
 _ORIGINAL = frozenset(ARABIC_UI)
 for _key, _value in SYSTEM_TEXT.items():
     ARABIC_UI.setdefault(_key, _value)

@@ -6,7 +6,6 @@ Reserved codes: none
 
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Claude | O7 finish: 3AY15-17, 3AY4/8/9/10, 3AU3-4 | `lightning/ui/phone/`, `lightning/ui/templates/phone/`, `static/phone*`, `tests/phone_pc_templates.txt` | 2026-11-11 |
 | Claude | O5 | `lightning/deposits/` | 2026-11-10 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
@@ -19,7 +18,9 @@ Reserved codes: none
 
 ## Next
 
-- **r28 (Codex):** Next: 3BC, 3BD, 3BF (owner order). **Read:** r28.
+- **Plan cut (owner, 11-11):** 29 parked, 3H and 9A dropped; findings go to `issues/INBOX.md`. **Read:** AGENTS §3.
+
+- **r28 (Codex):** Next: 3BC, 3BF (owner order; 3BD done). **Read:** r28.
 
 - **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
@@ -27,8 +28,6 @@ Reserved codes: none
 
 - **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12AB3 rest, 12Z5, 12AE4, 12Q. **Read:** 12AB.
 - **Upcoming (11-11, Claude):** 7AR1-3 built (owner: PC+phone check); 7AR4 .ics later. **Read:** 7AR.
-- **Phone (11-10, Claude):** 3AY14, 18, 3AU2 built. Sonnet: 3AY15-17; Opus: 3AY4, 8-10; owner 3AY13. Then 3AU3-4. **Read:** 3AY; 3AU.
-- **Play (Claude, 11-09):** NF-11B done; owner: 10H3, shots, 11B7-9. **Read:** NF-11B.
 - **O1:** owner checks Home. **Read:** Overview §7.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
@@ -39,7 +38,7 @@ Reserved codes: none
 
 - **Website (11-09):** owner: Home ends on Download; Marketplace in search (site PR). Analytics host blocked here: unread. **Read:** site README › Search.
 
-- **Import:** 7AB, 7AN, 7AK1-2, 7AQ1-4 built (owner: PC+phone check). Next 7AO, 7AQ5, 7AK3-4. **Read:** each item.
+- **Import:** 7AB, 7AN, 7AK1-2, 7AK4, 7AO, 7AQ1-5 built (owner: PC+phone, 7AQ5 Arabic). Next 7AK3.**Read:** 7AK.
 
 
 Plan: `issues/INDEX.md`.
@@ -49,8 +48,7 @@ Plan: `issues/INDEX.md`.
 3. **Audit 9 links:** 7T merged (#312); native CI held. **Read:** `tests/test_reserve_bills.py`, `tests/test_salary_day_portability.py`.
 4. **1H:** locks merged (#286); native checks held by owner; #302 open. **Read:** `issues/1-easy-to-contribute/IT-1H-coordinate-packaged-dependency-refresh.md`.
 5. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `issues/4-edit-journal-and-devices/r11-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
-6. **Website recapture** (Sonnet M3 session, last) for 3W, 3AG, 7Q, 3Q, 3S, 3T, 3G, 3H.  Fix the `a-kpis` caption. **Read:** `skills/site-recapture/SKILL.md`.
-7. **3H Tab-by-tab review:** optional reminders and grouped confirmations, then analytics; trust step 2 and weekly friction. **Read:** 3H §13–14.
+6. **Website recapture** (Sonnet M3 session, last) for 3W, 3AG, 7Q, 3Q, 3S, 3T, 3G.  Fix the `a-kpis` caption. **Read:** `skills/site-recapture/SKILL.md`.
 8. **O9 (Claude, 11-10):** 3BK, 9K done; 6F1 and Dubai done. Left: 3BK9 website guideline copy (repo access was denied here), 6F2 Abu Dhabi and Bahrain suffixes. **Read:** 3BK, 6F.
 9. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
 10. **6B, 6D, 3AI:** shares, gold and institution logos remain as their items describe. **Read:** each item in `issues/INDEX.md`.

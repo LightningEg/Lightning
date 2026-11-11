@@ -1,9 +1,0 @@
-{# A category sheet's last three payments this month (3AN7), drawn when the sheet opens; no frame. Nothing yet: last
-   month's figure, a way to it (3AN9). #}
-{% if rows %}
-<h3 class="phone-sheet-sub">{{ 'Last payments'|tr(locale) }}</h3>
-<div class="phone-rows">{% for r in rows %}<a class="phone-row" href="/transactions/{{ r.id }}"><span>{{ r.counterparty or r.description or r.type_label }}<small>{{ r.date }}</small></span><b>{{ r.amount|amount_role('row', True) }}</b></a>{% endfor %}</div>
-{% else %}
-<p class="phone-note">{{ 'Nothing spent here yet this month.'|tr(locale) }}</p>
-{% if earlier %}<div class="phone-rows"><a class="phone-row" href="{{ see_last }}"><span>{{ 'Last month'|tr(locale) }}<small>{{ last_month }}</small></span><b>{{ earlier|amount_role('total') }}</b></a></div>{% endif %}
-{% endif %}

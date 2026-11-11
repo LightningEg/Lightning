@@ -54,4 +54,4 @@ def test_phone_and_pc_budget_show_the_same_per_day_figure(sample):
     pc = TestClient(create_app(sample)).get("/budget?period=month&month=2026-10").text
     phone = _phone(sample).get("/budget?period=month&month=2026-10").text
     assert re.search(rf"about {figure} a day", pc), figure
-    assert re.search(rf"About {figure} a day for {everyday.days_left} days", phone), figure
+    assert re.search(rf"About {figure} a day\.", phone), figure  # flexible Budget's hero line (3AY9)

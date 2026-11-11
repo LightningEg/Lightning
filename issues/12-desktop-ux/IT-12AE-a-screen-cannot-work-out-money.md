@@ -4,7 +4,7 @@ type: tech
 pillar: build
 size: L
 model: opus
-status: ready
+status: parked
 created: 2026-11-09
 by: Claude
 skills: number-audit

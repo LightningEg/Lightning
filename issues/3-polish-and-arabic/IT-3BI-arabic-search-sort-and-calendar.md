@@ -4,7 +4,7 @@ type: tech
 pillar: everywhere
 size: M
 model: sonnet
-status: ready
+status: parked
 created: 2026-11-08
 by: Claude
 ---

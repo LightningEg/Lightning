@@ -19,7 +19,11 @@
   {% if not s.own_split %}<p class="phone-hero-line">{{ 'What you own'|tr(locale) }} <b><bdi class="fig">{{ s.what_you_own|money }}</bdi></b></p>{% endif %}
   {% if s.since_start is not none %}<p class="phone-hero-line">{{ '{amt} this month.'|tr(locale, amt=s.since_start|money(True)) }}</p>{% endif %}
 </div>{% endset %}
-{# NF-12AB4: the hero is the way into its working (C06.1) #}{% call sheet(fig.net_worth.label, lead, 'phone-home-hero') %}{{ working_rows(s.working) }}{% endcall %}
+{# NF-12AB4: the hero is the way into its working (C06.1) #}{% call sheet(fig.net_worth.label, lead, 'phone-home-hero') %}{{ working_rows(s.working) }}
+  {# 3AY10 (owner 2026-11-11): the parts, then US dollars and 21K gold as two rows; the 12-month line sits right
+     under the hero, once (A16: one figure, one home) #}
+  {% if s.units %}<div class="phone-rows net-worth-units">{% for u in s.units %}<div class="phone-row"><span>{{ ('In ' ~ u.unit)|tr(locale) }}<small>{{ 'at {price} on {date}'|tr(locale, price=u.price|money, date=u.date) }}</small></span><b><bdi class="fig">{{ u.value|money }}</bdi></b></div>{% endfor %}</div>{% endif %}
+{% endcall %}
 {% if s.trend %}<section class="phone-section phone-chart-card" aria-label="{{ 'Net worth, end of each month'|tr(locale) }}">{{ area_trend(s.trend, 'Net worth, end of each month'|tr(locale)) }}</section>{% endif %}
 {% if s.own_split %}<section class="phone-section" aria-labelledby="own-heading">
   <header class="phone-section-head"><h2 id="own-heading">{{ 'What you own'|tr(locale) }}</h2><b><bdi class="fig">{{ s.what_you_own|money }}</bdi></b></header>

@@ -5,7 +5,7 @@ type: polish
 pillar: own
 size: L
 model: opus
-status: new
+status: parked
 created: 2026-11-09
 by: Claude
 skills: bug-hunt
