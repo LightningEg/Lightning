@@ -147,7 +147,7 @@ def test_no_open_profile_owns_nothing_and_cannot_unlock(store, monkeypatch):
 
 
 def test_every_seat_taken_says_what_to_do(store):
-    with pytest.raises(entitlements.UnlockError, match="Every profile seat.*quarter of the price"):
+    with pytest.raises(entitlements.UnlockError, match="already unlocks 5 profiles.*hello@lightningeg.com"):
         entitlements.redeem("abcd1234abcd1234abcd1234abcd1234", opener=answer(status=409))
     assert not entitlements.licence_file().exists()
 

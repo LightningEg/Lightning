@@ -202,6 +202,7 @@ def test_a_parked_item_leaves_the_tables_and_the_caps_only_warn(tmp_path):  # ow
     assert page.split("## Parked")[1].count("**NF-9Z**") == 1
     now = tmp_path / "NOW.md"
     now.write_text("## Claimed\n9A 9B 9C 9D\n", encoding="utf-8")
+    module.MAX_BUILDING = 3
     said = module.warnings(milestones, now)
     assert any("4 items are building" in line and "cap is 3" in line for line in said)
     assert not any("9Z" in line for line in said), "a parked item is nobody's work: no split or claim warning"

@@ -89,7 +89,7 @@ naming its code, or a `/take` on GitHub; `--check` warns about one with no claim
 `parked` (kept, not planned: the owner set it aside; it leaves the tables and the counts and is listed once at the end of
 `INDEX.md`; nobody works on it until the owner sets it back to `ready`).
 
-**The caps (owner, 2026-11-11).** At most 3 items `building` and 20 open (parked ones do not count); `python tools/issues.py --check`
+**The caps (owner, 2026-11-11).** At most 10 items `building` and 20 open (parked ones do not count; the building cap was 3 until 2026-11-11, raised by the owner); `python tools/issues.py --check`
 warns above either. A finding is a line in [INBOX.md](INBOX.md), not an item, until work on it starts.
 
 ## Front matter (required, between two `---` lines, first in the file)

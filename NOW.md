@@ -20,7 +20,7 @@ Reserved codes: none
 
 - **Plan cut (owner, 11-11):** 29 parked, 3H and 9A dropped; findings go to `issues/INBOX.md`. **Read:** AGENTS §3.
 
-- **r28 (Codex):** Next: 3BF (owner order; 3BC, 3BD done). **Read:** r28.
+- **r28 (Codex):** Next: 3BF (owner order; 3BC and 3BD done). **Read:** r28.
 
 - **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
@@ -32,7 +32,7 @@ Reserved codes: none
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 
-- **Store (11-10, Claude):** 10D sets built (site #189: Papyrus 1,320, Dendera 1,280); owner runs migration 20261110200000 live. 10H3 built (site #186). Left: owner 10H4 prices, 10H5 old seats. **Read:** 10H.
+- **Store (11-11, Claude):** prices 60/120/200, cap 5 (site PR). Owner: migrations 20261110200000, 20261111120000; deploy redeem fns; 10H5. Next 10H6. **Read:** 10H.
 
 - **10A/10C app themes:** ready to sell, Dendera included; owner steps in 10C4. Dendera's premium pass (10F) is built; the site's demo shots are current (site #159). New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md`.
 
@@ -50,5 +50,4 @@ Plan: `issues/INDEX.md`.
 5. **2C and 4A:** native PC/phone and power-loss acceptance remain; pairing dummy fault kit built. **Read:** `issues/4-edit-journal-and-devices/r11-pairing-hardening/evidence/acceptance.md`; `issues/INDEX.md`.
 6. **Website recapture** (Sonnet M3 session, last) for 3W, 3AG, 7Q, 3Q, 3S, 3T, 3G.  Fix the `a-kpis` caption. **Read:** `skills/site-recapture/SKILL.md`.
 8. **O9 (Claude, 11-10):** 3BK, 9K done; 6F1 and Dubai done. Left: 3BK9 website guideline copy (repo access was denied here), 6F2 Abu Dhabi and Bahrain suffixes. **Read:** 3BK, 6F.
-9. **Website:** 8F next (device captures ready; 3AB blocks Budget). **Read:** 8F.
 10. **6B, 6D, 3AI:** shares, gold and institution logos remain as their items describe. **Read:** each item in `issues/INDEX.md`.

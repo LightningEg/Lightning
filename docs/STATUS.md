@@ -14,9 +14,9 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | [Everywhere](pillars/everywhere.md) | 2 | 2 |  |  |  |  |
 | [Feel](pillars/feel.md) | 1 | 1 |  |  |  |  |
 | [Build](pillars/build.md) | 1 |  | 1 |  |  |  |
-| [Reach](pillars/reach.md) | 1 |  | 1 |  |  |  |
+| [Reach](pillars/reach.md) | 0 |  |  |  |  |  |
 
-11 open items in 11 milestones.
+10 open items in 11 milestones.
 
 ## Being built now
 
@@ -34,7 +34,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 - **NF-7AQ5** (Capture) The owner's Arabic words · S, in [Search answers a typed question](../issues/7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md)
 - **NF-10C4** (Feel) Owner steps 1-6 in order, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
 - **NF-10C5** (Feel) Review prices after 60 days of sales, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
-- **NF-10H4** (Own) Owner: prices, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
+- **NF-10H4** (Own) Owner: set the prices in the Console, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
 - **NF-10H5** (Own) Owner: the extra seats already sold, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
 
 ## By milestone
@@ -47,7 +47,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 6 Market data | 0 | Prices arrive by themselves, from sources Lightning may redistribute. |
 | 7 Planning, import and search | 2 | Getting a month in takes minutes: any bank file, any old app, one search box. |
-| 8 Website | 1 | The site is honest, quick and in step with the app. |
+| 8 Website | 0 | The site is honest, quick and in step with the app. |
 | 9 Later | 0 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 2 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
 | 11 Phone UX | 0 | The phone is its own product: a few places that each answer one question, quick jobs in three taps, and no PC page squeezed into one column. |
