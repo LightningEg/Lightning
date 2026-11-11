@@ -4,7 +4,7 @@ from types import SimpleNamespace
 import pytest
 
 pytest.importorskip("playwright.sync_api")
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import expect, sync_playwright
 
 from lightning.runtime.app import SessionGate
 from lightning.runtime.http import Guard, Host
@@ -85,7 +85,7 @@ def test_larger_register_page_can_select_and_edit_one_hundred_entries(c, setup, 
     page.locator("#register-page-size").select_option("100")
     page.locator("form.register-page-size button").click()
     assert "page_size=100" in page.url and "q=Example" in page.url
-    assert page.locator(".transaction-select").count() == 100
+    expect(page.locator(".transaction-select")).to_have_count(100)
     page.locator("#select-visible").check()
     assert page.locator(".transaction-select:checked").count() == 100
     assert page.locator("#selection-count").inner_text() == "100 selected"

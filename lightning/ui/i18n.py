@@ -11,6 +11,8 @@ import html
 import re
 from decimal import Decimal
 
+from lightning.core.plural import counted  # noqa: F401 - re-exported: `from lightning.ui.i18n import counted`
+
 from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
@@ -224,7 +226,7 @@ ARABIC_UI = {
     'Suggested': 'مقترح',
     'Show all receipts': 'اعرض كل الإيصالات',
     'No receipt looks like this payout.': 'مفيش إيصال شبه الدفعة دي.',
-    'Matched {count} interest payment(s) to bank receipts.': 'اتطابقت {count} دفعة عائد مع إيصالات البنك.',
+    'Matched {count} interest payments to bank receipts.': 'اتطابقت {count} دفعة عائد مع إيصالات البنك.',
     'Reimbursement needs review': 'التعويض محتاج مراجعة',
     'This activity is no longer a posted cash income or expense.': 'النشاط ده ما بقاش إيراد أو مصروف نقدي مسجل.',
     '{name} needs review': '{name} محتاج مراجعة',
@@ -2027,6 +2029,7 @@ ARABIC_UI = {
     'Delete {subject}?': 'تحذف {subject}؟',
     'Transfer to {name} selected': 'تحويل إلى {name} المحدد',
     'Delete {count} transactions?': 'تحذف {count} معاملات؟',
+    'Delete 1 transaction?': 'تحذف معاملة واحدة؟',
     'Delete {count} selected?': 'تحذف {count} المحدد؟',
     'You have {owned} {unit}(s); you cannot sell {quantity}.': 'أنت تملك {owned} {unit}، ومش ممكن تبيع {quantity}.',
     'You hold {quantity} {unit}(s) here.': 'أنت تملك هنا {quantity} {unit}.',
@@ -3288,6 +3291,8 @@ ARABIC_UI = {
     '1 category': 'فئة واحدة',
     '{n} categories': '{n} فئات',
     '{n} days left': 'فاضل {n} يوم',
+    '{n} day left': 'فاضل يوم واحد',
+    '{n} category': 'فئة واحدة',
     'by day {n}': 'لحد يوم {n}',
     'for everyday, about {amt} a day': 'لليومي، حوالي {amt} في اليوم',
     'Spent {amt} of {x} planned': 'المصروف {amt} من {x} في الخطة',
@@ -3521,7 +3526,7 @@ ARABIC_UI = {
     'Saved {n} prices': 'اتحفظ {n} سعر',
     'Saved {n} price': 'اتحفظ سعر واحد',
     'Not found: {names}': 'مش موجود: {names}',
-    'Skipped {n} row(s) with no usable price or date': 'اتساب {n} صف من غير سعر أو تاريخ صالح',
+    'Skipped {n} rows with no usable price or date': 'اتساب {n} صف من غير سعر أو تاريخ صالح',
     'Yes. You keep {amt} safe to spend until {date}.': 'أيوه. هيفضل معاك {amt} آمن للصرف لحد {date}.',
     'Yes. You keep {amt} safe to spend.': 'أيوه. هيفضل معاك {amt} آمن للصرف.',
     'Only by cutting your plan: it takes {amt} from budget, bills or goals until {date}.': 'بس لو قللت خطتك: هياخد {amt} من الميزانية أو الفواتير أو الأهداف لحد {date}.',
@@ -3716,6 +3721,12 @@ _STAMPS = {"sa", "sb"}
 _MONEY = r"[-+\u2212]?[\d.,]+[kM]?%?(?: [A-Z]{3})?"
 _STAMP = r"\d{4}-\d\d(?:-\d\d)?"
 _NUMBER = r"[-+\u2212]?[\d.,]+[kM]?%?"
+_SINGULARS = {"accounts": "account", "rows": "row", "items": "item", "rules": "rule", "years": "year", "categories": "category",
+              "bills": "bill", "transactions": "transaction", "payments": "payment", "days": "day", "months": "month",
+              "budgets": "budget", "loans": "loan", "prices": "price", "holdings": "holding", "names": "name",
+              "receipts": "receipt", "valuations": "valuation", "inputs": "input", "dividends": "dividend",
+              "checkpoints": "checkpoint", "investments": "investment"}
+_COUNT_NOUN = re.compile(r"\{([a-z_]+)\} ((?:[a-z]+ )?)(" + "|".join(_SINGULARS) + r")\b")
 _PATTERNS: list[tuple[tuple[str, ...], re.Pattern, str]] | None = None
 _SEPARATORS = (" · ", " › ", " — ", ": ", ", ")
 _SENTENCES = re.compile(r"(?<=[.؟?]) (?=[A-Z\u201c\"])")
@@ -3727,7 +3738,12 @@ def _patterns():
     global _PATTERNS
     if _PATTERNS is None:
         compiled = []
-        for pattern, translated in ARABIC_UI.items():
+        entries = list(ARABIC_UI.items())
+        for pattern, translated in list(entries):  # "{n} rows" also reads "1 row": the singular of a counted noun, same Arabic
+            single = _COUNT_NOUN.sub(lambda m: "{%s} %s%s" % (m.group(1), m.group(2), _SINGULARS[m.group(3)]), pattern)
+            if single != pattern and single not in ARABIC_UI:
+                entries.append((single, translated))
+        for pattern, translated in entries:
             names = re.findall(r"\{([a-z_]+)\}", pattern)
             if not names:
                 continue
@@ -3765,7 +3781,8 @@ def _translate_whole(value: str) -> str | None:
                 continue  # a one-part pattern must not swallow a `A · B` line: each part is translated on its own
             if match:
                 try:
-                    return translated.format(**{k: _translate_text(v) for k, v in match.groupdict().items()})
+                    found = match.groupdict()
+                    return _agree_counts(translated, found).format(**{k: _translate_text(v) for k, v in found.items()})
                 except (KeyError, IndexError):
                     continue
     return ARABIC_UI.get(value)
@@ -3807,7 +3824,11 @@ def _translate_text(value: str) -> str:
 
 # Counted nouns as (one, two, three to ten): "يوم واحد", "يومين", "٣ أيام", and "١١ يوم" from eleven (or a fraction, or zero).
 _COUNTED = {"يوم": ("يوم واحد", "يومين", "أيام"), "شهر": ("شهر واحد", "شهرين", "شهور"),
-            "دفعة": ("دفعة واحدة", "دفعتين", "دفعات"), "معاملة": ("معاملة واحدة", "معاملتين", "معاملات")}
+            "دفعة": ("دفعة واحدة", "دفعتين", "دفعات"), "معاملة": ("معاملة واحدة", "معاملتين", "معاملات"),
+            "حساب": ("حساب واحد", "حسابين", "حسابات"), "فئة": ("فئة واحدة", "فئتين", "فئات"),
+            "صف": ("صف واحد", "صفين", "صفوف"), "بند": ("بند واحد", "بندين", "بنود"),
+            "فاتورة": ("فاتورة واحدة", "فاتورتين", "فواتير"), "قاعدة": ("قاعدة واحدة", "قاعدتين", "قواعد"),
+            "عنصر": ("عنصر واحد", "عنصرين", "عناصر"), "سنة": ("سنة واحدة", "سنتين", "سنين")}
 _COUNTED_FORMS = {form: lemma for lemma, (_, dual, plural) in _COUNTED.items() for form in (lemma, dual, plural)}
 _COUNT_PHRASE = re.compile(r"\{(\w+)\}\s+(" + "|".join(sorted(_COUNTED_FORMS, key=len, reverse=True)) + r")(?![\u0621-\u064A])")
 
