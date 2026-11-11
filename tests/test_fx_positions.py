@@ -6,6 +6,7 @@ import pytest
 
 from lightning.database.currencies import CurrencyRegistry
 from lightning.reporting.fx_positions import FxPositions, Position, month_ends
+from tests.screens import said
 
 CENT = D("0.01")
 
@@ -131,8 +132,8 @@ def test_the_currencies_tab_shows_the_figures_with_their_names(c, dollars):
     arabic = client.get("/accounts/currencies").text
     assert "ربح فروق العملة غير المحقق" in arabic and "متوسط السعر" in arabic and "Unrealized FX gain" not in arabic.split("<script")[0]
     # The rate line is one left-to-right run inside the right-to-left page, so it never reads backwards (3A); the
-    # browser turns its digits Arabic-Indic. Two decimals, not six or four.
-    assert '<bdi dir="ltr">1 USD = 51.00 EGP</bdi>' in arabic and '<bdi dir="ltr">48.33</bdi>' in arabic
+    # browser turns its digits Arabic-Indic. Two decimals, not six or four. Arabic pages name the pound ج.م (IV-3BK).
+    assert '<bdi dir="ltr">1 USD = 51.00 ج.م</bdi>' in arabic and '<bdi dir="ltr">48.33</bdi>' in arabic
     assert "51.000000" not in page.text and "48.3333" not in page.text
     c.settings.set("locale", "en")
     assert client.get("/accounts/currencies", params={"period": "custom", "date_from": "x"}).status_code == 200
@@ -290,8 +291,8 @@ def test_currency_history_includes_owned_investments_and_starts_axis_at_zero(c, 
     page = TestClient(create_app(c)).get("/accounts/currencies?period=custom&date_from=2026-09-01&date_to=2026-10-31")
     assert page.status_code == 200
     chart = page.text.split('class="card data-panel fx-chart"', 1)[1].split('</section>', 1)[0]
-    assert '<td>2026-09</td><td class="num">48,000</td>' in chart
-    assert '<td>2026-10</td><td class="num">50,000</td>' in chart
+    assert said('<td>2026-09</td><td class="num">48,000</td>') in chart
+    assert said('<td>2026-10</td><td class="num">50,000</td>') in chart
     assert 'chart-grid chart-grid-zero' in chart
     assert 'chart-line tone-hold' in chart and 'is-dashed' not in chart
 
@@ -326,7 +327,7 @@ def test_currency_history_leaves_a_gap_between_known_months(c, dollars, monkeypa
     assert 'Some months are missing because a value is unavailable.' in chart
     assert chart.count('class="chart-dot tone-hold') == 2
     assert 'class="chart-line tone-hold"' not in chart
-    assert '<td>2026-10</td><td class="num">—</td>' in chart
+    assert said('<td>2026-10</td><td class="num">—</td>') in chart
 
 
 def test_phone_currencies_show_each_total_once_and_lead_as_on_the_pc(c, dollars):

@@ -9,6 +9,7 @@
   'skipped': ('Skipped', 'Balance rows and lines you chose to leave out.', ''),
 } %}
 <div class="import-summary">
+  {% if done %}<p class="muted import-progress">{{ '{done} of {total} done'|tr(locale, done=done, total=rows|length) }}</p>{% endif %}
   {% for card in cards %}{% set w = words[card.state] %}
   <div class="import-question is-{{ card.state }}" data-state="{{ card.state }}">
     <div class="import-question-head">
@@ -17,6 +18,19 @@
       <span class="import-question-actions">{% if card.state == 'ready' %}<button class="btn primary" formaction="/accounts/{{ account.id }}/import/{{ batch.id }}/post-ready">{{ 'Post them'|tr(locale) }}</button>{% endif %}{% if w[2] %}<button type="button" class="btn" data-question-open aria-expanded="false">{{ w[2]|tr(locale) }}</button>{% endif %}</span>
     </div>
     {% if w[2] %}<div class="import-question-rows" hidden>
+      {% if card.state == 'needs' %}<div class="import-question-tools">
+        <button type="button" class="btn" data-quick-start data-picks="{{ quick_picks }}">{{ 'Quick mode'|tr(locale) }}</button>
+        <button type="button" class="btn" data-question-sort aria-pressed="false">{{ 'Biggest first'|tr(locale) }}</button>
+        <label class="field import-small"><span>{{ 'The rest under'|tr(locale) }}</span><input class="num money-input" type="text" inputmode="decimal" autocomplete="off" name="small_under" placeholder="100" aria-label="{{ 'Amount'|tr(locale) }}"></label>
+        <button class="btn" name="small_action" value="uncategorized">{{ 'To Uncategorized'|tr(locale) }}</button>
+      </div>
+      <div class="import-quick" hidden aria-live="polite">
+        <p class="muted small" data-quick-count></p>
+        <p class="import-quick-row"><b data-quick-name></b> <span class="num" data-quick-amount></span> <small class="muted" data-quick-date></small></p>
+        <div class="import-quick-picks" data-quick-picks></div>
+        <div class="import-quick-actions"><button type="button" class="btn" data-quick-back>← {{ 'Back'|tr(locale) }}</button><button type="button" class="btn" data-quick-skip>{{ 'Skip'|tr(locale) }} <small class="muted">S</small></button><button type="button" class="btn" data-quick-stop>{{ 'Done'|tr(locale) }}</button></div>
+        <p class="muted small">{{ 'Keys: 1 to 3 pick, Enter takes the first, S skips, ← goes back.'|tr(locale) }}</p>
+      </div>{% endif %}
       <div class="import-head" aria-hidden="true"><span></span><span>{{ 'Date'|tr(locale) }}</span><span>{{ 'Counterparty or account'|tr(locale) }}</span><span>{{ 'Category'|tr(locale) }}</span><span>{{ 'Held for'|tr(locale) }}</span><span>{{ 'Notes'|tr(locale) }}</span><span>{{ 'Amount'|tr(locale) }}</span><span>{{ 'Status'|tr(locale) }}</span></div>
       <div class="actions import-more" data-more-url="/accounts/{{ account.id }}/import/{{ batch.id }}/groups?state={{ card.state }}" data-next="0" hidden><button type="button" class="btn" data-import-more>{{ 'Show more rows'|tr(locale) }} <span class="muted num"></span></button></div>
     </div>{% endif %}

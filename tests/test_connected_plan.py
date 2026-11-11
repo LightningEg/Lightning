@@ -235,7 +235,7 @@ def test_a_goal_the_plan_cannot_reach_says_when_it_can(c):
     item = inbox["Car deposit will not be ready by its date"]
     assert "leaves 1,000 for it. Setting aside 1,000 a month, it is ready in May 2027." in item["detail"]
     page = visible_text(_ScreenClient(create_app(c), "http://testserver").get("/plan/reserves").text)
-    assert "Your plan leaves 1,000 a month for it: set that aside each month and it is ready in 2027-05" in page
+    assert "Your plan leaves 1,000 a month for it: set that aside each month and it is ready in May 2027" in page
     c.budgets.set_budget(c.categories.get_by_code("EXP.PERSONAL.FOOD").id, MONTH, "7000", schedule=c.schedules.view())
     assert c.health.goal_reach() == []
 

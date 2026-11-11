@@ -23,6 +23,7 @@ from lightning.runtime.http import MARKET_IMPORT_PATH, MAX_MARKET_IMPORT_BODY, r
 from lightning.ui.web import create_app
 from lightning.workflows import market_prices
 from lightning.workflows.market_prices import MarketPrices, current_set, pack_files, pack_rows
+from tests.screens import said
 
 COMI = Instrument("EG:COMI", "Commercial International Bank", "STOCK", "EGP", isin="EGS60121C018", mic="XCAI",
                   ticker="COMI", country="EG", unit="share")
@@ -205,7 +206,7 @@ def test_the_prices_page_follows_markets_updates_imports_and_fills(c, holdings, 
     assert pack_files(c.data_dir)["egx"] == {"created_at": "2026-12-31", "origin": "downloaded", "last_date": "2026-12-31",
                                              "instruments": 1}
     page = client.get("/investments/prices").text
-    assert "Fill from price files" in page and "2026-12-31, downloaded" in page and "price file" in page
+    assert "Fill from price files" in page and said("2026-12-31, downloaded") in page and "price file" in page
     refused = client.post("/investments/prices/market/import", files={"file": ("market.zip", older.read_bytes(), "application/zip")})
     assert "Nothing was imported. Kept your newer Egyptian funds, Egyptian stocks." in refused.text
     junk = client.post("/investments/prices/market/import", files={"file": ("market.zip", b"not a zip", "application/zip")})

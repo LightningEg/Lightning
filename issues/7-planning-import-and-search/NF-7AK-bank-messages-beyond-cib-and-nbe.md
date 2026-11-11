@@ -19,15 +19,10 @@ named pattern, 6 are read by the general rule (to check) and 6 real payments are
 look like common wordings; they are not verified bank text, so each step starts from real samples (owner or
 contributors, sanitized into `tests/fixtures/bank_sms.json`).
 
-## 7AK1 English card and account messages · M
-"was charged", "was used for", "You spent" are not in the out-words, so English CIB debit and credit card messages
-and Telda are unread. Add the words and a named English card pattern; a credit card's "available limit" is not a balance.
-**Done when:** the battery's English lines read with shop, date and ending.
-
-## 7AK2 Wallets, which name no card ending · M
-Vodafone Cash and other wallets say "محفظتك" and no four digits; the general rule demands an ending, so every wallet
-payment is manual. Let a sender (or the word wallet with its brand) be the account key, asked once like a card ending.
-**Done when:** a wallet payment and a wallet receipt stage rows in the wallet account.
+## Built
+2026-11-10: 7AK1 (English card messages: `parse_sms` English pattern, `sure=False` until a real sample confirms it;
+an available limit is not a balance) and 7AK2 (wallets: `wallet_key`, the sender is the key, `wallet-<sender>`,
+asked once on From SMS as "Wallet <name>"). Tests: `tests/test_sms_imports.py`.
 
 ## 7AK3 Purchases in another currency · M
 **Owner, 2026-11-09:** a dollar payment is recorded in dollars, and the balance is rated in pounds. The entry keeps

@@ -50,7 +50,7 @@ frame) is in Architecture › UI contract › *The phone is its own layer*; read
 Built: the router, `phone/base.html`, the status bar colour, "This is on your PC" (`BEST_ON_PC` empty on purpose, owner
 2026-11-08). Left, in this order:
 (a) `phone.css` standalone on the theme tokens. The bundle (`PHONE_CSS` in `ui/web.py`) still starts with `style.css`,
-because the 78 pages in `tests/phone_pc_templates.txt` are PC markup in the phone frame. Do it after 3AY15 to 3AY18 empty
+because the 78 pages in `tests/phone_pc_templates.txt` are PC markup in the phone frame. Do it after 3AY15 to 3AY17 empty
 that list: then drop `style{rtl}.css` from `PHONE_CSS` and move into `phone.css` only the rules the phone templates use.
 (b) A stack per slot: tapping the chosen slot returns to its top; Android back pops within the slot, then Home, then
 leaves (`static/phone-nav.js`; report r25 › Cross-cutting 5).
@@ -75,16 +75,9 @@ Built: Money, `/money/accounts`, `/money/bills`, `/money/report`, the redirects.
 time, US dollars and 21K gold): the parts are what the older Overview's sheets show (`phone/dashboard/index.html`,
 `presenters/overview.py`). When the sheet has them: the phone router answers `/` for every query (a period link goes to
 `/money/report`, an empty profile gets its own `phone/welcome.html`), and `phone/dashboard/`, `presenters/overview.py`
-and the route `/overview/fold/{name}` are deleted. Also left: an account page with *Check against the bank* first, and
+and the phone router's `/overview/fold/{name}` are deleted. Also left: an account page with *Check against the bank* first, and
 Settings rows marked "Best on your PC". Done when: no phone URL renders `phone/dashboard/index.html` and
 `tests/test_backend_roadmap.py` has a query budget for Home instead of the Overview.
-
-## 3AY14 To do's "See all" page · S · sonnet
-Home's *See all n* opens the PC's Needs you page. Add `screens/todo.py` (`build(c, day)`: the same `todo_rows` Home
-calls, not cut to three; copy the calls from `screens/home.py`), `templates/phone/todo.html` (the To do rows of
-`phone/home.html`, back to Home), a route `/todo` in `phone/router.py`, and point Home's link at it. New strings go in
-`ui/i18n.py`. Done when: a test in `tests/test_phone_home.py` shows `/todo` lists every row `todo_rows` returns, Home links
-to it, `/todo` is in `NEW_PHONE_SCREENS` (`tests/test_arabic_no_english.py`) and in `tools/phone_check.py`'s `PAGES`.
 
 ## 3AY15 Phone templates: the sheets the slots open · M · sonnet
 Give each a `templates/phone/<same name>` that extends `phone/base.html` and uses the phone parts (`phone-section`,
@@ -105,14 +98,6 @@ The same as 3AY15 for the `settings/` (7), `rules/`, `exports/`, `analysis/`, `a
 top-level (27) lines. `financial_health.html` is one of them: its phone template replaces the `phone_mode()` tests inside
 it (`presenters/health.py` stays). Done when: as 3AY15, and `grep -rn "phone_mode()" lightning/ui/templates --include=*.html`
 finds nothing outside `templates/phone/` and `partials/`.
-
-## 3AY18 The last phone routes leave the PC files · S · sonnet
-`tests/phone_routes_in_pc_files.txt` names three PC route files that still hold a route drawing a phone template:
-`accounts.py` (`/accounts/add-transaction`, `phone/accounts/pick.html`), `budget.py`
-(`/budget/category/{id}/payments`, `phone/budget_payments.html`; move `_last_payments` and `_tree_ids` to
-`ui/budget_rows.py`) and `dashboard.py` (`/overview/fold/{name}`; skip it if 3AY10 deleted it). Move each route to
-`phone/router.py` with `render_phone`, as `/birdview/expenses/more` was moved. Done when: that file lists nothing and
-`tests/test_phone_decoupled.py`, `tests/test_architecture.py` and the routes' own tests pass.
 
 ## 3AY13 Owner's phone check · owner
 One end-to-end check on a phone once 3AY10 is merged (it replaces 3AN13), including a native reader's pass over the Arabic

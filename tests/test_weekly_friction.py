@@ -67,8 +67,8 @@ def test_register_has_month_lines_with_the_closing_balance(c, setup):
     c.transactions.record_outflow("2026-09-10", accounts["cib"].id, "100", food.id)
     c.transactions.record_outflow("2026-10-10", accounts["cib"].id, "200", food.id)
     page = TestClient(create_app(c)).get(f"/accounts/{accounts['cib'].id}").text
-    months = re.findall(r'class="register-month"><td colspan="\d+"><b>(\d{4}-\d\d)</b>', page)
-    assert months[:2] == ["2026-10", "2026-09"] and "Closing balance" in page
+    months = re.findall(r'class="register-month"><td colspan="\d+"><b>([A-Z][a-z]+ \d{4})</b>', page)
+    assert months[:2] == ["October 2026", "September 2026"] and "Closing balance" in page
 
 
 def test_an_unpriced_karat_is_priced_from_another_by_purity(c):

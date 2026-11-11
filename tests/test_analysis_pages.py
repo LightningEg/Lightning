@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 from lightning.ui.charts import line_chart
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 def test_line_chart_keeps_missing_observations_as_gaps():
@@ -27,7 +28,7 @@ def test_expense_category_filter_applies_to_total_and_monthly_trend(c, setup):
     )
     assert page.status_code == 200
     assert "250" in page.text
-    assert '<p class="page-dates"><b><bdi dir="ltr">2026-10-01</bdi> to <bdi dir="ltr">2026-11-30</bdi></b></p>' in page.text
+    assert said('<p class="page-dates"><b><bdi dir="ltr">2026-10-01</bdi> to <bdi dir="ltr">2026-11-30</bdi></b></p>') in page.text
     assert "2026-10" in page.text and "2026-11" in page.text
     assert "150" in page.text and "100" in page.text
     assert "650" not in page.text  # November's unfiltered total
@@ -38,7 +39,7 @@ def test_empty_spending_period_keeps_its_dates_in_the_header(c):
         "/birdview/expenses?period=custom&date_from=2026-10-01&date_to=2026-10-31"
     )
     assert page.status_code == 200
-    assert '<p class="page-dates"><b><bdi dir="ltr">2026-10-01</bdi> to <bdi dir="ltr">2026-10-31</bdi></b></p>' in page.text
+    assert said('<p class="page-dates"><b><bdi dir="ltr">2026-10-01</bdi> to <bdi dir="ltr">2026-10-31</bdi></b></p>') in page.text
     assert "No spending in this period" in page.text
 
 

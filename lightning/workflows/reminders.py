@@ -71,6 +71,45 @@ class ReminderService:
                 result.append({"id": identity, "label": item["label"], "detail": item["detail"], "href": item["href"]})
         return result
 
+    def upcoming(self, days: int = 14) -> list[dict]:
+        """NF-3AU2: what to announce over the next ``days`` days with the app closed, each dated the day before it is
+        due, as ``{"day", "kind", "id"}``. Only days and kinds leave the profile (owner, 2026-11-08): the id is the
+        same hash ``due()`` gives that reminder on its day, so the closed-app notice and the open app's never repeat
+        each other, and it carries no name or figure. Payments (not income), gam'eya instalments and zakat day."""
+        if not self.enabled:
+            return []
+        c, day = self.c, today()
+        last = day + timedelta(days=days)
+        found = []  # (reminder day, kind, href, label, detail): label and detail feed the hash only
+        for payment in c.planning.all_payments(last + timedelta(days=1), day):
+            due = parse_date(payment.due_date)
+            if payment.outstanding and not payment.item.is_income and day < due <= last + timedelta(days=1):
+                found.append((due - timedelta(days=1), "payment", f"/plan/items/{payment.item.id}/pay?due={payment.due_date}",
+                              "Payment due tomorrow", payment.item.name))
+        for circle, _terms in c.gameya.circles():
+            next_date = c.gameya.progress(circle.id, day).next_date
+            if next_date and day < parse_date(next_date) <= last + timedelta(days=1):
+                found.append((parse_date(next_date) - timedelta(days=1), "gameya", f"/gameya/{circle.id}",
+                              "Gam'eya instalment due tomorrow", circle.name))
+        if c.zakat.enabled():
+            zakat = c.zakat.forecast(day)
+            if zakat and day < parse_date(str(zakat.day)) <= last + timedelta(days=1):
+                found.append((parse_date(str(zakat.day)) - timedelta(days=1), "zakat", "/zakat",
+                              "Zakat day is approaching", str(zakat.day)))
+        profile_key = self._profile_key()
+        result, seen = [], set()
+        for when, kind, href, label, detail in sorted(found, key=lambda f: (f[0], f[1])):
+            identity = sha256((profile_key + "\0" + when.isoformat() + "\0" + href
+                               + "\0" + label + "\0" + detail).encode()).hexdigest()[:32]
+            if identity not in seen:
+                seen.add(identity)
+                result.append({"day": when.isoformat(), "kind": kind, "id": identity})
+        return result
+
+    def profile_hash(self) -> str:
+        """Which profile a schedule belongs to, without its name or path: a hash of its identity."""
+        return sha256(("lightning-reminders\0" + self._profile_key()).encode()).hexdigest()[:32]
+
     def _profile_key(self):
         """Give native per-day dedupe a stable profile scope, with a path fallback for legacy databases."""
         db = self.c.db

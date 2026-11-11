@@ -137,4 +137,6 @@ PHONE_READING = {
     "Your profiles live only in Lightning's own storage on this phone. To delete them all, open Android's Settings › Apps › Lightning › Storage and clear it, or uninstall Lightning. Save a copy first if you may want them back.": 'بروفايلاتك موجودة بس في مساحة Lightning على الموبايل ده. عشان تمسحهم كلهم، افتح إعدادات أندرويد › التطبيقات › Lightning › التخزين وامسحه، أو امسح Lightning. احفظ نسخة الأول لو ممكن تحتاجهم تاني.',
     'Best on your PC': 'أحسن على الكمبيوتر',
     'Ask an AI, sale factors, target allocation, price files and each tab’s settings.': 'اسأل ذكاء اصطناعي، نسب البيع، التوزيع المستهدف، ملفات الأسعار وإعدادات كل تبويب.',
+    # IV-3AY14: To do's See all page
+    'Nothing to do today.': 'مفيش حاجة مطلوبة منك النهارده.',
 }

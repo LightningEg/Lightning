@@ -189,9 +189,10 @@ def test_the_phone_entry_sheet_follows_the_rule_when_the_category_is_left_empty(
         "kind": "out", "date": "2026-10-03", "counterparty": "Vodafone", "category_id": "", "amount": "450"},
         follow_redirects=False)
     assert saved.status_code == 303
-    refused = client.post(f"/accounts/{cib}/transaction/new", data={
-        "kind": "out", "date": "2026-10-03", "counterparty": "Vodafone", "category_id": "", "amount": "90"})
-    assert refused.status_code == 400 and "Choose a category" in refused.text   # no rule, no habit: he picks
-    row = c.db.one("SELECT l.category_id FROM ledger_entries l JOIN transactions t ON t.id=l.transaction_id "
-                   "WHERE t.counterparty='Vodafone' AND l.category_id IS NOT NULL")
-    assert row["category_id"] == cats["EXP.PERSONAL.UTILITIES"]
+    unsorted = client.post(f"/accounts/{cib}/transaction/new", data={
+        "kind": "out", "date": "2026-10-03", "counterparty": "Vodafone", "category_id": "", "amount": "90"},
+        follow_redirects=False)
+    assert unsorted.status_code == 303   # no rule, no habit: saved to sort later (NF-7AN), not refused
+    rows = c.db.all("SELECT l.category_id FROM ledger_entries l JOIN transactions t ON t.id=l.transaction_id "
+                    "WHERE t.counterparty='Vodafone' AND l.category_id IS NOT NULL ORDER BY t.id")
+    assert [r["category_id"] for r in rows] == [cats["EXP.PERSONAL.UTILITIES"], c.categories.get_by_code("EXP.UNACCOUNTED").id]

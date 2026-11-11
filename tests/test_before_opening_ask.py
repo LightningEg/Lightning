@@ -3,6 +3,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 @pytest.fixture
@@ -20,7 +21,7 @@ def test_the_register_row_asks_once_then_keeps_the_date(c, opened):
     client, bank, food = opened
     row = dict(date="2026-07-10", amount="-10", category="Food & Groceries", counterparty="", notes="")
     first = client.post(f"/accounts/{bank.id}/register", data=row)
-    assert first.status_code == 400 and "before this account opened on 2026-09-01" in first.text and _count(c, bank) == 0
+    assert first.status_code == 400 and said("before this account opened on 2026-09-01") in first.text and _count(c, bank) == 0
     again = client.post(f"/accounts/{bank.id}/register", data=row | {"early_checked": "2026-07-10"}, follow_redirects=False)
     assert again.status_code == 303 and _count(c, bank) == 1
     ordinary = client.post(f"/accounts/{bank.id}/register", data=row | {"date": "2026-09-05"}, follow_redirects=False)

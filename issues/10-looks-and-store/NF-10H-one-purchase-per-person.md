@@ -50,12 +50,7 @@ changes is how many licences one purchase may mint. "Profile" is the profile's s
 
 ## Fix
 
-Steps, in order; each is one pull request.
-
-## 10H3 Website: account-wide seats · M
-Website repo. A member's purchase claims up to 10 profiles at no charge (codes free per profile); remove the 25% extra
-profile price from the marketplace, checkout and owner console, English and Arabic; marketplace says how a website
-theme reaches a Play phone (case 7). Migration plus `seats.test.mjs`.
+Steps, in order; each is one pull request. Built: 10H1, 10H2 (app and `redeem-play`), 10H3 (website #186: a website purchase covers up to 10 profiles free, no 25% seats).
 
 ## 10H4 Owner: prices · owner
 One EGP price per theme on a Play price step, the same coins on the website; set the four Play products (`cotton`,

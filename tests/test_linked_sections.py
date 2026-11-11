@@ -209,7 +209,8 @@ def test_transaction_lines_describe_outflow_in_plain_words(c, setup):
     assert '<span class="pill">Money out</span>' in page
     assert '<span class="pill">OUTFLOW</span>' not in page
     from lightning.ui.routes.transactions import _display_timestamp
-    assert f'>{_display_timestamp(expense.created_at)}</time>' in page
+    from tests.screens import said
+    assert said(f'>{_display_timestamp(expense.created_at)}</time>') in page
 
 
 def test_transaction_timestamps_keep_recorded_offsets_in_readable_form():
