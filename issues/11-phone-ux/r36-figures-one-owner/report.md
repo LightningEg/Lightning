@@ -80,3 +80,5 @@ Three small things, in IT-12AE, none of them a rewrite:
 
 ## Dated follow-ups
 
+
+- **2026-11-11, IT-12AE closed.** F6: "Kept" is Net flow; the flow chart's band is "Kept as cash", a registry figure owned by `CashFlow.kept_as_cash`. F7: `tests/test_figures_layer.py` counts arithmetic in `lightning/ui`, and `tests/ui_arithmetic.json` is now empty; every remaining line is marked `# not money`. Money figures moved to their services: the Budget period (`lightning/budgeting/period.py`), the recurring and loan totals (`lightning/planning/totals.py`), period comparison (`lightning/reporting/period_compare.py`), the owned portfolio (`lightning/investments/owned.py`), account totals (`lightning/accounts/totals.py`), register figures (`lightning/reporting/account_figures.py`), and properties on `EverydayBudget`, `CashForecast`, `Position` and `CashFlow`. Every GET page, PC and phone on the demo household and Mohab's year (about 5,000 pages), was byte-identical before and after. `tests/test_figure_labels.py` keeps hand-written figure names from growing (172 today).
