@@ -292,8 +292,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | **BT-12AC** | [The Investments Lead's Cost and Unrealized gain do not add up to its Portfolio value - 325,088 and 27,399 under 752,486](12-desktop-ux/BT-12AC-investments-lead-parts-do-not-add-up.md) | bug, technical · medium | Own | M | Opus | ready |
 | **BT-12AD** | [The payday proposal's lines do not add up to the cash they share out, and "Everyday spending" there is not the figure of that name](12-desktop-ux/BT-12AD-payday-proposal-lines-overlap.md) | bug, technical · medium | Plan | M | Opus | ready |
 | **IT-12AE** | [A screen cannot work out money - derived figures move to their owners, a ratchet test counts arithmetic in the UI, and the PC and phone are compared on one household](12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | improvement, technical | Build | L | Opus | ready |
-| IT-12AE1 | ↳ The PC and the phone are compared on one household | | | M | Opus | |
-| IT-12AE2 | ↳ Parts add up to their whole | | | S | Sonnet | |
 | IT-12AE4 | ↳ Derived figures move to their owners | | | L | Opus | |
 | **IV-12AA** | [Suggestions with sensible defaults and honest counts - Refill offers to empty Safe to spend, Needs you counts three ways, a year is compared with nothing](12-desktop-ux/IV-12AA-suggestions-with-sensible-defaults.md) | improvement, visual | Plan | M | Opus | ready |
 | IV-12AA1 | ↳ Owner: what Refill offers first | | | owner |  | |

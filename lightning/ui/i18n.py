@@ -974,6 +974,7 @@ ARABIC_UI = {
     'More': 'أكتر',
     'Net cash flow by month': 'صافي التدفق النقدي شهريًا',
     'Kept': 'المتبقي',
+    'Kept as cash': 'اتحفظ كاش',
     'Invested': 'اتستثمر',
     'Repeat': 'التكرار',
     'Match by': 'طابق حسب',

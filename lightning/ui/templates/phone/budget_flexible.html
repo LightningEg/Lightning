@@ -17,7 +17,7 @@
 {% else %}
 <section class="phone-hero has-seam" aria-labelledby="lead-heading">
   <div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Over plan'|tr(locale) if s.left < 0 else fig.everyday_left.label }}</div>
-  <div class="phone-lead{{ ' is-negative' if s.left < 0 }}">{{ (s.left|abs)|money }} <small>{{ base }}</small></div>
+  <div class="phone-lead{{ ' is-negative' if s.left < 0 }}"{% if s.left >= 0 %} data-fig="everyday_left"{% endif %}>{{ (s.left|abs)|money }} <small>{{ base }}</small></div>
   {% if s.pace_gap is not none %}<p class="phone-hero-line">{% if s.pace_gap <= 0 %}{{ '{amt} under your pace for {m}.'|tr(locale, amt=(-s.pace_gap)|money, m=s.month) }}{% else %}{{ '{amt} over your pace for {m}.'|tr(locale, amt=s.pace_gap|money, m=s.month) }}{% endif %}{% if s.per_day %} {{ 'About {amt} a day.'|tr(locale, amt=s.per_day|money) }}{% endif %}</p>
   {% elif s.state == 'past' and s.used_pct is not none %}<p class="phone-hero-line">{{ '{pct}% of the plan was spent.'|tr(locale, pct=s.used_pct) }}</p>{% endif %}
   {% if s.month_bar %}{{ month_bar(s.month_bar) }}{% endif %}

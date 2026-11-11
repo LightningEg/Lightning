@@ -115,7 +115,7 @@ def money_sankey(c, first: date, last: date, cash_flow, sources_shown: int = 3, 
         if invested > 0:
             targets.append({"label": "Invested", "value": invested, "tone": "hold"})
         if cash_flow.net - invested > 0:
-            targets.append({"label": "Kept", "value": cash_flow.net - invested, "tone": "in"})
+            targets.append({"label": "Kept as cash", "value": cash_flow.net - invested, "tone": "in"})
     # Shown whole: round both columns to the same whole total so the parts add up to it (largest remainder).
     for column in (sources, targets):
         for row, value in zip(column, round_to_total([r["value"] for r in column])):

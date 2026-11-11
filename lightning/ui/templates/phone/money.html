@@ -13,7 +13,7 @@
 {% else %}
 <section class="phone-hero has-seam" aria-labelledby="worth-heading">
   <div id="worth-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig.net_worth.label }}</div>
-  <div class="phone-lead{{ ' is-negative' if s.net_worth < 0 }}">{{ s.net_worth|money }} <small>{{ base }}</small></div>
+  <div class="phone-lead{{ ' is-negative' if s.net_worth < 0 }}" data-fig="net_worth">{{ s.net_worth|money }} <small>{{ base }}</small></div>
   {% if not s.own_split %}<p class="phone-hero-line">{{ 'What you own'|tr(locale) }} <b><bdi class="fig">{{ s.what_you_own|money }}</bdi></b></p>{% endif %}
   {% if s.since_start is not none %}<p class="phone-hero-line">{{ '{amt} this month.'|tr(locale, amt=s.since_start|money(True)) }}</p>{% endif %}
 </section>

@@ -20,7 +20,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from lightning.core.dates import month_of, parse_date, parse_month
-from lightning.core.figures import label as figure_label
+from lightning.core.figures import FIGURES, label as figure_label
 from lightning.core.money import ZERO, fmt, signed_pct
 
 from . import charts
@@ -40,6 +40,10 @@ def line(text: str = "", action: str = "", href: str = "", popup: bool = False) 
     return {"text": text, "action": action, "href": href, "popup": popup}
 
 
+# A card whose label is a registry figure carries that figure's key, read by tests through data-fig (IT-12AE1).
+FIGURE_KEY_OF = {f.label: key for key, f in FIGURES.items()}
+
+
 def card(label: str, value: Decimal | None, comparison: dict, *, tone: str, chip_: dict | None = None,
          visual: dict | None = None, line_: dict | None = None, href: str = "", kind: str = "money",
          signed: bool = False, needs: bool = False, key: str = "") -> dict:
@@ -48,7 +52,7 @@ def card(label: str, value: Decimal | None, comparison: dict, *, tone: str, chip
         raise ValueError(f"KPI card {label!r} has no comparison")
     if tone not in TONES:
         raise ValueError(f"KPI card {label!r}: tone {tone!r} is not one of {sorted(TONES)}")
-    return {"key": key, "label": label, "value": value, "kind": kind, "signed": signed, "tone": tone, "needs": needs,
+    return {"key": key, "fig": FIGURE_KEY_OF.get(label, ""), "label": label, "value": value, "kind": kind, "signed": signed, "tone": tone, "needs": needs,
             "chip": chip_, "compare": comparison, "visual": visual, "line": line_ or line(), "href": href}
 
 
