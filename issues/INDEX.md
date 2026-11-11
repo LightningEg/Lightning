@@ -19,7 +19,6 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | IT-1E3 | ↳ Owner: deploy the website receiver and rotate the analytics key | | | owner |  | |
 | IT-1E4 | ↳ Check the live website receivers against formula injection and key leaks | | | S | Opus | |
 | IT-1E5 | ↳ Owner: apply the repository protections | | | owner |  | |
-| IT-1E6 | ↳ Prove the committed encrypted fixture is the demo household | | | S | Sonnet | |
 | IT-1E7 | ↳ Scan every repository's full history for secrets | | | M | Opus | |
 | IT-1E8 | ↳ Inspect the published Windows ZIP and Android APK | | | S | Opus | |
 | IT-1E9 | ↳ Triage the open dependency alerts | | | S | Opus | |
