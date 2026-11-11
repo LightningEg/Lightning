@@ -14,6 +14,7 @@ import pytest
 from lightning.database import migrator
 from lightning.database.connection import Database
 from lightning.database.seed import seed
+from tests.screens import said
 
 
 def _stage(c, account_id, csv_text, name="statement.csv"):
@@ -200,7 +201,7 @@ def test_review_screen_offers_link_post_as_new_and_skip(c, setup):
     page = client.get(f"/accounts/{cib}/import/{batch_id}")
     assert page.status_code == 200
     assert f'<select name="match_{row_id}"' in page.text and f'<option value="link:{manual.id}" selected>' in page.text
-    assert "Link to Carrefour · 2026-10-01" in page.text
+    assert said("Link to Carrefour · 2026-10-01") in page.text
     assert '<option value="new"' in page.text and "Not a duplicate — post as new" in page.text
     assert f'name="skip_{row_id}"' not in page.text  # one choice, not a second Skip box
 
