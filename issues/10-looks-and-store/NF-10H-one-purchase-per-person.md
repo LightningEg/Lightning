@@ -47,7 +47,7 @@ changes is how many licences one purchase may mint. "Profile" is the profile's s
 | 10 | Pending payment (Play cash or slow method) | Unchanged: "It unlocks when Google Play confirms it"; settled on the next Settings load. |
 | 11 | Refund or chargeback on Play | `redeem-play` checks the order (and Google's voided purchases); refused purchases mint no new licences (410). Existing licences stay. |
 | 12 | Sixth profile on one purchase | Refused with a message naming the cap; the owner can free a profile in the console (existing Members › Free a profile). |
-| 13 | Already sold extra seats (25%) | Owner decides in 10H5 (credit the coins back is the fair default). |
+| 13 | Already sold extra seats (25%) | None sold (owner, 2026-11-11): nothing to credit. |
 
 ## Fix
 
@@ -56,9 +56,7 @@ Steps, in order; each is one pull request. Built: 10H1, 10H2 (app and `redeem-pl
 ## 10H4 Owner: set the prices in the Console · owner
 Prices decided (above). Create the four Play products (`nile` 60, `cotton` 120, `papyrus` 200, `dendera` 200 EGP), set
 Egypt's price by hand, confirm the 15% service fee tier. Steps: [docs/google-play.md](../../docs/google-play.md) › In-app products.
-
-## 10H5 Owner: the extra seats already sold · owner
-Credit their coins back (recommended) or leave them.
+Waits for launch (owner, 2026-11-11): the Console cannot be set up before it. Do not ask again before launch.
 
 ## 10H6 A Play purchase reaches the buyer's website account, through the profile id · L · opus
 Today a Play purchase lives only in `private.play_purchase_profiles` (token hash, profile id); the website account

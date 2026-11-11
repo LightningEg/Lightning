@@ -32,7 +32,7 @@ Reserved codes: none
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 
-- **Store (11-11, Claude):** prices 60/120/200, cap 5 (site PR). Owner: migrations 20261110200000, 20261111120000; deploy redeem fns; 10H5. Next 10H6. **Read:** 10H.
+- **Store (11-11, Claude):** prices 60/120/200, cap 5 (site PR). 20261110200000 is live; owner: migration 20261111120000, deploy redeem fns; 10H4 at launch. Next 10H6. **Read:** 10H.
 
 - **10A/10C app themes:** ready to sell, Dendera included; owner steps in 10C4. Dendera's premium pass (10F) is built; the site's demo shots are current (site #159). New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md`.
 
