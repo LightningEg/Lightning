@@ -12,10 +12,5 @@ Bank accounts, wallets, cash, gold, certificates, shares and funds, foreign curr
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **NF-10H** | [One purchase per person](../../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md) | L | ready |
-| **IV-12L** | [Gold: add a piece and its purchase in one step, pick the price by karat, and show bars with the jew…](../../issues/12-desktop-ux/IV-12L-gold-one-step-and-one-table.md) | M | ready |
-
-## Reports with open follow-ups here
-
-- [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](../../issues/12-desktop-ux/r30-investments-beyond-stocks/report.md): 12L
 <!-- work:end -->
 
