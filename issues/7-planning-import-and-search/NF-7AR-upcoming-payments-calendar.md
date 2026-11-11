@@ -33,10 +33,11 @@ day's payments link to the existing pay sheet (`/plan/items/{id}/pay`) or the ci
 day in Meadow and the first scheduled shortfall (`DatedCashForecast.first_shortfall`) in Strong rose (A03).
 
 ## Steps
-- **7AR1 PC tab (L, opus):** service, route `/plan/upcoming`, template, section registry, Arabic, tests, Mohab step.
-  Done when the tab shows Mohab's month with the right totals and a day opens its pay sheet.
+- **7AR1 PC tab (L, opus):** built 2026-11-11 (`tests/test_upcoming_calendar.py`, Mohab
+  `test_what_is_left_to_pay_this_month_and_on_which_days`); waits for the owner's PC check.
 - **7AR2 Overview card (S, sonnet):** a next-7-days strip on the Summary linking to the tab. After 7AR1.
-- **7AR3 Phone strip (M, opus):** two weeks from today and the same day list, on the phone's Money screen in
-  place of *Coming up*, Part C. After 7AR1.
+- **7AR3 Phone strip (M, opus):** the phone's Upcoming tab draws two weeks from today and the day list (built
+  2026-11-11, `ui/phone/presenters/upcoming.py`). Left: the same strip on the phone's Money screen in place of
+  *Coming up* (`ui/phone/screens/money.py`), then the owner's phone check.
 - **7AR4 Export (S, sonnet, later):** an .ics file of the next three months' payments; nothing leaves the device
   until the person saves the file.

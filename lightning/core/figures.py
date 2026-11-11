@@ -242,6 +242,10 @@ _TABLE = [
      "This month's Spent less the plan's bills and loan payments already paid (or paid to that bill's payee in its "
      "category): what Budget's day rate is about. Budget compares it with the plan's straight-line pace and with "
      "last month by the same day."),
+    ("left_to_pay_in_month", "Left to pay", "What the month's bills, subscriptions, loan payments and gam'eya "
+     "instalments still ask, late ones included, in your profile currency (Upcoming)."),
+    ("already_paid_in_month", "Already paid", "What of the month's bills, subscriptions, loan payments and gam'eya "
+     "instalments is settled (Upcoming)."),
     ("payments_before_next_income", "Due before payday",
      "Scheduled bills, subscriptions and loan payments that are not due yet, up to your next income."),
     ("saving_for_goals", "Saving for goals", "What dated reserve goals still need this month, spread over the months left."),
@@ -348,6 +352,8 @@ _SOURCES = {
     "bills_inside_the_plan": (PLAN, f"{FC}.forecast"),
     "left_in_plan_after_bills": (BOTH, "lightning.planning.domain.ForecastMonth.budget_spending"),
     "everyday_spending": (BOTH, "lightning.planning.domain.EverydayBudget.everyday_spent"),
+    "left_to_pay_in_month": (PLAN, "lightning.planning.calendar.PaymentMonth.left_to_pay"),
+    "already_paid_in_month": (PLAN, "lightning.planning.calendar.PaymentMonth.already_paid"),
     "payments_before_next_income": (PLAN, f"{FC}._safe_to_spend"),
     "saving_for_goals": (PLAN, f"{FC}._goal_need"),
     "savings_target_rest": (PLAN, f"{FC}.forecast"),

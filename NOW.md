@@ -8,7 +8,7 @@ Reserved codes: none
 |---|---|---|---|
 | Claude | O7 finish: 3AY15-17, 3AY4/8/9/10, 3AU3-4 | `lightning/ui/phone/`, `lightning/ui/templates/phone/`, `static/phone*`, `tests/phone_pc_templates.txt` | 2026-11-11 |
 | Claude | O5 | `lightning/deposits/` | 2026-11-10 |
-| Claude | 7AR Upcoming calendar (payment-calendar branch) | `lightning/planning/calendar.py`, `lightning/ui/templates/planning/upcoming.html`, `tests/test_upcoming_calendar.py` | 2026-11-11 |
+| Claude | 7AR Upcoming | `lightning/planning/calendar.py`, `*/upcoming.*` | 2026-11-11 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
 ## Messages
@@ -27,6 +27,7 @@ Reserved codes: none
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
 - **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12AB3 rest, 12Z5, 12AE4, 12Q. **Read:** 12AB.
+- **Upcoming (11-11, Claude):** 7AR1 + phone strip built; next 7AR2, Money strip. **Read:** 7AR.
 - **Phone (11-10, Claude):** 3AY14, 18, 3AU2 built. Sonnet: 3AY15-17; Opus: 3AY4, 8-10; owner 3AY13. Then 3AU3-4. **Read:** 3AY; 3AU.
 - **Play (Claude, 11-09):** NF-11B done; owner: 10H3, shots, 11B7-9. **Read:** NF-11B.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
