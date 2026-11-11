@@ -3,7 +3,7 @@
 Everything still to do lives here: bugs, polish, features, under-the-hood work and what only the owner can do. It is grouped
 into numbered **big pictures** (folders), each holding the reports that started it and the items that came out of them. The repo is public: no names, emails, real financial data or private links.
 
-**To find something, read [INDEX.md](INDEX.md) only** (every big picture with its items and reports under it), then open the one item you
+**To find what is open, run `python tools/board.py`** (it reads GitHub; [INDEX.md](INDEX.md) says where the links are), then open the one item you
 need. The index is generated: `python tools/issues.py` rewrites it, `--check` verifies it (a test runs the check).
 
 ## Codes
@@ -34,7 +34,7 @@ requests and GitHub issue titles (`[BV-3C] Charts: two end labels overlap`). `py
 
 ```
 issues/
-  INDEX.md                                   generated: the whole plan
+  INDEX.md                                   where the plan lives (GitHub) and what this folder keeps
   REPORTS.md                                 the report catalogue and how to write a report
   12-desktop-ux/                             one big picture
     README.md                                its title, goal, "done when" and finished codes
@@ -86,8 +86,7 @@ cannot be done), `low` (it reads or looks off). INDEX shows it after the kind.
 `new` (found, not looked at) · `ready` (understood; anyone can build it) · `building` (someone has it: a claim in `NOW.md`
 naming its code, or a `/take` on GitHub; `--check` warns about one with no claim, without failing) · `blocked` (say what it waits for in `blocked_by`). Finished is never a status: delete the file.
 
-`parked` (kept, not planned: the owner set it aside; it leaves the tables and the counts and is listed once at the end of
-`INDEX.md`; nobody works on it until the owner sets it back to `ready`).
+`parked` (kept, not planned: the owner set it aside; its issue is labelled `when:after-launch` or `when:someday`; nobody works on it until the owner sets it back to `ready`).
 
 **The caps (owner, 2026-11-11).** At most 10 items `building` and 20 open (parked ones do not count; the building cap was 3 until 2026-11-11, raised by the owner); `python tools/issues.py --check`
 warns above either. A finding is a line in [INBOX.md](INBOX.md), not an item, until work on it starts.

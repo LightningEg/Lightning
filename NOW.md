@@ -22,7 +22,7 @@ Reserved codes: none
 
 - **r28 (Codex):** 3BC, 3BD and 3BF done. **Read:** r28.
 
-- **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
+- **Docs spine (2026-10-31):** trailers per AGENTS §3; Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
@@ -41,7 +41,7 @@ Reserved codes: none
 - **Import:** 7AB, 7AN, 7AK1-2, 7AK4, 7AO, 7AQ1-5 built (owner: PC+phone, 7AQ5 Arabic). Next 7AK3.**Read:** 7AK.
 
 
-Plan: `issues/INDEX.md`.
+Plan: `python tools/board.py` (GitHub issues; skill `dispatch`).
 
 1. **Report work paused** (owner); branches wait on native checks. **Read:** `issues/9-later/r22-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.
 2. **Report fixes:** 1G, 2AB, 3J, 4K, 7M, 7S built. **Read:** `issues/REPORTS.md`.

@@ -1,7 +1,7 @@
 """Build the pages people read from the facts the repository already holds, so nothing is typed twice.
 
-    python tools/status.py            # rewrite docs/STATUS.md, the work block on each docs/pillars/*.md, ai/INDEX.md
-    python tools/status.py --check    # exit 1 if any of them is out of date (a test runs this)
+    python tools/status.py            # rewrite ai/INDEX.md, the map of the AI documents
+    python tools/status.py --check    # exit 1 if it is out of date (a test runs this)
     python tools/status.py sections ai/ARCHITECTURE.md   # a long file's sections with their sizes, to read only one
 
 Sources: the items in issues/ (pillar, size, status, kind), the report catalogue in issues/REPORTS.md (open follow-up
@@ -116,25 +116,6 @@ def _kind(item) -> str:
     return ISSUES.TAGS[item["tag"]].replace("improvement", "better").replace("new feature", "new")
 
 
-def work_block(pillar: str, all_items, reports) -> str:
-    mine = [i for i in all_items if i["pillar"] == pillar]
-    lines = ["## Open work", ""]
-    if mine:
-        lines += ["| Code | Item | Size | Status |", "|---|---|---|---|"]
-        for i in mine:
-            status = i["status"] + (f" on {i['blocked_by']}" if i.get("blocked_by") else "")
-            lines.append(f"| **{i['tag']}-{i['code']}** | {link(i, '../../')} | {i.get('size') or 'owner'} | {status} |")
-    else:
-        lines.append("Nothing open.")
-    codes = {i["code"] for i in mine}
-    listed = [(title, path, [c for c in follow if c in codes]) for title, path, follow in reports
-              if any(c in codes for c in follow)]
-    if listed:
-        lines += ["", "## Reports with open follow-ups here", ""]
-        lines += [f"- [{title}](../../issues/{path}): {', '.join(found)}" for title, path, found in listed]
-    return "\n".join(lines)
-
-
 def report_rows() -> list[tuple[str, str, list[str]]]:
     text = (ROOT / "issues" / "REPORTS.md").read_text(encoding="utf-8")
     rows = []
@@ -144,51 +125,6 @@ def report_rows() -> list[tuple[str, str, list[str]]]:
         if link_ and link_.group(2).endswith("report.md"):
             rows.append((link_.group(1), link_.group(2), [c.strip() for c in cells[4].split(",") if re.match(r"^\d+[A-Z]+$", c.strip())]))
     return rows
-
-
-def pillar_page(pillar: str, all_items, reports, existing: str | None) -> str:
-    block = f"{START}\n{work_block(pillar, all_items, reports)}\n{END}"
-    if existing and START in existing and END in existing:
-        return existing[:existing.index(START)] + block + existing[existing.index(END) + len(END):]
-    line, para, deeper = PROSE[pillar]
-    return (f"# {PILLARS[pillar]}\n\n*{line}*\n\n{para}\n\n**Deeper:** {deeper}. "
-            f"How the pillars fit together: [the map](../README.md).\n\n{block}\n")
-
-
-def status_page(all_items, milestones) -> str:
-    owner = [i for i in all_items if i["type"] == "owner"]
-    building = [i for i in all_items if i["status"] == "building"]
-    big = [i for i in all_items if i.get("size") == "L" and not i["steps"]]
-    lines = [
-        "# Where Lightning stands",
-        "",
-        f"Version **{version()}**. Generated from the plan by `python tools/status.py`; do not edit by hand.",
-        "",
-        "## By pillar",
-        "",
-        "| Pillar | Open | Building | Ready | New | Blocked | Owner tasks |",
-        "|---|---|---|---|---|---|---|",
-    ]
-    for key, name in PILLARS.items():
-        mine = [i for i in all_items if i["pillar"] == key]
-        count = lambda status: sum(1 for i in mine if i["status"] == status) or ""
-        lines.append(f"| [{name}](pillars/{key}.md) | {len(mine)} | {count('building')} | {count('ready')} | {count('new')} | "
-                     f"{count('blocked')} | {sum(1 for i in mine if i['type'] == 'owner') or ''} |")
-    lines += ["", f"{len(all_items)} open items in {len(milestones)} milestones.", "", "## Being built now", ""]
-    lines += [f"- **{i['tag']}-{i['code']}** ({PILLARS[i['pillar']]}) {link(i, '../')}" for i in building] or ["Nothing."]
-    lines += ["", "## Waiting for the owner", ""]
-    steps = [f"- **{i['tag']}-{s['code']}** ({PILLARS[i['pillar']]}) {s['title']}, in {link(i, '../')}"
-             for i in all_items for s in i["steps"] if s["size"] == "owner"]
-    lines += [f"- **{i['tag']}-{i['code']}** ({PILLARS[i['pillar']]}) {link(i, '../')}: {i['status']}" for i in owner] + steps or ["Nothing."]
-    lines += ["", "## By milestone", "", "| Milestone | Open | Goal |", "|---|---|---|"]
-    for m in milestones:
-        lines.append(f"| {m['n']} {m['title']} | {sum(1 for i in m['items'] if i['status'] != 'parked')} | {m['goal']} |")
-    parked = sum(1 for m in milestones for i in m["items"] if i["status"] == "parked")
-    lines += ["", f"{parked} more are parked: kept, not planned, listed at the end of the plan."] if parked else []
-    lines += ["", f"{len(big)} large items still need splitting into steps before they are posted for contributors "
-                  f"(size L: {COINS['L']} coins or more).", "",
-              "The full plan is [issues/INDEX.md](../issues/INDEX.md); the pillars are explained in [the map](README.md)."]
-    return "\n".join(lines) + "\n"
 
 
 def ai_index() -> str:
@@ -213,13 +149,7 @@ def sections(path: Path) -> str:
 
 
 def expected() -> dict[Path, str]:
-    all_items, milestones = items()
-    reports = report_rows()
-    pages = {ROOT / "docs" / "STATUS.md": status_page(all_items, milestones), ROOT / "ai" / "INDEX.md": ai_index()}
-    for pillar in PILLARS:
-        path = ROOT / "docs" / "pillars" / f"{pillar}.md"
-        pages[path] = pillar_page(pillar, all_items, reports, path.read_text(encoding="utf-8") if path.exists() else None)
-    return pages
+    return {ROOT / "ai" / "INDEX.md": ai_index()}
 
 
 def main() -> int:
