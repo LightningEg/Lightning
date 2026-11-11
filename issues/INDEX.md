@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 60 open items. Each folder holds its reports and its items.
+11 big pictures, 59 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -204,7 +204,6 @@ Good ideas that wait until the milestones above are done.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-9A** | [Stored month-end figures](9-later/IT-9A-stored-month-end-figures.md) | improvement, technical | Understand | M | Opus | blocked on a profile past about 4,000 transactions or a tab past 400 ms |
-| **IT-9O** | [A slow page makes every other request wait - the routes are async def with synchronous database work, so one 76 ms Overview holds back a 4 ms stylesheet for about 110 ms](9-later/IT-9O-read-only-pages-block-other-requests.md) | improvement, technical | Build | M | Opus | new |
 | **NF-9D** | [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md) | new feature | Own | M | Opus | ready |
 | NF-9D3 | ↳ Hijri conversion in Python | | | S | Opus | |
 | NF-9D4 | ↳ Show the Hijri date beside every zakat day | | | S | Sonnet | |
@@ -212,7 +211,7 @@ Good ideas that wait until the milestones above are done.
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 
-Done: 9B, 9C, 9E, 9F, 9G, 9H, 9I, 9J, 9K, 9L, 9M, 9N. Next free code: 9P.
+Done: 9B, 9C, 9E, 9F, 9G, 9H, 9I, 9J, 9K, 9L, 9M, 9N, 9O. Next free code: 9P.
 
 ## 10 Looks and store
 
