@@ -33,3 +33,7 @@ the parser already reads and 2 unverified demos; its other 33 banks had none. Th
 its own currency and amount; the account's balance and the reports convert it at the dated rate (NF-7E's
 cross-currency leg), and the bank's later pound debit settles it rather than adding a second expense. Until this
 step is built, IV-7AJ keeps the message for the person.
+**Owner, 2026-11-11 (asked how, given one currency per account):** "you always have currency, then amount in
+currency, then equivalent in default currency." So the entry shows USD and 12.99 with its pound equivalent: the
+dated rate until the bank's pound debit arrives, then the pound debit itself (one expense, never two). Next: check
+how far ledger lines already carry this (`fx_rate`, `amount_base_e6`) before any migration.
