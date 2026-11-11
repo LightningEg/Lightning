@@ -26,7 +26,6 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 
 ## Waiting for the owner
 
-- **IT-1E3** (Build) Owner: deploy the website receiver and rotate the analytics key, in [Audit public repositories for personal data and security exposure](../issues/1-easy-to-contribute/IT-1E-public-repository-security-audit.md)
 - **IT-1E5** (Build) Owner: apply the repository protections, in [Audit public repositories for personal data and security exposure](../issues/1-easy-to-contribute/IT-1E-public-repository-security-audit.md)
 - **BT-2AI6** (Protect) Owner: the phone survives an update and a reinstall, in [Phone data must survive every app update and reinstall](../issues/2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md)
 - **NF-4A5** (Everywhere) J6 cutover, in [Edit journal: edit anywhere, one home confirms](../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md)

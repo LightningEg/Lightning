@@ -16,7 +16,6 @@ Anyone can find how to help in one click and send a first fix the same evening.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | improvement, technical | Build | M | Opus | ready |
-| IT-1E3 | ↳ Owner: deploy the website receiver and rotate the analytics key | | | owner |  | |
 | IT-1E4 | ↳ Check the live website receivers against formula injection and key leaks | | | S | Opus | |
 | IT-1E5 | ↳ Owner: apply the repository protections | | | owner |  | |
 | IT-1E6 | ↳ Prove the committed encrypted fixture is the demo household | | | S | Sonnet | |
