@@ -8,7 +8,7 @@ from io import StringIO
 from fastapi import APIRouter, Request
 from fastapi.responses import Response
 
-from lightning.core.errors import LightningError, NotFoundError, ValidationError
+from lightning.core.errors import NotFoundError, ValidationError
 from ..web import container, render
 
 router = APIRouter(prefix="/exports")
@@ -241,7 +241,7 @@ async def preview_starter_import(request: Request):
     import hashlib
     import secrets
     import time
-    from lightning.core.errors import LightningError, NotFoundError, ValidationError
+    from lightning.core.errors import LightningError
     from lightning.workflows import starter_import
     from lightning.workflows.starter_result import result_for
     from lightning.workflows.workbook_import import MAX_UPLOAD
