@@ -1,0 +1,5 @@
+{# Something went wrong, on the phone (3AY17). #}
+{% extends "base.html" %}
+{% block title %}{{ 'Something went wrong'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Something went wrong'|tr(locale) }}</h1>{% endblock %}
+{% block content %}<p>{{ 'Lightning could not open this page. Your records are safe; nothing was changed by this error.'|tr(locale) }}</p><a class="btn primary phone-save" href="{{ request.url.path }}">{{ 'Try again'|tr(locale) }}</a><a class="btn phone-save" href="/">{{ 'Home'|tr(locale) }}</a>{% endblock %}

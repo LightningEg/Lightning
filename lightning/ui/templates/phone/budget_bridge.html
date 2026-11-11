@@ -1,0 +1,6 @@
+{# Carryover on the phone (3AY17): each tracked category with what it carried into this month. #}
+{% extends "base.html" %}{% block title %}Budget carryover{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/budget?period=month&amp;month={{ month }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Budget'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>Carryover into {{ month }}</h1><p class="phone-note">{{ "The previous month’s final plan result, category by category"|tr(locale) }}</p>{% endblock %}
+{% block content %}<div class="phone-rows">{% for row in categories %}<div class="phone-row"><span>{{ row.name|tr(locale) }}<small>{{ previous }} · <bdi class="fig">{{ row.prior_spent|money(False, 0) }} / {{ row.prior_budget|money(False, 0) }}</bdi> · {{ month }} <bdi class="fig">{{ row.base|money(False, 0) }} → {{ row.current|money(False, 0) }}</bdi></small></span><b class="{{ row.incoming|tone }}"><bdi class="fig">{{ row.incoming|money(True) }}</bdi></b></div>{% else %}<p class="phone-note">{{ "No tracked categories have carryover enabled for this month."|tr(locale) }}</p>{% endfor %}</div>
+<p class="phone-note">{{ "Positive room and negative overspending carry forward as signed plan amounts. This calculation does not assign cash."|tr(locale) }}</p>{% endblock %}
