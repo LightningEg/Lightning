@@ -201,3 +201,26 @@ def payday(available: Decimal | None, unassigned: Decimal | None, enabled: bool)
         return sentence("This plan needs {amt} more than the cash you have.", amt=fmt(-unassigned, 0))
     return sentence("Confirm to give {amt} a job; {left} stays unassigned.", amt=fmt(available - (unassigned or ZERO), 0),
                     left=fmt(unassigned or ZERO, 0))
+
+
+def forecast_inputs(subjects: int) -> dict:
+    """Can I trust the forecast's inputs? (IV-12Q2) Counted by account or currency, as the rows are."""
+    if not subjects:
+        return sentence("Nothing behind the forecast is old or missing.")
+    if subjects == 1:
+        return sentence("One account or currency behind the forecast needs a look.")
+    return sentence("{n} accounts or currencies behind the forecast need a look.", n=subjects)
+
+
+def scenario(changed: bool, plan_low: Decimal | None, scenario_low: Decimal | None) -> dict:
+    """What would this change do to my lowest point ahead? (IV-12Q2)"""
+    if plan_low is None:
+        return sentence("Add your recurring payments to compare scenarios.")
+    if not changed or scenario_low is None:
+        return sentence("Your lowest point ahead is {amt}. Pick a change to compare.", amt=fmt(plan_low, 0))
+    diff = scenario_low - plan_low
+    if diff < ZERO:
+        return sentence("This change lowers your lowest point ahead by {amt}.", amt=fmt(-diff, 0))
+    if diff > ZERO:
+        return sentence("This change raises your lowest point ahead by {amt}.", amt=fmt(diff, 0))
+    return sentence("This change leaves your lowest point ahead where it is.")

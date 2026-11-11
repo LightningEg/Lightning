@@ -1,4 +1,8 @@
-{# Forecast inputs on the phone (3AY16): what the forecast leans on, and anything old or missing. #}
-{% extends "base.html" %}{% block title %}{{ 'Forecast inputs'|tr(locale) }}{% endblock %}
+{# Forecast inputs on the phone (3AY16, IV-12Q2): one row per account or currency, each with one action. #}
+{% extends "base.html" %}{% from "planning/_inputs_rows.html" import input_rows with context %}
+{% block title %}{{ 'Forecast inputs'|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Cash planning'|tr(locale) }}</span></a>{% endblock %}
 {% block heading %}<h1 id="app-popup-title">{{ 'Forecast inputs'|tr(locale) }}</h1>{% endblock %}
-{% block content %}<p class="phone-note">{{ 'The forecast uses confirmed cash and scheduled payments. These notes change no balance or plan.'|tr(locale) }}</p>{% include "partials/freshness.html" %}{% if not notes %}<p class="phone-note">{{ 'No old or missing inputs were found.'|tr(locale) }}</p>{% endif %}<a class="btn phone-save" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>{% endblock %}
+{% block content %}{% if status %}<p class="phone-hero-line">{{ status.text|tr(locale, **status['values']) }}</p>{% endif %}
+{% if notes %}<div class="phone-rows phone-section">{{ input_rows(groups, true) }}</div>{% else %}<p class="phone-note">{{ 'No old or missing inputs were found.'|tr(locale) }}</p>{% endif %}
+<p class="phone-note">{{ 'The forecast uses confirmed cash and scheduled payments. These notes change no balance or plan.'|tr(locale) }}</p>{% endblock %}

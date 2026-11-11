@@ -824,11 +824,30 @@ async def catch_up(request: Request):
     return render(request, "planning/catch_up.html", step=None, summary=summary, total=len(rows), here=here)
 
 
+# IV-12Q2: what needs a look first: a missing rate or price, an old one, then account checks and receipts.
+_INPUT_ORDER = ("no_rate", "no_price", "stale_rate", "stale_price", "pending_edits", "no_check", "old_check",
+                "unconfirmed_receipt")
+
+
+def _input_groups(notes):
+    """Forecast inputs by subject (an account or a currency), the most urgent group first, each in its own order."""
+    by_subject: dict[str, list] = {}
+    for note in notes:
+        by_subject.setdefault(note.subject, []).append(note)
+    rank = lambda note: _INPUT_ORDER.index(note.kind) if note.kind in _INPUT_ORDER else len(_INPUT_ORDER)
+    groups = [(subject, sorted(group, key=rank)) for subject, group in by_subject.items()]
+    return sorted(groups, key=lambda g: rank(g[1][0]))
+
+
 @router.get("/inputs")
 async def forecast_inputs(request: Request):
     c = container(request)
     day = today()
-    return render(request, "planning/inputs.html", notes=c.freshness.for_forecast(day),
+    from .. import status
+    notes = c.freshness.for_forecast(day)
+    groups = _input_groups(notes)
+    return render(request, "planning/inputs.html", notes=notes, groups=groups, as_of=day,
+                  status=status.forecast_inputs(len(groups)),
                   note_days=lambda note: c.freshness.days_old(note, day))
 
 
@@ -850,7 +869,13 @@ async def scenario_page(request: Request):
         error = exc.message
         comparison = compare_scenario(c.forecaster, day, end)
     payments, _ = c.forecaster.scheduled_inputs(day, end)
+    from .. import kpis, status
+    lead, chart = kpis.scenario(comparison)
+    moved = comparison.scenario_plan_low
+    page_status = status.scenario(bool(comparison.assumptions), comparison.plan_low.closing if comparison.plan_low else None,
+                                  moved[1] if moved else None)
     return render(request, "planning/scenarios.html", comparison=comparison, values=values, error=error, what=what,
+                  lead=lead, chart=chart, status=page_status,
                   day=str(day), end=str(end), payments=payments, occurrence_key=occurrence_key,
                   accounts=_paying_accounts(c))
 

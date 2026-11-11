@@ -1,0 +1,14 @@
+{# IV-12Q2: Forecast inputs grouped by what they are about (an account or a currency): one row each, the name once, what
+   is old or missing in a few words (receipts counted, not listed), and one action. #}
+{% macro input_text(kind, notes) -%}{% set note = notes|first %}{% set n = notes|length %}
+{% if kind == 'stale_price' %}{{ 'Price dated {date}, {days} days ago'|tr(locale, date=note.source_date|day(locale), days=note_days(note)) }}{% elif kind == 'no_price' %}{{ 'No price, so it is left out'|tr(locale) }}{% elif kind == 'stale_rate' %}{{ 'Rate dated {date}, {days} days ago'|tr(locale, date=note.source_date|day(locale), days=note_days(note)) }}{% elif kind == 'no_rate' %}{{ 'No rate to convert it with'|tr(locale) }}{% elif kind == 'old_check' %}{{ 'Last checked against its statement on {date}, {days} days ago'|tr(locale, date=note.source_date|day(locale), days=note_days(note)) }}{% elif kind == 'no_check' %}{{ 'Never checked against its statement'|tr(locale) }}{% elif kind == 'unconfirmed_receipt' %}{{ ('A receipt on {date} is not confirmed yet' if n == 1 else '{n} receipts are not confirmed yet, the first on {date}')|tr(locale, n=n, date=note.source_date|day(locale)) }}{% elif kind == 'pending_edits' %}{{ 'Unconfirmed device changes are excluded. Review or sync them before relying on this figure.'|tr(locale) }}{% endif %}
+{%- endmacro %}
+{% macro input_action(note) -%}
+{{ ('Update the rate' if note.kind in ('stale_rate', 'no_rate') else 'Update the price' if note.kind in ('stale_price', 'no_price') else 'Check the account' if note.kind in ('old_check', 'no_check') else 'Review')|tr(locale) }}
+{%- endmacro %}
+{% macro input_rows(groups, phone=false) -%}
+{% for subject, group in groups %}{% set first = group|first %}
+{% if phone %}<a class="phone-row" href="{{ first.link }}" data-freshness="{{ first.kind }}"><span>{{ subject }}{% for kind, same in group|kinds %}<small>{{ input_text(kind, same) }}</small>{% endfor %}</span><b>{{ input_action(first) }}</b></a>
+{% else %}<div class="compact-row inputs-row" data-freshness="{{ first.kind }}"><span><b>{{ subject }}</b>{% for kind, same in group|kinds %}<small class="muted">{{ input_text(kind, same) }}</small>{% endfor %}</span><a class="btn small" href="{{ first.link }}">{{ input_action(first) }}</a></div>{% endif %}
+{% endfor %}
+{%- endmacro %}

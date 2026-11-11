@@ -1,12 +1,15 @@
 {# Compare scenarios on the phone (3AY16): pick what to check, fill its two or three fields, then baseline and scenario
    side by side as rows. Nothing is saved. #}
 {% extends "base.html" %}
-{% from "phone/partials/sheet.html" import sheet with context %}
+{% from "phone/partials/sheet.html" import sheet with context %}{% from "phone/partials/hero.html" import hero %}{% from "partials/charts.html" import trend %}
 {% block title %}{{ 'Compare scenarios'|tr(locale) }}{% endblock %}
 {% block phone_back %}<a class="phone-back" href="/plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Cash planning'|tr(locale) }}</span></a>{% endblock %}
 {% block heading %}<h1>{{ 'Compare scenarios'|tr(locale) }}</h1>{% endblock %}
 {% block content %}{% set kinds = [('purchase', 'Buy something'), ('income', 'Income arrives late'), ('bill', 'Bill changes')] %}
 {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+{# IV-12Q2: the answer, then the plan and the scenario as two lines, the lowest month marked #}
+{% if lead %}{{ hero(lead.label, lead.value, (lead.compare.figure ~ ' ' ~ lead.compare.text|tr(locale))|trim, fig='lowest_point_ahead') }}
+<section class="phone-section" aria-label="{{ 'Month-end cash'|tr(locale) }}">{{ trend(chart, 'Month-end cash, your plan and with this change'|tr(locale), height=160) }}</section>{% endif %}
 <nav class="phone-segment" role="group" aria-label="{{ 'What do you want to check?'|tr(locale) }}">{% for key, text in kinds %}<a href="/plan/scenarios?what={{ key }}"{% if key == what %} aria-current="true"{% endif %}><span>{{ text|tr(locale) }}</span></a>{% endfor %}</nav>
 <form method="get" class="phone-form"><input type="hidden" name="what" value="{{ what }}">
 {% if what == 'income' %}<label>{{ 'Income payment'|tr(locale) }}<select name="income"><option value="">{{ 'No change'|tr(locale) }}</option>{% for p in payments if p.item.is_income %}<option value="{{ occurrence_key(p) }}" {{ 'selected' if values.income == occurrence_key(p) }}>{{ p.item.name }} · {{ p.due_date }}</option>{% endfor %}</select></label><label>{{ 'Delay in days'|tr(locale) }}<input name="delay" type="number" min="1" max="90" value="{{ values.delay }}" inputmode="numeric"></label>

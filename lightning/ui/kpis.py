@@ -491,3 +491,30 @@ def payday(allocation: dict) -> tuple[dict, dict | None]:
         ("Emergency and goals", pr["reserves"], "in"), ("Left unassigned", max(left, ZERO), "neutral")])
     lead = card(figure_label("cash_available_to_assign"), available, comparison, tone="hold", key="payday")
     return lead, split
+
+
+# ── Compare scenarios (IV-12Q2) ───────────────────────────────────────────────────────────────────────────────
+def scenario(result) -> tuple[dict | None, dict | None]:
+    """The Lead (Lowest point ahead with the change, against the plan's) and the chart: the plan and the scenario as
+    two lines over the forecast's months, the scenario's lowest month marked."""
+    low = result.plan_low
+    if low is None:
+        return None, None
+    moved = result.scenario_plan_low
+    changed = bool(result.assumptions) and moved is not None
+    value = moved[1] if changed else low.closing
+    if changed:
+        diff = moved[1] - low.closing
+        comparison = compare(f"on your plan's {fmt(low.closing, 0)}, in {moved[0]}", _signed(diff),
+                             "bad" if diff < 0 else "good" if diff > 0 else "plain")
+    else:
+        comparison = compare(f"in {low.month}, with your plan as it is")
+    lead = card(figure_label("lowest_point_ahead"), value, comparison, tone="over" if value < 0 else "hold",
+                key="scenario")
+    labels = [m for m, _, _ in result.months]
+    series = [{"name": "Your plan", "tone": "reference", "dashed": True, "values": [b for _, b, _ in result.months],
+               "mark_low": not changed}]
+    if changed:
+        series.append({"name": "With this change", "tone": "hold", "values": [c for _, _, c in result.months],
+                       "mark_low": True})
+    return lead, charts.trend(labels, series)
