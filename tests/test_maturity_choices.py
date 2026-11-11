@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from lightning.ui.web import create_app
 from test_deposit_ui import _purchase
+from tests.screens import said
 
 
 def test_expected_maturity_is_a_forecast_and_choices_wait_for_the_receipt(c, setup, monkeypatch):
@@ -19,7 +20,7 @@ def test_expected_maturity_is_a_forecast_and_choices_wait_for_the_receipt(c, set
     monkeypatch.setenv("LIGHTNING_TODAY", "2027-09-01")
     client = TestClient(create_app(c), follow_redirects=False)
     page = client.get(f"/deposits/{cd.id}")
-    assert "Expected 2027-09-01: about" in page.text and "not cash received" in page.text
+    assert said("Expected 2027-09-01: about") in page.text and "not cash received" in page.text
     assert "What next for the money" not in page.text and "allocation-choices" not in page.text   # a forecast is not cash
     outlook = c.deposits.maturity_outlook(c.deposits.list_certificates(cd.id)[0])
     assert outlook["received"] is None and outlook["expected"] > 5000
@@ -30,7 +31,7 @@ def test_expected_maturity_is_a_forecast_and_choices_wait_for_the_receipt(c, set
     assert done.status_code == 303
     page = client.get(f"/deposits/{cd.id}")
     assert "What next for the money from CIB 1-year certificate?" in page.text
-    assert "5,625 EGP reached your account on 2027-09-01" in page.text
+    assert said("5,625 EGP reached your account on 2027-09-01") in page.text
     for choice in ("Buy another certificate", "Top up the emergency fund", "Fund your payday plan", "Keep it as cash"):
         assert choice in page.text
     assert "Expected 2027-09-01" not in page.text                                    # redeemed: no forecast any more

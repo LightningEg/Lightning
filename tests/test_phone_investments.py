@@ -18,6 +18,7 @@ from lightning.ui.phone.presenters.investments import _phone_hero_line, _phone_v
 from lightning.ui.periods import Period
 
 from test_profile_app import create, token
+from tests.screens import said
 
 
 @pytest.fixture(scope="module")
@@ -56,7 +57,7 @@ def test_one_chart_card_with_three_dates_and_the_period_links(phone):
     html = phone.get("/investments").text
     card = html.split("phone-invest-card")[1].split("</article>")[0]
     assert card.count("chart-marks") == 1 and 'style="height:160px"' in card  # one line, 160 tall
-    assert len(re.findall(r'<span style="left:[\d.]+%">\d{4}-\d{2}-\d{2}</span>', card)) == 7  # seven dates drawn, CSS names three
+    assert len(re.findall(r'<span style="left:[\d.]+%">(?:Today|\d{1,2} [A-Z][a-z]{2}(?: \d{4})?)</span>', card)) == 7  # seven dates drawn, CSS names three
     links = re.findall(r'<a href="(/investments\?[^"]+)"( class="is-chosen")?', card)
     assert [(href.split("period=")[1].split("&")[0], bool(chosen)) for href, chosen in links] == [
         ("month", True), ("ytd", False), ("all", False)]  # the same period system: ?period=month|ytd|all
@@ -73,7 +74,7 @@ def test_the_other_ranges_read_in_words(phone, period, when):
 def test_a_past_month_names_the_month_and_the_day_it_is_valued(phone):
     month, last_day = _months_ago(1)
     html = phone.get("/investments", params={"period": "month", "month": month}).text
-    assert re.search(r'class="phone-hero-line">(Up|Down) [\d,]+ in (?:<span class="nowrap">)?' + month + r'(?:</span>)? \(', html) and f"As of {last_day}" in html
+    assert re.search(r'class="phone-hero-line">(Up|Down) [\d,]+ in (?:<span class="nowrap">)?' + said(month) + r'(?:</span>)? \(', html) and said(f"As of {last_day}") in html
 
 
 def test_holdings_are_flat_rows_with_see_all_past_five(phone, monkeypatch):

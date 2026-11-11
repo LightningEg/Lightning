@@ -257,7 +257,7 @@ def test_the_open_file_screen_speaks_arabic(tmp_path):
         browser.cookies.set("lightning_ui_locale", "ar")
         assert "افتح ملف بروفايل" in browser.get("/profiles").text
         page = browser.get("/profiles/open-file").text
-        assert "<h1 id=\"page-title\">افتح ملف بروفايل</h1>" in page and "اختار الملف" in page
+        assert "<h1 id=\"page-title\">افتح ملف بروفايل</h1>" in page and "اختيار الملف" in page
         junk = tmp_path / "junk.lightning"
         junk.write_bytes(b"x")
         assert "ده مش ملف بروفايل من لايتنينج." in _post_file(browser, junk, PASSWORD).text

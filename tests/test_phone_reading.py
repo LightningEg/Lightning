@@ -13,6 +13,7 @@ from lightning.runtime.devices import Devices
 from lightning.runtime.http import Credentials
 
 from test_profile_app import create, token
+from tests.screens import said
 
 NAMES = ("Lightning", "EGP", "Microbus", "Carrefour", "ACME", "Landlord")  # the brand, the currency and names the sample typed
 
@@ -115,7 +116,7 @@ def test_spending_opens_on_this_month_with_the_lead_four_categories_other_and_mo
     from lightning.core.dates import month_of, today
     html = phone.get("/birdview/expenses").text
     assert 'class="phone-appbar-title">Spending<' in html and "Birdview" not in html and "Expense analysis" not in html
-    assert re.search(r'<summary class="phone-period-now"[^>]*>%s</summary>' % month_of(today()), html)  # this month, not last
+    assert re.search(r'<summary class="phone-period-now"[^>]*>%s</summary>' % said(month_of(today())), html)  # this month, not last
     assert "so-far-line" not in html
     where = html[html.index('id="where-heading"'):]
     rows = re.findall(r'<a class="phone-row" href="[^"]+"><span>([^<]+)<small>\d+% of money out', where)
@@ -164,7 +165,7 @@ def test_a_month_with_nothing_spent_offers_last_month_with_its_figure(c, setup, 
     c.transactions.record_in_account(accounts["cib"].id, "2026-09-03", "-1200", cats["EXP.PERSONAL.FOOD"].id, None, "Carrefour", "")
     html = _phone_client(c, monkeypatch, "2026-10-02").get("/birdview/expenses").text
     assert "No spending in this period" in html and "More analysis" not in html
-    assert re.search(r'<a class="phone-row" href="/birdview/expenses\?period=month&amp;month=2026-09"><span>Last month<small>2026-09</small></span><b>1,200</b>', html)
+    assert re.search(r'<a class="phone-row" href="/birdview/expenses\?period=month&amp;month=2026-09"><span>Last month<small>September 2026</small></span><b>1,200</b>', html)
 
 
 def test_spending_more_analysis_is_arabic(phone):

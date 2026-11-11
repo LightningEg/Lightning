@@ -6,6 +6,7 @@ from fastapi.testclient import TestClient
 
 from lightning.reporting.spending import comparison_windows, spending_profile
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 def test_calendar_windows_preserve_completed_months_and_clamp_february():
@@ -32,7 +33,7 @@ def test_running_month_excludes_late_prior_payments_and_includes_refunds(c, setu
     client = TestClient(create_app(c))
     page = client.get('/birdview/expenses?month=2026-10').text
     assert 'Money out so far' in page
-    assert '2026-09 days 1–14' in page
+    assert said('2026-09 days 1–14') in page
     assert 'the same days in earlier months' in page
     assert 'is-down' not in page.split('cluster-change')[1].split('>')[0]
     client.post('/settings/locale', data={'locale': 'ar'})

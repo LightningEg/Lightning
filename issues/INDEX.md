@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 67 open items. Each folder holds its reports and its items.
+11 big pictures, 66 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -102,15 +102,8 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BH6 | ↳ Built-in categories in sentence case ([#427](https://github.com/LightningEg/Lightning/issues/427)) | | | M | Opus | |
 | IV-3BH7 | ↳ Headings never show a code ([#428](https://github.com/LightningEg/Lightning/issues/428)) | | | S | Sonnet | |
 | IV-3BH8 | ↳ More words found by r35 | | | S | Sonnet | |
-| **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | improvement, visual | Understand | L | Opus | ready |
-| IV-3BK1 | ↳ Guideline: human dates on screens ([#429](https://github.com/LightningEg/Lightning/issues/429)) | | | M | Opus | |
-| IV-3BK2 | ↳ The date filters, tested alone | | | M | Sonnet | |
-| IV-3BK3 | ↳ PC screens use them | | | M | Sonnet | |
-| IV-3BK4 | ↳ Phone screens use them | | | M | Sonnet | |
-| IV-3BK5 | ↳ Arabic currency label ج.م | | | S | Sonnet | |
-| IV-3BK6 | ↳ Rows drop ".00" on the PC too | | | S | Sonnet | |
-| IV-3BK7 | ↳ Arabic ٪ and the period chip in Arabic-Indic digits | | | S | Sonnet | |
-| IV-3BK8 | ↳ Arabic speaks to the person in neutral forms | | | M | Opus | |
+| **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | improvement, visual | Understand | S | Opus | ready |
+| IV-3BK9 | ↳ The website's copy of guideline 3.41, and a native reader ([#429](https://github.com/LightningEg/Lightning/issues/429)) | | | S | Sonnet | |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | Opus | ready |
 | NF-3AU3 | ↳ Windows: a daily task shows the schedule with the app closed | | | M | Opus | |
 | NF-3AU4 | ↳ Android: a daily job shows the schedule with the app closed | | | M | Opus | |
@@ -152,9 +145,8 @@ Prices arrive by themselves, from sources Lightning may redistribute.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 | **IT-6D** | [Gold prices: test the source from home; silver waits for holdings](6-market-data/IT-6D-gold-price-source.md) | improvement, technical | Own | S | Sonnet | blocked on a test from a home connection |
-| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history source](6-market-data/IT-6F-london-board-and-gulf-history.md) | improvement, technical | Own | M | Opus | ready |
-| IT-6F1 | ↳ London asks for pound and pence shares only, then the picker list is rebuilt ([#430](https://github.com/LightningEg/Lightning/issues/430)) | | | S | Sonnet | |
-| IT-6F2 | ↳ Dubai, Abu Dhabi and Bahrain month-ends from Yahoo, by venue ([#431](https://github.com/LightningEg/Lightning/issues/431)) | | | S | Opus | |
+| **IT-6F** | [London's board returns few UK shares, and Dubai, Abu Dhabi and Bahrain have no month-end history source](6-market-data/IT-6F-london-board-and-gulf-history.md) | improvement, technical | Own | S | Opus | ready |
+| IT-6F2 | ↳ Abu Dhabi and Bahrain month-ends from Yahoo, by venue ([#431](https://github.com/LightningEg/Lightning/issues/431)) | | | S | Opus | |
 | **NF-6A** | [Market data: price packs, collected in the cloud](6-market-data/NF-6A-price-packs.md) | new feature | Own | L | Opus | building |
 | NF-6A1 | ↳ Funds, currencies and gold matched to holdings | | | M | Opus | |
 | NF-6A2 | ↳ US stocks and FX revaluation, with multi-currency | | | L | Opus | |
@@ -219,10 +211,6 @@ Good ideas that wait until the milestones above are done.
 | IT-9F1 | ↳ A tool that lists unreachable CSS rules | | | S | Sonnet | |
 | IT-9F2 | ↳ Delete the unreachable rules from style.css | | | M | Sonnet | |
 | IT-9F3 | ↳ Do async routes with synchronous database work slow anything? | | | S | Opus | |
-| **IT-9K** | [Structure left - restore, device and borrowing routes out of profile_app](9-later/IT-9K-layers-and-copies.md) | improvement, technical | Build | M | Opus | ready |
-| IT-9K1 | ↳ Restore routes out of profile_app | | | S | Sonnet | |
-| IT-9K2 | ↳ The phone's device routes out of profile_app | | | M | Opus | |
-| IT-9K3 | ↳ The PC's borrowing routes and Lock out of profile_app | | | M | Opus | |
 | **IT-9L** | [The investment report reads the whole ledger four times per Overview - 426 ms at 4,400 transactions; a narrower query gives the same report twelve times faster](9-later/IT-9L-investment-report-reads-the-whole-ledger.md) | improvement, technical | Understand | M | Sonnet | ready |
 | IT-9L1 | ↳ Read only the transactions the report uses | | | M | Sonnet | |
 | IT-9L2 | ↳ Memo the purity read ([#491](https://github.com/LightningEg/Lightning/issues/491)) | | | S | Sonnet | |
@@ -238,7 +226,7 @@ Good ideas that wait until the milestones above are done.
 
 Reports: [r22](9-later/r22-code-quality-and-smart-features/report.md).
 
-Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J. Next free code: 9O.
+Done: 9B, 9C, 9E, 9G, 9H, 9I, 9J, 9K. Next free code: 9O.
 
 ## 10 Looks and store
 

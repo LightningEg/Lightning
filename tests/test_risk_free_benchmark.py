@@ -81,12 +81,12 @@ def test_holding_page_asks_for_a_rate_then_compares_and_follows_a_newer_one(held
                          follow_redirects=False)
     assert posted.status_code == 303 and posted.headers["location"].endswith("#risk-free") or "#risk-free" in posted.headers["location"]
     page = client.get(url).text
-    assert "risk-free rate" in page and "Using 20.00% a year, typed for 2026-01-01" in page
+    assert "risk-free rate" in page and "Using 20.00% a year, typed for 1 Jan" in page
     assert "Ahead of the risk-free rate" in page or "Behind the risk-free rate" in page
     client.post("/investments/risk-free-rate", data={"day": "2026-06-01", "percent": "25", "return_to": url})
-    assert "Using 25.00% a year, typed for 2026-06-01" in client.get(url).text
+    assert "Using 25.00% a year, typed for 1 Jun" in client.get(url).text
     client.post("/investments/risk-free-rate", data={"action": "remove", "day": "2026-06-01", "return_to": url})
-    assert "Using 20.00% a year, typed for 2026-01-01" in client.get(url).text
+    assert "Using 20.00% a year, typed for 1 Jan" in client.get(url).text
 
 
 def test_a_rate_starting_after_the_first_cash_flow_says_so_and_bad_input_is_refused(held):
@@ -94,7 +94,7 @@ def test_a_rate_starting_after_the_first_cash_flow_says_so_and_bad_input_is_refu
     client = _client(c)
     url = f"/investments/holding/{comi.id}?date=2026-09-30"
     client.post("/investments/risk-free-rate", data={"day": "2026-06-01", "percent": "20", "return_to": url})
-    assert "Your first typed rate is for 2026-06-01" in client.get(url).text
+    assert "Your first typed rate is for 1 Jun" in client.get(url).text
     refused = client.post("/investments/risk-free-rate", data={"day": "2026-07-01", "percent": "abc", "return_to": url},
                           follow_redirects=False)
     assert "msg=" in refused.headers["location"]

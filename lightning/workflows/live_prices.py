@@ -417,7 +417,7 @@ def gather(work: Plan, session=None, now: datetime | None = None, budget: float 
             if want.pack == "eg-funds":
                 quotes = mubasher.fetch_history(session, want.key, want.key.rsplit(":", 1)[1])
             else:
-                quotes = yahoo.fetch_history(session, want.key, _range(oldest, on))
+                quotes = yahoo.fetch_history(session, want.key, _range(oldest, on), mic=want.mic)
         except SourceError:
             name = "Mubasher" if want.pack == "eg-funds" else "Yahoo Finance"
             if name not in failed:

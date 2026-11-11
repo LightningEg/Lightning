@@ -49,3 +49,15 @@ def test_overview_kpi_comparisons_never_show_hyphen_before_a_number(c, monkeypat
     text = " ".join(parser.parts)
     assert re.search(r"−\d[\d,.]* points", text), text
     assert not re.search(r"(?<!\d)-\d", text), text
+
+
+def test_pc_register_rows_show_piastres_only_when_there_are_any(c, setup, monkeypatch):
+    """A06.1 (owner, 2026-11-08, IV-3BK6): rows drop ".00" on the PC as on the phone; piastres show when there are any."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-30")
+    accounts, _ = setup
+    utilities = c.categories.get_by_code("EXP.PERSONAL.UTILITIES").id
+    c.transactions.record_outflow("2026-09-10", accounts["cib"].id, "12000", utilities, counterparty="Landlord")
+    c.transactions.record_outflow("2026-09-11", accounts["cib"].id, "3250.75", utilities, counterparty="Vodafone")
+    page = TestClient(create_app(c)).get("/transactions").text
+    assert "−12,000<" in page.replace("</span>", "<") and "−3,250.75" in page
+    assert "−12,000.00" not in page
