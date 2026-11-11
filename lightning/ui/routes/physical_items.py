@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from fastapi import APIRouter, Request, Response
@@ -40,10 +39,7 @@ def _references(c, account, karat=None):
 
 def valuation_label(position, karat=None, item=False) -> tuple[str, dict]:
     """IV-12L: a plain label for where a value comes from, with its fill-ins ("21K price, 9 Nov")."""
-    when = ""
-    if position.price_date:
-        day = date.fromisoformat(str(position.price_date)[:10])
-        when = f"{day.day} {day.strftime('%b')}"
+    when = str(position.price_date or "")[:10]
     source = position.price_source or ""
     if source == "COST":
         return "At cost", {}

@@ -18,7 +18,7 @@
     <dl class="phone-facts">
       <div><dt>{{ 'Fine gold'|tr(locale) }}</dt><dd><bdi class="fig">{{ item.fine_gold|money(False,3) }} g</bdi></dd></div>
       <div><dt>{{ 'Cost'|tr(locale) }}</dt><dd><bdi class="fig">{{ item.position.cost_basis|money(False,0) if item.position else '—' }}</bdi></dd></div>
-      <div><dt>{{ 'Valuation'|tr(locale) }}</dt><dd>{{ item.label[0]|tr(locale, **item.label[1]) }}</dd></div>
+      <div><dt>{{ 'Valuation'|tr(locale) }}</dt><dd>{{ item.label[0]|tr(locale, **(item.label[1]|dict_day(locale))) }}</dd></div>
     </dl>
     <a class="btn phone-save" data-popup-open href="/accounts/{{ account.id }}/items/{{ item.asset_id }}/edit">{{ 'Edit'|tr(locale) }}</a>
     <form method="post" action="/accounts/{{ account.id }}/items/{{ item.asset_id }}/trade" class="phone-form phone-section"><input type="hidden" name="submission" value="{{ new_submission() }}">
@@ -45,7 +45,7 @@
   <a class="btn phone-save" data-popup-open href="/accounts/{{ account.id }}/items/new">{{ 'Add item'|tr(locale) }}</a>
 </section>
 <datalist id="owners">{% for p in counterparties %}<option value="{{ p.name }}">{% endfor %}</datalist>
-{% if other_holdings %}<section class="phone-section"><header class="phone-section-head"><h2>{{ 'Bars and coins'|tr(locale) }}</h2></header><div class="phone-rows">{% for h in other_holdings %}{% set p = h.position %}<div class="phone-row"><span>{{ p.asset_name }}<small>{{ p.quantity|money(False,0) }} {{ p.unit }} · {{ h.label[0]|tr(locale, **h.label[1]) }}</small></span><b><bdi class="fig">{{ p.value|money(False,0) if p.value is not none else '—' }}</bdi></b></div>{% endfor %}</div></section>{% endif %}
+{% if other_holdings %}<section class="phone-section"><header class="phone-section-head"><h2>{{ 'Bars and coins'|tr(locale) }}</h2></header><div class="phone-rows">{% for h in other_holdings %}{% set p = h.position %}<div class="phone-row"><span>{{ p.asset_name }}<small>{{ p.quantity|money(False,0) }} {{ p.unit }} · {{ h.label[0]|tr(locale, **(h.label[1]|dict_day(locale))) }}</small></span><b><bdi class="fig">{{ p.value|money(False,0) if p.value is not none else '—' }}</bdi></b></div>{% endfor %}</div></section>{% endif %}
 <section class="phone-section" aria-labelledby="pa-cash"><header class="phone-section-head"><h2 id="pa-cash">{{ 'Cash transaction activity'|tr(locale) }}</h2></header>
   {% if rows %}<div class="phone-rows">{% for r in rows %}<a class="phone-row" href="/transactions/{{ r.txn_id }}/sheet"><span>{% if r.counterparty or r.description %}{{ r.counterparty or r.description }}{% else %}{{ r.type_label|tr(locale) }}{% endif %}<small>{{ r.date }}{% if r.category_label %} · {{ r.category_label }}{% endif %}</small></span><b class="{{ r.amount|tone }}"><bdi class="fig">{{ r.amount|money(True) }}</bdi></b></a>{% endfor %}</div>
   {% else %}<p class="phone-note">{{ 'No cash transactions recorded yet. Holdings and manual valuations are listed above.'|tr(locale) }}</p>{% endif %}
