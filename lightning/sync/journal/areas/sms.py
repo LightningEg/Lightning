@@ -38,6 +38,8 @@ COMMANDS = {
                                        encode=_encode_answers, decode=_decode_answers),
     # A message entered by hand on the Add sheet is marked read, so the phone's inbox does not offer it again (3AN5).
     "sms_imports.mark_seen": Command("sms_imports.mark_seen", dict(text_fingerprint=TEXT)),
+    # NF-7AO2: take back a message that saved itself; its entry is deleted and the row waits on its review again.
+    "sms_imports.undo_saved": Command("sms_imports.undo_saved", dict(ref=TEXT)),
     # Pasted/shared messages arrive as tuples with a local timestamp; the wire carries an ISO timestamp.
     "sms_imports.read": Command("sms_imports.read", dict(messages=JSON, cursor_ms=optional(INT)),
                                  encode=_encode_read, decode=_decode_read),

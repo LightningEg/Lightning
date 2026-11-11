@@ -139,7 +139,7 @@ class ReviewInbox:
                           "glance": glance("Data checks", "Review", None, "does not add up")}
                          for check in integrity.checks(on) if check.status == "ISSUE")
         items.extend(self._statements())
-        items.extend(self._sms())
+        items.extend(self._sms(on))
         items.extend(self._sms_balances())
         items.extend(self._uncategorized())
         items.extend(self._smart_suggestions(on))
@@ -498,7 +498,7 @@ class ReviewInbox:
             found.append(item)
         return found
 
-    def _sms(self) -> list[dict]:
+    def _sms(self, on: date) -> list[dict]:
         """Bank SMS waiting on the owner before they reach a review: an account to choose, or words to read."""
         found = []
         count, unread = self.c.sms_imports.pending()
@@ -512,6 +512,13 @@ class ReviewInbox:
                           "detail": f"{_plural(unread, 'message waits', 'messages wait')}: unread, or the other side "
                                     "of a transfer. Enter or dismiss.", "href": "/sms", "action": "Look at them", "priority": 2,
                           "glance": glance("Bank SMS", "Enter", None, "1 kept for you" if unread == 1 else "{n} kept for you", unread)})
+        saved = self.c.sms_imports.saved_recently(on)
+        if saved:  # NF-7AO2: what saved itself is seen and can be undone; marked as reviewed, it returns with the next one
+            found.append({"label": "Saved from SMS",
+                          "detail": f"{_plural(saved, 'bank message', 'bank messages')} Lightning was sure about "
+                                    "saved themselves this week. Look at them, or undo any.",
+                          "href": "/sms#saved", "action": "Undo", "priority": 2, "consequence": "cleanup",
+                          "glance": glance("Bank SMS", "Undo", None, "1 saved from SMS" if saved == 1 else "{n} saved from SMS", saved)})
         return found
 
     def _sms_balances(self) -> list[dict]:

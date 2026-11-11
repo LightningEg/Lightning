@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 48 open items. Each folder holds its reports and its items.
+11 big pictures, 47 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -161,18 +161,13 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 |---|---|---|---|---|---|---|
 | **NF-7AK** | [Bank messages beyond CIB and NBE in Arabic: English card messages, wallets, other currencies, and the researched formats](7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | new feature | Capture | L | Opus | new |
 | NF-7AK3 | ↳ Purchases in another currency | | | M | Opus | |
-| NF-7AK4 | ↳ Use the researched formats | | | M | Opus | |
-| **NF-7AO** | [Bank messages Lightning is sure about save themselves, marked and undoable](7-planning-import-and-search/NF-7AO-sure-bank-messages-save-themselves.md) | new feature | Capture | L | Opus | new |
-| NF-7AO1 | ↳ What "sure" means, and the service | | | M | Opus | |
-| NF-7AO2 | ↳ Seen, marked, undoable | | | M | Opus | |
-| NF-7AO3 | ↳ Not twice | | | M | Opus | |
 | **NF-7AQ** | [Search answers a typed question - "food last month" gives the figure, its comparison and the rows, not a link to a filter](7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md) | new feature | Capture | L | Opus | new |
-| NF-7AQ5 | ↳ Accounts and tags, and the owner's Arabic words | | | S | Sonnet | |
+| NF-7AQ5 | ↳ The owner's Arabic words · S | | | owner |  | |
 | **NF-7AR** | [An Upcoming tab shows the month's payments on a calendar, with payday and the day cash runs short](7-planning-import-and-search/NF-7AR-upcoming-payments-calendar.md) | new feature | Plan | L | Opus | ready |
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md) · [r31](7-planning-import-and-search/r31-logging-entries/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AB, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI, 7AJ, 7AL, 7AM, 7AN, 7AP. Next free code: 7AS.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AB, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI, 7AJ, 7AL, 7AM, 7AN, 7AO, 7AP. Next free code: 7AS.
 
 ## 8 Website
 
