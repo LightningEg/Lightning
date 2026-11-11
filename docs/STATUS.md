@@ -49,7 +49,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | 11 Phone UX | 0 | The phone is its own product: a few places that each answer one question, quick jobs in three taps, and no PC page squeezed into one column. |
 | 12 Desktop UX and smart next steps | 0 | The PC app leads with the answer, works in bulk without surprises, and offers the next step where a figure raises the question. |
 
-27 more are parked: kept, not planned, listed at the end of the plan.
+26 more are parked: kept, not planned, listed at the end of the plan.
 
 0 large items still need splitting into steps before they are posted for contributors (size L: 800 coins or more).
 
