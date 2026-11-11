@@ -27,11 +27,13 @@ The owner picks the approach (3AU1). Then: a small reminder schedule written whi
 
 Each step is one pull request. Read only the files a step names. Run the step's test command, then `python -m pytest tests/test_workflow_views_review.py tests/test_review_decisions.py -q`; delete the step's heading in the same commit. 3AU3 and 3AU4 need a real Windows / Android run as evidence: run the Windows or Android workflow by hand only for those steps (AGENTS.md §2).
 
-## 3AU3 Windows: a daily task shows the schedule with the app closed · M · opus
-3AU2 is built: `lightning/workflows/reminder_schedule.py` (`read`, `KIND_TEXT`, `default_path()`), written by `ReminderService.upcoming()` on turning reminders on, on the daily `/reminders/due.json` poll and on lock.
-Files: `lightning/desktop/app.py` (argument parser ~line 17), `lightning/desktop/window.py` (`_show_balloon`, the reminder tray icon ~line 301), new `lightning/desktop/reminder_task.py`, new `tests/test_reminder_task.py`.
-Do: a hidden `--remind` argument that reads the schedule, shows one Windows notification for today's items (a single "Lightning: 2 things are due tomorrow" when there are several), records shown ids in `native-reminders.json` as the open app does, and exits without opening a window or a profile. `reminder_task.register(exe)` / `unregister()` create and delete a per-user task with `schtasks /Create /SC DAILY /ST 09:00 /TN "Lightning reminders" /TR "\"<exe>\" --remind" /F` (no admin rights; `/Delete /TN ... /F` to remove), called when reminders are turned on or off in the Windows app. A missing or stale (`written` older than 14 days) file shows nothing.
-Done when: `tests/test_reminder_task.py` checks the `schtasks` command lines (subprocess mocked) and that `--remind` with a fixture schedule calls the notifier once with no figure, and with no file calls it never: `python -m pytest tests/test_reminder_task.py -q`; then one Windows workflow run by hand shows the task created and removed.
+## 3AU3 Windows: the evidence run · S · opus
+Built (2026-11-11): `lightning/desktop/reminder_task.py` (`register`/`unregister` run the per-user `schtasks` lines;
+`remind()` shows one notice for today's items, notes their ids in `native-reminders.json`, ignores a missing or stale
+schedule), the exe's hidden `--remind`, and `reminder_schedule.ON_SWITCH`, which the Windows app fills so turning
+reminders on or off adds or removes the task (`tests/test_reminder_task.py`). The Windows job in
+`.github/workflows/desktop-probe.yml` creates the task for the shipped exe, runs `--remind` and deletes it.
+Left: one hand-run of that workflow (Windows minutes) showing the step green; then delete this step.
 
 ## 3AU4 Android: a daily job shows the schedule with the app closed · M · opus
 3AU2 is built: `lightning/workflows/reminder_schedule.py` (`read`, `KIND_TEXT`, `default_path()`), written by `ReminderService.upcoming()` on turning reminders on, on the daily `/reminders/due.json` poll and on lock.
