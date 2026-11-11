@@ -12,6 +12,7 @@ from lightning.core.errors import LightningError, ValidationError
 from lightning.workflows.ai_prompts import budget_prompt
 from lightning.categories.domain import Movement, Scope
 from lightning.core.money import ZERO, fmt, quantize, to_decimal
+from lightning.core.plural import counted
 
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
 from lightning.planning.domain import KIND_LABELS, PaymentStatus
@@ -841,7 +842,7 @@ async def apply_budget_fill(request: Request):
                       values=values, error=exc.message, status_code=400)
     if not changed:
         return redirect(f"/budget?month={month}", "Those base limits are already set for this month.")
-    return redirect(f"/budget?month={month}", f"Applied {changed} budget{'s' if changed != 1 else ''} for {month} only.")
+    return redirect(f"/budget?month={month}", f"Applied {counted(changed, 'budget', 'budgets')} for {month} only.")
 
 
 @router.post("")
@@ -867,7 +868,7 @@ async def save_budget(request: Request):
     if not changed:
         return redirect(f"/budget?month={month}", "Nothing changed.")
     scope = f"for {month} only" if only else f"from {month} onward"
-    return redirect(f"/budget?month={month}&open_group=all", f"Saved {changed} budget{'s' if changed != 1 else ''} {scope}.")
+    return redirect(f"/budget?month={month}&open_group=all", f"Saved {counted(changed, 'budget', 'budgets')} {scope}.")
 
 
 @router.post("/setup")
@@ -913,7 +914,7 @@ async def update_carryover(request: Request):
             changed = c.budgets.set_carryover(month, settings, schedule=c.schedules.view())
     except LightningError as exc:
         return redirect(f"/budget?month={month}", exc.message)
-    return redirect(f"/budget?month={month}", f"Updated carryover for {changed} budget line{'s' if changed != 1 else ''}.")
+    return redirect(f"/budget?month={month}", f"Updated carryover for {counted(changed, 'budget line', 'budget lines')}.")
 
 
 @router.post("/carryover/global")

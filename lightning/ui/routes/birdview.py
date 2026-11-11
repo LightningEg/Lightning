@@ -12,6 +12,7 @@ from fastapi import APIRouter, Request, Response
 from lightning.core.dates import fmt_date, month_of, parse_month, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.money import ZERO, fmt, to_decimal
+from lightning.core.plural import counted
 from lightning.workflows.ai_prompts import spending_prompt
 
 from ..web import container, redirect, render, settled_save
@@ -165,7 +166,7 @@ def _expense_stats(a, total, prior, prior_label, largest, selected, first, last,
     before = payments(prior_from, prior_to) if prior_from and prior_to else None
     stats.append({"key": "payments", "surface": "out", "label": "Average payment", "value": average, "kind": "money",
                   "empty": "—", "spark": charts.sparkline(counts), "spark_tone": "spend",
-                  "sub": (f"{count} payment{'s' if count != 1 else ''}"
+                  "sub": (f"{counted(count, 'payment', 'payments')}"
                           + (f" · {len(before)} in {prior_label}" if before is not None and prior_label else "")),
                   "href": f"/transactions?{query}"})
     top = a["rows"][0] if a["rows"] else None

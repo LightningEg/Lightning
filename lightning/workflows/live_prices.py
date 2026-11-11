@@ -43,6 +43,7 @@ from datetime import date, datetime, time as clock, timedelta, timezone
 from decimal import Decimal
 
 from lightning.core.dates import fmt_date
+from lightning.core.plural import counted
 from lightning.fx import rate_for, save_rate
 from lightning.market.http import APP_AGENT, Polite
 from lightning.market.model import Quote, SourceError
@@ -113,15 +114,15 @@ class Report:
     closest: dict[str, list[str]] = field(default_factory=dict)  # fund -> the Mubasher names nearest to it
 
     def summary(self) -> str:
-        parts = [f"Fetched {self.saved} price{'s' if self.saved != 1 else ''} for {len(self.priced)} "
-                 f"investment{'s' if len(self.priced) != 1 else ''}." if self.saved else "No new prices fetched."]
+        parts = [f"Fetched {counted(self.saved, 'price', 'prices')} for {len(self.priced)} "
+                 f"{'investment' if len(self.priced) == 1 else 'investments'}." if self.saved else "No new prices fetched."]
         if self.rates:
-            parts.append(f"Fetched {self.rates} exchange rate{'s' if self.rates != 1 else ''}.")
+            parts.append(f"Fetched {counted(self.rates, 'exchange rate', 'exchange rates')}.")
         if self.failed:
             parts.append(f"Not reachable now: {', '.join(self.failed)}.")
         if self.missing:
             shown = ", ".join(f"{name} {day}" for name, day in self.missing[:3])
-            parts.append(f"{len(self.missing)} month-end price{'s' if len(self.missing) != 1 else ''} still missing: "
+            parts.append(f"{counted(len(self.missing), 'month-end price', 'month-end prices')} still missing: "
                          f"{shown}{' and more' if len(self.missing) > 3 else ''}.")
         if self.gold:
             parts.append("Gold is an estimate from the world price and the dollar's rate; type your shop's price "

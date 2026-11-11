@@ -18,6 +18,7 @@ from lightning.core.errors import LightningError
 from lightning.core.matching import NUMERIC as _LOOKS_NUMERIC, fold_search_text as _fold_search_text, match_score as _score
 from lightning.core.money import ascii_digits
 from lightning.core.refs import parse_ref
+from lightning.core.plural import counted
 from lightning.transactions.tags import normalize as normal_tag
 
 from .web import _money
@@ -163,7 +164,7 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6, payments: 
     tag_needle = normal_tag(needle) if needle.startswith("#") or len(needle) > 1 else ""
     for tag, count in (c.transactions.tags() if tag_needle else []):
         add(_score(tag_needle, tag, False) or (0.7 if needle == "#" else 0), f"#{tag}", f"/transactions?tag={quote(tag)}", "Tag",
-            f"{count} transaction{'s' if count != 1 else ''}")
+            f"{counted(count, 'transaction', 'transactions')}")
     results: list[dict] = [e for e in (entry(c, query),) if e]  # a typed entry comes first (3G7)
     paid: list[dict] = []
     if payments and len(needle) >= 2 and not needle.startswith("#"):  # the first matching payments, newest first, above the other groups (IV-12W)

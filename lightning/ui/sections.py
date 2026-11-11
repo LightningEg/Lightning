@@ -151,7 +151,7 @@ def for_request(request) -> dict:
         return {"sections": SECTIONS, "section": section, "tab": tab}
     def keep(s: Section) -> Section:
         return replace(s, tabs=tuple(t for t in s.tabs if t.key not in hidden))
-    return {"sections": tuple(keep(s) for s in SECTIONS), "section": keep(section) if section else None, "tab": tab}
+    return {"sections": tuple(keep(sec) for sec in SECTIONS), "section": keep(section) if section else None, "tab": tab}
 
 
 def hidden_tabs(request) -> set[str]:
