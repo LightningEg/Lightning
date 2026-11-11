@@ -1,0 +1,11 @@
+{# Rules on the phone (3AY17): one row per rule, most specific first; a row opens its form. #}
+{% extends "base.html" %}
+{% block title %}Rules{% endblock %}
+{% block heading %}<h1>{{ 'Rules'|tr(locale) }}</h1><p class="phone-note">{{ rows|length }} saved · most specific first</p>{% endblock %}
+{% block content %}
+{% if undo %}<form method="post" action="/rules/undo" class="phone-row rule-undo"><span>{{ "Refiled the wrong ones?"|tr(locale) }}</span><input type="hidden" name="token" value="{{ undo }}"><button class="btn small">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+{% if rows %}<div class="phone-rows">{% for r in rows %}
+  <a class="phone-row rule-row" href="/rules/{{ r.rule.id }}/edit" data-popup-open><span>{% if r.rule.name %}{{ r.rule.name }}{% elif locale == 'ar' %}<span>{% for part in r.when_parts %}{% if not loop.first %}<span> {{ '·' if r.rule.match_all else 'or' }} </span>{% endif %}<span>{{ part }}</span>{% endfor %}</span>{% else %}{{ r.when }}{% endif %}<small>{% if r.rule.name %}{{ r.when }} · {% endif %}{{ r.then }}</small></span><b>{{ chevron() }}</b></a>{% endfor %}
+</div>{% else %}<p class="phone-note">{{ "No rules yet. A rule files a transaction by its counterparty, notes or amount, like Vodafone above 300 as Internet, before you review it."|tr(locale) }}</p>{% endif %}
+<a class="btn primary phone-save" data-popup-open href="/rules/new">{{ "Add rule"|tr(locale) }}</a>
+{% endblock %}

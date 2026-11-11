@@ -3,6 +3,9 @@
    goals, financial health and zakat, and one row for reports and reviews (IV-11H). Settings sit behind ⚙. #}
 {% extends "base.html" %}
 {% from "phone/partials/charts.html" import area_trend, parts_bar with context %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% from "phone/partials/working.html" import working_rows with context %}
+{% from "partials/chevron.html" import chevron %}
 {% block title %}Money{% endblock %}
 {% block heading %}<h1>{{ 'Money'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
@@ -11,12 +14,12 @@
 <p class="phone-note">{{ 'No accounts yet.'|tr(locale) }}</p>
 <a class="btn primary phone-save" href="/accounts/new" data-popup-open>{{ 'Add account'|tr(locale) }}</a>
 {% else %}
-<section class="phone-hero has-seam" aria-labelledby="worth-heading">
-  <div id="worth-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig.net_worth.label }}</div>
-  <div class="phone-lead{{ ' is-negative' if s.net_worth < 0 }}">{{ s.net_worth|money }} <small>{{ base }}</small></div>
+{% set lead %}<div class="phone-hero has-seam"><div id="worth-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig.net_worth.label }} <span aria-hidden="true">{{ chevron() }}</span></div>
+  <div class="phone-lead{{ ' is-negative' if s.net_worth < 0 }}" data-fig="net_worth">{{ s.net_worth|money }} <small>{{ base }}</small></div>
   {% if not s.own_split %}<p class="phone-hero-line">{{ 'What you own'|tr(locale) }} <b><bdi class="fig">{{ s.what_you_own|money }}</bdi></b></p>{% endif %}
   {% if s.since_start is not none %}<p class="phone-hero-line">{{ '{amt} this month.'|tr(locale, amt=s.since_start|money(True)) }}</p>{% endif %}
-</section>
+</div>{% endset %}
+{# NF-12AB4: the hero is the way into its working (C06.1) #}{% call sheet(fig.net_worth.label, lead, 'phone-home-hero') %}{{ working_rows(s.working) }}{% endcall %}
 {% if s.trend %}<section class="phone-section phone-chart-card" aria-label="{{ 'Net worth, end of each month'|tr(locale) }}">{{ area_trend(s.trend, 'Net worth, end of each month'|tr(locale)) }}</section>{% endif %}
 {% if s.own_split %}<section class="phone-section" aria-labelledby="own-heading">
   <header class="phone-section-head"><h2 id="own-heading">{{ 'What you own'|tr(locale) }}</h2><b><bdi class="fig">{{ s.what_you_own|money }}</bdi></b></header>

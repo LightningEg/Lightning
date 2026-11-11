@@ -1,7 +1,7 @@
 """The phone's Budget (phone overhaul 2026-10-22): "Tell me if I am on pace, and where I am over".
 
 A ring of how much of the plan is spent, the month stepper, one row for what is over plan, then a row per category,
-over plan first. The percentages, the order and the sentences are worked out in routes/budget.py, not the template."""
+over plan first. The percentages, the order and the sentences are worked out in phone/presenters/budget.py, not the template."""
 import re
 from decimal import Decimal
 from types import SimpleNamespace
@@ -12,7 +12,8 @@ from fastapi.testclient import TestClient
 from lightning.runtime.app import profile_app
 from lightning.runtime.devices import Devices
 from lightning.runtime.http import Credentials
-from lightning.ui.routes import budget
+from lightning.ui.budget_rows import plan_ring
+from lightning.ui.phone.presenters import budget
 
 from test_profile_app import create, token
 
@@ -31,14 +32,14 @@ def phone(tmp_path_factory):
 
 
 def test_the_ring_is_whole_percent_and_turns_rose_over_plan():
-    within = budget._plan_ring(Decimal(1000), Decimal(850), Decimal(150))
+    within = plan_ring(Decimal(1000), Decimal(850), Decimal(150))
     assert within["pct"] == 85 and not within["over"] and not within["wide"] and within["amount"] == Decimal(150)
     assert within["arc"] == pytest.approx(within["circumference"] * 0.85, abs=0.01)
-    over = budget._plan_ring(Decimal(1000), Decimal(1120), Decimal(-120))
+    over = plan_ring(Decimal(1000), Decimal(1120), Decimal(-120))
     assert over["pct"] == 112 and over["over"] and over["wide"] and over["amount"] == Decimal(120)
     assert over["arc"] == over["circumference"]  # a full turn, however far over
-    assert budget._plan_ring(Decimal(1000), Decimal(-50), Decimal(1050))["pct"] == 0  # refunds never draw backwards
-    assert budget._plan_ring(Decimal(0), Decimal(300), Decimal(-300)) is None  # nothing planned: no share to draw
+    assert plan_ring(Decimal(1000), Decimal(-50), Decimal(1050))["pct"] == 0  # refunds never draw backwards
+    assert plan_ring(Decimal(0), Decimal(300), Decimal(-300)) is None  # nothing planned: no share to draw
 
 
 def _lines():
@@ -196,7 +197,7 @@ def test_a_category_row_opens_its_sheet_and_see_transactions_keeps_budget_and_th
     page = phone.get(link.group(1).replace("&amp;", "&")).text
     assert re.search(r'class="phone-tab is-chosen" href="/budget" aria-current="page"', page)
     assert not re.search(r'class="phone-tab is-chosen" href="/transactions"', page)
-    assert re.search(r'<summary class="phone-period-now"[^>]*>\d{4}-\d{2}</summary>', page)  # the month, not a range
+    assert re.search(r'<summary class="phone-period-now"[^>]*>[A-Z][a-z]+ \d{4}</summary>', page)  # the month, not a range
     assert re.search(r'class="phone-back" href="/budget\?month=\d{4}-\d{2}"', page) and ">Budget<" in page
 
 

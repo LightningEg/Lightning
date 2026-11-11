@@ -1,0 +1,32 @@
+{# NF-5G5: an Interactive Brokers activity statement, previewed, then posted into the broker's currency pockets. #}
+{# A statement import step on the phone (3AY17): one column. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Import an Interactive Brokers statement'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Import an Interactive Brokers statement'|tr(locale) }}</h1><p class="phone-note">{{ account.name }}</p>{% endblock %}
+{% block content %}
+{% if not result %}
+<section class="phone-form phone-fields">
+  <p>{{ 'In Interactive Brokers, open Performance & Reports › Statements, run an Activity statement for the period and download it as CSV.'|tr(locale) }}</p>
+  <p class="phone-note">{{ 'Trades, currency conversions, dividends with their tax, interest and fees are recorded in this broker’s pocket for each currency. Rows already imported are skipped, so an overlapping statement is safe.'|tr(locale) }}</p>
+  <form method="post" enctype="multipart/form-data" action="/accounts/{{ account.id }}/broker-import">
+    <div class="field import-file-field"><label for="ibkr-csv">{{ 'Activity statement (CSV)'|tr(locale) }}</label><input id="ibkr-csv" type="file" name="file" accept=".csv,text/csv" required></div>
+    <div class="phone-actions"><button class="btn primary phone-save">{{ 'Review statement'|tr(locale) }}</button><a class="btn phone-save" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a></div>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+</section>
+{% else %}
+<section class="phone-form phone-fields">
+  <header class="phone-section-head"><h2>{{ ('What it will record' if not posted else 'What was recorded')|tr(locale) }}</h2></header>
+  <p class="phone-note">{% if posted %}{{ '{n} recorded'|tr(locale, n=result.count('posted')) }}{% else %}{{ '{n} to record'|tr(locale, n=result.count('new')) }}{% endif %}{% if result.count('imported') %} · {{ '{n} already imported'|tr(locale, n=result.count('imported')) }}{% endif %}{% if result.count('problem') %} · {{ '{n} not recorded'|tr(locale, n=result.count('problem')) }}{% endif %}</p>
+  {% if new_instruments %}<p class="phone-note">{{ 'New investments it will add: {names}'|tr(locale, names=new_instruments|join(', ')) }}</p>{% endif %}
+  <div class="phone-rows">{% for r in result.rows %}{% set e = r.event %}<div class="phone-row"><span>{{ kinds[e.kind]|tr(locale) }}{% if e.symbol %} · {{ e.symbol }}{% endif %}<small>{{ e.date }}{% if e.kind in ('buy','sell') %} · <span>{{ e.quantity|units_of('share') }}</span>{% elif e.kind == 'convert' %} · {{ e.text }}{% endif %} · {{ statuses[r.status]|tr(locale) }}{% if r.message %} · {{ r.message|tr(locale) }}{% endif %}</small></span><b><bdi class="fig">{{ e.amount|money(False, 2) }} {{ e.currency }}</bdi></b></div>{% endfor %}</div>
+  {% if not posted %}<form method="post" action="/accounts/{{ account.id }}/broker-import"><input type="hidden" name="statement" value="{{ statement_b64 }}"><input type="hidden" name="confirm" value="1">
+    <div class="phone-actions"><button class="btn primary phone-save"{% if not result.count('new') %} disabled{% endif %}>{{ 'Record it'|tr(locale) }}</button><a class="btn phone-save" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a></div>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+</section>
+{% if posted and positions %}<section class="phone-form phone-fields">
+  <header class="phone-section-head"><h2>{{ ('Positions match' if positions|selectattr('matches')|list|length == positions|length else 'Positions differ')|tr(locale) }}</h2></header><p class="phone-note">{{ 'Units in the statement’s open positions against this broker on {date}'|tr(locale, date=period_end) }}</p>
+  {% for p in positions %}<div class="phone-row"><span>{{ p.symbol }} <small>{{ p.currency }}</small></span><b>{{ p.ledger|units_of('share') }}{% if not p.matches %} <small>{{ 'statement {units}'|tr(locale, units=p.statement|units_of('share')) }}</small>{% endif %}</b></div>{% endfor %}
+</section>{% endif %}
+{% if posted %}<div class="phone-actions"><a class="btn primary phone-save" href="/accounts/{{ account.id }}">{{ 'Back to {name}'|tr(locale, name=account.name) }}</a></div>{% endif %}
+{% endif %}
+{% endblock %}

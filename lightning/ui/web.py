@@ -7,7 +7,6 @@ import functools
 import hashlib
 import json
 import logging
-from datetime import timedelta
 from contextlib import contextmanager
 
 import re
@@ -29,6 +28,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from lightning import DISPLAY_VERSION
 from lightning.bootstrap import Container
 from lightning.core.dates import fmt_date, month_of, today
+from lightning.ui.date_text import day_text, human_dates, month_short, month_text, range_text
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.figures import FIGURES
 from lightning.core.memo import request_cache
@@ -51,7 +51,7 @@ def _minus(text: str) -> str:
 # Reporting pages show money rounded to the nearest unit; stored values, entry fields and registers
 # keep their decimals. A template that asks for places explicitly (an input's value) gets them.
 _ROUND_MONEY: contextvars.ContextVar[bool] = contextvars.ContextVar("round_money", default=False)
-REPORTING_TEMPLATES = ("dashboard/", "phone/home.html", "phone/money.html", "phone/money_accounts.html", "phone/money_bills.html", "phone/money_report.html", "phone/add_bills.html", "phone/budget_flexible.html", "phone/birdview/", "budget.html", "birdview/", "investments/index.html", "investments/holding.html", "financial_health.html",
+REPORTING_TEMPLATES = ("dashboard/", "phone/home.html", "phone/money.html", "phone/money_accounts.html", "phone/money_bills.html", "phone/money_report.html", "phone/add_bills.html", "phone/catch_up.html", "phone/budget_flexible.html", "phone/birdview/", "budget.html", "birdview/", "investments/index.html", "investments/holding.html", "financial_health.html",
                        "investments/_targets.html", "investments/targets.html", "investments/report_detail.html",
                        "planning/plan.html", "reserves.html", "settings/index.html", "accounts/currencies.html", "zakat.html",
                        "accounts/list.html", "counterparty.html", "tag.html", "analysis/", "planning/loans.html",
@@ -80,9 +80,9 @@ def _amount_role(value, role: str, signed: bool = False) -> str:
     if role == "total":
         return _money(value, signed, 0)
     if role == "row":
-        # The phone drops ".00" from a whole amount (phone overhaul 2026-10-22); piastres still show when there are any.
+        # A whole amount shows no ".00" and piastres show when there are any, on the PC as on the phone (A06.1, IV-3BK6).
         whole = False
-        if phone_mode() and value is not None:
+        if value is not None:
             try:
                 number = Decimal(str(value).replace(",", "").replace("\u2212", "-"))
                 whole = number == number.to_integral_value()
@@ -181,17 +181,20 @@ templates.env.filters["tone"] = _tone
 
 
 def _day_label(date_text, locale: str = "en") -> str:
-    """A day header on a phone list (guideline C08.1): Today, Yesterday, then the date as yyyy-mm-dd (A06.1)."""
-    now = today()
-    text = str(date_text)
-    if text == fmt_date(now):
-        return translate("Today", locale)
-    if text == fmt_date(now - timedelta(days=1)):
-        return translate("Yesterday", locale)
-    return text
+    """A day header on a phone list (guideline C08.1): Today, Yesterday, then the day as people say it (A06.1)."""
+    return day_text(date_text, locale)
+
+
+def _locale(locale):
+    return locale or ui_locale()
 
 
 templates.env.filters["day_label"] = _day_label
+# Dates read on a screen (A06.1, IV-3BK); fields, files and exports keep yyyy-mm-dd.
+templates.env.filters["day"] = lambda value, locale=None: day_text(value, _locale(locale))
+templates.env.filters["month"] = lambda value, locale=None: month_text(value, _locale(locale))
+templates.env.filters["month_short"] = lambda value, locale=None: month_short(value, _locale(locale))
+templates.env.filters["day_range"] = lambda start, end, locale=None: range_text(start, end, _locale(locale))
 
 
 def _day_nets(rows, show_account: bool = False) -> dict[str, Decimal]:
@@ -384,7 +387,6 @@ _BARE_ERROR_PAGE = ("<!doctype html><meta charset=utf-8><meta name=viewport cont
                     "<p>Lightning could not open this page. Your records are safe.</p><p><a href='/'>Back to the dashboard</a></p>")
 
 _PHONE: contextvars.ContextVar[bool] = contextvars.ContextVar("lightning_phone", default=False)
-_PHONE_TEMPLATES: set[str] | None = None
 
 
 def phone_mode() -> bool:
@@ -439,18 +441,11 @@ from . import status as _page_status  # noqa: E402  the status sentences (A05), 
 templates.env.globals["page_status"] = _page_status
 
 
-def _phone_template(name: str) -> str:
-    """A page with its own phone screen has it under templates/phone/; every other page keeps its own."""
-    global _PHONE_TEMPLATES
-    if _PHONE_TEMPLATES is None:
-        _PHONE_TEMPLATES = {t for t in templates.env.list_templates() if t.startswith("phone/")}
-    return f"phone/{name}" if f"phone/{name}" in _PHONE_TEMPLATES else name
-
-
 def _render(request, name, status_code, c, total, owned_total, groups, context) -> HTMLResponse:
     phone = bool(getattr(request.state, "phone", False))
-    if phone:
-        name = _phone_template(name)
+    if phone:  # the phone layer picks its own template and adds what it shows (3AY11); this module knows no phone page
+        from lightning.ui.phone.presenters import present
+        name, context = present(request, c, name, context)
     marker = _PHONE.set(phone)
     try:
         return _render_page(request, name, status_code, c, total, owned_total, groups, context)
@@ -540,9 +535,11 @@ def _template_response(request, name, status_code, c, locale, total, owned_total
         },
         status_code=status_code,
     )
+    page = response.body.decode("utf-8")
     if locale == "ar":
-        response.body = localize_html(response.body.decode("utf-8")).encode("utf-8")
-        response.headers["content-length"] = str(len(response.body))
+        page = localize_html(page)
+    response.body = human_dates(page, locale).encode("utf-8")  # dates as people say them (A06.1, IV-3BK)
+    response.headers["content-length"] = str(len(response.body))
     return response
 
 

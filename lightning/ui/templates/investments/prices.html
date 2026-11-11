@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
 {% block title %}Investment prices{% endblock %}
-{% block heading %}{{ page_header('Investment prices'|tr(locale), '') }}{% endblock %}
+{% block heading %}{{ page_header('Prices'|tr(locale), page_status.count(pending|length, '1 price is waiting for you.', '{n} prices are waiting for you.', 'Every holding has a price.')|status_text) }}{% endblock %}
 {% block content %}
 {% if pending %}
 <form method="post" class="card" style="max-width:1000px;margin-bottom:16px" autocomplete="off" id="missing">
@@ -47,7 +47,7 @@
     <summary>{{ 'Import a file'|tr(locale) }}</summary>
     <form method="post" enctype="multipart/form-data" action="/investments/prices/market/import" style="margin-top:10px">
       <div class="field"><label for="market-zip">market.zip</label><input id="market-zip" type="file" name="file" accept=".zip,application/zip" required>
-        <div class="help">{{ ('From a newer Lightning or another device. A pack older than yours is skipped.' if phone_mode() else 'From a newer Lightning or another computer. A pack older than yours is skipped.')|tr(locale) }}</div></div>
+        <div class="help">{{ 'From a newer Lightning or another computer. A pack older than yours is skipped.'|tr(locale) }}</div></div>
       <div class="actions"><button class="btn">{{ 'Import and fill'|tr(locale) }}</button></div>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
   </details>
@@ -56,7 +56,7 @@
 
 <form method="post" class="card" style="max-width:1000px" autocomplete="off">
   <div class="field" style="max-width:220px">
-    <label for="date">{{ 'As of'|tr(locale) }} {% if not phone_mode() %}<span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span>{% endif %}</label>
+    <label for="date">{{ 'As of'|tr(locale) }} <span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span></label>
     <input type="text" id="date" name="date" value="{{ day }}" placeholder="yyyy-mm-dd" inputmode="numeric" autocomplete="off" data-smart-date required>
   </div>
   <table class="budget">

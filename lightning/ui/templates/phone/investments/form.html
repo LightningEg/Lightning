@@ -1,0 +1,124 @@
+{# A trade or holding on the phone (3AY16): the kind as chips, then one column of fields, Record full width. #}
+{% extends "base.html" %}
+{% from "partials/macros.html" import field, date_field with context %}
+{% block title %}{{ title|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ ('Edit ' ~ txn.ref) if txn else title|tr(locale) }}</h1>{% if hint %}<p class="phone-note">{{ hint|tr(locale) }}</p>{% endif %}{% endblock %}
+{% block content %}
+{% if not txn %}
+<div class="phone-cat-chips">
+  {% for k, label in [("buy", "Buy"), ("sell", "Sell"), ("dividend", "Dividend"), ("return_of_capital", "Return of capital"), ("bonus_or_split", "Bonus or split"), ("holding", "Holding I already own")] %}
+  <a class="phone-chip{{ ' is-chosen' if kind == k }}" href="/investments/new?kind={{ k }}{{ '&account=' ~ values.account_id if values.account_id }}">{{ label|tr(locale) }}</a>
+  {% endfor %}
+</div>
+{% endif %}
+<form method="post" class="phone-form phone-fields investment-ownership-form" data-trade-kind="{{ kind }}" {% if txn %}data-autosave-existing{% endif %} autocomplete="off">
+  {% if txn %}<input type="hidden" name="revision" value="{{ values.revision }}">{% else %}<input type="hidden" name="submission" value="{{ new_submission() }}">{% endif %}
+  <div class="phone-fields">
+    <div class="field {{ 'has-error' if error_field == 'account' }}">
+      <label for="account_id">{{ 'Account'|tr(locale) }}</label>
+      <select id="account_id" name="account_id" required data-own-picker>
+        <option value="">{{ 'Choose…'|tr(locale) }}</option>
+        {% for a in (all_accounts if spec and spec.income else holding_accounts) %}<option value="{{ a.id }}" {{ 'selected' if values.account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
+      </select>
+      {% if not holding_accounts %}<div class="help">{{ "No brokerage or physical-asset account yet —"|tr(locale) }}<a href="/accounts/new?type=BROKERAGE">{{ "add one"|tr(locale) }}</a>.</div>{% endif %}
+    </div>
+    <div class="field {{ 'has-error' if error_field == 'asset' }}">
+      <label for="asset_id">{{ 'Investment'|tr(locale) }}</label>
+      <select id="asset_id" name="asset_id" required data-own-picker>
+        <option value="">{{ 'Choose…'|tr(locale) }}</option>
+        {% for a in assets %}<option value="{{ a.id }}" {{ 'selected' if values.asset_id == a.id|string }}>{{ a.name }}</option>{% endfor %}
+      </select>
+      <div class="help"><a href="/investments/assets/new?then={{ kind }}">{{ "+ New investment"|tr(locale) }}</a></div>
+    </div>
+  </div>
+
+  {% if spec and spec.units %}
+  <div class="phone-fields">
+    {{ date_field(values, error_field) }}
+    {{ field('quantity', 'Units', values, error_field, placeholder='e.g. 100 shares, 12.5 grams', attrs='inputmode="decimal" required class="quantity-input"') }}
+  </div>
+  <div class="phone-fields">
+    {{ field('total', 'Amount (' ~ base ~ ')', values, error_field, help='Including fees, unless you tick Fees are extra.', placeholder='e.g. 10,000', attrs='inputmode="decimal" required class="money-input trade-total"') }}
+    <div class="field"><label>Price per unit ({{ base }})</label><input type="text" class="num unit-price-preview" readonly placeholder="Calculated from total ÷ units"><div class="help">{{ "Calculated automatically from the trade value and fee choice."|tr(locale) }}</div></div>
+  </div>
+  {% if not spec.fees %}
+  {% else %}
+  <div class="field"><label><input type="checkbox" name="fees_included" value="0" data-fees-excluded {{ 'checked' if values.get('fees_included') == '0' }}>{{ "Fees are extra (not in the amount)"|tr(locale) }}</label></div>
+  {% if txn and values.get('fees_included') != '0' %}
+  <div class="field muted">{{ "Fees inside the amount:"|tr(locale) }}<b>{{ values.fees|money(False, 2) }}</b>
+    <input type="hidden" name="fees" value="{{ values.fees }}">
+  </div>
+  {% else %}
+  <div data-fees-field>
+    {{ field('fees', 'Fees (' ~ base ~ ')', values, error_field, placeholder='e.g. 25', attrs='inputmode="decimal" class="money-input"') }}
+  </div>
+  {% endif %}
+  {% endif %}
+  {% if spec.cash_account %}
+  <div class="field {{ 'has-error' if error_field == 'cash_account' }}">
+    <label for="cash_account_id">{{ 'Cash account'|tr(locale) }}</label>
+    <select id="cash_account_id" name="cash_account_id" data-own-picker>
+      <option value="">{{ "The same account (its broker cash)"|tr(locale) }}</option>
+      {% for a in cash_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
+    </select>
+    <div class="help">{{ 'Where the money came from' if spec.cash_from else 'Where the money went' }}. For gold at home, choose the wallet or bank account.</div>
+  </div>
+  {% endif %}
+  {% elif spec and spec.income %}
+  <div class="phone-fields">
+    {{ date_field(values, error_field) }}
+    <div class="field {{ 'has-error' if error_field == 'amount' }}">
+      <label for="dividend-basis">{{ 'Dividend amount entered as'|tr(locale) }}</label>
+      <select name="dividend_basis" id="dividend-basis"><option value="total" {{ 'selected' if values.get('dividend_basis', 'total') == 'total' }}>{{ 'Total amount received'|tr(locale) }}</option><option value="per_share" {{ 'selected' if values.get('dividend_basis') == 'per_share' }}>{{ 'Amount per share / unit'|tr(locale) }}</option></select>
+      <div class="help">{{ "For a per share amount, the total is calculated using this owner’s units held on the selected date."|tr(locale) }}</div>
+    </div>
+    <div class="field {{ 'has-error' if error_field == 'amount' }}">
+      <label for="amount" id="dividend-amount-label">Amount ({{ base }})</label>
+      <input id="amount" type="text" name="amount" value="{{ values.amount }}" inputmode="decimal" required class="money-input">
+      <div class="help">{{ "Enter the amount after any tax withheld."|tr(locale) }}</div>
+    </div>
+  </div>
+  <script nonce="{{ request.state.csp_nonce|default('') }}">const basis=document.getElementById('dividend-basis'),label=document.getElementById('dividend-amount-label');function syncDividendBasis(){label.textContent=window.lightningT(basis.value==='per_share'?'Amount per unit ({cur})':'Amount ({cur})',{cur:'{{ base }}'})}basis.addEventListener('change',syncDividendBasis);syncDividendBasis();</script>
+  {% elif spec and spec.balance %}
+  <div class="phone-fields">
+    {{ date_field(values, error_field) }}
+    {{ field('quantity', 'Units you hold after it', values, error_field, help='Type the number of units you will hold after the bonus shares, split or reverse split. Your cost stays the same, so your average cost per unit changes; no money moves and nothing counts as a purchase.', placeholder='e.g. 125', attrs='inputmode="decimal" required') }}
+  </div>
+  {% elif spec and spec.capital %}
+  <div class="phone-fields">
+    {{ date_field(values, error_field) }}
+    {{ field('amount', 'Amount paid back (' ~ base ~ ')', values, error_field, help='The cash the fund paid you. Your units stay; your cost falls by this amount, and anything beyond your cost counts as a gain.', placeholder='e.g. 800', attrs='inputmode="decimal" required class="money-input"') }}
+  </div>
+  {% if spec.cash_account %}
+  <div class="field {{ 'has-error' if error_field == 'cash_account' }}">
+    <label for="cash_account_id">{{ 'Cash account'|tr(locale) }}</label>
+    <select id="cash_account_id" name="cash_account_id" data-own-picker>
+      <option value="">{{ "The same account (its broker cash)"|tr(locale) }}</option>
+      {% for a in cash_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
+    </select>
+    <div class="help">{{ 'Where the money went' }}.</div>
+  </div>
+  {% endif %}
+  {% else %}
+  <div class="phone-fields">
+    {{ field('quantity', 'Units', values, error_field, attrs='inputmode="decimal" required') }}
+    {{ field('total_cost', 'Cost (' ~ base ~ ')', values, error_field, help='What you paid for these units in total, fees included. THNDR shows it as average cost × units.', attrs='inputmode="decimal" required') }}
+  </div>
+  <div class="field {{ 'has-error' if error_field == 'date' }}">
+    <label for="date">{{ 'As of'|tr(locale) }}</label>
+    <input type="text" id="date" name="date" value="{{ values.date }}" placeholder="yyyy-mm-dd" inputmode="numeric" data-smart-date>
+    <div class="help">{{ "Choose when you want this existing holding to enter your tracked history."|tr(locale) }}</div>
+  </div>
+  {% endif %}
+
+  <div class="field investment-owner-field">
+    <label for="investment-owner">{{ 'Held for'|tr(locale) }}</label>
+    <select id="investment-owner" name="owner_id" data-own-picker><option value="">{{ 'You'|tr(locale) }}</option>{% for person in owners %}<option value="{{ person.id }}" {{ 'selected' if values.owner_id == person.id|string }}>{{ person.name }}</option>{% endfor %}</select>
+    <small class="phone-note">{{ "You, or the person these units belong to."|tr(locale) }}</small>
+  </div>
+  <div class="field"><label for="notes">{{ 'Notes'|tr(locale) }}</label><textarea id="notes" name="notes" rows="2">{{ values.notes }}</textarea></div>
+      {% if txn %}<span class="phone-note">{{ "Changes save automatically."|tr(locale) }}</span><span class="inline-save-status" role="status" aria-live="polite"></span>{% else %}<button class="btn primary phone-save">{% if kind == 'return_of_capital' %}{{ 'Record return of capital'|tr(locale) }}{% else %}{{ 'Record {what}'|tr(locale, what=({'buy': 'Buy', 'sell': 'Sell', 'dividend': 'Dividend', 'bonus_or_split': 'Bonus or split', 'holding': 'Holding I already own'}.get(kind, kind)|tr(locale))|lower) }}{% endif %}</button>{% endif %}
+    <a class="btn phone-save" href="/investments">{{ 'Cancel'|tr(locale) }}</a>
+    {% if txn %}<a class="btn phone-save" href="/transactions/{{ txn.id }}">{{ "Details &amp; history"|tr(locale) }}</a>{% endif %}
+<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+{% endblock %}

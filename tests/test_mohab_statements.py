@@ -22,6 +22,7 @@ def test_mohab_brings_a_statement_through_the_existing_review(c,setup,document):
     before=c.reporting.account_balance(bank.id)
     b.submit(button='Review statement',files={'file':(filename,data)})
     assert c.reporting.account_balance(bank.id)==before
+    b.click('See every row')  # the review opens on its questions (NF-7AB1); Mohab answers row by row
     form=b.page.form('Post ready rows')
     answers={}
     for key,value in form.fields.items():
@@ -59,6 +60,7 @@ def test_mohab_selects_a_worksheet_and_reviews_excel_serial_dates(c, setup):
     assert 'Choose worksheets' in b.page.text
     assert c.reporting.account_balance(bank.id) == before
     b.submit({'sheet_0': 'September cash'}, button='Review statement')
+    b.click('See every row')
     form = b.page.form('Post ready rows')
     date_key = next(key for key in form.fields if key.startswith('date_'))
     assert form.fields[date_key] == '2026-09-20'

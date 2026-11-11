@@ -15,10 +15,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-PAGES = ("/home", "/activity", "/activity?tab=review", "/budget/flexible", "/money", "/money/accounts", "/money/bills", "/money/report", "/money/reviews", "/settings/licences", "/pc?for=/checks", "/add/bills", "/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/birdview/expenses", "/financial-health", "/budget", "/plan", "/plan/recurring", "/plan/loans",
+PAGES = ("/home", "/todo", "/catch-up", "/activity", "/activity?tab=review", "/budget/flexible", "/money", "/money/accounts", "/money/bills", "/money/report", "/money/reviews", "/settings/licences", "/pc?for=/checks", "/add/bills", "/plan/purchases/new", "/exports/all", "/setup/salary", "/", "/birdview/expenses", "/financial-health", "/budget", "/plan", "/plan/recurring", "/plan/loans",
          "/plan/reserves", "/accounts/currencies", "/investments", "/investments?holdings=all", "/investments/planner", "/investments/prices", "/accounts", "/transactions",
          "/money-from-others", "/zakat", "/settings", "/categories", "/counterparties", "/checks", "/profiles",
-         "/profiles/devices", "/accounts/1", "/accounts/1/transaction/new", "/accounts/add-transaction", "/sms", "/search", "/search?q=food")
+         "/profiles/devices", "/accounts/1", "/accounts/1/transaction/new", "/accounts/add-transaction", "/sms", "/search", "/search?q=food",
+         # 3AY15-17: the phone's own pages for what the PC templates drew
+         "/plan/items/4/sheet", "/plan/items/4/edit", "/plan/scenarios", "/plan/purchases/new", "/budget/fill", "/budget/category/5/sheet",
+         "/investments/holding/11?account=4", "/investments/targets", "/investments/assets", "/investments/reevaluations", "/investments/new?kind=buy",
+         "/rules", "/rules/new", "/exports/import", "/exports/starter", "/needs-you", "/import", "/reports", "/spending/compare", "/spending/calendar",
+         "/accounts/6", "/accounts/new", "/accounts/1/convert", "/counterparties/1", "/transactions/10", "/transactions/deleted",
+         "/settings?section=budget", "/settings?section=zakat", "/settings?section=currencies", "/settings?section=financial-health")
 SMS = ("تم خصم 147.87 EGP من بطاقة الخصم المباشر رقم 2093 عند Uber                  Dow يوم 06/10/26 الساعه 11:13 "
        "المتاح 3512.40EGP للمزيد إتصل ب ١٩٦٢٣")
 WIDEST = """() => { const w = innerWidth; let worst = null, right = w;

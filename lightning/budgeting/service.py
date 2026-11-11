@@ -664,6 +664,12 @@ class BudgetService:
         investment = self._investment_ids()
         return {cid: v for cid, v in self.reporting.money_out_by_category(start, end).items() if cid not in investment}
 
+    def spent_in(self, category_ids, start, end) -> Decimal:
+        """What these categories spent between start and end, one-off purchases left out: a Budget category sheet's
+        "last month" figure when nothing is spent yet this month (3AN9)."""
+        one_offs, wanted = self.one_off_ids(), set(category_ids)
+        return sum((v for cid, v in self.owned_spending(start, end).items() if cid in wanted and cid not in one_offs), ZERO)
+
     def plan_funded_spending(self, start, end) -> dict[int, Decimal]:
         """Gross owned spending less confirmed funding outside this month's plan."""
         gross = self.owned_spending(start, end)

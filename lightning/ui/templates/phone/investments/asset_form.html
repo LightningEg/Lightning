@@ -1,0 +1,57 @@
+{# Add or edit an investment on the phone (3AY16): search the list first, then one column of fields. #}
+{% extends "base.html" %}
+{% from "partials/macros.html" import field with context %}
+{% block title %}{{ ('Edit investment' if asset else 'New investment')|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/investments/assets"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Investments'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ ('Edit ' ~ asset.label) if asset else 'New investment'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<form method="post" class="phone-form phone-fields" autocomplete="off">
+  {% if not asset %}
+  <section class="field instrument-picker" aria-label="Find a stock or fund">
+    <label for="instrument-search">{{ 'Find a stock or fund'|tr(locale) }}</label>
+    <input id="instrument-search" type="search" placeholder="Type a company, fund, or ticker (e.g. CIB or COMI)" autocomplete="off" aria-controls="instrument-results" aria-expanded="false" autofocus>
+    <div id="instrument-results" class="instrument-results" role="listbox" hidden></div>
+    <div id="instrument-selection" class="help" aria-live="polite">{{ "Search the local EGX, Thndr fund and US stock and ETF list, or enter details below."|tr(locale) }}</div>
+  </section>
+  <script nonce="{{ request.state.csp_nonce|default('') }}" id="instrument-catalogue" type="application/json">{{ catalogue | tojson }}</script>
+  {% endif %}
+  {{ field('name', 'Name', values, error_field, placeholder='e.g. Commercial International Bank', attrs='required') }}
+  <div class="phone-fields">
+    <div class="field {{ 'has-error' if error_field == 'class_code' }}">
+      <label for="class_code">{{ 'Type'|tr(locale) }}</label>
+      <select id="class_code" name="class_code">
+        {% for c in classes %}<option value="{{ c.code }}" {{ 'selected' if values.class_code == c.code }}>{{ c.name if c.depth == 0 else 'Fund · ' ~ c.name }}</option>{% endfor %}
+      </select>
+    </div>
+    {{ field('symbol', 'Ticker', values, error_field if error_field != 'ticker' else 'symbol', help='e.g. COMI. For gold leave empty.' if not asset else 'Changing it renames the code; the history stays.', placeholder='e.g. COMI') }}
+  </div>
+  <div class="phone-fields">
+    <div class="field {{ 'has-error' if error_field == 'mic' }}">
+      <label for="mic">{{ "Exchange"|tr(locale) }}</label>
+      <select id="mic" name="mic">
+        <option value="" {{ 'selected' if not values.mic }}>—</option>
+        {% for code, venue in venues.items() %}<option value="{{ code }}" {{ 'selected' if values.mic == code }}>{{ venue[0] }}</option>{% endfor %}
+      </select>
+      <div class="help">{{ "A stock is on EGX unless you choose another. Funds and gold are not listed."|tr(locale) }}</div>
+    </div>
+    {{ field('isin', 'ISIN', values, error_field, help='Optional, 12 characters from your statement, e.g. EGS60121C018.', placeholder='e.g. EGS60121C018') }}
+  </div>
+  {% if asset and values.class_code.startswith('FUND') %}
+  {{ field('fund_page', 'Mubasher page', values, error_field, help='Where its price comes from online. Lightning finds a fund by its name; if the name differs there, paste its page or number.', placeholder='e.g. english.mubasher.info/countries/eg/funds/4104') }}
+  {% endif %}
+  {% if not asset %}
+  <div id="karat-field" class="field" {% if values.class_code != 'GOLD' %}hidden{% endif %}>
+    <label for="karat">{{ "Gold karat"|tr(locale) }}</label>
+    <select id="karat" name="karat">{% for k in ['24', '22', '21', '18'] %}<option {{ 'selected' if values.karat == k }}>{{ k }}</option>{% endfor %}</select>
+  </div>
+  {% endif %}
+  <div class="phone-fields">
+      {% if not asset %}<div class="field"><label for="currency">{{ 'Trading currency'|tr(locale) }}</label><input id="currency" name="currency" value="{{ values.currency }}" maxlength="3" placeholder="{{ 'Follows the exchange'|tr(locale) }}" autocomplete="off"><p class="phone-note">{{ 'Only when it trades in another currency than its exchange, e.g. a dollar fund or a USD line in London.'|tr(locale) }}</p></div>{% endif %}
+      <div class="field"><label for="notes">{{ 'Notes'|tr(locale) }}</label><textarea id="notes" name="notes" rows="2">{{ values.notes }}</textarea></div>
+      {% if asset %}<label class="import-check"><input type="checkbox" name="active" value="1" {{ 'checked' if values.active }}>{{ "Show in lists"|tr(locale) }}</label>{% endif %}
+    </div>
+    <button class="btn primary phone-save">{{ 'Save'|tr(locale) }}</button>
+    <a class="btn phone-save" href="/investments">{{ 'Cancel'|tr(locale) }}</a>
+  {% if not asset %}<p class="phone-note">{{ "Picking a result fills in its name, ticker, and type. You can still edit those details."|tr(locale) }}</p>{% endif %}
+<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+{% endblock %}

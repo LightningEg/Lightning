@@ -180,7 +180,16 @@ class AssetService:
             if carat not in (Decimal(24), Decimal(22), Decimal(21), Decimal(18)):
                 raise ValidationError("Gold karat must be 24, 22, 21 or 18.", "karat")
             purity = (carat / Decimal(24)).quantize(Decimal("0.000001"))
-            symbol = symbol or f"{int(carat)}K"
+            if not symbol:
+                # No ticker typed: the first bar of a karat is GLD:24K; the next ones are named after themselves,
+                # so one profile can hold any number of 24K bars (r30 G1). Pricing follows purity, not the code.
+                symbol = f"{int(carat)}K"
+                if self.repo.get_asset_by_code(f"{kind.prefix}:{symbol}"):
+                    base, serial = slug(f"{int(carat)}K-{name}", 18) or symbol, 1
+                    symbol = base
+                    while self.repo.get_asset_by_code(f"{kind.prefix}:{symbol}"):
+                        serial += 1
+                        symbol = f"{base}-{serial}"
         symbol = slug(symbol or name, 20) or ""
         if not symbol:
             raise ValidationError("Enter a short symbol in Latin letters, e.g. COMI.", "symbol")

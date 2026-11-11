@@ -177,6 +177,6 @@ def test_budget_fill_screen_reviews_and_posts_month_only_edits(c, setup):
         "source": "last_month", "selected": str(food.id), f"amount_{food.id}": "5200",
     })
 
-    assert "Applied 1 budget for 2026-12 only" in response.text
+    assert "Applied 1 budget for December 2026 only" in response.text
     assert c.budgets.amounts_for("2026-12", loans=False, schedule=c.schedules.view())[food.id][0] == Decimal("5200")
     assert c.budgets.amounts_for("2027-01", loans=False, schedule=c.schedules.view())[food.id][0] == Decimal("4000")

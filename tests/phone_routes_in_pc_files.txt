@@ -1,0 +1,2 @@
+# PC route files that still hold a route drawing a phone template (IV-3AY11). Only shrinks: move the route to
+# lightning/ui/phone/router.py and delete its line. Empty since IV-3AY18.

@@ -131,3 +131,52 @@ def count(n: int, one: str, many: str, none: str) -> dict:
     if not n:
         return sentence(none)
     return sentence(one) if n == 1 else sentence(many, n=n)
+
+
+def recurring(monthly_out: Decimal, percent: Decimal | None) -> dict:
+    """What do my bills take? Told against income when income is known (IV-12Y4)."""
+    if monthly_out <= ZERO:
+        return sentence("No bills or subscriptions yet.")
+    if percent is not None:
+        return sentence("Your bills take {amt} a month, {n}% of your income.", amt=fmt(monthly_out, 0), n=f"{percent:.0f}")
+    return sentence("Your bills take {amt} a month.", amt=fmt(monthly_out, 0))
+
+
+def loans(still_to_pay: Decimal, n: int) -> dict:
+    """How much do I still owe on loans? (IV-12Y4)"""
+    if not n:
+        return sentence("No loans to pay.")
+    if n == 1:
+        return sentence("{amt} left to pay on 1 loan.", amt=fmt(still_to_pay, 0))
+    return sentence("{amt} left to pay on {n} loans.", amt=fmt(still_to_pay, 0), n=n)
+
+
+def reserves(months: Decimal | None, has_fund: bool) -> dict:
+    """How long would my emergency fund last? (IV-12Y4)"""
+    if not has_fund:
+        return sentence("Set up an emergency fund to see how long it lasts.")
+    if months is None:
+        return sentence("Record a month of income or spending to measure your emergency fund.")
+    return sentence("Your emergency fund covers {n} months.", n=f"{months:.1f}")
+
+
+def held_for_others(held: Decimal, people: int) -> dict:
+    """How much of my money is someone else's? (IV-12Y4)"""
+    if held <= ZERO:
+        return sentence("You hold no money for others.")
+    if people == 1:
+        return sentence("You hold {amt} for 1 person.", amt=fmt(held, 0))
+    return sentence("You hold {amt} for {n} people.", amt=fmt(held, 0), n=people)
+
+
+def currencies(n: int, value: Decimal, unrealized: Decimal, complete: bool) -> dict:
+    """What is my foreign money worth? (IV-12Y4: one plain sentence, not the page's definitions)"""
+    if not n:
+        return sentence("No accounts use another currency yet.")
+    if not complete:
+        return sentence("A rate is missing, so your foreign money cannot be valued.")
+    if unrealized > ZERO:
+        return sentence("Your foreign money is worth {amt}, {gain} more than it cost.", amt=fmt(value, 0), gain=fmt(unrealized, 0))
+    if unrealized < ZERO:
+        return sentence("Your foreign money is worth {amt}, {gain} less than it cost.", amt=fmt(value, 0), gain=fmt(-unrealized, 0))
+    return sentence("Your foreign money is worth {amt}.", amt=fmt(value, 0))

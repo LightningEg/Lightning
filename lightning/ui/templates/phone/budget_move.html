@@ -1,0 +1,17 @@
+{# Move plan from a category with room to one that ran over (3AY15). The total plan stays the same. #}
+{% extends "base.html" %}
+{% block title %}Move plan to {{ to.name }}{% endblock %}
+{% block heading %}<h1>Move plan to {{ to.name }}</h1><p class="phone-note">From {{ month }} on · the total plan stays the same</p>{% endblock %}
+{% block content %}
+<form method="post" action="/budget/move" class="phone-form">
+  <input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="to" value="{{ to.id }}"><input type="hidden" name="from" value="{{ source.id }}">
+  <p>{{ to.name }} was over its plan two months running; {{ source.name }} had room both months.</p>
+  <label for="move-amount">Amount to move ({{ base }})</label><input id="move-amount" name="amount" value="{{ amount|money(False, 0) }}" inputmode="decimal" class="money-input">
+  <dl class="phone-facts">
+    <div><dt>{{ to.name }}</dt><dd><bdi class="fig">{{ to_plan|money(False, 0) }} → {{ (to_plan + amount)|money(False, 0) }}</bdi></dd></div>
+    <div><dt>{{ source.name }}</dt><dd><bdi class="fig">{{ from_plan|money(False, 0) }} → {{ (from_plan - amount)|money(False, 0) }}</bdi></dd></div>
+  </dl>
+  <button class="btn primary phone-save">{{ "Move it"|tr(locale) }}</button><button type="button" class="btn phone-save" data-popup-close>{{ 'Cancel'|tr(locale) }}</button>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+</form>
+{% endblock %}

@@ -177,6 +177,7 @@ class ReviewInbox:
                                    "fields": {"outcome": "link", "due": payment.due_date,
                                               "transaction_id": str(txn["id"])}}})
         items.extend(c.gameya.attention(on))  # an instalment or payout past its date and not recorded
+        items.extend(c.deposits.attention(on))  # a certificate matured or just unlocked (IV-12J4)
         for changed in c.db.all(
                 "SELECT i.id,i.name,i.amount_e6,i.account_id,p.amount_e6 AS paid_e6,p.due_date "
                 "FROM planned_items i JOIN planned_payments p ON p.planned_item_id=i.id "
@@ -529,13 +530,15 @@ class ReviewInbox:
         for code, one, many in (("EXP.UNACCOUNTED", "payment has no category", "payments have no category"),
                                 ("INC.UNACCOUNTED", "incoming amount has no category", "incoming amounts have no category")):
             category = self.c.categories.get_by_code(code)
-            _, total = self.c.transactions.find(TxnFilter(category_ids=[category.id], limit=1))
+            rows, total = self.c.transactions.find(TxnFilter(category_ids=[category.id], limit=500))
             if total:
+                # NF-7AN: "3 to sort · 410": what is waiting, in the profile's currency (another currency is its own).
+                waiting = sum((abs(row.amount) for row in rows if row.currency == self.c.base_currency), ZERO)
                 found.append({"label": _plural(total, one, many).capitalize(),
                               "detail": "Choose a category for each, so the budget and reports count it.",
                               "href": f"/transactions?category_id={category.id}",
                               "action": "Sort them out", "priority": 2,
-                              "glance": glance("No category", "Sort", None,
+                              "glance": glance("No category", "Sort", waiting or None,
                                                ("1 payment" if total == 1 else "{n} payments") if code.startswith("EXP")
                                                else ("1 amount in" if total == 1 else "{n} amounts in"), total),
                               "source_version": sha256(json.dumps([tuple(row) for row in self.c.db.all(

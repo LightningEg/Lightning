@@ -1,0 +1,7 @@
+{# NF-12AB4 (C06.1): a hero's working in its sheet: the rows that add up to the figure, from the service that owns it
+   (lightning/core/working.py), then one link to the figure's home. #}
+{% macro working_rows(w) -%}
+<p class="phone-sheet-sub">{{ 'How it adds up'|tr(locale) }}</p>
+<div class="phone-rows phone-working">{% for r in w.shown %}<div class="phone-row"><span>{{ r.name|tr(locale) }}</span><b><bdi class="fig">{{ r.amount|money(not loop.first) }}</bdi></b></div>{% endfor %}</div>
+{% if w.home %}<a class="phone-quiet" href="{{ w.home }}">{{ 'Open its page'|tr(locale) }}</a>{% endif %}
+{%- endmacro %}

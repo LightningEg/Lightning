@@ -1,6 +1,7 @@
 """Emergency liquidity context labels accessible, locked and unknown holdings separately."""
 from decimal import Decimal
 from types import SimpleNamespace
+from tests.screens import said
 
 
 def _holding(asset, class_code, value, locked_until=None):
@@ -71,7 +72,7 @@ def test_reserves_and_health_show_the_display_only_context(c, setup):
     for page in (reserves, health):
         assert f"{fmt(position.free_cash, 0)}" in page
         assert "Money Market Fund" in page and "3,033" in page and "Accessible in days" in page
-        assert "CIB Certificate" in page and "100,000" in page and "Locked until 2027-08-01" in page
+        assert "CIB Certificate" in page and "100,000" in page and said("Locked until 2027-08-01") in page
         assert "Stocks" in page and "14,000" in page and "Access timing unknown" in page
 
 
@@ -106,7 +107,7 @@ def test_phone_liquidity_other_preserves_sources_and_timing(c, setup):
     assert 'Stocks' not in short and 'Unpriced gold' not in short
     full = context(phone.get(path + '?liquidity_view=all').text)
     assert 'Stocks' in full and 'Gold' in full and 'Value unavailable' in full
-    assert 'Accessible in days' in full and 'Locked until 2027-08-01' in full and 'Access timing unknown' in full
+    assert 'Accessible in days' in full and said('Locked until 2027-08-01') in full and 'Access timing unknown' in full
     assert 'Show fewer' in full
     desktop_context = context(desktop.get(path).text)
     assert 'Stocks' in desktop_context and 'Gold' in desktop_context and 'liquidity_view' not in desktop_context

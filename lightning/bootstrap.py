@@ -31,6 +31,7 @@ from lightning.database.seed import CASH_ASSETS
 from lightning.database.migrator import inspect_schema, migrate
 from lightning.database.seed import seed
 from lightning.database.settings import SettingsStore
+from lightning.people_money import PeopleMoneyService
 from lightning.deposits import DepositService, GameyaService
 from lightning.fx import CurrencyRates
 from lightning.investments.service import InvestmentService
@@ -81,6 +82,7 @@ class Container:
     investments: InvestmentService
     deposits: DepositService
     gameya: GameyaService
+    people_money: PeopleMoneyService
     account_flows: AccountWorkflows
     integrity: IntegrityService
     planning: PlanningService
@@ -246,6 +248,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
     schedules = ScheduleSource(planning, reserves)
     investments = InvestmentService(db, accounts, assets, categories, transactions, reporting, reevaluations)
     gameya = GameyaService(db, accounts, assets, transactions)
+    people_money = PeopleMoneyService(db, accounts, transactions, counterparties)  # NF-12G: Owed to you
     deposits = DepositService(db, accounts, assets, transactions, gameya)
     position = PositionService(reporting, assets, investments, money_from_others, reserves, planning, deposits)
     health = HealthService(planning, position, budgets, schedules)
@@ -303,6 +306,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         investments=investments,
         deposits=deposits,
         gameya=gameya,
+        people_money=people_money,
         account_flows=AccountWorkflows(db, accounts, transactions, reporting),
         integrity=IntegrityService(reporting, reserves, budgets, schedules, planning, position, investments),
         planning=planning,

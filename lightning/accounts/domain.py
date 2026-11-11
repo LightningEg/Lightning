@@ -20,6 +20,7 @@ class AccountType(StrEnum):
     PHYSICAL_ASSET = "PHYSICAL_ASSET"  # offered from M3 (holdings of gold etc.)
     OTHER_ASSET = "OTHER_ASSET"
     GAMEYA = "GAMEYA"  # a rotating savings circle: one account per circle; instalments and payout are transfers
+    RECEIVABLE = "RECEIVABLE"  # Owed to you (NF-12G): one per person, made by PeopleMoneyService only
 
 
 TYPE_LABELS: dict[AccountType, str] = {
@@ -31,6 +32,7 @@ TYPE_LABELS: dict[AccountType, str] = {
     AccountType.PHYSICAL_ASSET: "Physical asset (gold and things you own)",
     AccountType.OTHER_ASSET: "Other",
     AccountType.GAMEYA: "Gam'eya (savings circle)",
+    AccountType.RECEIVABLE: "Owed to you",
 }
 
 # For lists, where the picker's hints would only repeat (review, 2026-10-06).
@@ -43,6 +45,7 @@ TYPE_SHORT: dict[AccountType, str] = {
     AccountType.PHYSICAL_ASSET: "Physical asset",
     AccountType.OTHER_ASSET: "Other",
     AccountType.GAMEYA: "Gam'eya",
+    AccountType.RECEIVABLE: "Owed to you",
 }
 
 TYPE_ABBR: dict[AccountType, str] = {
@@ -54,6 +57,7 @@ TYPE_ABBR: dict[AccountType, str] = {
     AccountType.PHYSICAL_ASSET: "PHY",
     AccountType.OTHER_ASSET: "OTH",
     AccountType.GAMEYA: "GAM",
+    AccountType.RECEIVABLE: "OWE",
 }
 
 # Cash is one asset (CASH:EGP) wherever it sits; the account type decides where it is reported.
@@ -66,6 +70,7 @@ DEFAULT_CASH_CLASS: dict[AccountType, str] = {
     AccountType.PHYSICAL_ASSET: "OTHER",
     AccountType.OTHER_ASSET: "OTHER",
     AccountType.GAMEYA: "GAMEYA",
+    AccountType.RECEIVABLE: "RECEIVABLE",
 }
 
 # Types a user can pick today
@@ -96,6 +101,7 @@ SIDEBAR_GROUPS: dict[AccountType, str] = {
     AccountType.PHYSICAL_ASSET: "Investments",
     AccountType.OTHER_ASSET: "Other",
     AccountType.GAMEYA: "Gam'eya",
+    AccountType.RECEIVABLE: "People",
 }
 
 

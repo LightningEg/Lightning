@@ -15,6 +15,7 @@ from lightning.core.money import ZERO, fmt, to_decimal
 
 from . import register
 from .. import charts, kpis, status as page_status
+from ..entry import entry_accounts
 from ..i18n import translate
 from ..periods import parse_period
 from ..web import settled_save, container, redirect, render, ui_locale
@@ -172,33 +173,33 @@ async def currency_accounts(request: Request):
         trend = charts.trend([point.day[:7] for point in points], [
             {"name": "Value of what you hold", "tone": "hold", "values": [point.value for point in points]},
             {"name": "What it cost", "tone": "other", "dashed": True, "values": [point.cost for point in points]}])
-        if not getattr(request.state, "phone", False):
-            values = []
-            for point in points:
-                invested, unpriced = c.position.foreign_holdings(point.day, c.base_currency).get(
-                    chosen.currency, (ZERO, False))
-                values.append(None if unpriced or point.value is None else point.value + invested)
-            # Never bridge an unknown valuation with a line that suggests a known history.
-            combined_unavailable = any(value is None for value in values)
-            combined_trend = charts.trend([point.day[:7] for point in points], [
-                {"name": translate("Cash and investments", ui_locale()), "tone": "hold", "values": values}])
-            if not combined_trend["too_short"]:
-                series = combined_trend["series"][0]
-                dots, run, lines = iter(series["dots"]), [], []
-                for value in values:
-                    if value is None:
-                        if len(run) > 1:
-                            lines.append(" ".join(run))
-                        run = []
-                    else:
-                        dot = next(dots)
-                        run.append(f"{dot['x']:.2f},{dot['y']:.2f}")
-                if len(run) > 1:
-                    lines.append(" ".join(run))
-                series["lines"] = lines
+        values = []
+        for point in points:
+            invested, unpriced = c.position.foreign_holdings(point.day, c.base_currency).get(
+                chosen.currency, (ZERO, False))
+            values.append(None if unpriced or point.value is None else point.value + invested)
+        # Never bridge an unknown valuation with a line that suggests a known history.
+        combined_unavailable = any(value is None for value in values)
+        combined_trend = charts.trend([point.day[:7] for point in points], [
+            {"name": translate("Cash and investments", ui_locale()), "tone": "hold", "values": values}])
+        if not combined_trend["too_short"]:
+            series = combined_trend["series"][0]
+            dots, run, lines = iter(series["dots"]), [], []
+            for value in values:
+                if value is None:
+                    if len(run) > 1:
+                        lines.append(" ".join(run))
+                    run = []
+                else:
+                    dot = next(dots)
+                    run.append(f"{dot['x']:.2f},{dot['y']:.2f}")
+            if len(run) > 1:
+                lines.append(" ".join(run))
+            series["lines"] = lines
     totals = c.reporting.fx_positions.totals(positions)
     return render(request, "accounts/currencies.html", positions=shown, other=other, chosen=chosen, trend=trend,
                   totals=totals, period=period, period_error=period_error,
+                  answer=page_status.currencies(len(positions), totals["value"], totals["unrealized"], totals["complete"]),
                   fx_kpis=kpis.currencies(totals, start=period.start_text, end=period.end_text),
                   combined_trend=combined_trend, combined_unavailable=combined_unavailable)
 
@@ -301,18 +302,15 @@ def _account_id(text: str, field: str) -> int:
 LAST_ACCOUNT_COOKIE = "lightning_last_account"  # the account the last entry went to (phone roadmap M2)
 
 
-def _entry_accounts(c) -> list:
-    """The accounts a hand-entered transaction can go to: every active one that holds money, not a thing you own."""
-    return [a for a in c.accounts.list(active_only=True) if a.account_type.value not in ("PHYSICAL_ASSET", "OTHER_ASSET")]
 
 
 @router.get("/add-transaction")
 async def pick_account_for_entry(request: Request):
     """The phone's Add button (guideline C05.2): the sheet opens on the amount with an account already chosen, the one
     used last, else the one this person uses most (3AN3). No list of accounts first; the sheet's From chip changes it.
-    ?pick=1 still shows the list."""
+    ?pick=1, or no account yet, is the phone router's account list (3AY18); here the PC goes to Accounts."""
     c = container(request)
-    accounts = _entry_accounts(c)
+    accounts = entry_accounts(c)
     if not request.query_params.get("pick") and accounts:
         remembered = str(request.cookies.get(LAST_ACCOUNT_COOKIE, ""))
         ids = [a.id for a in accounts]
@@ -322,7 +320,7 @@ async def pick_account_for_entry(request: Request):
             cashy = [a.id for a in accounts if a.account_type.value in ("CASH", "BANK") and not a.parent_id]
             chosen = c.transactions.usual_account(cashy or ids)
         return await new_transaction_popup(request, chosen)
-    return render(request, "phone/accounts/pick.html", accounts=accounts)
+    return redirect("/accounts")
 
 
 @router.get("/new")
@@ -396,28 +394,10 @@ async def update_other_asset_details(request: Request, account_id: int):
     return redirect(f"/accounts/{account_id}", "Details saved.")
 
 
-def _capture_context(c, account) -> dict:
-    """What the phone's Add sheet shows besides the fields (3AN3): the accounts its From chip can change to, and the
-    usual categories for money out and money in as chips, most used first (computed from this person's history in
-    TransactionService.usual_capture_categories; never in the template)."""
-    def named(group):
-        names = [c.categories.get(category_id).name for category_id in group]
-        return [{"id": category_id, "label": c.categories.get(category_id).name if names.count(name) == 1
-                 else c.categories.display_name(category_id)} for category_id, name in zip(group, names)]
-    from lightning.core.dates import _local_now
-    from lightning.planning import bill_state
-    hour = _local_now().hour
-    return {"entry_accounts": [{"id": a.id, "name": a.name} for a in _entry_accounts(c)],
-            "bills_due": len(bill_state.unpaid_bills(c.planning, today(), bill_state.SOON_DAYS)),
-            "chips_out": named(c.transactions.usual_capture_categories("out", hour=hour)),
-            "chips_in": named(c.transactions.usual_capture_categories("in", hour=hour))}
-
-
 def _transaction_popup_context(request, account, values, action, error=None, txn_id=None, split_categories=None):
     c = container(request)
     counterparties = c.counterparties.list_active()
-    capture = _capture_context(c, account) if txn_id is None and getattr(request.state, "phone", False) else {}
-    return dict(**capture, account=account, values=values, action=action, txn_id=txn_id, hide_global_error=True,
+    return dict(account=account, values=values, action=action, txn_id=txn_id, hide_global_error=True,
                 title="Edit transaction" if txn_id else "Add transaction",
                 revision=values.get("revision", c.transactions.revision(txn_id)) if txn_id else "",
                 accounts=c.accounts.list(active_only=True),
@@ -490,8 +470,12 @@ def _save_popup_transaction(c, account_id: int, values: dict):
             # Left empty: a rule decides first, then the counterparty's usual category, as in the register.
             category_id = register.category_when_empty(c, values["counterparty"].strip(), values["notes"],
                                                        -amount if kind == "out" else amount, account_id)
-        if not category_id:
-            raise ValidationError("Choose a category.", "category")
+        unsorted = not category_id
+        if unsorted:
+            # NF-7AN: save now, sort later. With only an amount the entry waits as To sort (filed Unaccounted, a
+            # system category that is spending or income with no category yet); Home's To do and the phone's To
+            # sort list ask for it.
+            category_id = c.categories.get_by_code("EXP.UNACCOUNTED" if kind == "out" else "INC.UNACCOUNTED").id
         category = c.categories.get(category_id)
         if kind == "out" and category.movement.value != "OUTFLOW":  # money in to an expense is a refund
             raise ValidationError("Choose a category that matches this transaction type.", "category")
@@ -501,10 +485,12 @@ def _save_popup_transaction(c, account_id: int, values: dict):
             raise ValidationError("Choose Transfer and select the destination account explicitly.", "counterparty")
         if kind == "out":
             txn = c.transactions.record_outflow(day, account_id, amount, category_id,
-                                               counterparty=counterparty, notes=values["notes"], owner_id=owner_id)
+                                               counterparty=counterparty, notes=values["notes"], owner_id=owner_id,
+                                               allow_system_category=unsorted)
         else:
             txn = c.transactions.record_inflow(day, account_id, amount, category_id,
-                                              counterparty=counterparty, notes=values["notes"], owner_id=owner_id)
+                                              counterparty=counterparty, notes=values["notes"], owner_id=owner_id,
+                                              allow_system_category=unsorted)
     return txn
 
 

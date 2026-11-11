@@ -7,6 +7,7 @@ import pytest
 from fastapi.testclient import TestClient
 
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 @pytest.fixture
@@ -470,7 +471,7 @@ def test_phone_currency_settings_render_rates_and_fx_history_as_rows(c):
     phone = TestClient(phone_app).get('/settings?section=currencies&tab=rates').text
     desktop = TestClient(app).get('/settings?section=currencies&tab=rates').text
     assert '<table' not in phone and 'currency-rate-list' in phone
-    for value in ('USD', '55', 'Dollar savings', '2026-09-30', '500'):
+    for value in ('USD', '55', 'Dollar savings', said('2026-09-30'), '500'):
         assert value in phone and value in desktop
     assert '<table' in desktop
 

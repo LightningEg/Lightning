@@ -1,0 +1,53 @@
+{# Welcome on the phone (3AY17): currencies, then where you keep your money, then a sample. #}
+{% extends "base.html" %}
+
+{% block title %}{{ 'Welcome to Lightning'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ "Welcome to Lightning"|tr(locale) }}</h1><p class="phone-note">{{ "Add one account to get started. You can add others whenever you need them."|tr(locale) }}</p>{% endblock %}
+{% block content %}
+<section class="phone-form phone-fields">
+  <p class="phone-note">{{ "First step"|tr(locale) }}</p>
+  <h2>{{ "Your currencies"|tr(locale) }}</h2>
+  {% if currencies_done and not editing_currencies %}
+  <p class="welcome-currency-done"><b>{{ held_currencies|join(' · ') }}</b> <a class="phone-note" href="/?currencies=edit">{{ 'Change'|tr(locale) }}</a></p>
+  {% else %}
+  <form method="post" action="/setup/currency" class="welcome-currency">
+    <div class="field">
+      <label for="welcome-currency">{{ 'Profile currency'|tr(locale) }}</label>
+      <select id="welcome-currency" name="currency" data-own-picker>{% for code, label in currencies %}<option value="{{ code }}"{% if code == base %} selected{% endif %}>{{ code }} — {{ label }}</option>{% endfor %}</select>
+    </div>
+    <div class="field">
+      <label for="welcome-extra">{{ 'Other currencies you hold'|tr(locale) }}</label>
+      <select id="welcome-extra" data-own-picker data-chip-add="#welcome-chips" data-chip-name="extra" aria-label="{{ 'Other currencies you hold'|tr(locale) }}">
+        <option value="">{{ 'Add a currency'|tr(locale) }}</option>
+        {% for code, label in currency_choices %}<option value="{{ code }}">{{ code }} — {{ label }}</option>{% endfor %}
+      </select>
+      <div id="welcome-chips" class="chips chip-picks">{% for code in extra_currencies %}<span class="chip">{{ code }} <button type="button" class="chip-x" data-chip-remove aria-label="{{ 'Remove'|tr(locale) }}">×</button><input type="hidden" name="extra" value="{{ code }}"></span>{% endfor %}</div>
+    </div>
+    <button class="btn phone-save" type="submit">{{ 'Save currencies'|tr(locale) }}</button>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  </form>
+  <p class="phone-note welcome-currency-note">{{ 'Choose the currency used for totals. You can change it before recording money or exchange rates.'|tr(locale) }}</p>
+  {% endif %}
+  <h2>{{ "Where do you keep your money?"|tr(locale) }}</h2>
+  <p class="phone-note">{{ "Start with the account your salary goes into. Next you can import its statement, so your history is in from day one."|tr(locale) }}</p>
+  <div class="phone-rows first-account-choices">
+    {% for kind, label, description in [
+      ('BANK','Bank account','A current or savings account, like CIB or NBE'),
+      ('CASH','Cash','A wallet, cash at home, or Vodafone Cash'),
+      ('DEPOSIT','Certificates','A bank\'s certificates of deposit'),
+      ('BROKERAGE','Brokerage','Shares and funds, like THNDR'),
+      ('PHYSICAL_ASSET','Gold and other things','A gold ring, a gold pound or another named item')
+    ] %}
+    <a class="phone-row" data-popup-open href="/accounts/new?type={{ kind }}"><span>{{ label|tr(locale) }}<small>{{ description|tr(locale) }}</small></span><b>{{ 'Add'|tr(locale) }} {{ chevron() }}</b></a>
+    {% endfor %}
+  </div>
+</section>
+<section class="phone-section sample-section">
+  <header class="phone-section-head"><h2>{{ 'Or explore a sample'|tr(locale) }}</h2></header>
+  <div class="phone-rows sample-boxes">
+    <form method="post" action="/sample/mohab-2026" class="phone-row sample-box"><button type="submit"><span class="sample-box-name"><b>Mohab · {{ 'A full year'|tr(locale) }}</b></span><small>{{ 'Salary, a raise, Ramadan, THNDR and gold, January to today'|tr(locale) }}</small><span class="sample-box-load">{{ 'Load'|tr(locale) }}</span></button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+    {% for story in sample_stories %}<form method="post" action="/sample/{{ story.key }}" class="phone-row sample-box"><button type="submit"><span class="sample-box-name"><b>{{ story.name }} · {{ story.label|tr(locale) }}</b></span><small>{{ story.question|tr(locale) }}</small><span class="sample-box-load">{{ 'Load'|tr(locale) }}</span></button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}
+  </div>
+  <p class="phone-note">{% if request.state.secure_profiles|default(false) %}{{ 'Samples fill this profile. Use a separate profile to keep them apart from your own money.'|tr(locale) }}{% else %}{{ 'Samples fill this Lightning. To keep them apart from your own money, start Lightning with'|tr(locale) }} <code>--demo</code>.{% endif %}</p>
+</section>
+{% endblock %}

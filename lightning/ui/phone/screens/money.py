@@ -53,6 +53,7 @@ class MoneyScreen:
     goals_funded: int = 0              # goals and reserves at their target ("3 of 4 funded")
     goals_count: int = 0
     health_watch: int | None = None    # health figures outside their Good band; None when none has a limit
+    working: object = None             # NF-12AB4: Net worth's working, for the hero's sheet
     trend: dict | None = None          # charts.trend of net worth at each month end; the last point is today
     own_split: tuple[dict, ...] = ()   # what you own by asset class family: {key, label, value, share}, A04 order
 
@@ -110,7 +111,7 @@ def build(c, day: date) -> MoneyScreen:
     bills = bill_state.unpaid_bills(c.planning, day, BILLS_HORIZON_DAYS)
     funded, goals = _goals(c)
     return MoneyScreen(
-        net_worth=now.net_worth, what_you_own=now.what_you_own, what_you_owe=now.what_you_owe, since_start=since,
+        working=now.net_worth_working, net_worth=now.net_worth, what_you_own=now.what_you_own, what_you_owe=now.what_you_owe, since_start=since,
         accounts=tuple(rows[:ACCOUNTS_SHOWN]), accounts_more=max(len(rows) - ACCOUNTS_SHOWN, 0),
         accounts_total=sum((r.balance for r in rows), ZERO), held_for_others=now.held_for_others,
         coming_up=tuple(b for b in bills if b.state in UPCOMING)[:COMING_UP],

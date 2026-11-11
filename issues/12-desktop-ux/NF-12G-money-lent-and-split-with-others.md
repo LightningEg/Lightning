@@ -26,7 +26,7 @@ per person, of the account type `RECEIVABLE` that the `accounts` CHECK list alre
 `0053_gameya.sql`, worked like a Gam'eya account: lending and repayment are transfers, forgiving is spending). If the
 owner picks another option, rewrite 12G2-12G9 before anyone starts them.
 
-2026-11-08: verified against the code. Nothing of this is built: `AccountType` (`lightning/accounts/domain.py`) has no
+2026-11-10: 12G2 built (`lightning/people_money.py`, migration 0078, `tests/test_people_money.py`; synced as `people_money.lend/repay/forgive`). 2026-11-08, before it: nothing was built: `AccountType` (`lightning/accounts/domain.py`) has no
 `RECEIVABLE`, no service lends or splits, and `lightning/planning/position.py` has no "Owed to you" figure. Pieces to
 reuse: `ReimbursementService` (`lightning/reimbursements.py`, claims on an expense, never posts money),
 `MoneyFromOthersService` (`lightning/money_from_others.py`, Held for others), `GameyaService`
@@ -39,28 +39,6 @@ reuse: `ReimbursementService` (`lightning/reimbursements.py`, claims on an expen
 Each step is one pull request. Read only the files a step names; money rules are in `ai/ARCHITECTURE.md` (grep
 `^## `). Run the step's test command, then `python -m pytest tests/test_issues.py -q`; for a visible change also
 `python -m pytest tests/test_mohab_year.py -q`. Delete the step's heading in the same commit (AGENTS.md §3).
-
-## 12G2 Money lent and paid back: the service · M · opus
-Needs 12G1 merged first.
-Files: `lightning/accounts/domain.py` (add `AccountType.RECEIVABLE` to every map: labels "Owed to you", abbreviation
-`OWE`, cash class `RECEIVABLE`, sidebar group "People"; not in `OFFERED_TYPES`, it is made by the service only), a new
-migration `lightning/database/migrations/0077_owed_to_you.sql` (insert asset class `RECEIVABLE` "Owed to you", as
-`0053_gameya.sql` does for `GAMEYA`; follow skill `add-migration`; the next free number may differ),
-`lightning/database/seed.py`, a new `lightning/people_money.py` (`PeopleMoneyService`), wired in
-`lightning/bootstrap.py` beside `GameyaService` (line ~248), and `lightning/planning/position.py` (a new
-`owed_to_you` base figure inside What you own, below zero part in What you owe as `gameya_owed` is).
-Do: `PeopleMoneyService.account_for(person_id)` finds or makes the person's RECEIVABLE account;
-`lend(day, person, from_account_id, amount, notes="")` and `repay(day, person, to_account_id, amount, notes="")` post
-transfers through `TransactionService.record_transfer`; `forgive(day, person, amount, category_id)` posts an outflow
-from the person's account through `record_outflow`; `balance(person_id, as_of)` and `owed_to_you(as_of)` read the
-ledger. Refuse repaying or forgiving more than is owed, and lending more cash than you own (as
-`GameyaService._check_owned_cash`). Add "Owed to you" to `ai/GLOSSARY.md` and the formula block at the top of
-`position.py`.
-Done when: new `tests/test_people_money.py` (fixtures as in `tests/test_gameya.py`) lends 5,000, is repaid 3,000 and
-forgives 2,000, and asserts after each: cash −5,000/+3,000; Owed to you 5,000/2,000/0; Net worth unchanged by lend and
-repay and −2,000 by forgive; spending +2,000 only on forgive; a repay of 2,001 after the 3,000 is refused; an older
-profile upgrades (as `tests/test_gameya.py` does). `python -m pytest tests/test_people_money.py tests/test_gameya.py -q`
-and skill `number-audit`.
 
 ## 12G6 Lend, paid back and forgive on the person's page (PC) · M · sonnet
 Needs 12G2 merged first.

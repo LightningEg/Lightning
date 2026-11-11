@@ -1,0 +1,89 @@
+{# Convert between currencies on the phone (3AY17): one column. #}
+{% extends "base.html" %}
+
+{% block title %}{{ title|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ title|tr(locale) }}</h1><p class="phone-note">{{ 'Your own money changing currency, between two of your accounts.'|tr(locale) }}</p>{% endblock %}
+{% block content %}
+<section class="phone-form phone-fields" data-convert-form data-quote-url="/accounts/convert/quote">
+  {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+  <form method="post" action="{{ action }}"><input type="hidden" name="submission" value="{{ new_submission() }}">
+    <input type="hidden" name="return_to" value="{{ values.return_to }}">
+    {% if values.rate_checked %}<input type="hidden" name="rate_checked" value="{{ values.rate_checked }}">{% endif %}
+    {% if values.revision is defined %}<input type="hidden" name="revision" value="{{ values.revision }}">{% endif %}
+    <div class="phone-fields">
+      <div class="field {{ 'has-error' if error_field == 'date' }}">
+        <label for="convert-date">{{ 'Date'|tr(locale) }}</label>
+        <input id="convert-date" type="text" name="date" value="{{ values.date }}" placeholder="yyyy-mm-dd" inputmode="numeric" data-smart-date required>
+      </div>
+    </div>
+    <div class="phone-fields">
+      <div class="field {{ 'has-error' if error_field == 'from_account' }}">
+        <label for="convert-from">{{ 'From account'|tr(locale) }}</label>
+        <select id="convert-from" name="from_account_id" data-own-picker required>
+          <option value="">{{ 'Choose an account'|tr(locale) }}</option>
+          {% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if values.from_account_id == a.id|string }}>{{ a.label }} · {{ a.currency }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field {{ 'has-error' if error_field == 'to_account' }}">
+        <label for="convert-to">{{ 'To account'|tr(locale) }}</label>
+        <select id="convert-to" name="to_account_id" data-own-picker required>
+          <option value="">{{ 'Choose an account'|tr(locale) }}</option>
+          {% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if values.to_account_id == a.id|string }}>{{ a.label }} · {{ a.currency }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="phone-fields">
+      <div class="field {{ 'has-error' if error_field == 'amount' }}">
+        <label for="convert-sent">{{ 'You sent'|tr(locale) }}</label>
+        <input id="convert-sent" type="text" name="sent" value="{{ values.sent }}" inputmode="decimal" placeholder="50,000.00" autocomplete="off" required>
+      </div>
+      <div class="field {{ 'has-error' if error_field == 'received' }}">
+        <label for="convert-received">{{ 'You received'|tr(locale) }}</label>
+        <input id="convert-received" type="text" name="received" value="{{ values.received }}" inputmode="decimal" placeholder="1,030.00" autocomplete="off" required>
+      </div>
+    </div>
+    <p class="convert-quote muted" data-convert-quote aria-live="polite"><span data-quote-rate></span> <span data-quote-spread></span></p>
+    <div class="phone-fields">
+      <div class="field {{ 'has-error' if error_field == 'fee' }}">
+        <label for="convert-fee">{{ 'Fee'|tr(locale) }} <span class="phone-note">{{ '(optional)'|tr(locale) }}</span></label>
+        <input id="convert-fee" type="text" name="fee" value="{{ values.fee }}" inputmode="decimal" placeholder="0.00" autocomplete="off">
+        <small class="phone-note">{{ 'In the currency you sent. It is an expense in Fees & Charges, not part of the rate.'|tr(locale) }}</small>
+      </div>
+      <div class="field">
+        <label for="convert-notes">{{ 'Note'|tr(locale) }} <span class="phone-note">{{ '(optional)'|tr(locale) }}</span></label>
+        <input id="convert-notes" name="notes" value="{{ values.notes }}" placeholder="For example, dollars from Banque Misr">
+      </div>
+    </div>
+    <div class="phone-actions"><a class="btn phone-save" href="{{ back }}">{{ 'Cancel'|tr(locale) }}</a><button class="btn primary phone-save">{{ 'Convert'|tr(locale) }}</button></div>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  </form>
+</section>
+<script nonce="{{ request.state.csp_nonce|default('') }}">
+(() => {
+  const root = document.querySelector("[data-convert-form]");
+  if (!root) return;
+  const field = (id) => document.getElementById(id);
+  const rate = root.querySelector("[data-quote-rate]"), spread = root.querySelector("[data-quote-spread]");
+  let timer = 0;
+  const ask = async () => {
+    const query = new URLSearchParams({ date: field("convert-date").value, from: field("convert-from").value,
+      to: field("convert-to").value, sent: field("convert-sent").value, received: field("convert-received").value });
+    rate.textContent = ""; spread.textContent = "";
+    if (!query.get("from") || !query.get("to") || !query.get("sent") || !query.get("received")) return;
+    try {
+      const answer = await (await fetch(`${root.dataset.quoteUrl}?${query}`)).json();
+      if (!answer.rate) return;
+      rate.textContent = window.lightningT("Rate: 1 {a} = {rate} {b}", { a: answer.base, rate: answer.rate, b: answer.quote });
+      if (answer.reference) {
+        spread.textContent = window.lightningT(answer.direction === "above"
+          ? "{pct}% above the day's rate of {reference} ({date})" : "{pct}% below the day's rate of {reference} ({date})",
+          { pct: answer.percent, reference: answer.reference, date: answer.reference_date });
+      }
+    } catch (error) { /* the quote is a convenience; saving works without it */ }
+  };
+  root.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(ask, 250); });
+  root.addEventListener("change", ask);
+  ask();
+})();
+</script>
+{% endblock %}

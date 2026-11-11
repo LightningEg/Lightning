@@ -318,6 +318,23 @@ def test_certificate_purchase_terms_and_redemption(devices):
     assert pc.c.db.scalar("SELECT COUNT(*) FROM cd_redemptions") == hd.c.db.scalar("SELECT COUNT(*) FROM cd_redemptions") == 1
 
 
+def test_a_certificate_already_owned_reaches_the_other_device_with_no_bank_movement(devices):
+    hd, pc = devices
+    portfolio = open_account(pc, "CDs", "DEPOSIT")
+    settle(hd, pc, portfolio)
+    bank = uid(pc, "accounts", account(pc, "Bank").id)
+    before = pc.c.reporting.account_balance(account(pc, "Bank").id)
+    owned = pc.command("deposits.record_owned", account_id=record(portfolio), name="NBE old", start_date="2025-01-15",
+                       lockup_end_date="2026-07-15", maturity_date="2028-01-15", annual_rate="20",
+                       interest_method="SIMPLE", payout_frequency="MONTHLY", compounding_frequency="MONTHLY",
+                       principal="500.00", destination_account_id=bank, term_years="")
+    settle(hd, pc, owned)
+    home_cert = hd.c.deposits.list_certificates(account(hd, "CDs").id)[0]
+    assert home_cert.terms.name == "NBE old" and home_cert.terms.start_date == "2025-01-15" and home_cert.units == 1
+    assert pc.c.reporting.account_balance(account(pc, "Bank").id) == before
+    assert hd.c.reporting.account_balance(account(hd, "Bank").id) == before
+
+
 def test_gameya_terms_instalments_and_payout(devices):
     hd, pc = devices
     circle = open_account(pc, "Circle", "GAMEYA", institution="")

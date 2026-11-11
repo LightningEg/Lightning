@@ -28,7 +28,8 @@ from lightning.market.iso import venue_name
 from lightning.core.refs import DocType
 from lightning.transactions.tags import normalize as normal_tag
 
-from ..web import settled_save, container, render, _shift_month as shift_month
+from ..web import settled_save, container, render
+from ..row_sheet import category_for_party
 from ..charts import class_tone
 from ..i18n import translate
 
@@ -47,7 +48,6 @@ def _row_kind(row) -> str:
     if row.type in ("BUY", "SEL", "VAL", "OPN", "ADJ"):
         return ""
     return "in" if row.amount > 0 else "out"
-
 
 
 def account_composition(breakdown, value, owned, held):
@@ -100,7 +100,7 @@ def counterparty_category_map(c, names) -> dict:
         found[name] = None
         category_id, depends = by_rules[name]
         if category_id not in pickable:
-            category_id = None if depends else _category_for_party(parties[name], usual, pickable)
+            category_id = None if depends else category_for_party(parties[name], usual, pickable)
         if category_id:
             category = pickable.get(category_id) or c.categories.get(category_id)
             # The id is what counts; the text is only what the field shows, and it carries its group when another category
@@ -199,7 +199,6 @@ def _budget_feedback_text(c, txn) -> str:
     return "; ".join(impacts[:2]) + "." if impacts else ""
 
 
-
 def _catalog_key(item, duplicated):
     """catalog:TICKER, or catalog:TICKER@MIC when the same ticker is listed on more than one exchange."""
     mic = (item.get("mic") or "").upper()
@@ -292,68 +291,7 @@ def base_url_for(account_id: int | None) -> str:
     return f"/accounts/{account_id}" if account_id else "/transactions"
 
 
-def _phone_register(c, account_id, base_url, keep, kind, month, preset, from_query, to_query,
-                    matched_flows, unsorted_ids, date_from, date_to) -> dict:
-    """What the phone's register shows above its list (phone overhaul 2026-10-22): the filter chips, the month
-    stepper with its sheet, and the two tiles. Money in and Money out are the period's own (cash_flow for every
-    account), or those of the rows a search, tag or category found. Every link keeps the other choices."""
-    keep = {k: v for k, v in keep.items() if k != "page"}
-    if month or preset not in ("", "custom"):   # a month or a preset says its own days: they need not ride along
-        keep = {k: v for k, v in keep.items() if k not in ("date_from", "date_to")}
-
-    def href(changes: dict) -> str:
-        params = {k: v for k, v in {**keep, **changes}.items() if v not in ("", None)}
-        return base_url + ("?" + urlencode(params) if params else "")
-
-    now = fmt_date(today())[:7]
-    last = shift_month(now, -1)
-    ranged = {"month": "", "preset": "", "date_from": "", "date_to": ""}
-    chosen = month or (now if preset == "this_month" else last if preset == "last_month" else "")
-    if chosen:
-        shown = "month"
-    elif preset == "year_to_date":
-        shown = "ytd"
-    elif preset == "custom" and from_query and to_query:
-        shown = "custom"
-    else:
-        shown = "all"
-    # An account's page leads with its balance and its list: the two tiles come once a period or a search narrows it.
-    tiles = account_id is None or shown != "all" or matched_flows is not None
-    money_in, money_out = (matched_flows if matched_flows is not None else
-                           c.reporting.register_flows(account_id, date_from, date_to)) if tiles else (ZERO, ZERO)
-    # An empty month offers the month before with its figure instead of a wall of zeros (3AN9).
-    earlier = None
-    if shown == "month" and tiles and matched_flows is None and not kind and money_in == ZERO and money_out == ZERO:
-        before = shift_month(chosen, -1)
-        start, end = parse_month(before)
-        was_in, was_out = c.reporting.register_flows(account_id, start, end)
-        if was_in or was_out:
-            earlier = {"month": before, "out": -was_out, "in": was_in, "href": href({**ranged, "month": before})}
-    return {
-        "earlier": earlier,
-        "chips": [{"key": key, "label": label, "href": href({"kind": "" if key == "all" else key}),
-                   "chosen": kind == ("" if key == "all" else key), "count": len(unsorted_ids) if key == "unsorted" else 0}
-                  for key, label in (("all", "All"), ("in", "In"), ("out", "Out"), ("transfer", "Transfers"), ("unsorted", "To sort"))],
-        "period": shown, "month": chosen, "this": now, "last": last,
-        "prev": href({**ranged, "month": shift_month(chosen, -1)}) if chosen else "",
-        "next": href({**ranged, "month": shift_month(chosen, 1)}) if chosen and chosen < now else "",
-        "this_href": href({**ranged, "month": now}), "last_href": href({**ranged, "month": last}),
-        "ytd_href": href({**ranged, "preset": "year_to_date"}), "all_href": href({**ranged, "preset": "all_time"}),
-        "ytd_from": f"{now[:4]}-01",
-        # taking a tag or a category off again
-        "clear_tag": href({"tag": "", **({"q": ""} if keep.get("q", "").startswith("#") else {})}),
-        "clear_category": href({"category_id": ""}),
-        "tiles": tiles, "money_in": money_in, "money_out": -money_out,
-        # a row opened from To sort walks that list: its account and days ride along (3AN3)
-        "sort_qs": urlencode({"sort": 1, "sa": account_id or "", "sf": "" if date_from == FAR_PAST else date_from,
-                              "st": "" if date_to == FAR_FUTURE else date_to}) if kind == "unsorted" else "",
-        # what a form that adds one choice must send along: every other choice already made
-        "keep_for_search": [(k, v) for k, v in keep.items() if k != "q"],
-        "keep_for_dates": [(k, v) for k, v in keep.items() if k not in ranged],
-    }
-
-
-def _period_filters(c, qp, account_id, phone: bool, error: str):
+def _period_filters(c, qp, account_id, error: str):
     """The register's search text, month, date range and saved view from the query string, with the first
     problem found: (q, month, preset, from_query, to_query, date_from, date_to, active_view, error)."""
     q, month = qp.get("q", "").strip(), qp.get("month", "").strip()
@@ -368,12 +306,6 @@ def _period_filters(c, qp, account_id, phone: bool, error: str):
             month = ""
         except LightningError as exc:
             error = error or exc.message
-    # The phone's Transactions tab opens on this month (IV-3AL3, C08.3): the stepper shows and Money in and out answer
-    # for the month. All time stays a choice (preset=all_time); a search, tag or category still looks across every
-    # year; an account's own page stays its statement, every row with its balance after.
-    narrowed = month or preset or from_query or to_query or active_view or q or qp.get("tag") or qp.get("category_id")
-    if phone and account_id is None and not narrowed:
-        month = fmt_date(today())[:7]
     if preset == "custom" and not (from_query and to_query):
         # Let the user choose the range after selecting the custom option.
         date_from, date_to = FAR_PAST, FAR_FUTURE
@@ -503,9 +435,8 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     c = container(request)
     qp = request.query_params
     account = c.accounts.get(account_id) if account_id else None
-    phone = bool(getattr(request.state, "phone", False))
     q, month, preset, from_query, to_query, date_from, date_to, active_view, error = _period_filters(
-        c, qp, account_id, phone, error)
+        c, qp, account_id, error)
     # A tag (#eid, from a note's link or typed in the search) matches exactly: never #eid2026.
     filter_tag = normal_tag(active_view["tag"] if active_view else qp.get("tag", "")) or (normal_tag(q) if q.startswith("#") and " " not in q else "")
     kind = qp.get("kind", "").strip()
@@ -533,7 +464,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     # Money in and Money out of what a search, tag or category found (a tag's note and the phone's two tiles).
     matched_flows = None
     matching_ids = None  # every row a filter found, so "Select all N matching" reaches past this page
-    unsorted_ids = c.reporting.register_unsorted(account_id, date_from, date_to) if phone or kind == "unsorted" else set()
+    unsorted_ids = c.reporting.register_unsorted(account_id, date_from, date_to) if kind == "unsorted" else set()
     if matched_ids is None and not kind and not (val_count and not show_val):
         # read only the page shown; its running balance comes from SQL
         rows, total_rows, page_number = c.reporting.register_page(
@@ -549,7 +480,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         total_rows = len(all_rows)
         if matched_ids is not None:  # the totals cover exactly the rows counted
             matched_flows = c.reporting.money_in_out({row.txn_id for row in all_rows})
-        if not phone and matched_ids is not None and page_size < total_rows <= 2000:
+        if matched_ids is not None and page_size < total_rows <= 2000:
             # a transfer shows once per account here; one id each, so "Select all N" counts transactions
             matching_ids = list(dict.fromkeys(row.txn_id for row in all_rows))
         page_number = min(max(_int(qp.get("page")) or 1, 1), max(1, -(-total_rows // page_size)))
@@ -600,13 +531,14 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     if page_number > 1:
         keep["page"] = page_number
     base_url = base_url_for(account_id)
-    phone_register = _phone_register(c, account_id, base_url, keep, kind, month, preset, from_query, to_query,
-                                     matched_flows, unsorted_ids, date_from, date_to) if phone else None
     reserve_rows = [row.txn_id for row in rows if row.type == DocType.OUT]
     reserve_suggestions = c.reserves.suggested_reserves_for_transactions(reserve_rows)
     return render(
         request, "register.html", status_code=status_code,
         account=account,
+        # NF-7AB2: a statement of this account half reviewed is continued from the account, not only from Import.
+        import_waiting=[w for w in c.bank_imports.waiting_all() if account and w["account_id"] == account.id
+                        and not str(w["file_name"]).startswith("SMS ")],
         depends=c.linked.account(account.id) if account else None,
         account_spendable=account.counts_as_spendable(c.base_currency) if account else None,
         account_cost_method=account.cost_method if account else None,
@@ -638,11 +570,11 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         custody_present=any(custody_owners.values()),
         entry=entry or {"date": qp.get("date") or fmt_date(today()), "account_id": qp.get("new_acct", "")},
         edit_id=edit_id if edit_values is not None else None, edit_acct=edit_acct, edit=edit_values or {}, edit_original=edit_original,
-        reg=phone_register, chosen_kind=kind,
+        chosen_kind=kind, unsorted_ids=unsorted_ids, span=(date_from, date_to),
         q=q, month=month, preset=preset, active_view=active_view, show_val=show_val, val_count=val_count, val_toggle_url=val_toggle_url,
         saved_views=c.saved_views.list(account_id), view_account_id=account_id or "",
         filter_category=filter_category, category_sheet=category_sheet, filter_tag=filter_tag, tag_flows=tag_flows, matched_flows=matched_flows, matched_net=matched_flows[0] - matched_flows[1] if matched_flows else None, matching_ids=matching_ids,
-        import_accounts=[] if account_id or phone else [a for a in c.accounts.list(active_only=True)
+        import_accounts=[] if account_id else [a for a in c.accounts.list(active_only=True)
                                                           if a.account_type.value in ("CASH", "BANK") and not a.parent_id],
         replace_scope={"account_id": account_id or "", "date_from": "" if date_from == FAR_PAST else date_from,
                        "date_to": "" if date_to == FAR_FUTURE else date_to},
@@ -683,15 +615,7 @@ def category_when_empty(c, name: str, notes: str, amount, account_id: int | None
     ruled = c.rules.outcome([name, party["name"] if party else ""], notes, amount, account_id).category_id
     if ruled in pickable:
         return ruled
-    return _category_for_party(party, c.transactions.usual_categories(), pickable) if party else None
-
-
-def _category_for_party(party, usual: dict, pickable: set) -> int | None:
-    """The category set on the counterparty, else the one it is usually filed under, if it has one."""
-    if not party:
-        return None
-    chosen = party["default_category_id"] or (usual.get(party["name"]) or {}).get("category_id")
-    return int(chosen) if chosen and int(chosen) in pickable else None
+    return category_for_party(party, c.transactions.usual_categories(), pickable) if party else None
 
 
 def _resolve(request: Request, row_account: int | None, values: dict, allow_missing_category: bool = False):

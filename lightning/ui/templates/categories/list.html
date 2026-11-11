@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
 {% block title %}Categories{% endblock %}
-{% block heading %}{{ page_header('Settings'|tr(locale), "Categories · why money moved"|tr(locale)) }}{% endblock %}
+{% block heading %}{{ page_header('Categories'|tr(locale), page_status.count(category_count, '1 category for money out.', '{n} categories for money out.', 'No categories yet.')|status_text) }}{% endblock %}
 {% block content %}
 
 {% set session = request.state.session_token|default('') %}
@@ -128,21 +128,5 @@
   search.addEventListener('input', filter); syncSel(); filter();
 })();
 </script>
-{% if phone_mode() %}<script nonce="{{ request.state.csp_nonce|default('') }}">
-/* Phone: each group is its header until tapped (the page was 12,000px long); searching opens every group. */
-(() => {
-  const groups = [...document.querySelectorAll('.cat-group[data-group]')];
-  const search = document.getElementById('category-search');
-  const set = (g, open) => { g.classList.toggle('is-collapsed', !open); g.querySelector('.cat-l1')?.setAttribute('aria-expanded', open ? 'true' : 'false'); };
-  groups.forEach((g) => {
-    const head = g.querySelector('.cat-l1'); if (!head) return;
-    head.setAttribute('role', 'button'); head.tabIndex = 0;
-    set(g, false);
-    const toggle = (e) => { if (e.target.closest('button')) { set(g, true); return; } set(g, g.classList.contains('is-collapsed')); };
-    head.addEventListener('click', toggle);
-    head.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(e); } });
-  });
-  search?.addEventListener('input', () => groups.forEach((g) => set(g, search.value.trim() !== '')));
-})();
-</script>{% endif %}
+
 {% endblock %}

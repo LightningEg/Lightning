@@ -59,6 +59,9 @@ async def save_zakat_settings(request: Request):
                 return redirect("/zakat", "Zakat day saved.")
             c.zakat.save_settings(str(form.get("zakat_day", "")), str(form.get("typed_nisab", "")),
                                   form.get("count_worn_gold") == "1", form.get("deduct_debts_due") == "1")
+            if "nisab_basis" in form:  # NF-9D7: gold, silver or the lower of the two, and the silver gram price
+                silver = str(form.get("typed_silver", "")).strip()
+                c.zakat.save_nisab_basis(str(form.get("nisab_basis", "gold")), silver or None)
     except LightningError as exc:
         return redirect("/settings?section=zakat", exc.message)
     return redirect("/settings?section=zakat", "Zakat settings saved.")

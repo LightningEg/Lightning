@@ -1,0 +1,4 @@
+{# The security question on the phone (3AY17): two plain fields, the hint under each. #}
+<label for="security-question">{{ "Security question"|tr(locale) }}<input id="security-question" name="question" type="text" value="{{ question }}" list="suggested-questions" required autocomplete="off" maxlength="200"></label><p class="phone-note">{{ "Type your own, or pick one."|tr(locale) }}</p>
+<datalist id="suggested-questions">{% for item in questions %}<option value="{{ item }}">{% endfor %}</datalist>
+<label for="security-answer">{{ "Answer"|tr(locale) }}<input id="security-answer" name="answer" type="text" required autocomplete="off" spellcheck="false" maxlength="200"></label><p class="phone-note">{{ "Capitals, spaces and Arabic letter forms (أ إ آ ا, ة ه, ى ي) do not matter."|tr(locale) }}</p>

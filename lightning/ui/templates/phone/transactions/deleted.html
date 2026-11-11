@@ -1,0 +1,12 @@
+{# Deleted transactions on the phone (3AY15): one row each, Restore beside it. #}
+{% extends "base.html" %}
+{% block title %}Deleted transactions{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/activity"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Activity'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Deleted transactions'|tr(locale) }}</h1><p class="phone-note">{{ page_status.count(rows|length, '1 deleted transaction.', '{n} deleted transactions.', 'Nothing has been deleted.')|status_text }}</p>{% endblock %}
+{% block content %}
+{% if rows %}<div class="phone-rows">{% for row in rows %}
+  <form class="phone-row" method="post" action="/transactions/{{ row.id }}/restore">
+    <span><a href="/transactions/{{ row.id }}">{% if row.description or row.counterparty %}{{ row.description or row.counterparty }}{% else %}{{ row.type_label|tr(locale) }}{% endif %}</a><small>{{ row.date }} · {{ row.account_label }}{% if row.to_account_label %} → {{ row.to_account_label }}{% endif %} · <bdi class="fig">{{ row.amount|money(True) }} {{ row.currency }}</bdi></small></span>
+    <button class="btn small" aria-label="Restore {{ row.ref }}">{{ 'Restore'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}
+</div>{% else %}<p class="phone-note">{{ 'No deleted transactions.'|tr(locale) }}</p>{% endif %}
+{% endblock %}

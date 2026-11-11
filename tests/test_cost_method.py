@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from lightning.core.errors import ValidationError
 from lightning.investments.report import build_investment_report
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 @pytest.fixture
@@ -79,4 +80,4 @@ def test_the_holding_page_shows_each_purchase_and_each_sold_piece(held):
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
     page = client.get(f"/investments/holding/{comi.id}?account={thndr}").text
     assert "Each purchase" in page and "Still held" in page and "Per year" in page
-    assert "2026-03-01" in page and "2026-02-01" in page  # the open lot and the lot the sale came from
+    assert said(">2026-03-01<") in page and said(">2026-02-01<") in page  # the open lot and the lot the sale came from

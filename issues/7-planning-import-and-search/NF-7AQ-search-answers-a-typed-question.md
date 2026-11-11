@@ -24,18 +24,18 @@ When the words name a category, a payee, an account or a tag, optionally with a 
 
 Status is `new`: the grammar's period words need the owner's eye in Arabic.
 
+## Built
+
+2026-11-10: 7AQ1 (the PC lists payments first through the phone's `phone_results`), 7AQ2 (`lightning/core/periods.py`, `tests/test_periods.py`) and 7AQ3 (`lightning/workflows/answers.py`,
+`partials/search_answer.html` on PC and phone, `tests/test_search_answers.py`: "food 2026-09" answers 5,044, Spending's
+own figure), 7AQ4 (Mohab asks three questions). Categories and payees are answered; accounts and tags not yet. The owner still checks the Arabic period
+words (`_RELATIVE` and the month names in `core/periods.py`).
+
 ## How to work on this item
 
 Steps in order; one PR each. Read `lightning/ui/routes/` search route and its template only. After each: the step's test, `python -m pytest -q tests/test_mohab_year.py`, and `arabic-check` for new words. Delete the step's heading in the same commit.
 
-## 7AQ1 The PC lists matching payments first, as the phone does · S · sonnet
-One search service result for both devices: payments, then names and categories. Done when a test finds the same first five results for "food" on PC and phone templates.
-
-## 7AQ2 A period grammar, tested alone · M · opus
-A pure function: text to (subject words, period). English and Arabic: this month, last month, this year, last year, a year (2026), a month (2026-10, October, أكتوبر), "الشهر اللي فات". Unknown text returns no period. Done when a table-driven test covers each form and Arabic spellings (with IT-3BI1's normalisation if merged).
-
-## 7AQ3 The answer card · M · opus
-Subject resolved to a category, payee, account or tag (an exact or single clear match only; two candidates show both as choices). The card: total, comparison, count, rows, Open in Transactions. Done when a test on the sample year finds "food 2026-09" answering 5,044 (Spending's own figure for that month) and the link's filter returning the same rows.
-
-## 7AQ4 Mohab asks three questions · S · sonnet
-`tests/test_mohab_year.py`: Mohab types a category with a month, a payee with a year and a word that matches nothing, on PC and phone, and reads the card or the fallback.
+## 7AQ5 Accounts and tags, and the owner's Arabic words · S · sonnet
+The answer resolves categories and payees (`workflows/answers.py`); add an account ("CIB last month": its money out)
+and a tag the same way, each with a test on the sample year. The owner reads the Arabic period words in
+`core/periods.py` and says which to add or drop.

@@ -1,0 +1,72 @@
+{# A holding on the phone (3AY16): its value leads, then gain, total return and return as rows, value against cost over
+   time, the trades, and the rest (risk-free comparison, monthly moves, each purchase, planning) one sheet each. #}
+{% extends "base.html" %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% from "phone/partials/charts.html" import area_trend with context %}
+{% block title %}{{ h.asset_name }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/investments"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Investments'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ h.asset_name }}</h1><p class="phone-note">{{ h.account_label }} · {{ h.asset_class.split(' › ')[-1]|tr(locale) }}{% if asset and asset.exchange %} · {{ '{ticker} on {exchange}'|tr(locale, ticker=asset.ticker, exchange=asset.exchange) }}{% endif %} · <span>{{ h.quantity|units_of(h.unit) }}</span></p>{% endblock %}
+{% block content %}
+{% set j = journey %}{% set session = request.state.session_token|default('') %}{% set back_to = request.url.path ~ ('?' ~ request.url.query if request.url.query else '') %}
+<section class="phone-hero has-seam" aria-labelledby="lead-heading"><div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Current value'|tr(locale) }}</div>
+  <div class="phone-lead">{{ h.value|money if h.value is not none else '—' }} <small>{{ base }}</small></div>
+  <p class="phone-hero-line">{{ 'Price'|tr(locale) }} <bdi class="fig">{% if j.currency %}{{ h.price|money(False,2) if h.price is not none else '—' }} {{ j.currency }}{% else %}{{ h.price|money(False,2 if h.price is not none and h.price < 10 else 0) if h.price is not none else '—' }}{% endif %}</bdi> · {{ h.price_date or 'no price date' }}{% if h.price_source=='COST' %} · at cost{% endif %}{% if stale_price %} · <a href="/investments/prices">{{ 'out of date, update it'|tr(locale) }}</a>{% endif %}</p></section>
+<dl class="phone-facts">
+  <div><dt>{{ fig.unrealized_gain.label }}</dt><dd class="{{ h.unrealized|tone if h.unrealized is not none }}"><bdi class="fig">{{ h.unrealized|money(True) if h.unrealized is not none else '—' }}</bdi>{% if gain_pct is not none %} <small>{{ gain_pct|signed_pct }}%</small>{% endif %}</dd></div>
+  <div><dt>{{ fig.cost.label }}</dt><dd><bdi class="fig">{{ h.cost_basis|money }}</bdi></dd></div>
+  <div><dt>{{ 'Total return'|tr(locale) }}</dt><dd class="{{ total_return|tone }}"><bdi class="fig">{{ total_return|money(True) }}</bdi></dd></div>
+  <div><dt>{{ ('XIRR' if display_return and display_return.annualized else 'Return')|tr(locale) }}</dt><dd>{% if display_return and display_return.percent is not none %}{{ display_return.percent|signed_pct }}{{ ('% a year' if display_return.annualized else '%')|tr(locale) }}{% else %}—{% endif %}</dd></div>
+</dl>
+{% set q = '&account=' ~ h.account_id ~ '&asset=' ~ h.asset_id %}
+<a class="btn primary phone-save" data-popup-open href="/investments/new?kind=buy{{ q }}">{{ 'Buy more'|tr(locale) }}</a>
+{% if j.value_cost and not j.value_cost.too_short %}<section class="phone-section phone-chart-card" aria-label="{{ 'Value against cost'|tr(locale) }}">{{ area_trend(j.value_cost, 'Value against cost'|tr(locale)) }}</section>{% endif %}
+<section class="phone-section" aria-labelledby="h-trades">
+  <header class="phone-section-head"><h2 id="h-trades">{{ 'Trades and payouts'|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for t in j.trades[:5] %}<div class="phone-row"><span>{{ t.kind }}<small>{{ t.date }}{% if t.units %} · {{ ('+' if t.units > 0 else '') ~ (t.units|units) }}{% endif %}</small></span><b><bdi class="fig">{{ t.amount|money }}</bdi></b></div>{% else %}<p class="phone-note">{{ 'No trades yet.'|tr(locale) }}</p>{% endfor %}
+  {% if j.trades|length > 5 %}{% set row %}<span>{{ 'All trades'|tr(locale) }}<small>{{ j.trades|length }}</small></span><b>{{ chevron() }}</b>{% endset %}{% call sheet('Trades and payouts'|tr(locale), row) %}<div class="phone-rows">{% for t in j.trades %}<div class="phone-row"><span>{{ t.kind }}<small>{{ t.date }}{% if t.units %} · {{ ('+' if t.units > 0 else '') ~ (t.units|units) }}{% endif %} · {{ 'Held'|tr(locale) }} {{ t.held|units }}</small></span><b><bdi class="fig">{{ t.amount|money }}</bdi></b></div>{% endfor %}</div>{% endcall %}{% endif %}
+  </div>
+</section>
+<div class="phone-rows phone-section">
+  <a class="phone-row" data-popup-open href="/investments/new?kind=sell{{ q }}"><span>{{ 'Sell'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  <a class="phone-row" data-popup-open href="/investments/new?kind=dividend{{ q }}"><span>{{ 'Record a dividend'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  <a class="phone-row" href="/investments/prices?date={{ day }}#asset-{{ h.asset_id }}"><span>{{ 'Update price'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  {% if not h.has_other_owners and (h.flows or []) %}
+  {% set row %}<span>{{ 'Against the risk-free rate'|tr(locale) }}{% if bench %}<small class="{{ bench.gap|tone }}">{{ bench.gap|money(True) }} {{ base }}</small>{% endif %}</span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('Against the risk-free rate'|tr(locale), row) %}
+  <p class="phone-note" id="risk-free">{{ 'The same money on the same dates, if it had earned a T-bill or certificate rate you type.'|tr(locale) }}</p>
+  {% if bench %}<dl class="phone-facts">
+    <div><dt>{{ ('Ahead of the risk-free rate' if bench.gap >= 0 else 'Behind the risk-free rate')|tr(locale) }}</dt><dd class="{{ bench.gap|tone }}"><bdi class="fig">{{ bench.gap|money(True) }}</bdi></dd></div>
+    <div><dt>{{ 'Yearly, against the risk-free rate'|tr(locale) }}</dt><dd>{% if bench.rate is not none and xirr_pct is not none %}{{ (xirr_pct - bench.rate * 100)|signed_pct }}{{ '% a year'|tr(locale) }}{% else %}—{% endif %}</dd></div></dl>
+  <p class="phone-note">{{ 'Using {rate}% a year, typed for {date}. It holds until you type a newer one.'|tr(locale, rate='%.2f'|format(bench.latest_rate * 100), date=bench.latest_since.isoformat()) }}</p>
+  {% elif not rate_history %}<p class="phone-note">{{ 'Type the yearly rate of a T-bill or certificate to compare this holding with it.'|tr(locale) }}</p>
+  {% elif h.value is none %}<p class="phone-note">{{ 'This holding has no price yet, so there is nothing to compare.'|tr(locale) }}</p>
+  {% else %}<p class="phone-note">{{ "Your first typed rate is for {date}, after this holding's first cash flow. Type an earlier rate to compare."|tr(locale, date=rate_history[0][0].isoformat()) }}</p>{% endif %}
+  {% if rate_history %}<div class="phone-rows">{% for when, rate in rate_history|reverse %}<form class="phone-row" method="post" action="/investments/risk-free-rate"><input type="hidden" name="action" value="remove"><input type="hidden" name="day" value="{{ when.isoformat() }}"><input type="hidden" name="return_to" value="{{ back_to }}"><input type="hidden" name="__session" value="{{ session }}"><span>{{ when.isoformat() }}<small>{{ '%.2f'|format(rate * 100) }}%</small></span><button class="btn small">{{ 'Remove'|tr(locale) }}</button></form>{% endfor %}</div>{% endif %}
+  <form method="post" action="/investments/risk-free-rate" class="phone-form"><input type="hidden" name="return_to" value="{{ back_to }}"><input type="hidden" name="__session" value="{{ session }}">
+    <label>{{ 'From'|tr(locale) }}<input type="date" name="day" value="{{ day }}" required></label>
+    <label>{{ 'Yearly rate (%)'|tr(locale) }}<input name="percent" inputmode="decimal" placeholder="27.5" required></label>
+    <button class="btn primary phone-save">{{ 'Save rate'|tr(locale) }}</button></form>
+  {% endcall %}{% endif %}
+  {% set moves = (j.up or 0) + (j.down or 0) %}
+  {% if not j.flat and moves >= 3 %}
+  {% set row %}<span>{{ 'How bumpy has it been?'|tr(locale) }}<small>{{ 'Months up · down'|tr(locale) }} {{ j.up or 0 }} · {{ j.down or 0 }}</small></span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('How bumpy has it been?'|tr(locale), row) %}<dl class="phone-facts">
+    {% if j.best %}<div><dt>{{ 'Best month'|tr(locale) }} · {{ j.best[0] }}</dt><dd>{{ j.best[1]|signed_pct }}%</dd></div>{% endif %}
+    {% if j.worst and (not j.best or j.best[0] != j.worst[0]) %}<div><dt>{{ 'Worst month'|tr(locale) }} · {{ j.worst[0] }}</dt><dd>{{ j.worst[1]|signed_pct }}%</dd></div>{% endif %}
+    <div><dt>{{ 'Typical move'|tr(locale) }}</dt><dd>{% if j.typical is not none %}±{{ '%.1f'|format(j.typical) }}%{% else %}—{% endif %}</dd></div>
+    {% if j.max_drawdown is not none %}<div><dt>{{ 'Fall from its high'|tr(locale) }}</dt><dd>{{ '%.1f'|format(j.max_drawdown)|replace('-', '−') }}%</dd></div>{% endif %}
+  </dl>{% endcall %}
+  {% elif not j.flat and j.best %}<p class="phone-note">{{ 'Month-to-month moves appear after three month-ends.'|tr(locale) }} {{ 'So far: {pct}% in {month}.'|tr(locale, pct=(j.best[1])|signed_pct, month=j.best[0]) }}</p>{% endif %}
+  {% if purchases or sales %}
+  {% set row %}<span>{{ 'Each purchase'|tr(locale) }}<small>{{ purchases|length + sales|length }}</small></span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('Each purchase'|tr(locale), row) %}<div class="phone-rows">
+    {% for p in purchases %}<div class="phone-row"><span>{{ 'Bought'|tr(locale) }} {{ p.opened }}<small>{{ p.units|units }} · {{ 'Cost'|tr(locale) }} {{ p.cost|money }}{% if p.cagr is not none %} · {{ p.cagr|signed_pct }}% {{ 'Per year'|tr(locale) }}{% endif %}</small></span><b>{{ p.roi|signed_pct ~ '%' if p.roi is not none else '—' }}</b></div>{% endfor %}
+    {% for s in sales %}<div class="phone-row"><span>{{ 'Sold'|tr(locale) }} {{ s.sold }}<small>{{ 'Bought'|tr(locale) }} {{ s.opened }} · {{ s.units|units }} · {{ 'Gain'|tr(locale) }} {{ s.gain|money }}</small></span><b>{{ s.roi|signed_pct ~ '%' if s.roi is not none else '—' }}</b></div>{% endfor %}
+  </div>{% endcall %}{% endif %}
+  {% if asset %}{% set row %}<span>{{ 'Planning'|tr(locale) }}<small>{{ bucket|tr(locale) if bucket else '' }}{% if horizon %} · {{ horizon|tr(locale) }}{% endif %}</small></span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('Planning'|tr(locale), row) %}<p class="phone-note">{{ 'Horizon is your intended holding period: Short up to 1 year, Medium over 1 through 5 years, Long over 5 years. Edits save when you change them.'|tr(locale) }}</p>
+  <form method="post" action="/investments/asset-plan/{{ asset.id }}" class="phone-form"><label>{{ 'Allocation bucket'|tr(locale) }}<select name="allocation_bucket">{% for option in allocation_classes %}<option value="{{ option }}" {% if bucket==option %}selected{% endif %}>{{ option|tr(locale) }}</option>{% endfor %}</select></label><label>{{ 'Horizon'|tr(locale) }}<select name="investment_horizon"><option value="">{{ 'Unassigned'|tr(locale) }}</option>{% for option in ['Short','Medium','Long'] %}<option value="{{ option }}" {% if horizon==option %}selected{% endif %}>{{ option|tr(locale) }}</option>{% endfor %}</select></label><button class="btn primary phone-save">{{ 'Save'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ session }}"></form>
+  <p class="phone-note">Exposure {{ h.exposure }} · {{ fig.realized_gain.label }} in the period {{ period_realized|money(True) }} · {{ fig.dividends_and_interest.label }} in the period {{ period_dividends|money }}</p>{% endcall %}{% endif %}
+</div>
+{% if h.price_source=='COST' %}<p class="phone-note">{{ 'No market valuation is available for this date; current value is shown at cost.'|tr(locale) }}</p>{% endif %}
+{% endblock %}
