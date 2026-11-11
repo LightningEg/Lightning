@@ -162,15 +162,15 @@ Every look climbs the same three steps, and each step keeps everything below it.
 |---|---|---|---|---|
 | Recolour | One colour field or glow | 100 | 20 | Halo |
 | Texture | A drawn scene or pattern | 120–200 | 24–40 | Blueprint, Dusk, Circuit, Dunes, Borealis; seasonal 200–250 |
-| Animation | The scene with one slow motion | 300–350 | 60–70 | Drifting stars, Nile at night, Felucca, Sand wind |
+| Animation | The scene with one slow motion | 300–350 | 60–70 | Drifting stars, Nile at night, Felucca, Sand wind, Gold thread, Zodiac ceiling |
 
 **Frames**: the ring round your picture.
 
 | Tier | What changes | Coins | EGP | On sale |
 |---|---|---|---|---|
 | Recolour | A ring in one colour | 80 | 16 | Halo, Nile |
-| Texture | A metal or double ring | 100 | 20 | Gold, Double |
-| Animation | The ring with one slow glint | 200 | 40 | none yet |
+| Texture | A metal or double ring | 100 | 20 | Gold, Double, Lotus |
+| Animation | The ring with one slow glint | 200 | 40 | Gold foil |
 
 **Badges**: the mark beside your name. Earned badges (supporter, Founding, contribution) are never sold.
 
@@ -184,11 +184,11 @@ Every look climbs the same three steps, and each step keeps everything below it.
 
 | Tier | What changes | Coins | EGP | On sale |
 |---|---|---|---|---|
-| Recolour | One colour | 150 | 30 | Gold, Nile |
+| Recolour | One colour | 150 | 30 | Gold, Nile, Papyrus gold, Pigment blue |
 | Texture | A gradient | 300 | 60 | Sunset |
 | Animation | One slow shimmer | 500 | 100 | Shimmer |
 
-**Sets** cost 80% of the parts you do not own yet (a theme, a banner, a frame and a fourth piece: 680 to 890 coins new). **Seasonal** items keep their tier's price and are sold only inside their window; owners keep them after.
+**Sets** cost 80% of the parts you do not own yet (a theme, a banner, a frame and a fourth piece: 680 to 1,320 coins new). Every theme with pieces has one: Nile, Dusk (Garnet), Cotton, Papyrus (Gold thread, Gold foil, Papyrus gold: 1,320 new) and Dendera (Zodiac ceiling, Lotus, Pigment blue: 1,280 new). **Seasonal** items keep their tier's price and are sold only inside their window; owners keep them after.
 
 **Texture rules:**
 - Drawn by code: gradients, or inline SVG generated from the theme's own colours. No image files, requests or scripts.
