@@ -33,7 +33,7 @@ Each fact lives in one file; link to it, never copy it. Start at [the documentat
 
 Never at the cost of a test, a required check, or a read you need.
 
-- **Start:** `NOW.md` + `git log --oneline -15`. A *Next* item's code and **Read:** line name the rest; `issues/INDEX.md` is the whole plan.
+- **Start:** `python tools/board.py` (what is ready, running, blocked and waiting for a person, read from GitHub) + `git log --oneline -15`. Then the one issue you take and its **Read:** line. `NOW.md` holds only messages.
 - **Read sections, not files:** `grep -n '^## ' <file>`, then read that range. Guideline: never open whole; `python tools/guideline.py` lists sections, `python tools/guideline.py A12` prints one.
 - **Grep before reading.** Don't re-read what you just edited or read code you aren't changing.
 - **Skip unless needed:** `ai/archive/`, `ai/changelog/` files other than the newest, long designs in `issues/` other than yours, `Claude outputs/`, the Glossary's figures table.
@@ -47,13 +47,15 @@ Never at the cost of a test, a required check, or a read you need.
 
 ## 3. Every task
 
+**The plan is the GitHub issues (owner, 2026-11-11).** One issue is one pull request of work; a plan item is a parent issue, its steps are sub-issues, and what blocks what is GitHub's own *blocked by*. States are worked out by `python tools/board.py`, never typed. Skill `dispatch` has the rules for taking an issue, for people and AIs alike, and what the owner's "go" does. The files under `issues/` keep each item's design and its reports; `issues/INDEX.md`, `docs/STATUS.md` and the pillar pages are still generated from them until they are retired, so regenerate them when you change an item file, and never read them to learn what is open.
+
 1. **Start fresh:** `git pull` on `main`, create your branch (§6), read per §2.
-2. **Claim** work longer than one sitting in `NOW.md` *Claimed* and push that first. Stay out of others' claimed files. A report or more than one new item: write your codes on NOW.md's `Reserved codes:` line and push that commit first; remove them in the pull request that adds the files.
+2. **Claim** by opening a draft pull request that says `Closes #n` for an issue the board lists as ready (skill `dispatch`); nobody starts an issue that is running, blocked or held. Stay out of a running issue's `Area:`. A report or more than one new item: write your codes on NOW.md's `Reserved codes:` line and push that commit first; remove them in the pull request that adds the files.
 3. **Small finished steps:** commit and push each once its tests pass.
 4. **Test.** For visible changes also run Mohab (`tests/test_mohab_year.py`) and check A16.
 5. **Record:** end the commit message with `Release-note: <pillar>: one plain sentence a user would understand` (or `Release-note: none`) and `Detail: <what changed, where, why, in one line>`, and name the item's full code (`BV-3C`) in the subject. CI checks the pull request has both; the squash keeps every commit's trailers. Update the §1 files you touched, and run `python tools/status.py` if you changed the plan.
-6. **Check claims:** `python tools/claims.py --me <Claude|Codex|Luna>` lists changed files someone else claimed; leave them or ask the owner.
-7. **Hand off:** update/remove your claim, drop finished *Next* items, add new ones with **Read:**. Messages only for what your commit doesn't say; owner questions as GitHub issues. Push.
+6. **Check the board** again before pushing: if another pull request now closes the same issue, stop and say so on the issue.
+7. **Hand off** with one comment on the issue: **Done** (PR links) · **Left** · **Next**. Messages in `NOW.md` only for what no issue holds; owner questions in the question dialog. Push.
 
 - **Claims and messages belong to their author.** Never edit another AI's, except deleting a message to you once handled (to all: keep seven days). Make each claim's *Work* distinguish parallel sessions. A helper (Codex's Luna) gets its own rows, written by its AI.
 - **Push rejected?** `git pull --rebase`, keep both sides in `NOW.md`, retest, push.
