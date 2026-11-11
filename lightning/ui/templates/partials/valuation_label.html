@@ -1,0 +1,8 @@
+{# IV-12L: plain valuation words for a gold row: "21K price, 9 Nov" / "Your estimate, 9 Nov" / "At cost". #}
+{% macro valuation_text(v, karat) -%}
+{%- if v.key == 'cost' %}{{ 'At cost'|tr(locale) }}
+{%- elif v.key == 'estimate' %}{{ 'Your estimate, {d}'|tr(locale, d=v.date|day(locale)) }}
+{%- elif v.key == 'ref' %}{{ '{k}K price, {d}'|tr(locale, k=karat, d=v.date|day(locale)) }}
+{%- elif v.key == 'trade' %}{{ 'Last trade, {d}'|tr(locale, d=v.date|day(locale)) }}
+{%- else %}{{ 'No price yet'|tr(locale) }}{% endif -%}
+{%- endmacro %}
