@@ -55,7 +55,7 @@ REPORTING_TEMPLATES = ("dashboard/", "phone/home.html", "phone/money.html", "pho
                        "investments/_targets.html", "investments/targets.html", "investments/report_detail.html",
                        "planning/plan.html", "reserves.html", "settings/index.html", "accounts/currencies.html", "zakat.html",
                        "accounts/list.html", "counterparty.html", "tag.html", "analysis/", "planning/loans.html", "planning/upcoming.html", "phone/planning/upcoming.html",
-                       "investments/planner.html", "money_from_others.html", "planning/payday.html", "phone/planning/payday.html", "planning/scenarios.html", "phone/planning/scenarios.html")
+                       "investments/planner.html", "money_from_others.html", "planning/payday.html", "phone/planning/payday.html", "planning/scenarios.html", "phone/planning/scenarios.html", "planning/recurring.html")
 
 
 def _money(value, signed: bool = False, places: int | None = None) -> str:

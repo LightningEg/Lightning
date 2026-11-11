@@ -374,7 +374,7 @@ def test_paying_a_new_amount_offers_to_plan_it_from_now_on(c, setup, monkeypatch
                        follow_redirects=False)
     assert "12%2C500.00%20from%20now%20on" in paid.headers["location"]
     page = client.get("/plan/recurring").text
-    assert "Use 12,500.00 from now on" in page
+    assert "Use 12,500 from now on" in page
     client.post(f"/plan/items/{item_id}/amount", data={"amount": "12500", "back": "/plan/recurring"})
     assert c.planning.get(item_id).amount == Decimal("12500")
 
