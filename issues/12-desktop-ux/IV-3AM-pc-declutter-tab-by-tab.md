@@ -4,7 +4,7 @@ type: polish
 pillar: feel
 size: L
 model: opus
-status: parked
+status: ready
 created: 2026-10-30
 by: Claude Opus 5.5
 skills: guideline-audit

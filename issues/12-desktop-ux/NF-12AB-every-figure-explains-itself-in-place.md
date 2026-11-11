@@ -4,7 +4,7 @@ type: feature
 pillar: understand
 size: L
 model: opus
-status: parked
+status: ready
 created: 2026-11-09
 by: Claude
 skills: guideline-audit, bug-hunt

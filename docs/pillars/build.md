@@ -12,5 +12,10 @@ Tests, tools, documentation, the contributor path and the structure of the code.
 | Code | Item | Size | Status |
 |---|---|---|---|
 | **IT-1E** | [Audit public repositories for personal data and security exposure](../../issues/1-easy-to-contribute/IT-1E-public-repository-security-audit.md) | M | ready |
+| **IT-12AE** | [A screen cannot work out money](../../issues/12-desktop-ux/IT-12AE-a-screen-cannot-work-out-money.md) | L | ready |
+
+## Reports with open follow-ups here
+
+- [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](../../issues/11-phone-ux/r36-figures-one-owner/report.md): 12AE
 <!-- work:end -->
 
