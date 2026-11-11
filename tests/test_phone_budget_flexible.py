@@ -123,3 +123,23 @@ def test_the_month_bar_shows_over_plan_in_its_own_part():
     b = screen.month_bar(Decimal(1000), Decimal(1300))
     assert (b["spent"], b["left"], b["over"]) == (1000, 0, 300)
     assert screen.month_bar(Decimal(0), Decimal(0)) is None
+
+
+def test_the_plan_list_types_a_limit_beside_each_everyday_category_and_saves_it(mohab):
+    """3AY9: Make or Edit plan opens /budget/plan, one field per everyday category under its group; a field posts to
+    /budget/rule/{id}, and the older page's addresses (open_group, make) land on this list."""
+    import re
+    app = create_app(mohab)
+    mount_phone(app)
+    client = TestClient(app)
+    flexible = client.get("/budget?month=2026-10").text
+    assert 'href="/budget/plan?month=2026-10"' in flexible and 'phone-budget-ring' not in flexible
+    page = client.get("/budget/plan?month=2026-10").text
+    forms = re.findall(r'<form class="phone-row phone-limit" method="post" action="/budget/rule/(\d+)" data-budget-rule id="limit-\1">', page)
+    assert forms and page.count("<script") >= 1 and page.count("data-budget-rule]") == 1
+    assert 'href="/budget/fill?month=2026-10"' in page and 'href="/budget?month=2026-10"' in page  # fill, and back
+    for old in ("/budget?open_group=all&month=2026-10", "/budget?make=1&month=2026-10"):
+        moved = client.get(old, follow_redirects=False)
+        assert moved.status_code == 303 and moved.headers["location"] == "/budget/plan?month=2026-10"
+    saved = client.post(f"/budget/rule/{forms[0]}", data={"month": "2026-10", "rule": "1234"}, headers={"X-Requested-With": "fetch"})
+    assert saved.status_code == 204 and 'value="1234"' in client.get("/budget/plan?month=2026-10").text

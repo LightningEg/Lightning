@@ -11,12 +11,12 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | [Understand](pillars/understand.md) | 0 |  |  |  |  |  |
 | [Own](pillars/own.md) | 2 |  | 2 |  |  |  |
 | [Protect](pillars/protect.md) | 1 |  |  |  | 1 |  |
-| [Everywhere](pillars/everywhere.md) | 5 | 2 | 3 |  |  |  |
+| [Everywhere](pillars/everywhere.md) | 2 | 2 |  |  |  |  |
 | [Feel](pillars/feel.md) | 3 | 1 | 2 |  |  |  |
 | [Build](pillars/build.md) | 1 |  | 1 |  |  |  |
 | [Reach](pillars/reach.md) | 1 |  | 1 |  |  |  |
 
-16 open items in 11 milestones.
+13 open items in 11 milestones.
 
 ## Being built now
 
@@ -36,10 +36,6 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 - **NF-10C5** (Feel) Review prices after 60 days of sales, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
 - **NF-10H4** (Own) Owner: prices, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
 - **NF-10H5** (Own) Owner: the extra seats already sold, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
-- **IV-3AY13** (Everywhere) Owner's phone check, in [Phone-first architecture](../issues/11-phone-ux/IV-3AY-phone-first-architecture.md)
-- **NF-11B7** (Everywhere) Owner: the developer account and the listing, in [Ship the phone on Google Play](../issues/11-phone-ux/NF-11B-ship-the-phone-on-google-play.md)
-- **NF-11B8** (Everywhere) Owner: closed test, 12 testers for 14 days, in [Ship the phone on Google Play](../issues/11-phone-ux/NF-11B-ship-the-phone-on-google-play.md)
-- **NF-11B9** (Everywhere) Owner: the phone check before production, in [Ship the phone on Google Play](../issues/11-phone-ux/NF-11B-ship-the-phone-on-google-play.md)
 
 ## By milestone
 
@@ -47,14 +43,14 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 |---|---|---|
 | 1 Easy to contribute | 1 | Anyone can find how to help in one click and send a first fix the same evening. |
 | 2 Safe for real money | 1 | The owner can keep real money in Lightning: nothing is lost on restore, reboot, update or a new PC. |
-| 3 Polish and Arabic | 3 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
+| 3 Polish and Arabic | 2 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 6 Market data | 0 | Prices arrive by themselves, from sources Lightning may redistribute. |
 | 7 Planning, import and search | 2 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 1 | The site is honest, quick and in step with the app. |
 | 9 Later | 0 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 2 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |
-| 11 Phone UX | 2 | The phone is its own product: a few places that each answer one question, quick jobs in three taps, and no PC page squeezed into one column. |
+| 11 Phone UX | 0 | The phone is its own product: a few places that each answer one question, quick jobs in three taps, and no PC page squeezed into one column. |
 | 12 Desktop UX and smart next steps | 2 | The PC app leads with the answer, works in bulk without surprises, and offers the next step where a figure raises the question. |
 
 29 more are parked: kept, not planned, listed at the end of the plan.

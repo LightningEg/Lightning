@@ -163,13 +163,13 @@ def test_the_raise_offer_is_a_page_card_that_stays(phone_page):
         name: 'Salary', amount: '60000', frequency: 'MONTHLY', interval_count: '1', start_date: '2026-11-01',
         account_id: account, category_id: category, past_due: 'later'})}); }""")
     page.goto(origin + "/budget?period=month")  # the old Budget carries the raise offer; a query steps past the new one
-    card = page.locator("section.raise-prompt")
+    card = page.locator("section:has(#raise-heading)")
     assert card.count() == 1 and page.locator(".flash.raise-prompt").count() == 0
     assert card.evaluate("el => getComputedStyle(el).position") != "fixed"
     top = page.locator(".phone-appbar").bounding_box()
     assert card.bounding_box()["y"] >= top["y"] + top["height"]  # below the top bar, never over it
     page.wait_for_timeout(5500)  # past the 5 second timer that removes plain messages
-    assert card.locator("a.btn.primary").is_visible() and card.locator("a.phone-quiet").is_visible()
+    assert card.locator("a.btn.primary").is_visible()  # Choose: raise the plan or save the difference
 
 
 def test_the_pc_popup_says_what_is_missing_and_fills_a_learned_category(pc_page):

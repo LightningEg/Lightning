@@ -37,6 +37,24 @@
   let pending = null;  // the swap under way; a newer tap cancels it
   let early = null;    // a tab's page asked for when the finger lands, before it lifts
 
+  // Each slot keeps its own stack (3AY4, r25 › Cross-cutting 5). History holds Home, then the chosen slot's pages:
+  // switching slots goes back to Home's entry first and drops the other slot's pages, so Back walks the slot, then
+  // Home, then leaves the app (MainActivity.goBack). Each entry's state carries its depth above Home.
+  const slotOf = (path) => (path === "/" || path === "/home" ? "home" : path.split("/")[1] || "home");
+  const chosenSlot = () => slotOf(new URL(document.querySelector(".phone-tabbar .phone-tab.is-chosen")?.href
+                                          || location.href, location.href).pathname);
+  const floor = (slot) => (slot === "home" ? 0 : 1);   // a slot's own top sits one above Home's entry
+  const depth = () => history.state?.lightningDepth ?? 0;
+  let after = null;    // a slot to open once going back to Home's entry has landed
+  try {
+    if (history.state?.lightningDepth === undefined) {
+      const slot = chosenSlot();
+      const top = location.pathname === new URL(document.querySelector(".phone-tabbar .phone-tab.is-chosen")?.href
+                                                 || location.href, location.href).pathname;
+      history.replaceState({ ...(history.state || {}), lightningDepth: floor(slot) + (top ? 0 : 1) }, "");
+    }
+  } catch (error) { /* a full history: plain back still works */ }
+
   const sameDocument = (url) => url.pathname + url.search === here();
   const canSwap = (url) => url.origin === location.origin && !ELSEWHERE.test(url.pathname);
   const loadWhole = (url) => { window.location.assign(url); };
@@ -113,7 +131,7 @@
     }
     if (push) {
       keepScroll();
-      history.pushState({ lightningSwap: true }, "", address.href);
+      history.pushState({ lightningSwap: true, lightningDepth: typeof push === "number" ? push : depth() + 1 }, "", address.href);
     } else if (address.pathname + address.search !== here()) {
       history.replaceState(history.state, "", address.href);
     }
@@ -140,6 +158,16 @@
     const url = new URL(link.href, location.href);
     if (!canSwap(url) || (sameDocument(url) && url.hash)) return;
     event.preventDefault();
+    if (link.closest(".phone-tabbar")) {   // a slot: its own top, its stack cleared (3AY4)
+      const target = slotOf(url.pathname);
+      const above = depth() - (target === chosenSlot() ? floor(target) : 0);
+      if (target !== chosenSlot() && target !== "home") after = url.href;
+      if (above > 0) { history.go(-above); return; }
+      if (after) { const next = after; after = null; swap(next, { push: floor(target) }); return; }
+      if (sameDocument(url)) return;
+      swap(url.href, { push: floor(target) });
+      return;
+    }
     swap(url.href);
   });
 
@@ -172,6 +200,12 @@
   // Back and forward (the phone's back gesture too) return to a swapped page by swapping again. A sheet's own
   // history entries are app.js's: when the address is still the page on screen, there is nothing to do here.
   window.addEventListener("popstate", (event) => {
+    if (after && depth() === 0) {   // back on Home's entry on the way to another slot: open its top above it
+      const next = after;
+      after = null;
+      swap(next, { push: 1 });
+      return;
+    }
     if (here() === shown || event.state?.lightningPopup) return;
     swap(location.href, { push: false, scroll: event.state?.lightningScroll || 0 });
   });

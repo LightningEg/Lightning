@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 16 open items. Each folder holds its reports and its items.
+11 big pictures, 13 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -60,13 +60,10 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BD3 | ↳ Half-English sentences and internal codes ([#411](https://github.com/LightningEg/Lightning/issues/411)) | | | S | Sonnet | |
 | IV-3BD4 | ↳ Import errors never show Python's text ([#412](https://github.com/LightningEg/Lightning/issues/412)) | | | S | Sonnet | |
 | IV-3BD5 | ↳ The validation page names the problem, not "Check your setup" ([#413](https://github.com/LightningEg/Lightning/issues/413)) | | | S | Sonnet | |
-| **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | Opus | ready |
-| NF-3AU3 | ↳ Windows: a daily task shows the schedule with the app closed | | | M | Opus | |
-| NF-3AU4 | ↳ Android: a daily job shows the schedule with the app closed | | | M | Opus | |
 
 Reports: [r14](3-polish-and-arabic/r14-users-main-questions/report.md) · [r28](3-polish-and-arabic/r28-international-polish/report.md).
 
-Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BE, 3BG, 3BJ, 3AU2. Next free code: 3BL.
+Done: 3A, 3B, 3C, 3D, 3E, 3G, 3I, 3J, 3L, 3M, 3N, 3O, 3P, 3Q, 3R, 3S, 3T, 3U, 3V, 3W, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AD, 3AE, 3AF, 3AG, 3AH, 3AJ, 3AK, 3AL, 3AO, 3AP, 3AQ, 3AR, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BB, 3BE, 3BG, 3BJ, 3AU2, 3AU3, 3AU4, NF-3AU. Next free code: 3BL.
 
 ## 4 Edit journal and devices
 
@@ -170,20 +167,10 @@ The phone is its own product: a few places that each answer one question, quick 
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-3AY** | [Phone-first architecture - five places that each answer one question, state-aware screens, and a phone decoupled from the PC](11-phone-ux/IV-3AY-phone-first-architecture.md) | improvement, visual | Everywhere | L | Opus | ready |
-| IV-3AY4 | ↳ The phone stylesheet stands alone, and each slot keeps its stack | | | L | Opus | |
-| IV-3AY8 | ↳ Activity: the review cards that are rows, and search | | | M | Opus | |
-| IV-3AY9 | ↳ Budget: the payday strip and This month in detail | | | M | Opus | |
-| IV-3AY10 | ↳ Money: the net worth sheet, then the older Overview goes | | | M | Opus | |
-| IV-3AY13 | ↳ Owner's phone check | | | owner |  | |
-| **NF-11B** | [Ship the phone on Google Play - a release bundle at API 36, the SMS and payments policies, the app's own privacy notice and the Console declarations](11-phone-ux/NF-11B-ship-the-phone-on-google-play.md) | new feature | Everywhere | L | Opus | ready |
-| NF-11B7 | ↳ Owner: the developer account and the listing | | | owner |  | |
-| NF-11B8 | ↳ Owner: closed test, 12 testers for 14 days | | | owner |  | |
-| NF-11B9 | ↳ Owner: the phone check before production | | | owner |  | |
 
 Reports: [r17](11-phone-ux/r17-phone-tab-audit/report.md) · [r20](11-phone-ux/r20-phone-convenience-audit/report.md) · [r25](11-phone-ux/r25-phone-ux-architecture/report.md) · [r29](11-phone-ux/r29-google-play-readiness/report.md) · [r36](11-phone-ux/r36-figures-one-owner/report.md).
 
-Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11K, 11L, 11B1, 11B2, 11B3, 11B4, 3AN, 11B5, 11B6, 11D1, 11D2, 11D4, 11D5, 11D6, 11L1, 3AY1, 3AY3, 3AY5, 3AY6, 3AY7, 3AN12, 3AN13, 3AY11, 3AY12, 3AY14, 3AY15, 3AY16, 3AY17, 3AY18, IV-3F, BV-11G, BV-11L2, BV-11L3, BV-11L4, IV-11D3. Next free code: 11M.
+Done: 11A, 11D, 11E, 11F, 11H, 11I, 11J, 11K, 11L, 11B1, 11B2, 11B3, 11B4, 3AN, 11B5, 11B6, 11B7, 11B8, 11B9, 11D1, 11D2, 11D4, 11D5, 11D6, 11L1, 3AY1, 3AY3, 3AY4, 3AY5, 3AY6, 3AY7, 3AY8, 3AY9, 3AN12, 3AN13, 3AY10, 3AY11, 3AY12, 3AY13, 3AY14, 3AY15, 3AY16, 3AY17, 3AY18, IV-3F, BV-11G, IV-3AY, NF-11B, BV-11L2, BV-11L3, BV-11L4, IV-11D3. Next free code: 11M.
 
 ## 12 Desktop UX and smart next steps
 

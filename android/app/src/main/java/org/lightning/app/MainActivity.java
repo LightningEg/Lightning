@@ -482,6 +482,9 @@ public final class MainActivity extends Activity {
         new Thread(() -> {
             ReminderNotifications.PollResult result = ReminderNotifications.check(this, currentOrigin, cookie);
             reminderEnabled = result.enabled;
+            // NF-3AU4: the daily closed-app job follows the reminder preference the open profile reports.
+            if (result.enabled) ClosedReminderJobService.schedule(this);
+            else if (result.sessionAvailable) ClosedReminderJobService.cancel(this);
             if (result.enabled) runOnUiThread(this::askForNotifications);
         }, "lightning-reminders").start();
     }

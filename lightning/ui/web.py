@@ -487,7 +487,7 @@ ARABIC_UI_SRC = "/static/ui-ar.js?v=" + hashlib.sha256(_ARABIC_UI_JS).hexdigest(
 
 # The phone's stylesheets as one cached file (phone roadmap M8): one request instead of six, in this order, which is
 # the cascade the shells rely on (style, then phone, then the theme layers). fonts.css stays apart (relative urls).
-PHONE_CSS = ("style{rtl}.css", "phone{rtl}.css", "themes.generated.css", "theme-surfaces.css",
+PHONE_CSS = ("phone-base{rtl}.css", "phone{rtl}.css", "themes.generated.css", "theme-surfaces.css",
              "theme-materials.css", "visual-flow.css")
 
 

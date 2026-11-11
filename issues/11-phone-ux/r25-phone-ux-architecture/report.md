@@ -455,7 +455,7 @@ and the website's `guideline/` in one session, with a PR in each:
 
 ## Build plan
 
-Plan item [IV-3AY](../IV-3AY-phone-first-architecture.md) holds the steps, in order. The
+Plan item IV-3AY (done, PR #533) holds the steps, in order. The
 first one fixes today's four state and copy bugs (F3 tile, F7, F11 and the late rows under "Next 14 days") and can ship
 before the owner's decisions. 3AN's remaining Accounts-tab-first step (3AN12) is overtaken by Money, and its owner check
 (3AN13) joins 3AY's.

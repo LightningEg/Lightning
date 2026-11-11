@@ -15,6 +15,19 @@
 {% if account_held_value %}<p class="phone-note">{{ fig.what_you_own.label }} {{ account_owned_value|money(False, 0) }} · Held for others {{ account_held_value|money(False, 0) }}</p>{% endif %}
 {% else %}<h1>{{ 'Transactions'|tr(locale) }}</h1>{% endif %}
 {% endblock %}
+{% block section_tabs %}{{ super() }}
+{# 3AY10 (r25 › Money › An account): Check against the bank first. Yes protects the history checked so far; Fix it
+   opens Adjust balance. Gone once this account is checked through today. #}
+{% if account and account.active and account.account_type.value in ('CASH','BANK') and account_balance is not none and checked_through != today_iso %}
+<section class="phone-section bank-check" aria-labelledby="bank-check-heading">
+  <header class="phone-section-head"><h2 id="bank-check-heading">{{ 'Check against the bank'|tr(locale) }}</h2></header>
+  <p>{{ 'Does {name} say {amount}?'|tr(locale, name=account.institution or account.name, amount=account_balance|money ~ ' ' ~ account.currency) }}</p>
+  <div class="phone-segment" data-two>
+    <form method="post" action="/accounts/{{ account.id }}/reconcile/close"><input type="hidden" name="date" value="{{ today_iso }}"><input type="hidden" name="balance" value="{{ account_balance }}"><input type="hidden" name="return_to" value="/accounts/{{ account.id }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary phone-save">{{ 'Yes'|tr(locale) }}</button></form>
+    <a class="btn phone-save" href="/accounts/{{ account.id }}/reconcile?date={{ today_iso }}">{{ 'Fix it'|tr(locale) }}</a>
+  </div>
+</section>{% endif %}
+{% endblock %}
 {% block top_actions %}{# C04.5: one Secondary, the rest behind ⋯ #}
 {% if account %}
 {% set kind = account.account_type.value %}{% set cashy = account.active and kind in ('CASH','BANK') %}

@@ -50,9 +50,8 @@ def test_the_chosen_section_and_the_period_words(phone):
     html = phone.get("/budget").text
     assert re.search(r'class="phone-tab is-chosen" href="/budget" aria-current="page"', html)
     assert re.search(r'class="phone-tab is-chosen" href="/" aria-current="page"', phone.get("/").text)  # Home, IV-3AY10
-    overview = phone.get("/?period=month").text  # the older Overview, still behind a query until 3AY11 removes it
-    assert ">Monthly<" not in overview and 'class="period-buttons"' not in overview  # one month stepper, no sideways chips
-    assert 'class="phone-period-sheet"' in overview and ">Last month<" in overview  # the month opens Choose period
+    moved = phone.get("/?period=month", follow_redirects=False)  # 3AY10: the older Overview is gone
+    assert moved.status_code in (302, 303) and moved.headers["location"] == "/money/report?period=month"
     assert re.search(r'class="phone-tab is-chosen" href="/money"', phone.get("/plan").text)  # Cash planning lives under Money
     assert re.search(r'class="phone-tab is-chosen" href="/activity"', phone.get("/transactions").text)  # redirected to Activity
 
@@ -67,22 +66,7 @@ def test_the_pc_keeps_its_own_frame(tmp_path):
     assert 'class="shell"' in html and "phone-tabbar" not in html and "phone.css" not in html
 
 
-def test_overview_uses_the_phone_forms(phone):
-    html = phone.get("/?period=month").text
-    assert 'class="phone-kpis"' in html and html.count('class="phone-kpi ') == 2  # C06.1, 3AN4: two tiles, Net worth and Left in plan
-    assert "Savings rate" not in html and "Investing rate" not in html  # they live on Financial health (owner, 2026-11-02)
-    assert "stat-tile-spark" not in html  # no sparkline in a phone tile
-    kpis = html.split('class="phone-kpis"', 1)[1].split("</section>", 1)[0]
-    tiles = kpis.split('class="phone-kpi ')[1:]
-    assert all('class="phone-kpi-sub"' in tile for tile in tiles)  # 3T6: each tile compares, Left in plan under its meter
-    fold = phone.get("/overview/fold/money-in").text  # the money-in fold loads when opened (backend roadmap B1)
-    assert "chart-sankey" not in html + fold and 'class="phone-flow"' in fold  # C07.3.3
-    assert "chart-cfall" not in html and "scheme-flow" in html  # C07.3.2: the waterfall as rows
-    assert 'class="mcal"' not in html and 'class="phone-months"' in html  # C07.3.4
-    assert re.search(r'class="phone-lead">[\d,]+ <small>EGP</small>', html)  # whole EGP on the big figure
-
-
-@pytest.mark.parametrize("path, marker", [("/budget?period=month", 'class="phone-plan-bar'), ("/plan", 'id="plan-build"'),
+@pytest.mark.parametrize("path, marker", [("/budget?period=month", 'class="phone-row phone-budget-cat'), ("/plan", 'id="plan-build"'),
                                           ("/investments", 'id="holdings-heading"')])
 def test_budget_cash_and_investments_have_phone_designs(phone, path, marker):
     html = phone.get(path).text
@@ -175,11 +159,6 @@ def test_settings_on_the_phone_leads_to_pairing_sms_and_the_profile(phone):
     assert "Pair a PC" in phone.get("/profiles/devices").text
 
 
-def test_overview_puts_needs_you_before_latest(phone):
-    html = phone.get("/?period=month").text
-    assert html.index('class="card phone-needs') < html.index('aria-labelledby="latest-heading"')
-
-
 def test_one_navigation_the_app_bar_title_is_plain_text_and_every_old_menu_page_is_still_reachable(phone):
     """3AN2: the app bar's page menu (a second way to move) is gone; the title is text. Each page it used to reach is
     a tab, a row on More, or reached from a page that has its own way back."""
@@ -216,10 +195,9 @@ def _phone_app(c, monkeypatch, today):
     return TestClient(app)
 
 
-def test_one_needs_you_card_under_the_stepper_names_the_next_bill_and_opens_its_pay_sheet(c, setup, monkeypatch):
-    """IV-3AL1, 3AN4 (J3): a bill due within three days is named in the Needs you card by payee, amount and days, and
-    that line opens the bill's pay sheet (tap it, then Record and mark paid); no second card above the stepper, and
-    Manage Needs you is the card's last row, not a loose link."""
+def test_the_next_bill_is_named_and_opens_its_pay_sheet(c, setup, monkeypatch):
+    """IV-3AL1, 3AN4 (J3), on Money's Bills since 3AY10: a bill due soon is a row by payee and amount under This week,
+    and the row opens the bill's pay sheet (tap it, then Record and mark paid). The older Overview's card is gone."""
     accounts, _ = setup
     c.planning.create(kind="BILL", name="Internet", amount="650", frequency="MONTHLY", start_date="2026-10-01",
                       account_id=str(accounts["cib"].id))
@@ -227,16 +205,22 @@ def test_one_needs_you_card_under_the_stepper_names_the_next_bill_and_opens_its_
                       account_id=str(accounts["cib"].id))
     c.planning.create(kind="BILL", name="Gym", amount="400", frequency="MONTHLY", start_date="2026-10-20",
                       account_id=str(accounts["cib"].id))
-    html = _phone_app(c, monkeypatch, "2026-09-30").get("/").text
-    assert 'class="card phone-card phone-soon' not in html and html.count('class="card phone-needs"') == 1
-    strip = re.search(r'<details class="card phone-needs".*?</details>', html, re.S).group(0)
-    assert html.index('class="phone-period"') < html.index('class="card phone-needs"')
-    named = re.search(r'<a class="phone-needs-bill" data-popup-open href="(/plan/items/\d+/pay\?due=2026-10-01[^"]*)">([^<]+)</a>', strip)
-    assert named and named.group(2) == "Internet 650 tomorrow"  # the earliest, by payee, amount and days
-    assert "2 payments due soon" in strip and "Landlord" in strip and "Gym" not in strip  # Landlord is 3 days out
-    assert "Mark paid" in strip  # each bill's row says what the tap does
-    assert strip.rindex('href="/needs-you"') > strip.index("Landlord")
-    assert html.count('href="/needs-you"') == 1
+    from lightning.ui.phone.router import mount_phone
+    from lightning.ui.web import create_app
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-30")
+    app = create_app(c)
+    mount_phone(app)
+
+    @app.middleware("http")
+    async def as_phone(request, call_next):
+        request.state.phone = True
+        return await call_next(request)
+    html = TestClient(app).get("/money/bills").text
+    assert 'class="card phone-needs"' not in html
+    week = html[html.index('id="week-heading"'):]
+    week = week[:week.index("</section>")]
+    row = re.search(r'<a class="phone-row" data-popup-open href="(/plan/items/\d+/pay\?due=2026-10-01[^"]*)"><span>Internet', week)
+    assert row and "Landlord" in week and "Gym" not in week   # Gym is 20 days out: after this week
 
 
 def test_a_bill_further_than_three_days_off_is_not_named(c, setup, monkeypatch):
@@ -245,16 +229,6 @@ def test_a_bill_further_than_three_days_off_is_not_named(c, setup, monkeypatch):
                       account_id=str(accounts["cib"].id))
     html = _phone_app(c, monkeypatch, "2026-09-30").get("/").text
     assert "phone-needs-bill" not in html and "Gym" not in html
-
-
-def test_the_due_line_says_today_tomorrow_days_and_late():
-    from lightning.ui.phone.presenters.overview import _due_line
-    text = lambda *a: (lambda s: s["text"].format(**s["values"]))(_due_line(*a))
-    assert text("Landlord", "12,000", 2, 0) == "Landlord 12,000 in 2 days"
-    assert text("Landlord", "12,000", 1, 0) == "Landlord 12,000 tomorrow"
-    assert text("Landlord", "12,000", 0, 0) == "Landlord 12,000 today"
-    assert text("Landlord", "12,000", 0, 1) == "Landlord 12,000, 1 day late"
-    assert text("Landlord", "12,000", 0, 4) == "Landlord 12,000, 4 days late"
 
 
 def test_the_weekly_review_keeps_money_chosen_and_the_old_more_is_gone(phone):
@@ -281,21 +255,6 @@ def test_financial_health_holds_the_savings_and_investing_rates_the_overview_gav
     saving = html[html.index(">Saving<"):html.index(">Debt and monthly commitments<")]
     assert "Savings rate" in saving and "Investing rate" in saving
     assert 'href="/investments"' in saving
-
-
-def test_needs_you_names_what_is_inside_and_a_match_is_not_a_bill():
-    """3AN1 (P6): the payments group holds bills, interest to match and payments to check; each is named as itself."""
-    from lightning.ui.phone.presenters.overview import _needs_parts
-    match = {"label": "CD: 1 interest payment to match", "href": "/deposits/3#interest-receipts"}
-    bill = {"label": "Bill due: Internet", "href": "/plan/items/1/pay?due=2026-12-01&back=%2F"}
-    early = {"label": "Rent was paid early", "href": "/plan/items/2/pay?due=2026-12-01&back=%2F"}
-    text = lambda groups: [part["text"] for part in _needs_parts(groups)]
-    assert text([{"key": "payments", "count": 1, "items": [match]}]) == ["1 to match"]
-    assert text([{"key": "payments", "count": 1, "items": [bill]}]) == ["1 bill"]
-    assert text([{"key": "payments", "count": 3, "items": [bill, match, early]},
-                 {"key": "activity", "count": 4, "items": []}]) == ["1 bill", "1 to match", "1 payment to check", "4 to sort out"][:3]
-    assert "1 bill" not in text([{"key": "payments", "count": 2, "items": [match, match]}])
-    assert text([{"key": "payments", "count": 2, "items": [match, match]}]) == ["{n} to match"]
 
 
 def test_the_entry_sheet_has_no_balance_sentence_and_the_amount_starts_at_zero(phone):
@@ -351,8 +310,9 @@ def test_phone_settings_use_more_instead_of_five_tabs(phone):
 def test_budget_category_returns_to_budget_and_leads_with_register(phone):
     from html import unescape
 
-    budget = phone.get('/budget?period=month').text  # the older Budget carries the category links
-    match = re.search(r'href="(/transactions\?category_id=[^"]+)"', budget)
+    budget = phone.get('/budget?period=month').text  # a category row opens its sheet, whose See transactions this is
+    sheet = re.search(r'href="(/budget/category/\d+/sheet\?month=[\d-]+)"', budget).group(1)
+    match = re.search(r'href="(/transactions\?category_id=[^"]+)"', phone.get(sheet).text)
     assert match, 'the demo budget has a category link'
     page = phone.get(unescape(match.group(1)), headers={'referer': 'http://127.0.0.1:9861/budget'}).text
     assert re.search(r'class="phone-back" href="/budget(?:\?[^"]*)?"', page)

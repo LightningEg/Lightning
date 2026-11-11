@@ -9,6 +9,7 @@ from datetime import date, timedelta
 from decimal import ROUND_CEILING, Decimal
 
 from lightning.core.dates import month_of, parse_month
+from lightning.planning.salary_day import payday_to_plan
 from lightning.ui.charts import ranked_donut
 
 ZERO = Decimal(0)
@@ -49,6 +50,7 @@ class BudgetScreen:
     month_bar: dict | None = None     # IV-11D2: the everyday plan as one bar: spent, left, over (amounts add to the plan)
     spend: dict | None = None         # IV-11D5: where the month went: a donut of four categories then Other, and its rows
     working: object = None            # NF-12AB4: the hero's working, for its sheet
+    payday: dict | None = None        # 3AY9: {amount, date} from the salary's day until this month's plan is saved
 
 
 def _shift(month: str, step: int) -> str:
@@ -107,7 +109,8 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
                         shown_needs, max(len(needs) - ATTENTION, 0), listed, planned, paid, count,
                         move, c.health.raise_offer(shown) if state == "current" else None,
                         month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, e.everyday_spent),
-                        working=e.everyday_left_working)
+                        working=e.everyday_left_working,
+                        payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None)
 
 
 def month_bar(plan: Decimal, spent: Decimal) -> dict | None:
@@ -149,3 +152,55 @@ def _cover(c, month: str, schedule, over: list[CategoryRow], room: dict) -> dict
         return None
     return {"name": c.categories.get(best[1]).name, "amount": amount,
             "href": f"/budget/move?month={month}&to={target.category_id}&from={best[1]}&amount={amount}"}
+
+
+@dataclass(frozen=True)
+class PlanRow:
+    category_id: int
+    name: str
+    value: str          # what the field holds: "20%" or "1500.00", "" when the month has no limit of its own
+    placeholder: str    # the limit it has from elsewhere (an average, a parent), else ""
+    spent: Decimal
+
+
+@dataclass(frozen=True)
+class PlanList:
+    month: str
+    groups: tuple[tuple[str, tuple[PlanRow, ...]], ...]   # (group name, its categories) in the plan's order
+    # No plan yet: Lightning's proposal from what was spent, (group, ((category id, name, amount), ...)), saved at once
+    first: tuple = ()
+
+
+def plan_list(c, month: str) -> PlanList:
+    """Your plan for a month (3AY9): every everyday category under its group, one field each holding its limit as an
+    amount or a % of income. Bills and loans are not here: they are Fixed costs, planned by Recurring."""
+    shown = month_of(parse_month(month)[0])
+    view = c.budgets.month_view(shown, schedule=c.schedules.view())
+    first: dict[str, list] = {}
+    if not c.budgets.has_plan(shown, schedule=c.schedules.view()):
+        for category_id, amount in c.budgets.first_plan_suggestions(shown).items():  # round numbers (BU-3)
+            parts = c.categories.display_name(category_id).split(" › ")
+            first.setdefault(parts[0], []).append((category_id, " › ".join(parts[1:]) or parts[0], amount))
+    groups: list[tuple[str, tuple[PlanRow, ...]]] = []
+    for section in view.sections:
+        current, rows = "", []
+        for line in section.lines:
+            if line.depth == 1:
+                if rows:
+                    groups.append((current, tuple(rows)))
+                current, rows = line.name, []
+                continue
+            if line.depth != 2 or line.from_bills or line.from_loans:
+                continue
+            value = (f"{line.income_percent.normalize():f}%" if line.income_percent is not None
+                     else _plain_amount(line.direct) if line.direct is not None and not line.average_months else "")
+            holder = f"{line.budget:,.0f}" if line.budget is not None and not value else ""
+            rows.append(PlanRow(line.category_id, line.name, value, holder, line.actual))
+        if rows:
+            groups.append((current, tuple(rows)))
+    return PlanList(shown, tuple(groups), tuple((g, tuple(rows)) for g, rows in first.items()))
+
+
+def _plain_amount(amount) -> str:
+    """What a limit field holds: whole pounds without decimals (1500), piastres only when there are some."""
+    return f"{amount.to_integral_value():f}" if amount == amount.to_integral_value() else f"{amount:.2f}"
