@@ -45,7 +45,7 @@ layers = [
     "lightning.people_money",
     "lightning.investments | lightning.deposits | lightning.rules | lightning.reevaluations | lightning.physical_items | lightning.reserves | lightning.reimbursements",
     "lightning.reporting",
-    "lightning.transactions | lightning.money_from_others",
+    "lightning.transactions | lightning.money_from_others | lightning.foreign_amounts",
     "lightning.accounts | lightning.counterparties",
     "lightning.assets | lightning.categories | lightning.fx",
     "lightning.database | lightning.security | lightning.market",
