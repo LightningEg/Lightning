@@ -32,6 +32,7 @@
     <span class="phone-txn-amount"><b>{{ r.value|money if r.value is not none else 'Unavailable'|tr(locale) }}</b></span></a>
 {% endmacro %}
 {% block content %}
+<a class="btn primary phone-save" href="/investments/add">{{ 'Add investment'|tr(locale) }}</a>
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
 {% if not accounts %}
 <section class="card phone-card"><p class="phone-note">{{ "Investments live in a brokerage account or a physical asset account."|tr(locale) }}</p><a class="btn primary phone-save" href="/accounts/new?type=BROKERAGE">{{ "Add a brokerage account"|tr(locale) }}</a></section>

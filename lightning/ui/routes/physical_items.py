@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import date
 from decimal import Decimal, InvalidOperation
 
 from fastapi import APIRouter, Request, Response
@@ -37,6 +38,24 @@ def _references(c, account, karat=None):
     return unique
 
 
+def valuation_label(position, karat=None, item=False) -> tuple[str, dict]:
+    """IV-12L: a plain label for where a value comes from, with its fill-ins ("21K price, 9 Nov")."""
+    when = ""
+    if position.price_date:
+        day = date.fromisoformat(str(position.price_date)[:10])
+        when = f"{day.day} {day.strftime('%b')}"
+    source = position.price_source or ""
+    if source == "COST":
+        return "At cost", {}
+    if item and source == "MANUAL":
+        return "Your estimate, {date}", {"date": when}
+    if karat is None and position.asset_code.startswith("GLD:"):
+        karat = position.asset_code[4:].rstrip("K")
+    if karat is not None and source:
+        return "{karat}K price, {date}", {"karat": karat, "date": when}
+    return "Missing", {}
+
+
 def account_page(request: Request, account_id: int):
     c = container(request)
     account = c.accounts.get(account_id)
@@ -55,9 +74,11 @@ def account_page(request: Request, account_id: int):
                                * Decimal(item["karat"]) / Decimal(24)
                                * (position.quantity if position else ZERO)),
                     history=c.physical_items.valuations(item["asset_id"]))
+        item["label"] = valuation_label(position, item["karat"], True) if position else ("No pieces held", {})
         items.append(item)
     item_ids = {item["asset_id"] for item in items}
-    other_holdings = [position for position in portfolio.open if position.asset_id not in item_ids]
+    other_holdings = [{"position": position, "label": valuation_label(position)}
+                      for position in portfolio.open if position.asset_id not in item_ids]
     total = c.reporting.account_value(account_id, today())
     owned = c.reporting.owned_account_value(account_id, today())
     rows = c.reporting.register(account_id, "1900-01-01", "9999-12-31")

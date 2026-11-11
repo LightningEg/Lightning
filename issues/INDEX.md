@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 48 open items. Each folder holds its reports and its items.
+11 big pictures, 46 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -272,8 +272,6 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 | IV-12J1 | ↳ The certificate's holding page and the certificates page | | | M | Opus | |
 | IV-12J3 | ↳ A certificate paid at maturity gains value as it earns | | | M | Opus | |
 | IV-12J4 | ↳ A variable rate is dated | | | S | Opus | |
-| **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | improvement, visual | Capture | M | Sonnet | ready |
-| **IV-12L** | [Gold: add a piece and its purchase in one step, pick the price by karat, and show bars with the jewellery](12-desktop-ux/IV-12L-gold-one-step-and-one-table.md) | improvement, visual | Own | M | Sonnet | ready |
 | **IV-12Q** | [The unfinished pages of Budget and Cash planning get the page pattern: a lead figure, a visual, cards](12-desktop-ux/IV-12Q-unfinished-budget-and-cash-pages.md) | improvement, visual | Plan | L | Opus | new |
 | IV-12Q1 | ↳ Fund your payday plan, as one short step | | | M | Opus | |
 | IV-12Q2 | ↳ Compare scenarios and Forecast inputs | | | M | Opus | |
@@ -313,4 +311,4 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 12H, 12N, 12U, 12V, 12W, 12X, 3AZ, BV-12O, IV-12P, IV-12T, NF-12I, NF-12R, NF-12S, BT-12AC, BT-12AD, IV-12AA. Next free code: 12AF.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 12H, 12N, 12U, 12V, 12W, 12X, 3AZ, BV-12O, IV-12K, IV-12L, IV-12P, IV-12T, NF-12I, NF-12R, NF-12S, BT-12AC, BT-12AD, IV-12AA. Next free code: 12AF.
