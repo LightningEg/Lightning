@@ -7,7 +7,7 @@
 {% block content %}
 {% set session = request.state.session_token|default('') %}
 {% macro fields(cat, level) %}
-  <label>{{ 'Name'|tr(locale) }}<input name="name" value="{{ cat.name if cat else '' }}" placeholder="{{ ('New detail' if level == 3 else 'New category')|tr(locale) }}" required autocomplete="off"></label>
+  <label>{{ 'Name'|tr(locale) }}<input name="name" value="{{ cat.name if cat else '' }}" placeholder="{{ ('New detail' if level == 3 else 'New category')|tr(locale) }}" required autocomplete="off" spellcheck="false"></label>
   <label>{{ 'Income or expense'|tr(locale) }}<select name="direction" {{ 'disabled' if cat and cat.code == 'EXP.SYSTEM.CUSTODY' }}>{% for value, text in (('OUT', '− Expense'), ('IN', '+ Income'), ('BOTH', '± Both')) %}<option value="{{ value }}" {{ 'selected' if (cat and cat.direction.value == value) or (not cat and value == 'OUT') }}>{{ text|tr(locale) }}</option>{% endfor %}</select></label>
   {% if not cat or cat.direction.value in ('IN', 'BOTH') %}<label class="import-check"><input type="checkbox" name="recurring" value="1" {{ 'checked' if cat and cat.id in recurring }}> {{ 'Recurring'|tr(locale) }} · {{ 'Counted in the income average and the forecast'|tr(locale) }}</label>{% endif %}
   {% if not cat or cat.direction.value in ('OUT', 'BOTH') %}<label class="import-check"><input type="checkbox" name="one_off" value="1" {{ 'checked' if cat and cat.id in one_offs }}> {{ 'One-off'|tr(locale) }} · {{ 'In cash flow, left out of the budget'|tr(locale) }}</label>{% endif %}

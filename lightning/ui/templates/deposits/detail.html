@@ -25,7 +25,7 @@
           {% set o = outlooks[t.id] %}{% if not (cert.redeemed or cert.units == 0) and o.expected %}<br><small class="muted">{{ 'Expected {date}: about {amount} {currency}. A forecast from its terms, not cash received.'|tr(locale, date=o.expected_date, amount=o.expected|money(places=0), currency=account.currency) }}</small>{% endif %}</td>
         <td><details{{ ' open' if redeem_id == t.id }}><summary>{{ 'Actions'|tr(locale) }}</summary>
           <form method="post" action="/deposits/{{ account.id }}/certificates/{{ t.id if t.id else cert.id }}/terms" class="stack">
-            <label>{{ 'Name'|tr(locale) }}<input name="name" value="{{ t.name }}" required></label>
+            <label>{{ 'Name'|tr(locale) }}<input name="name" value="{{ t.name }}" required spellcheck="false" autocomplete="off"></label>
             <label>{{ 'Earliest withdrawal'|tr(locale) }}<input name="lockup_end_date" type="text" value="{{ t.lockup_end_date }}" placeholder="yyyy-mm-dd" data-smart-date required></label>
             <div class="row" data-cd-maturity data-start-date="{{ t.start_date }}"><label>{{ 'Maturity date'|tr(locale) }}<input name="maturity_date" type="text" value="{{ t.maturity_date }}" placeholder="yyyy-mm-dd" data-cd-maturity-date data-smart-date></label><label>{{ 'Term (years)'|tr(locale) }}<input name="term_years" type="number" min="0.01" max="100" step="any" placeholder="e.g. 3" data-cd-term><small class="muted">{{ 'Enter a term in 3-month increments, or choose a date.'|tr(locale) }}</small></label></div>
             <label>Annual rate (%)<input name="annual_rate" type="number" min="0" max="100" step="0.01" value="{{ t.annual_rate }}" required></label>
@@ -63,7 +63,7 @@
   <p class="muted">{{ 'The purchase is recorded from the account you choose. Interest is estimated for cash forecasting only and is never posted automatically; record it as money in when it appears on your bank statement. Record principal proceeds separately from interest.'|tr(locale) }}</p>
   <form method="post" action="/deposits/{{ account.id }}/purchase" class="stack" style="max-width:900px"><input type="hidden" name="submission" value="{{ new_submission() }}">
     <div class="row">
-      <label>{{ 'Certificate name'|tr(locale) }}<input name="name" value="{{ values.name }}" placeholder="e.g. CIB 3-year certificate" required></label>
+      <label>{{ 'Certificate name'|tr(locale) }}<input name="name" value="{{ values.name }}" placeholder="e.g. CIB 3-year certificate" required spellcheck="false" autocomplete="off"></label>
       <label>{{ 'Purchase date'|tr(locale) }}<input name="start_date" type="text" value="{{ values.start_date }}" placeholder="yyyy-mm-dd" data-smart-date required></label>
     </div>
     <label class="check"><input type="checkbox" name="already_owned" value="1" data-unrequires="funding_account_id" {{ 'checked' if values.already_owned }}> {{ 'I already own it: bought before I started tracking, so no money leaves an account'|tr(locale) }}</label>

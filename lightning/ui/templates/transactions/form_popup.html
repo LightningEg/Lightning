@@ -4,7 +4,6 @@
 {% block heading %}{{ page_header(title|tr(locale), account.label) }}{% endblock %}
 {% block content %}
 <section class="card app-popup-content" data-transaction-form data-account-name="{{ account.name }}" data-currency="{{ account.currency }}">
-  <h2 data-popup-title>{{ title|tr(locale) }}</h2>
   <p class="muted">{{ 'Record one account activity. Enter a positive amount; choose Money out, Money in, or Transfer.'|tr(locale) }}</p>
   {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
   <form method="post" action="{{ action }}" {% if txn_id %}data-popup-autosave{% endif %}>
@@ -18,15 +17,15 @@
       {% endfor %}
     </div>{% endif %}
     <div class="row">
+      <div class="field {{ 'has-error' if error_field == 'amount' }}">
+        <label for="popup-amount">{{ 'Amount'|tr(locale) }} ({{ account.currency }})</label>
+        <input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" required autofocus {{ 'readonly' if split_categories }}>
+        {% if error_field == 'amount' %}<small class="field-error">{{ error|tr(locale) }}</small>{% endif %}
+      </div>
       <div class="field {{ 'has-error' if error_field == 'date' }}">
         <label for="popup-date">{{ 'Date'|tr(locale) }}</label>
         <input id="popup-date" name="date" type="text" value="{{ values.date }}" placeholder="yyyy-mm-dd" inputmode="numeric" data-smart-date required>
         {% if error_field == 'date' %}<small class="field-error">{{ 'Check the date.'|tr(locale) }}</small>{% endif %}
-      </div>
-      <div class="field {{ 'has-error' if error_field == 'amount' }}">
-        <label for="popup-amount">Amount ({{ account.currency }})</label>
-        <input id="popup-amount" name="amount" type="text" value="{{ values.amount }}" inputmode="decimal" placeholder="0.00" required {{ 'readonly' if split_categories }}>
-        {% if error_field == 'amount' %}<small class="field-error">{{ error|tr(locale) }}</small>{% endif %}
       </div>
     </div>
     <div class="row">
@@ -48,7 +47,7 @@
       </div>
       <div class="field money-only {{ 'has-error' if error_field == 'counterparty' }}" {{ 'hidden' if values.kind == 'transfer' }}>
         <label for="popup-counterparty">{{ 'Counterparty'|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label>
-        <input id="popup-counterparty" name="counterparty" value="{{ values.counterparty }}" list="popup-counterparties" data-own-suggestions placeholder="Type a person or business" autocomplete="off">
+        <input id="popup-counterparty" name="counterparty" value="{{ values.counterparty }}" list="popup-counterparties" data-own-suggestions placeholder="Type a person or business" autocomplete="off" spellcheck="false">
         <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}<option value="{{ person.name }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}>{% endfor %}</datalist>
         {% if error_field == 'counterparty' %}<small class="field-error">{{ 'Choose a saved Counterparty.'|tr(locale) }}</small>{% endif %}
       </div>
