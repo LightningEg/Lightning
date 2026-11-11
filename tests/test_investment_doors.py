@@ -58,3 +58,16 @@ def test_held_for_others_rows_have_actions(client, c, setup):
     html = client.get("/money-from-others").text
     assert "Give back" in html and "Receive more" in html and "Hold money for someone" in html
     assert "How to record ownership" not in html
+
+
+def test_bars_and_coins_are_rows_valued_by_the_karat_price(client, c, setup):
+    """IV-12L: a bar held by the gram follows the dated karat price (not what was paid) and shows whole EGP."""
+    from lightning.accounts.domain import AccountType
+    gold = c.accounts.create("Gold", AccountType.PHYSICAL_ASSET, opening_date="2026-01-01")
+    bar = c.assets.create_investment("10g bar", "GOLD", karat="24")
+    c.assets.set_price(bar.id, "2026-09-01", "5314")
+    c.investments.add_holding(gold.id, bar.id, "10", "62000", "2026-09-05")
+    position = next(p for p in c.investments.portfolio("2026-12-31", gold.id).open if p.asset_id == bar.id)
+    assert position.value == D("53140") and position.price_source != "COST"
+    html = client.get(f"/accounts/{gold.id}").text
+    assert "10g bar" in html and "53,140" in html and "53,140.00" not in html and "24K price, 1 Sep" in html
