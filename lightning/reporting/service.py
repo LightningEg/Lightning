@@ -116,6 +116,15 @@ class CashFlow:
         """Net flow = Money in − Money out."""
         return self.inflows - self.outflows
 
+    def invested_from_net(self, money_added: Decimal) -> Decimal:
+        """The part of Net flow that went into investments: money added, never below zero and never more than
+        Net flow (money from earlier savings is not part of what you kept). Zero when Net flow is not positive."""
+        return min(max(money_added, ZERO), self.net) if self.net > ZERO else ZERO
+
+    def kept_as_cash(self, money_added: Decimal) -> Decimal:
+        """Kept as cash = Net flow − what of it went into investments; zero when Net flow is not positive."""
+        return self.net - self.invested_from_net(money_added) if self.net > ZERO else ZERO
+
     @property
     def savings_rate(self) -> Decimal | None:
         """Savings rate = Net flow ÷ Money in, as a percentage; None without money in."""
