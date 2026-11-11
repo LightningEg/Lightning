@@ -169,7 +169,7 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6, payments: 
     if payments and len(needle) >= 2 and not needle.startswith("#"):  # the first matching payments, newest first, above the other groups (IV-12W)
         ordered = c.reporting.newest_first(c.transactions.search_ids(ascii_digits(query)))
         shown: set[int] = set()
-        for row in c.reporting.rows_for_transactions(ordered[:payments * 2]):
+        for row in c.reporting.rows_for_transactions(ordered[:payments * 2]):  # not money
             if row.type == "VAL" or row.txn_id in shown or len(shown) >= payments:
                 continue
             shown.add(row.txn_id)
@@ -180,7 +180,7 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6, payments: 
         ranked = sorted((pair for pair in found if pair[1]["kind"] == group), key=lambda p: (-p[0], p[1]["label"].casefold()))
         results += [row for _, row in ranked[:per_group]]
         if group == "Transaction":  # an exact reference first, then the payments that match the words
-            results += [row for row in paid if row["href"] not in {r["href"] for r in results}]
+            results += [row for row in paid if row["href"] not in {r["href"] for r in results}]  # not money
     results.append({"label": f"Find transactions with “{query}”", "href": "/transactions?" + urlencode({"q": query}),
                     "kind": "Search", "context": "Search every account's register", "entity_id": "history", "rank": 0, "match_reason": "literal history query"})
     return results

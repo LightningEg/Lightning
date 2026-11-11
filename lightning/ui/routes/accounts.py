@@ -569,7 +569,7 @@ async def save_transaction_popup(request: Request, account_id: int):
             back = "/accounts/%d/transaction/new?%s" % (account_id, urlencode({
                 "date": values["date"], "return_to": values["return_to"]}))
             response = redirect(back, "Saved. Add the next one.")
-            response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,
+            response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,  # not money
                                 httponly=True, samesite="lax")
             return response
         feedback = register._budget_feedback(c, txn)
@@ -679,7 +679,7 @@ def _bank_check_page(request, c, account_id: int, through: str, raw_balance: str
     dated = len(through) == 10 and through[4] == "-"
     recent = []
     if dated:  # the account's last rows beside the form: what to compare the bank's figure with
-        first = (parse_date(through) - timedelta(days=60)).isoformat()
+        first = (parse_date(through) - timedelta(days=60)).isoformat()  # not money
         recent = list(reversed(c.reporting.statement(account_id, first, through).rows))[:6]
     return render(request, "accounts/reconcile.html", account=account, recent=recent, through=through, balance_input=raw_balance,
                   lightning_balance=c.reconciliation.balance(account_id, through) if dated else None,
