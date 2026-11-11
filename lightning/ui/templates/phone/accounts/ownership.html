@@ -1,0 +1,53 @@
+{# Move money between owners on the phone (3AY17): one column. #}
+{% extends "base.html" %}
+{% from "partials/macros.html" import category_options %}
+{% block title %}Change ownership · {{ account.name }}{% endblock %}
+{% block heading %}<h1>{{ "Change ownership"|tr(locale) }}</h1><p class="phone-note">{{ account.name }} · {{ account.currency }}. The account balance stays the same.</p>{% endblock %}
+{% block content %}
+<section class="phone-form phone-fields app-popup-content">
+  <h2>{{ "What happened?"|tr(locale) }}</h2>
+  {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+  <form method="post" action="{{ action }}" data-ownership-form>
+    {% if not txn_id %}<input type="hidden" name="submission" value="{{ new_submission() }}">{% endif %}
+    {% if txn_id %}<input type="hidden" name="revision" value="{{ values.revision }}">{% endif %}
+    <div class="field"><label for="ownership-mode">{{ "Activity"|tr(locale) }}</label><select id="ownership-mode" name="mode" data-own-picker>
+      <option value="assign" {{ 'selected' if values.mode != 'expense' }}>{{ "Change who owns this money"|tr(locale) }}</option>
+      <option value="expense" {{ 'selected' if values.mode == 'expense' }}>{{ "Someone paid an expense for you"|tr(locale) }}</option>
+    </select></div>
+    <div class="phone-fields">
+      <div class="field {{ 'has-error' if error_field == 'date' }}">
+        <label for="ownership-date">{{ 'Date'|tr(locale) }}</label>
+        <input id="ownership-date" type="text" name="date" value="{{ values.date }}" placeholder="yyyy-mm-dd" inputmode="numeric" data-smart-date required>
+      </div>
+      <div class="field {{ 'has-error' if error_field == 'amount' }}">
+        <label for="ownership-amount">Amount ({{ account.currency }})</label>
+        <input id="ownership-amount" type="text" name="amount" value="{{ values.amount }}" inputmode="decimal" placeholder="5,000.00" required>
+      </div>
+    </div>
+    <div class="phone-fields">
+      <div class="field {{ 'has-error' if error_field == 'from_owner_id' }}">
+        <label for="ownership-from">{{ 'From'|tr(locale) }}</label>
+        <select id="ownership-from" name="from_owner_id" data-own-picker><option value="">{{ 'You'|tr(locale) }}</option>
+          {% for person in owners %}<option value="{{ person.id }}" {{ 'selected' if values.from_owner_id == person.id|string }}>{{ person.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div class="field {{ 'has-error' if error_field == 'to_owner_id' }}">
+        <label for="ownership-to">{{ "To / person who paid"|tr(locale) }}</label>
+        <select id="ownership-to" name="to_owner_id" data-own-picker><option value="">{{ 'You'|tr(locale) }}</option>
+          {% for person in owners %}<option value="{{ person.id }}" {{ 'selected' if values.to_owner_id == person.id|string }}>{{ person.name }}</option>{% endfor %}
+        </select>
+      </div>
+    </div>
+    <div class="field {{ 'has-error' if error_field in ('category_id','category') }}">
+      <label for="expense-category">{{ "Expense category"|tr(locale) }}<span class="phone-note">{{ "(required for “Someone paid”)"|tr(locale) }}</span></label>
+      <select id="expense-category" name="category_id" data-own-picker><option value="">{{ "Choose an expense category"|tr(locale) }}</option>
+        {{ category_options(category_groups(categories|map(attribute='id')|list), values.category_id) }}
+      </select>
+    </div>
+    <p class="phone-note">{{ "For an ownership change, choose who it moves from and to; leave Expense category empty. For someone who paid for you, choose You as From, that person as To, and the expense category. CIB stays at the same total."|tr(locale) }}</p>
+    <div class="field"><label for="ownership-notes">{{ "Note"|tr(locale) }}<span class="phone-note">{{ "(optional)"|tr(locale) }}</span></label><input id="ownership-notes" name="notes" value="{{ values.notes }}" placeholder="For example, Dad paid October rent"></div>
+    <div class="phone-actions"><a class="btn phone-save" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a><button class="btn primary phone-save">{{ 'Save'|tr(locale) }}</button></div>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  </form>
+</section>
+{% endblock %}

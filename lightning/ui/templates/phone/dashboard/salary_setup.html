@@ -1,0 +1,14 @@
+{# Add your salary on the phone (3AY17): amount, payday and account, then Add salary. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Add your salary'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Add your salary'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% if accounts %}<form method="post" action="/setup/salary" class="phone-form" data-popup-return="response">
+  <label>{{ 'Salary each month'|tr(locale) }} ({{ base }})<input name="amount" {{ 'aria-invalid=true' if error_field == 'amount' }} value="{{ values.amount }}" inputmode="decimal" class="money-input {{ 'bad' if error_field == 'amount' }}" required></label>
+  <label>{{ 'Salary arrives on'|tr(locale) }} · {{ 'day'|tr(locale) }} … {{ 'of each month'|tr(locale) }}<input name="payday" {{ 'aria-invalid=true' if error_field == 'payday' }} type="number" min="1" max="31" value="{{ values.payday }}" inputmode="numeric" required class="{{ 'bad' if error_field == 'payday' }}"></label>
+  <label>{{ 'Salary account'|tr(locale) }}<select name="account_id" {{ 'aria-invalid=true' if error_field == 'account_id' }} data-own-picker>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if values.account_id == a.id|string }}>{{ a.name }}</option>{% endfor %}</select></label>
+  <p class="phone-note">{{ 'Lightning expects it then; you record it when it arrives.'|tr(locale) }}</p>
+  <button class="btn primary phone-save">{{ 'Add salary'|tr(locale) }}</button><a class="btn phone-save" href="/" data-popup-close>{{ 'Later'|tr(locale) }}</a>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+</form>{% else %}<p class="phone-note">{{ 'Add a bank or cash account in your profile currency first.'|tr(locale) }}</p><a class="btn primary phone-save" href="/accounts/new?type=BANK">{{ 'Add account'|tr(locale) }}</a>{% endif %}
+{% endblock %}

@@ -1,0 +1,37 @@
+{# Money held for others on the phone (3AY17): the total leads, each person's cash a row whose sheet holds Give back,
+   Spend for them and Receive more; investments, Hold money and the two histories one sheet each. #}
+{% extends "base.html" %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% from "phone/partials/hero.html" import hero with context %}
+{% block title %}{{ fig.held_for_others.label }}{% endblock %}
+{% block heading %}<h1>{{ fig.held_for_others.label }}</h1>{% endblock %}
+{% block content %}
+{{ hero('Total'|tr(locale), held_total|round(0), '') }}
+<section class="phone-section" aria-labelledby="mfo-cash"><header class="phone-section-head"><h2 id="mfo-cash">{{ 'Cash'|tr(locale) }}</h2></header>
+  {% if owners %}<div class="phone-rows">{% for row in owners %}
+    {% set r %}<span>{{ row.owner }}<small>{{ row.account_name }}</small></span><b><bdi class="fig">{{ row.amount|money }}</bdi></b>{% endset %}
+    {% if row.owner_id %}{% call sheet(row.owner, r) %}{% set q = 'owner_id=' ~ row.owner_id ~ '&counterparty=' ~ row.owner|urlencode ~ '&return_to=%2Fmoney-from-others' %}
+      {% if row.amount > 0 %}<a class="btn primary phone-save" data-popup-open href="/accounts/{{ row.account_id }}/transaction/new?kind=out&amp;amount={{ '%.2f'|format(row.amount) }}&amp;notes={{ 'Given back'|tr(locale)|urlencode }}&amp;{{ q }}">{{ 'Give back'|tr(locale) }}</a>
+      <a class="btn phone-save" data-popup-open href="/accounts/{{ row.account_id }}/transaction/new?kind=out&amp;{{ q }}">{{ 'Spend for them'|tr(locale) }}</a>{% endif %}
+      <a class="btn phone-save" data-popup-open href="/accounts/{{ row.account_id }}/transaction/new?kind=in&amp;notes={{ 'Received to hold'|tr(locale)|urlencode }}&amp;{{ q }}">{{ 'Receive more'|tr(locale) }}</a>
+    {% endcall %}{% else %}<div class="phone-row">{{ r }}</div>{% endif %}{% endfor %}</div>
+  {% else %}<p class="phone-note">{{ "No cash is held for others."|tr(locale) }}</p>{% endif %}
+</section>
+{% if investments %}<section class="phone-section" aria-labelledby="mfo-inv"><header class="phone-section-head"><h2 id="mfo-inv">{{ 'Investments'|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for row in investments %}<div class="phone-row"><span>{{ row.asset_name }}<small>{{ row.owner }} · {{ row.account_name }} · <span>{{ row.units|units_of(row.unit) }}</span></small></span><b><bdi class="fig">{{ row.value|money if row.value is not none else '—' }}</bdi></b></div>{% endfor %}</div></section>
+{% else %}<p class="phone-note">{{ "No investments are held for others."|tr(locale) }}</p>{% endif %}
+<div class="phone-rows phone-section">
+  {% set r %}<span>{{ "Hold money for someone"|tr(locale) }}</span><b>+</b>{% endset %}
+  {% call sheet('Hold money for someone'|tr(locale), r) %}<form method="post" action="/money-from-others" class="phone-form" id="hold-money">
+    <label>{{ 'Held for'|tr(locale) }}<input name="owner" list="hold-people" required autocomplete="off" placeholder="{{ 'Type and pick a saved person'|tr(locale) }}"><datalist id="hold-people">{% for party in counterparties %}<option value="{{ party.name }}">{% endfor %}</datalist></label>
+    <label>{{ 'Account'|tr(locale) }}<select name="account_id">{% for account in accounts if account.account_type.value in ('BANK','CASH') %}<option value="{{ account.id }}">{{ account.name }}</option>{% endfor %}</select></label>
+    <label>{{ 'Amount'|tr(locale) }}<input name="amount" inputmode="decimal" required></label>
+    <label>{{ 'Date'|tr(locale) }}<input name="date" type="date" value="{{ today_iso }}"></label>
+    <label>{{ 'Notes'|tr(locale) }}<input name="notes"></label>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary phone-save" type="submit">{{ 'Hold money'|tr(locale) }}</button></form>{% endcall %}
+  {% set r %}<span>{{ "Cash ownership history"|tr(locale) }}</span><b>{{ entries|length }} {{ chevron() }}</b>{% endset %}
+  {% call sheet('Cash ownership history'|tr(locale), r) %}<div class="phone-rows">{% for row in entries %}<div class="phone-row"><span>{{ row.owner }}<small>{{ row.date }} · {{ row.account_name }}{% if row.notes %} · {{ row.notes }}{% endif %}</small></span><b class="{{ row.amount|tone }}"><bdi class="fig">{{ row.amount|money(True) }} {{ row.currency }}</bdi></b></div>{% else %}<p class="phone-note">{{ "No entries yet."|tr(locale) }}</p>{% endfor %}</div>{% endcall %}
+  {% set r %}<span>{{ "Investment ownership history"|tr(locale) }}</span><b>{{ investment_entries|length }} {{ chevron() }}</b>{% endset %}
+  {% call sheet('Investment ownership history'|tr(locale), r) %}<div class="phone-rows">{% for row in investment_entries %}<div class="phone-row"><span>{{ row.asset_name }}<small>{{ row.date }} · {{ row.owner }} · {{ row.account_name }} · <bdi dir="ltr">{{ row.ref }}</bdi></small></span><b><bdi class="fig">{{ row.units|money(True, 4) }} {{ row.unit }}</bdi></b></div>{% else %}<p class="phone-note">{{ "No investment ownership changes yet."|tr(locale) }}</p>{% endfor %}</div>{% endcall %}
+</div>
+{% endblock %}

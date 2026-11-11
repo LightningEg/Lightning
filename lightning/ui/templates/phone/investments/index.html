@@ -41,7 +41,7 @@
 {% else %}
 {% set ph = invest_phone %}
 {{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}
-{% include "investments/_explain.html" %}
+{% include "phone/investments/_explain.html" %}
 {% if investment_report.missing %}<p class="flash">Prices missing: {% for issue in investment_report.missing %}{{ issue.asset }}{% if not loop.last %}, {% endif %}{% endfor %}. Their value may be out of date.</p>{% endif %}
 
 {% if since_return and (since_return.percent is not none or since_return.annualized) %}<div class="phone-rows phone-invest-return"><div class="phone-row"><span>{{ ('XIRR' if since_return.annualized else 'Return')|tr(locale) }}<small>{% if since_return.explanation %}{{ since_return.explanation|tr(locale) }}{% else %}{{ ('Held {n} day' if since_return.days_held == 1 else 'Held {n} days')|tr(locale, n=since_return.days_held) }}{% endif %}</small></span><b>{% if since_return.percent is not none %}{{ since_return.percent|signed_pct }}{{ ('% a year' if since_return.annualized else '%')|tr(locale) }}{% else %}—{% endif %}</b></div></div>{% endif %}

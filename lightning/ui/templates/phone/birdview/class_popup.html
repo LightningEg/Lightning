@@ -1,0 +1,4 @@
+{# An investment class on the phone (3AY17): its holdings as rows. #}
+<section class="app-popup-content phone-txn-sheet"><h2 class="phone-sheet-title" id="app-popup-title">{{ asset_class.name|tr(locale) }}</h2><p class="phone-note">Owned positions as of {{ as_of }} · other owners excluded.</p>
+<div class="phone-rows">{% for row in rows %}<div class="phone-row"><span>{{ row.asset }}<small>{{ row.account }} · {{ row.quantity }} {{ row.unit }}</small></span><b><bdi class="fig">{{ row.value|money }}</bdi></b></div>{% else %}<p class="phone-note">{{ "No owned holdings in this class on this date."|tr(locale) }}</p>{% endfor %}</div>
+<a class="btn phone-save" href="/investments">{{ "Open Investments"|tr(locale) }}</a></section>

@@ -56,8 +56,8 @@ def test_phone_content_fits_and_controls_remain_readable(phone_page, width):
     page.set_viewport_size({"width": width, "height": 800})
 
     page.goto(origin + "/counterparties")
-    page.locator(".alias-details summary").first.click()
-    save = page.locator(".alias-submit").first
+    page.locator('section[aria-labelledby="cp-list"] .phone-sheet-row > summary').first.click()   # a name's sheet (3AY17)
+    save = page.locator('.phone-sheet-row[open] form:has(input[name=alias]) button').first
     assert save.is_visible()
     assert save.bounding_box()["height"] >= 48
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")

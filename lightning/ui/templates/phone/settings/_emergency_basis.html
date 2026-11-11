@@ -1,0 +1,5 @@
+{# The emergency fund's basis on the phone (3AY17): months of income or of spending. #}
+<fieldset class="phone-segment" data-two aria-label="{{ 'Count it in months of'|tr(locale) }}"><legend class="phone-note">{{ 'Emergency fund'|tr(locale) }} · {{ 'Count it in months of'|tr(locale) }}</legend>
+  <label><input type="radio" name="emergency_basis" value="income"{% if emergency_basis != 'spending' %} checked{% endif %}><span>{{ 'Income'|tr(locale) }}</span></label>
+  <label><input type="radio" name="emergency_basis" value="spending"{% if emergency_basis == 'spending' %} checked{% endif %}><span>{{ 'Spending'|tr(locale) }}</span></label>
+</fieldset>

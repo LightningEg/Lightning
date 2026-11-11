@@ -1,0 +1,15 @@
+{# Age of Money and the spending calendar on the phone (3AY17): the age leads, then each day of the month as a row. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Age of Money and spending calendar'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Age of Money and spending calendar'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<section class="phone-hero has-seam" aria-labelledby="lead-heading"><div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig.age_of_money.label }}</div>
+  <div class="phone-lead">{% if age.days is not none %}{{ age.days|money }} <small>{{ 'days'|tr(locale) }}</small>{% else %}—{% endif %}</div>
+  <p class="phone-hero-line">{% if age.days is none %}{{ 'Unavailable until the sampled spending has known cash dates.'|tr(locale) }}{% else %}{{ 'Amount-weighted age of cash used by your last {count} payments in the profile currency.'|tr(locale, count=age.payments) }}{% if age.previous_days is not none %} {{ 'Previous sample: {days} days.'|tr(locale, days=age.previous_days|money) }}{% endif %}{% endif %}</p></section>
+<p class="phone-note">{{ 'Cash is consumed oldest first. Transfers preserve age. Opening cash has unknown age; investment purchases are not spending samples. This is past cash timing, not how long your money will last.'|tr(locale) }}</p>
+<section class="phone-section" aria-labelledby="cal-head"><header class="phone-section-head"><h2 id="cal-head">{{ 'Spending calendar'|tr(locale) }}</h2></header>
+  <form method="get" class="phone-form"><label>{{ 'Month'|tr(locale) }}<input type="month" name="month" value="{{ month }}" required></label><button class="btn phone-save">{{ 'Show'|tr(locale) }}</button></form>
+  <p class="phone-note">{{ 'Recorded spending less refunds, by posting date. Transfers and money held for others are excluded.'|tr(locale) }}</p>
+  <div class="phone-rows">{% for day in days %}<a class="phone-row" href="/transactions?date_from={{ day.date }}&amp;date_to={{ day.date }}"><span>{{ day.date }}<small>{{ '{count} transactions'|tr(locale, count=day.transactions) }}</small></span><b><bdi class="fig">{{ day.amount|money }}</bdi></b></a>{% else %}<p class="phone-note">{{ 'No spending in this month.'|tr(locale) }}</p>{% endfor %}</div>
+</section>
+{% endblock %}

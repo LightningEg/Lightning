@@ -1,0 +1,21 @@
+{# NF-3AZ9 on the phone (3AY16): what changed in the period, each part a row that opens its sheet with the rows behind it. #}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% set labels = {'price': 'Price change on what you hold', 'fx': 'Exchange rates', 'sales': 'Gain from sales', 'income': 'Income, less tax and fees'} %}
+<section class="phone-section" id="what-changed" aria-labelledby="what-changed-h">
+  <header class="phone-section-head"><h2 id="what-changed-h">{{ 'What changed'|tr(locale) }}</h2><span>{{ explain.start }} {{ 'to'|tr(locale) }} {{ explain.end }}</span></header>
+  <div class="phone-rows">
+  {% for part in explain.parts %}
+    {% set row %}<span>{{ labels[part.key]|tr(locale) }}</span><b class="{{ part.amount|tone }}"><bdi class="fig">{{ part.amount|money(True, 0) }}</bdi></b>{% endset %}
+    {% call sheet(labels[part.key]|tr(locale), row) %}
+    {% if part.href %}<a class="phone-row" data-popup-open href="{{ part.href }}"><span>{{ 'See the sales'|tr(locale) }}</span><b>{{ chevron() }}</b></a>{% endif %}
+    <div class="phone-rows">{% for row in part.rows %}{% set href = row.href or ('/investments/holding/' ~ row.asset_id ~ '?account=' ~ row.account_id ~ '&date=' ~ explain.end ~ '&start=' ~ explain.start if row.asset_id else '') %}<{{ 'a' if href else 'div' }} class="phone-row"{% if href %} href="{{ href }}"{% if row.href %} data-popup-open{% endif %}{% endif %}><span>{{ row.name|tr(locale) if row.href else row.name }}</span><b class="{{ row.amount|tone }}"><bdi class="fig">{{ row.amount|money(True, 0) }}</bdi></b></{{ 'a' if href else 'div' }}>{% else %}{% if not part.href %}<p class="phone-note">{{ 'Nothing in this part for the period.'|tr(locale) }}</p>{% endif %}{% endfor %}</div>
+    {% endcall %}
+  {% endfor %}
+  <div class="phone-row"><span><b>{{ fig.result.label }}</b></span>{% if explain.total is not none %}<b class="{{ explain.total|tone }}"><bdi class="fig">{{ explain.total|money(True, 0) }}</bdi></b>{% else %}<b>—</b>{% endif %}</div>
+  </div>
+  <p class="phone-note">{{ 'Money you added or took out is not part of the result: {added} in, {out} out.'|tr(locale, added=explain.new_money|money(False, 0) ~ ' ' ~ base, out=explain.withdrawn|money(False, 0) ~ ' ' ~ base) }} <a data-popup-open href="{{ explain.money_href }}">{{ 'See the transactions'|tr(locale) }}</a></p>
+  {% if explain.total is none %}<p class="phone-note">{{ 'A dated price is missing, so the parts cannot be added up.'|tr(locale) }} {% for issue in explain.missing %}{{ issue.asset }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  {% if explain.stale %}<p class="phone-note">{{ 'These prices are old, so their change may be out of date:'|tr(locale) }} {% for h in explain.stale %}{{ h.name }} ({{ h.price_date }}){% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  {% if explain.at_cost %}<p class="phone-note">{{ 'Counted at what you paid, with no gain yet:'|tr(locale) }} {% for h in explain.at_cost %}{{ h.asset }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
+  <p class="phone-note">{{ 'This explains what happened. It is not advice on what to buy or sell.'|tr(locale) }}</p>
+</section>

@@ -2,10 +2,10 @@
 {% from "planning/_macros.html" import status %}
 {% block title %}Recurring · Cash planning{% endblock %}
 {% block heading %}<div><h1>{{ 'Recurring'|tr(locale) }}</h1>{% set st = answer %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p></div>{% endblock %}
-{% block top_actions %}<a class="btn{{ '' if phone_mode() else ' primary' }}" data-popup-open href="/plan/items/new?kind=BILL">{{ 'Add recurring item'|tr(locale) }}</a>{% endblock %}
+{% block top_actions %}<a class="btn primary" data-popup-open href="/plan/items/new?kind=BILL">{{ 'Add recurring item'|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import kpi_row %}
-{% if not phone_mode() %}{{ kpi_row(recurring_kpis, base, 'Your fixed costs'|tr(locale)) }}{% endif %}
+{{ kpi_row(recurring_kpis, base, 'Your fixed costs'|tr(locale)) }}
 {% for r in rows %}{% if r.last_paid and r.last_paid.paid_amount is not none and r.last_paid.paid_amount != r.item.amount and r.item.frequency.value != 'ONCE' %}
 <section class="card stack" aria-label="Review changed recurring amount">
   <h2>Review {{ r.item.name }} amount</h2>
@@ -19,8 +19,8 @@
   <header class="overview-section-head"><h2 id="recurring-totals">{{ 'Every month'|tr(locale) }}</h2></header>
   <article class="card">
     <div class="section-head"><div><h2>{{ 'Bills and subscriptions'|tr(locale) }}</h2></div></div>
-    {% if phone_mode() or not recurring_kpis %}<div class="plan-figure plan-figure-small">{{ monthly_out|money(False, 0) }} <small>{{ base }} a month</small></div>{% endif %}{% if (phone_mode() or not recurring_kpis) and fixed_tiles|length == 1 and fixed_tiles[0].value is not none %}<p class="muted small"><b>{{ '%.1f'|format(fixed_tiles[0].value) }}%</b> {{ fixed_tiles[0].label }} · {{ fixed_tiles[0].sub }}</p>{% endif %}
-    {% if subscriptions_per_year and (phone_mode() or not recurring_kpis) %}<p class="muted small">Subscriptions come to {{ subscriptions_per_year|money(places=0) }} a year.</p>{% endif %}
+    {% if not recurring_kpis %}<div class="plan-figure plan-figure-small">{{ monthly_out|money(False, 0) }} <small>{{ base }} a month</small></div>{% endif %}{% if not recurring_kpis and fixed_tiles|length == 1 and fixed_tiles[0].value is not none %}<p class="muted small"><b>{{ '%.1f'|format(fixed_tiles[0].value) }}%</b> {{ fixed_tiles[0].label }} · {{ fixed_tiles[0].sub }}</p>{% endif %}
+    {% if subscriptions_per_year and not recurring_kpis %}<p class="muted small">Subscriptions come to {{ subscriptions_per_year|money(places=0) }} a year.</p>{% endif %}
     {% from "partials/charts.html" import bars %}{{ bars(bill_bars, 'spend', 'No bills or subscriptions yet.') }}
   </article>
 </section>

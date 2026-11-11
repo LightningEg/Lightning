@@ -1,0 +1,55 @@
+{# A gold or physical-items account on the phone (3AY17): its total leads, each item a row whose sheet holds its facts,
+   record a purchase or sale, and a manual value; then the cash activity. #}
+{% extends "base.html" %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% from "phone/partials/hero.html" import hero with context %}
+{% block title %}{{ account.name }}{% endblock %}
+{% block heading %}<h1>{{ account.name }}</h1><p class="phone-note">{{ account.currency }} · {{ account.type_label|tr(locale) }}</p>{% endblock %}
+{% block content %}{% set session = request.state.session_token|default('') %}
+{{ hero('In this account'|tr(locale), total, (fig.what_you_own.label ~ ' ' ~ owned|money) if held else '', unit=account.currency) }}
+{% if held %}<p class="phone-note">{{ 'Held for others'|tr(locale) }} <bdi class="fig">{{ held|money }}</bdi></p>{% endif %}
+<a class="btn primary phone-save" href="/investments/gold/new">{{ 'Add gold'|tr(locale) }}</a>
+<section class="phone-section" id="physical-items" aria-labelledby="pa-items"><header class="phone-section-head"><h2 id="pa-items">{{ 'Physical items'|tr(locale) }}</h2></header>
+  <p class="phone-note">{{ 'Value uses matching-karat price per gram or a dated manual valuation.'|tr(locale) }}</p>
+  {% if items %}<div class="phone-rows">{% for item in items %}
+    {% set r %}<span>{{ item.name }}<small>{{ item.held|money(False,0) }} × {{ item.karat }}K · <bdi class="fig">{{ (item.gold_weight * item.held)|money(False,3) }} g</bdi></small></span><b><bdi class="fig">{{ item.value|money if item.position and item.position.value is not none else '—' }}</bdi></b>{% endset %}
+    {% call sheet(item.name, r) %}
+    <p class="phone-note">{{ item.item_kind }}{% if item.details %} · {{ item.details }}{% endif %}</p>
+    <dl class="phone-facts">
+      <div><dt>{{ 'Fine gold'|tr(locale) }}</dt><dd><bdi class="fig">{{ item.fine_gold|money(False,3) }} g</bdi></dd></div>
+      <div><dt>{{ 'Cost'|tr(locale) }}</dt><dd><bdi class="fig">{{ item.position.cost_basis|money if item.position else '—' }}</bdi></dd></div>
+      <div><dt>{{ 'Valuation'|tr(locale) }}</dt><dd>{% if item.position %}{{ ('At cost' if item.position.price_source == 'COST' else (item.position.price_source or 'Missing'))|tr(locale) }}{% if item.position.price_date %} · {{ item.position.price_date }}{% endif %}{% else %}{{ 'No pieces held'|tr(locale) }}{% endif %}</dd></div>
+    </dl>
+    <a class="btn phone-save" data-popup-open href="/accounts/{{ account.id }}/items/{{ item.asset_id }}/edit">{{ 'Edit'|tr(locale) }}</a>
+    <form method="post" action="/accounts/{{ account.id }}/items/{{ item.asset_id }}/trade" class="phone-form phone-section"><input type="hidden" name="submission" value="{{ new_submission() }}">
+      <header class="phone-section-head"><h2>{{ 'Purchase, sale, or add an existing holding'|tr(locale) }}</h2></header>
+      <label>{{ 'Type'|tr(locale) }}<select name="action"><option value="buy">{{ 'Record purchase'|tr(locale) }}</option><option value="sell">{{ 'Record sale'|tr(locale) }}</option><option value="holding">{{ 'Add existing holding'|tr(locale) }}</option></select></label>
+      <label>{{ 'Date'|tr(locale) }}<input name="date" value="{{ today }}" type="text" placeholder="yyyy-mm-dd" inputmode="numeric" autocomplete="off" data-smart-date required></label>
+      <label>{{ 'Units'|tr(locale) }}<input name="quantity" type="number" min="1" step="1" value="1" required></label>
+      <label>{{ 'Amount'|tr(locale) }}<input name="total" inputmode="decimal" placeholder="{{ 'Including fees'|tr(locale) }}" required></label>
+      <label>{{ 'Workmanship (purchase only)'|tr(locale) }}<input name="workmanship" inputmode="decimal" value="0"></label>
+      <label>{{ 'Fees'|tr(locale) }} · {{ 'inside the amount'|tr(locale) }}<input name="fees" inputmode="decimal" value="0"></label>
+      <label>{{ 'Cash account'|tr(locale) }}<select name="cash_account_id" required data-cash-for-trade data-own-picker><option value="">{{ 'Choose…'|tr(locale) }}</option>{% for a in cash_accounts if a.id != account.id and a.account_type.value in ('CASH','BANK','DEPOSIT','BROKERAGE') %}<option value="{{ a.id }}">{{ a.name }} · {{ a.currency }}</option>{% endfor %}</select></label>
+      <label>{{ 'Held for (optional)'|tr(locale) }}<input name="owner" list="owners" data-own-suggestions placeholder="{{ 'You, or a saved name'|tr(locale) }}"></label>
+      <label>{{ 'Notes'|tr(locale) }}<input name="notes" placeholder="{{ 'Optional'|tr(locale) }}"></label>
+      <button class="btn primary phone-save">{{ 'Save'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ session }}"></form>
+    <form method="post" action="/accounts/{{ account.id }}/items/{{ item.asset_id }}/value" class="phone-form phone-section">
+      <header class="phone-section-head"><h2>{{ 'Update estimated value manually'|tr(locale) }}</h2></header>
+      <label>{{ 'As of'|tr(locale) }}<input name="date" value="{{ today }}" type="text" placeholder="yyyy-mm-dd" inputmode="numeric" autocomplete="off" data-smart-date required></label>
+      <label>{{ 'Value'|tr(locale) }} ({{ account.currency }}) · {{ 'all pieces'|tr(locale) }}<input name="value" inputmode="decimal" required></label>
+      <label>{{ 'Notes'|tr(locale) }}<input name="notes"></label>
+      <button class="btn phone-save">{{ 'Save value'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ session }}"></form>
+    {% if item.history %}<p class="phone-note">{% for v in item.history %}{{ v.date }} · {{ (v.total_value_e6 / 1000000)|money }}{% if not loop.last %}; {% endif %}{% endfor %}</p>{% endif %}
+    {% endcall %}{% endfor %}</div>
+  {% else %}<p class="phone-note">{{ 'Add a named item such as a gold ring, then record its purchase or what you already own.'|tr(locale) }}</p>{% endif %}
+  <a class="btn phone-save" data-popup-open href="/accounts/{{ account.id }}/items/new">{{ 'Add item'|tr(locale) }}</a>
+</section>
+<datalist id="owners">{% for p in counterparties %}<option value="{{ p.name }}">{% endfor %}</datalist>
+{% if other_holdings %}<section class="phone-section"><header class="phone-section-head"><h2>{{ 'Other tracked holdings'|tr(locale) }}</h2></header><div class="phone-rows">{% for h in other_holdings %}<div class="phone-row"><span>{{ h.asset_name }}<small>{{ h.quantity|money(False,3) }} {{ h.unit }}</small></span><b><bdi class="fig">{{ h.value|money if h.value is not none else '—' }}</bdi></b></div>{% endfor %}</div></section>{% endif %}
+<section class="phone-section" aria-labelledby="pa-cash"><header class="phone-section-head"><h2 id="pa-cash">{{ 'Cash transaction activity'|tr(locale) }}</h2></header>
+  {% if rows %}<div class="phone-rows">{% for r in rows %}<a class="phone-row" href="/transactions/{{ r.txn_id }}/sheet"><span>{% if r.counterparty or r.description %}{{ r.counterparty or r.description }}{% else %}{{ r.type_label|tr(locale) }}{% endif %}<small>{{ r.date }}{% if r.category_label %} · {{ r.category_label }}{% endif %}</small></span><b class="{{ r.amount|tone }}"><bdi class="fig">{{ r.amount|money(True) }}</bdi></b></a>{% endfor %}</div>
+  {% else %}<p class="phone-note">{{ 'No cash transactions recorded yet. Holdings and manual valuations are listed above.'|tr(locale) }}</p>{% endif %}
+</section>
+<div class="phone-rows"><a class="phone-row" data-popup-open href="/accounts/{{ account.id }}/edit"><span>{{ 'Edit account'|tr(locale) }}</span><b>{{ chevron() }}</b></a></div>
+<script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{document.querySelectorAll('[data-cash-for-trade]').forEach(cash=>{const action=cash.form?.elements.action;if(!action)return;const box=cash.closest('label');const sync=()=>{const holding=action.value==='holding';cash.required=!holding;cash.disabled=holding;if(box)box.hidden=holding};action.addEventListener('change',sync);sync()})})();</script>
+{% endblock %}

@@ -131,7 +131,7 @@ class Mohab:
         screen = self.b.go("Investments", "Prices")
         fields = {}
         for name, price in typed.items():
-            rows = [block for block in re.findall(r"(?s)<tr\b.*?</tr>", screen.html)
+            rows = [block for block in re.findall(r'(?s)<tr\b.*?</tr>|<div class="phone-row"[^>]*>.*?</div>', screen.html)   # PC table or phone rows
                     if name.casefold() in re.sub(r"<[^>]+>", " ", block).casefold()]
             names = [re.findall(r'<(?:input|select|textarea)\b[^>]*\bname="([^"]+)"', row)
                      for row in rows]
@@ -722,7 +722,7 @@ def _exercise_cash_ownership(o: Mohab) -> None:
     gross_before = money(account.after("In this account"))
     # Mom was saved by an import as a plain name. Before money can be held for her, he says she is a person.
     names = b.open("/counterparties")
-    mom_id = re.search(r'name="counterparty_id" value="(\d+)">\s*<input type="text" name="name" value="Mom"', names.html).group(1)
+    mom_id = re.search(r'name="counterparty_id" value="(\d+)">\s*(?:<label>[^<]*)?<input type="text" name="name" value="Mom"', names.html).group(1)
     assert b.client.post("/counterparties", data={"counterparty_id": mom_id, "counterparty_action": "kind:PERSON"}).status_code == 200
     account = b.go("CIB Payroll")
     b.click("Change ownership")

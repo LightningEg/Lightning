@@ -1,0 +1,13 @@
+{# A statement import step on the phone (3AY17): one column. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Choose worksheets'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Choose worksheets'|tr(locale) }}</h1><p class="phone-note">{{ account.name }}</p>{% endblock %}
+{% block content %}<section class="phone-form phone-fields"><p>{{ 'Choose the worksheet to import from each workbook. Nothing is posted yet.'|tr(locale) }}</p>
+<form method="post" enctype="multipart/form-data" action="/accounts/{{ account.id }}/import/sheets">
+<input type="hidden" name="bundle" value="{{ bundle|tojson|forceescape }}"><input type="hidden" name="encoding" value="{{ encoding }}">
+{% for index, name in sheets.items() %}<input type="hidden" name="sheet_{{ index }}" value="{{ name }}">{% endfor %}
+{% for choice in choices %}<div class="field"><label for="sheet-{{ choice.index }}">{{ choice.filename }}</label>
+<input id="sheet-{{ choice.index }}" name="sheet_{{ choice.index }}" list="sheet-options-{{ choice.index }}" data-own-suggestions autocomplete="off" placeholder="{{ 'Choose a worksheet'|tr(locale) }}" required>
+<datalist id="sheet-options-{{ choice.index }}">{% for name in choice.sheets %}<option value="{{ name }}">{% endfor %}</datalist></div>{% endfor %}
+<div class="phone-actions"><button class="btn primary phone-save">{{ 'Review statement'|tr(locale) }}</button><a class="btn phone-save" href="/accounts/{{ account.id }}/import">{{ 'Cancel'|tr(locale) }}</a></div>
+<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></section>{% endblock %}

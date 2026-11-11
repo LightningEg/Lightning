@@ -1,0 +1,51 @@
+{# A statement import step on the phone (3AY17): one column. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Match CSV columns'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Match your columns'|tr(locale) }}</h1><p class="phone-note">{{ account.name }} · {{ filename }}</p>{% endblock %}
+{% block content %}
+<section class="phone-form phone-fields">
+  <p class="phone-note">{{ 'Check the columns we matched. We remember them for this bank.'|tr(locale) }}</p>
+  {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
+  {% if reject_prompt %}<p class="phone-note">{{ 'This prompt gives your AI tool what it cannot guess: your file’s header, what Lightning rejected and the columns it accepts. It fixes the file for you instead of you hunting for the problem.'|tr(locale) }}</p>
+  {% set ai_text = reject_prompt %}<div class="phone-actions">{% include "partials/ai_prompt.html" %}</div>{% endif %}
+  {% macro column(name, label, required=False, empty='Not in file') -%}
+  <div class="field"><label for="map_{{ name }}">{{ label|tr(locale) }}</label><select id="map_{{ name }}" name="map_{{ name }}"{{ ' required' if required }}><option value="">{{ empty|tr(locale) }}</option>{% for h in headers %}<option value="{{ h }}" {{ 'selected' if mapping.get(name) == h }}>{{ h }}</option>{% endfor %}</select></div>
+  {%- endmacro %}
+  <form method="post" enctype="multipart/form-data" action="/accounts/{{ account.id }}/import/map" class="import-map-form">
+    <input type="hidden" name="payload" value="{{ payload }}"><input type="hidden" name="filename" value="{{ filename }}">{% if bundle %}<input type="hidden" name="bundle" value='{{ bundle|tojson }}'>{% endif %}
+    <span class="phone-note">{{ 'Amounts'|tr(locale) }}</span><div class="phone-segment import-amount-model" role="radiogroup" aria-label="{{ 'How does this statement show amounts?'|tr(locale) }}">
+      <label><input type="radio" name="amount_model" value="SINGLE" {{ 'checked' if suggested_amount_model == 'SINGLE' }}><span>{{ 'One amount column'|tr(locale) }}</span></label>
+      <label><input type="radio" name="amount_model" value="SEPARATE" {{ 'checked' if suggested_amount_model == 'SEPARATE' }}><span>{{ 'In and out columns'|tr(locale) }}</span></label>
+      <label><input type="radio" name="amount_model" value="BALANCE" {{ 'checked' if suggested_amount_model == 'BALANCE' }}><span>{{ 'Balance column only'|tr(locale) }}</span></label>
+    </div>
+    <div class="phone-fields">
+      {{ column('Date', 'Date', True, 'Choose date column…') }}
+      <div class="field-pair" data-amount-fields="SINGLE" {{ 'hidden' if suggested_amount_model != 'SINGLE' }}>
+        {{ column('Amount', 'Amount column', False, 'Choose amount column…') }}
+        <label class="check small"><input type="checkbox" name="amount_sign" value="invert" {{ 'checked' if invert_amount }}> {{ 'Reverse the sign'|tr(locale) }}</label>
+      </div>
+      <div class="field-pair" data-amount-fields="SEPARATE" {{ 'hidden' if suggested_amount_model != 'SEPARATE' }}>{{ column('Inflow', 'Money in', False, 'Choose inflow column…') }}</div>
+      <div class="field-pair" data-amount-fields="SEPARATE" {{ 'hidden' if suggested_amount_model != 'SEPARATE' }}>{{ column('Outflow', 'Money out', False, 'Choose outflow column…') }}</div>
+      {% for key in optional %}{{ column(key, 'Category group' if key == 'Group' else 'Money in or out (DR/CR)' if key == 'Direction' else key) }}{% endfor %}
+    </div>
+    <div class="phone-actions"><button class="btn primary phone-save">{{ 'Preview rows'|tr(locale) }}</button><a class="btn phone-save" href="/accounts/{{ account.id }}/import">{{ 'Cancel'|tr(locale) }}</a></div>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+</section>
+<script nonce="{{ request.state.csp_nonce|default('') }}">
+(() => {
+  const form = document.querySelector('.import-map-form');
+  if (!form) return;
+  const sync = () => {
+    const selected = form.querySelector('[name="amount_model"]:checked')?.value || 'SINGLE';
+    form.querySelectorAll('[data-amount-fields]').forEach((group) => {
+      const active = group.dataset.amountFields === selected;
+      group.hidden = !active;
+      group.querySelectorAll('select').forEach((field) => { field.required = active; field.disabled = !active; });
+      group.querySelectorAll('input[type="checkbox"]').forEach((field) => { field.disabled = !active; });
+    });
+  };
+  form.addEventListener('change', sync);
+  sync();
+})();
+</script>
+{% endblock %}

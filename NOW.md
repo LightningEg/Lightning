@@ -6,6 +6,7 @@ Reserved codes: none
 
 | Who | Work | Files | Since |
 |---|---|---|---|
+| Claude | O7 finish: 3AY15-17, 3AY4/8/9/10, 3AU3-4 | `lightning/ui/phone/`, `lightning/ui/templates/phone/`, `static/phone*`, `tests/phone_pc_templates.txt` | 2026-11-11 |
 | Claude | O5 | `lightning/deposits/` | 2026-11-10 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 

@@ -247,7 +247,10 @@ document.addEventListener("click", (event) => {
   const done = target.closest("[data-sheet-close]");
   if (done) { event.preventDefault(); done.closest("details").open = false; return; }
   const open = document.querySelector(".phone-sheet-row[open]");
-  if (!open || target.closest(".phone-sheet-panel")) return;
+  if (!open || target.closest("#app-popup, dialog")) return;   // a popup opened from the sheet takes its own taps
+  const popupLink = target.closest(".phone-sheet-panel [data-popup-open]");
+  if (popupLink) { open.open = false; return; }                 // the popup replaces the sheet; the click goes on
+  if (target.closest(".phone-sheet-panel")) return;
   if (target.closest("summary") === open.querySelector(":scope > summary")) return;  // its own row toggles it
   event.preventDefault();
   event.stopPropagation();

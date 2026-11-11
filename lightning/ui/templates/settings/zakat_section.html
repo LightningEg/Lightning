@@ -4,7 +4,7 @@
   <form method="post" action="/zakat/settings">
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
     <div class="field"><label for="zakat-day">{{ 'Zakat day'|tr(locale) }}</label>
-      <input id="zakat-day" name="zakat_day" type="date"{% if phone_mode() %} data-native-date{% endif %} value="{{ zakat_settings.zakat_day or '' }}">
+      <input id="zakat-day" name="zakat_day" type="date" value="{{ zakat_settings.zakat_day or '' }}">
       <small class="muted">{{ 'The next zakat day is 354 days after this one: it follows the lunar year.'|tr(locale) }}</small></div>
     <div class="field"><label for="zakat-nisab">{{ 'Nisab you type'|tr(locale) }} ({{ base }})</label>
       <input id="zakat-nisab" name="typed_nisab" inputmode="decimal" value="{{ zakat_settings.typed_nisab or '' }}" placeholder="{{ 'Used only when there is no gold price'|tr(locale) }}">

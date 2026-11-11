@@ -42,8 +42,11 @@ def test_purchase_preview_edit_save_and_export_download(c, setup, phone, tmp_pat
             page.locator('#app-popup-content button.btn.primary').click()
             page.wait_for_url('**/plan/loans*')
             # The sheet leaves the URL on /plan/loans while saving, so the URL alone does not wait for the new row.
-            page.locator('.plan-loan').get_by_role('link', name='Phone', exact=True).wait_for()
-            page.locator('a[href$="/early-payment"]').click()
+            if phone:   # 3AY16: a loan is a row that opens its sheet, where Pay early lives
+                page.locator('.phone-sheet-summary', has_text='Phone').first.click()
+            else:
+                page.locator('.plan-loan').get_by_role('link', name='Phone', exact=True).wait_for()
+            page.locator('a[href$="/early-payment"]:visible').first.click()
             page.locator('#app-popup-content input[name=principal]').fill('1000')
             page.locator('#app-popup-content input[role=combobox]').fill('CIB')
             page.locator('#app-popup-content [role=option]', has_text='CIB Current').click()
@@ -52,7 +55,7 @@ def test_purchase_preview_edit_save_and_export_download(c, setup, phone, tmp_pat
             assert '2,000' in page.locator('#app-popup-content').inner_text()
             page.locator('#app-popup-content button.btn.primary').click()
             page.wait_for_url('**/plan/loans*')
-            page.locator('a[href$="/early-payment"]').wait_for()
+            page.locator('a[href$="/early-payment"]').first.wait_for(state='attached')
             page.goto(host.origin + '/settings')
             page.locator('a[href="/exports/all"]').click()
             with page.expect_download() as result:
