@@ -124,6 +124,7 @@ _TIP = re.compile(r"""(\s(?:title|aria-label|data-tip)=)(["'])(.*?)\2""", re.S |
 _STAMP = r"(?<![\w./-])(\d{4}-(?:0[1-9]|1[0-2])(?:-(?:0[1-9]|[12]\d|3[01]))?)(?![\w/]|-\d|\.\d)"
 _RANGE = re.compile(_STAMP + r"( to | لحد | – |–| - )" + _STAMP)
 _ONE = re.compile(_STAMP)
+_ON_DAY = re.compile(r"\bon (today|yesterday)\b")
 _SENTENCE_START = re.compile(r"(?:^|[.:·؟?!\n]\s*|[(«“\"]\s*)$")
 
 
@@ -143,7 +144,8 @@ def human_text(text: str, locale: str = "en", today: date | None = None) -> str:
         return text
     now = today or _today()
     text = _RANGE.sub(lambda m: range_text(m.group(1), m.group(3), locale, now), text)
-    return _ONE.sub(lambda m: _one(m, text, locale, now), text)
+    text = _ONE.sub(lambda m: _one(m, text, locale, now), text)
+    return _ON_DAY.sub(r"\1", text)  # "reached your account on today" -> "... today"
 
 
 def human_dates(page: str, locale: str = "en", today: date | None = None) -> str:

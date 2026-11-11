@@ -49,3 +49,9 @@ def test_today_comes_from_lightning_today_and_the_filters_are_registered(monkeyp
     assert day_text("2026-11-07") == "Yesterday" and range_text("2026-11-01", "2026-11-08") == "1–8 Nov"
     render = templates.env.from_string("{{ d|day('en') }} · {{ m|month('ar') }} · {{ a|day_range(b, 'en') }}").render
     assert render(d="2026-11-08", m="2026-11", a="2026-11-01", b="2026-11-08") == "Today · نوفمبر ٢٠٢٦ · 1–8 Nov"
+
+
+def test_a_sentence_says_today_not_on_today():
+    from lightning.ui.date_text import human_text
+    assert human_text("reached your account on 2026-11-08", "en", NOW) == "reached your account today"
+    assert human_text("Due 2026-11-07 · until 2026-12-01", "en", NOW) == "Due yesterday · until 1 Dec"
