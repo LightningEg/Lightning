@@ -734,14 +734,15 @@ const openCalendar = (text, button) => {
   panel.style.left = `${Math.max(8, Math.min(rect.left, window.innerWidth - panel.offsetWidth - 8))}px`;
   if (room < panel.offsetHeight + 12 && rect.top > room) panel.style.top = `${Math.max(8, rect.top - panel.offsetHeight - 6)}px`;
   else panel.style.top = `${rect.bottom + 6}px`;
-  openCal = { panel, text, button };
+  openCal = { panel, text, button, at: Date.now() };
   button?.setAttribute("aria-expanded", "true");
   panel.querySelector(`[data-day="${focus}"]`)?.focus();
 };
 document.addEventListener("mousedown", (e) => {
   if (openCal && !openCal.panel.contains(e.target) && !e.target.closest("[data-open-date-picker]")) closeCalendar();
 });
-document.addEventListener("scroll", (e) => { if (openCal && !openCal.panel.contains(e.target)) closeCalendar(); }, true);
+// A scroll closes the calendar, except the sheet scrolling the tapped field into view as the calendar opens.
+document.addEventListener("scroll", (e) => { if (openCal && !openCal.panel.contains(e.target) && Date.now() - openCal.at > 400) closeCalendar(); }, true);
 window.addEventListener("resize", closeCalendar);
 // Alt+Down in a date field opens the calendar, as in the browser's own.
 document.addEventListener("keydown", (e) => {
