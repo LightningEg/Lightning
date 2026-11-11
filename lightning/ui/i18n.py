@@ -3653,6 +3653,14 @@ ARABIC_UI = {
     'From last month, your schedule or your average': 'من الشهر اللي فات، أو جدولك، أو متوسطك',
     'Spent {amt}': 'اتصرف {amt}',
     'No everyday categories yet.': 'مفيش فئات يومية لسه.',
+    'Delete the copy': 'امسح النسخة المكررة',
+    'Keep both': 'سيب الاتنين',
+    'Both kept.': 'سبنا الاتنين.',
+    'Copy deleted.': 'اتمسحت النسخة المكررة.',
+    'Recorded twice? The copy goes; the first one stays, with both notes.': 'اتسجلت مرتين؟ النسخة المكررة هتتمسح، والأولى هتفضل ومعاها ملاحظات الاتنين.',
+    'A payment': 'دفعة',
+    'These two are no longer offered as possible duplicates.': 'الاتنين دول مبقوش معروضين كتكرار محتمل.',
+    'These two are no longer offered.': 'الاتنين دول مبقوش معروضين.',
 }
 
 

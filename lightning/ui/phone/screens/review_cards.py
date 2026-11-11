@@ -1,8 +1,8 @@
 """Activity's To review, one row per card (IV-3AY8; owner picks 2026-11-11). Each card's Primary is its kind's own verb:
 a row nobody sorted *Looks right* (it files the row under the category it is usually given), a payment that looks monthly
 *Track it*, deposit interest *Match to deposit*, a bank message *Looks right*; *Change* opens the thing itself and *Skip*
-moves on. Possible duplicates have no card yet: no service lists them (they are merged from the register). The rest
-of the inbox's Activity items stay one card each with their own action."""
+moves on. Two entries that look like one payment recorded twice *Delete the copy* (the preview-checked merge, undoable)
+with Keep both beside it. The rest of the inbox's Activity items stay one card each with their own action."""
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -18,7 +18,7 @@ SORT_CARDS = 40     # a queue a thumb can finish; the register holds the rest
 
 @dataclass(frozen=True)
 class ReviewCard:
-    kind: str                      # sort | recurring | interest | sms | other
+    kind: str                      # sort | duplicate | recurring | interest | sms | other
     title: str
     detail: str = ""
     amount: Decimal | None = None
@@ -27,6 +27,8 @@ class ReviewCard:
     href: str = ""                 # the Primary opens this ...
     post: dict | None = None       # ... or posts this form: {action, fields}
     change: str = ""               # Change opens this
+    change_label: str = "Change"
+    second: dict | None = None     # a second answer beside Change: {label, action, fields}, posted
     review_id: str = ""            # an inbox item: Not now snoozes it
     popup: bool = False
     chips: tuple = field(default_factory=tuple)   # a sort card's other likely categories: ({id, label}, ...)
@@ -61,6 +63,29 @@ def _sort_cards(c, day: date) -> list[ReviewCard]:
     return cards
 
 
+DUPLICATE_DAYS = 90  # not money
+
+
+def _duplicate_cards(c, day: date) -> list[ReviewCard]:
+    from lightning.transactions.duplicates import possible_duplicates
+    cards = []
+    back = "/activity?tab=review"
+    for keep_id, drop_id in possible_duplicates(c, day - timedelta(days=DUPLICATE_DAYS), day):  # not money
+        keep, drop = c.transactions.get(keep_id), c.transactions.get(drop_id)
+        fingerprint = c.transactions.merge_preview(keep_id, drop_id).fingerprint
+        title = keep.counterparty or drop.counterparty or keep.description or "A payment"
+        days = keep.date if keep.date == drop.date else f"{min(keep.date, drop.date)} · {max(keep.date, drop.date)}"
+        cards.append(ReviewCard("duplicate", title, "Recorded twice? The copy goes; the first one stays, with both notes.",
+                                abs(c.transactions.summarize(keep).amount), days, "Delete the copy",
+                                post={"action": "/transactions/merge",
+                                      "fields": {"keep_id": keep_id, "drop_id": drop_id, "fingerprint": fingerprint,
+                                                 "return_to": back}},
+                                change=f"/transactions/merge?keep={keep_id}&drop={drop_id}", change_label="Compare",
+                                second={"label": "Keep both", "action": "/activity/keep-both",
+                                        "fields": {"keep_id": keep_id, "drop_id": drop_id}}))
+    return cards
+
+
 def _recurring_cards(c, day: date) -> list[ReviewCard]:
     cards = []
     for s in c.planning.suggestions(day):
@@ -87,7 +112,8 @@ def _inbox_card(item: dict) -> ReviewCard:
 
 
 def review_cards(c, day: date, inbox_items: list[dict]) -> list[ReviewCard]:
-    """Rows to sort first (newest first), then payments that look monthly, then the inbox's other Activity items. The
+    """Rows to sort first (newest first), then possible duplicates, then payments that look monthly, then the inbox's
+    other Activity items. The
     inbox's grouped "N payments have no category" item is left out: its rows are the sort cards."""
     rest = [i for i in inbox_items if not i["href"].startswith("/transactions?category_id=")]
-    return [*_sort_cards(c, day), *_recurring_cards(c, day), *(_inbox_card(i) for i in rest)]
+    return [*_sort_cards(c, day), *_duplicate_cards(c, day), *_recurring_cards(c, day), *(_inbox_card(i) for i in rest)]

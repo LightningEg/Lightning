@@ -199,6 +199,20 @@ def phone_router() -> APIRouter:
             return redirect("/activity?tab=review", exc.message)
         return redirect("/activity?tab=review")
 
+    @router.post("/activity/keep-both")
+    async def activity_keep_both(request: Request):
+        """Keep both on a possible-duplicates card: the pair is not offered again; nothing is merged (3AY8)."""
+        from lightning.core.dates import today
+        from lightning.core.errors import LightningError
+        from lightning.transactions.duplicates import keep_both
+        form = await request.form()
+        try:
+            keep_both(container(request), int(str(form.get("keep_id", "0")) or 0), int(str(form.get("drop_id", "0")) or 0),
+                      today())
+        except (LightningError, ValueError) as exc:
+            return redirect("/activity?tab=review", getattr(exc, "message", "These two are no longer offered."))
+        return redirect("/activity?tab=review", "Both kept.")
+
     @router.get("/transactions/{txn_id:int}/sheet")
     async def row_sheet(request: Request, txn_id: int):
         """A row's own sheet, to look at first (guideline C09.7, owner 2026-11-02): Edit opens the form."""
