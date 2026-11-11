@@ -52,7 +52,7 @@ def _gram_row(c, position, day: str):
         return None
     karat = int((asset.purity * 24).to_integral_value())  # not money
     valuation = _valuation(position.price_source, position.price_date)
-    if valuation["key"] == "missing" and position.price_source:
+    if valuation["key"] in {"missing", "estimate"} and position.price_source:
         valuation["key"] = "ref"
     return {"name": asset.name, "karat": karat, "grams": position.quantity, "cost": position.cost_basis,
             "value": position.value, "valuation": valuation, "kind": "Bar or coin"}
