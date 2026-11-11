@@ -62,3 +62,29 @@ def test_pc_and_phone_list_the_same_first_payments(sample):
     phone = [str(row.txn_id) for row in phone_results(sample, "food")["payments"][:5]]
     assert pc and pc == phone
     assert page.index("search-group") < page.index('href="/transactions/' + pc[0])
+
+
+def test_an_account_answers_its_money_out(sample):
+    """NF-7AQ5: "CIB last month" is the account's money out, Spending's own per-account figure."""
+    c = sample
+    got = answer(c, "CIB last month", SAMPLE_TODAY)
+    cib = next(a for a in c.accounts.list() if a.name == "CIB Payroll")
+    assert got["name"] == "CIB Payroll"
+    assert got["total"] == dict(c.reporting.spending_by_account("2026-09-01", "2026-09-30"))[cib.id] > 0
+    assert got["before"] == dict(c.reporting.spending_by_account("2026-08-01", "2026-08-31"))[cib.id]
+    assert got["count"] >= len(got["rows"]) > 0 and all(row.amount < 0 for row in got["rows"])
+    assert got["href"] == f"/transactions?account_id={cib.id}&date_from=2026-09-01&date_to=2026-09-30"
+
+
+def test_a_tag_answers_the_money_out_of_its_transactions(sample):
+    """NF-7AQ5: "#eid 2026" totals Spending's lines of the transactions the tag marks; without the # the
+    words are a category, account or payee first ("eid" is the payee Eidiya)."""
+    c = sample
+    ids = c.transactions.tag_transaction_ids("eid")
+    expected = sum(row["value"] for row in c.reporting.spending_lines("2026-01-01", "2026-12-31")
+                   if row["transaction_id"] in ids)
+    got = answer(c, "#eid 2026", SAMPLE_TODAY)
+    assert got["name"] == "#eid" and got["total"] == expected > 0
+    assert all(row.id in ids for row in got["rows"])
+    assert got["href"].startswith("/transactions?tag=eid&date_from=2026-01-01")
+    assert answer(c, "eid 2026", SAMPLE_TODAY)["name"] == "Eidiya"
