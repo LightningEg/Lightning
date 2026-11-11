@@ -31,6 +31,24 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 ## Waiting for the owner
 
 - **OW-3AI** (Feel) [Additional broker and institution logos still needed](../issues/3-polish-and-arabic/OW-3AI-institution-logos.md): ready
+- **IT-1E3** (Build) Owner: deploy the website receiver and rotate the analytics key, in [Audit public repositories for personal data and security exposure](../issues/1-easy-to-contribute/IT-1E-public-repository-security-audit.md)
+- **IT-1E5** (Build) Owner: apply the repository protections, in [Audit public repositories for personal data and security exposure](../issues/1-easy-to-contribute/IT-1E-public-repository-security-audit.md)
+- **BT-2AI6** (Protect) Owner: the phone survives an update and a reinstall, in [Phone data must survive every app update and reinstall](../issues/2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md)
+- **IT-2A5** (Protect) Reboot drill on an ordinary PC, in [Restore safety: durable intent, source-copy manifest, Windows marker publication, deterministic rep…](../issues/2-safe-for-real-money/IT-2A-restore-safety.md)
+- **IT-2C1** (Protect) Owner: run the ordinary-PC sheet, in [Ordinary-PC acceptance: recovery and faults, legacy import, native file pickers, unresolved-evidenc…](../issues/2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md)
+- **NF-4A5** (Everywhere) J6 cutover, in [Edit journal: edit anywhere, one home confirms](../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md)
+- **NF-4A6** (Everywhere) Real-device evidence, in [Edit journal: edit anywhere, one home confirms](../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md)
+- **NF-6A3** (Own) Publish the packs, in [Market data: price packs, collected in the cloud](../issues/6-market-data/NF-6A-price-packs.md)
+- **NF-6B2** (Own) A source that allows redistribution, in [Listed shares in Europe and the GCC: verify live boards and find a source that allows redistribution](../issues/6-market-data/NF-6B-europe-and-gcc-shares.md)
+- **NF-10A6** (Feel) Checkout, receipts and prices, in [Cosmetic parts, account-wide claiming and native acceptance](../issues/10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md)
+- **NF-10C4** (Feel) Owner steps 1-6 in order, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
+- **NF-10C5** (Feel) Review prices after 60 days of sales, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
+- **NF-10H4** (Own) Owner: prices, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
+- **NF-10H5** (Own) Owner: the extra seats already sold, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
+- **IV-3AY13** (Everywhere) Owner's phone check, in [Phone-first architecture](../issues/11-phone-ux/IV-3AY-phone-first-architecture.md)
+- **NF-11B7** (Everywhere) Owner: the developer account and the listing, in [Ship the phone on Google Play](../issues/11-phone-ux/NF-11B-ship-the-phone-on-google-play.md)
+- **NF-11B8** (Everywhere) Owner: closed test, 12 testers for 14 days, in [Ship the phone on Google Play](../issues/11-phone-ux/NF-11B-ship-the-phone-on-google-play.md)
+- **NF-11B9** (Everywhere) Owner: the phone check before production, in [Ship the phone on Google Play](../issues/11-phone-ux/NF-11B-ship-the-phone-on-google-play.md)
 
 ## By milestone
 
