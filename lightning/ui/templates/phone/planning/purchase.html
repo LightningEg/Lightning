@@ -14,7 +14,7 @@
   </dl>
   {% for key,value in values.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
 {% else %}
-  <label for="pp-name">{{ 'Name'|tr(locale) }}</label><input id="pp-name" name="name" {{ bad('name') }} value="{{ values.name }}" required class="{{ 'bad' if error_field == 'name' }}">
+  <label for="pp-name">{{ 'Name'|tr(locale) }}</label><input id="pp-name" name="name" {{ bad('name') }} value="{{ values.name }}" required class="{{ 'bad' if error_field == 'name' }}" spellcheck="false" autocomplete="off">
   <label for="pp-price">{{ 'Price still to pay'|tr(locale) }} ({{ base }})</label><input id="pp-price" name="price" {{ bad('price') }} value="{{ values.price }}" inputmode="decimal" class="money-input {{ 'bad' if error_field == 'price' }}" required>
   <label for="pp-months">{{ 'Number of instalments'|tr(locale) }}</label><input id="pp-months" name="months" {{ bad('months') }} type="number" min="1" max="600" value="{{ values.months }}" inputmode="numeric" required class="{{ 'bad' if error_field == 'months' }}">
   <label for="pp-first">{{ 'First instalment'|tr(locale) }}</label><input id="pp-first" name="first_date" {{ bad('first_date') }} type="date" value="{{ values.first_date }}" required class="{{ 'bad' if error_field == 'first_date' }}">

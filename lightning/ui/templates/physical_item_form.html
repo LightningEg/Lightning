@@ -6,7 +6,7 @@
 <form method="post" class="card" style="max-width:760px" {% if item %}data-popup-autosave{% endif %}>
   {% if error %}<p class="error">{{ error|tr(locale) }}</p>{% endif %}
   <div class="row">
-    <div class="field {{ 'has-error' if error_field == 'name' }}"><label for="name">{{ 'Name'|tr(locale) }}</label><input id="name" name="name" value="{{ values.name }}" placeholder="{{ 'e.g. Gold ring'|tr(locale) }}" required></div>
+    <div class="field {{ 'has-error' if error_field == 'name' }}"><label for="name">{{ 'Name'|tr(locale) }}</label><input id="name" name="name" value="{{ values.name }}" placeholder="{{ 'e.g. Gold ring'|tr(locale) }}" required spellcheck="false" autocomplete="off"></div>
     <div class="field {{ 'has-error' if error_field == 'kind' }}"><label for="kind">{{ 'Type'|tr(locale) }}</label><input id="kind" name="kind" value="{{ values.kind }}" placeholder="{{ 'Ring, bar, coin'|tr(locale) }}" required></div>
   </div>
   <div class="row">

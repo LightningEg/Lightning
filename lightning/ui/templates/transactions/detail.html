@@ -29,7 +29,7 @@
       {% if txn.notes %}<tr><td class="muted">{{ 'Notes'|tr(locale) }}</td><td>{{ txn.notes|tagged }}</td></tr>{% endif %}
       <tr><td class="muted">{{ "Recorded"|tr(locale) }}</td><td class="small"><time datetime="{{ txn.created_at }}">{{ recorded_at }}</time>{% if txn.updated_at != txn.created_at %} · {{ 'Updated'|tr(locale) }} <time datetime="{{ txn.updated_at }}">{{ updated_at }}</time>{% endif %}</td></tr>
     </table>
-    <div class="actions" style="margin-top:14px">
+    <div class="actions mt-card">
       {% if not txn.is_void %}
         {% if txn.source == 'SYSTEM' %}<span class="muted small">{{ "Deleting this reevaluation removes its effect from the account."|tr(locale) }}</span>
         {% elif txn.type == 'CNV' %}<a class="btn" href="/transactions/{{ txn.id }}/convert/edit">{{ 'Edit'|tr(locale) }}</a>
@@ -46,7 +46,7 @@
   {{ touched_panel(touched, txn, base) }}
 </div>
 {% set suggest = review and (review.can_recategorize or review.planned_choices or review.reserve_choices) %}
-<div class="grid g2" style="margin-top:16px">
+<div class="grid g2 mt-card">
   {% if suggest %}{{ suggested_links(review, base) }}{% endif %}
   <div class="card">
     <h2>{{ "History"|tr(locale) }}</h2>
@@ -58,7 +58,7 @@
 {% set pair_actions = can_split and txn.type.value == 'OUT' and not txn.is_void %}
 {% if pair_actions %}<div class="grid g2 transaction-actions-grid">{% endif %}
 {% if can_split and not txn.is_void %}
-<section class="card expense-split" style="margin-top:16px">
+<section class="card expense-split mt-card">
   <h2>{{ "Expense categories"|tr(locale) }}</h2>
   <p class="muted small">Split the total across categories. The amounts must add up to {{ abs(summary.amount)|money }} {{ summary.currency }}. Refunds should be entered as money in under the original expense category.</p>
   <form method="post" action="/transactions/{{ txn.id }}/split" id="expense-split-form">
@@ -82,7 +82,7 @@
 </section>
 {% endif %}
 {% if txn.type.value == 'OUT' and not txn.is_void %}
-<section class="card reserve-payment" style="margin-top:16px">
+<section class="card reserve-payment mt-card">
   <h2>{{ "Assign payment to a reserve"|tr(locale) }}</h2>
   <p class="muted small">{{ "Link this payment to the plan it covers. Its amount will stop counting as cash still set aside, while the project keeps its progress. Repeating projects advance when linked payments reach the target. Matching payments are suggested for your confirmation in the account transaction list."|tr(locale) }}</p>
   {% if reserves %}<form method="post" action="/transactions/{{ txn.id }}/reserve" class="reserve-allocate">
@@ -93,7 +93,7 @@
 </section>
 {% endif %}
 {% if pair_actions %}</div>{% endif %}
-<div class="card" style="margin-top:16px">
+<div class="card mt-card">
   <details>
     <summary>{{ "Ledger lines — how this transaction affects balances"|tr(locale) }}</summary>
     <table style="margin-top:10px">
