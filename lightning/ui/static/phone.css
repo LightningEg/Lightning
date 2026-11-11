@@ -1138,3 +1138,5 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .needs-item > .needs-link { flex: 1; min-width: 0; display: flex; justify-content: space-between; align-items: center; gap: 12px; color: inherit; text-decoration: none; }
 .needs-item > .needs-link > span { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
 .needs-item > .needs-link > b { flex: none; white-space: nowrap; }
+.phone-segment-4 { grid-template-columns: repeat(4, 1fr); }
+html.phone :is(.counterparty-results, .category-results) { min-width: 0; max-width: calc(100vw - 32px); box-sizing: border-box; }
