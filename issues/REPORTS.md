@@ -13,7 +13,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r7 | [Audit 6: open pull request cleanup](1-easy-to-contribute/r7-pull-request-cleanup/report.md) | 2026-10-23 | review | 1H |
 | r11 | [Pairing backend hardening and security review](4-edit-journal-and-devices/r11-pairing-hardening/report.md) | 2026-10-26 | review | 4A |
 | r12 | [v1.5.0 PR review, theme switching and package preparation](10-looks-and-store/r12-v150-release/report.md) | 2026-10-26 | release | 1H, 10A, 10C |
-| r13 | [Store and community: unlocking themes, the market, rewards and staying in Lightning](10-looks-and-store/r13-store-and-community/report.md) | 2026-10-27 | research | 10C, 10D |
+| r13 | [Store and community: unlocking themes, the market, rewards and staying in Lightning](10-looks-and-store/r13-store-and-community/report.md) | 2026-10-27 | research | 10C |
 | r14 | [Users' main questions: what each screen must answer, with known gaps](3-polish-and-arabic/r14-users-main-questions/report.md) | 2026-10-27 | reference | none |
 | r17 | [Audit 10: the phone, tab by tab - quick actions and the answer first](11-phone-ux/r17-phone-tab-audit/report.md) | 2026-10-29 | audit | 3AN |
 | r19 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](12-desktop-ux/r19-desktop-tab-audit/report.md) | 2026-10-30 | audit | 3AM |

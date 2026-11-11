@@ -31,7 +31,7 @@ def build(request, c) -> dict:
     """Spending on the phone (3AN12): the lead (spent against the same days usually), the four biggest categories then
     Other as rows, then one row "More analysis" whose sheet loads the heat map, the money-flow diagrams, the small
     multiples and the month grid when it opens. A month with nothing spent yet offers last month (3AN9)."""
-    f = spending_page.facts(c, request.query_params, early_month=False)
+    f = spending_page.facts(c, request.query_params)
     selected, first, last, total, prior_total = f["selected"], f["first"], f["last"], f["spending_total"], f["prior_spending"]
     prior_label, category_filter, category_code = f["prior_label"], f["category_filter"], f["category_code"]
     analysis = visuals.expense_analysis(c, first, last, category_code)

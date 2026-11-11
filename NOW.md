@@ -24,19 +24,20 @@ Reserved codes: none
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **Phone (11-10, Claude):** IV-3AY: PC routes no longer know the phone (3AY11), catch-up built. Sonnet: 3AY14-18; Opus: 3AY4, 8, 9, 10; then owner 3AY13. **Read:** 3AY; Architecture › UI contract.
-- **Play (Claude, 11-09):** NF-11B code done; bundle signs. Before submitting (owner): 10H3, then shots, 11B7-9 (11A and 11D built). **Read:** NF-11B.
-- **r33 review (Claude, 11-09):** first 1Y, 9L. **Read:** r33.
+- **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12Y4, 12Z2-5, 12AE1-2. **Read:** 12Y.
+- **Phone (11-10, Claude):** IV-3AY: 3AY11 and catch-up built. Sonnet: 3AY14-18; Opus: 3AY4, 8-10; then owner 3AY13. **Read:** 3AY; Architecture › UI contract.
+- **Play (Claude, 11-09):** NF-11B done; owner: 10H3, shots, 11B7-9. **Read:** NF-11B.
+- **r33 (Claude):** 1Y, 9L. **Read:** r33.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 - **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 
-- **Store and community (2026-10-27):** 10C unlock once, 8M–8S merged in both repos; the website migrations (up to 20261027210000) are run and checked live and `redeem-purchase` is redeployed; the app release that carries 10C ships the unlock. Next: 10D (Papyrus and Dendera sets need a banner, frame and name designed). **Read:** `issues/10-looks-and-store/r13-store-and-community/report.md`.
+- **Store (11-10, Claude):** 10D sets built (site #189: Papyrus 1,320, Dendera 1,280); owner runs migration 20261110200000 live. 10H3 built (site #186). Left: owner 10H4 prices, 10H5 old seats. **Read:** 10H.
 
 - **10A/10C app themes:** ready to sell, Dendera included; owner steps in 10C4. Dendera's premium pass (10F) is built; the site's demo shots are current (site #159). New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md`.
 
 - **Website (11-09):** owner: Home ends on Download; Marketplace in search (site PR). Analytics host blocked here: unread. **Read:** site README › Search.
 
-- **Import:** NF-7AB flow decided. 2AI5, 2AI2, 2AI3 built; 2AI4 waits on 4A4; owner 2AI6. **Read:** 2AI, 7AB.
+- **Import:** 7AB1 built. Next 7AB3, 2, 6, 4, 5; then 7AK, 7AO, 7AN, 7AQ. 2AI4 waits on 4A4. **Read:** 7AB.
 
 
 Plan: `issues/INDEX.md`.

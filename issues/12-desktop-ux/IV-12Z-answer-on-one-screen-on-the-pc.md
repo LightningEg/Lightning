@@ -27,12 +27,13 @@ IV-3AM3 put each tab's answer above the fold; this item is about what follows it
 
 Each tab keeps, open: the header, the Lead, Needs you, the KPI row and the one detail that answers the first follow-up. Every other block is a titled row that opens in place ("Day by day", "Cash flow", "Month by month") and remembers that it was opened. A section with nothing to tell is one line. No list appears twice on a page.
 
+## Built
+
+12Z1: `tests/test_page_skeleton.py` fails a tab taller than 2.5 screens at 1366 x 768 (Transactions and Categories excepted); Spending, Cash planning, Holdings and Your data are listed in its `ALLOWED` with their step.
+
 ## How to work on this item
 
 One PR per step. After each: `python -m pytest -q tests/test_brand_audit.py tests/test_mohab_year.py` and the step's test. Mohab reads some of these blocks: open them in his steps, never delete what he checks. Delete the step's heading in the same commit.
-
-## 12Z1 A length budget in the skeleton test · S · sonnet · #496
-File: `tests/test_page_skeleton.py` (from IV-12Y2; create it here if this step comes first). On the sample year at 1366 × 768 a tab is at most 2.5 screens as it first opens, registers excepted (Transactions, an account, Categories). Today's long tabs go in the allow-list with this item's code.
 
 ## 12Z2 Cash planning says each thing once · M · sonnet
 Files: `lightning/ui/templates/planning/`. Late rows live in Needs you only; "The next 30 days" starts at today. "Can I afford this?" becomes a row or its own card beside the Lead, not a card in it. Zakat day joins the forecast card as one line. Done when a test finds no bill name twice above the forecast and no `.card` inside the Lead card.

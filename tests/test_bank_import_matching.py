@@ -198,7 +198,7 @@ def test_review_screen_offers_link_post_as_new_and_skip(c, setup):
     batch_id, rows = _stage(c, cib, "Date,Counterparty,Amount\n2026-10-01,CARREFOUR MAADI,-450\n")
     row_id = rows[0]["_import_row_id"]
 
-    page = client.get(f"/accounts/{cib}/import/{batch_id}")
+    page = client.get(f"/accounts/{cib}/import/{batch_id}?rows=all")
     assert page.status_code == 200
     assert f'<select name="match_{row_id}"' in page.text and f'<option value="link:{manual.id}" selected>' in page.text
     assert said("Link to Carrefour · 2026-10-01") in page.text
