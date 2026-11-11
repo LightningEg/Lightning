@@ -107,15 +107,8 @@ Every screen reads right in English and Arabic, on PC and phone, and says only w
 | IV-3BH6 | ↳ Built-in categories in sentence case ([#427](https://github.com/LightningEg/Lightning/issues/427)) | | | M | Opus | |
 | IV-3BH7 | ↳ Headings never show a code ([#428](https://github.com/LightningEg/Lightning/issues/428)) | | | S | Sonnet | |
 | IV-3BH8 | ↳ More words found by r35 | | | S | Sonnet | |
-| **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | improvement, visual | Understand | L | Opus | ready |
-| IV-3BK1 | ↳ Guideline: human dates on screens ([#429](https://github.com/LightningEg/Lightning/issues/429)) | | | M | Opus | |
-| IV-3BK2 | ↳ The date filters, tested alone | | | M | Sonnet | |
-| IV-3BK3 | ↳ PC screens use them | | | M | Sonnet | |
-| IV-3BK4 | ↳ Phone screens use them | | | M | Sonnet | |
-| IV-3BK5 | ↳ Arabic currency label ج.م | | | S | Sonnet | |
-| IV-3BK6 | ↳ Rows drop ".00" on the PC too | | | S | Sonnet | |
-| IV-3BK7 | ↳ Arabic ٪ and the period chip in Arabic-Indic digits | | | S | Sonnet | |
-| IV-3BK8 | ↳ Arabic speaks to the person in neutral forms | | | M | Opus | |
+| **IV-3BK** | [Human dates on screens and ج.م in Arabic, as the owner decided on 2026-11-08](3-polish-and-arabic/IV-3BK-human-dates-and-arabic-currency.md) | improvement, visual | Understand | S | Opus | ready |
+| IV-3BK9 | ↳ The website's copy of guideline 3.41, and a native reader ([#429](https://github.com/LightningEg/Lightning/issues/429)) | | | S | Sonnet | |
 | **NF-3AU** | [Reminders only reach Windows and Android while the app (or its sync service) is running](3-polish-and-arabic/NF-3AU-reminders-when-the-app-is-closed.md) | new feature | Everywhere | M | Opus | ready |
 | NF-3AU2 | ↳ Write the reminder schedule while the profile is open | | | M | Opus | |
 | NF-3AU3 | ↳ Windows: a daily task shows the schedule with the app closed | | | M | Opus | |
