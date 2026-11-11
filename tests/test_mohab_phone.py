@@ -151,7 +151,7 @@ class PhoneMohab(Mohab):
         """Home leads with Safe to spend and To do; what he owns lives on Money (3AY6, 3AY10)."""
         return super().ask(key, question, *clicks, start="/money" if key == "needs_you" and not clicks else start)
 
-    def enter(self, account, when, party, category, amount, **more):
+    def enter(self, account, when, party, category, amount, refund=False, **more):
         """The add button opens the entry sheet (C05.2, C09): Out, In or Transfer, then the fields."""
         self.b.go("Accounts", account, "Add transaction")  # the Overview leads with transactions now (C11.1)
         value = amount.replace(",", "")

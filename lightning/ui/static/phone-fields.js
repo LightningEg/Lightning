@@ -70,7 +70,8 @@
       if (navigator.clipboard && navigator.clipboard.readText) button.hidden = false;
     });
     const amount = root.querySelector(".phone-entry input[autofocus]");
-    if (amount && !amount.value) setTimeout(() => { if (document.activeElement === document.body || document.activeElement === amount || document.activeElement?.tagName === "DIALOG") amount.focus({ preventScroll: true }); }, 60);
+    if (amount && amount.value && amount.hasAttribute("data-repeat")) setTimeout(() => { amount.focus({ preventScroll: true }); amount.select(); }, 60);  // Repeat: a new figure replaces the old one
+    else if (amount && !amount.value) setTimeout(() => { const now = document.activeElement; if (now === document.body || now === amount || now?.tagName === "DIALOG" || now?.type === "radio") amount.focus({ preventScroll: true }); }, 60);
   };
   const box = document.getElementById("app-popup-content");
   if (box) new MutationObserver(() => ready(box)).observe(box, { childList: true });
@@ -102,7 +103,12 @@
     try {
       const response = await fetch(button.dataset.smsUrl, { method: "POST", body: data, headers: { "X-Requested-With": "fetch" } });
       const found = await response.json().catch(() => ({}));
-      if (!response.ok) { say(found.error || "No amount found in this message."); return; }
+      if (!response.ok) {
+        say(found.error || "No amount found in this message.");
+        const amountField = form.querySelector('[name="amount"]');
+        if (amountField) amountField.focus({ preventScroll: true });
+        return;
+      }
       const amount = String(found.amount || "").replace(/\.00$/, "");  // whole EGP
       const here = (form.getAttribute("action") || "").match(/\/accounts\/(\d+)\//);
       if (found.account_id && here && String(found.account_id) !== here[1] && window.lightningPopupOpen) {
@@ -126,7 +132,9 @@
           : "Which account ends with {digits}? Choose it above; Lightning remembers it.", { digits: found.ending });
         const chip = form.querySelector("[data-account-chip]");
         if (chip) { chip.closest(".phone-account-chip").classList.add("needs-pick"); chip.focus({ preventScroll: true }); }
-      } else say("Filled from the message. Check and save.");
+      } else if (found.currency) say("This message is in {code}. Check the account and the amount.", { code: found.currency });
+      else if (found.note) say(found.note);
+      else say("Filled from the message. Check and save.");
       if (navigator.vibrate) navigator.vibrate(15);
     } finally { button.disabled = false; }
   });

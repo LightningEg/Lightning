@@ -142,6 +142,15 @@ def recurring(monthly_out: Decimal, percent: Decimal | None) -> dict:
     return sentence("Your bills take {amt} a month.", amt=fmt(monthly_out, 0))
 
 
+def upcoming(left: Decimal, month: str, days: int) -> dict:
+    """What do I still have to pay this month, and on which days? (NF-7AR)"""
+    if left <= ZERO:
+        return sentence("Nothing left to pay in {when}.", when=month)
+    if days == 1:
+        return sentence("{amt} left to pay in {when}, on 1 day.", amt=fmt(left, 0), when=month)
+    return sentence("{amt} left to pay in {when}, on {n} days.", amt=fmt(left, 0), when=month, n=days)
+
+
 def loans(still_to_pay: Decimal, n: int) -> dict:
     """How much do I still owe on loans? (IV-12Y4)"""
     if not n:

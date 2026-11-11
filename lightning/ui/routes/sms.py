@@ -3,6 +3,7 @@ bank import's review screen. The phone app will also send new messages here by i
 from __future__ import annotations
 
 import re
+from decimal import Decimal
 from datetime import datetime
 from urllib.parse import urlencode
 
@@ -10,7 +11,8 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from lightning.core.errors import LightningError
-from lightning.sms_imports import MAX_TEXT, SALARY_ENDING, WALLET_PREFIX, fingerprint, parse_sms, prefill, wallet_name
+from lightning.sms_imports import (MAX_TEXT, SALARY_ENDING, WALLET_PREFIX, _IGNORE as _IGNORE_RE, fingerprint, parse_sms,
+                                    prefill, wallet_name)
 
 from ..web import container, redirect, render, settled_save
 
@@ -41,7 +43,8 @@ def _enter_url(message: dict) -> str:
     """Add, filled from a kept message as far as it can be read: the amount, its day and which way it went, with the
     message itself in Notes. Saving it takes the message off From SMS."""
     found = prefill(message.get("text", ""))
-    values = {"kind": found["kind"], "amount": found["amount"], "date": str(message.get("received", ""))[:10],
+    values = {"kind": found["kind"], "amount": found["amount"], "date": found["date"] or str(message.get("received", ""))[:10],
+              "counterparty": found["counterparty"],
               "notes": str(message.get("text", ""))[:200], "sms_fp": str(message.get("id", "")).split("@")[0],
               "return_to": "/sms"}
     return "/accounts/add-transaction?" + urlencode({k: v for k, v in values.items() if v})
@@ -159,9 +162,17 @@ async def read_one_message(request: Request):
         found = parse_sms(text)
     except ValueError:  # a clock or date the bank wrote wrongly (29:13): nothing to fill in
         found = None
-    if found is None:
-        return JSONResponse({"error": "No amount found in this message."}, status_code=422)
     c = container(request)
+    if found is None:
+        # No bank pattern read it: fill what the words still say (amount, day, shop) and ask the person to check
+        # the account and who, instead of an error. Only a message with no amount at all is refused.
+        loose = prefill(text)
+        if not loose["amount"] or _IGNORE_RE.search(text):
+            return JSONResponse({"error": "No amount found in this message."}, status_code=422)
+        return JSONResponse({"amount": f"{Decimal(loose['amount']):.2f}", "counterparty": loose["counterparty"],
+                             "date": loose["date"], "kind": loose["kind"], "bank": "", "sure": False,
+                             "ending": "", "account_id": None, "currency": loose["currency"],
+                             "note": "Check the account and who.", "fingerprint": fingerprint(text)})
     # No account is asked (3AN5): the card or account ending in the message is the account, once it has been said. An
     # ending not seen before comes back with no account; the sheet asks once, and saving remembers the answer.
     return JSONResponse({"amount": f"{found.amount:.2f}", "counterparty": found.place, "date": found.when[:10],

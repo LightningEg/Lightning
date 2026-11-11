@@ -1,10 +1,11 @@
 {# The phone hero (phone overhaul 2026-10-22): every tab leads with one figure on the page, no card: its label, the
    figure in whole EGP with EGP once, one calm sentence, then the seam (A02.3). href makes the whole hero a way in.
-   raw replaces the money figure (a count or a percentage); note sits on the label's right, Muted. #}
-{% macro hero(label, value=none, line='', note='', href='', raw='', id='lead-heading', unit=none) -%}
+   raw replaces the money figure (a count or a percentage); note sits on the label's right, Muted. fig names the
+   figure's registry key for the PC and phone comparison (IT-12AE1). #}
+{% macro hero(label, value=none, line='', note='', href='', raw='', id='lead-heading', unit=none, fig='') -%}
 <{{ 'a' if href else 'section' }} class="phone-hero has-seam"{% if href %} href="{{ href }}"{% endif %} aria-labelledby="{{ id }}">
   <div id="{{ id }}" class="phone-hero-label" role="heading" aria-level="2">{{ label }}{% if note %} <span>{{ note }}</span>{% endif %}</div>
-  <div class="phone-lead">{% if raw %}{{ raw }}{% elif value is none %}—{% else %}{{ value|money }} <small>{{ unit if unit is not none else base }}</small>{% endif %}</div>
+  <div class="phone-lead"{% if fig %} data-fig="{{ fig }}"{% endif %}>{% if raw %}{{ raw }}{% elif value is none %}—{% else %}{{ value|money }} <small>{{ unit if unit is not none else base }}</small>{% endif %}</div>
   {% if line %}<p class="phone-hero-line">{{ line|keep_dates }}</p>{% endif %}
 </{{ 'a' if href else 'section' }}>
 {%- endmacro %}

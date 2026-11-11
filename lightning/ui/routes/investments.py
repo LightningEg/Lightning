@@ -208,9 +208,18 @@ async def portfolio(request: Request):
             compare = kpis.compare("since six months ago", fmt(change, 0, True), "good" if change >= 0 else "bad")
             six = f"{label('result')} 0" + (f", excluding {fmt(spark['added'], 0)} you already owned"
                                                    if spark.get("added") else "")
+        # BT-12AC: the Lead and its parts come from one function over the same holdings, so they add up;
+        # what has no cost or market price (a share of a flat) is its own part, not dropped.
+        parts = extras["lead_parts"].scaled(extras["lens"]["divisor"])
+        value = parts.value
+        part_line = " · ".join(text for text in (
+            f"Cost {fmt(parts.cost, 0)}" if parts.cost else "",
+            f"Unrealized gain {fmt(parts.unrealized, 0, True)}" if parts.cost else "",
+            f"Valued by you {fmt(parts.valued_by_you, 0)}" if parts.valued_by_you else "") if text)
         lead = kpis.card(label("portfolio_value"), value, compare, tone="hold", key="value", chip_=kpis.chip(chip_text),
-                         visual=kpis.segments([("Cost", owned_cost, "neutral"), ("Unrealized gain", owned_unrealized, "in")]),
-                         line_=kpis.line((f"Cost {fmt(owned_cost, 0)} · Unrealized gain {fmt(owned_unrealized, 0, True)}" if owned_cost else "") + (" · " if owned_cost and (six or since) else "") + (six or since)))  # the return since purchase is also the table's All holdings row
+                         visual=kpis.segments([("Cost", parts.cost, "neutral"), ("Unrealized gain", parts.unrealized, "in"),
+                                               ("Valued by you", parts.valued_by_you, "hold")]),
+                         line_=kpis.line(part_line + (" · " if part_line and (six or since) else "") + (six or since)))  # the return since purchase is also the table's All holdings row
     status = page_status.investments(investment_report.get("result"), bool(owned_rows), period.key, current)
     divisor = extras["lens"]["divisor"]   # the USD lens shows the allocation card and brokerage cash in dollars too
     lensed = lambda amount: None if amount is None else amount / divisor  # noqa: E731
@@ -328,7 +337,7 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
             # An Account column only when holdings sit in more than one account.
             "holding_accounts": len({h.account_id for h, *_ in owned_rows}),
             "holdings_total": holdings_total, "ytd_dividends": dividends, "ytd_year": now.year,
-            "horizons": horizons,
+            "horizons": horizons, "lead_parts": breakdown.lead,
             "flows": charts.diverging(flow_rows)}
 
 

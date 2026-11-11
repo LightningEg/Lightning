@@ -108,11 +108,17 @@ class Mohab:
         return self.b.submit({"name": name, "account_type": Choose(kind), "institution": bank,
                               "opening_balance": balance, "opening_balance_date": when}, button="Add account")
 
-    def enter(self, account: str, when: str, party: str, category: str, amount: str, **more) -> Screen:
+    def enter(self, account: str, when: str, party: str, category: str, amount: str, refund: bool = False, **more) -> Screen:
         """Type one row into an account's register and press Add."""
         self.b.go(account)
-        return self.b.submit({"date": when, "counterparty": party, "category": category, "amount": amount} | more,
-                             button="Add")
+        values = {"date": when, "counterparty": party, "category": category, "amount": amount} | more
+        if refund:  # IV-12W: money in on a spending category asks once; he means it, so he presses Add again
+            asked = self.b.submit(values, button="Add", expect=400)
+            assert asked.shows("Refund of", "or a payment?")
+            return self.b.submit(None, button="Add", page=asked)
+        if not amount.startswith("-"):  # money in he has already confirmed as such (the question is asked once, above)
+            values["sign_checked"] = amount
+        return self.b.submit(values, button="Add")
 
     def trade(self, action: str, when: str, find: str, **values) -> Screen:
         """Buy, sell or record a dividend in THNDR, picking the investment from the search results."""
@@ -417,9 +423,11 @@ def _confirm_payday_proposal(o: Mohab) -> None:
     o.c.settings.set("cash_funding_enabled", "1")
     screen = o.ask("payday_proposal", "My salary just landed. Does Lightning offer one plan for it?", "Salary received",
                    start="/needs-you")
-    for line in ("Your payday proposal", "Bills protected", "Everyday spending", "Emergency and goals",
+    for line in ("Your payday proposal", "Bills protected", "To your plan", "Emergency and goals",
                  "Left unassigned", "after you confirm", "expected salary is not counted"):
         assert screen.shows(line), f"The payday proposal lacks {line!r}"
+    pr = o.c.funding.preview()["proposal"]   # BT-12AD: four disjoint lines that add up to the cash they share out
+    assert pr["bills"] + pr["to_plan"] + pr["reserves"] + pr["unassigned"] == pr["available_before"]
     assert o.c.db.scalar("SELECT count(*) FROM cash_funding") == 0   # looking assigns nothing
     if getattr(o.c, "is_journal", False):   # a journal profile confirms through its own commands: test_salary_day_portability
         o.c.settings.set("cash_funding_enabled", "0")
@@ -447,6 +455,8 @@ def _live_the_year(o: Mohab) -> None:
     o.pay_from_overview("Landlord")
     o.pay_from_overview("Car loan")
     o.ask("paid_from_overview", "Did paying from the Overview move my money?")
+    o.ask("upcoming", "Rent and the car are paid. What is still to pay in October, and on which days?",
+          "Cash planning", "Upcoming")
     o.notes["what_you_own_before_paying"] = before
 
     o.on("2026-10-31")
@@ -457,7 +467,7 @@ def _live_the_year(o: Mohab) -> None:
     o.fix_amount("CIB Payroll", "Carrefour", "-4,060")
     o.enter("CIB Payroll", "2026-10-10", "Cash wallet", "", "-2,000")          # ATM
     o.enter("CIB Payroll", "2026-10-10", "CIB", "Fees & Charges", "-25")      # and its fee
-    o.enter("CIB Payroll", "2026-10-15", "Amazon", "Shopping", "1,299")        # August's purchase returned
+    o.enter("CIB Payroll", "2026-10-15", "Amazon", "Shopping", "1,299", refund=True)        # August's purchase returned
     o.enter("CIB Payroll", "2026-10-18", "Al Mansour Service", "Personal › Transportation", "-6,500")
     o.to_reserve("CIB Payroll", "Al Mansour Service", "Emergency Fund")                         # paid from the emergency fund
 
@@ -1266,6 +1276,16 @@ def test_how_much_of_my_income_is_already_promised(mohab):
     assert fixed.shows("Fixed costs to income Good 34.7 % 15,630 a month of 45,000 income Your limit 50%")
 
 
+def test_what_is_left_to_pay_this_month_and_on_which_days(mohab):
+    """Cash planning › Upcoming (NF-7AR), 6 October after paying rent and the car: what is left is the internet
+    and the electricity, the month's total is Recurring's 15,630, and the day list opens on the next bill."""
+    upcoming = mohab.answers["upcoming"]
+    assert route(mohab, "upcoming") == ["/", "/plan", "/plan/upcoming"]
+    assert upcoming.figure("Left to pay in October") == D("1130")    # WE Internet 650 + North Cairo Electricity 480
+    assert upcoming.shows("1,130 left to pay in October, on 2 days.", "14,500 paid of 15,630 due in October",
+                          "Payday 1 Oct", "20 Oct WE Internet Bills · To pay 650")
+
+
 def test_the_emergency_fund_in_months(mohab):
     answer = mohab.answers["last"]
     assert answer.shows("Emergency fund covers 0.3 months")
@@ -1507,7 +1527,7 @@ def test_a_small_difference_from_the_bank_is_one_adjustment(mohab):
     check = mohab.notes["wallet_check"]
     assert check.shows("A small difference", "Lightning is 30.00 EGP above your bank", "Post adjustment of −30.00")
     assert mohab.notes["wallet_adjusted"].shows("Balance adjustment", "The account now matches your bank")
-    assert mohab.notes["wallet_adjusted"].shows("2027-09-30 Balance adjustment Other Personal Bank showed",
+    assert mohab.notes["wallet_adjusted"].shows("2027-09-30 Balance adjustment Unaccounted Spending Bank showed",
                                                 "−30 Edit 42,950")
     assert mohab.notes["wallet_rechecked"].shows("It matches")
 

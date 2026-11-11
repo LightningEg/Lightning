@@ -31,6 +31,7 @@ WAITING_KEY = "sms_waiting"            # parsed messages whose account ending is
 UNREAD_KEY = "sms_unread"              # messages with an amount that no rule could read: never dropped unseen
 LAST_READ_KEY = "sms_last_read_ms"     # the phone's inbox is read from here on
 QUIET_KEY = "sms_quiet_senders"        # {"Vodafone365": dismissals}: senders whose unreadable messages are offers
+STATED_KEY = "sms_stated_balances"     # {account_id: {"date", "balance"}}: the newest balance a bank message stated
 BANK_SENDERS_KEY = "sms_bank_senders"  # senders that sent a message a rule read: never made quiet
 QUIET_AFTER = 2                        # dismissing this many of a sender's unreadable messages quiets it
 MAX_UNREAD = 200
@@ -47,6 +48,10 @@ _DIGITS = str.maketrans("٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹٫٬", "0123456
 _NUM = r"([\d,]+(?:\.\d{1,2})?)"
 _CUR = r"(?:EGP|جم|ج\.م\.?|جنيه)"
 _AMOUNT = _CUR + r"?\s*" + _NUM + r"\s*" + _CUR + r"?"
+# Another currency a message may name (a card used abroad): kept for the person, never read as pounds.
+_FOREIGN = r"(?:USD|EUR|GBP|SAR|AED|KWD|QAR|CHF|CAD)"
+_ANY_MONEY = (r"(?:(?P<c1>" + _CUR + "|" + _FOREIGN + r")\s*(?P<n1>[\d,]+(?:\.\d{1,2})?)|(?P<n2>[\d,]+(?:\.\d{1,2})?)\s*(?P<c2>"
+              + _CUR + "|" + _FOREIGN + "))")
 _ENDING = r"(?:(?:المنتهية|المنتهي)\s*ب[ـ]?|رقم)\s*[*•xX]*\s*(\d{4})"
 _CLOCK = r"(?:\s*(?:الساع[هة])?\s*(\d{1,2}:\d{2}))?"
 _IGNORE = re.compile(r"(OTP|one[- ]time|رمز\s*(?:التحقق|التفعيل|المرور)|كلمة\s*(?:السر|المرور)|"
@@ -226,23 +231,35 @@ def looks_like_money(text: str) -> bool:
     """A message the owner should see even when no rule reads it: an amount with a currency, said about an account,
     a card or a wallet, and not an offer. Codes, declined payments, adverts and bundles are not money."""
     flat = _clean(text or "")
-    return (bool(re.search(_CUR + r"\s*" + _NUM + r"|" + _NUM + r"\s*" + _CUR, flat)) and not _IGNORE.search(flat)
+    return (bool(re.search(_ANY_MONEY, flat)) and not _IGNORE.search(flat)
             and bool(_ACCOUNTISH.search(flat)) and not _PROMO.search(flat))
 
 
 def prefill(text: str) -> dict:
-    """What a kept message (one no rule read) can still fill on the Add sheet: its first amount with a currency and
-    which way the money went, when the words say. The person checks the rest; nothing is saved here."""
+    """What a kept message (one no rule read) can still fill on the Add sheet: its first amount with a currency,
+    which way the money went when the words say, the message's own date and the shop after "at / عند / لدى". The
+    currency is "" for pounds and its code for another known one. The person checks the rest; nothing is saved."""
     flat = _clean(text or "")
-    money = re.search(_CUR + r"\s*" + _NUM + r"|" + _NUM + r"\s*" + _CUR, flat)
-    amount = ""
+    money = re.search(_ANY_MONEY, flat)
+    amount = currency = ""
     if money:
         try:
-            amount = format(Decimal((money.group(1) or money.group(2)).replace(",", "")), "f")
+            amount = format(Decimal((money.group("n1") or money.group("n2")).replace(",", "")), "f")
         except (InvalidOperation, AttributeError):
             amount = ""
+        code = (money.group("c1") or money.group("c2") or "").upper()
+        currency = code if re.fullmatch(_FOREIGN, code) else ""
     inflow = bool(re.search(_IN_WORDS, flat, re.IGNORECASE)) and not re.search(_OUT_WORDS, flat, re.IGNORECASE)
-    return {"amount": amount, "kind": "in" if inflow else "out"}
+    day = re.search(r"(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})(?:\D{0,12}?(\d{1,2}:\d{2}))?", flat)
+    date = ""
+    if day:
+        try:
+            date = _when(day.group(1), day.group(2), datetime.now())[:10]
+        except ValueError:
+            date = ""
+    place = re.search(r"(?:عند|لدى|\bat)\s+(.+?)(?=\s+(?:يوم|في|on|بتاريخ|\d)|$)", flat)
+    return {"amount": amount, "kind": "in" if inflow else "out", "currency": currency, "date": date,
+            "counterparty": _place(place.group(1)) if place else ""}
 
 
 WALLET_PREFIX = "wallet-"
@@ -391,6 +408,31 @@ class SmsImportService:
             return of_bank[0] if len(of_bank) == 1 else None  # another bank's card is never guessed as this one
         return bank_accounts[0].id if len(bank_accounts) == 1 else None
 
+    def balance_gaps(self) -> list[dict]:
+        """Accounts whose ledger balance, on the day of the newest bank message that stated one, differs from it by
+        more than a piastre: [{account_id, name, date, stated, ledger, difference}] (NF-7AP). Nothing is adjusted. An
+        account with rows still waiting in a statement review is left out: the gap may be those rows."""
+        waiting = {int(b["account_id"]) for b in self.bank_imports.waiting_all()}
+        names = {a.id: a.name for a in self.accounts.list(active_only=True)}
+        found = []
+        for key, value in self._json(STATED_KEY, {}).items():
+            if not str(key).isdigit() or int(key) not in names or int(key) in waiting or not isinstance(value, dict):
+                continue
+            try:
+                stated = Decimal(str(value["balance"]))
+                day = str(value["date"])
+            except (KeyError, InvalidOperation):
+                continue
+            total = self.db.scalar(
+                "SELECT COALESCE(SUM(le.quantity_e6),0) FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id "
+                "WHERE le.account_id=? AND le.date<=? AND t.status='POSTED' "
+                "AND le.asset_id IN (SELECT id FROM financial_assets WHERE is_cash=1)", (int(key), day))
+            ledger = Decimal(total or 0) / Decimal(1_000_000)
+            if abs(stated - ledger) > Decimal("0.01"):
+                found.append({"account_id": int(key), "name": names[int(key)], "date": day, "stated": stated,
+                              "ledger": ledger, "difference": stated - ledger})
+        return found
+
     def read(self, messages: list[tuple], cursor_ms: int | None = None) -> dict:
         """New messages (sender, text, received[, inbox ms]) into review. Returns counts: staged rows by account,
         waiting, skipped (not money, or read before). A pasted or shared message is known by its text; an inbox
@@ -407,6 +449,7 @@ class SmsImportService:
         endings = {ending: account_id for ending, account_id in endings.items() if account_id in usable}
         waiting = self._json(WAITING_KEY, [])
         by_account: dict[int, list[SmsTransaction]] = {}
+        stated = self._json(STATED_KEY, {})
         skipped = 0
         unread = self._json(UNREAD_KEY, [])
         banks = set(self._json(BANK_SENDERS_KEY, []))
@@ -433,6 +476,10 @@ class SmsImportService:
                     skipped += 1
                 continue
             account_id = endings.get(found.ending)  # never guessed: the first message of an ending asks once
+            if account_id is not None and found.balance is not None and found.kind != "salary" \
+                    and not re.search(r"limit|الحد", text, re.IGNORECASE):  # a card's available limit is not a balance
+                if found.when[:10] >= stated.get(str(account_id), {}).get("date", ""):
+                    stated[str(account_id)] = {"date": found.when[:10], "balance": format(found.balance, "f")}
             if account_id is None:
                 waiting.append(_to_json(found))
             else:
@@ -443,6 +490,7 @@ class SmsImportService:
                       if rows}
             self.settings.set(SEEN_KEY, json.dumps(seen[-MAX_SEEN:]))
             self.settings.set(WAITING_KEY, json.dumps(waiting))
+            self.settings.set(STATED_KEY, json.dumps(stated))
             self.settings.set(UNREAD_KEY, json.dumps(unread[-MAX_UNREAD:]))
             self.settings.set(BANK_SENDERS_KEY, json.dumps(sorted(banks)[:200]))
             if cursor_ms is not None:

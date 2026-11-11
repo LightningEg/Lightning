@@ -79,10 +79,14 @@ def sheet_context(request: Request, c, txn) -> dict:
         chips = [{"id": item, "label": c.categories.get(item).name} for item in usual[:5]]
         other = [item for item in c.categories.pickable()
                  if item.movement.value == ("OUTFLOW" if movement == "out" else "INFLOW") and not item.is_system]
+    repeat = {"kind": "transfer" if transfer else kind, "amount": str(amount), "counterparty": txn.counterparty or "",
+              "category_id": category.id if category is not None and not transfer else "",
+              "to_account_id": target.id if target is not None else "", "repeat": 1}
+    repeat_url = f"/accounts/{account.id}/transaction/new?" + urlencode({k: v for k, v in repeat.items() if v != ""})
     args = sort_args(request.query_params)
     queue = sort_queue(c, args) if args else []
     skip = next_in_queue(queue, txn.id) if queue else None
-    return dict(txn=txn, kind=kind, account=account, target=target, amount=amount, currency=account.currency,
+    return dict(txn=txn, kind=kind, account=account, target=target, repeat_url=repeat_url, amount=amount, currency=account.currency,
                 category=category, unsorted=unsorted, plan=plan, chips=chips, other=other, sort=args, hide_global_error=True,
                 sort_query=urlencode(args), skip=skip, split=txn.type.value == "OUT" and len(cash) == 1 and not unsorted,
                 return_to=return_to(request.query_params.get("return_to")), who=txn.counterparty or txn.description or "", label=DOC_LABELS.get(txn.type, "Transaction"))

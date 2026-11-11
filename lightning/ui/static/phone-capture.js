@@ -69,12 +69,13 @@
             if (openOther && input) input.focus({ preventScroll: true });
           }
         });
-        select.addEventListener("change", sync);
+        select.addEventListener("change", () => { select.setCustomValidity(""); sync(); });
       }
       form.querySelectorAll('[name="kind"]').forEach((radio) => radio.addEventListener("change", sync));
       // Save with no category: the field that says so must be on screen, or the browser blocks the form with nothing to read.
       form.addEventListener("invalid", (event) => {
         if (!event.target.closest("[data-category-field]") || !select) return;
+        select.setCustomValidity(t("Choose a category."));  // our own words, not the browser's "Choose an option from the list"
         openOther = true;
         sync();
       }, true);

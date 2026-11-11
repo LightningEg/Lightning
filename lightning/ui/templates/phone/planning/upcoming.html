@@ -1,0 +1,33 @@
+{# Upcoming on a phone (NF-7AR3): the hero is Left to pay this month (C04.1), then today and the next 13 days as a
+   two-row strip, then the chosen day's payments as rows that open the pay sheet. The phone is always today: no month
+   stepper and no chips (C04.2). Same figures as the PC, from lightning/planning/calendar.py. #}
+{% extends "base.html" %}
+{% from "phone/partials/hero.html" import hero with context %}
+{% block title %}Upcoming · Cash planning{% endblock %}
+{% block heading %}<h1>{{ 'Cash planning'|tr(locale) }}</h1>
+{% if cal.month_total %}<div class="phone-plan-hero">{{ hero(hero_label, cal.left_to_pay, (hero_line.text|tr(locale, **hero_line['values']))) }}</div>{% endif %}{% endblock %}
+{% block content %}
+{% if cal.entries or strip|selectattr('entries')|list %}
+<section class="phone-section phone-upcoming" aria-labelledby="upcoming-strip">
+  <header class="phone-section-head"><h2 id="upcoming-strip">{{ 'Next two weeks'|tr(locale) }}</h2></header>
+  <div class="phone-strip" role="grid" aria-label="{{ 'Next two weeks'|tr(locale) }}">
+    {% for d in strip %}<a class="phone-strip-day{{ ' is-today' if d.today }}{{ ' is-chosen' if d.chosen }}{{ ' is-payday' if d.payday }}{{ ' is-short' if d.short }}" role="gridcell" href="/plan/upcoming?day={{ d.date }}"{% if d.chosen %} aria-current="date"{% endif %}>
+      <small>{{ d.weekday|tr(locale) }}</small><i>{{ d.day }}</i>
+      <span class="phone-strip-marks">{% for e in d.entries %}<b class="pay-mark is-{{ e.state }}{{ ' is-in' if e.incoming }}" aria-hidden="true"></b>{% endfor %}</span>
+    </a>{% endfor %}
+  </div>
+</section>
+<section class="phone-section" aria-labelledby="upcoming-day">
+  <header class="phone-section-head"><h2 id="upcoming-day">{{ chosen|day }}</h2>{% for d in strip if d.chosen and (d.payday or d.short) %}<span class="{{ 'pos' if d.payday else 'is-short' }}">{{ ('Payday' if d.payday else 'Cash runs short')|tr(locale) }}</span>{% endfor %}</header>
+  {% if shown %}<div class="phone-rows">{% for e in shown %}
+    {% if e.item_id %}<a class="phone-row" data-popup-open href="/plan/items/{{ e.item_id }}/pay?due={{ e.date }}&amp;back={{ day_back|urlencode }}">{% else %}<a class="phone-row" href="/gameya/{{ e.circle_id }}">{% endif %}
+      <span>{{ e.name }}<small>{{ groups[e.group]|tr(locale) }}{% if e.number %} · {{ '{n} of {m}'|tr(locale, n=e.number, m=e.of) }}{% endif %} · {{ ('Payout' if e.group == 'gameya' and e.incoming else {'paid': 'Paid', 'skipped': 'Skipped', 'late': 'Late', 'today': 'Due today', 'upcoming': ('Expected' if e.incoming else 'To pay')}[e.state])|tr(locale) }}</small></span>
+      <b class="{{ 'pos' if e.incoming else ('is-late' if e.state == 'late' else '') }}">{{ '+' if e.incoming else '−' }}{{ e.amount|money(False, 0) }}</b>
+    </a>{% endfor %}</div>
+  {% else %}<p class="phone-note">{{ 'Nothing due on this day. Pick a day with a mark to see what it takes.'|tr(locale) }}</p>{% endif %}
+</section>
+{% else %}
+<p class="phone-note">{{ 'Nothing is planned for this month. Add your rent, bills, subscriptions or a loan, and each one appears on the day it is due.'|tr(locale) }}</p>
+<a class="btn primary phone-save" data-popup-open href="/plan/items/new?kind=BILL">{{ 'Add recurring item'|tr(locale) }}</a>
+{% endif %}
+{% endblock %}

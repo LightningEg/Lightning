@@ -1,5 +1,6 @@
-"""NF-12AB4 (C06.1): on the phone, Home's Safe to spend, Money's Net worth and Budget's hero open their working as a
-sheet: the rows the owning service returns (lightning/core/working.py) and one link to the figure's home."""
+"""NF-12AB4 (C06.1): on the phone, Money's Net worth and Budget's hero open their working as a sheet: the rows the
+owning service returns (lightning/core/working.py) and one link to the figure's home. With a plan, Home leads with
+Left for everyday (IV-12P): its hero opens the everyday budget and Safe to spend is one row that opens Cash planning."""
 from __future__ import annotations
 
 import pytest
@@ -30,8 +31,10 @@ def test_each_hero_opens_its_working(c, monkeypatch):
         with sync_playwright() as p:
             browser = p.chromium.launch(executable_path=executable)
             page = browser.new_context(viewport={"width": 360, "height": 800}, is_mobile=True, has_touch=True).new_page()
-            for path, rows, home in (("/home", "Free cash", "/plan"), ("/money", "Cash you own", "/"),
-                                     ("/budget", "Bills to pay", "/budget")):
+            page.goto(host.origin + "/home")
+            assert page.locator('.phone-home-hero a.phone-home-lead[href="/budget/flexible"] .phone-lead').is_visible()
+            assert page.locator('a#home-safe[href="/plan"]').is_visible()
+            for path, rows, home in (("/money", "Cash you own", "/"), ("/budget", "Bills to pay", "/budget")):
                 page.goto(host.origin + path)
                 hero = page.locator("details.phone-sheet-row:has(.phone-lead) > summary").first
                 panel = page.locator("details.phone-sheet-row:has(.phone-lead) .phone-sheet-panel").first

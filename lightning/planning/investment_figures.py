@@ -25,6 +25,25 @@ class InvestmentBreakdown:
     horizons: dict[str, Decimal]
     balances: list[tuple[str, OwnedHolding]]
     total: Decimal
+    lead: "LeadParts | None" = None
+
+
+@dataclass(frozen=True)
+class LeadParts:
+    """Portfolio value and what it is made of, over the same holdings, so the parts always add up (BT-12AC):
+    value = cost + unrealized + valued_by_you. Cost and Unrealized gain cover the priced holdings you bought;
+    Valued by you is what has a balance and no cost or market price (a share of a flat). A holding with no
+    price is in none of them, as it is not in Portfolio value."""
+    value: Decimal
+    cost: Decimal
+    unrealized: Decimal
+    valued_by_you: Decimal
+
+    def scaled(self, divisor: Decimal) -> "LeadParts":
+        """The same parts in another lens (USD): denomination only."""
+        if divisor == 1:
+            return self
+        return LeadParts(self.value / divisor, self.cost / divisor, self.unrealized / divisor, self.valued_by_you / divisor)
 
 
 def _owned_split(split, units, quantity, gain) -> dict:
@@ -104,4 +123,9 @@ def investment_breakdown(owned_rows: list[OwnedRow], position: Position, report:
         g["weight"] = g["value"] / holdings_total * 100 if holdings_total else ZERO
         g["gain_pct"] = g["gain"] / g["invested"] * 100 if g["invested"] else None
     holding_groups = sorted(groups.values(), key=lambda g: (-g["value"], g["name"].casefold()))
-    return InvestmentBreakdown(holding_groups, horizons, balances, holdings_total)
+    priced = [(yours, capital) for _, yours, _, _, capital, _, _ in owned_rows if yours is not None]
+    cost = sum((capital for _, capital in priced), ZERO)
+    value = sum((yours for yours, _ in priced), ZERO)
+    valued_by_you = sum((item.value for _, item in balances), ZERO)
+    lead = LeadParts(value + valued_by_you, cost, value - cost, valued_by_you)
+    return InvestmentBreakdown(holding_groups, horizons, balances, holdings_total, lead)

@@ -36,7 +36,12 @@ def _plan(c, **items):
 
 
 def _hero(html: str) -> str:
-    return re.search(r'(?s)<section class="phone-hero has-seam".*?</section>', html).group(0)
+    return re.search(r'(?s)<(section|a) class="phone-hero has-seam".*?</(section|a)>', html).group(0)
+
+
+def _due(html: str) -> str:
+    """Due before payday and its coverage sentences, at the top of Coming up (IV-12P: Safe to spend is the hero)."""
+    return re.search(r'(?s)<p class="phone-note" id="plan-due">.*?</p>', html).group(0)
 
 
 def _coming(html: str) -> str:
@@ -59,14 +64,16 @@ def week(c, setup, monkeypatch):
     return _phone(c)
 
 
-def test_the_hero_is_the_workings_due_before_payday_with_its_sentences(c, week):
+def test_the_hero_is_safe_to_spend_and_coming_up_opens_on_due_before_payday(c, week):
     html = week.get("/plan").text
-    parts = dict(c.forecaster.forecast(DAY).safe_to_spend_parts)
-    due = -parts[label("payments_before_next_income")]
-    hero = _hero(html)
-    assert "Due before payday" in hero and f"{due:,.0f} <small>EGP</small>" in hero
-    assert "12,770" in hero  # Landlord 12,000 + Streaming 120 + Internet's October 650
-    text = _text(hero)
+    forecast = c.forecaster.forecast(DAY)
+    due = -dict(forecast.safe_to_spend_parts)[label("payments_before_next_income")]
+    hero = _hero(html)  # IV-12P (owner, 2026-11-09): the same lead as the PC
+    assert "Safe to spend" in hero and f"{forecast.safe_to_spend:,.0f} <small>EGP</small>" in hero
+    line = _due(html)
+    assert "Due before payday" in line and f"{due:,.0f} EGP" in line and line in _coming(html)
+    assert "12,770" in line  # Landlord 12,000 + Streaming 120 + Internet's October 650
+    text = _text(line)
     assert "3 payments until 25 Oct." in text and "All covered by free cash." in text
     assert "1 payment is already late." in text
     # The hero sits above the worded tabs, which sit right under its sentence.
@@ -108,18 +115,18 @@ def test_short_free_cash_says_by_how_much(c, setup, monkeypatch):
           laptop=("Laptop", "BILL", "90000", "2026-10-12", {}))
     html = _phone(c).get("/plan").text
     free = c.forecaster.forecast(DAY).free_cash
-    assert f"Free cash is {90000 - free:,.0f} short of what is due." in _text(_hero(html))
+    assert f"Free cash is {90000 - free:,.0f} short of what is due." in _text(_due(html))
     assert "−" in re.search(r"After bills: ([^<]+)<", html).group(0)  # the true minus, like every other figure
 
 
 def test_no_income_date_reads_the_next_three_months_and_nothing_planned_asks_for_bills(c, setup, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
     empty = _phone(c).get("/plan").text
-    assert "Nothing is due in the next 3 months." in _text(_hero(empty))
+    assert "Nothing is due in the next 3 months." in _text(_due(empty))
     assert "Add your bills, subscriptions, income and loans on Recurring" in _coming(empty)
     _plan(c, rent=("Landlord", "BILL", "12000", "2026-10-10", {}))
     html = _phone(c).get("/plan").text
-    assert "payments in the next 3 months." in _text(_hero(html)) or "1 payment in the next 3 months." in _text(_hero(html))
+    assert "payments in the next 3 months." in _text(_due(html)) or "1 payment in the next 3 months." in _text(_due(html))
     assert 'class="phone-row phone-plan-row' in _coming(html) and "Payday" not in _coming(html)
 
 
@@ -130,7 +137,7 @@ def test_nothing_before_payday_names_the_next_payment_after_it(c, setup, monkeyp
     _plan(c, salary=("ACME Egypt", "INCOME", "45000", "2026-11-01", {}),
           rent=("Landlord", "BILL", "12000", "2026-11-03", {}),
           gym=("Gym", "BILL", "300", "2026-11-09", {}))
-    text = _text(_hero(_phone(c).get("/plan").text))
+    text = _text(_due(_phone(c).get("/plan").text))
     assert "Nothing is due before 1 Nov. Next: Landlord, 12,000 on 3 Nov." in text
 
 @pytest.mark.parametrize("locale", ["en", "ar"])

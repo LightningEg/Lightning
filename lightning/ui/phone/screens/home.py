@@ -67,6 +67,7 @@ class HomeScreen:
     month: str
     catch_up: bill_state.CatchUp
     month_bar: dict | None = None      # IV-11D2: the plan as one bar (spent, left, over); None without a plan
+    everyday_left: Decimal | None = None  # IV-12P: the hero, Left for everyday (owner, 2026-11-09); None with no plan
 
 
 def _first_run(c) -> bool:
@@ -113,4 +114,5 @@ def build(c, day: date) -> HomeScreen:
                       todo=_shown(rows), todo_total=len(rows), latest=latest,
                       spent=c.reporting.cash_flow(day.replace(day=1), day).outflows,
                       left_in_plan=plan["left"] if plan else None, month=month, catch_up=away,
-                      month_bar=month_bar(plan["planned"], plan["spent"]) if plan else None)
+                      month_bar=month_bar(plan["planned"], plan["spent"]) if plan else None,
+                      everyday_left=everyday.everyday_left if everyday and everyday.current else None)

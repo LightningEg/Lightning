@@ -118,10 +118,11 @@ class CashForecaster:
         average = self.budgets.income_average(month_of(as_of), schedule=self.schedules.view())
         return average.amount, average.months_counted
 
-    def free_cash(self, as_of: date) -> Decimal:
+    def free_cash(self, as_of: date, *, match_payments: bool = True) -> Decimal:
         """Free cash from the position (Position.free_cash, its one formula). Forecasts run on today, whose
-        reserves are always known, so it is never None here; an older date without reserve history is refused."""
-        free = self.position.at(as_of).free_cash
+        reserves are always known, so it is never None here; an older date without reserve history is refused.
+        ``match_payments=False`` reads without linking recorded payments to the plan (a page that must not write)."""
+        free = self.position.at(as_of, match_payments=match_payments).free_cash
         if free is None:
             raise ValueError(f"Free cash on {as_of} is unknown: reserve history is incomplete for that date.")
         return free
@@ -237,11 +238,12 @@ class CashForecaster:
 
     # -------------------------------------------------------------- forecast
     def forecast(self, as_of: date | None = None, months: int = HORIZON_MONTHS, *,
-                 refill: Decimal = ZERO) -> CashForecast:
+                 refill: Decimal = ZERO, match_payments: bool = True) -> CashForecast:
         """The cash forecast. ``refill`` asks "what if" this much free cash were moved into the emergency fund now:
-        free cash falls by it and the top-up the plan still needs is recomputed (BT-2AH). Nothing is written."""
+        free cash falls by it and the top-up the plan still needs is recomputed (BT-2AH). Nothing is written.
+        ``match_payments=False``: see free_cash."""
         day = as_of or today()
-        free = self.free_cash(day) - refill
+        free = self.free_cash(day, match_payments=match_payments) - refill
         average, average_months = self.average_income(day)
         month_keys = _months(day, months)
         horizon_end = parse_month(month_keys[-1])[1]
@@ -325,13 +327,17 @@ class CashForecaster:
                             before, dated_cash_forecast(self.reporting, *self.scheduled_inputs(day, horizon_end), day, horizon_end),
                             before_total)
 
-    def refill_options(self, as_of: date | None, room: Decimal) -> dict:
+    def refill_options(self, as_of: date | None, room: Decimal, top_up: Decimal | None = None) -> dict:
         """What moving free cash into the emergency fund does to Safe to spend, for the refill prompt (BT-2AH).
 
         ``room`` is the most that could move (the gap to the target, or free cash if less). Returns that amount's
         Safe to spend afterwards, and the largest whole amount, up to ``room``, that leaves Safe to spend at or above
         zero (0 when even a little would not). Every figure is the forecast itself run with the refill, because a
-        refill also changes the savings the plan still asks for; nothing is written."""
+        refill also changes the savings the plan still asks for; nothing is written.
+
+        ``top_up`` (the plan's Emergency fund top-up a month) gives the first offer (IV-12AA2): that amount, rounded
+        up to whole units, when it is below the safe amount, else the safe amount; ``first_after`` is Safe to spend
+        after it."""
         day = as_of or today()
         now = self.forecast(day, refill=ZERO)
         everything = self.forecast(day, refill=room)
@@ -347,8 +353,13 @@ class CashForecaster:
                 guess = max((guess + trial.safe_to_spend).quantize(Decimal("1"), ROUND_DOWN), ZERO)
                 trial = self.forecast(day, refill=guess)
             safe_amount, safe_after = guess, trial.safe_to_spend
+        first, first_after = safe_amount, safe_after
+        modest = (top_up or ZERO).quantize(Decimal("1"), ROUND_UP)
+        if ZERO < modest < safe_amount:
+            first, first_after = modest, self.forecast(day, refill=modest).safe_to_spend
         return {"before": now.safe_to_spend, "until": now.next_income_date, "all": room,
-                "all_after": everything.safe_to_spend, "safe": safe_amount, "safe_after": safe_after}
+                "all_after": everything.safe_to_spend, "safe": safe_amount, "safe_after": safe_after,
+                "first": first, "first_after": first_after}
 
     def refill_schedule(self, as_of: date | None, gap: Decimal, options: dict, months: int = 6) -> list[dict]:
         """NF-3AZ7: the emergency refill as instalments after the upcoming needs, when one move now would not fit.

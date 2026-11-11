@@ -1,9 +1,10 @@
-{# One payday proposal for PC and phone (NF-3AZ1): posted cash only, nothing assigned until Confirm. #}
+{# One payday proposal for PC and phone (NF-3AZ1): posted cash only, nothing assigned until Confirm. The four lines
+   are disjoint and add up to Cash available to assign (BT-12AD); the service returns them, nothing is added here. #}
 {% set pr = allocation.proposal %}
 <section class="card{{ ' phone-card' if phone }}" id="payday-proposal"><h2>{{ 'Your payday proposal'|tr(locale) }}</h2>
 <div class="asset-rows">
   <div class="compact-row"><span>{{ 'Bills protected'|tr(locale) }}</span><b>{{ pr.bills|money(places=0) }} {{ base }}</b></div>
-  <div class="compact-row"><span>{{ 'Everyday spending'|tr(locale) }}</span><b>{{ pr.spending|money(places=0) }} {{ base }}</b></div>
+  <div class="compact-row"><span>{{ 'To your plan'|tr(locale) }}</span><b>{{ pr.to_plan|money(places=0) }} {{ base }}</b></div>
   <div class="compact-row"><span>{{ 'Emergency and goals'|tr(locale) }}</span><b>{{ pr.reserves|money(places=0) }} {{ base }}</b></div>
   <div class="compact-row"><span>{{ 'Left unassigned'|tr(locale) }}</span><b class="{{ 'neg' if pr.unassigned < 0 else '' }}">{{ pr.unassigned|money(places=0) }} {{ base }}</b></div>
 </div>

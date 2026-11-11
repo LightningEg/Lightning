@@ -105,5 +105,15 @@ def catch_up(c, day: date, rows: list[BillRow] | None = None) -> CatchUp:
     return CatchUp(since, stale, bool((since is not None and since >= AWAY_DAYS) or stale), last[:10] if last else None)
 
 
+CATCH_UP_FROM = 3   # this many late payments or more: Cash planning offers one Catch up, not a row each (IV-12AA5)
+
+
+def late_payments(planning, day: date) -> list[Payment]:
+    """Every unpaid payment (not income) past its date on ``day``, earliest first: the rows Catch up walks through."""
+    late = [p for p in planning.all_payments(day, day)
+            if p.outstanding and not p.item.is_income and p.days_late(day)]
+    return sorted(late, key=lambda p: (p.due_date, p.item.name.casefold()))
+
+
 # The same list under a name that reads as a read (the journal coverage tool treats "open_*" as a write verb).
 unpaid_bills = open_bills

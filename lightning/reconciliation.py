@@ -3,7 +3,9 @@
 The user types the ending balance from the bank (or wallet app) on a date. Lightning compares it with the
 account's own cash balance on that date. A small difference is settled with one balance adjustment, posted as
 ordinary Money out (Other Personal) or Money in (Other Income), so it counts in spending and income like any
-other row. A big difference is never adjusted: the user reviews the register or reimports the statement.
+other row. A big difference on a bank account is never adjusted: the user reviews the register or reimports the
+statement. A cash wallet has no statement to import (owner, 2026-11-10, IV-12V): any difference is settled there, filed
+under Unaccounted Spending (cash is below the books) or Unaccounted Money Found (cash is above them), not inside the budget.
 """
 
 from __future__ import annotations
@@ -21,6 +23,8 @@ SMALL_FLOOR = Decimal("100")    # ...or up to 100 in the account's currency, whi
 ADJUSTMENT = "Balance adjustment"
 SHORTFALL_CATEGORY = "EXP.PERSONAL.OTHER"          # Other Personal
 EXCESS_CATEGORY = "EXP.PERSONAL.OTHER_INCOME"      # Other Income
+CASH_SHORTFALL_CATEGORY = "EXP.UNACCOUNTED"         # Unaccounted Spending
+CASH_EXCESS_CATEGORY = "INC.UNACCOUNTED"            # Unaccounted Money Found
 
 
 @dataclass(frozen=True)
@@ -30,6 +34,7 @@ class BalanceCheck:
     lightning_balance: Decimal
     difference: Decimal          # bank − Lightning: positive means the bank has more
     limit: Decimal               # the largest difference that is still small
+    is_cash: bool = False        # a cash wallet: any difference can be adjusted, filed as unaccounted
 
     @property
     def matches(self) -> bool:
@@ -38,6 +43,17 @@ class BalanceCheck:
     @property
     def small(self) -> bool:
         return not self.matches and abs(self.difference) <= self.limit
+
+    @property
+    def adjustable(self) -> bool:
+        return not self.matches and (self.small or self.is_cash)
+
+    @property
+    def filed_under(self) -> str:
+        """The plain name of the category the adjustment lands in."""
+        if self.is_cash:
+            return "Unaccounted Money Found" if self.difference > ZERO else "Unaccounted Spending"
+        return "Other Income" if self.difference > ZERO else "Other Personal spending"
 
 
 class ReconciliationService:
@@ -84,24 +100,27 @@ class ReconciliationService:
     def check(self, account_id: int, through: str, bank_balance: Decimal) -> BalanceCheck:
         mine = self.balance(account_id, through)
         limit = max(SMALL_FLOOR, (abs(bank_balance) * SMALL_SHARE).quantize(Decimal("0.01")))
-        return BalanceCheck(through, bank_balance, mine, bank_balance - mine, limit)
+        is_cash = self.transactions.accounts.get(account_id).account_type.value == "CASH"
+        return BalanceCheck(through, bank_balance, mine, bank_balance - mine, limit, is_cash)
 
     def adjust(self, account_id: int, through: str, bank_balance: Decimal):
         """Post the small difference so the account matches the bank on ``through``."""
         result = self.check(account_id, through, bank_balance)
         if result.matches:
             raise ValidationError("The account already matches your bank; there is nothing to adjust.", "balance")
-        if not result.small:
+        if not result.adjustable:
             raise ValidationError("The difference is too big to adjust. Review the register, or delete and "
                                   "reimport the statement.", "balance")
         notes = f"Bank showed {bank_balance:,.2f} on {through}"
         if result.difference > ZERO:
-            category = self.categories.get_by_code(EXCESS_CATEGORY)
+            category = self.categories.get_by_code(CASH_EXCESS_CATEGORY if result.is_cash else EXCESS_CATEGORY)
             return self.transactions.record_inflow(through, account_id, result.difference, category.id,
-                                                   counterparty=ADJUSTMENT, notes=notes)
-        category = self.categories.get_by_code(SHORTFALL_CATEGORY)
+                                                   counterparty=ADJUSTMENT, notes=notes,
+                                                   allow_system_category=result.is_cash)
+        category = self.categories.get_by_code(CASH_SHORTFALL_CATEGORY if result.is_cash else SHORTFALL_CATEGORY)
         return self.transactions.record_outflow(through, account_id, -result.difference, category.id,
-                                                counterparty=ADJUSTMENT, notes=notes)
+                                                counterparty=ADJUSTMENT, notes=notes,
+                                                allow_system_category=result.is_cash)
 
     @staticmethod
     def parse_bank_balance(value: str) -> Decimal:

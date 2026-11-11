@@ -1,6 +1,7 @@
-"""Cash planning: Plan · Recurring · Loans · Reserves."""
+"""Cash planning: Plan · Upcoming · Recurring · Loans · Reserves."""
 from __future__ import annotations
 
+import calendar
 from datetime import timedelta
 from decimal import Decimal
 from urllib.parse import urlencode
@@ -14,6 +15,7 @@ from lightning.core.figures import label
 from lightning.core.money import ZERO, fmt, to_decimal
 from lightning.planning.domain import (FREQUENCY_LABELS, KIND_LABELS, RECURRING_KINDS, WEEKEND_MOVE_LABELS, Frequency,
                                        PaymentStatus, PlanKind, WeekendMove, per_year)
+from lightning.planning.bill_state import CATCH_UP_FROM, late_payments
 from lightning.planning.schedule import describe
 from lightning.planning.service import LOAN_CATEGORY
 
@@ -26,7 +28,7 @@ router = APIRouter(prefix="/plan")
 FIELDS = ("kind", "name", "amount", "frequency", "interval_count", "start_date", "end_date", "payment_count",
           "account_id", "category_id", "counterparty", "principal", "notes", "weekend_move",
           "match_window_days", "match_tolerance_pct")
-TABS = (("plan", "Plan", "/plan"), ("recurring", "Recurring", "/plan/recurring"),
+TABS = (("plan", "Plan", "/plan"), ("upcoming", "Upcoming", "/plan/upcoming"), ("recurring", "Recurring", "/plan/recurring"),
         ("loans", "Loans", "/plan/loans"), ("reserves", "Reserves", "/plan/reserves"))
 
 
@@ -150,6 +152,11 @@ async def plan_page(request: Request):
     needs = [{"label": f"{p.item.name} is late", "detail": f"Due {p.due_date} · {fmt(p.still_owed, 0)} · {p.days_late(day)} days late",
               "href": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fplan", "popup": True, "action": "Mark paid"}
              for p in late]
+    if len(late) >= CATCH_UP_FROM:
+        # IV-12AA5: many late payments are one Catch up, each in turn, not a row and a Mark paid each.
+        names = ", ".join(p.item.name for p in late[:2]) + (f" and {len(late) - 2} more" if len(late) > 2 else "")  # not money: counts and keys
+        needs = [{"label": f"{len(late)} payments are late", "detail": names, "href": "/plan/catch-up",
+                  "action": "Catch up"}]
     status = page_status.cash_plan(forecast.safe_to_spend, forecast.next_income_date, has_income)
     afford, afford_error = None, ""
     raw_afford = request.query_params.get("afford", "").replace(",", "").strip()
@@ -268,6 +275,76 @@ async def recurring_page(request: Request):
                   suggestions=c.planning.suggestions(day), dismissed=c.planning.dismissed_suggestions(),
                   subscriptions_per_year=subscriptions,
                   monthly_out=monthly_out, monthly_in=monthly_in, labels=labels, as_of=fmt_date(day))
+
+
+UPCOMING_GROUPS = {"bills": "Bills", "instalments": "Instalments", "gameya": "Gam'eya", "income": "Income"}
+MARKS_PER_DAY = 3  # a day cell shows three marks, then "+n"
+
+
+def _month_grid(month, first, last, day, show: str, chosen: str) -> list[list[dict | None]]:
+    """The month as weeks starting Saturday (A12.1.12): each day with its marks; figures come from the service."""
+    order = [(visuals.WEEK_STARTS_ON + i) % 7 for i in range(7)]  # not money
+    weeks, week = [], [None] * order.index(first.weekday())  # not money
+    cursor, today_text = first, fmt_date(day)
+    paydays = set(month.paydays)
+    while cursor <= last:
+        key = fmt_date(cursor)
+        entries = [e for e in month.on(key) if show == "all" or e.group == show]
+        week.append({"day": cursor.day, "date": key, "today": key == today_text, "chosen": key == chosen,
+                     "payday": key in paydays, "short": key == month.short_on, "entries": entries[:MARKS_PER_DAY],
+                     "more": max(len(entries) - MARKS_PER_DAY, 0),  # not money
+                     "late": any(e.state == "late" for e in entries)})
+        if len(week) == 7:
+            weeks.append(week)
+            week = []
+        cursor += timedelta(days=1)  # not money
+    if week:
+        weeks.append(week + [None] * (7 - len(week)))  # not money
+    return weeks
+
+
+@router.get("/upcoming")
+async def upcoming_page(request: Request):
+    """What do I still have to pay this month, and on which days? (NF-7AR)"""
+    from lightning.planning.calendar import month_calendar
+    c = container(request)
+    day = today()
+    c.planning.match_payments(day)
+    month = str(request.query_params.get("month", "")) or month_of(day)
+    try:
+        first, last = parse_month(month)
+    except ValidationError:
+        month = month_of(day)
+        first, last = parse_month(month)
+    show = str(request.query_params.get("show", "all"))
+    show = show if show in UPCOMING_GROUPS else "all"
+    cal = month_calendar(c.planning, c.gameya, month, day, c.forecaster)
+    chosen = str(request.query_params.get("day", ""))
+    if not (chosen[:7] == month and len(chosen) == 10):
+        # The answer first: the next day that still asks for money (a late one before it), else today or the 1st.
+        open_days = [e.date for e in cal.entries if not e.incoming and e.left > ZERO
+                     and (e.date >= fmt_date(day) or e.state == "late")]
+        chosen = open_days[0] if open_days else fmt_date(day) if first <= day <= last else fmt_date(first)
+    shown = [e for e in cal.on(chosen) if show == "all" or e.group == show]
+    name = calendar.month_name[first.month]
+    previous_name = calendar.month_name[(first - timedelta(days=1)).month]  # not money
+    change, last_total = cal.change_from_last_month, cal.last_month_total
+    compared = ("" if not last_total else f"The same as {previous_name}" if not change
+                else f"{fmt(change, 0)} more than {previous_name}" if change > 0
+                else f"{fmt(change, 0).lstrip('-−')} less than {previous_name}")
+    lead = kpis.card(
+        f"Left to pay in {name}", cal.left_to_pay,
+        kpis.compare(f"of {fmt(cal.month_total, 0)} due in {name}", f"{fmt(cal.already_paid, 0)} paid", "good"),
+        tone="out", visual=kpis.segments([("Paid", cal.already_paid, "hold"), ("Left", cal.left_to_pay, "out")]),
+        line_=kpis.line(compared), needs=any(e.state == "late" for e in cal.entries)) if cal.month_total else None
+    back = urlencode({"month": month, "day": chosen, **({"show": show} if show != "all" else {})})
+    return render(request, "planning/upcoming.html", tabs=TABS, plan_tab="upcoming", cal=cal, lead=lead,
+                  answer=page_status.upcoming(cal.left_to_pay, name, cal.days_to_pay),
+                  weeks=_month_grid(cal, first, last, day, show, chosen), weekdays=[visuals.WEEKDAYS[(visuals.WEEK_STARTS_ON + i) % 7] for i in range(7)],  # not money
+                  month=month, month_name=f"{name} {first.year}", show=show, groups=UPCOMING_GROUPS,
+                  chosen=chosen, shown=shown, day_back="/plan/upcoming?" + back,
+                  previous_month=month_of(first - timedelta(days=1)), next_month=month_of(last + timedelta(days=1)),  # not money
+                  this_month=month_of(day))
 
 
 @router.get("/loans")
@@ -691,8 +768,59 @@ async def settle_payment(request: Request, item_id: int):
             else:
                 raise LightningError("Choose how this payment was settled.")
     except LightningError as exc:
-        return redirect(f"/plan/items/{item_id}/pay?due={due}&back={back}", exc.message)
+        return redirect(f"/plan/items/{item_id}/pay?" + urlencode({"due": due, "back": back}), exc.message)
     return redirect(back, message)
+
+
+def _catch_key(payment) -> str:
+    return f"{payment.item.id}:{payment.due_date}"
+
+
+@router.get("/catch-up")
+async def catch_up(request: Request):
+    """IV-12AA5: each late payment in turn, paid (on the pay page: a matching payment first, then the day and the
+    account) or not yet, then a summary of what this catch-up changed, with Undo. The list is fixed when it
+    starts (``start``), so a bill paid along the way stays in the summary; ``later`` holds the ones left for now."""
+    c = container(request)
+    day = today()
+    q = request.query_params
+    if not q.get("start"):
+        late = late_payments(c.planning, day)
+        if not late:
+            return redirect("/plan", "Nothing is late.")
+        return redirect("/plan/catch-up?" + urlencode({"start": ",".join(_catch_key(p) for p in late)}))
+    start = [key for key in str(q.get("start", "")).split(",") if key]
+    later = [key for key in str(q.get("later", "")).split(",") if key in start]
+    here = "/plan/catch-up?" + urlencode({"start": ",".join(start), **({"later": ",".join(later)} if later else {})})
+    rows = []
+    for key in start:
+        item_id, _, due = key.partition(":")
+        try:
+            item = c.planning.get(int(item_id))
+        except (LightningError, ValueError):
+            continue
+        payment = next((p for p in c.planning.payments(item, due, day) if p.due_date == due), None)
+        if payment is not None:
+            rows.append({"key": key, "item": item, "payment": payment, "later": key in later})
+    waiting = [r for r in rows if r["payment"].outstanding and not r["later"]]
+    if waiting:
+        current = waiting[0]
+        p = current["payment"]
+        currency = c.accounts.get(p.item.account_id).currency if p.item.account_id else c.base_currency
+        return render(request, "planning/catch_up.html", step=current, number=rows.index(current) + 1, total=len(rows),  # not money: counts and keys
+                      amount=p.still_owed, currency=currency, late_days=p.days_late(day),
+                      pay_href=f"/plan/items/{p.item.id}/pay?" + urlencode({"due": p.due_date, "back": here}),
+                      later_href="/plan/catch-up?" + urlencode({"start": ",".join(start),
+                                                                "later": ",".join(later + [current["key"]])}),  # not money: counts and keys
+                      summary=None, here=here)
+    summary = {"paid": [r for r in rows if r["payment"].status == PaymentStatus.PAID],
+               "skipped": [r for r in rows if r["payment"].status == PaymentStatus.SKIPPED],
+               "not_yet": [r for r in rows if r["payment"].outstanding]}
+    for r in summary["paid"]:
+        p = r["payment"]
+        r["paid"] = c.planning.amount_in_base(p, p.paid_amount if p.paid_amount is not None else p.amount, day)
+    summary["paid_total"] = sum((r["paid"] for r in summary["paid"]), ZERO)
+    return render(request, "planning/catch_up.html", step=None, summary=summary, total=len(rows), here=here)
 
 
 @router.get("/inputs")
