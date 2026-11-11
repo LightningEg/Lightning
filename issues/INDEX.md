@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 68 open items. Each folder holds its reports and its items.
+11 big pictures, 67 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -261,16 +261,13 @@ App themes and looks are bought once, worn on every device of a profile, and nev
 | NF-10C3 | ↳ Fix the app's own green on dark cards | | | S | Opus | |
 | NF-10C4 | ↳ Owner steps 1-6 in order | | | owner |  | |
 | NF-10C5 | ↳ Review prices after 60 days of sales | | | owner |  | |
-| **NF-10D** | [Papyrus and Dendera bundles need a banner, frame and name designed first](10-looks-and-store/NF-10D-papyrus-and-dendera-bundles.md) | new feature | Feel | M | Opus | ready |
-| NF-10D2 | ↳ Add the pieces and the two sets to the catalogue | | | M | Opus | |
 | **NF-10H** | [One purchase per person - a theme bought on Google Play or the website unlocks every profile of that buyer, on every surface](10-looks-and-store/NF-10H-one-purchase-per-person.md) | new feature | Own | L | Opus | ready |
-| NF-10H3 | ↳ Website: account-wide seats | | | M | Opus | |
 | NF-10H4 | ↳ Owner: prices | | | owner |  | |
 | NF-10H5 | ↳ Owner: the extra seats already sold | | | owner |  | |
 
 Reports: [r12](10-looks-and-store/r12-v150-release/report.md) · [r13](10-looks-and-store/r13-store-and-community/report.md).
 
-Done: 10E, 10F, 10G, 10H1, 10H2. Next free code: 10I.
+Done: 10D, 10E, 10F, 10G, 10H1, 10H2, 10H3. Next free code: 10I.
 
 ## 11 Phone UX
 
