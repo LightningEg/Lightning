@@ -12,11 +12,7 @@ counterparties.html
 counterparty.html
 dashboard/welcome.html
 financial_health.html
-import.html
-integrity.html
 money_from_others.html
-needs_you.html
 physical_account.html
 physical_item_form.html
 reserves.html
-tag.html

@@ -3551,6 +3551,7 @@ ARABIC_UI = {
     'e.g. Pets': 'مثال: حيوانات أليفة',
     'Record {what}': 'سجّل {what}',
     'Edit rule': 'تعديل القاعدة',
+    'Choose files': 'اختار الملفات',
 }
 
 
