@@ -14,7 +14,7 @@
 {% block title %}Cash planning{% endblock %}
 {# The hero sits in the heading so the tabs come right under its sentence, as the design shows. #}
 {% block heading %}<h1>{{ 'Cash planning'|tr(locale) }}</h1>{% if cash and (has_accounts or cash.due) %}
-<div class="phone-plan-hero">{% set line %}{% if status %}{{ status.text|tr(locale, **status['values']) }}{% endif %}{% endset %}{{ hero(fig.safe_to_spend.label, forecast.safe_to_spend, line, note="As of {date}"|tr(locale, date=as_of), href='#plan-build' if has_accounts else '') }}</div>{% endif %}{% endblock %}
+<div class="phone-plan-hero">{% set line %}{% if status %}{{ status.text|tr(locale, **status['values']) }}{% endif %}{% endset %}{{ hero(fig.safe_to_spend.label, forecast.safe_to_spend, line, note="As of {date}"|tr(locale, date=as_of), href='#plan-build' if has_accounts else '', fig='safe_to_spend') }}</div>{% endif %}{% endblock %}
 {% macro plan_row(r) %}
 <a class="phone-row phone-plan-row{{ ' is-late' if r.late }}"{% if r.popup %} data-popup-open{% endif %} href="{{ r.href }}"><span>{{ r.name }}<small>{{ r.kind|tr(locale) }}{% if r.estimated %} · {{ 'Estimated'|tr(locale) }}{% endif %} · {% if r.late_text %}<span class="nowrap">{{ r.date }}</span> · <span class="plan-status plan-status-late">{{ r.late_text.text|tr(locale, **r.late_text['values']) }}</span>{% else %}{{ r.when.text|tr(locale, **r.when['values']) }} · <span class="nowrap">{{ r.date }}</span>{% endif %}</small></span><b class="{{ 'pos' if r.income }}">{{ '+' if r.income else '−' }}{{ r.amount|money }}</b>{{ arrow('in' if r.income else 'out') }}</a>
 {% endmacro %}

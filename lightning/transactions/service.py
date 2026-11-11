@@ -8,6 +8,7 @@ Search reads transactions, accounts and categories directly, so nothing derived 
 from __future__ import annotations
 
 from dataclasses import asdict, replace
+from datetime import timedelta
 from decimal import Decimal
 
 from lightning.accounts.domain import Account, AccountType
@@ -372,9 +373,6 @@ class TransactionService:
         category = self.categories.get(category_id)
         return (DocType.OUT if value < 0 else DocType.IN), value, category.id
 
-    def _tagged_notes(self) -> list:
-        return search.tagged_notes(self.repo)
-
     def tag_transaction_ids(self, tag: str) -> set[int]:
         """Posted transactions whose notes carry the tag (#eid matches #Eid, never #eid2026)."""
         return search.tag_transaction_ids(self.repo, tag)
@@ -400,6 +398,11 @@ class TransactionService:
         2 to 4. {name: {category_id, count, total}}."""
         return search.usual_categories(
             self.repo, window=self.USUAL_WINDOW, minimum=self.USUAL_MIN, days=self.USUAL_DAYS)
+
+    def common_categories(self, limit: int = 3) -> dict[str, list[int]]:
+        """NF-7AB5 quick mode: the categories this person uses most for money out and money in, last 180 days."""
+        since = (today() - timedelta(days=self.USUAL_DAYS)).isoformat()
+        return {kind.lower(): self.repo.common_categories(kind, since, limit) for kind in ("OUT", "IN")}
 
     def last_accounts(self) -> dict[str, int]:
         """{counterparty name: the account its newest money in or out used}; quick add fills it in (IV-12C)."""
@@ -770,10 +773,6 @@ class TransactionService:
             "AND NOT EXISTS (SELECT 1 FROM reevaluation_account_posts p WHERE p.transaction_id=t.id)")}
 
     # -- one save per submitted form (2J) ------------------------------------------------------------------
-    @staticmethod
-    def _submission(token, payload: dict) -> tuple[str, str] | None:
-        return submissions.fingerprint(token, payload)
-
     def submitted(self, token, payload: dict) -> Transaction | None:
         """The transaction an earlier delivery of this same form created, if any. Call inside the write transaction."""
         return self._submissions.submitted(token, payload)
@@ -796,6 +795,10 @@ class TransactionService:
         if not found:
             raise NotFoundError("Transaction not found.")
         return found
+
+    def get_many(self, txn_ids: list[int]) -> dict[int, Transaction]:
+        """Several transactions at once (the Activity list); an id that does not exist is left out."""
+        return self.repo.get_many([int(i) for i in txn_ids])
 
     def revision(self, txn_id: int) -> str:
         """Opaque form version, covering the header and every posting line."""
@@ -901,18 +904,6 @@ class TransactionService:
     def _is_ownership_transaction(txn: Transaction) -> bool:
         return txn.type == DocType.ADJ and txn.description.startswith("Ownership:")
 
-    def _ownership_cash_keys(self, lines):
-        keys = set()
-        for line in lines:
-            asset = self.assets.get_asset(line.asset_id)
-            if asset.is_cash:
-                keys.add((line.account_id, line.asset_id, line.owner_id))
-        return keys
-
-    def _tagged_cash_keys(self, lines):
-        return {(line.account_id, line.asset_id, line.owner_id) for line in lines
-                if line.owner_id is not None and self.assets.get_asset(line.asset_id).is_cash}
-
     # ======================================================================
     # Internals
     # ======================================================================
@@ -946,11 +937,14 @@ class TransactionService:
         dst = self.accounts.require_usable(to_id, "to_account")
         if src.id == dst.id:
             raise ValidationError("Choose two different accounts.", "to_account")
-        # A gam'eya circle receives instalments and pays out your turn as transfers (lightning/deposits/gameya.py).
-        source_accounts = {AccountType.CASH, AccountType.BANK, AccountType.BROKERAGE, AccountType.GAMEYA}
+        # A gam'eya circle receives instalments and pays out your turn as transfers (lightning/deposits/gameya.py);
+        # a person's Owed to you account receives what you lend and pays back what they return (NF-12G).
+        source_accounts = {AccountType.CASH, AccountType.BANK, AccountType.BROKERAGE, AccountType.GAMEYA,
+                           AccountType.RECEIVABLE}
         if allow_legacy_deposit_cash:
             source_accounts.add(AccountType.DEPOSIT)
-        destination_accounts = {AccountType.CASH, AccountType.BANK, AccountType.BROKERAGE, AccountType.GAMEYA}
+        destination_accounts = {AccountType.CASH, AccountType.BANK, AccountType.BROKERAGE, AccountType.GAMEYA,
+                                AccountType.RECEIVABLE}
         if src.account_type not in source_accounts or dst.account_type not in destination_accounts:
             raise ValidationError("Transfers can move cash from wallets, banks, or legacy deposit balances into liquid accounts.", "to_account")
         if src.currency != dst.currency:

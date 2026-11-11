@@ -74,7 +74,7 @@ def test_the_hero_is_safe_to_spend_and_coming_up_opens_on_due_before_payday(c, w
     assert "Due before payday" in line and f"{due:,.0f} EGP" in line and line in _coming(html)
     assert "12,770" in line  # Landlord 12,000 + Streaming 120 + Internet's October 650
     text = _text(line)
-    assert "3 payments until 2026-10-25." in text and "All covered by free cash." in text
+    assert "3 payments until 25 Oct." in text and "All covered by free cash." in text
     assert "1 payment is already late." in text
     # The hero sits above the worded tabs, which sit right under its sentence.
     assert html.index('class="phone-hero has-seam"') < html.index('class="section-bar"') < html.index('class="phone-section phone-plan-coming"')
@@ -138,7 +138,7 @@ def test_nothing_before_payday_names_the_next_payment_after_it(c, setup, monkeyp
           rent=("Landlord", "BILL", "12000", "2026-11-03", {}),
           gym=("Gym", "BILL", "300", "2026-11-09", {}))
     text = _text(_due(_phone(c).get("/plan").text))
-    assert "Nothing is due before 2026-11-01. Next: Landlord, 12,000 on 2026-11-03." in text
+    assert "Nothing is due before 1 Nov. Next: Landlord, 12,000 on 3 Nov." in text
 
 @pytest.mark.parametrize("locale", ["en", "ar"])
 def test_an_empty_profile_shows_no_zero_tiles(c, monkeypatch, locale):

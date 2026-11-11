@@ -131,8 +131,9 @@ _TABLE = [
     ("zakatable_wealth", "Zakatable wealth", "What zakat is worked out on: what you hold, less the debts due now.",
      "Cash you own + Deposits + Gam'eya paid in + Shares and funds + Gold held as savings + Gold you wear "
      "− Debts due now − Gam'eya instalments due now"),
-    ("nisab", "Nisab", "The least wealth zakat applies to: 85 g of 24K gold at the gold price of the day, or the "
-     "amount you typed when there is no gold price."),
+    ("nisab", "Nisab", "The least wealth zakat applies to: 85 g of 24K gold at the gold price of the day by default, "
+     "595 g of silver at the silver price you typed, or the lower of the two, as you choose; the amount you typed "
+     "when that price is missing."),
     ("zakat_rate", "Zakat rate", "The share of zakatable wealth that is due: 2.5% by the common rule."),
     ("zakat_due", "Zakat due", "An estimate by the common rule, for a scholar to confirm: the zakat rate of Zakatable "
      "wealth when it is at or above the Nisab, else nothing.", "Zakatable wealth × Zakat rate"),

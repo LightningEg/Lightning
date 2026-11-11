@@ -69,7 +69,8 @@ def test_an_overspent_day_has_a_negative_hero_and_says_so(sample, monkeypatch):
         def items(self, on, **kw):
             out = super().items(on, **kw)
             self.forecast = SimpleNamespace(safe_to_spend=-1200, next_income_date=self.forecast.next_income_date,
-                                            safe_to_spend_parts=self.forecast.safe_to_spend_parts)
+                                            safe_to_spend_parts=self.forecast.safe_to_spend_parts,
+                                            safe_to_spend_working=self.forecast.safe_to_spend_working)
             return out
     monkeypatch.setattr(home, "ReviewInbox", Short)
     screen = home.build(c, day)
@@ -97,7 +98,8 @@ def test_home_has_at_most_eight_figures(sample):
              html.split('id="month-heading"', 1)[1].split("</section>", 1)[0]]
     text = re.sub(r'<div class="phone-sheet-panel".*?</details>', " ", " ".join(parts), flags=re.S)  # the working is a sheet, not on the screen
     text = re.sub(r"<[^>]+>", " ", text)
-    text = re.sub(r"\d{4}-\d\d-\d\d|See all \d+", " ", text)  # dates and the count on "See all" are not figures
+    months = "Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec"
+    text = re.sub(rf"\d{{4}}-\d\d-\d\d|\b\d{{1,2}} (?:{months})\b(?: \d{{4}})?|See all \d+", " ", text)  # dates (1 Nov) and "See all" are not figures
     figures = re.findall(r"\d[\d,]*(?:\.\d+)?(?!\d)(?!\s*(?:days?|bills?|more|items?))", text)  # amounts, not counts of days
     assert len(figures) <= 8 and not any("." in f for f in figures), (figures, text)  # whole EGP
 
@@ -228,3 +230,24 @@ def test_no_meter_without_a_plan(tmp_path, monkeypatch):
     c = build(tmp_path / "empty.db")
     assert home.build(c, date(2026, 10, 4)).meter is None
     c.db.close()
+
+
+def test_see_all_lists_every_to_do_row_and_home_links_to_it(sample):
+    """IV-3AY14: /todo lists every row todo_rows returns, in order; Home's See all opens it, not the PC's Needs you."""
+    from lightning.ui.phone.screens import todo
+    c, day = _on(sample, "2026-10-04")
+    rows = todo.build(c, day).rows
+    screen = home.build(c, day)
+    assert len(rows) == screen.todo_total and rows[:2] == screen.todo[:2]
+    app = create_app(c)
+    mount_phone(app)
+    client = TestClient(app)
+    page = client.get("/todo")
+    assert page.status_code == 200
+    body = page.text[page.text.index('<h1>'):]
+    assert len(re.findall(r'class="phone-row[ "]', body)) == len(rows)
+    for r in rows:
+        assert r.href.replace("&", "&amp;") in body
+    if screen.todo_total > len(screen.todo):
+        assert 'href="/todo"' in client.get("/home").text
+    assert 'href="/needs-you"' not in client.get("/home").text

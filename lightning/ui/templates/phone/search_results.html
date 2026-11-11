@@ -1,6 +1,7 @@
 {# The phone Search results (3AN6): payments first as the Transactions list draws them, then the names behind them, then
    pages and actions under their own heading. A fragment: the page includes it and the live search asks for it alone. #}
 {% from "phone/partials/txn.html" import txn_list with context %}
+{% include "partials/search_answer.html" %}
 {% if query and not payments and not money and not pages %}<p class="empty">{{ 'Nothing matches “{q}”.'|tr(locale, q=query) }}</p>{% elif not query %}<p class="phone-note">{{ 'Search a payee, a category or an amount. Pages and actions are below.'|tr(locale) }}</p>{% endif %}
 {% if payments %}
 <section class="phone-section" aria-labelledby="search-payments">

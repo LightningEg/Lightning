@@ -22,7 +22,7 @@
   </div>
   <div class="phone-hero has-seam phone-budget-hero-text">
     <div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Over plan'|tr(locale) if ring.over else fig.left_in_plan.label }}</div>
-    <div class="phone-lead{{ ' is-negative' if ring.over }}">{{ ring.amount|money }} <small>{{ base }}</small></div>
+    <div class="phone-lead{{ ' is-negative' if ring.over }}"{% if not ring.over %} data-fig="left_in_plan"{% endif %}>{{ ring.amount|money }} <small>{{ base }}</small></div>
     {% set line = phone_plan.day_one or status %}{% if line %}<p class="phone-hero-line">{{ line.text|tr(locale, **line['values']) }}</p>{% endif %}
   </div>
 </section>

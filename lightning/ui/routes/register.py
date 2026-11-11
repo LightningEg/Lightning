@@ -536,6 +536,9 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     return render(
         request, "register.html", status_code=status_code,
         account=account,
+        # NF-7AB2: a statement of this account half reviewed is continued from the account, not only from Import.
+        import_waiting=[w for w in c.bank_imports.waiting_all() if account and w["account_id"] == account.id
+                        and not str(w["file_name"]).startswith("SMS ")],
         depends=c.linked.account(account.id) if account else None,
         account_spendable=account.counts_as_spendable(c.base_currency) if account else None,
         account_cost_method=account.cost_method if account else None,

@@ -10,6 +10,7 @@ from lightning.core.errors import ValidationError
 from lightning.planning.domain import Frequency, PaymentStatus, PlanKind, PlannedItem, WeekendMove
 from lightning.planning.schedule import describe, on_working_day, payment_dates
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 def _item(**kw) -> PlannedItem:
@@ -236,7 +237,7 @@ def test_overview_lists_due_bills_under_needs_you(c, setup, monkeypatch):
     # Feedback ticket 84: both are payments, so they are one row that opens their own page.
     assert "Bills and payments · 2" in attention and "Loan payment due: Car loan, Bill due: Electricity" in attention
     group = TestClient(create_app(c), base_url="http://127.0.0.1").get("/needs-you/payments").text
-    assert "Bill due: Electricity" in group and "Due 2026-09-25 · 480" in group
+    assert "Bill due: Electricity" in group and said("Due 2026-09-25 · 480") in group
     assert "Loan payment due: Car loan" in group and "Mark paid" in group
 
 

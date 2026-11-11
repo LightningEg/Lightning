@@ -15,7 +15,7 @@ from lightning.categories.domain import Movement
 from lightning.planning.emergency_context import emergency_liquidity_context
 from lightning.planning.domain import PlanKind
 
-from .. import charts, keynotes
+from .. import charts, keynotes, status as page_status
 from ..web import container, redirect, render, ui_locale, settled_save
 from ..i18n import translate
 
@@ -100,6 +100,7 @@ def _context(request: Request, error: str = ""):
     return {"reserves": listed, "bills": bills, "completed_reserves": completed, "notes": notes, "emergency_meter": emergency_meter,
             "emergency_set_aside": set_aside, "emergency": emergency, "fund": fund, "refill": refill,
             "pos": position, "liquidity_context": liquidity_context, "error": error,
+            "answer": page_status.reserves(fund.months, emergency is not None),
             "counterparties": c.counterparties.list_active(),
             "accounts": [account for account in c.accounts.list(active_only=True)
                          if account.account_type.value in ("CASH", "BANK", "DEPOSIT", "BROKERAGE")],

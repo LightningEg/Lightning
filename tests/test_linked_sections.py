@@ -209,7 +209,8 @@ def test_transaction_lines_describe_outflow_in_plain_words(c, setup):
     assert '<span class="pill">Money out</span>' in page
     assert '<span class="pill">OUTFLOW</span>' not in page
     from lightning.ui.routes.transactions import _display_timestamp
-    assert f'>{_display_timestamp(expense.created_at)}</time>' in page
+    from tests.screens import said
+    assert said(f'>{_display_timestamp(expense.created_at)}</time>') in page
 
 
 def test_transaction_timestamps_keep_recorded_offsets_in_readable_form():
@@ -250,5 +251,5 @@ def test_pc_activity_uses_category_leaf_and_detail_keeps_hierarchy(c, setup):
     assert ' › ' not in summary_category
     from test_gameya_screens import _client
     phone = _client(c, phone=True).get(f"/transactions/{expense.id}").text
-    phone_category = phone.split('<td class="category-context">', 1)[1].split('</td>', 1)[0]
-    assert 'Personal ›' in phone_category and escape(food.name) in phone_category
+    phone_category = phone.split(f'<dt>Category</dt><dd>', 1)[1].split('</dd>', 1)[0]   # 3AY15: the phone's facts list
+    assert 'Personal · ' in phone_category and escape(food.name) in phone_category

@@ -1,0 +1,6 @@
+{# Target allocation as a page on the phone (3AY16). #}
+{% extends "base.html" %}
+{% block title %}Target allocation{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/investments"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Investments'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Target allocation'|tr(locale) }}</h1>{% endblock %}
+{% block content %}{% include "phone/investments/_targets.html" %}{% endblock %}

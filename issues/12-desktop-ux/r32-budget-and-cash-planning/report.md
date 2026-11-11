@@ -68,8 +68,8 @@ Severity: high = a wrong figure; medium = a contradiction or an unfinished page;
 
 | ID | Feature | Owner, 2026-11-09 | Follow-up |
 | --- | --- | --- | --- |
-| F1 | Fill this month from the average of the last three months | Build | NF-12R |
-| F2 | Warn before a category runs out, with Move room or Raise | Build | NF-12S |
+| F1 | Fill this month from the average of the last three months | Built (NF-12R) | `tests/test_budget_fill.py::test_average_source_uses_three_full_months_and_one_month_of_history` |
+| F2 | Warn before a category runs out, with Move room or Raise | Built (NF-12S) | `tests/test_running_out.py` |
 | F3 | Bills on a calendar | Not chosen | none |
 | F4 | Change limit shows the last three months | Not chosen (the popup of IV-12Q3 shows this month only) | none |
 

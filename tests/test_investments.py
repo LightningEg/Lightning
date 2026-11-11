@@ -759,13 +759,13 @@ def test_phone_planner_keeps_remainder_details_and_controls(c):
         await app(scope, receive, send)
     phone = TestClient(phone_app).get('/investments/planner?amount=1000').text
     desktop = TestClient(app).get('/investments/planner?amount=1000').text
-    phone_rows = phone.split('<div class="planner-popup-rows">', 1)[1]
+    phone_rows = phone.split('planner-popup-rows">', 1)[1]   # 3AY16: the phone's own planner
     assert 'class="phone-row-more planner-other"' in phone_rows
     before, remainder = phone_rows.split('<details class="phone-row-more planner-other">', 1)
     after = remainder.split('</details>', 1)[0]
     assert sum(f'data-planner-bucket="{name}"' in before for name in names) == 4
     assert sum(f'data-planner-bucket="{name}"' in after for name in names) == 1
-    assert 'Other</span><b>200</b>' in after
+    assert re.search(r'Other</span><b>(<bdi class="fig">)?200', after)
     assert all(f'data-planner-bucket="{name}"' in desktop for name in names)
     assert 'planner-other' not in desktop
     assert all(f'name="{field}"' in phone and f'name="{field}"' in desktop for field in ('amount', 'monthly_goal', 'mode'))

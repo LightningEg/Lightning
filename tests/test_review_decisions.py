@@ -8,6 +8,7 @@ from lightning.core.errors import ValidationError
 from lightning.ui.web import create_app
 from lightning.workflows.review import ReviewInbox
 from lightning.workflows.reminders import ReminderService
+from tests.screens import said
 
 
 def _waiting(c, setup):
@@ -66,7 +67,7 @@ def test_actions_through_inbox_are_scoped_to_item_and_persist(c, setup):
     assert page.status_code == 200 and 'Mark as reviewed' in page.text and 'Remind me on' in page.text
     result = client.post('/needs-you/state', data={'identity': item['review_id'], 'action': 'snoozed', 'until': '2027-01-07'})
     assert result.status_code == 200 and item['label'] not in result.text
-    assert '2027-01-07' in client.get('/needs-you?tab=handled').text
+    assert said('2027-01-07') in client.get('/needs-you?tab=handled').text
     result = client.post('/needs-you/state', data={'identity': item['review_id'], 'action': 'restore', 'tab': 'handled'})
     assert result.status_code == 200
     assert item['label'] in client.get('/needs-you').text

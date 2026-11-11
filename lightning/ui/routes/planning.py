@@ -153,7 +153,7 @@ async def plan_page(request: Request):
              for p in late]
     if len(late) >= CATCH_UP_FROM:
         # IV-12AA5: many late payments are one Catch up, each in turn, not a row and a Mark paid each.
-        names = ", ".join(p.item.name for p in late[:2]) + (f" and {len(late) - 2} more" if len(late) > 2 else "")
+        names = ", ".join(p.item.name for p in late[:2]) + (f" and {len(late) - 2} more" if len(late) > 2 else "")  # not money: counts and keys
         needs = [{"label": f"{len(late)} payments are late", "detail": names, "href": "/plan/catch-up",
                   "action": "Catch up"}]
     status = page_status.cash_plan(forecast.safe_to_spend, forecast.next_income_date, has_income)
@@ -179,7 +179,9 @@ async def plan_page(request: Request):
                   afford_amount=raw_afford,
                   gameya_owed=position.gameya_still_to_pay,
                   notes=[], plan=plan, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
-                  next_payments=next_payments, late_days=late_days, circle_rows=circle_rows, as_of=fmt_date(day), window_end=fmt_date(window_end),
+                  next_payments=next_payments, late_days=late_days, circle_rows=circle_rows,
+                  upcoming=[p for p in next_payments if p not in late],  # IV-12Z2: the PC lists late bills in Needs you only
+                  as_of=fmt_date(day), window_end=fmt_date(window_end),
                   has_items=has_items, labels=_labels(c), zakat=c.zakat.forecast(day))
 
 
@@ -260,6 +262,7 @@ async def recurring_page(request: Request):
                               "note": r["item"].kind_label + (" · " + r["category"] if r["category"] else "")}
                              for r in rows if not r["item"].is_income])
     return render(request, "planning/recurring.html", tabs=TABS, plan_tab="recurring", rows=rows, stopped=stopped,
+                  answer=page_status.recurring(monthly_out, fixed.percent),
                   bill_bars=bill_bars, fixed_tiles=fixed_tiles,
                   recurring_kpis=kpis.recurring(
                       monthly_out=monthly_out, fixed=fixed, limit=c.health.limit_values().get(fixed.key),
@@ -296,6 +299,7 @@ async def loans_page(request: Request):
                      needs=bool(summary and summary["tone"] == "attention")) if loans else None
     health = c.health
     return render(request, "planning/loans.html", tabs=TABS, plan_tab="loans", loans=loans, lead=lead,
+                  answer=page_status.loans(still_to_pay, len(loans)),
                   debt_tiles=_debt_tiles(health.at(day), fmt_date(day)),
                   debt_kpis=kpis.debt(health.at(day), limits=health.limit_values(), band=health.band, as_of=fmt_date(day)),
                   still_to_pay=still_to_pay, as_of=fmt_date(day))
@@ -732,11 +736,11 @@ async def catch_up(request: Request):
         current = waiting[0]
         p = current["payment"]
         currency = c.accounts.get(p.item.account_id).currency if p.item.account_id else c.base_currency
-        return render(request, "planning/catch_up.html", step=current, number=rows.index(current) + 1, total=len(rows),
+        return render(request, "planning/catch_up.html", step=current, number=rows.index(current) + 1, total=len(rows),  # not money: counts and keys
                       amount=p.still_owed, currency=currency, late_days=p.days_late(day),
                       pay_href=f"/plan/items/{p.item.id}/pay?" + urlencode({"due": p.due_date, "back": here}),
                       later_href="/plan/catch-up?" + urlencode({"start": ",".join(start),
-                                                                "later": ",".join(later + [current["key"]])}),
+                                                                "later": ",".join(later + [current["key"]])}),  # not money: counts and keys
                       summary=None, here=here)
     summary = {"paid": [r for r in rows if r["payment"].status == PaymentStatus.PAID],
                "skipped": [r for r in rows if r["payment"].status == PaymentStatus.SKIPPED],

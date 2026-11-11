@@ -34,7 +34,7 @@
     <p class="muted small">{{ 'CSV up to 5 MB; Excel .xlsx and text-based CIB PDFs up to 8 MB. Every row is reviewed before saving.'|tr(locale) }}</p></div>
     <div class="field"><label for="csv-encoding">{{ 'CSV encoding'|tr(locale) }}</label><select id="csv-encoding" name="encoding" data-native>
 <option value="auto">{{ 'Automatic (Unicode or Windows Arabic)'|tr(locale) }}</option><option value="cp1256">{{ 'Windows Arabic'|tr(locale) }}</option><option value="cp1252">{{ 'Windows Western'|tr(locale) }}</option><option value="utf-8-sig">UTF-8</option><option value="utf-16">UTF-16</option><option value="utf-16-le">UTF-16 LE</option><option value="utf-16-be">UTF-16 BE</option></select></div>
-    <div class="actions"><button class="btn primary">{{ 'Review statement'|tr(locale) }}</button>{% if not phone_mode() %}<a class="btn" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a>{% endif %}</div>
+    <div class="actions"><button class="btn primary">{{ 'Review statement'|tr(locale) }}</button><a class="btn" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a></div>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 </section>
 {% endblock %}

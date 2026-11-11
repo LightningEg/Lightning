@@ -23,7 +23,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 PAGES = ("/", "/budget", "/plan", "/plan/recurring", "/plan/loans", "/plan/reserves", "/investments", "/investments/prices",
          "/accounts", "/accounts/1", "/transactions", "/birdview/expenses", "/financial-health", "/categories",
-         "/counterparties", "/settings", "/money-from-others", "/checks")
+         "/counterparties", "/settings", "/money-from-others", "/checks", "/activity", "/needs-you", "/review",
+         "/search?q=a", "/payday", "/zakat", "/reimbursements", "/spending/compare", "/reports")
+PHONE_PAGES = ("/", "/budget", "/add/bills", "/activity", "/money", "/money/accounts", "/investments", "/plan")
 
 
 def main() -> int:
@@ -56,17 +58,27 @@ def main() -> int:
                 return _original(sql, *a, **k)
             setattr(container.db, name, counted)
         app = create_app(container)
-        if args.phone:  # the phone app's frame and screens (backend roadmap B6: profile phone latency)
+        pages = list(PAGES)
+        if args.phone:  # the phone app's own screens (backend roadmap B6: profile phone latency)
+            from lightning.ui.phone.router import mount_phone
+            mount_phone(app)
+            pages = list(PHONE_PAGES)
             inner = app
 
             async def app(scope, receive, send):
                 if scope["type"] == "http":
                     scope.setdefault("state", {})["phone"] = True
                 return await inner(scope, receive, send)
+        else:
+            biggest = container.db.one(  # the longest statement review: its cost grows with the rows
+                "SELECT b.account_id, b.id FROM bank_import_batches b "
+                "ORDER BY (SELECT COUNT(*) FROM bank_import_rows r WHERE r.batch_id=b.id) DESC, b.id LIMIT 1")
+            if biggest:
+                pages.append(f"/accounts/{biggest['account_id']}/import/{biggest['id']}")
         client = TestClient(app, base_url="http://127.0.0.1")
         worst = 0
         print(f"{'page':26}{'warm ms':>8}{'queries':>9}  most repeated query")
-        for page in PAGES:
+        for page in pages:
             client.get(page)
             counts.clear()
             start = time.perf_counter()

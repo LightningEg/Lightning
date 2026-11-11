@@ -15,6 +15,7 @@ from lightning.core.money import ZERO, fmt, to_decimal
 
 from . import register
 from .. import charts, kpis, status as page_status
+from ..entry import entry_accounts
 from ..i18n import translate
 from ..periods import parse_period
 from ..web import settled_save, container, redirect, render, ui_locale
@@ -198,6 +199,7 @@ async def currency_accounts(request: Request):
     totals = c.reporting.fx_positions.totals(positions)
     return render(request, "accounts/currencies.html", positions=shown, other=other, chosen=chosen, trend=trend,
                   totals=totals, period=period, period_error=period_error,
+                  answer=page_status.currencies(len(positions), totals["value"], totals["unrealized"], totals["complete"]),
                   fx_kpis=kpis.currencies(totals, start=period.start_text, end=period.end_text),
                   combined_trend=combined_trend, combined_unavailable=combined_unavailable)
 
@@ -300,18 +302,15 @@ def _account_id(text: str, field: str) -> int:
 LAST_ACCOUNT_COOKIE = "lightning_last_account"  # the account the last entry went to (phone roadmap M2)
 
 
-def _entry_accounts(c) -> list:
-    """The accounts a hand-entered transaction can go to: every active one that holds money, not a thing you own."""
-    return [a for a in c.accounts.list(active_only=True) if a.account_type.value not in ("PHYSICAL_ASSET", "OTHER_ASSET")]
 
 
 @router.get("/add-transaction")
 async def pick_account_for_entry(request: Request):
     """The phone's Add button (guideline C05.2): the sheet opens on the amount with an account already chosen, the one
     used last, else the one this person uses most (3AN3). No list of accounts first; the sheet's From chip changes it.
-    ?pick=1 still shows the list."""
+    ?pick=1, or no account yet, is the phone router's account list (3AY18); here the PC goes to Accounts."""
     c = container(request)
-    accounts = _entry_accounts(c)
+    accounts = entry_accounts(c)
     if not request.query_params.get("pick") and accounts:
         remembered = str(request.cookies.get(LAST_ACCOUNT_COOKIE, ""))
         ids = [a.id for a in accounts]
@@ -321,7 +320,7 @@ async def pick_account_for_entry(request: Request):
             cashy = [a.id for a in accounts if a.account_type.value in ("CASH", "BANK") and not a.parent_id]
             chosen = c.transactions.usual_account(cashy or ids)
         return await new_transaction_popup(request, chosen)
-    return render(request, "phone/accounts/pick.html", accounts=accounts)
+    return redirect("/accounts")
 
 
 @router.get("/new")
@@ -471,8 +470,12 @@ def _save_popup_transaction(c, account_id: int, values: dict):
             # Left empty: a rule decides first, then the counterparty's usual category, as in the register.
             category_id = register.category_when_empty(c, values["counterparty"].strip(), values["notes"],
                                                        -amount if kind == "out" else amount, account_id)
-        if not category_id:
-            raise ValidationError("Choose a category.", "category")
+        unsorted = not category_id
+        if unsorted:
+            # NF-7AN: save now, sort later. With only an amount the entry waits as To sort (filed Unaccounted, a
+            # system category that is spending or income with no category yet); Home's To do and the phone's To
+            # sort list ask for it.
+            category_id = c.categories.get_by_code("EXP.UNACCOUNTED" if kind == "out" else "INC.UNACCOUNTED").id
         category = c.categories.get(category_id)
         if kind == "out" and category.movement.value != "OUTFLOW":  # money in to an expense is a refund
             raise ValidationError("Choose a category that matches this transaction type.", "category")
@@ -482,10 +485,12 @@ def _save_popup_transaction(c, account_id: int, values: dict):
             raise ValidationError("Choose Transfer and select the destination account explicitly.", "counterparty")
         if kind == "out":
             txn = c.transactions.record_outflow(day, account_id, amount, category_id,
-                                               counterparty=counterparty, notes=values["notes"], owner_id=owner_id)
+                                               counterparty=counterparty, notes=values["notes"], owner_id=owner_id,
+                                               allow_system_category=unsorted)
         else:
             txn = c.transactions.record_inflow(day, account_id, amount, category_id,
-                                              counterparty=counterparty, notes=values["notes"], owner_id=owner_id)
+                                              counterparty=counterparty, notes=values["notes"], owner_id=owner_id,
+                                              allow_system_category=unsorted)
     return txn
 
 

@@ -13,6 +13,7 @@ from fastapi.testclient import TestClient
 from lightning.samples import load_mohab_2026
 from lightning.ui import charts, kpis
 from lightning.ui.web import create_app
+from tests.screens import said
 
 
 def test_a_card_without_a_comparison_is_refused():
@@ -102,7 +103,7 @@ def test_cash_plannings_free_cash_compares_with_the_last_month_end(mohab, monkey
     assert [card.split(" ")[1] for card in cards[1:]] == ["Free", "Due", "Lowest"]
     then = c.position.at(date(2026, 9, 30)).free_cash
     now = c.forecaster.forecast(date(2026, 10, 19)).free_cash
-    assert f"+{now - then:,.0f} since 2026-09-30" in cards[1]
+    assert said(f"+{now - then:,.0f} since 2026-09-30") in cards[1]
     assert "Due before payday 4 late" in cards[2] and "already late" in cards[2]
     assert "below today" in cards[3] and "months of spending at its lowest" in cards[3]
 
@@ -144,7 +145,8 @@ def test_neighbouring_figures_no_longer_disagree_or_read_wrong(mohab, monkeypatc
     scen = _page(client, "/plan/scenarios")                                    # (b) whole EGP and a note, (c) no "None None"
     assert "None None" not in scen and "No shortfall" in scen and "Cash planning’s, month by month" in scen
     low = c.forecaster.forecast(date(2026, 10, 19)).lowest              # IV-12P: the plan's own Lowest point ahead
-    assert f"Lowest point ahead {low.closing:,.0f} EGP · {low.month}" in scen and "Lowest scheduled cash" not in scen
+    from lightning.ui.date_text import month_text
+    assert f"Lowest point ahead {low.closing:,.0f} EGP · {month_text(low.month)}" in scen and "Lowest scheduled cash" not in scen
     assert not re.search(r"\d,\d{3}\.\d\d EGP", scen)
     health = _page(client, "/financial-health")                                # (d) only figures with a limit count
     judged = re.search(r"of the (\d+) figures you set a limit for", health)

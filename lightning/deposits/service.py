@@ -66,6 +66,37 @@ class DepositService:
                         "amount": from_e6(amount_e6)}
         return {"expected_date": terms.maturity_date, "expected": expected if expected > ZERO else None, "received": received}
 
+    def open_certificates(self):
+        """Every certificate still held (not redeemed), oldest maturity first."""
+        rows = self.db.all("SELECT id FROM cd_certificates ORDER BY maturity_date,id")
+        items = (self.repo.get_certificate(int(row["id"])) for row in rows)
+        return [item for item in items if item is not None and not item.redeemed and item.units == Decimal(1)]
+
+    def attention(self, on: date) -> list[dict]:
+        """IV-12J4: Needs you rows for a certificate that matured and is not yet recorded as redeemed, and for one
+        whose earliest withdrawal date arrived in the last 14 days. Nothing is posted."""
+        rows = []
+        for item in self.open_certificates():
+            terms = item.terms
+            maturity, unlock = parse_date(terms.maturity_date), parse_date(terms.lockup_end_date)
+            account = self.accounts.get(terms.account_id)
+            href = f"/deposits/{terms.account_id}?redeem={terms.id}#certificate-{terms.id}"
+            if maturity <= on:
+                expected = self.maturity_outlook(item)["expected"] or terms.principal
+                rows.append({"label": f"Certificate matured: {terms.name}",
+                             "detail": f"Matured {terms.maturity_date} · about {fmt(expected, 0)} {account.currency} "
+                                       "expected · record what the bank paid.",
+                             "href": href, "action": "Record what the bank paid", "priority": 1,
+                             "glance": {"name": terms.name, "verb": "Record", "amount": expected,
+                                        "when": "matured {sa}", "n": None, "sa": terms.maturity_date}})
+            elif unlock != parse_date(terms.start_date) and unlock <= on <= unlock + timedelta(days=14):
+                rows.append({"label": f"Certificate can now be withdrawn: {terms.name}",
+                             "detail": f"Earliest withdrawal {terms.lockup_end_date} · matures {terms.maturity_date}.",
+                             "href": href, "action": "Open", "priority": 2,
+                             "glance": {"name": terms.name, "verb": "Open", "amount": terms.principal,
+                                        "when": "unlocked {sa}", "n": None, "sa": terms.lockup_end_date}})
+        return rows
+
     def certificate_for_asset(self, asset_id: int):
         return self.repo.get_certificate_by_asset(asset_id)
 
@@ -94,9 +125,10 @@ class DepositService:
 
     def purchase(self, account_id: int, name: str, start_date, lockup_end_date, maturity_date,
                  principal, annual_rate, interest_method, payout_frequency,
-                 compounding_frequency, destination_account_id: int, funding_account_id: int,
-                 term_years=""):
+                 compounding_frequency, destination_account_id: int, funding_account_id: int | None,
+                 term_years="", *, _owned=False):
         """Buy one named certificate into a bank's deposit portfolio from chosen liquid cash."""
+        owned = _owned
         if self.assets is None or self.transactions is None:
             raise RuntimeError("Certificate purchase dependencies are not configured.")
         portfolio = self._portfolio(account_id)
@@ -128,9 +160,15 @@ class DepositService:
         compounding = self._compounding_frequency(compounding_frequency)
         if method == InterestMethod.COMPOUND and payout != PayoutFrequency.AT_MATURITY:
             raise ValidationError("Compound interest is paid at maturity only.", "payout_frequency")
-        funding = self._typed_account(funding_account_id, {AccountType.BANK, AccountType.CASH}, "funding_account_id")
         destination = self._typed_account(destination_account_id, {AccountType.BANK, AccountType.CASH},
                                     "destination_account_id")
+        if owned:
+            if destination.currency != portfolio.currency:
+                raise ValidationError("The portfolio and payout account must use the same currency.",
+                                      "destination_account_id")
+            return self._record_owned(portfolio, name, start, lockup, maturity, amount, rate, method, payout,
+                                      compounding, destination)
+        funding = self._typed_account(funding_account_id, {AccountType.BANK, AccountType.CASH}, "funding_account_id")
         if funding.currency != portfolio.currency or destination.currency != portfolio.currency:
             raise ValidationError("The portfolio, funding account and payout account must use the same currency.",
                                   "funding_account_id")
@@ -162,6 +200,44 @@ class DepositService:
             ]
             txn = self.transactions.post(DocType.BUY, fmt_date(start), lines,
                                          f"Buy CD · {name}", portfolio.institution)
+            terms = CertificateTerms(
+                id=0, account_id=portfolio.id, asset_id=asset.id, name=name,
+                start_date=fmt_date(start), lockup_end_date=fmt_date(lockup), maturity_date=fmt_date(maturity),
+                principal=amount, annual_rate=rate, interest_method=method, payout_frequency=payout,
+                compounding_frequency=compounding, destination_account_id=destination.id,
+                purchase_transaction_id=txn.id,
+            )
+            certificate_id = self.repo.save_certificate(terms)
+        return self.certificate(certificate_id), txn
+
+    def record_owned(self, account_id: int, name: str, start_date, lockup_end_date, maturity_date, principal,
+                     annual_rate, interest_method, payout_frequency, compounding_frequency,
+                     destination_account_id: int, term_years=""):
+        """NF-12I: a certificate bought before tracking began. No cash moves: it posts an opening (``OPN``) unit
+        line at the principal on the day tracking starts (``tracking_start``), keeps the true purchase date in the
+        terms for the schedule and maturity, and counts as a baseline, never new money."""
+        return self.purchase(account_id, name, start_date, lockup_end_date, maturity_date, principal, annual_rate,
+                             interest_method, payout_frequency, compounding_frequency, destination_account_id, None,
+                             term_years, _owned=True)
+
+    def tracking_start(self, on=None) -> date:
+        """The day this profile's records begin: its earliest posted entry, or today when it has none."""
+        first = self.db.scalar("SELECT MIN(date) FROM transactions WHERE status='POSTED'")
+        current = parse_date(on or today())
+        return min(parse_date(first), current) if first else current
+
+    def _record_owned(self, portfolio, name, start: date, lockup: date, maturity: date, amount: Decimal,
+                      rate: Decimal, method, payout, compounding, destination):
+        if maturity <= today():
+            raise ValidationError("This certificate has already matured; record what the bank paid as money in.",
+                                  "maturity_date")
+        counted_from = max(start, self.tracking_start())
+        with self.db.transaction():
+            asset = self.assets.create_certificate_asset(name)
+            lines = [PostingLine.units(portfolio.id, asset.id, Decimal(1), amount, Effect.OPENING, amount,
+                                       memo=f"Certificate already owned · {name}")]
+            txn = self.transactions.post(DocType.OPN, fmt_date(counted_from), lines,
+                                         f"Certificate already owned · {name}", portfolio.institution)
             terms = CertificateTerms(
                 id=0, account_id=portfolio.id, asset_id=asset.id, name=name,
                 start_date=fmt_date(start), lockup_end_date=fmt_date(lockup), maturity_date=fmt_date(maturity),
@@ -354,7 +430,8 @@ class DepositService:
             step = _COMPOUND_MONTHS[terms.compounding_frequency]
             while True:
                 period_end = min(_add_months(start, index * step), maturity)
-                accrued += (principal + accrued) * rate * Decimal((period_end - previous).days) / Decimal(365)
+                full = period_end == _add_months(start, index * step)
+                accrued += _period_interest(principal + accrued, rate, previous, period_end, step if full else 0)
                 previous = period_end
                 if period_end == maturity:
                     break
@@ -363,12 +440,14 @@ class DepositService:
             return events
         previous, index = start, 1
         if terms.payout_frequency == PayoutFrequency.AT_MATURITY:
-            emit(maturity, principal * rate * Decimal((maturity - start).days) / Decimal(365), "INTEREST")
+            emit(maturity, _period_interest(principal, rate, start, maturity, _whole_months(start, maturity)),
+                 "INTEREST")
         else:
             step = _MONTHS[terms.payout_frequency]
             while True:
                 period_end = min(_add_months(start, index * step), maturity)
-                emit(period_end, principal * rate * Decimal((period_end - previous).days) / Decimal(365),
+                full = period_end == _add_months(start, index * step)
+                emit(period_end, _period_interest(principal, rate, previous, period_end, step if full else 0),
                      "INTEREST")
                 previous = period_end
                 if period_end == maturity:
@@ -472,6 +551,21 @@ class DepositService:
         if expected_type and account.account_type.value != expected_type:
             raise ValidationError("Choose a DEPOSIT account.", field)
         return account
+
+
+def _whole_months(start: date, end: date) -> int:
+    """The number of whole months from start to end, or 0 when end is not a whole number of months away."""
+    months = (end.year - start.year) * 12 + end.month - start.month
+    return months if months > 0 and _add_months(start, months) == end else 0
+
+
+def _period_interest(principal: Decimal, rate: Decimal, begin: date, end: date, months: int) -> Decimal:
+    """IV-12J2: interest for one payout period the way Egyptian banks pay it. A full period of ``months`` months earns
+    principal x rate x months / 12 (a monthly payout is the same every month); a broken period (``months`` 0, shorter
+    than its schedule) earns by actual days / 365."""
+    if months:
+        return principal * rate * Decimal(months) / Decimal(12)
+    return principal * rate * Decimal((end - begin).days) / Decimal(365)
 
 
 def _add_months(start: date, months: int) -> date:

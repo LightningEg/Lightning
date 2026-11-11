@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from lightning.ui.web import create_app
 from lightning.workflows.review import ReviewInbox, by_consequence, consequence_of
+from tests.screens import said
 
 TODAY = date(2026, 12, 20)
 
@@ -48,5 +49,5 @@ def test_the_three_pages_lead_to_the_same_task_and_snoozing_is_not_resolving(c, 
     assert "1 reviewed or snoozed items are still open, not resolved" in client.get("/review").text
     assert "1 reviewed or snoozed items are still open, not resolved" in client.get("/").text
     handled = client.get("/needs-you?tab=handled").text
-    assert "Bill due: Rent" in handled and "Snoozed until 2026-12-27, still open" in handled
+    assert "Bill due: Rent" in handled and said("Snoozed until 2026-12-27, still open") in handled
     assert c.planning.what_you_owe(TODAY).bills_due_items                      # the bill itself is still owed

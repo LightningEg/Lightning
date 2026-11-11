@@ -179,3 +179,13 @@ def test_a_step_issue_does_not_repeat_the_item_plan_or_its_sibling_steps(tmp_pat
     body = module.issue_text({"code": "NF-9Z1", "title": "First", "size": "M", "item": _item("9Z", file="9-later/9Z-x.md"), "step": step})[1]
     assert "Do A. Done when: A works." in body and "Why this matters." in body
     assert "How it was planned" not in body and "The whole plan" not in body and "Do B." not in body
+
+
+def test_reserved_codes_are_skipped_by_the_next_code():
+    module = _tool()
+    milestone = {"n": 12, "items": [{"code": "12T"}], "done": []}
+    reserved = module.reserved_codes("Reserved codes: 12U-12W Claude, r34 Codex\n")
+    assert reserved == ["12U-12W", "r34"]
+    assert module.next_code(milestone, None, reserved) == "12X"
+    assert module.reserved_codes("Reserved codes: none\n") == []
+    assert module.next_code(milestone) == "12U"

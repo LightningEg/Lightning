@@ -1,0 +1,55 @@
+{# Counterparties on the phone (3AY17): search, then one row per name; a row opens its sheet (rename, suggested
+   category, person or business, aliases, merge, open, delete). Add one in its own sheet. Plain forms, no script needed. #}
+{% extends "base.html" %}
+{% from "partials/macros.html" import category_options %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% block title %}Counterparties{% endblock %}
+{% block heading %}<h1>{{ 'Counterparties'|tr(locale) }}</h1><p class="phone-note">{{ page_status.count(total_parties, '1 saved name.', '{n} saved names.', 'No saved names yet.')|status_text }}</p>{% endblock %}
+{% block content %}
+{% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
+{% if review_required %}
+<section class="phone-section" aria-labelledby="counterparty-review-title"><header class="phone-section-head"><h2 id="counterparty-review-title">{{ "Review this Counterparty"|tr(locale) }}</h2></header>
+  <p class="phone-note">Before saving “{{ entered_name }}”, check the saved names. Pressing Enter alone never creates a new Counterparty.</p>
+  {% if similar_counterparties %}<div class="phone-rows">{% for match in similar_counterparties %}<form class="phone-row" method="post" action="/counterparties"><input type="hidden" name="name" value="{{ entered_name }}"><input type="hidden" name="default_category_id" value="{{ entered_category_id }}"><span>{{ match.name }}</span><button class="btn small" name="counterparty_action" value="existing:{{ match.id }}">{{ 'Use'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}</div>{% else %}<p class="phone-note">{{ "No close match found."|tr(locale) }}</p>{% endif %}
+  {% if not exact_existing %}<form method="post" action="/counterparties" class="phone-form"><input type="hidden" name="name" value="{{ entered_name }}"><input type="hidden" name="default_category_id" value="{{ entered_category_id }}"><button class="btn primary phone-save" name="counterparty_action" value="create">Create “{{ entered_name }}” as a new Counterparty</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+  <a class="btn phone-save" href="/counterparties">{{ 'Cancel'|tr(locale) }}</a>
+</section>
+{% endif %}
+<form method="get" action="/counterparties" class="phone-form" role="search"><input type="search" name="q" value="{{ query }}" placeholder="{{ 'Search names and aliases'|tr(locale) }}" aria-label="{{ 'Search names and aliases'|tr(locale) }}" autocomplete="off"></form>
+{% if search_suggestions %}<p class="phone-note">Did you mean {% for name, score in search_suggestions %}<a href="/counterparties?q={{ name|urlencode }}">{{ name }}</a>{% if not loop.last %} · {% endif %}{% endfor %}?</p>{% endif %}
+<div class="phone-rows">
+  {% set row %}<span>{{ "Add a counterparty"|tr(locale) }}</span><b>+</b>{% endset %}
+  {% call sheet('Add a counterparty'|tr(locale), row) %}<p class="phone-note">{{ "Use one saved name across transactions. You can set a suggested category; each transaction can still use a different one."|tr(locale) }}</p>
+  <form method="post" action="/counterparties" class="phone-form">
+    <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ entered_name or '' }}" placeholder="e.g. Talabat" required></label>
+    <label>{{ 'Person or business'|tr(locale) }}<select name="kind" data-own-picker><option value="">{{ "Not set"|tr(locale) }}</option><option value="PERSON">{{ "Person"|tr(locale) }}</option><option value="BUSINESS">{{ "Business"|tr(locale) }}</option></select></label>
+    <label>{{ 'Suggested category'|tr(locale) }}<select name="default_category_id" data-own-picker><option value="">{{ "No default"|tr(locale) }}</option>{{ category_options(category_groups(categories), entered_category_id) }}</select></label>
+    <button class="btn primary phone-save">{{ "Add counterparty"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endcall %}
+</div>
+{% if parties %}
+{% if merge_choices|default([]) %}<datalist id="merge-parties">{% for other in merge_choices %}<option value="{{ other.name }}" data-pick="counterparty:{{ other.id }}">{% endfor %}</datalist>{% endif %}
+<section class="phone-section" aria-labelledby="cp-list"><header class="phone-section-head"><h2 id="cp-list">{{ "Find and correct names"|tr(locale) }}</h2><span>{{ parties|length }} / {{ total_parties }}</span></header>
+<div class="phone-rows">{% for party in parties %}{% set aliases = aliases_by_id.get(party.id, []) %}
+  {% set learned = (usual or {}).get(party.name) %}{% set learned_label = category_labels.get(learned.category_id) if learned else none %}{% set own_label = category_labels.get(party.default_category_id) if party.default_category_id else none %}
+  {% set row %}<span>{{ party.name }}<small>{% if party.kind == 'PERSON' %}{{ 'Person'|tr(locale) }} · {% elif party.kind == 'BUSINESS' %}{{ 'Business'|tr(locale) }} · {% endif %}{% if own_label %}{{ own_label.split(' › ')[-1]|tr(locale) }}{% elif learned_label %}{{ 'Learned'|tr(locale) }}: {{ learned_label.split(' › ')[-1]|tr(locale) }}{% else %}{{ 'No default'|tr(locale) }}{% endif %}{% if aliases %} · {{ aliases|length }} {{ 'Alias'|tr(locale) }}{% endif %}{% if not party.active %} · {{ 'Archived'|tr(locale) }}{% endif %}</small></span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet(party.name, row, 'is-muted' if not party.active else '') %}
+  <a class="btn primary phone-save" href="/counterparties/{{ party.id }}">{{ 'Open {name}'|tr(locale, name=party.name) }}</a>
+  <form method="post" action="/counterparties" class="phone-form"><input type="hidden" name="counterparty_action" value="rename"><input type="hidden" name="counterparty_id" value="{{ party.id }}">
+    <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ party.name }}"></label>
+    <label>{{ 'Suggested category'|tr(locale) }}<select name="default_category_id" data-own-picker><option value="">{{ (('Learned' |tr(locale)) ~ ': ' ~ learned_label.split(' › ')[-1]|tr(locale)) if learned_label else 'No default'|tr(locale) }}</option>{{ category_options(category_groups(categories), party.default_category_id or '') }}</select></label>
+    {% if learned_label and not party.default_category_id %}<p class="phone-note">{{ learned.count }} of the last {{ learned.total }}</p>{% endif %}
+    <button class="btn phone-save">{{ 'Save'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+  <form method="post" action="/counterparties" class="phone-segment" data-two aria-label="{{ 'Person or business'|tr(locale) }}"><input type="hidden" name="counterparty_id" value="{{ party.id }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    <button class="btn{{ ' primary' if party.kind == 'PERSON' }}" name="counterparty_action" value="kind:PERSON" aria-pressed="{{ 'true' if party.kind == 'PERSON' else 'false' }}">{{ 'Person'|tr(locale) }}</button>
+    <button class="btn{{ ' primary' if party.kind == 'BUSINESS' }}" name="counterparty_action" value="kind:BUSINESS" aria-pressed="{{ 'true' if party.kind == 'BUSINESS' else 'false' }}">{{ 'Business'|tr(locale) }}</button></form>
+  <div class="phone-rows">{% for item in aliases %}<form class="phone-row" method="post" action="/counterparties"><input type="hidden" name="counterparty_action" value="remove_alias"><input type="hidden" name="counterparty_id" value="{{ party.id }}"><input type="hidden" name="alias_id" value="{{ item.id }}"><span>{{ item.alias }}<small>{{ 'Alias'|tr(locale) }}</small></span><button class="btn small" aria-label="Remove alias {{ item.alias }}">{{ 'Remove'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}</div>
+  {% if aliases|length < alias_limit %}<form method="post" action="/counterparties" class="phone-form"><input type="hidden" name="counterparty_action" value="add_alias"><input type="hidden" name="counterparty_id" value="{{ party.id }}"><label>{{ 'Save alias'|tr(locale) }}<input type="text" name="alias" placeholder="{{ 'Add alias…'|tr(locale) }}" required></label><button class="btn phone-save">{{ 'Save alias'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% else %}<p class="phone-note">{{ "Alias limit reached"|tr(locale) }}</p>{% endif %}
+  {% if party.active and (merge_choices|default([]))|length > 1 %}<form method="post" action="/counterparties" class="phone-form" data-confirm-delete="{{ 'Merge {name} into the name you picked? Everything that uses {name} (transactions, rules, plans) moves to it, and {name} becomes one of its aliases. This cannot be split again.'|tr(locale, name=party.name) }}"><input type="hidden" name="counterparty_action" value="merge"><input type="hidden" name="counterparty_id" value="{{ party.id }}">
+    <label>{{ 'Merge into…'|tr(locale) }}<input type="text" list="merge-parties" data-own-suggestions data-pick-target="merge-pick-{{ party.id }}" aria-label="{{ 'Merge {name} into'|tr(locale, name=party.name) }}" autocomplete="off" required></label><input type="hidden" id="merge-pick-{{ party.id }}" name="merge_into" required>
+    <button class="btn phone-save">{{ 'Merge'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+  {% if not party.active %}<form method="post" action="/counterparties" class="phone-form"><input type="hidden" name="counterparty_id" value="{{ party.id }}"><button class="btn phone-save" name="counterparty_action" value="activate">{{ "Activate"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+  <form method="post" action="/counterparties" class="phone-form" data-confirm-delete="{{ 'Delete this counterparty? If it has transaction history, it is archived instead.'|tr(locale) }}"><input type="hidden" name="counterparty_id" value="{{ party.id }}"><button class="btn danger phone-save" name="counterparty_action" value="delete">{{ 'Delete'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+  {% endcall %}{% endfor %}</div>
+</section>
+{% else %}<p class="phone-note">{{ "No saved counterparties yet."|tr(locale) }}</p>{% endif %}
+{% endblock %}

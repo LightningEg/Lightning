@@ -113,7 +113,8 @@ def test_long_review_is_paged_and_unseen_rows_still_post(c, setup):
     assert r.status_code == 303
     url = r.headers["location"]
     batch = int(re.search(r"/import/(\d+)", url).group(1))
-    page = client.get(url).text
+    assert 'name="date_' not in client.get(url).text  # the questions come first (NF-7AB1)
+    page = client.get(url + "?rows=all").text
     assert 100 <= len(re.findall(r'name="date_\d+"', page)) <= 300 and "data-import-more" in page
     more = client.get(f"/accounts/{cib}/import/{batch}/groups?start=999")
     assert more.status_code == 200 and more.headers["X-Remaining"] == "0"

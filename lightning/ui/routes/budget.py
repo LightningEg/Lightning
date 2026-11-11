@@ -16,12 +16,11 @@ from lightning.core.money import ZERO, fmt, quantize, to_decimal
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
 from lightning.planning.domain import KIND_LABELS, PaymentStatus
 from lightning.planning.health import PlanCheck
-from lightning.transactions.domain import TxnFilter
 
 from .. import charts, keynotes, kpis, status as page_status
 from ..web import container, redirect, render, settled_save
 from ..periods import parse_period
-from ..budget_rows import cover_from, neighbours, pace_line, see_all
+from ..budget_rows import cover_from, last_payments, neighbours, pace_line
 
 router = APIRouter(prefix="/budget")
 SMALL_OVER = Decimal(100)  # BU-2: below this, or under 5% of its plan, an overspend is a rose bar, not a Needs you row
@@ -362,44 +361,6 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                   previous_bridge=c.budgets.month_view(neighbours(month)[0], schedule=c.schedules.view()))
 
 
-def _tree_ids(c, category_id: int) -> set[int]:
-    """A category and every category below it."""
-    children: dict[int, list[int]] = {}
-    for item in c.categories.tree(Movement.OUTFLOW):
-        if item.parent_id:
-            children.setdefault(item.parent_id, []).append(item.id)
-    found, pending = {category_id}, [category_id]
-    while pending:
-        for child in children.get(pending.pop(), []):
-            if child not in found:
-                found.add(child)
-                pending.append(child)
-    return found
-
-
-@router.get("/category/{category_id:int}/payments")
-async def category_payments(request: Request, category_id: int):
-    """A category sheet's last three payments this month, drawn when the sheet opens (3AN7). Nothing yet this month: last
-    month's figure and a way to it, never a wall of zeros (3AN9)."""
-    return render(request, "phone/budget_payments.html", **_last_payments(container(request), category_id, _month(request)))
-
-
-def _last_payments(c, category_id: int, month: str) -> dict:
-    """A category's last three payments in a month, or last month's total when there are none (3AN9)."""
-    first, last = parse_month(month)
-    rows, total = c.transactions.find(TxnFilter(category_ids=sorted(_tree_ids(c, category_id)),
-                                                date_from=fmt_date(first), date_to=fmt_date(last), limit=3))
-    before = neighbours(month)[0]
-    earlier = ZERO
-    if not rows:
-        start, end = parse_month(before)
-        one_offs = c.budgets.one_off_ids()
-        spending = {cid: v for cid, v in c.budgets.owned_spending(start, end).items() if cid not in one_offs}
-        earlier = sum((spending.get(cid, ZERO) for cid in _tree_ids(c, category_id)), ZERO)
-    return {"rows": rows, "total": total, "month": month, "last_month": before, "earlier": earlier,
-            "see_all": see_all(category_id, month), "see_last": see_all(category_id, before)}
-
-
 def _plan_bills(c, everyday) -> list[dict]:
     """The bills and loan payments in the month's plan, late first, then due, then paid: each once, with Mark paid."""
     day = today()
@@ -629,7 +590,7 @@ async def category_sheet(request: Request, category_id: int):
     editable = (category.movement == Movement.OUTFLOW and not category.is_root and not category.is_system
                 and category.active and not (line is not None and line.from_loans))
     return render(request, "budget/category_sheet.html", category=category, group=group, r=r,
-                  spent=spent, planned=planned, editable=editable, **_last_payments(c, category_id, month))
+                  spent=spent, planned=planned, editable=editable, **last_payments(c, category_id, month))
 
 
 @router.get("/category/{category_id:int}/edit")

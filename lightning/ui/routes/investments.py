@@ -9,6 +9,7 @@ from fastapi import APIRouter, Request, Response
 from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
+from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, parse_date, parse_month, today
 from lightning.core.errors import LightningError, NotFoundError, ValidationError
 from lightning.core.refs import DocType
@@ -199,13 +200,13 @@ async def portfolio(request: Request):
                    else kpis.compare("A dated price is missing, so the result is unavailable"))
         ret = p.display_return if not p.has_other_owners else None
         spark, change = extras["value_spark"], extras["hero_change"]
-        six = (f"{fmt(change, 0, True)} since six months ago" + (f", not counting {fmt(spark['added'], 0)} of opening balances"
+        six = (f"{fmt(change, 0, True)} since six months ago" + (f", excluding {fmt(spark['added'], 0)} you already owned"
                                                                   if spark.get("added") else "")) if change is not None else ""
         since = f"Return since purchase {signed_pct(ret.percent)}%" if ret and ret.percent is not None else ""
         if result is not None and not result and current and change is not None:
             # A08.5 (3Q2): nothing has moved yet this period, so the comparison is the last six months, not a dead 0
             compare = kpis.compare("since six months ago", fmt(change, 0, True), "good" if change >= 0 else "bad")
-            six = f"{label('result')} 0" + (f", not counting {fmt(spark['added'], 0)} of opening balances"
+            six = f"{label('result')} 0" + (f", excluding {fmt(spark['added'], 0)} you already owned"
                                                    if spark.get("added") else "")
         # BT-12AC: the Lead and its parts come from one function over the same holdings, so they add up;
         # what has no cost or market price (a share of a flat) is its own part, not dropped.
@@ -303,7 +304,7 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
     spark = _portfolio_value_spark(c, today())
     breakdown = c.position.investment_breakdown(day, owned_rows, report)
     holding_groups, horizons = breakdown.groups, breakdown.horizons
-    balances, holdings_total = breakdown.balances, breakdown.total
+    holdings_total = breakdown.total
     biggest = charts.bars_with_other([{"label": r["name"], "value": r["value"], "note": f"{r['weight']:.1f}% · {g['name']}",
                             "href": f"/accounts/{r['account_id']}"} if r["h"] is None else
                            {"label": r["h"].asset_name, "value": r["value"], "note": f"{r['weight']:.1f}% · {r['h'].asset_class.split(' › ')[-1]}",
@@ -316,29 +317,18 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
     paid_before = {(x.account_id, x.asset_id): x.owned_dividends for x in before.positions}
     dividends = charts.bars([{"label": x.asset_name, "value": x.owned_dividends - paid_before.get((x.account_id, x.asset_id), ZERO)}
                              for x in current.positions], 8)
-    # The period's flows: money added and taken out, then how each class's value moved.
-    start_values: dict[str, Decimal] = defaultdict(lambda: ZERO)
-    for old in prior.positions:
-        if not old.quantity or old.value is None:
-            continue
-        others = prior_custody.get((old.account_id, old.asset_id), ZERO)
-        held = c.reporting.value_of(old.asset_id, others, before_day).value if others else ZERO
-        start_values[old.asset_class.split(" › ")[-1]] += old.value - (held or ZERO)
-    traded_before = {(x.account_id, x.asset_id) for x in prior.positions if x.quantity}
-    for cls in c.position.at(before_day).classes:   # balance-only assets, as in the table
-        for item in cls.items:
-            if (item.account_id, item.asset_id) not in traded_before and item.value:
-                start_values[cls.name] += item.value
-    # Recording what you already had (an opening balance dated inside the period) is not a change in
-    # its value: count it as part of where the period started (audit 2026-10-05 #14).
-    openings = c.reporting.opening_by_holding(period.start_text, period.end_text)
-    for h, *_ in owned_rows:
-        start_values[h.asset_class.split(" › ")[-1]] += openings.get((h.account_id, h.asset_id), ZERO)
-    for name, item in balances:
-        start_values[name] += openings.get((item.account_id, item.asset_id), ZERO)
-    end_values = {g["name"]: g["value"] for g in holding_groups}
-    class_changes = sorted(((name, end_values.get(name, ZERO) - start_values.get(name, ZERO))
-                            for name in set(start_values) | set(end_values)), key=lambda item: -abs(item[1]))
+    # The period's flows: money added and taken out, then how each class's prices moved.
+    # Price change per class, the report's own part (what a purchase adds is money in, shown beside, never value
+    # gained: r30 N1). Rows are keyed by holding, then folded into the holding's class.
+    class_of = {(h.asset_id, h.account_id): h.asset_class.split(" › ")[-1] for h, *_ in owned_rows}
+    class_of.update({(x.asset_id, x.account_id): x.asset_class.split(" › ")[-1] for x in prior.positions})
+    price_part = next(part for part in explain_period(report, period.start_text, period.end_text)["parts"] if part["key"] == "price")
+    by_class: dict[str, Decimal] = defaultdict(lambda: ZERO)
+    for row in price_part["rows"]:
+        name = class_of.get((row.get("asset_id"), row.get("account_id")))
+        if name:
+            by_class[name] += row["amount"]
+    class_changes = sorted(by_class.items(), key=lambda item: -abs(item[1]))
     flow_rows = ([row for row in ({"label": "Money in", "value": report["new_money"], "group": "money"},
                                   {"label": "Money out", "value": -report["withdrawn"], "group": "money"}) if row["value"]]
                  + [{"label": name, "value": change, "group": "class"} for name, change in class_changes if change])
@@ -570,13 +560,26 @@ async def save_asset_plan(request: Request,asset_id:int):
 
 
 # -- trades -------------------------------------------------------------------
+def _tradable_assets(c, keep: str = ""):
+    """What the trade form can take: not a price reference, a certificate or a physical item (each has its own door)."""
+    return [a for a in c.assets.investments(active_only=True)
+            if str(a.id) == keep or not a.code.startswith(("REF:", "CD:", "OTH:ITEM-"))]
+
+
+def _cash_accounts(c, keep: str = ""):
+    """Where the money comes from or goes to: bank, cash and wallet accounts, never a CD portfolio or gam'eya."""
+    return [a for a in c.accounts.list(active_only=True)
+            if str(a.id) == keep or a.account_type in (AccountType.BANK, AccountType.CASH, AccountType.CASH_AT_HAND)]
+
+
 def _form(request: Request, kind: str, values: dict, txn=None, error: LightningError | None = None, status=200):
     c = container(request)
     return render(request, "investments/form.html", status_code=status, kind=kind, title=KINDS[kind][0],
                   spec=events.form_fields(kind) if kind in events.EVENTS else None,
                   hint=KINDS[kind][1], values=values, txn=txn,
                   holding_accounts=c.investments.investment_accounts(), all_accounts=c.accounts.list(active_only=True),
-                  assets=c.assets.investments(active_only=True),
+                  assets=_tradable_assets(c, values.get("asset_id", "")),
+                  cash_accounts=_cash_accounts(c, values.get("cash_account_id", "")),
                   counterparties=c.counterparties.list_active(), owners=c.counterparties.list_people(),
                   error=error.message if error else "", error_field=(error.field or "") if error else "")
 
@@ -630,6 +633,15 @@ def _save(request: Request, kind: str, v: dict, txn_id: int | None = None):
                               v["notes"], owner)
 
     return txn
+
+
+@router.get("/add")
+async def add_investment(request: Request):
+    """One door (r30 E1-E4): ask what it is, then go to the short form that fits."""
+    c = container(request)
+    cd = next((a for a in c.accounts.list(active_only=True) if a.account_type == AccountType.DEPOSIT), None)
+    return render(request, "investments/add.html",
+                  certificate_href=f"/accounts/{cd.id}" if cd else "/accounts/new?type=DEPOSIT")
 
 
 @router.get("/new")

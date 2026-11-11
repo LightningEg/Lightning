@@ -1,0 +1,26 @@
+{# Pay a loan early on the phone (3AY15): amount, day and account, then a preview of what changes before it records. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Pay early'|tr(locale) }} · {{ item.name }}{% endblock %}
+{% block heading %}<h1>{{ 'Pay early'|tr(locale) }}</h1><p class="phone-note">{{ item.name }}</p>{% endblock %}
+{% block content %}<form method="post" action="/plan/items/{{ item.id }}/early-payment" class="phone-form" data-popup-return="{{ 'response' if preview else 'popup' }}">
+<input type="hidden" name="intent" value="{{ 'record' if preview else 'preview' }}">
+{% if preview %}
+  <dl class="phone-facts">
+    <div><dt>{{ 'Money leaving your account'|tr(locale) }}</dt><dd><bdi class="fig">{{ preview.cash_payment|money(False,2) }}</bdi></dd></div>
+    <div><dt>{{ 'Fee'|tr(locale) }}</dt><dd><bdi class="fig">{{ preview.fee|money(False,2) }}</bdi></dd></div>
+    <div><dt>{{ 'Still to pay afterwards'|tr(locale) }}</dt><dd><bdi class="fig">{{ preview.remaining_after|money(False,0) }} {{ base }}</bdi></dd></div>
+    <div><dt>{{ 'Last payment'|tr(locale) }}</dt><dd>{{ preview.last_date or ('Paid off'|tr(locale)) }}</dd></div>
+  </dl>
+  {% for key,value in values.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}
+  <input type="hidden" name="expected_remaining" value="{{ preview.remaining_before }}">
+{% else %}
+  <label for="early-principal">{{ 'Reduce the loan by'|tr(locale) }} ({{ base }})</label><input id="early-principal" name="principal" {{ 'aria-invalid=true' if error_field == 'principal' }} value="{{ values.principal }}" inputmode="decimal" class="money-input {{ 'bad' if error_field == 'principal' }}" required>
+  <label for="early-date">{{ 'Paid on'|tr(locale) }}</label><input id="early-date" name="date_paid" {{ 'aria-invalid=true' if error_field == 'date_paid' }} type="date" value="{{ values.date_paid }}" required class="{{ 'bad' if error_field == 'date_paid' }}">
+  <label for="early-account">{{ 'Pay from'|tr(locale) }}</label><select id="early-account" name="account_id" {{ 'aria-invalid=true' if error_field == 'account_id' }} data-own-picker required><option value="">{{ 'Choose an account'|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if values.account_id == a.id|string }}>{{ a.name }}</option>{% endfor %}</select>
+  <label for="early-fee">{{ 'Early settlement fee'|tr(locale) }} ({{ base }})</label><input id="early-fee" name="fee" {{ 'aria-invalid=true' if error_field == 'fee' }} value="{{ values.fee }}" inputmode="decimal" class="money-input {{ 'bad' if error_field == 'fee' }}" placeholder="0">
+{% endif %}
+  <p class="phone-note">{{ 'The extra payment shortens the loan from the end. Earlier unpaid instalments still come first. A fee is spending, not a reduction of the loan.'|tr(locale) }}</p>
+  <button class="btn primary phone-save">{{ ('Record payment' if preview else 'Preview')|tr(locale) }}</button>
+  <a class="btn phone-save" href="{{ edit_url if preview else '/plan/loans' }}" {{ 'data-popup-open' if preview else 'data-popup-close' }}>{{ ('Edit' if preview else 'Cancel')|tr(locale) }}</a>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+</form>{% endblock %}

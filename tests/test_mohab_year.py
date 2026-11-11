@@ -131,7 +131,7 @@ class Mohab:
         screen = self.b.go("Investments", "Prices")
         fields = {}
         for name, price in typed.items():
-            rows = [block for block in re.findall(r"(?s)<tr\b.*?</tr>", screen.html)
+            rows = [block for block in re.findall(r'(?s)<tr\b.*?</tr>|<div class="phone-row"[^>]*>.*?</div>', screen.html)   # PC table or phone rows
                     if name.casefold() in re.sub(r"<[^>]+>", " ", block).casefold()]
             names = [re.findall(r'<(?:input|select|textarea)\b[^>]*\bname="([^"]+)"', row)
                      for row in rows]
@@ -320,11 +320,13 @@ def _first_evening(o: Mohab) -> None:
     b.submit({}, button="Review statement", files={"file": ("cib-jul-sep.csv", _statement(), "text/csv")})
     b.submit({"map_Date": Choose("Date"), "map_Amount": Choose("Amount"), "map_Counterparty": Choose("Description")},
              button="Preview rows")
-    o.notes["review"] = b.page
+    o.notes["questions"] = b.page  # the review opens on its questions (NF-7AB1)
+    o.notes["review"] = b.click("See every row")
     # Halfway through he leaves to check something, then comes back to the review from the Overview.
     o.ask("import_waiting", "I left the import half done. Does Lightning remember it?")
     o.notes["import_again"] = b.go("Transactions", "Accounts", "CIB Payroll", "Import statement")
     b.go("Imported activity needs a decision")
+    b.click("See every row")
     review = b.page.form("Post ready rows")
     # Rows like the register: he answers each row's own wells. Rows share an imported name, so he answers the
     # same way for each; a new counterparty is "+ New counterparty" in the well, a transfer is picking his account.
@@ -384,7 +386,7 @@ def _first_evening(o: Mohab) -> None:
     o.ask("moms_money", "How much of Mom's money am I holding?", "Transactions", "Held for others")
 
     # The plan: a budget from his own spending, an emergency fund, his bills and the car loan.
-    b.go("Set a plan for 2026-09")
+    b.go("Set a plan for September 2026")
     b.submit({}, button="Create plan")
     b.go("Safety", "Reserves", "Edit")  # Reserves reads; Edit opens the emergency fund's amount
     b.submit({"allocated": "20,000"}, action="/reserves/emergency")
@@ -722,7 +724,7 @@ def _exercise_cash_ownership(o: Mohab) -> None:
     gross_before = money(account.after("In this account"))
     # Mom was saved by an import as a plain name. Before money can be held for her, he says she is a person.
     names = b.open("/counterparties")
-    mom_id = re.search(r'name="counterparty_id" value="(\d+)">\s*<input type="text" name="name" value="Mom"', names.html).group(1)
+    mom_id = re.search(r'name="counterparty_id" value="(\d+)">\s*(?:<label>[^<]*)?<input type="text" name="name" value="Mom"', names.html).group(1)
     assert b.client.post("/counterparties", data={"counterparty_id": mom_id, "counterparty_action": "kind:PERSON"}).status_code == 200
     account = b.go("CIB Payroll")
     b.click("Change ownership")
@@ -813,6 +815,8 @@ def _the_feedback_round(o: Mohab) -> None:
     o.notes["big_review"] = b.submit({"amount_model": "SEPARATE", "map_Date": Choose("Date"), "map_Inflow": Choose("Credit"),
                                       "map_Outflow": Choose("Debit"), "map_Counterparty": Choose("Description"),
                                       "map_Reference": Choose("Reference")}, button="Preview rows")
+    o.notes["big_questions"] = o.notes["big_review"]
+    o.notes["big_review"] = b.click("See every row")
     first = min(int(k.rsplit("_", 1)[1]) for k in b.page.form("Post ready rows").fields if k.startswith("notes_"))
     o.notes["import_error"] = b.submit({f"date_{first}": "31/31/2026"}, button="Post ready rows")
 
@@ -1004,9 +1008,9 @@ def test_paying_from_the_overview_moves_net_worth_only_by_the_salary(mohab):
 
 def test_a_mistake_is_fixed_in_place_and_a_double_entry_deleted(mohab):
     register = mohab.answers["fixed"]
-    assert register.shows("2026-10-26 Carrefour Food & Groceries — −4,060.00")
+    assert register.shows("2026-10-26 Carrefour Food & Groceries — −4,060")
     assert "−4,600" not in register.screen.text
-    assert register.screen.text.count("2026-10-10 Talabat Eating Out") == 1
+    assert register.screen.text.count(register.screen.said("2026-10-10 Talabat Eating Out")) == 1
 
 
 def test_the_atm_fee_is_only_inside_others(mohab):
@@ -1335,6 +1339,13 @@ def test_one_decision_per_name_in_the_import(mohab):
     assert mohab.notes["import_decisions"] == 17
 
 
+def test_the_import_asks_its_questions_before_its_rows(mohab):
+    # 43 rows open as a few questions with a count each; the rows are one click away (NF-7AB1).
+    page = mohab.notes["questions"]
+    assert 'class="import-summary"' in page.html and '<div class="import-line' not in page.html
+    assert page.shows("Needs you", "See every row")
+
+
 def test_thndr_can_be_where_a_transfer_went(mohab):
     assert re.search(r'<option value="THNDR" data-pick="account:\d+"', mohab.notes["review"].html)
 
@@ -1457,7 +1468,7 @@ def test_other_investments_are_in_the_investment_analysis(mohab):
     assert route(mohab, "flat") == ["/", "/investments"]
     assert mohab.answers["flat"].shows("Other Investments", "400,000")
     # Recording the flat is not growth: the investments line and the net worth chart both say so.
-    assert re.search(r"since six months ago, not counting 400,000 of opening balances", mohab.answers["flat"].screen.text)
+    assert re.search(r"since six months ago, excluding 400,000 you already owned", mohab.answers["flat"].screen.text)
     assert mohab.answers["flat_jump"].shows("2027-09 includes 400,000 of opening balances: yours before, so not a change.")
 
 
@@ -1499,7 +1510,7 @@ def test_a_small_difference_from_the_bank_is_one_adjustment(mohab):
     assert check.shows("A small difference", "Lightning is 30.00 EGP above your bank", "Post adjustment of −30.00")
     assert mohab.notes["wallet_adjusted"].shows("Balance adjustment", "The account now matches your bank")
     assert mohab.notes["wallet_adjusted"].shows("2027-09-30 Balance adjustment Other Personal Bank showed",
-                                                "−30.00 Edit 42,950")
+                                                "−30 Edit 42,950")
     assert mohab.notes["wallet_rechecked"].shows("It matches")
 
 
@@ -1517,11 +1528,13 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
     from zipfile import ZipFile
 
     screen = mohab.b.go("Settings", "Your data")
-    assert screen.shows("Your data", "Ask an AI", "All time", "YTD", "Month", "Custom",
+    assert screen.shows("Your data", "Ask an AI") and 'href="/settings/ask-ai"' in screen.html  # IV-12Y5: its one home
+    screen = mohab.b.open("/settings/ask-ai")
+    assert screen.shows("Ask an AI", "All time", "YTD", "Month", "Custom",
                         "Copy for AI", "Save as a file", "Hide names", "Digest", "Standard", "Full",
                         "Review my period", "Where did the money go", "Check my budget",
                         "What changed my net worth", "My own question", "Export for AI analysis")
-    screen = mohab.b.submit(button="All time", action=r"/settings$")
+    screen = mohab.b.submit(button="All time", action=r"/settings/ask-ai$")
     assert screen.shows("2026-07-01 to 2027-09-30", "transactions")
     assert "Rules for your answer" not in screen.html and "data-ai-prompt" not in screen.html
     form = screen.form(button="Export for AI analysis", action=r"/settings/ai-analysis")
@@ -1546,8 +1559,8 @@ def test_ask_ai_brief_of_mohabs_year_agrees_with_the_reports_in_every_preset_and
     """7W: the file a person pastes into an AI tool says what the reports say, in every preset and size, and hides names on request."""
     from lightning.workflows.ask_ai import PRESETS, SIZES, money
 
-    mohab.b.go("Settings", "Your data")
-    screen = mohab.b.submit(button="All time", action=r"/settings$")
+    mohab.b.open("/settings/ask-ai")
+    screen = mohab.b.submit(button="All time", action=r"/settings/ask-ai$")
     form = screen.form(button="Export for AI analysis", action=r"/settings/ai-analysis")
     flow = mohab.c.reporting.cash_flow("2026-07-01", "2027-09-30")
     sizes = {}
@@ -1809,3 +1822,21 @@ def test_the_starter_workbook_fills_an_empty_lightning_and_hands_the_codes_back(
         assert c.transactions.opening_balance(next(a for a in c.accounts.list() if a.name == "CIB Payroll").id) == D("12500")
     finally:
         c.db.close()
+
+
+def test_mohab_asks_search_three_questions(mohab):
+    # NF-7AQ4: a category with a month, a payee with a year, and a word that matches nothing, on PC and phone.
+    from lightning.workflows.answers import answer
+    c = mohab.c
+    spending = {g.code: g.value for g in c.reporting.spending_by_category("2026-09-01", "2026-09-30")}
+    food = answer(c, "food 2026-09", dates.today())
+    assert food and food["total"] == spending["EXP.PERSONAL.FOOD"]
+    payee = c.reporting.spending_by_counterparty("2026-01-01", "2026-12-31")[0][0]
+    paid = answer(c, f"{payee} 2026", dates.today())
+    assert paid and paid["name"] == payee and paid["total"] > 0
+    from fastapi.testclient import TestClient
+    client = TestClient(create_app(c))
+    pc = client.get("/search", params={"q": "food 2026-09"}).text
+    assert 'class="search-answer"' in pc and "Open in Transactions" in pc
+    nothing = client.get("/search", params={"q": "qqqqzz"}).text
+    assert 'class="search-answer"' not in nothing

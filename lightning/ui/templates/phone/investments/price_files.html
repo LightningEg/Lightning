@@ -1,0 +1,19 @@
+{# Price files on the phone (3AY16): one row per market with Follow, what it covers and what is on this phone. #}
+{% extends "base.html" %}
+{% block title %}Price files{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/investments/prices"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Prices'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Price files'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<form method="post" class="phone-form" autocomplete="off">
+  <div class="phone-rows">{% for r in rows %}
+    <label class="phone-row"><span>{{ r.name }}<small>{{ r.covers }}{% if r.venues %} · {{ r.venues }}{% endif %}</small><small>{% if r.have %}{{ r.have.instruments }} price{{ '' if r.have.instruments == 1 else 's' }} to {{ r.have.last_date }}{% else %}{{ 'Not downloaded'|tr(locale) }}{% endif %}{% if r.bytes %} · {% if r.bytes >= 1000000 %}{{ (r.bytes / 1000000) | round(1) }} MB{% else %}{{ (r.bytes / 1000) | round(0, 'ceil') | int }} KB{% endif %}{% endif %}{% if r.held %} · {{ 'You hold something here'|tr(locale) }}{% endif %}</small></span><input type="checkbox" name="pack" value="{{ r.id }}" {{ 'checked' if r.on or r.held }}{{ ' disabled' if r.held }} aria-label="Follow {{ r.name }}"></label>{% endfor %}
+  </div>
+  <p class="phone-note">{{ "Each market is its own file, refreshed after that market closes. After the first download, an update brings only what changed, about 1 MB a month for each. Unfollowing a market removes its file from this computer; prices already filled stay."|tr(locale) }}</p>
+  <button class="btn primary phone-save" name="update" value="1" data-busy="Downloading…">{{ "Save and download shared prices"|tr(locale) }}</button><button class="btn phone-save">{{ 'Save'|tr(locale) }}</button>
+<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+<form method="post" class="phone-form phone-section" action="/investments/prices/markets/test">
+  <header class="phone-section-head"><h2>{{ "Price sources"|tr(locale) }}</h2></header>
+  <p class="phone-note">{{ "Lightning asks TradingView, Yahoo Finance, Mubasher and Banque Misr for prices itself. If prices stop coming, test each source once to see which one is not answering."|tr(locale) }}</p>
+  <button class="btn phone-save" data-busy="Testing sources…">{{ "Test price sources"|tr(locale) }}</button>
+<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+{% endblock %}

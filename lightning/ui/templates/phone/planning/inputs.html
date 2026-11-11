@@ -1,0 +1,4 @@
+{# Forecast inputs on the phone (3AY16): what the forecast leans on, and anything old or missing. #}
+{% extends "base.html" %}{% block title %}{{ 'Forecast inputs'|tr(locale) }}{% endblock %}
+{% block heading %}<h1 id="app-popup-title">{{ 'Forecast inputs'|tr(locale) }}</h1>{% endblock %}
+{% block content %}<p class="phone-note">{{ 'The forecast uses confirmed cash and scheduled payments. These notes change no balance or plan.'|tr(locale) }}</p>{% include "partials/freshness.html" %}{% if not notes %}<p class="phone-note">{{ 'No old or missing inputs were found.'|tr(locale) }}</p>{% endif %}<a class="btn phone-save" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>{% endblock %}

@@ -1,0 +1,23 @@
+{# Financial health limits on the phone (3AY17): each limit is a row that opens its sheet (good, needs you, no limit,
+   Save, Restore default); then the emergency fund's target. #}
+{% from "phone/partials/sheet.html" import sheet with context %}
+<section class="phone-section health-settings" aria-labelledby="hs-limits"><header class="phone-section-head"><h2 id="hs-limits">{{ 'Financial health limits'|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for limit in health_limits %}{% set good = ('Good minimum' if limit.direction == 'minimum' else 'Good maximum')|tr(locale) %}{% set alert = ('Needs you below' if limit.direction == 'minimum' else 'Needs you above')|tr(locale) %}
+    {% set row %}<span>{{ limit.label|tr(locale) }}<small>{{ ('Good is at least' if limit.direction == 'minimum' else 'Good is at most')|tr(locale) }} {% if limit.no_limit %}{{ 'No limit'|tr(locale) }}{% else %}{{ limit.value if limit.value is not none else '—' }} {{ limit.unit }}{% endif %}</small></span><b>{{ chevron() }}</b>{% endset %}
+    {% call sheet(limit.label|tr(locale), row) %}
+    <form class="phone-form phone-fields" method="post" action="/settings/financial-health-limit"><input type="hidden" name="key" value="{{ limit.key }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+      <label>{{ good }} ({{ limit.unit }})<input id="health-limit-{{ limit.key }}" name="value" type="number" min="0" step="0.1" value="{{ limit.value if limit.value is not none else '' }}" {{ 'readonly' if limit.good_locked }}></label>
+      <label>{{ alert }} ({{ limit.unit }})<input id="health-alert-{{ limit.key }}" name="alert" type="number" min="0" step="0.1" value="{{ limit.alert if limit.alert is not none else '' }}"></label>
+      {% if limit.supports_no_limit %}<label class="import-check"><input type="checkbox" name="no_limit" value="1" {{ 'checked' if limit.no_limit }}> {{ "No limit"|tr(locale) }}</label>{% endif %}
+      <button class="btn primary phone-save" type="submit" name="action" value="save">{{ 'Save'|tr(locale) }}</button><button class="btn phone-save" type="submit" name="action" value="reset">{{ "Restore default"|tr(locale) }}</button>
+    </form>{% endcall %}{% endfor %}</div>
+</section>
+<section class="phone-section health-settings-emergency" aria-labelledby="hs-fund"><header class="phone-section-head"><h2 id="hs-fund">{{ 'Emergency fund'|tr(locale) }}</h2></header>
+  <dl class="phone-facts">
+    <div><dt>{{ "Good from"|tr(locale) }}</dt><dd>{{ "At least 6 months"|tr(locale) }}</dd></div>
+    <div><dt>{{ 'Basis'|tr(locale) }}</dt><dd>{{ fig[health_fund.figure].label }}</dd></div>
+    <div><dt>{{ "Target"|tr(locale) }}</dt><dd>{% if health_fund.target is not none %}<bdi class="fig">{{ health_fund.target|money }} {{ base }}</bdi>{% else %}{{ 'Unavailable'|tr(locale) }}{% endif %}</dd></div>
+  </dl>
+  {% if health_fund.average.amount is not none %}<p class="phone-note">{% if health_fund.average.scheduled %}From your recurring income{% else %}{{ health_fund.average.window }} · {{ health_fund.average.months_counted }} completed months{% if health_fund.average.manual %} · set by hand{% endif %}{% endif %}</p>{% else %}<p class="phone-note">{{ "A target appears when the selected average is available."|tr(locale) }}</p>{% endif %}
+  <div class="phone-rows"><a class="phone-row" href="/plan/reserves"><span>{{ "Open Reserves"|tr(locale) }}</span><b>{{ chevron() }}</b></a><a class="phone-row" href="/settings?section=budget"><span>{{ "Change income or spending basis"|tr(locale) }}</span><b>{{ chevron() }}</b></a></div>
+</section>

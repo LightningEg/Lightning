@@ -61,6 +61,15 @@ def test_gulf_and_european_boards_use_iso_venues_and_whole_currency_units():
     assert later.instruments[0].key == later.quotes[0].key == "AE:EMAAR-XADS"
 
 
+def test_london_asks_for_pound_and_pence_shares_only():
+    pounds = {"left": "currency", "operation": "in_range", "right": ["GBX", "GBP"]}
+    uk = tradingview.BOARDS["europe"][0]
+    assert uk.screener == "uk" and pounds in tradingview.query(uk, "stocks")["filter"]
+    assert pounds not in tradingview.query(uk, "etfs")["filter"]  # London's dollar ETFs (VWRA) stay
+    others = [b for boards in tradingview.BOARDS.values() for b in boards if b is not uk]
+    assert not any(f["left"] == "currency" for b in others for f in tradingview.query(b, "stocks")["filter"])
+
+
 def test_mubasher_funds_and_their_history():
     funds = mubasher.parse_funds(sample("mubasher_funds.json"), {4104: "FUND.FIXED_INCOME"})
     assert [(i.key, i.name, i.currency, i.category) for i in funds.instruments][:2] == [
@@ -117,6 +126,17 @@ def test_yahoo_history_is_put_back_to_the_prices_that_traded():
         ("2025-09-24", D("80")), ("2025-09-25", D("82")), ("2025-09-26", D("42.5"))]
     assert yahoo.symbol_for("EG:COMI") == "COMI.CA" and yahoo.symbol_for("US:BRK.B") == "BRK-B"
     assert yahoo.symbol_for("EG:FUND:4104") is None and yahoo.symbol_for("USD/EGP") == "EGP=X"
+    assert yahoo.symbol_for("AE:EMAAR", "XDFM") == "EMAAR.AE" and yahoo.symbol_for("AE:EMAAR") is None
+    # Abu Dhabi and Bahrain are not confirmed on Yahoo (IT-6F2, 2026-11-10): no suffix is guessed
+    assert yahoo.symbol_for("AE:EMAAR-XADS", "XADS") is None and yahoo.symbol_for("BH:BATELCO", "XBAH") is None
+
+
+def test_dubai_month_ends_come_from_yahoo_by_venue():
+    """A saved Yahoo answer for EMAAR.AE (Dubai, AED; IT-6F2 probe run 2026-11-10), dated by Dubai's own day."""
+    data = sample("yahoo_chart_xdfm.json")
+    assert data["chart"]["result"][0]["meta"]["exchangeName"] == "DFM" and data["chart"]["result"][0]["meta"]["currency"] == "AED"
+    quotes = yahoo.parse(data, "AE:EMAAR", yahoo.ZONES["AE"])
+    assert [(q.date, q.close) for q in quotes] == [("2026-11-09", D("12.800000")), ("2026-11-10", D("12.9"))]
 
 
 # -- checks -----------------------------------------------------------------------------------------

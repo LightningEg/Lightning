@@ -61,6 +61,7 @@ def phone_router() -> APIRouter:
     started = APIRouter(route_class=_plain("msg", when=lambda request: bool(container(request).accounts.list())))
     slots = APIRouter(route_class=_plain())              # a bare slot URL: no query at all
     months = APIRouter(route_class=_plain("month", "msg"))  # Budget keeps its month stepper; a saved note rides along
+    picking = APIRouter(route_class=_plain(any_query=True, when=_picks_account))  # the list, not the sheet
     unnarrowed = APIRouter(route_class=_plain(any_query=True, when=lambda request: not any(
         request.query_params.get(key) for key in NARROWS)))  # a register address that names no period or search
 
@@ -152,6 +153,13 @@ def phone_router() -> APIRouter:
         return render_phone(request, "phone/activity_home.html", screen=screen.build(
             container(request), today(), asked.get("tab", "all"), asked.get("month", ""), index))
 
+    @router.get("/transactions/sorted")
+    async def transactions_sorted(request: Request):
+        """The end of To sort: nothing left to sort (a PC request is redirected by the shared route)."""
+        from lightning.ui.row_sheet import return_to
+        return render_phone(request, "phone/transactions/sorted.html",
+                            return_to=return_to(request.query_params.get("return_to")))
+
     @router.post("/activity/not-now")
     async def activity_not_now(request: Request):
         """Not now on a review card: it leaves the queue until tomorrow and nothing is posted or changed (3AY8)."""
@@ -203,6 +211,55 @@ def phone_router() -> APIRouter:
         """The PC's Catch up on late bills (IV-12AA5) is the phone's own Catch up, never PC markup."""
         return redirect("/catch-up")
 
+    @router.get("/todo")
+    async def todo(request: Request):
+        """To do's See all (3AY14): every row Home's To do would show, in the same order."""
+        from lightning.core.dates import today
+        from lightning.ui.phone.screens import todo as screen
+        return render_phone(request, "phone/todo.html", screen=screen.build(container(request), today()))
+
+    @router.get("/budget/category/{category_id:int}/payments")
+    async def category_payments(request: Request, category_id: int):
+        """A category sheet's last three payments this month, drawn when the sheet opens (3AN7, moved in 3AY18).
+        Nothing yet this month: last month's figure and a way to it, never a wall of zeros (3AN9)."""
+        from lightning.core.dates import month_of, parse_month, today
+        from lightning.ui.budget_rows import last_payments
+        month = request.query_params.get("month") or month_of(today())
+        parse_month(month)
+        return render_phone(request, "phone/budget_payments.html", **last_payments(container(request), category_id, month))
+
+    @router.get("/overview/fold/{name}")
+    async def overview_fold(request: Request, name: str):
+        """One closed fold of the phone's Overview, drawn when it is opened (backend roadmap B1; moved in 3AY18).
+        Goes with the older Overview in 3AY10."""
+        from fastapi import HTTPException
+        from lightning.core.dates import month_of, today
+        from lightning.core.errors import ValidationError
+        from lightning.ui import visuals
+        from lightning.ui.periods import parse_period
+        if name not in ("trend", "money-in"):
+            raise HTTPException(404)
+        c = container(request)
+        try:
+            period = parse_period(request.query_params, today(), c.reporting.first_activity_date())
+        except ValidationError:
+            period = parse_period({"period": "month", "month": month_of(today())}, today(), None)
+        first, as_of = period.start, period.end
+        if name == "trend":
+            position = c.position.at(min(as_of, today()))
+            lead = "net_worth" if position.what_you_owe > 0 else "what_you_own"
+            return render_phone(request, "phone/dashboard/fold.html", fold=name, lead=lead,
+                                networth_trend=visuals.net_worth_trend(c, as_of))
+        return render_phone(request, "phone/dashboard/fold.html", fold=name,
+                            **visuals.cash_flow_charts(c, first, as_of, period.key == "month", today()))
+
+    @picking.get("/accounts/add-transaction")
+    async def pick_account(request: Request):
+        """The Add button's account list (3AY18): asked for with ?pick=1, or when no account is set up yet. Otherwise
+        the shared route opens the entry sheet on the usual account (C05.2)."""
+        from lightning.ui.entry import entry_accounts
+        return render_phone(request, "phone/accounts/pick.html", accounts=entry_accounts(container(request)))
+
     @router.get("/add/bills")
     async def add_bills(request: Request):
         """Pay a bill, from the Add sheet (3AY7): what is due, earliest first; a row opens that bill's pay sheet."""
@@ -218,7 +275,13 @@ def phone_router() -> APIRouter:
     router.include_router(slots)
     router.include_router(months)
     router.include_router(unnarrowed)
+    router.include_router(picking)
     return router
+
+
+def _picks_account(request: Request) -> bool:
+    from lightning.ui.entry import entry_accounts
+    return bool(request.query_params.get("pick")) or not entry_accounts(container(request))
 
 
 def _safe_back(value: str) -> str:

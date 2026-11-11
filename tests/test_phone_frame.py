@@ -270,9 +270,9 @@ def test_the_weekly_review_keeps_money_chosen_and_the_old_more_is_gone(phone):
 def test_financial_health_puts_what_needs_you_under_its_lead_and_the_chart_in_its_own_card(phone):
     """Audit 10, F20 (C12: one chart per card): on the phone the savings rate over time leaves the lead card."""
     html = phone.get("/financial-health").text
-    lead = re.search(r'(?s)<section class="card lead-card lead-hero".*?</section>', html).group(0)
-    assert "lead-side" not in lead and "health-over-time-heading" not in lead
-    assert html.index('id="health-limits-heading"') < html.index('class="card phone-card health-side"')
+    lead = re.search(r'(?s)<section class="phone-hero has-seam".*?</section>', html).group(0)
+    assert "health-over-time-heading" not in lead
+    assert html.index('id="hg-1"') < html.index('id="health-over-time-heading"')   # the limits, then the line over time
 
 
 def test_financial_health_holds_the_savings_and_investing_rates_the_overview_gave_up(phone):

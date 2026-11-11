@@ -1,0 +1,317 @@
+{# Import review on the phone (3AY17): its questions first, then the rows, one column. #}
+{% extends "base.html" %}
+{# A batch read from bank SMS (IV-3AU 3AU2) is the same review in an SMS mode: named for messages, each row with the
+   message it came from, no statement-only extras (the fee inside an amount, a transfer across currencies: bank SMS are
+   EGP), one Primary, and back to From SMS. #}
+{% block title %}{% if batch.file_name.startswith('SMS ') %}{{ 'Check bank messages'|tr(locale) }}{% else %}Review statement{% endif %}{% endblock %}
+{% block phone_back %}{% if batch.file_name.startswith('SMS ') %}<a class="phone-back" href="/sms"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'From SMS'|tr(locale) }}</span></a>{% else %}{{ super() }}{% endif %}{% endblock %}
+{% block section_tabs %}{% if not batch.file_name.startswith('SMS ') %}{{ super() }}{% endif %}{% endblock %}
+{% block pc_section_tabs %}{% if not batch.file_name.startswith('SMS ') %}{{ super() }}{% endif %}{% endblock %}
+{% block heading %}{% if batch.file_name.startswith('SMS ') %}<h1>{% if batch.status == 'POSTED' %}{{ 'Messages posted'|tr(locale) }}{% else %}{{ 'Check bank messages'|tr(locale) }}{% endif %}</h1><p class="phone-note">{{ account.name }} · {{ 'Read on {when}'|tr(locale, when=batch.file_name[4:]) }}</p>{% else %}<h1>{% if batch.status == 'POSTED' %}Import result{% else %}Review import{% endif %}</h1><p class="phone-note">{{ account.name }} · {{ batch.file_name }}</p>{% endif %}{% endblock %}
+{% from "partials/macros.html" import category_options with context %}
+{#
+  The statement as rows, like the account register (feedback batch 004, T12 to T14): every row has its own
+  counterparty-or-account, category, held-for, notes and amount, as soft 30px wells. Rows are grouped by the
+  statement's own name only to fold and to tick together; nothing is decided once for a whole name. Ticking
+  rows opens the bulk bar, which writes into the ticked rows' wells; nothing posts until "Post ready rows".
+#}
+
+{% block content %}
+{% set sms = batch.file_name.startswith('SMS ') %}
+{% if batch.status == 'POSTED' %}<section class="phone-form phone-fields"><h2>{{ 'Import complete'|tr(locale) }}</h2><p>{{ summary.posted }} posted · {% if summary.linked %}{{ summary.linked }} linked to entries you already had · {% endif %}{{ summary.skipped }} skipped · {{ summary.duplicates }} duplicates.</p>
+{% if balance_gaps %}<div class="flash error" role="note"><b>{{ 'The statement’s balance does not add up'|tr(locale) }}</b>
+    <ul>{% for g in balance_gaps %}<li>{{ 'Line'|tr(locale) }} {{ g.line }}: {{ 'the balance moved by'|tr(locale) }} <span class="num">{{ g.moved|money }}</span> {{ 'since line'|tr(locale) }} {{ g.previous_line }}, {{ 'but the line says'|tr(locale) }} <span class="num">{{ g.added|money }}</span>. {{ 'A row may be missing, or counted twice.'|tr(locale) }}</li>{% endfor %}</ul></div>{% endif %}
+<div class="phone-actions">{% if sms %}<a class="btn phone-save" href="/sms">{{ 'Back to From SMS'|tr(locale) }}</a>{% else %}<a class="btn phone-save" href="/accounts/{{ account.id }}">{{ 'Return to account'|tr(locale) }}</a>{% endif %}
+{% if undo_count %}<form method="post" action="/import/{{ batch.id }}/undo" data-confirm-delete="{{ 'Undo this import? {n} entries from {filename} are deleted.'|tr(locale, n=undo_count, filename=batch.file_name) }}"><button class="btn phone-save">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div></section>
+{% else %}
+{% set cat_groups = category_groups(categories|map(attribute='id')|list) %}
+<datalist id="import-parties">{% for a in account_choices %}<option value="{{ a.name }}" data-pick="account:{{ a.id }}" data-group="Your accounts" data-label="{{ a.currency }} · {{ 'Account'|tr(locale) }}">{% endfor %}{% for cp in counterparties %}<option value="{{ cp.name }}" data-pick="counterparty:{{ cp.id }}" data-group="People and businesses">{% endfor %}</datalist>
+<datalist id="import-owners"><option value="{{ 'You'|tr(locale) }}" data-pick="self">{% for cp in owners %}<option value="{{ cp.name }}" data-pick="counterparty:{{ cp.id }}">{% endfor %}</datalist>
+<form method="post" action="/accounts/{{ account.id }}/import/{{ batch.id }}/confirm" id="import-review-form"><section class="phone-form phone-fields">
+  {% if sms %}<div class="card-heading"><div><h2>{% if rows|length == 1 %}{{ '1 message'|tr(locale) }}{% else %}{{ '{n} messages'|tr(locale, n=rows|length) }}{% endif %}</h2></div></div>
+  {% elif view == 'summary' %}<div class="card-heading"><div><h2>{{ rows|length }} row{{ 's' if rows|length != 1 }}</h2></div><a class="btn phone-save" href="/accounts/{{ account.id }}/import/{{ batch.id }}?rows=all">{{ 'See every row'|tr(locale) }}</a></div><input type="hidden" name="view" value="summary">
+  {% include "partials/bank_import_summary.html" %}
+  {% else %}<div class="card-heading"><div><h2>{{ rows|length }} row{{ 's' if rows|length != 1 }} · {{ groups|length }} name{{ 's' if groups|length != 1 }}</h2></div><a class="btn phone-save" href="/accounts/{{ account.id }}/import/{{ batch.id }}">{{ 'Back to the questions'|tr(locale) }}</a><button class="btn primary phone-save">{{ 'Post ready rows'|tr(locale) }}</button></div>{% endif %}
+  <div class="import-chips" role="group" aria-label="{{ 'Show'|tr(locale) }}"{{ ' hidden' if view == 'summary' or (sms and groups|length < 5) }}>
+    <button type="button" class="chip is-on" data-filter="all">{{ 'All'|tr(locale) }} {{ counts.all }}</button>
+    <button type="button" class="chip" data-filter="err">{{ 'To fix'|tr(locale) }} {{ counts.err }}</button>
+    <button type="button" class="chip" data-filter="needs">{{ 'Needs you'|tr(locale) }} {{ counts.needs }}</button>
+    <button type="button" class="chip" data-filter="dup">{{ 'Possible duplicates'|tr(locale) }} {{ counts.dup }}</button>
+    <button type="button" class="chip" data-filter="ready">{{ 'Ready'|tr(locale) }} {{ counts.ready }}</button>
+  </div>
+  {% if reject_prompt %}<div class="import-ai"><p class="phone-note">{{ 'This prompt gives your AI tool what it cannot guess: your file’s header, what Lightning rejected on each line and the columns it accepts. It fixes the file for you instead of you hunting for the problem.'|tr(locale) }}</p>
+  {% set ai_text = reject_prompt %}<div class="phone-actions">{% include "partials/ai_prompt.html" %}</div></div>{% endif %}
+  <div class="import-bulk" id="import-bulk" hidden>
+    <b class="import-bulk-count"><span data-bulk-count>0</span> {{ 'selected'|tr(locale) }}</b>
+    <small class="import-bulk-hint">{{ 'Change a field in any ticked row and every ticked row takes it.'|tr(locale) }}</small>
+    <div class="counterparty-picker-slot"><input type="text" id="bulk-cp" form="import-bulk-none" list="import-parties" data-own-suggestions data-allow-add data-add-label="+ New counterparty &quot;{name}&quot;" data-pick-target="bulk-cp-pick" data-create-url="/accounts/{{ account.id }}/import/counterparty" placeholder="{{ 'Counterparty or account'|tr(locale) }}" aria-label="{{ 'Counterparty or account'|tr(locale) }}" autocomplete="off"><input type="hidden" id="bulk-cp-pick" form="import-bulk-none"></div>
+    <select id="bulk-category" form="import-bulk-none" data-own-picker aria-label="{{ 'Category'|tr(locale) }}"><option value="">{{ 'Category'|tr(locale) }}</option><option value="__uncategorized__">{{ 'Uncategorized'|tr(locale) }}</option>{{ category_options(cat_groups, '') }}</select>
+    <div class="counterparty-picker-slot"><input type="text" id="bulk-whom" form="import-bulk-none" list="import-owners" data-own-suggestions data-allow-add data-add-label="+ New counterparty &quot;{name}&quot;" data-pick-target="bulk-whom-pick" data-create-url="/accounts/{{ account.id }}/import/counterparty" data-create-kind="PERSON" placeholder="{{ 'Held for'|tr(locale) }}" aria-label="{{ 'Held for'|tr(locale) }}" autocomplete="off"><input type="hidden" id="bulk-whom-pick" form="import-bulk-none"></div>
+    <label class="import-check"><input type="checkbox" id="bulk-remember" form="import-bulk-none"> {{ 'Use this category for this counterparty next time'|tr(locale) }}</label>
+    <button type="button" class="btn primary phone-save" data-bulk-apply>{{ 'Apply'|tr(locale) }}</button>
+    <button type="button" class="btn phone-save" data-bulk-skip>{{ 'Skip'|tr(locale) }}</button>
+  </div>
+  {% if balance_gaps %}<div class="flash error" role="note"><b>{{ 'The statement’s balance does not add up'|tr(locale) }}</b>
+    <ul>{% for g in balance_gaps %}<li>{{ 'Line'|tr(locale) }} {{ g.line }}: {{ 'the balance moved by'|tr(locale) }} <span class="num">{{ g.moved|money }}</span> {{ 'since line'|tr(locale) }} {{ g.previous_line }}, {{ 'but the line says'|tr(locale) }} <span class="num">{{ g.added|money }}</span>. {{ 'A row may be missing, or counted twice.'|tr(locale) }}</li>{% endfor %}</ul></div>{% endif %}
+  {% if view != 'summary' %}<div class="import-head" aria-hidden="true"><span></span><span>{{ 'Date'|tr(locale) }}</span><span>{{ 'Counterparty or account'|tr(locale) }}</span><span>{{ 'Category'|tr(locale) }}</span><span>{{ 'Held for'|tr(locale) }}</span><span>{{ 'Notes'|tr(locale) }}</span><span>{{ 'Amount'|tr(locale) }}</span><span>{{ 'Status'|tr(locale) }}</span></div>
+  {% include "partials/bank_import_groups.html" %}{% endif %}
+  {% if more_rows and view != 'summary' %}<div class="actions import-more" data-more-url="/accounts/{{ account.id }}/import/{{ batch.id }}/groups" data-next="{{ shown_groups }}"><button type="button" class="btn phone-save" data-import-more>{{ 'Show more rows'|tr(locale) }} <span class="muted num">({{ more_rows }})</span></button></div>{% endif %}
+  <div class="phone-actions"><button class="btn primary phone-save">{{ 'Post ready rows'|tr(locale) }}</button><a class="btn phone-save" href="{{ '/sms' if sms else '/accounts/' ~ account.id }}">{{ 'Finish later'|tr(locale) }}</a></div>
+</section><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+<form method="post" action="/accounts/{{ account.id }}/import/{{ batch.id }}/discard" class="import-discard" data-confirm-delete="{% if sms %}{{ 'Discard these messages? Nothing from them is posted.'|tr(locale) }}{% else %}Discard this import? Nothing from {{ batch.file_name }} is posted. You can import the file again later.{% endif %}">
+  <button class="btn danger">{{ ('Discard these messages' if sms else 'Discard this import')|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+</form>
+{% endif %}
+<script nonce="{{ request.state.csp_nonce|default('') }}">
+(() => {
+  const target = location.hash ? document.getElementById(location.hash.slice(1)) : null;
+  const block = target?.closest('details.import-group');
+  if (block) { block.open = true; target.scrollIntoView({block: 'center'}); }
+  const form = document.getElementById('import-review-form');
+  if (!form) return;
+  const bar = document.getElementById('import-bulk');
+  const picks = () => Array.from(form.querySelectorAll('.import-pick:checked'));
+  const sync = () => {
+    const n = picks().length;
+    bar.hidden = n === 0;
+    bar.querySelector('[data-bulk-count]').textContent = n;
+  };
+  // A name's checkbox ticks its rows; it never folds the group.
+  form.addEventListener('click', (event) => {
+    if (event.target.closest('.import-pick-group')) event.stopPropagation();
+  }, true);
+  form.addEventListener('change', (event) => {
+    const group = event.target.closest('.import-pick-group');
+    if (group) form.querySelectorAll(`.import-line[data-group="${group.dataset.group}"] .import-pick`).forEach((box) => { box.checked = group.checked; });
+    if (event.target.closest('.import-pick, .import-pick-group')) sync();
+  });
+  // Long files: the next names are fetched into this same form, so nothing typed so far is lost.
+  // A question line (NF-7AB1) has its own loader, for its state's rows only.
+  const loadMore = async (more) => {
+    const button = more?.querySelector('[data-import-more]');
+    if (!more || !more.isConnected || !button || button.disabled) return false;
+    button.disabled = true;
+    try {
+      const url = more.dataset.moreUrl;
+      const response = await fetch(`${url}${url.includes('?') ? '&' : '?'}start=${more.dataset.next}`, {credentials: 'same-origin'});
+      if (!response.ok) throw new Error('failed');
+      const box = document.createElement('div');
+      box.innerHTML = await response.text();
+      const added = [...box.children];
+      more.before(...added);
+      // Fetched rows get the type-and-pick wells a drawn row has (A16: type and pick, never a dropdown of your data).
+      if (typeof initOwnDataPickers === 'function') added.forEach((node) => initOwnDataPickers(node));
+      more.dataset.next = response.headers.get('X-Next-Start');
+      const left = Number(response.headers.get('X-Remaining'));
+      if (left > 0) { button.querySelector('.num').textContent = `(${left})`; button.disabled = false; more.hidden = false; }
+      else if (more.closest('.import-question')) { button.disabled = false; more.hidden = true; }  // kept: "Biggest first" reloads through it
+      else { more.remove(); }
+      return added.length > 0;
+    } catch (error) { button.disabled = false; return false; }
+  };
+  form.querySelectorAll('.import-more').forEach((more) => more.querySelector('[data-import-more]').addEventListener('click', () => loadMore(more)));
+  // NF-7AB4: "All of these" gives every row of the name that category and remembers it for the name next time.
+  form.addEventListener('change', (event) => {
+    const all = event.target.closest('[data-group-all]');
+    if (!all || !all.value) return;
+    relaying = true;
+    form.querySelectorAll(`.import-line[data-group="${all.dataset.groupAll}"]`).forEach((line) => {
+      const select = line.querySelector('select[name^="category_"]');
+      if (select) { select.value = all.value; select.dispatchEvent(new Event('change', {bubbles: true})); }
+      const keep = line.querySelector('input[name^="remember_"]');
+      if (keep) keep.checked = true;
+    });
+    relaying = false;
+    const rule = all.closest('.import-group-tools')?.querySelector('[data-rule-link]');
+    if (rule) rule.href = `${rule.dataset.ruleLink}&category_id=${encodeURIComponent(all.value)}`;
+  });
+  // "Biggest first" reloads the question's rows, largest amounts first.
+  form.querySelectorAll('[data-question-sort]').forEach((button) => button.addEventListener('click', async () => {
+    const box = button.closest('.import-question-rows'), more = box.querySelector('.import-more');
+    if (!more) return;
+    box.querySelectorAll('details.import-group').forEach((group) => group.remove());
+    const on = button.getAttribute('aria-pressed') !== 'true';
+    button.setAttribute('aria-pressed', String(on));
+    more.dataset.moreUrl = more.dataset.moreUrl.replace(/&sort=amount/, '') + (on ? '&sort=amount' : '');
+    more.dataset.next = '0';
+    await loadMore(more);
+  }));
+  // NF-7AB5 Quick mode: the waiting rows one at a time, three likely categories as 1-3. Each answer writes the row's
+  // own category or Skip well, so posting is unchanged.
+  form.querySelectorAll('[data-quick-start]').forEach((start) => start.addEventListener('click', async () => {
+    const box = start.closest('.import-question-rows'), panel = box.querySelector('.import-quick');
+    const more = box.querySelector('.import-more');
+    while (more && !more.hidden && await loadMore(more)) { /* every waiting row, not only the first page */ }
+    const picks = JSON.parse(start.dataset.picks || '{"out":[],"in":[]}');
+    const lines = [...box.querySelectorAll('.import-line')];
+    if (!lines.length) return;
+    let at = 0;
+    const amountOf = (line) => Number((line.querySelector('[name^="amount_"]')?.value || '0').replace(/[,−]/g, (c) => (c === '−' ? '-' : '')));
+    const show = () => {
+      if (at >= lines.length) { stop(); return; }
+      const line = lines[at];
+      lines.forEach((other) => other.classList.toggle('is-quick', other === line));
+      panel.querySelector('[data-quick-count]').textContent = `${at + 1} / ${lines.length}`;
+      panel.querySelector('[data-quick-name]').textContent = line.querySelector('[name^="counterparty_"]:not([name*="_pick_"])')?.value || '';
+      panel.querySelector('[data-quick-amount]').textContent = line.querySelector('[name^="amount_"]')?.value || '';
+      panel.querySelector('[data-quick-date]').textContent = line.querySelector('[name^="date_"]')?.value || '';
+      const list = picks[amountOf(line) < 0 ? 'out' : 'in'] || [];
+      const holder = panel.querySelector('[data-quick-picks]');
+      holder.replaceChildren(...list.map((pick, index) => {
+        const button = document.createElement('button');
+        button.type = 'button'; button.className = 'btn' + (index === 0 ? ' primary' : '');
+        button.dataset.quickPick = pick.id; button.textContent = `${index + 1} · ${pick.name}`;
+        return button;
+      }));
+      line.scrollIntoView({block: 'nearest'});
+    };
+    const answer = (value) => {
+      const line = lines[at];
+      if (!line) return;
+      const select = line.querySelector('select[name^="category_"]'), skip = line.querySelector('input[name^="skip_"]');
+      if (value === 'skip') { if (skip) skip.checked = true; }
+      else if (select) { if (skip) skip.checked = false; select.value = String(value); select.dispatchEvent(new Event('change', {bubbles: true})); }
+      at += 1; show();
+    };
+    const keys = (event) => {
+      if (event.target.closest('input, select, textarea')) return;
+      const buttons = [...panel.querySelectorAll('[data-quick-pick]')];
+      if (/^[1-3]$/.test(event.key) && buttons[Number(event.key) - 1]) { event.preventDefault(); answer(buttons[Number(event.key) - 1].dataset.quickPick); }
+      else if (event.key === 'Enter' && buttons[0]) { event.preventDefault(); answer(buttons[0].dataset.quickPick); }
+      else if (event.key.toLowerCase() === 's') { event.preventDefault(); answer('skip'); }
+      else if (event.key === 'ArrowLeft' || event.key === 'Backspace') { event.preventDefault(); at = Math.max(0, at - 1); show(); }
+      else if (event.key === 'Escape') { stop(); }
+    };
+    const click = (event) => {
+      const pick = event.target.closest('[data-quick-pick]');
+      if (pick) answer(pick.dataset.quickPick);
+      else if (event.target.closest('[data-quick-skip]')) answer('skip');
+      else if (event.target.closest('[data-quick-back]')) { at = Math.max(0, at - 1); show(); }
+      else if (event.target.closest('[data-quick-stop]')) stop();
+    };
+    const stop = () => {
+      panel.hidden = true; box.classList.remove('is-quick-mode');
+      lines.forEach((line) => line.classList.remove('is-quick'));
+      document.removeEventListener('keydown', keys); panel.removeEventListener('click', click);
+    };
+    panel.hidden = false; box.classList.add('is-quick-mode');
+    document.addEventListener('keydown', keys); panel.addEventListener('click', click);
+    show();
+  }));
+  form.querySelectorAll('[data-question-open]').forEach((button) => button.addEventListener('click', async () => {
+    const question = button.closest('.import-question'), box = question.querySelector('.import-question-rows');
+    const opening = box.hidden;
+    box.hidden = !opening;
+    button.setAttribute('aria-expanded', String(opening));
+    if (opening && !question.dataset.loaded) { question.dataset.loaded = '1'; await loadMore(box.querySelector('.import-more')); }
+  }));
+  // Ticking a name means all its rows, drawn or not: load the rest of that name first, then tick them.
+  form.addEventListener('change', async (event) => {
+    const box = event.target.closest('.import-pick-group');
+    if (!box || !box.checked) return;
+    const want = Number(box.dataset.count || 0), group = box.dataset.group;
+    const more = () => (box.closest('.import-question') || form).querySelector('.import-more');
+    while (form.querySelectorAll(`.import-line[data-group="${group}"]`).length < want && await loadMore(more())) { /* next page */ }
+    const picks = form.querySelectorAll(`.import-line[data-group="${group}"] .import-pick`);
+    picks.forEach((pick) => { pick.checked = true; });
+    picks[0]?.dispatchEvent(new Event('change', {bubbles: true}));
+  });
+  // Filter chips show the names in one state.
+  form.querySelectorAll('[data-filter]').forEach((chip) => chip.addEventListener('click', () => {
+    form.querySelectorAll('[data-filter]').forEach((other) => other.classList.toggle('is-on', other === chip));
+    form.querySelectorAll('details.import-group').forEach((box) => { box.hidden = chip.dataset.filter !== 'all' && box.dataset.state !== chip.dataset.filter; });
+  }));
+  const val = (id) => document.getElementById(id)?.value ?? '';
+  const setPicker = (text, pick, textValue, pickValue) => {
+    const input = document.getElementById(text), hidden = document.getElementById(pick);
+    if (!input) return;
+    input.value = textValue; input.dispatchEvent(new Event('change', {bubbles: true}));
+    if (hidden) hidden.value = pickValue;
+  };
+  // Ticked rows are one edit. With two or more ticked, a change in a ticked row's counterparty, category, held-for or
+  // notes goes to every ticked row, so nobody retypes the same thing row by row. Date and amount stay the row's own.
+  let relaying = false;
+  const spread = (event) => {
+    if (relaying) return;
+    const line = event.target.closest('.import-line');
+    const field = event.target.name || '';
+    const kind = ['counterparty', 'category', 'whom', 'notes'].find((key) => field.startsWith(key + '_') && !field.includes('_pick_'));
+    if (!line || !kind || !line.querySelector('.import-pick')?.checked) return;
+    const others = picks().filter((box) => box.dataset.row !== line.querySelector('.import-pick').dataset.row);
+    if (!others.length) return;
+    const id = field.slice(kind.length + 1), pickName = kind === 'counterparty' ? 'counterparty_pick_' : kind === 'whom' ? 'whom_pick_' : '';
+    const pick = pickName ? (form.elements[pickName + id]?.value ?? '') : '';
+    relaying = true;
+    others.forEach((box) => {
+      const to = box.dataset.row;
+      if (pickName) setPicker(`${kind === 'counterparty' ? 'cp' : 'whom'}-${to}`, `${kind === 'counterparty' ? 'cp' : 'whom'}-pick-${to}`, event.target.value, pick);
+      else { const target = form.elements[`${kind}_${to}`]; if (target) { target.value = event.target.value; target.dispatchEvent(new Event('change', {bubbles: true})); } }
+    });
+    relaying = false;
+  };
+  form.addEventListener('change', spread);
+  form.addEventListener('change', (event) => { if (!relaying && event.target.name?.startsWith('category_')) delete event.target.dataset.fromLabel; });
+  // A category set for one of the file's own category names goes to every row that has that name and whose category
+  // is still empty or was set the same way; a row the person changed by hand keeps its own.
+  form.addEventListener('change', (event) => {
+    const pick = event.target.closest('[data-file-label-pick]');
+    if (!pick) return;
+    // Rows not drawn yet (long files load in pages) take the choice on the server: it goes with the form.
+    form.querySelectorAll('input[name="labelcat"]').forEach((box) => { if (JSON.parse(box.value)[0] === pick.dataset.fileLabelPick) box.remove(); });
+    if (pick.value) { const box = document.createElement('input'); box.type = 'hidden'; box.name = 'labelcat'; box.value = JSON.stringify([pick.dataset.fileLabelPick, pick.value]); form.appendChild(box); }
+    relaying = true;
+    form.querySelectorAll('.import-line[data-file-label]').forEach((line) => {
+      if (line.dataset.fileLabel !== pick.dataset.fileLabelPick) return;
+      const select = line.querySelector('select[name^="category_"]');
+      if (!select || (select.value && select.dataset.fromLabel !== '1')) return;
+      select.value = pick.value; select.dataset.fromLabel = '1';
+      select.dispatchEvent(new Event('change', {bubbles: true}));
+    });
+    relaying = false;
+  });
+  // A counterparty made here is saved already: every row's list offers it, and the rows of the same statement name
+  // that were still only typed take it, so a name is settled once, not once per row.
+  document.addEventListener('lightning:counterparty-created', (event) => {
+    const {id, name, pick, typed, from} = event.detail;
+    document.querySelectorAll('#import-parties, #import-owners').forEach((list) => {
+      if (Array.from(list.options).some((option) => option.dataset.pick === pick)) return;
+      const option = document.createElement('option');
+      option.value = name; option.dataset.pick = pick; option.dataset.group = 'People and businesses';
+      list.append(option);
+    });
+    const same = typed.trim().toLocaleLowerCase();
+    const group = from.closest('details.import-group');
+    const kind = from.name?.startsWith('whom_') ? 'whom' : (from.name?.startsWith('counterparty_') ? 'cp' : '');
+    if (!kind || !group) return;
+    relaying = true;
+    group.querySelectorAll(`.import-line input[name^="${kind === 'cp' ? 'counterparty' : 'whom'}_"]:not([name*="_pick_"])`).forEach((input) => {
+      const rowId = input.name.slice(input.name.indexOf('_') + 1);
+      const hidden = document.getElementById(`${kind === 'cp' ? 'cp' : 'whom'}-pick-${rowId}`);
+      if (input !== from && input.value.trim().toLocaleLowerCase() === same && hidden && !hidden.value) setPicker(input.id, hidden.id, name, pick);
+    });
+    relaying = false;
+  });
+  // Apply writes the bar's choices into the ticked rows' wells; nothing is posted yet.
+  bar.querySelector('[data-bulk-apply]').addEventListener('click', () => {
+    const cp = val('bulk-cp').trim(), cpPick = val('bulk-cp-pick'), cat = val('bulk-category');
+    const whom = val('bulk-whom').trim(), whomPick = val('bulk-whom-pick'), remember = document.getElementById('bulk-remember').checked;
+    relaying = true;
+    picks().forEach((box) => {
+      const id = box.dataset.row;
+      if (cp) setPicker(`cp-${id}`, `cp-pick-${id}`, cp, cpPick);
+      if (cat) { const select = document.getElementById(`category-${id}`); select.value = cat; select.dispatchEvent(new Event('change', {bubbles: true})); }
+      if (whom) setPicker(`whom-${id}`, `whom-pick-${id}`, whom, whomPick);
+      if (remember) { const keep = form.elements[`remember_${id}`]; if (keep) keep.checked = true; }
+    });
+    relaying = false;
+  });
+  bar.querySelector('[data-bulk-skip]').addEventListener('click', () => {
+    picks().forEach((box) => {
+      const id = box.dataset.row;
+      const skip = form.elements[`skip_${id}`], match = form.elements[`match_${id}`];
+      if (skip) skip.checked = true;
+      if (match) match.value = 'skip';
+    });
+  });
+})();
+</script>{% endblock %}

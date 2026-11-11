@@ -1,0 +1,154 @@
+{# Reserves on the phone (3AY17): the emergency fund first, then what you are saving for, one column. #}
+{% extends "base.html" %}
+{% macro date_control(name, value, control_id) -%}
+<input id="{{ control_id }}" type="text" name="{{ name }}" value="{{ value or '' }}" placeholder="yyyy-mm-dd"
+         inputmode="numeric" title="yyyy-mm-dd, like 2026-01-31" data-smart-date>
+{%- endmacro %}
+{% block title %}{{ 'Reserves'|tr(locale) }} · {{ 'Safety'|tr(locale) }}{% endblock %}
+{% block phone_title %}{{ 'Financial health'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Reserves'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% macro repeat_seg(current) %}<span class="phone-note">{{ "Repeat"|tr(locale) }}</span><div class="phone-segment phone-segment-4" role="radiogroup" aria-label="{{ 'Repeat'|tr(locale) }}">{% for value, text in [('NONE', 'Once'), ('WEEKLY', 'Weekly'), ('MONTHLY', 'Monthly'), ('YEARLY', 'Yearly')] %}<label{% if value == 'NONE' %} title="Does not repeat"{% endif %}><input type="radio" name="recurrence" value="{{ value }}"{% if value == current %} checked{% endif %}><span>{{ text|tr(locale) }}</span></label>{% endfor %}</div>{% endmacro %}
+{% macro match_by(reserve, label) %}
+<div class="reserve-match" role="group" aria-label="{{ label }}" data-reserve-match>
+  <span class="planner-mode-label">{{ 'Match by'|tr(locale) }}</span>
+  <label class="reserve-criterion-toggle"><input type="checkbox" name="match_by" value="none"{% if not reserve or not (reserve.account_id or reserve.counterparty_id or reserve.category_id) %} checked{% endif %}><span>{{ 'Ask'|tr(locale) }}</span></label>
+  {% for value, text in [('account', 'Account'), ('counterparty', 'Counterparty'), ('category', 'Category')] %}
+  {% set active = reserve and reserve[value ~ '_id'] %}
+  <div class="reserve-criterion">
+    <label class="reserve-criterion-toggle"><input type="checkbox" name="match_by" value="{{ value }}"{% if active %} checked{% endif %}><span>{{ text|tr(locale) }}</span></label>
+    <label data-match-picker="{{ value }}"{% if not active %} hidden{% endif %}>
+      <span class="sr-only">{{ text|tr(locale) }}</span>
+      <select name="{{ value }}_id" data-own-picker aria-label="{{ text|tr(locale) }}"{% if active %} required{% else %} disabled{% endif %}>
+        <option value="">{{ ('Choose an account' if value == 'account' else 'Choose a saved counterparty' if value == 'counterparty' else 'Choose a spending category')|tr(locale) }}</option>
+        {% if value == 'category' %}{% from 'partials/macros.html' import category_options %}{{ category_options(category_groups(categories), reserve.category_id if reserve else '') }}
+        {% else %}{% for item in (accounts if value == 'account' else counterparties) %}<option value="{{ item.id }}"{% if active == item.id %} selected{% endif %}>{{ item.name }}</option>{% endfor %}{% endif %}
+      </select>
+    </label>
+  </div>
+  {% endfor %}
+</div>
+{% endmacro %}
+
+
+{% from "partials/charts.html" import key_notes, meter %}
+<div data-reserve-refresh="notes">{{ key_notes(notes) }}</div>
+{% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
+{% set edit = request.query_params.get('edit', '') or ('all' if request.method == 'POST' else '') %}
+
+<section class="phone-form phone-fields">
+  {% if refill %}<div class="refill-prompt" role="status">
+    {% if refill.move > 0 %}<span>{{ ('Free cash can fill your emergency fund.' if refill.full else 'This month\'s top-up for your emergency fund fits your free cash.' if refill.is_top_up else 'Part of your free cash can go to your emergency fund without cutting into your plan.')|tr(locale) }}
+      <small class="phone-note">{{ 'Safe to spend after: {amount}'|tr(locale, amount=refill.after|money(False, 0) ~ ' ' ~ base) }}{% if refill.until %} · {{ 'until {date}'|tr(locale, date=refill.until) }}{% endif %}</small></span>
+    <form method="post" action="/reserves/emergency"><input type="hidden" name="allocated" value="{{ refill.to|money(False, 2) }}"><button class="btn primary phone-save">{{ 'Refill'|tr(locale) }} {{ refill.move|money(False, 0) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+    {% else %}<span>{{ 'Your plan needs your free cash first, so a refill now would leave Safe to spend below zero.'|tr(locale) }}</span>{% endif %}
+    {% if refill.safe > refill.move or (not refill.all_is_safe and refill.all > refill.move) %}<details class="refill-more" id="refill-more"><summary>{{ 'Move more'|tr(locale) }}</summary>
+      {% if refill.safe > refill.move %}<p class="phone-note">{{ 'Moving {amount} keeps your plan; Safe to spend after: {after}.'|tr(locale, amount=refill.safe|money(False, 0) ~ ' ' ~ base, after=refill.safe_after|money(False, 0) ~ ' ' ~ base) }}</p>
+      <form method="post" action="/reserves/emergency"><input type="hidden" name="allocated" value="{{ refill.safe_to|money(False, 2) }}"><button class="btn small">{{ 'Refill'|tr(locale) }} {{ refill.safe|money(False, 0) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+      {% if not refill.all_is_safe and refill.all > refill.safe %}<p class="phone-note">{{ 'Moving {amount} leaves Safe to spend at {after}: money your plan still needs would be missing.'|tr(locale, amount=refill.all|money(False, 0) ~ ' ' ~ base, after=refill.all_after|money(True, 0) ~ ' ' ~ base) }}</p>
+      <form method="post" action="/reserves/emergency"><input type="hidden" name="allocated" value="{{ refill.all_to|money(False, 2) }}"><button class="btn small">{{ 'Refill'|tr(locale) }} {{ refill.all|money(False, 0) }} {{ 'anyway'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</details>{% endif %}
+    {% if refill.schedule %}<details class="refill-more" id="refill-schedule" open><summary>{{ 'Refill in instalments'|tr(locale) }}</summary>
+      <p class="phone-note">{{ 'Instalments start on your next income and keep Safe to spend at or above zero where they can. Each figure assumes today\'s cash and plan; nothing is scheduled or moved until you press Refill.'|tr(locale) }}</p>
+      <div class="phone-rows">{% for step in refill.schedule %}<div class="phone-row"><span><b>{{ step.date }}</b><small class="phone-note">{{ 'Emergency fund after'|tr(locale) }} {{ step.fund_after|money(False, 0) }} {{ base }} · {{ 'Safe to spend after'|tr(locale) }} <span class="{{ 'neg' if not step.keeps_plan }}">{{ step.safe_after|money(True, 0) }} {{ base }}</span></small></span><b>{{ step.amount|money(False, 0) }} {{ base }}</b></div>{% endfor %}</div></details>{% endif %}
+    <form method="get" action="/reserves" class="refill-manual"><label>{{ 'Or choose your own amount'|tr(locale) }} <input name="refill_amount" inputmode="decimal" class="money-input" value="{{ refill.manual_raw or '' }}"></label> <button class="btn small">{{ 'Preview'|tr(locale) }}</button></form>
+    {% if refill.manual %}<form method="post" action="/reserves/emergency" id="refill-manual-preview"><p class="phone-note">{{ 'Moving {amount} makes the fund {to}; Safe to spend becomes {after}.'|tr(locale, amount=refill.manual.amount|money(False, 0) ~ ' ' ~ base, to=refill.manual.to|money(False, 0) ~ ' ' ~ base, after=refill.manual.after|money(True, 0) ~ ' ' ~ base) }}</p><input type="hidden" name="allocated" value="{{ refill.manual.to|money(False, 2) }}"><button class="btn small">{{ 'Refill'|tr(locale) }} {{ refill.manual.amount|money(False, 0) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div>{% endif %}
+  <header class="phone-section-head"><h2>{{ 'Emergency fund'|tr(locale) }}</h2></header>
+  {% set avg = fund.average %}{% set what = 'income' if fund.basis == 'income' else 'spending' %}
+  <div data-reserve-refresh="emergency-progress">{% if emergency_meter %}<div class="emergency-meter">{{ meter('Towards six months of ' ~ what, emergency_set_aside, fund.target, emergency_meter, '', '', 'target') }}</div>{% endif %}
+  {% if fund.target and fund.target > pos.cash_you_own %}<p class="phone-note">{{ "Your emergency target is more than the cash you own."|tr(locale) }}</p>{% endif %}
+  </div><div class="emergency-stats" data-reserve-refresh="emergency-stats">
+    {% if fund.top_up %}<div><span class="phone-note">{{ fig.emergency_top_up.label }}</span><b>{{ fund.top_up|money(False, 0) }}</b><small class="phone-note">{{ "a month to reach six months within two years; the budget leaves room for it"|tr(locale) }}</small></div>{% endif %}
+    <div><span class="phone-note">{{ fig[fund.figure].label }}</span><b>{{ (avg.amount or 0)|money }}</b><small class="phone-note">{% if avg.manual %}Set by hand in Settings{% elif avg.scheduled %}From your recurring income{% else %}{{ avg.window }} · {{ avg.months_counted }} month{{ '' if avg.months_counted == 1 else 's' }} with {{ what }}{% endif %}</small></div>
+  </div>
+  {% if not fund.monthly %}<p class="phone-note">{% if fund.basis == 'income' %}Choose your income categories in <a href="/settings?section=budget">{{ 'Settings'|tr(locale) }}</a> to measure months covered.{% else %}Months covered are measured once a month of spending is recorded.{% endif %}</p>{% endif %}
+  <p class="phone-note">Counted in months of {{ what }} · <a href="/settings?section=budget">{{ "Change in Settings"|tr(locale) }}</a></p>
+  {% if edit in ('emergency', 'all') %}<form method="post" action="/reserves/emergency" class="emergency-form" data-autosave-form>
+    <label>{{ "Amount set aside"|tr(locale) }}<input class="money-input" type="text" name="allocated" value="{{ emergency.effective_allocated|money(False, 2) if emergency else '0.00' }}" inputmode="decimal" required>{% if emergency and emergency.spent %}<small class="phone-note">{{ emergency.effective_allocated|money(False, 0) }} left of {{ (emergency.effective_allocated + emergency.spent)|money(False, 0) }} · {{ emergency.spent|money(False, 0) }} used</small>{% endif %}</label>
+    <span class="inline-save-status" aria-live="polite"></span>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+  {% else %}<p class="emergency-set"><span class="phone-note">{{ "Amount set aside"|tr(locale) }}</span> <b>{{ (emergency.effective_allocated if emergency else 0)|money(False, 0) }}</b> <small class="phone-note">{{ base }}</small><a class="quiet-link" href="/plan/reserves?edit=emergency">{{ 'Edit'|tr(locale) }}</a>{% if emergency and emergency.spent %}<small class="phone-note">{{ emergency.effective_allocated|money(False, 0) }} left of {{ (emergency.effective_allocated + emergency.spent)|money(False, 0) }} · {{ emergency.spent|money(False, 0) }} used</small>{% endif %}</p>{% endif %}
+  {% if emergency and emergency.spent %}<form method="post" action="/reserves/emergency" class="emergency-refill"><input type="hidden" name="allocated" value="{{ (emergency.effective_allocated + emergency.spent)|money(False, 2) }}"><button class="btn small">Refill to {{ (emergency.effective_allocated + emergency.spent)|money(False, 0) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}
+  {% include "partials/emergency_liquidity_context.html" %}
+</section>
+
+<section class="phone-form phone-fields">
+  <header class="phone-section-head"><h2>{{ "What are you saving for?"|tr(locale) }}</h2></header>
+  {% if not reserves %}<p class="phone-note">{{ "Nothing yet. Add a reserve below for a payment or a savings goal."|tr(locale) }}</p>{% else %}
+  <ul class="reserve-rows">
+    {% for reserve in reserves %}{% set status = 'Spent in full' if reserve.spent >= reserve.target else ('Partly spent' if reserve.spent > 0 else 'Not spent yet') %}<li class="reserve-row" id="reserve-{{ reserve.id }}">
+      <div class="reserve-line">
+        <div class="reserve-what" data-reserve-refresh="name-{{ reserve.id }}"><b>{{ reserve.name }}</b><small class="phone-note">{{ ('Upcoming payment' if reserve.due_date else 'Savings goal') if reserve.kind == 'PROJECT' else 'Reserve' }}{% if reserve.due_date %} · due {{ reserve.due_date }}{% endif %}{% if reserve.recurrence != 'NONE' %} · {{ reserve.recurrence|lower }}{% endif %}</small></div>
+        <div class="reserve-set"><span class="phone-note" data-reserve-refresh="target-{{ reserve.id }}">Set aside of {{ reserve.target|money(False, 0) }}</span>{% if edit in ('all', reserve.id|string) %}<form method="post" action="/reserves/{{ reserve.id }}/allocate" class="reserve-allocate" data-autosave-form>
+        <input class="money-input" type="text" name="allocated" value="{{ reserve.allocated|money(False, 2) }}" inputmode="decimal" aria-label="Amount set aside for {{ reserve.name }}" required>
+        <span class="inline-save-status" aria-live="polite"></span>
+      <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% else %}<b class="num">{{ reserve.allocated|money(False, 0) }}</b><a class="quiet-link" href="/plan/reserves?edit={{ reserve.id }}#reserve-{{ reserve.id }}">{{ 'Edit'|tr(locale) }}</a>{% endif %}</div>
+      </div>
+      <div class="reserve-line">
+        <div class="reserve-meter" data-reserve-refresh="progress-{{ reserve.id }}"><div class="bartrack"><div class="bar" style="width:{{ reserve.progress }}%"></div></div>
+          <small>{% if reserve.allocated >= reserve.target %}<span>Fully funded</span>{% else %}<span>{{ (reserve.target - reserve.allocated)|money(False, 0) }} to fund</span>{% endif %} · <span class="status-dot{{ ' is-done' if reserve.spent >= reserve.target }}">{{ status }}</span>{% if reserve.spent %} · {{ reserve.spent|money(False, 0) }} spent · {{ reserve.effective_allocated|money(False, 0) }} still set aside{% endif %}</small></div>
+        <div class="reserve-actions">
+      <form method="post" action="/reserves/{{ reserve.id }}/complete" class="reserve-complete"><button class="cat-icon" title="Complete" aria-label="Complete {{ reserve.name }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>
+      </div>
+      <p class="phone-note" data-reserve-refresh="goal-{{ reserve.id }}"{% if not reserve.a_month and not reserve.late %} hidden{% endif %}>{% if reserve.a_month %}About {{ reserve.a_month|money(False, 0) }} {{ base }} a month. {% endif %}{% if reserve.late %}{% if reserve.late.reached %}Your plan leaves {{ reserve.late.can|money(False, 0) }} a month for it: set that aside each month and it is ready in {{ reserve.late.reached }}.{% else %}Your plan leaves nothing for it yet.{% endif %}{% endif %}</p>
+
+      <div class="reserve-foot small">{% for payment in reserve.payments %}<a href="/transactions/{{ payment.id }}">{{ payment.ref }} · {{ payment.date }} · {{ payment.amount|money }}</a> {% endfor %}<a href="/reserves/{{ reserve.id }}/payments" data-popup-open>{{ "Link or review a payment"|tr(locale) }}</a><details class="reserve-edit"><summary>{{ "Edit"|tr(locale) }}</summary>
+        <form method="post" action="/reserves/{{ reserve.id }}/edit" class="stack" data-reserve-autosave>
+          <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ reserve.name }}" required></label>
+          <label>{{ "Target amount"|tr(locale) }}<input class="money-input" type="text" name="target" value="{{ reserve.target|money(False, 2) }}" inputmode="decimal" required></label>
+          <label>Due date{{ date_control('due_date', reserve.due_date, 'reserve-due-' ~ reserve.id) }}</label>
+          {{ repeat_seg(reserve.recurrence or 'NONE') }}
+          {{ match_by(reserve, 'Match payments for ' ~ reserve.name) }}
+          <span class="inline-save-status" role="status" aria-live="polite"></span>
+        <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+            <form method="post" action="/reserves/{{ reserve.id }}/bill" class="reserve-bill-link">
+        <label>{{ 'Bill funded by this reserve'|tr(locale) }}
+          <select name="planned_item_id" data-own-picker>
+            <option value="">{{ 'No linked bill'|tr(locale) }}</option>
+            {% for bill in bills %}<option value="{{ bill.id }}"{% if reserve.planned_item_id == bill.id %} selected{% endif %}>{{ bill.name }}</option>{% endfor %}
+            {% if reserve.planned_item_id and not bills|selectattr('id', 'equalto', reserve.planned_item_id)|list %}<option value="{{ reserve.planned_item_id }}" selected disabled>{{ 'Bill no longer active'|tr(locale) }}</option>{% endif %}
+          </select>
+        </label>
+        <small>{{ "Payments use the cash saved here. Cash planning counts the remaining bill cost instead of a separate reserve top-up."|tr(locale) }}</small>
+        <button class="btn small">{{ 'Save bill link'|tr(locale) }}</button>
+        <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+      </form>
+</details></div>
+    </li>
+    {% endfor %}
+  </ul>{% endif %}
+</section>
+{% if completed_reserves %}<details class="phone-form phone-fields"><summary><b>{{ "Completed payment occurrences"|tr(locale) }}</b><span class="phone-note">{{ completed_reserves|length }} completed</span></summary><p class="phone-note">{{ "Recurring payments appear here after the matched payment completes an occurrence. Savings goals stay separate."|tr(locale) }}</p><div class="phone-rows">{% for reserve in completed_reserves %}<div class="phone-row"><span>{{ reserve.name }}<small>{{ reserve.due_date or '—' }} · {{ ('Paid/reconciled' if reserve.spent >= reserve.target else 'Completed')|tr(locale) }}{% for payment in reserve.payments %} · <a href="/transactions/{{ payment.id }}/sheet">{{ payment.date }} · {{ payment.amount|money }}</a>{% else %} · {{ "No linked transaction"|tr(locale) }}{% endfor %}</small></span></div>{% endfor %}</div></details>{% endif %}
+<details id="add-reserve" class="phone-form phone-fields" {{ 'open' if error }}>
+  <summary><b>{{ "Add a reserve"|tr(locale) }}</b></summary>
+  
+  <form method="post" action="/reserves" class="reserve-create-form">
+    <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" placeholder="e.g. Rent" required></label>
+    <label>{{ "Target amount"|tr(locale) }}<input class="money-input" type="text" name="target" inputmode="decimal" placeholder="e.g. 20,000" required></label>
+    <label>Due date{{ date_control('due_date', '', 'reserve-due-new') }}</label>
+    {{ repeat_seg('NONE') }}
+    {{ match_by(none, 'Match payments') }}
+    <label>{{ "Amount set aside"|tr(locale) }}<input class="money-input" type="text" name="allocated" inputmode="decimal" value="0.00"></label>
+    <button class="btn primary phone-save">{{ "Add reserve"|tr(locale) }}</button>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+</details>
+<script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelectorAll('[data-reserve-match]').forEach(group=>{
+  const ask=group.querySelector('[value=none]');
+  const criteria=[...group.querySelectorAll('input[name=match_by]')].filter(box=>box!==ask);
+  const update=()=>{
+    ask.checked=!criteria.some(box=>box.checked);
+    criteria.forEach(box=>{
+      const label=box.closest('.reserve-criterion').querySelector('[data-match-picker]');
+      label.hidden=!box.checked;
+      label.querySelectorAll('select,input').forEach(field=>{field.disabled=!box.checked;field.required=box.checked});
+    });
+  };
+  group.addEventListener('change',event=>{
+    if(event.target===ask && ask.checked) criteria.forEach(box=>{box.checked=false});
+    update();
+  });
+  update();
+});
+const createDetails=document.getElementById('add-reserve');document.querySelector('.reserve-add-link')?.addEventListener('click',()=>{if(createDetails)createDetails.open=true});if(location.hash==='#add-reserve'&&createDetails){createDetails.open=true;createDetails.scrollIntoView({block:'start'})}
+</script>
+<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ static_url('reserve-autosave.js') }}"></script>
+{% endblock %}

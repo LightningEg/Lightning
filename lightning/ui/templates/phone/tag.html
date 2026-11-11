@@ -1,0 +1,18 @@
+{# A tag's totals on the phone (NF-7T4, 3AY17): money out leads against its reserve, then by category, by account and
+   the reserve as rows. Figures from LinkedSections.tag. #}
+{% extends "base.html" %}
+{% from "phone/partials/hero.html" import hero with context %}
+{% block title %}#{{ page.tag }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="{{ back_url(request) or '/transactions?tag=' ~ page.tag|urlencode }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Back'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>#{{ page.tag }}</h1>{% if page.count %}<p class="phone-note">{{ '{sa} to {sb}'|tr(locale, sa=page.first, sb=page.last) }}</p>{% endif %}{% endblock %}
+{% block content %}
+{% set reserve = page.reserves[0] if page.reserves else none %}
+{% set compare_text = ('of the {amt} target for {name}'|tr(locale, amt=reserve.target|money(False, 0), name=reserve.name)) if reserve else ('{n} transactions'|tr(locale, n=page.count)) %}
+{{ hero('Money out'|tr(locale), page.money_out|round(0), compare_text) }}
+{% if page.money_in %}<p class="phone-note">{{ 'Money in'|tr(locale) }} <bdi class="fig">{{ page.money_in|money(False, 0) }}</bdi></p>{% endif %}
+{% macro rows(title, items, empty, id) %}<section class="phone-section" aria-labelledby="{{ id }}"><header class="phone-section-head"><h2 id="{{ id }}">{{ title|tr(locale) }}</h2></header><div class="phone-rows">{{ caller() }}</div>{% if not items %}<p class="phone-note">{{ empty|tr(locale) }}</p>{% endif %}</section>{% endmacro %}
+{% call rows('By category', page.categories, 'No money out carries this tag.', 'tag-categories') %}{% for row in page.categories %}<{{ 'a' if row.href else 'div' }} class="phone-row"{% if row.href %} href="{{ row.href }}"{% endif %}><span>{{ row.name|tr(locale) }}</span><b><bdi class="fig">{{ row.money_out|money(False, 0) }}</bdi></b></{{ 'a' if row.href else 'div' }}>{% endfor %}{% endcall %}
+{% call rows('By account', page.accounts, 'No money out carries this tag.', 'tag-accounts') %}{% for row in page.accounts %}<{{ 'a' if row.href else 'div' }} class="phone-row"{% if row.href %} href="{{ row.href }}"{% endif %}><span>{{ row.name }}</span><b><bdi class="fig">{{ row.money_out|money(False, 0) }}</bdi></b></{{ 'a' if row.href else 'div' }}>{% endfor %}{% endcall %}
+{% call rows('Reserves', page.reserves, 'No reserve shares this name. A reserve named like the tag is compared with it.', 'tag-reserves') %}{% for r in page.reserves %}<a class="phone-row" href="/reserves/{{ r.id }}/payments"><span>{{ r.name }}<small>{{ 'Target {amt}'|tr(locale, amt=r.target|money(False, 0)) }} · {{ '{amt} paid from it with this tag'|tr(locale, amt=r.from_tag|money(False, 0)) }}</small></span><b><bdi class="fig">{{ r.effective_allocated|money(False, 0) }}</bdi></b></a>{% endfor %}{% endcall %}
+<a class="btn phone-save" href="/transactions?tag={{ page.tag|urlencode }}">{{ 'Its transactions'|tr(locale) }}</a>
+{% endblock %}

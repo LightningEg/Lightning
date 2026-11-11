@@ -1,0 +1,16 @@
+{# To do, all of it (IV-3AY14, C11.1): Home's To do rows, not cut to three, then back to Home. #}
+{% extends "phone/base.html" %}
+{% from "phone/partials/todo.html" import todo_rows with context %}
+{% block title %}To do{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Home'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'To do'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+{% if screen.rows %}
+<section class="phone-section phone-todo" aria-label="{{ 'To do'|tr(locale) }}">
+  <div class="phone-rows">
+  {{ todo_rows(screen.rows) }}
+  </div>
+</section>
+{% else %}<p class="phone-note">{{ 'Nothing to do today.'|tr(locale) }}</p>{% endif %}
+<section class="phone-section"><a class="btn" href="/home">{{ 'Done'|tr(locale) }}</a></section>
+{% endblock %}

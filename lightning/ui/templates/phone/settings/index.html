@@ -1,7 +1,17 @@
 {# Phone Settings (IV-11H, guideline C11.3): what a phone needs, in rows (Appearance, Language, This phone, Bank SMS,
    Backup, Privacy, About and licences, Delete this profile), then what is best on a PC. Every other section
-   (?section=budget, currencies, …) is the shared page. #}
+   (?section=budget, currencies, zakat, targets, financial-health) is its phone part; the rest is the shared page. #}
 {% extends "settings/index.html" %}
+{% block top_actions %}{% endblock %}
+{# Sale factors and configured classes (section=valuations) keep the shared page; these two lists are the phone's. #}
+{% block factor_list %}
+<div class="phone-rows factor-phone-rows">{% for g in factor_groups %}{% for row in [g.root] + g.children %}
+  <div class="phone-row"><span><b>{{ row.name }}</b><small>{{ 'Value you own'|tr(locale) }}: {{ (g.value if loop.first else row.value)|money }}</small><small>{{ 'After sale (estimate)'|tr(locale) }}: {{ (g.estimate if loop.first else row.estimate)|money }}</small>
+    {% if loop.first %}{% for child in [g.root] + g.children %}{% for item in child.locked %}<small>{{ item.asset }} · {{ item.value|money }} · {{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small>{% endfor %}{% endfor %}{% else %}{% for item in row.locked %}<small>{{ item.asset }} · {{ item.value|money }} · {{ "not counted until {date}"|tr(locale, date=item.locked_until) }}</small>{% endfor %}{% endif %}</span>
+    <form class="factor-form" action="/settings/liquidation-factor/{{ row.id }}"><label class="sr-only" for="factor-{{ row.id }}">{{ '{name} sale factor'|tr(locale, name=row.name) }}</label><span class="row-field-unit"><input class="row-field" id="factor-{{ row.id }}" name="factor" type="number" min="0" max="100" step="1" value="{{ '%g'|format(row.own) if row.own is not none }}" placeholder="{{ '%g'|format(row.factor) }}"><i>%</i></span>{% if not loop.first and row.own is none %}<small class="factor-from">{{ 'from'|tr(locale) }} {{ row.from|tr(locale) }}</small>{% endif %}<small class="inline-save-status" role="status"></small></form></div>
+{% endfor %}{% else %}<p class="phone-note">{{ "No investment classes are configured."|tr(locale) }}</p>{% endfor %}</div>
+{% endblock %}
+{% block configured_list %}<div class="phone-rows">{% for c in classes %}<div class="phone-row"><span>{{ c.name }}</span></div>{% endfor %}</div><h3>{{ 'Financial assets'|tr(locale) }}</h3><div class="phone-rows">{% for a in assets %}<div class="phone-row"><span>{{ a.name }}</span></div>{% endfor %}</div>{% endblock %}
 {% block content %}
 {% if section in ('', 'general') %}
 {% set session = request.state.session_token|default('') %}
@@ -88,5 +98,10 @@
   <p class="phone-note">{{ 'Ask an AI, sale factors, target allocation, price files and each tab’s settings.'|tr(locale) }}</p>
 </section>
 <script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelectorAll('[data-autosubmit],[data-locale-auto]').forEach(control=>control.addEventListener('change',()=>control.form?.requestSubmit()));</script>
+{% elif section == 'budget' %}{% include 'phone/settings/budget_section.html' %}
+{% elif section == 'financial-health' %}{% include 'phone/settings/financial_health_section.html' %}
+{% elif section == 'zakat' %}{% include 'phone/settings/zakat_section.html' %}
+{% elif section == 'targets' %}{% include 'phone/investments/_targets.html' %}
+{% elif section == 'currencies' %}{% include 'phone/settings/currencies.html' %}
 {% else %}{{ super() }}{% endif %}
 {% endblock %}

@@ -75,7 +75,8 @@ def explain_period(report: dict, start: str, end: str, stale_days: int = 45) -> 
     ]
     limit = (date.fromisoformat(end) - timedelta(days=stale_days)).isoformat()
     stale = [{"name": h["asset"], "price_date": h["price_date"]} for h in report["holdings"]
-             if h.get("price_source") not in ("BALANCE", "COST") and h.get("price_date") and h["price_date"] < limit]
+             if h.get("price_source") not in ("BALANCE", "COST") and not h.get("certificate")
+             and h.get("price_date") and h["price_date"] < limit]
     return {"parts": parts, "total": sum((p["amount"] for p in parts), ZERO) if known else None,
             "result": report.get("result"), "new_money": report["new_money"], "withdrawn": report["withdrawn"],
             "missing": report.get("missing", []), "at_cost": report.get("at_cost", []), "stale": stale,
@@ -179,8 +180,8 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
     # Position (Overview) moves that debt to What you owe instead.
     balance_ids = (investment_account_ids - brokerage_ids) | {
         a.id for a in account_rows if a.account_type in (AccountType.DEPOSIT, AccountType.GAMEYA)}
-    placeholders = ",".join("?" for _ in investment_account_ids)
-    if not placeholders:
+    portfolio_ids = investment_account_ids | balance_ids
+    if not investment_account_ids:
         return {"new_money": ZERO, "withdrawn": ZERO, "net_money": ZERO,
                 "dividends": ZERO, "tax": ZERO, "fees": ZERO, "realized": ZERO, "unresolved_dividends": 0,
                 "holdings": [], "investment_cash": ZERO, "missing": [], "at_cost": [], "cost": ZERO,
@@ -192,7 +193,11 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
         f"LEFT JOIN categories c ON c.id=le.category_id "
         f"LEFT JOIN investment_dividend_assets da ON da.transaction_id=t.id "
         f"WHERE t.status='POSTED' AND t.type<>'VAL' AND le.owner_id IS NULL AND le.date<=? "
-        f"ORDER BY le.date,t.id,le.line_no", (end,))
+        # only transactions that touch a portfolio account or a non-cash asset can change this report
+        f"AND le.transaction_id IN (SELECT x.transaction_id FROM ledger_entries x "
+        f"JOIN financial_assets fa ON fa.id=x.asset_id WHERE fa.is_cash=0 "
+        f"OR x.account_id IN ({','.join('?' for _ in portfolio_ids)})) "
+        f"ORDER BY le.date,t.id,le.line_no", (end, *sorted(portfolio_ids)))
     # Metadata is stable for this read-only report invocation. Loading it once
     # avoids one SELECT per historical ledger row while keeping all results
     # local to this report (no cross-request invalidation concerns).
@@ -238,7 +243,6 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
     dividends += sum((paid["amount"] for paid in reporting.certificate_interest(end) if paid["date"] >= start), ZERO)
     # Portfolio boundary movement per source transaction: inside-to-inside lines cancel. Deposit
     # accounts are inside: buying a certificate from the bank is money added (owner decision 2026-10-04).
-    portfolio_ids = investment_account_ids | balance_ids
     for row in rows:
         if (row["date"] < start or row["type"] in ("DIV", "OPN") or row["category_code"] in
                 ("EXP.INVEST.DIVIDEND", "EXP.INVEST.INTEREST", "EXP.INVEST.TAX") or
@@ -289,7 +293,9 @@ def build_investment_report(db, accounts, assets, reporting, start: str, end: st
                          "realized": b["realized"], "unrealized": None if value is None else value-b["cost"],
                          "price_date": valuation.price_date, "price_source": valuation.source,
                          "currency": asset.currency, "cost_native": b["cost_native"],
-                         "price_part": price_part, "fx_part": fx_part})
+                         "price_part": price_part, "fx_part": fx_part,
+                         # IV-12J4: a certificate is valued from its terms, so it never has an "old price"
+                         "certificate": account_by_id[account_id].account_type == "DEPOSIT"})
     for (account_id, cash_asset_id), quantity in asset_balances.items():
         if quantity == ZERO:
             continue

@@ -3,9 +3,11 @@
    in a sheet, To do (three rows: name, figure, when, one verb; See all), Latest five, This month. First run replaces the hero with three steps; catch-up,
    payday and overspent change the hero's sentence and what To do leads with. #}
 {% extends "base.html" %}
+{% from "phone/partials/working.html" import working_rows with context %}
 {% from "phone/partials/sheet.html" import sheet with context %}
 {% from "phone/partials/charts.html" import month_bar with context %}
 {% from "phone/partials/txn.html" import txn_list with context %}
+{% from "phone/partials/todo.html" import todo_rows with context %}
 {% block title %}Home{% endblock %}
 {% block heading %}<h1>{{ 'Home'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
@@ -39,26 +41,18 @@
 {% else %}
 {# The hero is the way into its working (C11.1): one tap opens the sheet, so no row of its own is needed. #}
 {% set lead %}<div class="phone-hero has-seam"><div id="home-hero" class="phone-hero-label" role="heading" aria-level="2">{{ fig.safe_to_spend.label }} <span aria-hidden="true">{{ chevron() }}</span></div>
-  <div class="phone-lead">{{ s.safe|money }} <small>{{ base }}</small></div><p class="phone-hero-line">{{ line|keep_dates }}</p>
+  <div class="phone-lead" data-fig="safe_to_spend">{{ s.safe|money }} <small>{{ base }}</small></div><p class="phone-hero-line">{{ line|keep_dates }}</p>
   {# IV-11D1, C06.1: everyday money gone (fill) against the pace by today (tick); rose when spending is ahead. #}
   {% if s.meter %}<span class="phone-pay-meter{{ ' is-ahead' if s.meter.ahead }}" role="img" aria-label="{{ '{spent}% of everyday money spent; the pace is at {pace}% today.'|tr(locale, spent=s.meter.spent|round|int, pace=s.meter.pace|round|int) }}"><i style="width:{{ '%.1f'|format(s.meter.spent) }}%"></i><b style="inset-inline-start:{{ '%.1f'|format(s.meter.pace) }}%"></b></span>{% endif %}</div>{% endset %}
 {% call sheet(fig.safe_to_spend.label, lead, 'phone-home-hero') %}
-  <div class="phone-rows">{% for name, value in s.working %}<div class="phone-row"><span>{{ name|tr(locale) }}</span><b>{{ value|money(True) }}</b></div>{% endfor %}</div>
+  {{ working_rows(s.working) }}
 {% endcall %}
 {% endif %}
 {% if s.todo %}
 <section class="phone-section phone-todo" aria-labelledby="todo-heading">
-  <header class="phone-section-head"><h2 id="todo-heading">{{ 'To do'|tr(locale) }}</h2>{% if s.todo_total > s.todo|length %}<a class="phone-quiet" href="/needs-you">{{ 'See all {n}'|tr(locale, n=s.todo_total) }}</a>{% endif %}</header>
+  <header class="phone-section-head"><h2 id="todo-heading">{{ 'To do'|tr(locale) }}</h2>{% if s.todo_total > s.todo|length %}<a class="phone-quiet" href="/todo">{{ 'See all {n}'|tr(locale, n=s.todo_total) }}</a>{% endif %}</header>
   <div class="phone-rows">
-  {% for r in s.todo %}
-    <a class="phone-row{{ ' is-late' if r.kind == 'bill' and r.late }}"{% if r.popup %} data-popup-open{% endif %} href="{{ r.href }}">
-      {# IV-11E, C11.1: the name, its figure, when or how many, then one verb: "Vodafone 350 · in 3 days  Pay ›". #}
-      <span>{% if r.kind == 'bill' %}{% if r.late %}{{ ('{name} {amt} · 1 day late' if r.late == 1 else '{name} {amt} · {n} days late')|tr(locale, name=r.subject, amt=r.amount|money, n=r.late) }}{% elif r.days == 0 %}{{ '{name} {amt} · today'|tr(locale, name=r.subject, amt=r.amount|money) }}{% elif r.days == 1 %}{{ '{name} {amt} · tomorrow'|tr(locale, name=r.subject, amt=r.amount|money) }}{% else %}{{ '{name} {amt} · in {n} days'|tr(locale, name=r.subject, amt=r.amount|money, n=r.days) }}{% endif %}
-      {%- elif r.kind == 'catch_up' %}{% if r.days is not none and r.days >= 3 %}{{ '{n} days not recorded'|tr(locale, n=r.days) }}{% else %}{{ ('1 bill long overdue' if r.count == 1 else '{n} bills long overdue')|tr(locale, n=r.count) }}{% endif %}
-      {%- else %}{{ r.subject|tr(locale) }}{% if r.amount is not none %} {{ r.amount|money }}{% endif %}{% if r.when %} · {{ r.when|tr(locale, n=r.count, sa=r.since) }}{% endif %}{% endif %}</span>
-      <b>{{ r.action|tr(locale) }} {{ chevron() }}</b>
-    </a>
-  {% endfor %}
+  {{ todo_rows(s.todo) }}
   </div>
 </section>
 {% endif %}

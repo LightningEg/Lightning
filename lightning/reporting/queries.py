@@ -346,6 +346,7 @@ class ReportQueries:
             "AND active=1 AND (code LIKE 'GLD:%' OR code LIKE 'REF:GLD-%')")]
         return sorted(rows, key=lambda r: (r["purity_e6"] != 875000, -r["purity_e6"]))
 
+    @request_cached
     def asset_purity(self, asset_id: int) -> int | None:
         return self.db.scalar("SELECT purity_e6 FROM financial_assets WHERE id=?", (asset_id,))
 

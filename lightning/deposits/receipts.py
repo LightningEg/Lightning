@@ -20,7 +20,9 @@ from lightning.transactions.domain import TxnStatus
 
 MAX_CONFIRMATIONS = 50
 AMOUNT_TOLERANCE = Decimal("0.05")       # a receipt this close to the expected interest is plausible by amount alone
-PAYER_AMOUNT_TOLERANCE = Decimal("0.15")  # from the certificate's own bank the fixed monthly payout may differ more
+# IV-12J2: the forecast now pays a full period as principal x rate x months / 12, as the bank does, so a receipt from
+# the certificate's own bank is held to the same 5%.
+PAYER_AMOUNT_TOLERANCE = AMOUNT_TOLERANCE
                                            # than 5% from day-count interest (28-day month vs 31-day month is ~8%)
 MATCH_WINDOW_DAYS = 31
 
@@ -160,8 +162,7 @@ class DepositReceiptService:
 
         A candidate carries payer_ok (the payer is the portfolio's institution), amount_ok, days (receipt minus
         expected date) and plausible (payer_ok or amount_ok). A receipt is suggested only inside the 31-day window and
-        when the amount is close (5%; 15% if the payer is the certificate's bank; a row with no payer may also match
-        by amount). Suggestions are one-to-one across the whole portfolio, closest date after the expected date first,
+        when the amount is within 5% (a row with no payer may also match by amount). Suggestions are one-to-one across the whole portfolio, closest date after the expected date first,
         then closest amount. Nothing is confirmed here."""
         occurrences = self.expected_past(account_id, as_of)
         institution = normalize(self.accounts.get(account_id).institution)
@@ -204,8 +205,8 @@ class DepositReceiptService:
 
     @staticmethod
     def needs_match(occurrence: dict) -> bool:
-        """Whether Needs you should still ask about an occurrence. A confirmed receipt within 15% of the day-count
-        estimate settles the question: a bank that pays a fixed monthly amount never equals it to the piastre."""
+        """Whether Needs you should still ask about an occurrence. A confirmed receipt within 5% of the
+        estimate settles the question (a bank may round the payout)."""
         if occurrence["attention"] or occurrence["received"] <= 0:
             return bool(occurrence["attention"]) or occurrence["remaining"] > 0
         return occurrence["remaining"] > occurrence["expected"] * PAYER_AMOUNT_TOLERANCE
@@ -277,6 +278,8 @@ class DepositReceiptService:
             if purchase.status != TxnStatus.POSTED:
                 continue
             first = parse_date(terms.start_date) - timedelta(days=1)
+            if purchase.type == DocType.OPN:  # owned before tracking (NF-12I): only payouts after the first day
+                first = max(first, parse_date(purchase.date))
             redeemed = self.db.scalar(
                 "SELECT t.date FROM cd_redemptions r JOIN transactions t ON t.id=r.transaction_id "
                 "WHERE r.certificate_id=? AND t.status='POSTED' ORDER BY t.date LIMIT 1", (terms.id,))

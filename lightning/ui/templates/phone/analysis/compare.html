@@ -1,0 +1,19 @@
+{# Compare periods on the phone (3AY17): the answer leads, the periods, then the biggest changes as rows. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Compare periods'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Compare periods'|tr(locale) }}</h1><p class="phone-note">{{ '{sa} to {sb}'|tr(locale, sa=fmt_date(a[0]), sb=fmt_date(a[1]))|isolate_dates }}</p>{% endblock %}
+{% block content %}
+<section class="phone-hero has-seam" aria-labelledby="lead-heading"><div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ lead.label }}</div>
+  <div class="phone-lead">{{ lead.value|money(lead.signed) if lead.value is not none else '—' }} <small>{{ base }}</small></div><p class="phone-hero-line">{% if lead.compare.figure %}<b>{{ lead.compare.figure }}</b> {% endif %}<span>{{ status|tr(locale) }}</span></p></section>
+<nav class="phone-segment" aria-label="{{ 'Preset'|tr(locale) }}">{% for k, label in (('month','Month'),('quarter','Quarter'),('year','Year')) %}<a href="/spending/compare?preset={{ k }}&amp;by={{ by }}"{% if kind == k %} aria-current="true"{% endif %}><span>{{ label|tr(locale) }}</span></a>{% endfor %}</nav>
+<form class="phone-form compare-picker" method="get" action="/spending/compare">
+  <label>{{ 'This period'|tr(locale) }}<input type="date" name="a_from" value="{{ fmt_date(a[0]) }}"></label><input type="date" name="a_to" value="{{ fmt_date(a[1]) }}" aria-label="{{ 'This period'|tr(locale) }}">
+  <label>{{ 'Against'|tr(locale) }}<input type="date" name="b_from" value="{{ fmt_date(b[0]) }}"></label><input type="date" name="b_to" value="{{ fmt_date(b[1]) }}" aria-label="{{ 'Against'|tr(locale) }}">
+  <label>{{ 'By'|tr(locale) }}<select name="by"><option value="category" {{ 'selected' if by == 'category' }}>{{ 'Category'|tr(locale) }}</option><option value="payee" {{ 'selected' if by == 'payee' }}>{{ 'Counterparty'|tr(locale) }}</option></select></label>
+  <button class="btn primary phone-save">{{ 'Compare'|tr(locale) }}</button></form>
+<section class="phone-section" aria-labelledby="compare-rows"><header class="phone-section-head"><h2 id="compare-rows">{{ 'Biggest changes first'|tr(locale) }}</h2></header>
+  {% if not rows %}<p class="phone-note">{{ 'No spending in either period.'|tr(locale) }}</p>{% else %}
+  <div class="phone-rows">{% for r in rows %}<a class="phone-row" href="{% if by == 'category' and r.id %}/analysis/category/{{ r.id }}{% else %}/analysis/payee?name={{ r.name|urlencode }}{% endif %}"><span>{{ r.name|tr(locale) }}<small><bdi class="fig">{{ r.a|money }}</bdi> · {{ 'Against'|tr(locale) }} <bdi class="fig">{{ r.b|money }}</bdi>{% if r.pct is not none %} · {{ r.pct }}%{% endif %}</small></span><b class="{{ 'is-up' if r.diff > 0 else ('is-down' if r.diff < 0 else '') }}"><bdi class="fig">{{ r.diff|money(signed=true) }}</bdi></b></a>{% endfor %}
+  <div class="phone-row"><span><b>{{ 'Total'|tr(locale) }}</b><small><bdi class="fig">{{ total_a|money }}</bdi> · {{ 'Against'|tr(locale) }} <bdi class="fig">{{ total_b|money }}</bdi></small></span><b><bdi class="fig">{{ total_diff|money(signed=true) }}</bdi></b></div></div>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,12 @@
+{# Reports on the phone (3AY17): the report figures as rows, then saved views; export and print stay on the PC. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Reports'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Reports'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<div class="phone-rows">{% for k in cards %}{% set href = k.href or (k.line.href if k.line else '') %}<{{ 'a' if href else 'div' }} class="phone-row"{% if href %} href="{{ href }}"{% endif %}><span>{{ k.label }}{% if k.compare and k.compare.text %}<small>{% if k.compare.figure %}<span>{{ k.compare.figure }}</span> {% endif %}<span>{{ k.compare.text }}</span></small>{% endif %}</span><b>{% if k.value is none %}—{% elif k.kind == 'rate' %}{{ '%.0f'|format(k.value) }}%{% elif k.kind == 'count' %}{{ k.value }}{% else %}<bdi class="fig">{{ k.value|money(k.signed, 0) }}</bdi>{% endif %}</b></{{ 'a' if href else 'div' }}>{% endfor %}
+<a class="phone-row" href="/spending/calendar"><span>{{ 'Age of Money and spending calendar'|tr(locale) }}</span><b>{{ chevron() }}</b></a></div>
+<section class="phone-section" aria-labelledby="views-head"><header class="phone-section-head"><h2 id="views-head">{{ 'Saved views'|tr(locale) }}</h2></header>
+  {% if views %}<div class="phone-rows">{% for v in views %}<a class="phone-row" href="/transactions/views/{{ v.id }}/report"><span>{{ v.name }}</span><b>{{ chevron() }}</b></a>{% endfor %}</div>
+  {% else %}<p class="phone-note">{{ 'No saved views yet.'|tr(locale) }} {{ 'Save a filter on Transactions to see it here.'|tr(locale) }}</p>{% endif %}</section>
+<a class="btn phone-save" href="/exports/all">{{ 'Export all data (CSV or Excel)'|tr(locale) }}</a>
+{% endblock %}

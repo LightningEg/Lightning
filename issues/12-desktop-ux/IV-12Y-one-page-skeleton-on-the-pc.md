@@ -29,21 +29,13 @@ Screens: [Overview](../12-desktop-ux/r35-ux-against-users-questions/evidence/pc/
 
 One header partial renders every tab: the title, the answer sentence, the dates line, the seam; then one control row in one order (tabs, period bar, Undo, gear, more, the one filled action). A page states what it has; the partial decides where it goes. A test walks `sections.SECTIONS` and fails a tab that differs. The guideline changes first where it is silent (title rule, control order): both repos, same session (AGENTS §1).
 
+## Decided and built
+
+Owner, 2026-11-10 (12Y1): a tab's title is the tab's own name (a section's first tab may carry the section's name: Overview, Cash planning, Investments); Spending opens on this month like every other tab. Both are in guideline A05. Built: `tests/test_page_skeleton.py` (12Y2) with its `ALLOWED` list; the titles of Recurring, Loans, Reserves, Limits, Prices, Import, Your data, Categories, Counterparties and Data checks; Spending's early-month "so far" strip is gone. 12Y4: a status sentence on every tab (`lightning/ui/status.py`: recurring, loans, reserves, held_for_others, currencies; counts elsewhere). 12Y5: Currencies has one filled button; Ask an AI has one page, `/settings/ask-ai`, linked from Your data, Spending and Budget (Budget's paragraph itself goes with IV-12Q5).
+
 ## How to work on this item
 
 Steps in order; each is one PR. `python tools/guideline.py A05` and `A09` print the rules. After each step: `python -m pytest -q tests/test_brand_audit.py tests/test_mohab_year.py`, and check A16 on the changed tabs. Stay out of `lightning/ui/journal*` (claimed). Delete the step's heading in the same commit.
 
-## 12Y1 Owner: the title rule and the control order · owner
-Two choices the guideline does not state, asked as pick-lists: is a tab's title the tab's name (recommended: the sidebar already shows the section) or the section's; and does Spending keep opening on the last complete month (recommended: yes, and its sentence says so) or on this month like the rest. Record the answers in the guideline (A05) and `ai/PROJECT_OVERVIEW.md`.
-
-## 12Y2 The test first, with today's exceptions listed · M · opus
-File: a new `tests/test_page_skeleton.py` using the browser fixture of `tests/test_brand_audit.py`. For every tab in `sections.SECTIONS` on the sample year: one H1 equal to the rule of 12Y1; a non-empty answer sentence of at most 16 words that does not repeat the title; the control row's order; one filled button at most. Today's failures go in an explicit allow-list in the test, each with this item's code, so every later step removes names from it. Done when the test passes with the list and fails if a listed tab is removed from it unfixed.
-
 ## 12Y3 One header partial, used by every tab · L · opus
-Files: `lightning/ui/templates/partials/` (the page header), `lightning/ui/static/style.css` (then rebuild `style.rtl.css`), each section's templates. Titles follow 12Y1; Undo, the period bar, the gear and the filled action sit in one order on one row (two rows only when the width needs it, always the same two). Currencies uses the standard period bar. Done when the allow-list has no title, Undo or period entries.
-
-## 12Y4 An answer sentence on the 13 tabs that have none · M · sonnet
-Files: `lightning/ui/status.py` (the sentences live in Python, not templates), the tab routes. One plain sentence each, from figures the page already has: Recurring ("Your bills take 14,610 a month, 38% of your income."), Loans ("52,500 left on 2 loans; the last ends 2027-12."), Reserves ("Your emergency fund covers 0.5 months; your limit is 3."), Transactions ("309 transactions; 3 wait to be sorted."), and so on; Arabic for each (`arabic-check`). Done when the allow-list has no sentence entries and Mohab's steps read the new sentences where they assert a header.
-
-## 12Y5 One filled action a tab, and one home for Ask an AI · M · sonnet
-Transactions' filled button is Add transaction (Choose an account becomes a quiet control). Ask an AI gets one home (a tab's "more" menu opens it with that tab's period; Settings links to it) instead of a form in Your data and a paragraph on Budget. Done when the skeleton test finds one filled button on Transactions and no Ask an AI form inside Settings › Your data.
+Files: `lightning/ui/templates/partials/` (the page header), `lightning/ui/static/style.css` (then rebuild `style.rtl.css`), each section's templates. Titles follow 12Y1; Undo, the period bar, the gear and the filled action sit in one order on one row (two rows only when the width needs it, always the same two). Currencies uses the standard period bar. Done when the skeleton test's `ALLOWED` has no Undo or period entries and Currencies uses the standard period bar.

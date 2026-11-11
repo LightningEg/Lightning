@@ -39,6 +39,53 @@ class ImportProposals:
 
     _accounts_seen = None
     _remembered: dict = {}
+    _seen = None  # what one preview read for all its rows at once (IT-9N); None outside a preview
+
+    @staticmethod
+    def _lower(text: str) -> str:
+        """SQLite's lower(): ASCII letters only, so a lookup here answers as ``lower(name)=lower(?)`` did."""
+        return "".join(ch.lower() if ch < "\x80" else ch for ch in text)
+
+    def _read_together(self, batch, rows, dates: set) -> dict:
+        """The questions every row used to ask alone, answered once for the whole file (IT-9N1, IT-9N2)."""
+        account_id, batch_id = batch["account_id"], batch["id"]
+        digest = batch["file_hash"].split("#", 1)[0]
+        known = {
+            "references": {r[0] for r in self.db.all(
+                "SELECT r.bank_reference FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
+                "JOIN transactions t ON t.id=r.transaction_id AND t.status='POSTED' "
+                "WHERE b.account_id=? AND b.id<>? AND r.status IN ('POSTED','LINKED') "
+                "AND r.bank_reference IS NOT NULL", (account_id, batch_id))},
+            "repeats": {r[0] for r in self.db.all(
+                "SELECT r.row_number FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
+                "JOIN transactions t ON t.id=r.transaction_id AND t.status='POSTED' "
+                "WHERE b.account_id=? AND b.id<>? AND (b.file_hash=? OR b.file_hash LIKE ?) "
+                "AND r.status IN ('POSTED','LINKED')", (account_id, batch_id, digest, digest + "#%"))},
+            "voided": {r[0] for r in self.db.all(
+                "SELECT r.bank_reference FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
+                "JOIN transactions t ON t.id=r.transaction_id AND t.status='VOID' "
+                "WHERE b.account_id=? AND b.id<>? AND r.bank_reference IS NOT NULL", (account_id, batch_id))},
+            "names": {},
+            "own_amounts": set(),
+            "opposite": {},
+        }
+        for a in self.db.all("SELECT id, name FROM accounts WHERE active=1"):
+            known["names"].setdefault(self._lower(a["name"]), []).append(a["id"])
+        days = sorted(dates)
+        for start in range(0, len(days), 500):
+            chunk = days[start:start + 500]
+            marks = ",".join("?" for _ in chunk)
+            for r in self.db.all(
+                    "SELECT DISTINCT t.date, l.amount_e6 FROM transactions t JOIN ledger_entries l ON l.transaction_id=t.id "
+                    f"WHERE t.status='POSTED' AND l.account_id=? AND t.date IN ({marks})", (account_id, *chunk)):
+                known["own_amounts"].add((r["date"], r["amount_e6"]))
+            for r in self.db.all(
+                    "SELECT DISTINCT t.date, le.amount_e6, le.account_id FROM ledger_entries le "
+                    "JOIN transactions t ON t.id=le.transaction_id "
+                    f"WHERE t.status='POSTED' AND t.type IN ('IN','OUT') AND t.date IN ({marks}) AND le.account_id<>?",
+                    (*chunk, account_id)):
+                known["opposite"].setdefault((r["date"], r["amount_e6"]), set()).add(r["account_id"])
+        return known
 
     def _remembered_names(self, account_id: int) -> dict:
         """IT-7Z1: what the person chose before for a name in this account's files (kept by `remember_names`)."""
@@ -55,6 +102,7 @@ class ImportProposals:
             return self._preview(batch_id)
         finally:
             self._accounts_seen = None
+            self._seen = None
 
     def _preview(self, batch_id: int):
         batch = self.db.one("SELECT * FROM bank_import_batches WHERE id=?", (batch_id,))
@@ -64,11 +112,16 @@ class ImportProposals:
         rows = self.db.all("SELECT * FROM bank_import_rows WHERE batch_id=? ORDER BY row_number", (batch_id,))
         result = []
         amount_dates = {}
+        dates = set()
         for source_row in rows:
             staged = json.loads(source_row["raw_json"])["parsed"]
+            if not staged.get("_errors"):
+                dates.add(staged["Date"])
             if not staged.get("_errors") and not staged.get("_skip_reason"):
                 key = (staged["Date"], staged["Amount"])
                 amount_dates[key] = amount_dates.get(key, 0) + 1
+        if self._accounts_seen is not None:  # inside preview(): ask the per-row questions once
+            self._seen = self._read_together(batch, rows, dates)
         # The same date and amount waiting in another review of this account (an SMS and a statement, or two
         # copies of one message): flagged like a posted look-alike, so neither posts twice unnoticed.
         pending_elsewhere = {}
@@ -90,13 +143,14 @@ class ImportProposals:
             parsed = record["parsed"]
             raw = record.get("raw") if isinstance(record.get("raw"), dict) else {}
             parsed["_message"] = str(raw.get("Message", ""))[:1000]  # a bank SMS row keeps its message (IV-3AU)
-            ref_duplicate = bool(row["bank_reference"] and (row["bank_reference"] in seen_refs or self.db.scalar(
+            ref_duplicate = bool(row["bank_reference"] and (row["bank_reference"] in seen_refs or (
+                row["bank_reference"] in self._seen["references"] if self._seen is not None else self.db.scalar(
                 "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
                 "JOIN transactions t ON t.id=r.transaction_id AND t.status='POSTED' "
                 "WHERE b.account_id=? AND r.bank_reference=? AND b.id<>? AND r.status IN ('POSTED','LINKED') LIMIT 1",
-                (batch["account_id"], row["bank_reference"], batch_id))))
+                (batch["account_id"], row["bank_reference"], batch_id)))))
             file_digest = batch["file_hash"].split("#", 1)[0]
-            repeat_import = bool(self.db.scalar(
+            repeat_import = bool(row["row_number"] in self._seen["repeats"] if self._seen is not None else self.db.scalar(
                 "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
                 "JOIN transactions t ON t.id=r.transaction_id AND t.status='POSTED' "
                 "WHERE b.account_id=? AND b.id<>? AND (b.file_hash=? OR b.file_hash LIKE ?) "
@@ -230,6 +284,8 @@ class ImportProposals:
         if parsed.get("_errors"):
             return False
         if reference:
+            if self._seen is not None:
+                return reference in self._seen["voided"]
             return bool(self.db.scalar(
                 "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
                 "JOIN transactions t ON t.id=r.transaction_id AND t.status='VOID' "
@@ -290,12 +346,15 @@ class ImportProposals:
         if parsed.get("_errors"):
             return None
         amount_e6 = int(Decimal(parsed["Amount"]) * 1_000_000)
-        rows = self.db.all(
-            "SELECT DISTINCT le.account_id FROM ledger_entries le "
-            "JOIN transactions t ON t.id=le.transaction_id "
-            "WHERE t.status='POSTED' AND t.type IN ('IN','OUT') AND t.date=? "
-            "AND le.account_id<>? AND le.amount_e6=?",
-            (parsed["Date"], source_account_id, -amount_e6))
+        if self._seen is not None:
+            rows = [{"account_id": i} for i in self._seen["opposite"].get((parsed["Date"], -amount_e6), ())]
+        else:
+            rows = self.db.all(
+                "SELECT DISTINCT le.account_id FROM ledger_entries le "
+                "JOIN transactions t ON t.id=le.transaction_id "
+                "WHERE t.status='POSTED' AND t.type IN ('IN','OUT') AND t.date=? "
+                "AND le.account_id<>? AND le.amount_e6=?",
+                (parsed["Date"], source_account_id, -amount_e6))
         source_currency = self._account(source_account_id).currency
         bank_ids = {account.id: account.name for account in self._active()
                     if account.account_type.value == "BANK" and account.currency == source_currency}
@@ -419,9 +478,13 @@ class ImportProposals:
         if parsed["_errors"]:
             return False
         amount = Decimal(parsed["Amount"])
-        targets = self.db.all("SELECT id FROM accounts WHERE active=1 AND lower(name)=lower(?)",
-                              (parsed["Counterparty"].strip(),))
-        target = targets[0] if len(targets) == 1 else None
+        if self._seen is not None:
+            ids = self._seen["names"].get(self._lower(parsed["Counterparty"].strip()), [])
+            target = {"id": ids[0]} if len(ids) == 1 else None
+        else:
+            targets = self.db.all("SELECT id FROM accounts WHERE active=1 AND lower(name)=lower(?)",
+                                  (parsed["Counterparty"].strip(),))
+            target = targets[0] if len(targets) == 1 else None
         if target:
             transfer = self.db.scalar(
                 "SELECT 1 FROM transactions t "
@@ -436,6 +499,8 @@ class ImportProposals:
             )
             if transfer:
                 return True
+        if self._seen is not None:
+            return (parsed["Date"], int(amount * 1_000_000)) in self._seen["own_amounts"]
         row = self.db.one(
             "SELECT 1 FROM transactions t JOIN ledger_entries l ON l.transaction_id=t.id "
             "WHERE t.status='POSTED' AND t.date=? AND l.account_id=? "
