@@ -26,6 +26,10 @@ def _month_name(month: str) -> str:
     return date.fromisoformat(month + "-01").strftime("%B %Y")
 
 
+def _ordinal(day: int) -> str:
+    return f"{day}{'th' if 11 <= day % 100 <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')}"
+
+
 def _plural(count: int, one: str, many: str) -> str:
     return f"{count} {one if count == 1 else many}"
 
@@ -468,6 +472,20 @@ class ReviewInbox:
                               "href": f"/budget?month={month}&open_group=all#limit-{row['category_id']}",
                               "action": "Change the plan", "priority": 2,
                               "glance": glance(row["name"], "Adjust", row["amount"], "over plan 2 months")})
+        for row in c.budgets.running_out(month, on, schedule=c.schedules.view()):  # NF-12S
+            raise_href = f"/budget?month={month}&open_group=all#limit-{row['category_id']}"
+            item = {"label": f"{row['name']} will run out around the {_ordinal(row['day'])}",
+                    "detail": f"At this pace it passes its {fmt(row['limit'], 0)} {cur} limit before the month ends. "
+                              f"It needs about {fmt(row['amount'], 0)} {cur} more.",
+                    "priority": 2, "source_version": f"running-out:{month}:{row['category_id']}"}
+            if row["can_move"]:
+                item.update(href=f"/budget/move?month={month}&to={row['category_id']}&from={row['from_id']}"
+                                 f"&amount={row['amount']}", popup=True, action="Move room",
+                            alt={"label": "Raise", "href": raise_href})
+            else:
+                item.update(href=raise_href, action="Raise")
+            item["glance"] = glance(row["name"], item["action"], row["amount"], "runs out around day {n}", n=row["day"])
+            found.append(item)
         return found
 
     def _sms(self) -> list[dict]:

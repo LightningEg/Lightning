@@ -156,6 +156,15 @@ def test_overview_horizons_keep_the_same_status_layout_and_popup_range(client, c
     assert "/?period=custom&amp;date_from=2026-09-10&amp;date_to=2026-09-20" in popup.text
 
 
+def test_overview_links_each_figure_to_its_explain_page(client, setup):
+    """IV-12T: What you own, Free cash and Net flow each open the page that shows their parts."""
+    page = client.get("/?period=custom&date_from=2026-09-10&date_to=2026-09-20").text
+    for kind in ("owned", "free-cash", "flow"):
+        href = f"/explain/{kind}?period=custom&amp;date_from=2026-09-10&amp;date_to=2026-09-20"
+        assert f'href="{href}"' in page
+        assert client.get(href.replace("&amp;", "&")).status_code == 200
+
+
 def test_birdview_other_assets_has_no_empty_disclosure(client, setup):
     response = client.get("/birdview")
     assert response.status_code == 200

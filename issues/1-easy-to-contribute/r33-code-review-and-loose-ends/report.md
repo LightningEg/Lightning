@@ -65,7 +65,7 @@ ordinary PC shows.
 | F10 | medium (process) | The guideline is at 3.40 in the app and 3.39 in the website: app #450 and #456 are merged, their mirrors (website #174, #176) are still open. With both repositories checked out, `tests/test_docs_structure.py::test_the_app_and_website_guidelines_are_all_mirrored` fails on `main`. AGENTS.md says never leave one copy behind. | `cmp guideline/phone.html ../Lightning_website/guideline/phone.html` | IT-1X (done; `tests/test_issues.py`, `tests/test_docs_structure.py`) step 1X3 |
 | F11 | low | Unused code that only tests keep alive, or nothing does: ten functions and four unused names (list in the item). | [results.md](evidence/results.md) §4 | IT-1Z (done; kept list in Overview §2) |
 | F12 | medium (desert) | Data checks (`/checks`, eight reconciliations of the ledger against the screens on the sample) are reachable only from Settings. A check that reads ISSUE raises nothing on the Overview, in Needs you, in the weekly review or in a reminder. The one feature that can say "a figure is wrong" is the one nobody is led to. | `grep -n "integrity\|/checks" lightning/workflows/review.py lightning/workflows/reminders.py` prints nothing | [NF-2AJ](../../2-safe-for-real-money/NF-2AJ-a-failed-data-check-reaches-needs-you.md) |
-| F13 | low (desert) | `GET /explain/owned`, `/explain/free-cash` and `/explain/flow` are finished pages (parts of the figure, its meaning, freshness notes, a way back) that no template, script or screen links to, on the PC or the phone. Tests are their only visitor. | [results.md](evidence/results.md) §5 | [IV-12T](../../12-desktop-ux/IV-12T-explain-pages-have-no-way-in.md) |
+| F13 | low (desert) | `GET /explain/owned`, `/explain/free-cash` and `/explain/flow` are finished pages (parts of the figure, its meaning, freshness notes, a way back) that no template, script or screen links to, on the PC or the phone. Tests are their only visitor. | [results.md](evidence/results.md) §5 | Built (IV-12T): `tests/test_ui.py::test_overview_links_each_figure_to_its_explain_page` |
 | F14 | low | About a quarter of `style.css` cannot be reached: 378 of 1,486 class names appear in no template, script or Python string, and 941 of 3,823 rules use only such names. The RTL sheet doubles it. | [results.md](evidence/results.md) §4 | IT-9F (open; this is its step 1 measured a second way) |
 
 ### What is complicated
@@ -148,7 +148,7 @@ In the order the plan and the code point to, not a new plan:
 | 6 | IT-9N import review | M | Sonnet |
 | 7 | NF-2AJ data checks reach Needs you | M | Opus |
 | 8 | IT-1X codes across sessions | M | Sonnet |
-| 9 | IV-12T explain pages | S | Sonnet |
+| 9 | ~~IV-12T explain pages~~ done | S | Sonnet |
 | 10 | IT-1Z unused code | S | Sonnet |
 
 ## Dated follow-ups
