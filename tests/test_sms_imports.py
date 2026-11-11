@@ -523,6 +523,9 @@ def test_stated_balance_gap_is_one_quiet_row_that_clears(c, setup):
     c.sms_imports.read([(withdrawal["sender"], withdrawal["text"], datetime.fromisoformat(withdrawal["received"]))])
     stated = json.loads(c.settings.get(STATED_KEY))[str(cib.id)]
     assert stated["balance"] == "12904.50"
+    saved = c.sms_imports.saved()                    # NF-7AO: the withdrawal to the one cash wallet saved itself
+    assert len(saved) == 1 and saved[0]["account"] == cib.code
+    c.sms_imports.undo_saved(saved[0]["ref"])        # undone, it waits in review again
     assert c.sms_imports.balance_gaps() == []        # its own rows still wait in review: the gap may be those
     c.settings.set(STATED_KEY, json.dumps({str(cib.id): {"date": "2026-09-30", "balance": "49650.00"}}))
     c.bank_imports.db.execute("DELETE FROM bank_import_rows")  # nothing waits any more
