@@ -234,7 +234,7 @@ def redeem(code: str, *, opener=None) -> str:
     items = [{"item_id": name, "asset_version": version} for name, version in supported.items()]
     body = {"code": code, "items": items, "profile_id": profile}
     return _exchange(conf["redeem_url"], body, profile, {
-        409: "Every profile seat for this theme is used. Add another profile on your account page: it costs a quarter of the price.",
+        409: "This theme already unlocks 5 profiles. Write to hello@lightningeg.com to free one you no longer use.",
     }, "That code is used or expired. Get a fresh one from your account page.", opener=opener)
 
 
@@ -245,7 +245,7 @@ def redeem_play(product: str, token: str, *, opener=None) -> str:
     """The Play build's purchase (NF-11B3): send Google Play's purchase token to the store's redeem-play function, which
     asks Google whether it is a paid, not refunded purchase of this theme, and keep the signed licence it returns for
     the open profile, exactly as a website code's. One purchase per person (NF-10H): every profile opened with the
-    buying Google account gets its own licence from the same token, up to 10. Returns the theme id the licence names."""
+    buying Google account gets its own licence from the same token, up to 5 (owner, 2026-11-11). Returns the theme id the licence names."""
     supported, conf, check, profile = paid_themes(), store(), _verifier(), profile_id()
     if check is None or not conf["keys"] or not conf["play_redeem_url"].startswith("https://"):
         raise UnlockError("Unlocking opens with the next Lightning update.")
@@ -258,7 +258,7 @@ def redeem_play(product: str, token: str, *, opener=None) -> str:
             "profile_id": profile}
     return _exchange(conf["play_redeem_url"], body, profile, {
         402: "The payment is not finished yet. It unlocks when Google Play confirms it.",
-        409: "This purchase already unlocks 10 profiles.",
+        409: "This purchase already unlocks 5 profiles.",
         410: "This purchase was refunded or cancelled.",
     }, "Google Play does not know this purchase.", opener=opener)
 

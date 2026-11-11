@@ -13,6 +13,7 @@ Updated 2026-10-24 for Lightning's pricing policy; competitor facts remain dated
 | International competitors | You are comparing a feature with the best apps |
 | Phone flow, words and icons | You design a phone screen, or choose between an icon and a word |
 | Where Lightning wins and loses | You write the website or plan the roadmap |
+| AI assistants | You write or change the website's AI-assistant comparison |
 | Selling points, stress-tested | You write a headline, a hero line or a claim about what only Lightning does |
 | Watch list | Every few months, or before a release |
 | Open source | You want source code to inspect before designing a finance feature |
@@ -126,7 +127,7 @@ How the best money apps lay out a phone, read 2026-10-06 (Claude) for the phone 
 
 ## Where Lightning wins and loses
 
-The site's three comparison pages rate Lightning against *kinds* of tool in Low, Medium and High, and cite this section as evidence: the scorecard is `comparisons.json` in the website repository (guideline B10). Change a claim here and the matching rating there.
+The site's four comparison pages rate Lightning against *kinds* of tool in Low, Medium and High, and cite this section as evidence: the scorecard is `comparisons.json` in the website repository (guideline B10). Change a claim here and the matching rating there.
 
 Checked against the code, Overview and changelog 2026-10-15 (v1.1: Arabic and right-to-left, Android beta with bank SMS, foreign currency, FX gains, US stocks).
 
@@ -143,6 +144,21 @@ Checked against the code, Overview and changelog 2026-10-15 (v1.1: Arabic and ri
 - Securities depth: no tax lots or specific-lot selling, splits, reinvested dividends, return of capital, tax reports or TWR (Overview, Deeper investments).
 - No community or ratings yet: Say has 2,128, Qershnat 592 in four months.
 - Gam'eya and zakat are built; silver and specialised property/vehicle workflows remain open. Other asset accounts can already track a flat or car by value.
+
+## AI assistants (2026-11-11)
+
+The website's fourth comparison page rates Lightning against a *kind* of tool, an AI assistant (a chat assistant you ask about your money in plain words), in Low, Medium and High; the scorecard is `comparisons.json` in the website repository. Owner decision 2026-11-11: say that you do not own your data with an assistant, that it can be powerful, and that it is expensive. Change a claim here and the matching rating there. No vendor or price is named: prices move, so none is quoted without a dated source.
+
+| Quality | Assistant | Why (checked against how a general chat assistant works, 2026-11-11) |
+|---|---|---|
+| Quick to log a spend | Low | No capture: each spend is typed or pasted again, and nothing keeps last week's ledger. |
+| Your data stays yours | Low | What you type or paste is sent to the company's servers; use is a subscription or per-use fees. |
+| Wealth depth | Low | It reasons about a figure you give it; it holds no holdings, gold, loans or dollars. |
+| Egypt and Arabic fit | Medium | Good Arabic and general Egyptian money knowledge; does not know a bank's messages, and its prices can be old. |
+| Numbers you can trace | Low | It can be fluent and wrong, and no ledger shows how an answer was reached. |
+| Easy to start | High | Open it and ask; no setup. |
+
+**Where an assistant is better (say so):** open questions, drafting a message, explaining a term, and a first plan on a blank page. Lightning wins on data ownership, traceable numbers and Egypt fit.
 
 ## How AI search finds us (2026-10-20)
 
