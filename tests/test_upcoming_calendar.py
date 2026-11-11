@@ -137,3 +137,36 @@ def test_the_phone_strip_reaches_into_next_month(c, monkeypatch):
     text = _phone_client(c).get("/plan/upcoming").text
     assert 'href="/plan/upcoming?day=2026-12-08"' in text
     assert "Rent" in _phone_client(c).get("/plan/upcoming?day=2026-12-03").text.split('id="upcoming-day"')[1]
+
+
+def test_a_window_of_days_crosses_the_month_end(c):
+    from lightning.planning.calendar import payment_window
+    _household(c)
+    week = payment_window(c.planning, c.gameya, date(2026, 11, 28), 7)
+    assert [d.date for d in week.days][0] == "2026-11-28" and week.days[-1].date == "2026-12-04"
+    assert [e.name for d in week.days for e in d.entries] == ["Salary", "Rent"]
+    assert (week.left_to_pay, week.to_pay) == (D("12000"), 1) and week.days[3].payday
+
+
+def test_the_overview_shows_the_next_seven_days_and_a_quiet_week_names_the_next_bill(c, monkeypatch):
+    _household(c)
+    client = TestClient(create_app(c))
+    quiet = client.get("/").text                                    # 11 to 17 Nov: nothing; the loan is late, not ahead
+    assert "Next 7 days" in quiet and 'class="week-day' not in quiet
+    assert "Next: Internet, 650 on 20 Nov." in quiet
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-11-18")
+    week = client.get("/").text
+    assert week.count('class="week-day') == 7
+    assert "650 to pay, of 3,150 left this month" in week and 'href="/plan/upcoming?month=2026-11&amp;day=2026-11-20"' in week
+
+
+def test_the_overview_has_no_week_without_a_plan(c):
+    c.account_flows.open_account("Wallet", "CASH", "2026-09-01", "1000")
+    assert "Next 7 days" not in TestClient(create_app(c)).get("/").text
+
+
+def test_money_coming_up_carries_the_two_weeks(c):
+    from lightning.ui.phone.screens.money import build
+    _household(c)
+    strip = build(c, TODAY).strip
+    assert len(strip) == 14 and strip[0]["today"] and strip[9]["date"] == "2026-11-20" and strip[9]["entries"]

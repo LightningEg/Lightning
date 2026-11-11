@@ -3,52 +3,46 @@
 from __future__ import annotations
 
 import calendar
-from datetime import timedelta
+from datetime import date
 from urllib.parse import urlencode
 
-from lightning.core.dates import fmt_date, month_of, parse_month, today
-from lightning.core.money import ZERO, fmt
-from lightning.planning.calendar import month_calendar
+from lightning.core.dates import today
+from lightning.core.money import fmt
+from lightning.planning.calendar import payment_window
 from lightning.ui import status, visuals
 
 STRIP_DAYS = 14
 MARKS_PER_DAY = 3
 
 
+def strip_days(window, chosen: str = "") -> list[dict]:
+    """The window's days for a strip: weekday, number and up to three marks each (phone Upcoming and Money)."""
+    out = []
+    for index, d in enumerate(window.days):
+        out.append({"date": d.date, "day": int(d.date[8:]), "weekday": visuals.WEEKDAYS[_weekday(d.date)],
+                    "today": index == 0, "entries": d.entries[:MARKS_PER_DAY], "payday": d.payday, "short": d.short,
+                    "open": d.open, "chosen": d.date == chosen})
+    return out
+
+
+def _weekday(text: str) -> int:
+    return date.fromisoformat(text).weekday()
+
+
 def present(request, c, context: dict) -> dict:
     day = today()
-    month = month_of(day)
-    cal = context["cal"]
-    if cal.month != month:  # a PC link with ?month= still opens on today here
-        cal = month_calendar(c.planning, c.gameya, month, day, c.forecaster)
-    last = parse_month(month)[1]
-    end = day + timedelta(days=STRIP_DAYS - 1)  # not money
-    following = month_calendar(c.planning, c.gameya, month_of(end), day, c.forecaster) if end > last else None
-
-    def on(key: str):
-        return (cal if key[:7] == month or following is None else following).on(key)
-
-    paydays = set(cal.paydays) | set(following.paydays if following else ())
-    short = {s for s in (cal.short_on, following.short_on if following else None) if s}
-    strip = []
-    for offset in range(STRIP_DAYS):
-        when = day + timedelta(days=offset)  # not money
-        key = fmt_date(when)
-        entries = on(key)
-        strip.append({"date": key, "day": when.day, "weekday": visuals.WEEKDAYS[when.weekday()], "today": offset == 0,
-                      "entries": entries[:MARKS_PER_DAY], "payday": key in paydays, "short": key in short,
-                      "open": any(not e.incoming and e.left > ZERO for e in entries)})
+    window = payment_window(c.planning, c.gameya, day, STRIP_DAYS, c.forecaster)
+    cal = window.month
     asked = str(request.query_params.get("day", ""))
-    keys = [d["date"] for d in strip]
+    keys = [d.date for d in window.days]
     late = [e.date for e in cal.entries if e.state == "late" and not e.incoming]
     if asked in keys or asked in late:
         chosen = asked
     else:  # a late payment first, else the next day that asks for money, else today
-        chosen = (late or [d["date"] for d in strip if d["open"]] or keys)[0]
-    for d in strip:
-        d["chosen"] = d["date"] == chosen
+        chosen = (late or [d.date for d in window.days if d.open] or keys)[0]
     name = calendar.month_name[day.month]
-    return {"cal": cal, "strip": strip, "hero_label": f"Left to pay in {name}",
+    return {"cal": cal, "strip": strip_days(window, chosen), "chosen": chosen, "shown": list(window.on(chosen)),
+            "hero_label": f"Left to pay in {name}",
             "hero_line": status.sentence("{amt} paid of {amt2} due this month.", amt=fmt(cal.already_paid, 0),
-                                         amt2=fmt(cal.month_total, 0)), "chosen": chosen, "shown": on(chosen),
+                                         amt2=fmt(cal.month_total, 0)),
             "day_back": "/plan/upcoming?" + urlencode({"day": chosen})}

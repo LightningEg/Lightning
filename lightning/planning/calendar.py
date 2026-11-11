@@ -152,3 +152,66 @@ def month_calendar(planning, gameya, month: str, day: date, forecaster=None) -> 
     groups = tuple(g for g in GROUPS if any(e.group == g for e in entries))
     return PaymentMonth(month, fmt_date(day), tuple(entries), left, paid, _out_total(planning, previous, day),
                         money_in, paydays, short_on, short_by, groups)
+
+
+@dataclass(frozen=True)
+class WindowDay:
+    date: str
+    entries: tuple[CalendarEntry, ...]
+    payday: bool
+    short: bool                # the first day scheduled cash goes below zero
+
+    @property
+    def open(self) -> bool:
+        """The day still asks for money."""
+        return any(not e.incoming and e.left > ZERO for e in self.entries)
+
+
+@dataclass(frozen=True)
+class PaymentWindow:
+    """``days`` days from ``start``, across a month end when they reach it (the Overview's week, the phone's two
+    weeks). Late payments are dated before the window and are not in it: Needs you and the late list carry them."""
+    start: str
+    days: tuple[WindowDay, ...]
+    left_to_pay: Decimal       # what the window's outgoing payments still ask
+    to_pay: int                # how many outgoing payments in the window are still to pay
+    month: PaymentMonth        # the start's month, for its Left to pay and its late payments
+
+    @property
+    def empty(self) -> bool:
+        return not any(d.entries for d in self.days)
+
+    @property
+    def next_after(self) -> CalendarEntry | None:
+        """The first payment still to pay after the window, in the start's month (the quiet week's one line)."""
+        end = self.days[-1].date
+        return next((e for e in self.month.entries if e.date > end and not e.incoming and e.left > ZERO), None)
+
+    def on(self, day: str) -> tuple[CalendarEntry, ...]:
+        found = next((d for d in self.days if d.date == day), None)
+        return found.entries if found else tuple(self.month.on(day))
+
+
+def payment_window(planning, gameya, start: date, days: int, forecaster=None, forecast=None) -> PaymentWindow:
+    """``forecast`` is a CashForecast the caller already has (the Overview's); else ``forecaster`` makes one."""
+    end = start + timedelta(days=days - 1)
+    months = {}
+    cursor = start.replace(day=1)
+    while cursor <= end:
+        key = fmt_date(cursor)[:7]
+        months[key] = month_calendar(planning, gameya, key, start)
+        cursor = parse_month(key)[1] + timedelta(days=1)
+    short_on = None
+    if forecast is None and forecaster is not None:
+        forecast = forecaster.forecast(start)
+    if forecast is not None:
+        dated = forecast.dated
+        short_on = dated.first_shortfall.date if dated and dated.first_shortfall else None
+    rows = []
+    for offset in range(days):
+        key = fmt_date(start + timedelta(days=offset))
+        month = months[key[:7]]
+        rows.append(WindowDay(key, tuple(month.on(key)), key in month.paydays, key == short_on))
+    outgoing = [e for d in rows for e in d.entries if not e.incoming and e.left > ZERO]
+    return PaymentWindow(fmt_date(start), tuple(rows), sum((e.left for e in outgoing), ZERO), len(outgoing),
+                         months[fmt_date(start)[:7]])

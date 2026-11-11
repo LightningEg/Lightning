@@ -7,7 +7,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
 | [Capture](pillars/capture.md) | 10 |  | 6 | 4 |  |  |
-| [Plan](pillars/plan.md) | 5 | 1 | 2 | 2 |  |  |
+| [Plan](pillars/plan.md) | 5 |  | 3 | 2 |  |  |
 | [Understand](pillars/understand.md) | 3 |  | 2 |  | 1 |  |
 | [Own](pillars/own.md) | 11 | 1 | 6 | 2 | 2 |  |
 | [Protect](pillars/protect.md) | 4 | 1 | 2 |  | 1 |  |
@@ -24,7 +24,6 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 - **NF-4A** (Everywhere) [Edit journal: edit anywhere, one home confirms](../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md)
 - **NF-4B** (Everywhere) [Multiple devices: implementation plan](../issues/4-edit-journal-and-devices/NF-4B-multiple-devices.md)
 - **NF-6A** (Own) [Market data: price packs, collected in the cloud](../issues/6-market-data/NF-6A-price-packs.md)
-- **NF-7AR** (Plan) [An Upcoming tab shows the month's payments on a calendar, with payday and the day cash runs short](../issues/7-planning-import-and-search/NF-7AR-upcoming-payments-calendar.md)
 - **NF-10A** (Feel) [Cosmetic parts, account-wide claiming and native acceptance](../issues/10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md)
 - **NF-10C** (Feel) [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
 - **IV-3AN** (Everywhere) [Phone visual plan](../issues/11-phone-ux/IV-3AN-phone-visual-plan-quick-actions.md)

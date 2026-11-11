@@ -33,6 +33,7 @@
 </section>
 <section class="phone-section" aria-labelledby="coming-heading">
   <header class="phone-section-head"><h2 id="coming-heading">{{ 'Coming up'|tr(locale) }}</h2><a href="/money/bills">{% if s.late_count %}{{ ('1 late' if s.late_count == 1 else '{n} late')|tr(locale, n=s.late_count) }} · {% endif %}{{ 'All bills'|tr(locale) }}{{ chevron() }}</a></header>
+  {% if s.strip %}<div class="phone-strip" role="grid" aria-label="{{ 'Next two weeks'|tr(locale) }}">{% for d in s.strip %}<a class="phone-strip-day{{ ' is-today' if d.today }}{{ ' is-payday' if d.payday }}" role="gridcell" href="/plan/upcoming?day={{ d.date }}"><small>{{ d.weekday|tr(locale) }}</small><i>{{ d.day }}</i><span class="phone-strip-marks">{% for e in d.entries %}<b class="pay-mark is-{{ e.state }}{{ ' is-in' if e.incoming }}" aria-hidden="true"></b>{% endfor %}</span></a>{% endfor %}</div>{% endif %}
   <div class="phone-rows">{% for b in s.coming_up %}<a class="phone-row" data-popup-open href="/plan/items/{{ b.payment.item.id }}/pay?due={{ b.due_date }}&amp;back=%2Fmoney"><span>{{ b.payment.item.name }}<small>{{ b.due_date }}</small></span><b><bdi class="fig">{{ b.payment.amount|money }}</bdi></b></a>
   {% else %}<p class="phone-note">{{ 'Nothing is due soon.'|tr(locale) }}</p>{% endfor %}</div>
 </section>
