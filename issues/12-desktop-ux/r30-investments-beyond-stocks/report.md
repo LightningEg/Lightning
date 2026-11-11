@@ -34,10 +34,10 @@ Severity: high = wrong money or a job that cannot be done; medium = a wrong or m
 
 | ID | Severity | Observation and expected behavior | Follow-up |
 | --- | --- | --- | --- |
-| E1 | high | Investments has no Add button. A stock is added on the broker's account page, a certificate on a CD portfolio's page (after creating that account under Transactions › Accounts), jewellery inside a physical-asset account, a flat as an "Other" account. Expected: one *Add investment* that asks what it is. | IV-12K |
-| E2 | medium | `/investments/new` lists things it then refuses: the certificate ("Certificates must be held in a bank-specific CD portfolio."), the gold price references ("only supplies a price"), jewellery items. | IV-12K |
-| E3 | medium | *Cash account* (where the money came from) offers CD portfolios, the gam'eya, the broker and the gold account. | IV-12K |
-| E4 | low | New investment's types are Silver, Stocks, five Funds, Gold, Other Investments: no certificate, no property, and nothing says where those live. | IV-12K |
+| E1 | high | Investments has no Add button. A stock is added on the broker's account page, a certificate on a CD portfolio's page (after creating that account under Transactions › Accounts), jewellery inside a physical-asset account, a flat as an "Other" account. Expected: one *Add investment* that asks what it is. | done: `tests/test_investment_doors.py` |
+| E2 | medium | `/investments/new` lists things it then refuses: the certificate ("Certificates must be held in a bank-specific CD portfolio."), the gold price references ("only supplies a price"), jewellery items. | done: `tests/test_investment_doors.py` |
+| E3 | medium | *Cash account* (where the money came from) offers CD portfolios, the gam'eya, the broker and the gold account. | done: `tests/test_investment_doors.py` |
+| E4 | low | New investment's types are Silver, Stocks, five Funds, Gold, Other Investments: no certificate, no property, and nothing says where those live. | done: `tests/test_investment_doors.py` |
 
 ### Certificates
 
@@ -57,10 +57,10 @@ Severity: high = wrong money or a job that cannot be done; medium = a wrong or m
 | ID | Severity | Observation and expected behavior | Follow-up |
 | --- | --- | --- | --- |
 | G1 | high | A second gold investment of the same karat is refused: "GLD:24K already exists." on a Ticker field that says "For gold leave empty." | BT-12H |
-| G2 | medium | Adding jewellery is two steps: an empty item ("0 pieces · No pieces held"), then a folded form for what you paid. [Screenshot](evidence/gold-account.png). | IV-12L |
-| G3 | medium | A bar bought by the gram sits outside the table as one line ("Other tracked holdings") and is valued at what was paid (6,200 a gram) beside a 24K reference of 5,314; jewellery follows the reference. Same metal, two values. | IV-12L |
-| G4 | low | "Gold price reference" is asked for though the karat decides it; 22K has none. | IV-12L |
-| G5 | low | Labels: "piece · MANUAL reference", "Coin ·", "0.000 g", piastres on large figures; the page sits under Transactions. | IV-12L |
+| G2 | medium | Adding jewellery is two steps: an empty item ("0 pieces · No pieces held"), then a folded form for what you paid. [Screenshot](evidence/gold-account.png). | done: `tests/test_investment_doors.py` |
+| G3 | medium | A bar bought by the gram sits outside the table as one line ("Other tracked holdings") and is valued at what was paid (6,200 a gram) beside a 24K reference of 5,314; jewellery follows the reference. Same metal, two values. | done: `tests/test_investment_doors.py` |
+| G4 | low | "Gold price reference" is asked for though the karat decides it; 22K has none. | done: `tests/test_investment_doors.py` |
+| G5 | low | Labels: "piece · MANUAL reference", "Coin ·", "0.000 g", piastres on large figures; the page sits under Transactions. | done: `tests/test_investment_doors.py` |
 | G6 | low | Gold prices online are a world-price estimate; the shop price (with the local premium) must be typed. Already planned. | IT-6D |
 
 ### Property and other things you own
