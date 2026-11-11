@@ -290,6 +290,7 @@ ARABIC_UI = {
     'Year to date so far': 'من أول السنة لحد دلوقتي',
     'All time so far': 'كل الفترة لحد دلوقتي',
     'Income collected (dividends and interest)': 'الدخل اللي وصلك (توزيعات وفوايد)',
+    'Money and value by class': 'الفلوس والقيمة حسب نوع الاستثمار',
     'Income collected this year': 'الدخل اللي وصلك السنة دي',
     'Total gain': 'إجمالي المكسب',
     'No recorded balance yet.': 'لسه مفيش رصيد مسجّل.',
