@@ -14,7 +14,7 @@ from lightning.core.dates import today
 from lightning.import_profile import read_date
 from lightning.core.errors import ValidationError
 from lightning.core.limits import MAX_CSV_IMPORT_BYTES
-from lightning.core.money import ascii_digits
+from lightning.core.money import ZERO, ascii_digits
 
 REQUIRED = ("Date", "Amount")
 # "Group" is the parent a category sits under in another app's export ("Work" for "Work › Transportation").
@@ -318,3 +318,16 @@ def decode_csv(data: bytes) -> tuple[list[str], list[dict[str, str]]]:
     except csv.Error as exc:
         logging.getLogger("lightning").info("CSV not read: %s", exc)
         raise ValidationError("This file is not a CSV Lightning can read. Save it from your bank as CSV and try again.", "file") from None
+
+
+def staged_amount(row: dict) -> Decimal:
+    """A staged row's Amount as a number (zero when it does not read), the figure its review group adds up."""
+    try:
+        return Decimal(str(row.get("Amount", "")).replace(",", "").replace("−", "-"))
+    except (InvalidOperation, ValueError):
+        return ZERO
+
+
+def staged_total(rows) -> Decimal:
+    """What a review group's staged rows add up to (IT-12AE4: the review screen reads it, never works it out)."""
+    return sum((staged_amount(row) for row in rows), ZERO)

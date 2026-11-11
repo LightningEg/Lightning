@@ -18,6 +18,7 @@ from fastapi import Request
 from lightning.accounts.domain import AccountType, INVESTMENT_ACCOUNT_TYPES
 from lightning.accounts.valuations import ASSET_KINDS
 from lightning.planning.domain import PlanKind
+from lightning.reporting import account_figures
 from lightning.workflows import investment_entry as entry_workflow
 from lightning.categories.domain import Movement
 from lightning.assets.catalog import instruments as catalog_instruments
@@ -52,21 +53,21 @@ def _row_kind(row) -> str:
 
 def account_composition(breakdown, value, owned, held):
     """U4: the account's classes as one 100% bar (four, then Other) and, when held for others, an owned/held bar."""
-    parts = [row for row in breakdown if row["total"] > 0]
-    total = sum((row["total"] for row in parts), ZERO)
+    mix = account_figures.class_mix(breakdown)
+    parts, total = mix["parts"], mix["total"]
     held_bar = None
     if held and held > 0 and value and value > 0:
         yours = max(owned, ZERO)
-        held_bar = {"owned": yours, "held": held, "owned_pct": float(yours / value * 100), "held_pct": float(held / value * 100)}
+        held_bar = {"owned": yours, "held": held, "owned_pct": float(yours / value * 100), "held_pct": float(held / value * 100)}  # not money: bar widths
     if (len(parts) < 2 and not held_bar) or not total:
         return None
     segments = [{"name": row["name"], "tone": class_tone(row["code"]), "amount": row["total"]} for row in parts[:4]]
-    rest = parts[4:]
-    if rest:
-        segments.append({"name": "Other", "tone": "other", "amount": sum((row["total"] for row in rest), ZERO)})
+    if mix["other"] is not None:
+        segments.append({"name": "Other", "tone": "other", "amount": mix["other"]})
     for seg in segments:
-        seg["pct"] = float(seg["amount"] / total * 100)
-        seg["share"] = int((seg["amount"] / total * 100).quantize(Decimal(1), ROUND_HALF_UP))
+        share = account_figures.share_of(seg["amount"], total)
+        seg["pct"] = float(share)
+        seg["share"] = int(share.quantize(Decimal(1), ROUND_HALF_UP))
     return {"segments": segments if len(parts) >= 2 else [], "held_bar": held_bar}
 
 
@@ -364,23 +365,20 @@ def _account_holdings(c, account):
     if account.account_type == AccountType.BROKERAGE and (account.parent_id or c.accounts.pockets(account.id)):
         broker = c.accounts.broker_of(account)
         holdings = c.investments.portfolio(fmt_date(day), account.id).open
-        value = owned = ZERO
-        for pocket in [broker, *c.accounts.pockets(broker.id)]:
-            value += c.reporting.account_value(pocket.id, day)
-            owned += c.reporting.owned_account_value(pocket.id, day)
+        value, owned, held = account_figures.combined_value(
+            c.reporting, [pocket.id for pocket in [broker, *c.accounts.pockets(broker.id)]], day)
         breakdown = c.reporting.account_asset_class_breakdown(account.id, day)
-        return holdings, value, owned, value - owned, breakdown
+        return holdings, value, owned, held, breakdown
     holdings = c.investments.portfolio(fmt_date(day), account.id).open
-    account_value = c.reporting.account_value(account.id, day)
-    account_owned_value = c.reporting.owned_account_value(account.id, day)
     breakdown = []
     if account.account_type == AccountType.BROKERAGE:
         breakdown = c.reporting.account_asset_class_breakdown(account.id, day)
-    for pocket in c.accounts.pockets(account.id):
-        holdings = list(holdings) + list(c.investments.portfolio(fmt_date(day), pocket.id).open)
-        account_value += c.reporting.account_value(pocket.id, day)
-        account_owned_value += c.reporting.owned_account_value(pocket.id, day)
-    return holdings, account_value, account_owned_value, account_value - account_owned_value, breakdown
+    pockets = c.accounts.pockets(account.id)
+    for pocket in pockets:
+        holdings = list(holdings) + list(c.investments.portfolio(fmt_date(day), pocket.id).open)  # not money: list glue
+    account_value, account_owned_value, account_held_value = account_figures.combined_value(
+        c.reporting, [account.id, *(pocket.id for pocket in pockets)], day)
+    return holdings, account_value, account_owned_value, account_held_value, breakdown
 
 
 def _edit_original(c, row, txn_id: int, custody_owners) -> dict:
@@ -404,10 +402,10 @@ def _asset_view(c, account) -> dict | None:
     details = c.accounts.other_asset_details(account.id)
     value, value_date = c.reporting.other_asset_native_value(account.id, today())  # BT-2AF: the dated estimate, not cash
     price = details["purchase_price"] if details else None
-    change = value - price if price is not None else None
     history = c.accounts.other_asset_history(account.id)
-    rows = [{"date": row["effective_date"], "value": row["value"],
-             "change": row["value"] - history[i - 1]["value"] if i else None} for i, row in enumerate(history)]
+    figures = account_figures.other_asset_figures(value, price, history)
+    rows = [{"date": row["effective_date"], "value": row["value"], "change": change}
+            for row, change in zip(history, figures["history_changes"])]
     loan = None
     if details and details["loan_item_id"]:
         try:
@@ -416,11 +414,11 @@ def _asset_view(c, account) -> dict | None:
             loan_currency = c.accounts.get(item.account_id).currency if item.account_id else c.base_currency
             # Value less what is left only when both are in one currency; never subtract across currencies.
             loan = {"id": item.id, "name": item.name, "left": left, "currency": loan_currency,
-                    "equity": value - left if loan_currency == account.currency else None}
+                    "equity": account_figures.equity(value, left) if loan_currency == account.currency else None}
         except LightningError:
             loan = None
-    return {"details": details, "value": value, "value_date": value_date, "price": price, "change": change,
-            "change_pct": change / price * 100 if change is not None and price else None,
+    return {"details": details, "value": value, "value_date": value_date, "price": price, "change": figures["change"],
+            "change_pct": figures["change_pct"],
             "history": list(reversed(rows))[:8], "loan": loan,
             "loans": [{"id": i.id, "name": i.name} for i in c.planning.items((PlanKind.LOAN,))],
             "kinds": ASSET_KINDS}
@@ -483,9 +481,9 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         if matched_ids is not None and page_size < total_rows <= 2000:
             # a transfer shows once per account here; one id each, so "Select all N" counts transactions
             matching_ids = list(dict.fromkeys(row.txn_id for row in all_rows))
-        page_number = min(max(_int(qp.get("page")) or 1, 1), max(1, -(-total_rows // page_size)))
-        rows = all_rows[(page_number - 1) * page_size:page_number * page_size]
-    total_pages = max(1, -(-total_rows // page_size))
+        page_number = min(max(_int(qp.get("page")) or 1, 1), max(1, -(-total_rows // page_size)))  # not money: paging
+        rows = all_rows[(page_number - 1) * page_size:page_number * page_size]  # not money: paging
+    total_pages = max(1, -(-total_rows // page_size))  # not money: paging
     tag_flows = matched_flows if filter_tag else None
     custody_owners = c.money_from_others.transaction_owners(row.txn_id for row in rows)
     conversions = {row.txn_id: c.transactions.conversion_of(c.transactions.get(row.txn_id))
@@ -526,7 +524,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         keep["select"] = qp["select"]
     page_size_keep = {k: v for k, v in keep.items() if k != "page_size"}
     page_base_qs = urlencode(keep)
-    val_toggle_url = base_url_for(account_id) + "?" + urlencode({**{k: v for k, v in keep.items() if k != "val"},
+    val_toggle_url = base_url_for(account_id) + "?" + urlencode({**{k: v for k, v in keep.items() if k != "val"},  # not money: a link
                                                                  **({} if show_val else {"val": "1"})})
     if page_number > 1:
         keep["page"] = page_number
@@ -573,7 +571,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
         chosen_kind=kind, unsorted_ids=unsorted_ids, span=(date_from, date_to),
         q=q, month=month, preset=preset, active_view=active_view, show_val=show_val, val_count=val_count, val_toggle_url=val_toggle_url,
         saved_views=c.saved_views.list(account_id), view_account_id=account_id or "",
-        filter_category=filter_category, category_sheet=category_sheet, filter_tag=filter_tag, tag_flows=tag_flows, matched_flows=matched_flows, matched_net=matched_flows[0] - matched_flows[1] if matched_flows else None, matching_ids=matching_ids,
+        filter_category=filter_category, category_sheet=category_sheet, filter_tag=filter_tag, tag_flows=tag_flows, matched_flows=matched_flows, matched_net=account_figures.search_net(matched_flows), matching_ids=matching_ids,
         import_accounts=[] if account_id else [a for a in c.accounts.list(active_only=True)
                                                           if a.account_type.value in ("CASH", "BANK") and not a.parent_id],
         replace_scope={"account_id": account_id or "", "date_from": "" if date_from == FAR_PAST else date_from,
@@ -874,7 +872,7 @@ def _native_value(c, account, value):
     if not account or value is None or account.currency == c.base_currency:
         return None
     rate = c.reporting.valuer.fx(account.currency, fmt_date(today()))
-    return value / rate.rate if rate and rate.rate else None
+    return account_figures.in_own_currency(value, rate)
 
 
 def _pocket_cash(c, account):
@@ -897,7 +895,7 @@ def _pocket_cash(c, account):
         else:
             found = c.reporting.valuer.fx(a.currency, fmt_date(day))
             rate = found.rate if found and found.rate else None
-        invested = (value / rate - cash) if rate else None
+        invested = account_figures.pocket_invested(value, rate, cash)
         rows.append({"id": a.id, "currency": a.currency, "cash": cash, "invested": invested, "value": value,
                      "current": a.id == account.id})
     return rows

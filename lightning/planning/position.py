@@ -464,3 +464,10 @@ class PositionService:
             owed_to_you=wealth.owed_to_you, you_owe_people=wealth.you_owe_people,
             kept_apart=self.reporting.owned_cash_kept_apart(text),
             bill_reserve_coverage=sum(self.planning.bill_reserve_coverage(day, day).values(), ZERO))
+
+
+def class_group_totals(classes) -> tuple[Decimal, Decimal]:
+    """A group of asset classes together (a top-level class and its children; a class you hold nothing of is None):
+    their owned value and what they would fetch if sold (IT-12AE4: Settings' sale factors read it)."""
+    present = [cls for cls in classes if cls is not None]
+    return sum((cls.value for cls in present), ZERO), sum((cls.after_sale for cls in present), ZERO)

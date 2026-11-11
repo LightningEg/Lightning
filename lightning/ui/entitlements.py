@@ -57,7 +57,7 @@ class UnlockError(ValueError):
 @lru_cache(maxsize=1)
 def store() -> dict:
     data = json.loads(STORE.read_text())
-    keys = {kid: base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)) for kid, raw in data.get("keys", {}).items()}
+    keys = {kid: base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)) for kid, raw in data.get("keys", {}).items()}  # not money: key padding
     return {"keys": keys, "redeem_url": data.get("redeem_url", ""), "play_redeem_url": data.get("play_redeem_url", "")}
 
 
@@ -151,7 +151,7 @@ def _synced_envelopes() -> list[dict]:
         return found
     for item in paid_themes():
         try:
-            envelope = json.loads(settings.get(LICENCE_KEY + item) or "null")
+            envelope = json.loads(settings.get(LICENCE_KEY + item) or "null")  # not money: a settings key
         except Exception:  # unreadable or missing setting: ignored like any invalid licence
             continue
         if isinstance(envelope, dict):
@@ -166,7 +166,7 @@ def owned() -> frozenset[str]:
     if check is None or profile is None:
         return frozenset()
     InvalidCosmeticLicense, verify_license = check
-    for envelope in _envelopes() + _synced_envelopes():
+    for envelope in _envelopes() + _synced_envelopes():  # not money: list glue
         try:
             ids.update(name for name, _ in verify_license(envelope, keys, supported, expected_profile=profile).items)
         except InvalidCosmeticLicense:
@@ -185,7 +185,7 @@ def wearable(theme: str, mine: frozenset[str] | None = None) -> bool:
 def _save(envelope: dict) -> None:
     path = licence_file()
     path.parent.mkdir(parents=True, exist_ok=True)
-    kept = [e for e in _envelopes() if e.get("payload") != envelope.get("payload")] + [envelope]
+    kept = [e for e in _envelopes() if e.get("payload") != envelope.get("payload")] + [envelope]  # not money: list glue
     fd, tmp = tempfile.mkstemp(dir=path.parent, prefix=".licenses-", suffix=".json")
     try:
         with os.fdopen(fd, "w", encoding="utf-8") as handle:
@@ -204,7 +204,7 @@ def _share(item: str, envelope: dict) -> None:
     if settings is None:
         return
     try:
-        settings.set(LICENCE_KEY + item, json.dumps(envelope, separators=(",", ":")))
+        settings.set(LICENCE_KEY + item, json.dumps(envelope, separators=(",", ":")))  # not money: a settings key
     except Exception:  # PendingOnHome (applies once the home confirms) or a read-only refusal: the file still unlocks here
         pass
 
@@ -213,7 +213,7 @@ def shared(theme: str) -> bool:
     """Whether the open profile's synced settings hold this theme's licence, so its other devices unlock by themselves."""
     settings = _profile_settings()
     try:
-        return bool(settings is not None and settings.get(LICENCE_KEY + theme))
+        return bool(settings is not None and settings.get(LICENCE_KEY + theme))  # not money: a settings key
     except Exception:  # a profile that cannot read its settings shares nothing
         return False
 

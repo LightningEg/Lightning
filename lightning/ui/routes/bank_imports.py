@@ -9,6 +9,7 @@ from decimal import Decimal, InvalidOperation
 from lightning.core.dates import today
 from lightning.workflows.market_prices import fill_followed
 from lightning.import_reconcile import balance_gaps
+from lightning.bank_import_rows import staged_amount, staged_total
 from lightning.bank_imports import OPTIONAL, REQUIRED, SEPARATE_AMOUNT_FIELDS, decode_csv
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.limits import (MAX_CSV_MAPPING_REQUEST_BYTES, MAX_IMPORT_REVIEW_REQUEST_BYTES,
@@ -25,7 +26,7 @@ router = APIRouter(prefix="/accounts")
 
 # Journal proposals have a 64 KiB signed-message ceiling and carry CSV bytes as
 # base64. Keep the decoded attachment below the command protocol's 40 KiB cap.
-MAX_JOURNAL_CSV_COMMAND_BYTES = 40 * 1024
+MAX_JOURNAL_CSV_COMMAND_BYTES = 40 * 1024  # not money: bytes
 
 
 def _budget_import_feedback(c, batch_id: int) -> str:
@@ -124,7 +125,7 @@ def _rejected_prompt(account, headers, problems, failing=0):
 def _review_form_max_fields(row_count: int) -> int:
     # Each row submits about twelve fields (date, counterparty and its pick, category, held for and its pick,
     # notes, amount, skip, match, remember); leave room for form metadata.
-    return max(1_000, row_count * 12 + 100)
+    return max(1_000, row_count * 12 + 100)  # not money: form field count
 
 
 @router.get("/{account_id:int}/import")
@@ -184,8 +185,8 @@ async def upload(request: Request, account_id: int):
         return _render_upload(request, c, account_id, error="Choose at least one statement file.", status_code=400)
     files, total = [], 0
     for item in upload_files:
-        data = await item.read(MAX_STATEMENT_DOCUMENT_BYTES + 1)
-        total += len(data)
+        data = await item.read(MAX_STATEMENT_DOCUMENT_BYTES + 1)  # not money: bytes
+        total += len(data)  # not money: bytes
         if total > MAX_STATEMENT_DOCUMENT_BYTES:
             return _render_upload(request, c, account_id, error="Statement uploads must total 8 MB or less. Upload fewer files or a shorter period.", status_code=400)
         files.append({"filename": item.filename, "data": data})
@@ -211,7 +212,7 @@ def _read_sheet_bundle(raw):
             if not item["filename"] or len(item["filename"]) > 255 or len(item["payload"]) > MAX_WORKSHEET_REQUEST_BYTES:
                 raise ValueError
             data = base64.b64decode(item["payload"], validate=True)
-            total += len(data)
+            total += len(data)  # not money: bytes
             if total > MAX_STATEMENT_DOCUMENT_BYTES:
                 raise ValueError
             files.append({"filename": item["filename"], "data": data})
@@ -245,7 +246,7 @@ def _prepare_upload(request, c, account_id, files, *, encoding="auto", sheets=No
             except WorksheetSelectionRequired as exc:
                 choices.append({"index": index, "filename": item["filename"], "sheets": exc.sheets})
                 continue
-            filename = item["filename"] + (f" [{chosen}]" if chosen else "")
+            filename = item["filename"] + (f" [{chosen}]" if chosen else "")  # not money: text
             normalized.append((filename, data))
         if choices:
             return render(request, "bank_import_sheets.html", account=c.accounts.get(account_id),
@@ -277,7 +278,7 @@ def _prepare_upload(request, c, account_id, files, *, encoding="auto", sheets=No
                                       status_code=400)
             bundle = [{"filename": name, "payload": base64.b64encode(data).decode("ascii")}
                       for name, data, _, _, _ in prepared]
-            total_bytes = sum(len(item["payload"]) for item in bundle)
+            total_bytes = sum(len(item["payload"]) for item in bundle)  # not money: bytes
             if total_bytes > MAX_CSV_MAPPING_REQUEST_BYTES:
                 return _render_upload(request, c, account_id,
                                       error="These files are too large to map together. Choose fewer files, or match them one at a time.",
@@ -369,10 +370,7 @@ async def map_columns(request: Request, account_id: int):
 
 
 def _amount(row) -> Decimal:
-    try:
-        return Decimal(str(row.get("Amount", "")).replace(",", "").replace("−", "-"))
-    except (InvalidOperation, ValueError):
-        return ZERO
+    return staged_amount(row)
 
 
 def _row_status(row: dict) -> str:
@@ -442,7 +440,7 @@ def _review_groups(c, rows: list[dict], form=None, sort: str = "") -> list[dict]
     """Rows grouped by imported name (a header with its total and state, the rows under it). Every row keeps its
     own counterparty, category, held-for, notes and amount; a group is only a place to fold and to tick."""
     all_accounts = c.accounts.list(active_only=True)
-    accounts = {a.name: a.id for a in all_accounts if sum(b.name == a.name for b in all_accounts) == 1}
+    accounts = {a.name: a.id for a in all_accounts if sum(b.name == a.name for b in all_accounts) == 1}  # not money: counts
     parties = {p["name"]: p["id"] for p in c.counterparties.list_active()}
     by_key: dict[str, list[dict]] = {}
     for row in rows:
@@ -459,9 +457,9 @@ def _review_groups(c, rows: list[dict], form=None, sort: str = "") -> list[dict]
             "i": index, "key": key, "rows": members, "count": len(members), "status": status, "kind": kind,
             "label": label if kind == "label" else "",
             "name": _QUESTION_NAMES.get(kind) or members[0].get("Counterparty") or "No counterparty",
-            "total": sum((_amount(r) for r in members), ZERO),
-            "errors": sum(1 for r in members if r["_state"] == "err"),
-            "duplicates": sum(1 for r in members if r["_state"] == "dup"),
+            "total": staged_total(members),
+            "errors": sum(1 for r in members if r["_state"] == "err"),  # not money: counts
+            "duplicates": sum(1 for r in members if r["_state"] == "dup"),  # not money: counts
         })
     if sort == "amount":  # NF-7AB4 "Biggest first": the rows that matter most are answered first
         for group in groups:
@@ -479,7 +477,7 @@ def _review_pieces(groups: list[dict]) -> list[dict]:
     pieces = []
     for group in groups:
         for start in range(0, len(group["rows"]), REVIEW_PAGE_ROWS):
-            pieces.append(group | {"rows": group["rows"][start:start + REVIEW_PAGE_ROWS], "cont": start > 0})
+            pieces.append(group | {"rows": group["rows"][start:start + REVIEW_PAGE_ROWS], "cont": start > 0})  # not money: paging
     return pieces
 
 
@@ -487,10 +485,10 @@ def _take_page(pieces: list[dict], start: int) -> list[dict]:
     """Pieces from ``start`` until about REVIEW_PAGE_ROWS rows are in."""
     page, rows = [], 0
     for piece in pieces[start:]:
-        if page and rows + len(piece["rows"]) > REVIEW_PAGE_ROWS:
+        if page and rows + len(piece["rows"]) > REVIEW_PAGE_ROWS:  # not money: paging
             break
         page.append(piece)
-        rows += len(piece["rows"])
+        rows += len(piece["rows"])  # not money: paging
     return page
 
 
@@ -518,7 +516,7 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
     # come first, so a long file's first page is the part that asks something.
     pieces = _review_pieces(groups) if paged else groups
     shown = _take_page(pieces, 0) if paged else groups
-    counts = {"all": len(groups)} | {key: sum(1 for g in groups if g["status"] == key) for key in _STATUS_ORDER}
+    counts = {"all": len(groups)} | {key: sum(1 for g in groups if g["status"] == key) for key in _STATUS_ORDER}  # not money: counts
     accounts_here = [a for a in c.accounts.list(active_only=True) if a.id != account_id and (a.currency == account.currency or a.account_type.value in ("BANK", "CASH", "BROKERAGE"))]
     failing = [r for r in rows if _row_status(r) == "err"]
     reject_prompt = ""
@@ -528,7 +526,7 @@ def _render_review(request, c, account_id: int, batch, rows, *, summary, form=No
             [(str(r["_line"]), str(r.get("_row_error") or " ".join(r.get("_errors") or []))) for r in failing], len(failing))
     return render(request, "bank_import_preview.html", account=account, batch=batch, rows=rows,
                   groups=shown, balance_gaps=balance_gaps(rows), shown_groups=len(shown),
-                  more_rows=sum(len(p['rows']) for p in pieces[len(shown):]) if paged else 0, counts=counts, categories=_categories(c),
+                  more_rows=sum(len(p['rows']) for p in pieces[len(shown):]) if paged else 0, counts=counts, categories=_categories(c),  # not money: counts
                   counterparties=c.counterparties.list_active(), owners=c.counterparties.list_people(), account_choices=accounts_here,
                   summary=summary, msg=msg, error=error, reject_prompt=reject_prompt, status_code=status_code,
                   view=view, cards=_question_cards(rows, summary) if view == "summary" else [],
@@ -597,8 +595,8 @@ async def more_groups(request: Request, account_id: int, batch_id: int, start: i
                       gp=state,
                       sms=batch["file_name"].startswith("SMS "), categories=categories,
                       cat_groups=c.categories.select_groups([cat["id"] for cat in categories]))
-    response.headers["X-Next-Start"] = str(start + len(page))
-    response.headers["X-Remaining"] = str(sum(len(p["rows"]) for p in pieces[start + len(page):]))
+    response.headers["X-Next-Start"] = str(start + len(page))  # not money: paging
+    response.headers["X-Remaining"] = str(sum(len(p["rows"]) for p in pieces[start + len(page):]))  # not money: counts
     return response
 
 
@@ -782,20 +780,20 @@ def _posted_result(request, c, account_id: int, batch_id: int, count: dict, form
         except LightningError:
             report = None
         if report is not None and (report.added or report.missing):
-            feedback += f" {report.summary()}"
+            feedback += f" {report.summary()}"  # not money: text
     if count.get("ambiguous_reserves"):
-        feedback += f" {counted(count['ambiguous_reserves'], 'row', 'rows')} could match multiple reserves; choose beside each transaction in its account list."
+        feedback += f" {counted(count['ambiguous_reserves'], 'row', 'rows')} could match multiple reserves; choose beside each transaction in its account list."  # not money: text
     batch, result_rows = c.bank_imports.preview(batch_id)
-    remaining = sum(row["_status"] == "REVIEW" for row in result_rows)
+    remaining = sum(row["_status"] == "REVIEW" for row in result_rows)  # not money: counts
     if remaining:
         _keep_typed(form, result_rows)
     settled = c.planning.settled_bill_names({row["_transaction_id"] for row in result_rows
                                            if row.get("_transaction_id")})
     if settled:
-        feedback += " Settled bills: " + ", ".join(settled) + "."
+        feedback += " Settled bills: " + ", ".join(settled) + "."  # not money: text
     return _render_review(request, c, account_id, batch, result_rows, summary=count, form=form if remaining else None,
                           paged=view == "summary", view=view,
-                          msg=f"Import {'updated' if remaining else 'complete'}: {count['posted']} posted, "
+                          msg=f"Import {'updated' if remaining else 'complete'}: {count['posted']} posted, "  # not money: text
                               + (f"{count['linked']} linked to entries you already had, " if count.get("linked") else "")
                               + f"{count['skipped']} skipped, {count['duplicates']} duplicates."
                               + (" Some rows still need review." if remaining else "") + feedback)

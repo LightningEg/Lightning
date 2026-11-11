@@ -103,12 +103,12 @@ async def find_replace(request: Request):
                 if field == "counterparty" and value and not c.counterparties.resolve(value):
                     c.counterparties.create(value)   # the user typed it on purpose: a new saved payee
                 done, left = c.transactions.bulk_update(ids, {field: value})
-                changed, skipped = changed + len(done), skipped + len(left)
+                changed, skipped = changed + len(done), skipped + len(left)  # not money: counts
     except LightningError as exc:
         return redirect(destination, exc.message)
     message = f"Replaced “{find}” on {counted(changed, 'row', 'rows')}."
     if skipped:
-        message += f" {skipped} left as they were (transfers and investment rows)."
+        message += f" {skipped} left as they were (transfers and investment rows)."  # not money: text
     return redirect(destination, message)
 
 

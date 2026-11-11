@@ -169,7 +169,7 @@ async def preview_workbook_import(request: Request):
     from lightning.workflows.workbook_import import MAX_UPLOAD, SETUP_PROMPT, prepare_import, confirm_import
     c = container(request)
     try:
-        form = await request.form(max_part_size=MAX_UPLOAD * 2)
+        form = await request.form(max_part_size=MAX_UPLOAD * 2)  # not money: bytes
         action = form.get('action', 'preview')
         pending = getattr(request.app.state, 'workbook_import_tokens', {})
         pending = {key: value for key, value in pending.items() if value[1] > time.monotonic()}
@@ -188,12 +188,12 @@ async def preview_workbook_import(request: Request):
         upload = form.get('workbook')
         if upload is None or not hasattr(upload, 'read'):
             raise ValueError('Choose an Excel .xlsx workbook.')
-        data = await upload.read(MAX_UPLOAD + 1)
+        data = await upload.read(MAX_UPLOAD + 1)  # not money: bytes
         tables = prepare_import(c, data)
         if len(pending) >= 8:
             pending.pop(next(iter(pending)))
         token = secrets.token_urlsafe(32)
-        pending[token] = (hashlib.sha256(data).hexdigest(), time.monotonic() + 900, id(c.db))
+        pending[token] = (hashlib.sha256(data).hexdigest(), time.monotonic() + 900, id(c.db))  # not money: seconds
         return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT,
                       preview=[(name, len(rows)) for name, (_, rows) in tables.items()],
                       token=token, payload=base64.b64encode(data).decode('ascii'))
@@ -247,7 +247,7 @@ async def preview_starter_import(request: Request):
     from lightning.workflows.workbook_import import MAX_UPLOAD
     c = container(request)
     try:
-        form = await request.form(max_part_size=MAX_UPLOAD * 2)
+        form = await request.form(max_part_size=MAX_UPLOAD * 2)  # not money: bytes
         state = _starter_state(request)
         if form.get('action') == 'confirm':
             try:
@@ -259,17 +259,17 @@ async def preview_starter_import(request: Request):
                 raise ValueError('The preview expired or the file changed. Upload the workbook again.')
             result = starter_import.confirm(c, data)  # the same bytes, read again: the profile may have changed
             token = secrets.token_urlsafe(32)
-            state[token] = {'result': result_for(c, result), 'expires': time.monotonic() + 900, 'db': id(c.db)}
+            state[token] = {'result': result_for(c, result), 'expires': time.monotonic() + 900, 'db': id(c.db)}  # not money: seconds
             return render(request, 'exports/starter.html', done=result, token=token, shown=_STARTER_SHOWN)
         upload = form.get('workbook')
         if upload is None or not hasattr(upload, 'read'):
             raise ValueError('Choose an Excel .xlsx workbook.')
-        data = await upload.read(MAX_UPLOAD + 1)
+        data = await upload.read(MAX_UPLOAD + 1)  # not money: bytes
         preview = starter_import.prepare(c, data)
         if len(state) >= 8:
             state.pop(next(iter(state)))
         token = secrets.token_urlsafe(32)
-        state[token] = {'sha': hashlib.sha256(data).hexdigest(), 'expires': time.monotonic() + 900, 'db': id(c.db)}
+        state[token] = {'sha': hashlib.sha256(data).hexdigest(), 'expires': time.monotonic() + 900, 'db': id(c.db)}  # not money: seconds
         return render(request, 'exports/starter.html', preview=preview, token=token, shown=_STARTER_SHOWN,
                       payload=base64.b64encode(data).decode('ascii'))
     except (ValueError, LightningError) as exc:
