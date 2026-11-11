@@ -32,8 +32,8 @@ def test_the_late_chip_shows_on_the_plan_and_the_review(c, setup):
     _overdue_bill(c, accounts)
     browser = _ScreenClient(create_app(c), "http://testserver")
     plan = visible_text(browser.get("/plan").text)
-    assert "Landlord 2026-12-20" in plan and "Late · 11 days" in plan
-    assert plan.index("Landlord 2026-12-20") < plan.index("Landlord 2027-01-20")  # late first
+    assert "Landlord 20 Dec" in plan and "Late · 11 days" in plan
+    assert plan.index("Landlord 20 Dec") < plan.index("Landlord 20 Jan 2027")  # late first
     assert "Late · 11 days" in visible_text(browser.get("/review").text)
 
 
