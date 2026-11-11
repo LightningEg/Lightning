@@ -17,6 +17,7 @@ def test_a_late_bill_is_listed_once_and_the_lead_holds_no_card(c, monkeypatch):
     late = set(re.findall(r"([\w'& ]+) is late", page))
     assert late, "the sample has late bills on this day"
     nxt = page.split('id="plan-next"', 1)[1].split("</section>", 1)[0]
+    assert "20 Oct – 19 Nov" in nxt  # the list starts at today
     assert "is-late" not in nxt and "plan-status-late" not in nxt  # a later instalment of the same bill may still be listed
     lead = page.split('class="card lead-card', 1)[1].split("</section>", 1)[0]
     assert 'class="card' not in lead and 'id="afford-h"' not in lead

@@ -174,7 +174,8 @@ async def plan_page(request: Request):
                   gameya_owed=position.gameya_still_to_pay,
                   notes=[], plan=plan, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
                   next_payments=next_payments, late_days=late_days, circle_rows=circle_rows,
-                  upcoming=[p for p in next_payments if p not in late],  # IV-12Z2: the PC lists late bills in Needs you only as_of=fmt_date(day), window_end=fmt_date(window_end),
+                  upcoming=[p for p in next_payments if p not in late],  # IV-12Z2: the PC lists late bills in Needs you only
+                  as_of=fmt_date(day), window_end=fmt_date(window_end),
                   has_items=has_items, labels=_labels(c), zakat=c.zakat.forecast(day))
 
 

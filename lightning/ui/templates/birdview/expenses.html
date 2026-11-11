@@ -85,5 +85,4 @@
   </details>{% endif %}
 </div>
 {% endif %}
-<script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{/* IV-12Z3: a row opened on request stays open next time */for(const d of document.querySelectorAll('details[data-remember-open]')){const k='lightning.open.'+d.id;try{if(localStorage.getItem(k)==='1')d.open=true}catch(e){}d.addEventListener('toggle',()=>{try{localStorage.setItem(k,d.open?'1':'0')}catch(e){}})}})();</script>
 {% endblock %}

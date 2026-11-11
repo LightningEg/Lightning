@@ -75,7 +75,7 @@
 
 {% if zakat and not has_income %}<div class="compact-list" id="plan-zakat"><a class="compact-row" href="/zakat"><span>{{ 'Zakat day'|tr(locale) }}<small>{{ zakat.day }} · {{ 'An estimate at today’s figures. It changes no balance and is not in the forecast above.'|tr(locale) }}</small></span><b>{% if zakat.amount %}{{ zakat.amount|money }} <small>{{ base }}</small>{% else %}{{ 'Nothing due'|tr(locale) }}{% endif %}</b></a></div>{% endif %}
 {% if has_income %}
-<header class="overview-section-head inv-head" id="plan-forecast"><h2>{{ 'Where is my cash heading?'|tr(locale) }}</h2><span>The last {{ p.heading.labels|length - f.months|length if p.heading.labels else 0 }} month ends, then the next {{ f.months|length }}</span></header>
+<details class="flow-disclosure plan-more" id="plan-forecast" data-remember-open><summary class="overview-section-head inv-head"><h2>{{ 'Where is my cash heading?'|tr(locale) }}</h2><span>The last {{ p.heading.labels|length - f.months|length if p.heading.labels else 0 }} month ends, then the next {{ f.months|length }}</span></summary>
 {% set has_circle = f.months|selectattr("circle_in")|list or f.months|selectattr("circle_out")|list %}
 <section class="card wide-card"><div class="overview-split">
   <section><div class="overview-block-head"><div><h3>{{ "Free cash, then the forecast"|tr(locale) }}</h3>{% if f.lowest %}<p>{{ 'lowest {amount} in {month}'|tr(locale, amount=f.lowest.closing|money, month=f.lowest.month) }}</p>{% endif %}</div></div>
@@ -88,14 +88,14 @@
       <thead><tr><th>{{ 'Month'|tr(locale) }}</th><th class="num">{{ "Income (estimate)"|tr(locale) }}</th>{% if has_deposits %}<th class="num">{{ "CD proceeds (estimate)"|tr(locale) }}</th>{% endif %}{% if has_circle %}<th class="num">{{ "Gam'eya payout (estimate)"|tr(locale) }}</th>{% endif %}<th class="num">{{ "Out (estimate)"|tr(locale) }}</th><th class="num">{{ "Ends with (estimate)"|tr(locale) }}</th></tr></thead>
       <tbody>{% for m in f.months %}<tr class="{{ 'plan-low' if f.lowest and m.month == f.lowest.month }}"><td>{{ ('Rest of ' ~ m.month) if loop.first and p.flows and p.flows[0].rest else m.month }}</td><td class="num">{{ m.income|money }}{% if m.income_estimated %} <small class="muted">{{ "average"|tr(locale) }}</small>{% endif %}</td>{% if has_deposits %}<td class="num">{{ m.deposit_cash|money }}</td>{% endif %}{% if has_circle %}<td class="num">{{ m.circle_in|money }}</td>{% endif %}<td class="num"><details><summary>{{ m.money_out|money }}</summary><small>{{ ("Bills and loan payments from Free cash" if m.reserved_bills else "Bills and loan payments")|tr(locale) }} {{ m.commitments|money }}{% if m.reserved_bills %} · {{ "{amount} already covered by reserves"|tr(locale, amount=m.reserved_bills|money) }}{% endif %} · {{ fig.left_in_plan_after_bills.label }} {{ m.budget_spending|money }} · {{ fig.saving_for_goals.label }} {{ m.goal_saving|money }}{% if m.emergency_saving %} · {{ fig.emergency_top_up.label }} {{ m.emergency_saving|money }}{% endif %}{% if m.target_saving %} · {{ fig.savings_target_rest.label }} {{ m.target_saving|money }}{% endif %}{% if m.circle_out %} · {{ "Gam'eya instalments"|tr(locale) }} {{ m.circle_out|money }}{% endif %}</small></details></td><td class="num">{{ m.closing|money }}</td></tr>{% endfor %}</tbody>
     </table></div></details></section>
-</div></section>
+</div></section></details>
 
 {% else %}
 <header class="overview-section-head inv-head" id="plan-forecast"><h2>{{ 'Where is my cash heading?'|tr(locale) }}</h2><span>{{ 'Today'|tr(locale) }}</span></header>
 <section class="card wide-card empty-state"><p>{{ "Add your salary and bills to see where your cash is heading. Lightning forecasts from what you expect to come in and go out; with nothing planned it would only be guessing."|tr(locale) }}</p><div class="actions"><a class="btn primary" href="/plan/recurring">{{ 'Add salary and bills'|tr(locale) }}</a></div></section>
 
 {% endif %}
-<header class="overview-section-head inv-head"><h2>{{ 'What is promised?'|tr(locale) }}</h2><span>{{ 'Today'|tr(locale) }}</span></header>
+<details class="flow-disclosure plan-more" id="plan-promised" data-remember-open><summary class="overview-section-head inv-head"><h2>{{ 'What is promised?'|tr(locale) }}</h2><span>{{ 'Today'|tr(locale) }}</span></summary>
 {% set by_loan = p.loan_bars.rows|length > 1 %}
 <section class="card wide-card owe-card" id="what-you-owe"><div class="overview-split{{ '' if by_loan else ' is-single' }}">
   <section><div class="overview-block-head"><div><h3>{{ fig.what_you_owe.label }}</h3></div><a class="quiet-link" href="/plan/loans">{{ 'Loans'|tr(locale) }}</a></div>
@@ -106,5 +106,5 @@
       {% if gameya_owed %}<div class="overview-static-row"><span>{{ fig.gameya_still_to_pay.label }}</span><b>{{ gameya_owed|money }}</b></div>{% endif %}</div></section>
   {% if by_loan %}<section><div class="overview-block-head"><div><h3>{{ "By loan"|tr(locale) }}</h3></div></div>
     {{ bars(p.loan_bars, 'spend', 'No loans to pay.') }}</section>{% endif %}
-</div></section>
+</div></section></details>
 {% endblock %}

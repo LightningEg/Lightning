@@ -31,7 +31,7 @@ Each tab keeps, open: the header, the Lead, Needs you, the KPI row and the one d
 
 12Z1: `tests/test_page_skeleton.py` fails a tab taller than 2.5 screens at 1366 x 768 (Transactions and Categories excepted); Spending, Cash planning, Holdings and Your data are listed in its `ALLOWED` with their step.
 
-Built 12Z2: Cash planning lists a late bill in Needs you only, "Can I afford this?" is its own card, Zakat day is a line of the forecast card (`tests/test_plan_says_each_thing_once.py`). Built 12Z3: Spending keeps Where did it go? open; Is this period unusual?, Day by day, Cash flow and Month by month are closed rows that remember being opened, and Spending is within 2.5 screens. Their one-line summaries are still to write. Cash planning is still over 2.5 screens; 12Z3's pattern (closed rows) applies to its lower cards.
+Built 12Z2: Cash planning lists a late bill in Needs you only, "Can I afford this?" is its own card, Zakat day is a line of the forecast card (`tests/test_plan_says_each_thing_once.py`). Built 12Z3: Spending keeps Where did it go? open; Is this period unusual?, Day by day, Cash flow and Month by month are closed rows that remember being opened, and Spending is within 2.5 screens. Their one-line summaries are still to write. Where is my cash heading? and What is promised? are closed rows that remember being opened, so Cash planning is within 2.5 screens.
 
 ## How to work on this item
 
