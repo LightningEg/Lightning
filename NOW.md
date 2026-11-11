@@ -6,7 +6,6 @@ Reserved codes: none
 
 | Who | Work | Files | Since |
 |---|---|---|---|
-| Codex | IV-3BF PC finish, steps 1-7. | `lightning/ui/static/`, `lightning/ui/templates/`, `tests/test_*browser.py`, `issues/3-polish-and-arabic/` | 2026-11-11 |
 | Claude | O5 | `lightning/deposits/` | 2026-11-10 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
@@ -21,7 +20,7 @@ Reserved codes: none
 
 - **Plan cut (owner, 11-11):** 29 parked, 3H and 9A dropped; findings go to `issues/INBOX.md`. **Read:** AGENTS §3.
 
-- **r28 (Codex):** Next: 3BF (owner order; 3BC and 3BD done). **Read:** r28.
+- **r28 (Codex):** 3BC, 3BD and 3BF done. **Read:** r28.
 
 - **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 

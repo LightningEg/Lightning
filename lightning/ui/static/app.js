@@ -1,6 +1,70 @@
 // Small helpers only — no financial logic lives in the browser.
 const t = (text, values) => window.lightningT ? window.lightningT(text, values) : String(text);
 
+// IV-3BF5: the browser still checks fields, but Lightning shows the message in its own rose well.
+const requiredMessage = {
+  amount: "Enter an amount.", category_id: "Choose a category.", date: "Pick a date.",
+  name: "Enter a name.", counterparty: "Enter a name.",
+};
+let clientErrorId = 0;
+const clearClientError = (field) => {
+  const id = field.dataset.clientErrorId;
+  if (!id) return;
+  document.getElementById(id)?.remove();
+  field.removeAttribute("aria-invalid");
+  field.setAttribute("aria-describedby", (field.getAttribute("aria-describedby") || "").split(/\s+/).filter((part) => part && part !== id).join(" "));
+  if (!field.getAttribute("aria-describedby")) field.removeAttribute("aria-describedby");
+  field.closest(".field")?.classList.remove("has-error");
+  delete field.dataset.clientErrorId;
+};
+const showFieldError = (field) => {
+  if (!field || field.disabled) return;
+  clearClientError(field);
+  const host = field.closest(".field, label") || field.parentElement;
+  if (!host) return;
+  const message = field.validity.valueMissing
+    ? t(requiredMessage[field.name] || (field.tagName === "SELECT" ? "Choose an option." : "Fill in this field."))
+    : t(field.validity.customError ? field.validationMessage : "Enter a valid value.");
+  const well = document.createElement("small");
+  well.className = "field-error";
+  well.id = `client-field-error-${++clientErrorId}`;
+  well.setAttribute("role", "alert");
+  well.textContent = message;
+  host.append(well);
+  host.classList.add("has-error");
+  field.dataset.clientErrorId = well.id;
+  field.setAttribute("aria-invalid", "true");
+  field.setAttribute("aria-describedby", [field.getAttribute("aria-describedby"), well.id].filter(Boolean).join(" "));
+};
+const showFormErrors = (form) => {
+  const invalid = [...form.elements].filter((field) => field.willValidate && !field.checkValidity());
+  invalid.forEach(showFieldError);
+  if (invalid.length) {
+    const first = invalid[0];
+    const visible = first.hidden ? first.closest(".counterparty-picker")?.querySelector('[role="combobox"]') : first;
+    (visible || first).focus();
+  }
+  return invalid.length === 0;
+};
+window.lightningShowFormErrors = showFormErrors;
+const initValidationForms = (root) => {
+  const forms = [...(root.matches?.("form") ? [root] : []), ...root.querySelectorAll("form")];
+  forms.forEach((form) => {
+    form.noValidate = true;
+    if (form.dataset.clientValidationReady) return;
+    form.dataset.clientValidationReady = "1";
+    form.addEventListener("input", (event) => { if (event.target.dataset?.clientErrorId) clearClientError(event.target); });
+    form.addEventListener("change", (event) => { if (event.target.dataset?.clientErrorId) clearClientError(event.target); });
+  });
+};
+initValidationForms(document);
+new MutationObserver((changes) => changes.forEach((change) => change.addedNodes.forEach((node) => {
+  if (node instanceof Element) initValidationForms(node);
+}))).observe(document.documentElement, {childList: true, subtree: true});
+document.addEventListener("submit", (event) => {
+  if (!showFormErrors(event.target)) { event.preventDefault(); event.stopImmediatePropagation(); }
+}, true);
+
 // Match server-rendered numbers regardless of the device's regional settings.
 window.lightningNumber = (value, {min = 0, max = 2, signed = false} = {}) => {
   const text = new Intl.NumberFormat("en-US", {
@@ -814,7 +878,7 @@ const initDateFields = (root = document) => {
       form.dataset.dateSubmitReady = "1";
       form.addEventListener("submit", (event) => {
         const bad = [...form.elements].find((field) => field.matches?.("[data-smart-date]") && !normalizeDateField(field));
-        if (bad) { event.preventDefault(); event.stopImmediatePropagation(); bad.reportValidity(); bad.focus(); }
+        if (bad) { event.preventDefault(); event.stopImmediatePropagation(); showFieldError(bad); bad.focus(); }
       }, true);
     }
   });
@@ -1337,7 +1401,7 @@ document.addEventListener("submit", (event) => {
   if (!pending.length) return;
   event.preventDefault();
   event.stopImmediatePropagation();
-  Promise.all(pending.map(workOutSum)).then(() => pending.find((field) => field.validationMessage)?.reportValidity());
+  Promise.all(pending.map(workOutSum)).then(() => { const bad = pending.find((field) => !field.checkValidity()); if (bad) { showFieldError(bad); bad.focus(); } });
 }, true);
 // Format money as the user types (1,000.50) while retaining a plain numeric value on submit.
 const setupMoneyInput = (input) => {
@@ -1349,7 +1413,7 @@ const setupMoneyInput = (input) => {
     if (event.key !== "Enter" || !pendingSum(input)) return;
     event.preventDefault();  // the first Enter works the sum out; the next one saves
     event.stopImmediatePropagation();
-    workOutSum(input).then(() => { if (input.validationMessage) input.reportValidity(); });
+    workOutSum(input).then(() => { if (!input.checkValidity()) { showFieldError(input); input.focus(); } });
   });
   input.addEventListener("input", () => {
     input.setCustomValidity("");
@@ -1949,7 +2013,7 @@ const initAutosaveExisting = (root = document) => root.querySelectorAll("form[da
   let saved = new URLSearchParams(new FormData(form)).toString(), busy = false;
   const save = async () => {
     const data = new URLSearchParams(new FormData(form)), next = data.toString();
-    if (busy || next === saved || !form.reportValidity()) return;
+    if (busy || next === saved || !showFormErrors(form)) return;
     busy = true; status.textContent = t("Saving…");
     try {
       const response = await fetch(form.action || location.href, { method: "POST", body: data,
@@ -2154,7 +2218,7 @@ initCurrencySearch();
       const save = async () => {
         const data = new URLSearchParams(new FormData(form));
         const next = data.toString();
-        if (busy || next === saved || !form.reportValidity()) return;
+        if (busy || next === saved || !showFormErrors(form)) return;
         busy = true;
         if (status) status.textContent = t("Saving…");
         let succeeded = false;
@@ -2438,7 +2502,7 @@ const initMonthPickers = (root = document) => root.querySelectorAll("[data-month
       const value = input.value.trim();
       if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(value) || toIndex(value) > currentIndex) {
         input.setCustomValidity(`Use yyyy-mm, up to ${currentMonth}.`);
-        input.reportValidity();
+        showFieldError(input);
         return;
       }
       input.setCustomValidity("");
@@ -2447,7 +2511,7 @@ const initMonthPickers = (root = document) => root.querySelectorAll("[data-month
         const end = customInputs.find((field) => field.name === "date_to");
         if (toIndex(end.value.trim()) < toIndex(start.value.trim())) {
           end.setCustomValidity("The end month must be the same as or after the start month.");
-          end.reportValidity();
+          showFieldError(end);
           return;
         }
         form.requestSubmit(form.querySelector('[name="period"][value="custom"]'));
@@ -2462,7 +2526,7 @@ const initMonthPickers = (root = document) => root.querySelectorAll("[data-month
     event.preventDefault();
     if (!event.target.checkValidity() || (event.target === monthValue && !valid(monthValue.value.trim()))) {
       if (event.target === monthValue) monthValue.setCustomValidity(`Use yyyy-mm, up to ${currentMonth}.`);
-      event.target.reportValidity();
+      showFieldError(event.target);
       return;
     }
     const selected = form.querySelector("button.period-button.selected")
@@ -2479,7 +2543,7 @@ const initMonthPickers = (root = document) => root.querySelectorAll("[data-month
     const value = monthValue.value.trim();
     if (!valid(value)) {
       monthValue.setCustomValidity(`Use yyyy-mm, up to ${currentMonth}.`);
-      monthValue.reportValidity();
+      showFieldError(monthValue);
       return;
     }
     monthValue.value = value;

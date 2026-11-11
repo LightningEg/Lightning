@@ -21,7 +21,7 @@
   {% set row %}<span>{{ "Add a counterparty"|tr(locale) }}</span><b>+</b>{% endset %}
   {% call sheet('Add a counterparty'|tr(locale), row) %}<p class="phone-note">{{ "Use one saved name across transactions. You can set a suggested category; each transaction can still use a different one."|tr(locale) }}</p>
   <form method="post" action="/counterparties" class="phone-form">
-    <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ entered_name or '' }}" placeholder="e.g. Talabat" required></label>
+    <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ entered_name or '' }}" placeholder="e.g. Talabat" required spellcheck="false" autocomplete="off"></label>
     <label>{{ 'Person or business'|tr(locale) }}<select name="kind" data-own-picker><option value="">{{ "Not set"|tr(locale) }}</option><option value="PERSON">{{ "Person"|tr(locale) }}</option><option value="BUSINESS">{{ "Business"|tr(locale) }}</option></select></label>
     <label>{{ 'Suggested category'|tr(locale) }}<select name="default_category_id" data-own-picker><option value="">{{ "No default"|tr(locale) }}</option>{{ category_options(category_groups(categories), entered_category_id) }}</select></label>
     <button class="btn primary phone-save">{{ "Add counterparty"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endcall %}
@@ -35,7 +35,7 @@
   {% call sheet(party.name, row, 'is-muted' if not party.active else '') %}
   <a class="btn primary phone-save" href="/counterparties/{{ party.id }}">{{ 'Open {name}'|tr(locale, name=party.name) }}</a>
   <form method="post" action="/counterparties" class="phone-form"><input type="hidden" name="counterparty_action" value="rename"><input type="hidden" name="counterparty_id" value="{{ party.id }}">
-    <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ party.name }}"></label>
+    <label>{{ 'Name'|tr(locale) }}<input type="text" name="name" value="{{ party.name }}" spellcheck="false" autocomplete="off"></label>
     <label>{{ 'Suggested category'|tr(locale) }}<select name="default_category_id" data-own-picker><option value="">{{ (('Learned' |tr(locale)) ~ ': ' ~ learned_label.split(' › ')[-1]|tr(locale)) if learned_label else 'No default'|tr(locale) }}</option>{{ category_options(category_groups(categories), party.default_category_id or '') }}</select></label>
     {% if learned_label and not party.default_category_id %}<p class="phone-note">{{ learned.count }} of the last {{ learned.total }}</p>{% endif %}
     <button class="btn phone-save">{{ 'Save'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>

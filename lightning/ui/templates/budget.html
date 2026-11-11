@@ -1,3 +1,4 @@
+{% from "partials/chevron.html" import chevron with context %}
 {% extends "base.html" %}
 {% block title %}Budget{% endblock %}
 {% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/budget", period.key, month, this_month, period.start_text, period.end_text) }} <a class="btn small" href="/budget/fill?month={{ month }}">{{ "Fill this month"|tr(locale) }}</a>{% endblock %}
@@ -29,7 +30,7 @@
   <span class="bullet-key"><span><i class="k spent"></i>{{ ('From monthly plan' if funding_adjustment_total else 'Spent')|tr(locale) }}</span><span><i class="k plan"></i>{{ 'Plan'|tr(locale) }}</span><span><i class="k over"></i>{{ "Over plan"|tr(locale) }}</span></span></div>
   {% if meter_active %}<div class="bullets">{% for r in meter_active %}{{ bullet_row(r.label, r.used, r.total, r.b, r.href) }}{% endfor %}</div>{% endif %}
   {% if meter_rest %}<details class="budget-untouched"{{ ' open' if not meter_active }}><summary>{{ '{n} untouched'|tr(locale, n=meter_rest|length) }}</summary><div class="bullets">{% for r in meter_rest %}{{ bullet_row(r.label, r.used, r.total, r.b, r.href) }}{% endfor %}</div></details>{% endif %}
-  {% if plan_bills %}<a class="compact-row budget-bills-link" id="budget-bills" href="/plan"><span>{{ "Bills still to pay this month"|tr(locale) }}<small>{{ 'Mark them paid in Cash planning'|tr(locale) }}</small></span><b>{% if everyday and everyday.bills_to_pay %}{{ everyday.bills_to_pay|money }} {{ base }}{% endif %} ›</b></a>{% endif %}
+  {% if plan_bills %}<a class="compact-row budget-bills-link" id="budget-bills" href="/plan"><span>{{ "Bills still to pay this month"|tr(locale) }}<small>{{ 'Mark them paid in Cash planning'|tr(locale) }}</small></span><b>{% if everyday and everyday.bills_to_pay %}{{ everyday.bills_to_pay|money }} {{ base }}{% endif %} {{ chevron() }}</b></a>{% endif %}
 </section>{% elif pace and not lead %}<section class="card" id="budget-pace" aria-labelledby="pace-heading"><div class="card-heading"><div><h2 id="pace-heading">{{ 'Is everyday spending on pace?'|tr(locale) }}</h2></div></div>
     {{ pace_chart(pace, base, previous_month) }}
   </section>{% endif %}
