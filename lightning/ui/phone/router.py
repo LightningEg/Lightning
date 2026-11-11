@@ -76,7 +76,8 @@ def phone_router() -> APIRouter:
         from lightning.ui.phone.screens import home as screen
         asked = request.query_params
         if request.url.path == "/" and any(asked.get(key) for key in PERIOD_KEYS):   # 3AY10: a period link reads the report
-            return redirect("/money/report?" + urlencode({"period": asked.get("period") or "month"}))
+            return redirect("/money/report?" + urlencode({key: asked.get(key) for key in ("period", "date_from", "date_to")
+                                                          if asked.get(key)} or {"period": "month"}))
         c = container(request)
         _read_new_sms(request, c)
         return render_phone(request, "phone/home.html", screen=screen.build(c, today()))
@@ -131,7 +132,8 @@ def phone_router() -> APIRouter:
         from lightning.core.dates import today
         from lightning.ui.phone.screens import report as screen
         return render_phone(request, "phone/money_report.html",
-                            screen=screen.build(container(request), today(), request.query_params.get("period", "month")))
+                            screen=screen.build(container(request), today(), request.query_params.get("period", "month"),
+                                                request.query_params.get("date_from", ""), request.query_params.get("date_to", "")))
 
     @router.get("/money/reviews")
     async def money_reviews(request: Request):

@@ -3618,6 +3618,7 @@ ARABIC_UI = {
     'Looks monthly. Track it so the plan expects it.': 'شكله شهري. تابعه عشان الخطة تتوقعه.',
     'A payment with no category': 'دفعة من غير فئة',
     'Search payments': 'دوّر في المدفوعات',
+    'Period': 'الفترة',
 }
 
 
