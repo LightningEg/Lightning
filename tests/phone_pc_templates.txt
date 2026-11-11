@@ -3,10 +3,6 @@
 accounts/convert.html
 accounts/form.html
 accounts/ownership.html
-analysis/calendar.html
-analysis/compare.html
-analysis/item.html
-analysis/reports.html
 bank_import_map.html
 bank_import_preview.html
 bank_import_sheets.html
