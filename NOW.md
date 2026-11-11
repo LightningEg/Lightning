@@ -37,7 +37,7 @@ Reserved codes: none
 
 - **Website (11-09):** owner: Home ends on Download; Marketplace in search (site PR). Analytics host blocked here: unread. **Read:** site README › Search.
 
-- **Import:** 7AB built (owner: one PC+phone check). Next 7AK, 7AO, 7AN, 7AQ. **Read:** Architecture › File profile.
+- **Import:** 7AB, 7AN, 7AK1-2, 7AQ1-4 built (owner: PC+phone check). Next 7AO, 7AQ5, 7AK3-4. **Read:** each item.
 
 
 Plan: `issues/INDEX.md`.

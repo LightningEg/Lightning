@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 69 open items. Each folder holds its reports and its items.
+11 big pictures, 68 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -176,26 +176,20 @@ Getting a month in takes minutes: any bank file, any old app, one search box.
 | **IV-7AJ** | [Paste SMS fills what it can: the amount when no pattern matches, and the message's own date and shop](7-planning-import-and-search/IV-7AJ-paste-sms-fills-what-it-can.md) ([#490](https://github.com/LightningEg/Lightning/issues/490)) | improvement, visual | Capture | S | Sonnet | ready |
 | **IV-7AL** | [Phone Add: start on the amount, come back to the same Home, pay from the account that payee usually uses](7-planning-import-and-search/IV-7AL-phone-add-focus-return-and-account.md) | improvement, visual | Capture | M | Sonnet | new |
 | **NF-7AK** | [Bank messages beyond CIB and NBE in Arabic: English card messages, wallets, other currencies, and the researched formats](7-planning-import-and-search/NF-7AK-bank-messages-beyond-cib-and-nbe.md) | new feature | Capture | L | Opus | new |
-| NF-7AK1 | ↳ English card and account messages | | | M | Opus | |
-| NF-7AK2 | ↳ Wallets, which name no card ending | | | M | Opus | |
 | NF-7AK3 | ↳ Purchases in another currency | | | M | Opus | |
 | NF-7AK4 | ↳ Use the researched formats | | | M | Opus | |
 | **NF-7AM** | [Repeat an entry in one tap, and Save and add another](7-planning-import-and-search/NF-7AM-repeat-and-add-another.md) | new feature | Capture | M | Sonnet | ready |
-| **NF-7AN** | [Save now, sort later: an entry with only an amount waits in To sort](7-planning-import-and-search/NF-7AN-save-now-sort-later.md) | new feature | Capture | M | Opus | ready |
 | **NF-7AO** | [Bank messages Lightning is sure about save themselves, marked and undoable](7-planning-import-and-search/NF-7AO-sure-bank-messages-save-themselves.md) | new feature | Capture | L | Opus | new |
 | NF-7AO1 | ↳ What "sure" means, and the service | | | M | Opus | |
 | NF-7AO2 | ↳ Seen, marked, undoable | | | M | Opus | |
 | NF-7AO3 | ↳ Not twice | | | M | Opus | |
 | **NF-7AP** | [Compare the balance a bank message states with the account, as a quiet To do row](7-planning-import-and-search/NF-7AP-bank-message-balance-check.md) | new feature | Capture | M | Sonnet | ready |
 | **NF-7AQ** | [Search answers a typed question - "food last month" gives the figure, its comparison and the rows, not a link to a filter](7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md) | new feature | Capture | L | Opus | new |
-| NF-7AQ1 | ↳ The PC lists matching payments first, as the phone does | | | S | Sonnet | |
-| NF-7AQ2 | ↳ A period grammar, tested alone | | | M | Opus | |
-| NF-7AQ3 | ↳ The answer card | | | M | Opus | |
-| NF-7AQ4 | ↳ Mohab asks three questions | | | S | Sonnet | |
+| NF-7AQ5 | ↳ Accounts and tags, and the owner's Arabic words | | | S | Sonnet | |
 
 Reports: [r23](7-planning-import-and-search/r23-csv-import-stress/report.md) · [r31](7-planning-import-and-search/r31-logging-entries/report.md).
 
-Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AB, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI. Next free code: 7AR.
+Done: 7A, 7B, 7C, 7D, 7E, 7F, 7G, 7H, 7I, 7J, 7K, 7L, 7M, 7N, 7O, 7P, 7Q, 7R, 7S, 7T, 7U, 7V, 7W, 7X, 7Y, 7Z, 7AA, 7AB, 7AC, 7AD, 7AE, 7AF, 7AG, 7AH, 7AI, 7AN. Next free code: 7AR.
 
 ## 8 Website
 

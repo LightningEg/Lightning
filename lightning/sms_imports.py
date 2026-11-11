@@ -131,7 +131,9 @@ def parse_sms(text: str, *, sender: str = "", received: datetime | None = None) 
     bank = next((name for phone, name in BANK_PHONES.items() if phone in flat), "")
     bank = bank or next((name for name in BANK_PHONES.values() if sender.upper().startswith(name)), "") \
         or ("CIB" if "CIB" in flat.upper() else sender)
-    balance_match = re.search(r"(?:الرصيد\s*المتاح|المتاح)\s*" + _AMOUNT, flat)
+    # A credit card's "available limit" is what it may still spend, not money held: never read as a balance.
+    balance_match = re.search(r"(?:الرصيد\s*المتاح|المتاح|available\s+balance|avl\.?\s*bal\.?|(?<!limit\s)balance)"
+                              r"\s*:?\s*" + _AMOUNT, flat, re.IGNORECASE)
     balance = _amount(balance_match.group(1)) if balance_match else None
     on = r"(?:في|بتاريخ|يوم)\s*(\d{1,2}[/-]\d{1,2}(?:[/-]\d{2,4})?)" + _CLOCK
 
@@ -175,6 +177,21 @@ def parse_sms(text: str, *, sender: str = "", received: datetime | None = None) 
                               _when(day, clock, received, month_first=True), who.strip(), reference or "",
                               balance, bank)
 
+    # A card in English (NF-7AK1): "Your debit card ending with 1234 was charged EGP 250.00 at TALABAT on 08/11/26
+    # at 21:15", "Your credit card ending 5678 was used for EGP 1,250.00 at AMAZON.EG on 08/11 20:01". Common
+    # wordings, not yet checked against a real message: read, but marked to check (sure=False) until a sample is.
+    english = re.search(r"(debit|credit)?\s*card\s*(?:ending|no\.?)\s*(?:with|in)?\s*[*xX•]*\s*(\d{4})\s*was\s*"
+                        r"(?:charged|used\s*for|debited(?:\s*with)?)\s*(?:with\s*)?(EGP)\s*" + _NUM +
+                        r"\s*(?:at|in)\s+(.+?)\s+on\s+(\d{1,2}/\d{1,2}(?:/\d{2,4})?)(?:\s*(?:at)?\s*(\d{1,2}:\d{2}))?",
+                        flat, re.IGNORECASE)
+    if english:
+        _card, ending, _cur, raw, place, day, clock = english.groups()
+        amount = _amount(raw)
+        if amount is None:
+            return None
+        return SmsTransaction("purchase", amount, ending, _when(day, clock, received), _place(place),
+                              balance=balance if (_card or "").lower() != "credit" else None, bank=bank, sure=False)
+
     # Salary, CIB: "عميلنا العزيز لقد تم تحويل مبلغ EGP19,584.66 على حسابكم لدينا من جهة العمل"
     salary = re.search(r"تحويل\s*مبلغ\s*" + _AMOUNT + r"\s*(?:على|الى|إلى)\s*حساب\S*.*?جهة\s*العمل", flat)
     if salary:
@@ -182,10 +199,11 @@ def parse_sms(text: str, *, sender: str = "", received: datetime | None = None) 
         if amount is None:
             return None
         return SmsTransaction("salary", amount, SALARY_ENDING, _when(None, None, received), "Salary", bank=bank)
-    return _general(flat, received, balance, bank)
+    return _general(flat, received, balance, bank, sender)
 
 
-_OUT_WORDS = r"(خصم|سحب|شراء|سداد|دفع|مدفوعات|تحويل\s*لحظي\s*من|تحويل\s*من\s*حساب|debited|withdraw\w*|purchase|paid|spent|sent)"
+_OUT_WORDS = (r"(خصم|سحب|شراء|سداد|دفع|مدفوعات|تحويل\s*لحظي\s*من|تحويل\s*من\s*حساب|debited|withdraw\w*|purchase|paid|spent|"
+              r"sent|charged|used\s+for)")
 _IN_WORDS = r"(إضافة|اضافة|إيداع|ايداع|استلام|استرداد|لحسابكم|إلى\s*حسابك|الى\s*حسابك|credited|received|deposit\w*|refund\w*)"
 
 
@@ -227,7 +245,35 @@ def prefill(text: str) -> dict:
     return {"amount": amount, "kind": "in" if inflow else "out"}
 
 
-def _general(flat: str, received: datetime, balance: Decimal | None, bank: str) -> SmsTransaction | None:
+WALLET_PREFIX = "wallet-"
+_WALLET_BRANDS = ((r"فودافون\s*كاش|vodafone\s*cash", "vodafonecash"), (r"اتصالات\s*كاش|etisalat\s*cash|e&\s*cash", "etisalatcash"),
+                  (r"اورنج\s*كاش|أورنج\s*كاش|orange\s*cash", "orangecash"), (r"\btelda\b", "telda"), (r"\bwe\s*pay\b", "wepay"))
+
+
+def wallet_key(flat: str, sender: str) -> str | None:
+    """NF-7AK2: a wallet names no card ending, so the wallet itself is the key, asked once like an ending: its sender,
+    else (a pasted message) the brand the words name. None when the message is not about a wallet."""
+    if not re.search(r"محفظ|wallet|using\s+your\s+\w+\s+card", flat, re.IGNORECASE):
+        return None
+    slug = re.sub(r"[^a-z0-9]", "", (sender or "").lower())[:24]
+    if len(slug) >= 2 and not PERSON.match(sender or ""):  # one wallet, one sender: its messages share the key
+        return WALLET_PREFIX + slug
+    for pattern, brand in _WALLET_BRANDS:  # pasted with no sender: the brand the words name
+        if re.search(pattern, flat, re.IGNORECASE):
+            return WALLET_PREFIX + brand
+    return None
+
+
+def wallet_name(key: str) -> str:
+    """How a wallet key reads on screen: its brand, else the sender as it came."""
+    names = {"vodafonecash": "Vodafone Cash", "etisalatcash": "e& cash", "orangecash": "Orange Cash", "telda": "Telda",
+             "wepay": "WE Pay"}
+    slug = key.removeprefix(WALLET_PREFIX)
+    return names.get(slug, slug.upper())
+
+
+def _general(flat: str, received: datetime, balance: Decimal | None, bank: str,
+             sender: str = "") -> SmsTransaction | None:
     """The general rule, for a wording no bank pattern knows yet: an amount with its currency, an account or
     card ending, and words that say which way the money went. All three, or nothing."""
     money = re.search(_CUR + r"\s*" + _NUM + r"|" + _NUM + r"\s*" + _CUR, flat)
@@ -235,14 +281,15 @@ def _general(flat: str, received: datetime, balance: Decimal | None, bank: str) 
                        re.IGNORECASE)
     out_word = re.search(_OUT_WORDS, flat, re.IGNORECASE)
     in_word = re.search(_IN_WORDS, flat, re.IGNORECASE)
-    if not money or not ending or bool(out_word) == bool(in_word) or _PROMO.search(flat):
+    key = ending.group(1) if ending else wallet_key(flat, sender)
+    if not money or not key or bool(out_word) == bool(in_word) or _PROMO.search(flat):
         return None
     amount = _amount(money.group(1) or money.group(2))
     if amount is None:
         return None
     day = re.search(r"(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})(?:\D{0,12}?(\d{1,2}:\d{2}))?", flat)
-    place = re.search(r"(?:عند|لدى|\bat)\s+(.+?)(?=\s+(?:يوم|في|on|بتاريخ|\d)|$)", flat)
-    return SmsTransaction("money_in" if in_word else "money_out", amount, ending.group(1),
+    place = re.search(r"(?:عند|لدى|\bat|(?:الى|إلى)\s*التاجر)\s+(.+?)(?=\s+(?:يوم|في|on|using|بتاريخ|\d)|\.|$)", flat)
+    return SmsTransaction("money_in" if in_word else "money_out", amount, key,
                           _when(day.group(1) if day else None, day.group(2) if day else None, received),
                           place.group(1).strip() if place else "", balance=balance, bank=bank, sure=False)
 
@@ -483,7 +530,8 @@ class SmsImportService:
         messages to review, one batch per account. Returns {ending: batch id} for endings that had messages."""
         accounts = {}
         for ending, account_id in answers.items():
-            if not (re.fullmatch(r"\d{4}", ending) or ending == SALARY_ENDING):
+            if not (re.fullmatch(r"\d{4}", ending) or ending == SALARY_ENDING
+                    or re.fullmatch(re.escape(WALLET_PREFIX) + r"[a-z0-9]{2,24}", ending)):
                 raise ValidationError("Choose the account for these messages.", "ending")
             account = self.accounts.require_usable(account_id)
             if account.currency != "EGP":

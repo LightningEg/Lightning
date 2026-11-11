@@ -471,8 +471,12 @@ def _save_popup_transaction(c, account_id: int, values: dict):
             # Left empty: a rule decides first, then the counterparty's usual category, as in the register.
             category_id = register.category_when_empty(c, values["counterparty"].strip(), values["notes"],
                                                        -amount if kind == "out" else amount, account_id)
-        if not category_id:
-            raise ValidationError("Choose a category.", "category")
+        unsorted = not category_id
+        if unsorted:
+            # NF-7AN: save now, sort later. With only an amount the entry waits as To sort (filed Unaccounted, a
+            # system category that is spending or income with no category yet); Home's To do and the phone's To
+            # sort list ask for it.
+            category_id = c.categories.get_by_code("EXP.UNACCOUNTED" if kind == "out" else "INC.UNACCOUNTED").id
         category = c.categories.get(category_id)
         if kind == "out" and category.movement.value != "OUTFLOW":  # money in to an expense is a refund
             raise ValidationError("Choose a category that matches this transaction type.", "category")
@@ -482,10 +486,12 @@ def _save_popup_transaction(c, account_id: int, values: dict):
             raise ValidationError("Choose Transfer and select the destination account explicitly.", "counterparty")
         if kind == "out":
             txn = c.transactions.record_outflow(day, account_id, amount, category_id,
-                                               counterparty=counterparty, notes=values["notes"], owner_id=owner_id)
+                                               counterparty=counterparty, notes=values["notes"], owner_id=owner_id,
+                                               allow_system_category=unsorted)
         else:
             txn = c.transactions.record_inflow(day, account_id, amount, category_id,
-                                              counterparty=counterparty, notes=values["notes"], owner_id=owner_id)
+                                              counterparty=counterparty, notes=values["notes"], owner_id=owner_id,
+                                              allow_system_category=unsorted)
     return txn
 
 
