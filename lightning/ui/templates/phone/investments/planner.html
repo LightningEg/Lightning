@@ -1,0 +1,32 @@
+{# Investment planner on the phone (3AY16): the amount and the split, then the suggested amount per class (four, then
+   Other in its sheet). #}
+{% extends "base.html" %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% block title %}Investment plan helper{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/investments"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Investments'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ "Planner"|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<form method="post" action="/investments/planner" data-popup-return="popup" class="phone-form">
+  <label>{{ "Amount in EGP"|tr(locale) }}<input autofocus name="amount" type="text" inputmode="decimal" class="money-input" autocomplete="off" value="{{ amount }}" required></label>
+  <label>{{ 'Monthly investing goal'|tr(locale) }}<input name="monthly_goal" type="text" inputmode="decimal" class="money-input" value="{{ monthly_goal }}" placeholder="{{ 'Set a monthly amount'|tr(locale) }}"></label>
+  <fieldset class="phone-segment" data-two aria-label="{{ 'How to split it'|tr(locale) }}">
+    <label><input type="radio" name="mode" value="prorata"{% if mode=='prorata' %} checked{% endif %}><span>{{ 'Spread across gaps'|tr(locale) }}</span></label>
+    <label><input type="radio" name="mode" value="fill_gaps"{% if mode=='fill_gaps' %} checked{% endif %}><span>{{ 'Biggest gaps first'|tr(locale) }}</span></label>
+  </fieldset>
+  <button class="btn primary phone-save">{{ "Show suggested split"|tr(locale) }}</button>
+<input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+{% if not planner_ready %}
+<section class="phone-section" aria-labelledby="planner-targets"><header class="phone-section-head"><h2 id="planner-targets">{{ "Set target allocation first"|tr(locale) }}</h2></header>
+  <p class="phone-note">Set positive target weights totaling at most 100% before using the helper. Current target total: {{ target_total|round(2) }}%</p>
+  <a class="btn phone-save" href="/investments/targets">{{ "Set target allocation"|tr(locale) }}</a></section>
+{% else %}
+{% if by_current_mix %}<p class="phone-note">{{ "By your current mix — set targets to change it"|tr(locale) }} · <a href="/investments/targets">{{ "Set target allocation"|tr(locale) }}</a></p>{% elif target_total < 100 %}<p class="phone-note">{{ "Targets total {total}%. Suggestions scale them to 100%; your saved targets stay unchanged."|tr(locale, total=target_total|round(2)) }}</p>{% endif %}
+<section class="phone-section" aria-labelledby="planner-result">
+  <header class="phone-section-head"><h2 id="planner-result">{{ "Suggested allocation"|tr(locale) }}</h2><span><bdi class="fig">{{ amount|money(places=0) }}</bdi></span></header>
+  <div class="phone-flow-bar" role="img" aria-label="{% for part in stack %}{{ part.label|tr(locale) }} · {{ part.value|money(places=0) }}{{ ', ' if not loop.last }}{% endfor %}">{% for part in stack %}<i class="tone-{{ part.tone }}" style="width:{{ part.value/amount*100 if amount else 0 }}%"></i>{% endfor %}</div>
+  {% macro planner_row(row) %}<div class="phone-row{{ ' is-zero' if not row.suggested }}" data-planner-bucket="{{ row.bucket }}"><span><span><i class="phone-key tone-{{ row.tone }}" aria-hidden="true"></i> {{ row.bucket|tr(locale) }}</span><small>{{ ("Current {value} · {weight}%" if by_current_mix else "Current {value} · {weight}% · Target {target}%")|tr(locale, value=row.value|money, weight=row.weight|round(1), target=(row.target|round(1) if row.target is not none else '')) }}</small></span><b><bdi class="fig">{{ row.suggested|money(places=0) }}</bdi></b></div>{% endmacro %}
+  <div class="phone-rows">{% for row in phone_shown %}{{ planner_row(row) }}{% endfor %}
+  {% if phone_other %}{% set row %}<span>{{ 'Other'|tr(locale) }}</span><b><bdi class="fig">{{ phone_other_total|money(places=0) }}</bdi></b>{% endset %}{% call sheet('Other'|tr(locale), row) %}<div class="phone-rows">{% for r in phone_other %}{{ planner_row(r) }}{% endfor %}</div>{% endcall %}{% endif %}</div>
+  <p class="phone-note">{% if by_current_mix %}{{ "Each class gets the same share of the amount as it holds now. Nothing is sold."|tr(locale) }}{% else %}{% if mode=='fill_gaps' %}<span>The class furthest below its target, in percentage points, gets money first until it is level with the next; then both are filled together, and so on.</span>{% else %}<span>Every class below its target gets the same share of its gap, so each one moves part of the way.</span>{% endif %} <span>If the money covers every gap, both ways give the same split. Nothing is sold.</span>{% endif %}</p>
+</section>{% endif %}
+{% endblock %}

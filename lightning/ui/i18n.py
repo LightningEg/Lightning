@@ -3549,6 +3549,7 @@ ARABIC_UI = {
     'Borrowed {amt} {cur}': 'مبلغ القرض {amt} {cur}',
     'Edit category': 'تعديل الفئة',
     'e.g. Pets': 'مثال: حيوانات أليفة',
+    'Record {what}': 'سجّل {what}',
 }
 
 

@@ -1130,3 +1130,6 @@ button.is-busy::after { content: ""; display: inline-block; width: 14px; height:
 .phone-row > label { display: flex; gap: 10px; align-items: center; min-width: 0; }
 .phone-row > label > span { display: flex; flex-direction: column; min-width: 0; overflow-wrap: anywhere; }
 .phone-form > label:not(.import-check) { display: flex; flex-direction: column; gap: 6px; }
+.phone-fields { display: flex; flex-direction: column; gap: 12px; }
+.phone-fields .field { display: flex; flex-direction: column; gap: 6px; margin: 0; }
+.phone-segment[data-two] { grid-template-columns: repeat(2, 1fr); border: 0; margin: 0; }
