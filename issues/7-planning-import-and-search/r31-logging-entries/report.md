@@ -69,7 +69,7 @@ Severity: high = wrong money or a lost entry; medium = a job that takes the long
 | --- | --- | --- | --- |
 | F1 | Repeat an entry in one tap; Save and add another; usual payees as chips | Build | NF-7AM |
 | F2 | Save with only an amount, sort later | Build | NF-7AN |
-| F3 | Messages Lightning is sure about save themselves, marked and undoable | Build ("auto-save the sure ones") | NF-7AO |
+| F3 | Messages Lightning is sure about save themselves, marked and undoable | Build ("auto-save the sure ones") | NF-7AO, built: `tests/test_sms_autosave.py` |
 | F4 | App notifications (Telda, InstaPay, wallets) as a source | Not chosen | none |
 | F5 | A receipt photo on an entry | Not chosen | none |
 

@@ -46,8 +46,16 @@ jobs:
       - name: Install Chromium for the browser tests (IT-1U)
         # The browser tests (clicks, phone layout, the brand audit) skipped on every pull request until this step, and
         # failures piled up unseen. The link puts this Chromium on the PATH for tests that look for `chromium` there.
+        # The fonts come from Ubuntu's mirror, which a runner sometimes cannot reach for a while (2026-11-11: three
+        # runs failed before any test): three tries, a minute apart, with a fresh package list each time.
         run: |
-          python -m playwright install --with-deps chromium
+          for attempt in 1 2 3; do
+            python -m playwright install --with-deps chromium && break
+            if [ "$attempt" = 3 ]; then exit 1; fi
+            echo "Browser install failed (try $attempt of 3); retrying in 60 s."
+            sleep 60
+            sudo apt-get update || true
+          done
           sudo ln -sf "$(python -c 'from playwright.sync_api import sync_playwright as s; p = s().start(); print(p.chromium.executable_path); p.stop()')" /usr/local/bin/chromium
       - env:
           LIGHTNING_REQUIRE_BROWSER: '1'  # a browser test that skips for want of a browser fails (tests/browser_support.py)

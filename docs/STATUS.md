@@ -6,7 +6,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 
 | Pillar | Open | Building | Ready | New | Blocked | Owner tasks |
 |---|---|---|---|---|---|---|
-| [Capture](pillars/capture.md) | 4 |  | 1 | 3 |  |  |
+| [Capture](pillars/capture.md) | 3 |  | 1 | 2 |  |  |
 | [Plan](pillars/plan.md) | 0 |  |  |  |  |  |
 | [Understand](pillars/understand.md) | 0 |  |  |  |  |  |
 | [Own](pillars/own.md) | 2 |  | 2 |  |  |  |
@@ -16,7 +16,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | [Build](pillars/build.md) | 1 |  | 1 |  |  |  |
 | [Reach](pillars/reach.md) | 1 |  | 1 |  |  |  |
 
-17 open items in 11 milestones.
+16 open items in 11 milestones.
 
 ## Being built now
 
@@ -31,6 +31,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 - **BT-2AI6** (Protect) Owner: the phone survives an update and a reinstall, in [Phone data must survive every app update and reinstall](../issues/2-safe-for-real-money/BT-2AI-phone-data-survives-updates.md)
 - **NF-4A5** (Everywhere) J6 cutover, in [Edit journal: edit anywhere, one home confirms](../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md)
 - **NF-4A6** (Everywhere) Real-device evidence, in [Edit journal: edit anywhere, one home confirms](../issues/4-edit-journal-and-devices/NF-4A-edit-journal.md)
+- **NF-7AQ5** (Capture) The owner's Arabic words · S, in [Search answers a typed question](../issues/7-planning-import-and-search/NF-7AQ-search-answers-a-typed-question.md)
 - **NF-10C4** (Feel) Owner steps 1-6 in order, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
 - **NF-10C5** (Feel) Review prices after 60 days of sales, in [Theme materials, selling themes, owner console](../issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md)
 - **NF-10H4** (Own) Owner: prices, in [One purchase per person](../issues/10-looks-and-store/NF-10H-one-purchase-per-person.md)
@@ -49,7 +50,7 @@ Version **2.1.2**. Generated from the plan by `python tools/status.py`; do not e
 | 3 Polish and Arabic | 3 | Every screen reads right in English and Arabic, on PC and phone, and says only what helps. |
 | 4 Edit journal and devices | 2 | Edit on the phone or the PC; one home confirms every change and nothing is lost. |
 | 6 Market data | 0 | Prices arrive by themselves, from sources Lightning may redistribute. |
-| 7 Planning, import and search | 3 | Getting a month in takes minutes: any bank file, any old app, one search box. |
+| 7 Planning, import and search | 2 | Getting a month in takes minutes: any bank file, any old app, one search box. |
 | 8 Website | 1 | The site is honest, quick and in step with the app. |
 | 9 Later | 0 | Good ideas that wait until the milestones above are done. |
 | 10 Looks and store | 2 | App themes and looks are bought once, worn on every device of a profile, and never change a number. |

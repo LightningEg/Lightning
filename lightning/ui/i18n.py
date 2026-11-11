@@ -882,7 +882,7 @@ ARABIC_UI = {
     'Messages': 'الرسائل',
     'Read them': 'اقرأها',
     'Read bank SMS by itself': 'قراءة رسائل البنك مباشرة',
-    'Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction you check. It reads messages from senders with a name or a short code, like CIB or NBE, never from people\'s numbers. The messages stay on this phone: nothing is sent anywhere. Nothing is posted until you check it.': 'Lightning بيقرأ رسائل البنك وبيحوّل كل دفعة وتحويل ومرتب لمعاملة تراجعها. بيقرأ الرسائل اللي جاية من اسم أو رمز قصير زي CIB أو NBE، ومش بيقرأ رسائل أرقام الأشخاص. الرسائل بتفضل على الموبايل ومش بتتبعت لأي مكان. مفيش حاجة بتتسجل غير بعد مراجعتك.',
+    "Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction. It reads messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages stay on this phone: nothing is sent anywhere. A payment Lightning is sure about saves itself, marked and undoable; the rest wait for your check.": 'Lightning بيقرأ رسائل البنك وبيحوّل كل دفعة وتحويل ومرتب لمعاملة. بيقرأ الرسائل اللي جاية من اسم أو رمز قصير زي CIB أو NBE، ومش بيقرأ رسائل أرقام الأشخاص. الرسائل بتفضل على الموبايل ومش بتتبعت لأي مكان. الدفعة اللي Lightning متأكد منها بتتسجل لوحدها، وعليها علامة وتقدر تلغيها؛ والباقي بيستنى مراجعتك.',
     'Allow reading SMS': 'اسمح بقراءة الرسائل',
     'Reads new bank messages when you open Overview or this page': 'بيقرأ رسائل البنك الجديدة لما تفتح نظرة عامة أو الصفحة دي',
     'Enter it': 'سجّلها',
