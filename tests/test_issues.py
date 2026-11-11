@@ -189,3 +189,21 @@ def test_reserved_codes_are_skipped_by_the_next_code():
     assert module.next_code(milestone, None, reserved) == "12X"
     assert module.reserved_codes("Reserved codes: none\n") == []
     assert module.next_code(milestone) == "12U"
+
+
+def test_a_parked_item_leaves_the_tables_and_the_caps_only_warn(tmp_path):  # owner, 2026-11-11: cut, then cap
+    module = _tool()
+    items = [_item(f"9{chr(65 + n)}", status="building") for n in range(4)] + [_item("9Z", status="parked", size="L")]
+    for i in items:
+        i.update(file=f"9-later/NF-{i['code']}-x.md", pillar="build", steps=i.get("steps", []))
+    milestones = [{"n": 9, "title": "Later", "goal": "", "dir": "9-later", "items": items, "done": []}]
+    page = module.render(milestones)
+    assert "1 big pictures, 4 open items" in page and "| **NF-9Z** |" not in page
+    assert page.split("## Parked")[1].count("**NF-9Z**") == 1
+    now = tmp_path / "NOW.md"
+    now.write_text("## Claimed\n9A 9B 9C 9D\n", encoding="utf-8")
+    said = module.warnings(milestones, now)
+    assert any("4 items are building" in line and "cap is 3" in line for line in said)
+    assert not any("9Z" in line for line in said), "a parked item is nobody's work: no split or claim warning"
+    module.MAX_OPEN = 3
+    assert any("4 items are open" in line and "INBOX.md" in line for line in module.warnings(milestones, now))

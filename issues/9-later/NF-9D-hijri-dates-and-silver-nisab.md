@@ -4,7 +4,7 @@ type: feature
 pillar: own
 size: M
 model: opus
-status: ready
+status: parked
 created: 2026-10-19
 by: Claude
 ---
@@ -12,7 +12,7 @@ by: Claude
 ## Report
 Arabic and zakat are built without them. Checked 2026-11-08 against the code:
 
-- **Zakat day is Gregorian only.** `lightning/zakat.py` `zakat_days(first_day, on)` adds `LUNAR_YEAR_DAYS = 354` to the date the user picked; the zakat pages (`lightning/ui/templates/zakat.html`, `phone/zakat.html`) and the gear (`settings/zakat_section.html`) show and take a `yyyy-mm-dd` date. A true lunar year is about 354.37 days, so +354 drifts about one day every three years from the Hijri date the user meant. Nothing in `lightning/` converts to or from Hijri (`grep -rni hijri lightning` is empty). The tab-by-tab review asks for it too: [IV-3H](../12-desktop-ux/IV-3H-tab-by-tab-review.md) ZK-1 ("Offer 1 Ramadan this year and show the Hijri date beside the Gregorian").
+- **Zakat day is Gregorian only.** `lightning/zakat.py` `zakat_days(first_day, on)` adds `LUNAR_YEAR_DAYS = 354` to the date the user picked; the zakat pages (`lightning/ui/templates/zakat.html`, `phone/zakat.html`) and the gear (`settings/zakat_section.html`) show and take a `yyyy-mm-dd` date. A true lunar year is about 354.37 days, so +354 drifts about one day every three years from the Hijri date the user meant. Nothing in `lightning/` converts to or from Hijri (`grep -rni hijri lightning` is empty). The tab-by-tab review asks for it too: [IV-3H](https://github.com/LightningEg/Lightning/blob/6e4d540/issues/12-desktop-ux/IV-3H-tab-by-tab-review.md) ZK-1 ("Offer 1 Ramadan this year and show the Hijri date beside the Gregorian").
 - **Silver nisab built** (9D6, 9D7: migration 0077, `ZakatService.save_nisab_basis`, `tests/test_zakat.py`): gold by default, silver at a typed gram price, or the lower of the two.
 - Architecture › Zakat, Glossary › Zakat day and Overview §shipped all say "Hijri dates are not built"; each step below updates the line it makes untrue.
 
