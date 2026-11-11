@@ -120,7 +120,7 @@ async def financial_health(request: Request):
     outside = [item for item in judged if item.band == "alert"]  # Watch stays quiet (A08)
     lead = (kpis.card("Within your limits", Decimal(within), kpis.compare(f"of the {len(judged)} figures you set a limit for"),
                       tone="in" if not outside else "over", kind="count", key="within",
-                      line_=kpis.line(f"{len(outside)} need{'s' if len(outside) == 1 else ''} you" if outside else "All of them are good"))
+                      line_=kpis.line(f"{len(outside)} {'needs' if len(outside) == 1 else 'need'} you" if outside else "All of them are good"))
             if judged else None)
     needs = [{"label": f"{labels.get(item.key, item.key)} is outside your limit",
               "detail": " · ".join(x for x in (limit_words(item), item.period) if x), "href": item.href,

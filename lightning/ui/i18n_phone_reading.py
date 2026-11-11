@@ -37,6 +37,7 @@ PHONE_READING = {
     'Review changed recurring amount': 'راجع مبلغ متكرر اتغير',
     'Review {name} amount': 'راجع مبلغ {name}',
     'The matched payment on {date} was {paid}, while future payments are planned at {planned}.': 'الدفعة المطابقة يوم {date} كانت {paid}، والدفعات الجاية متخططة بـ {planned}.',
+    '{n} month · usually around day {day}': 'شهر واحد · غالبًا حوالي يوم {day}',
     '{n} months · usually around day {day}': '{n} شهور · غالبًا حوالي يوم {day}',
     'Subscriptions come to {amt} a year.': 'الاشتراكات بتبلغ {amt} في السنة.',
     # 3AN12: Overview's rows that open sheets, Spending's lead and "More analysis"

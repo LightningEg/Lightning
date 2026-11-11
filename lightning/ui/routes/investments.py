@@ -28,6 +28,7 @@ from ...investments.report import (PLANNER_MODES, explain_period, build_investme
                                     normalized_target_weights)
 from .. import charts, kpis, status as page_status
 from lightning.core.figures import label
+from lightning.core.plural import counted
 from lightning.market.packs import chosen, read_zip
 from lightning.market.update import DEFAULT_URL, update_packs
 from lightning.workflows import live_prices
@@ -998,7 +999,7 @@ async def import_price_csv(request: Request):
     if rows.unmatched:
         parts.append(f"Not found: {', '.join(rows.unmatched[:5])}{'…' if len(rows.unmatched) > 5 else ''}")
     if rows.bad:
-        parts.append(f"Skipped {len(rows.bad)} row(s) with no usable price or date")
+        parts.append(f"Skipped {counted(len(rows.bad), 'row', 'rows')} with no usable price or date")
     note = " · ".join(parts)
     return redirect("/investments/prices", note)
 
@@ -1034,7 +1035,7 @@ async def save_prices(request: Request):
             c.reevaluations.process_due()
     except LightningError as exc:
         return redirect(f"/investments/prices?date={day}", exc.message)
-    return redirect("/investments", f"Saved {count} price input{'s' if count != 1 else ''}; reevaluation catch-up completed." if count
+    return redirect("/investments", f"Saved {counted(count, 'price input', 'price inputs')}; reevaluation catch-up completed." if count
                     else "No prices entered.")
 
 

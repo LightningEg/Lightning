@@ -6,6 +6,7 @@ from __future__ import annotations
 import logging
 
 from lightning.core.dates import today
+from lightning.core.plural import counted
 
 _log = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ def open_profile_tasks(container, *, wait: bool) -> list:
         if report not in (None, False, True):
             reports.append(report)
     try:
-        reports.append(f"Investment reevaluations: {container.reevaluations.process_due()} monthly checkpoint(s) posted.")
+        reports.append(f"Investment reevaluations: {counted(container.reevaluations.process_due(), 'monthly checkpoint', 'monthly checkpoints')} posted.")
     except Exception:  # noqa: BLE001 - the next price update or investment write posts them
         _log.warning("Month-end valuation checkpoints failed while opening the profile", exc_info=True)
     return reports

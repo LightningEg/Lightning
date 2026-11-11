@@ -4,7 +4,7 @@
 {% block heading %}{{ page_header("Reevaluation ledger"|tr(locale), "Monthly investment returns and sale-day adjustments. Each account checkpoint links to one aggregated entry in the main ledger."|tr(locale)) }}{% endblock %}
 {% block top_actions %}<a class="btn small" href="/investments">{{ 'Investments'|tr(locale) }}</a><a class="btn small" href="/investments/prices">{{ "Prices needed"|tr(locale) }}</a>{% endblock %}
 {% block content %}
-{% if pending %}<div class="card" style="margin-bottom:14px"><b>{{ pending|length }} price input(s) needed.</b> <a href="/investments/prices">{{ "Review missing prices"|tr(locale) }}</a></div>{% endif %}
+{% if pending %}<div class="card" style="margin-bottom:14px"><b>{{ pending|length|counted('price input', 'price inputs') }} needed.</b> <a href="/investments/prices">{{ "Review missing prices"|tr(locale) }}</a></div>{% endif %}
 <div class="card wide">
   <form id="reevaluation-export" method="post" action="/exports/reevaluations"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn small">{{ "Export selected"|tr(locale) }}</button></form>
   <table><thead><tr><th><input type="checkbox" id="reevaluation-select-all" aria-label="Select all visible reevaluations"></th><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'Type'|tr(locale) }}</th><th>{{ 'Investment'|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ 'Held for'|tr(locale) }}</th><th class="num">{{ "Units"|tr(locale) }}</th><th class="num">{{ "Price"|tr(locale) }}</th><th>{{ "Source"|tr(locale) }}</th><th class="num">{{ "Return"|tr(locale) }}</th><th>{{ "Main journal"|tr(locale) }}</th></tr></thead>
