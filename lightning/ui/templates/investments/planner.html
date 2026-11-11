@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Investment plan helper{% endblock %}
-{% block heading %}<h1>{{ "Planner"|tr(locale) }}</h1>{% endblock %}
+{% block heading %}<h1>{{ "Planner"|tr(locale) }}</h1>{% set st = page_status.count(rows|selectattr('value')|list|length, 'Your money is in 1 kind of holding.', 'Your money is in {n} kinds of holding.', 'No holdings to plan yet.') %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p>{% endblock %}
 {% block content %}
 <form method="post" action="/investments/planner" data-popup-return="popup" class="card planner-popup-form">
   <label>{{ "Amount in EGP"|tr(locale) }}<input autofocus name="amount" type="text" inputmode="decimal" class="money-input" autocomplete="off" value="{{ amount }}" required></label>

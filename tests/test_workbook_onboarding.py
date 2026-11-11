@@ -128,6 +128,8 @@ def test_settings_keeps_the_ai_text_off_the_page_and_groups_data_tools(c):
     assert 'class="data-settings"' in html
     assert 'id="data-portability"' in html and 'Export your data' in html and 'Import your data' in html
     assert 'Not the file for an AI' in html                       # the machine export says what it is not for
+    assert 'href="/settings/ask-ai"' in html and 'data-ask-form' not in html   # IV-12Y5: Ask an AI has one home
+    html=client.get('/settings/ask-ai').text
     assert 'Ask an AI' in html and 'Copy for AI' in html and 'Save as a file' in html and 'data-ask-form' in html
     # Owner rule 2026-10-30: the text of a hand-off is never open on the page, and there is no dialog holding it.
     assert '<dialog class="review-dialog ai-prompt-dialog"' not in html and 'data-ai-prompt' not in html

@@ -41,8 +41,5 @@ Files: `lightning/ui/templates/planning/`. Late rows live in Needs you only; "Th
 ## 12Z3 Spending opens on the categories; the other charts open on request · M · opus
 Files: `lightning/ui/templates/birdview/`. Open: Money out as a Lead with its change, then "Where did it go?". Closed rows: Is this period unusual?, Day by day, Cash flow, Month by month, each with a one-line summary of what it would show ("Loan payments and Health are above their usual range"). Done when Spending is within the budget of 12Z1.
 
-## 12Z4 Investments shows nothing as one line · S · sonnet · #497
-Files: `lightning/ui/templates/investments/`, the holdings route. A period with no change says "Nothing changed in your holdings this month." in place of five zero rows and the empty "Money and value by class" card. (The two Cost figures are BT-12AC.) Done when a test with a flat-only month finds one line.
-
 ## 12Z5 Overview's tail · S · sonnet · #498
-Get set up and Your position: once setup is 5 of 5 the heading is gone; Your position opens by default when the page would otherwise end above the fold's end, or moves beside the KPI row. Done when Overview on the sample year has no collapsed heading followed by empty space.
+Built: a finished setup no longer shows its heading; a quiet Investments period is one line (12Z4, `tests/test_investment_explain.py`). Left: Your position still ends the page as a closed heading. Opening it by default takes Overview past 2.5 screens, so it moves beside the KPI row instead. Done when Overview on the sample year has no collapsed heading followed by empty space.

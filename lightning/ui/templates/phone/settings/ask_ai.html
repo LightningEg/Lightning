@@ -1,0 +1,11 @@
+{# Ask an AI on the phone (IV-12Y5): the PC page holds the form; the phone says where it is and the way back. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Ask an AI'|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Back'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ 'Ask an AI'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<section class="phone-section">
+  <p>{{ '{name} works best on your PC, where there is room for it. Your data is the same on both.'|tr(locale, name='Ask an AI'|tr(locale)) }}</p>
+  <a class="btn primary" href="/settings">{{ 'Back'|tr(locale) }}</a>
+</section>
+{% endblock %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
 {% block title %}Investment prices{% endblock %}
-{% block heading %}{{ page_header('Prices'|tr(locale), '') }}{% endblock %}
+{% block heading %}{{ page_header('Prices'|tr(locale), page_status.count(pending|length, '1 price is waiting for you.', '{n} prices are waiting for you.', 'Every holding has a price.')|status_text) }}{% endblock %}
 {% block content %}
 {% if pending %}
 <form method="post" class="card" style="max-width:1000px;margin-bottom:16px" autocomplete="off" id="missing">

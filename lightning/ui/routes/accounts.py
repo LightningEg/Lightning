@@ -199,6 +199,7 @@ async def currency_accounts(request: Request):
     totals = c.reporting.fx_positions.totals(positions)
     return render(request, "accounts/currencies.html", positions=shown, other=other, chosen=chosen, trend=trend,
                   totals=totals, period=period, period_error=period_error,
+                  answer=page_status.currencies(len(positions), totals["value"], totals["unrealized"], totals["complete"]),
                   fx_kpis=kpis.currencies(totals, start=period.start_text, end=period.end_text),
                   combined_trend=combined_trend, combined_unavailable=combined_unavailable)
 

@@ -45,7 +45,7 @@
 {{ page_header(head.name, head.type_short|tr(locale) ~ (' · ' ~ head.institution if head.institution else '') ~ ' · ' ~ ((pocket_cash|map(attribute='currency')|join(' · ')) if pocket_cash else head.currency), tile=head.institution or head.name, tile_kind='CASH_AT_HAND' if head.cash_at_hand else head.account_type.value, figure=strip) }}
 
 {% else %}
-<div class="acct-title"><h1>{{ 'Transactions'|tr(locale) }}</h1><p class="muted small">Every account · {{ base }}{% if held_total %} · {{ fig.held_for_others.label }} {{ held_total|money(False, 0) }}{% endif %}</p></div>
+<div class="acct-title"><h1>{{ 'Transactions'|tr(locale) }}</h1>{% set st = page_status.count(total_rows, '1 transaction.', '{n} transactions.', 'No transactions yet.') %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p><p class="muted small">Every account · {{ base }}{% if held_total %} · {{ fig.held_for_others.label }} {{ held_total|money(False, 0) }}{% endif %}</p></div>
 {% endif %}
 {% endblock %}
 

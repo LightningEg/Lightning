@@ -1526,11 +1526,13 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
     from zipfile import ZipFile
 
     screen = mohab.b.go("Settings", "Your data")
-    assert screen.shows("Your data", "Ask an AI", "All time", "YTD", "Month", "Custom",
+    assert screen.shows("Your data", "Ask an AI") and 'href="/settings/ask-ai"' in screen.html  # IV-12Y5: its one home
+    screen = mohab.b.open("/settings/ask-ai")
+    assert screen.shows("Ask an AI", "All time", "YTD", "Month", "Custom",
                         "Copy for AI", "Save as a file", "Hide names", "Digest", "Standard", "Full",
                         "Review my period", "Where did the money go", "Check my budget",
                         "What changed my net worth", "My own question", "Export for AI analysis")
-    screen = mohab.b.submit(button="All time", action=r"/settings$")
+    screen = mohab.b.submit(button="All time", action=r"/settings/ask-ai$")
     assert screen.shows("2026-07-01 to 2027-09-30", "transactions")
     assert "Rules for your answer" not in screen.html and "data-ai-prompt" not in screen.html
     form = screen.form(button="Export for AI analysis", action=r"/settings/ai-analysis")
@@ -1555,8 +1557,8 @@ def test_ask_ai_brief_of_mohabs_year_agrees_with_the_reports_in_every_preset_and
     """7W: the file a person pastes into an AI tool says what the reports say, in every preset and size, and hides names on request."""
     from lightning.workflows.ask_ai import PRESETS, SIZES, money
 
-    mohab.b.go("Settings", "Your data")
-    screen = mohab.b.submit(button="All time", action=r"/settings$")
+    mohab.b.open("/settings/ask-ai")
+    screen = mohab.b.submit(button="All time", action=r"/settings/ask-ai$")
     form = screen.form(button="Export for AI analysis", action=r"/settings/ai-analysis")
     flow = mohab.c.reporting.cash_flow("2026-07-01", "2027-09-30")
     sizes = {}

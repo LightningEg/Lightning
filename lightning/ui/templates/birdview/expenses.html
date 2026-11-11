@@ -27,7 +27,7 @@
   </section>
 </div></section>
 
-{% if spending_ai_prompt %}<details class="ai-line ai-more"><summary>{{ "Get another analysis"|tr(locale) }}</summary><p class="muted small">{{ 'Want a second opinion on this period? This prompt gives your AI tool Lightning’s own words and your category names, which it cannot guess. Add the numbers with'|tr(locale) }} <a href="/settings?section=general&amp;period={{ period }}&amp;month={{ month }}&amp;date_from={{ custom_from }}&amp;date_to={{ custom_to }}#export-for-ai">{{ 'Ask an AI'|tr(locale) }}</a>.</p>
+{% if spending_ai_prompt %}<details class="ai-line ai-more"><summary>{{ "Get another analysis"|tr(locale) }}</summary><p class="muted small">{{ 'Want a second opinion on this period? This prompt gives your AI tool Lightning’s own words and your category names, which it cannot guess. Add the numbers with'|tr(locale) }} <a href="/settings/ask-ai?period={{ period }}&amp;month={{ month }}&amp;date_from={{ custom_from }}&amp;date_to={{ custom_to }}">{{ 'Ask an AI'|tr(locale) }}</a>.</p>
 {% set ai_text = spending_ai_prompt %}<div class="actions">{% include "partials/ai_prompt.html" %}</div></details>{% endif %}
 <header class="overview-section-head inv-head"><h2 id="usual-heading">{{ 'Is this period unusual?'|tr(locale) }}</h2><span>{{ ('This month' if a.months_in == 1 else 'A month in this period')|tr(locale) }} {{ ('against the 1 month before it'|tr(locale)) if a.history_months == 1 else ('against the {n} months before it'|tr(locale, n=a.history_months)) }}</span></header>
 {% if a.has_history %}
