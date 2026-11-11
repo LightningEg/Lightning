@@ -6,9 +6,9 @@ from __future__ import annotations
 import calendar
 from datetime import date, timedelta
 
+from lightning.reporting.period_compare import total
 from lightning.core.dates import month_of, today
 from lightning.core.errors import LightningError
-from lightning.core.money import ZERO
 from lightning.reporting.spending import comparison_windows, partial_months
 
 from .periods import Period, parse_period
@@ -36,28 +36,28 @@ def facts(c, params) -> dict:
     flow = c.reporting.cash_flow(first, last)
     l1 = c.reporting.spending_by_category(first, last, depth=1)
     l2 = c.reporting.spending_by_category(first, last, depth=2)
-    for group in l1 + l2:
+    for group in l1 + l2:  # not money
         group.category_id = c.categories.get_by_code(group.code).id
     prior = None
     if selected.key != "all":
         if selected.key == "month":
-            prior_to = first - timedelta(days=1)
+            prior_to = first - timedelta(days=1)  # not money
             prior_from = prior_to.replace(day=1)
             prior_from, prior_to = comparison_windows(first, last, prior_from.strftime("%Y-%m"))[0]
         elif selected.key == "ytd":
-            prior_from = date(first.year - 1, 1, 1)
-            prior_to = date(first.year - 1, last.month, min(last.day, calendar.monthrange(first.year - 1, last.month)[1]))
+            prior_from = date(first.year - 1, 1, 1)  # not money
+            prior_to = date(first.year - 1, last.month, min(last.day, calendar.monthrange(first.year - 1, last.month)[1]))  # not money
         else:
-            prior_to = first - timedelta(days=1)
-            prior_from = prior_to - (last - first)
+            prior_to = first - timedelta(days=1)  # not money
+            prior_from = prior_to - (last - first)  # not money
         prior = c.reporting.cash_flow(prior_from, prior_to)
     trend_first = first.replace(day=1)
-    trend_count = (last.year - trend_first.year) * 12 + last.month - trend_first.month + 1
+    trend_count = (last.year - trend_first.year) * 12 + last.month - trend_first.month + 1  # not money
     trend_truncated = trend_count > 24
     if trend_count > 24:
         trend_first = last.replace(day=1)
         for _ in range(23):
-            trend_first = (trend_first - timedelta(days=1)).replace(day=1)
+            trend_first = (trend_first - timedelta(days=1)).replace(day=1)  # not money
     trend = c.reporting.monthly_flow_between(max(first, trend_first), last)
     category_filter = str(params.get("category_id", ""))
     category_code = ""
@@ -71,8 +71,8 @@ def facts(c, params) -> dict:
     if selected_category:
         depth = selected_category.depth
         def selected_spending(start, end):
-            return sum((group.value for group in c.reporting.spending_by_category(start, end, depth=depth)
-                        if group.code == category_code), ZERO)
+            return total(group.value for group in c.reporting.spending_by_category(start, end, depth=depth)
+                         if group.code == category_code)
         spending_total = selected_spending(first, last)
         prior_spending = selected_spending(prior_from, prior_to) if prior else None
         for item in trend:
@@ -80,5 +80,5 @@ def facts(c, params) -> dict:
     else:
         spending_total = flow.outflows
         prior_spending = prior.outflows if prior else None
-    prior_label = (prior_from.strftime("%Y-%m") + (f" days {prior_from.day}–{prior_to.day}" if partial_months(first, last) else "") if selected.key == "month" else "the period before") if prior else ""
+    prior_label = (prior_from.strftime("%Y-%m") + (f" days {prior_from.day}–{prior_to.day}" if partial_months(first, last) else "") if selected.key == "month" else "the period before") if prior else ""  # not money
     return {"selected": selected, "error": error, "first": first, "last": last, "flow": flow, "l1": l1, "l2": l2, "prior": prior, "prior_from": prior_from, "prior_to": prior_to, "trend": trend, "trend_truncated": trend_truncated, "category_filter": category_filter, "category_code": category_code, "category_name": category_name, "spending_total": spending_total, "prior_spending": prior_spending, "prior_label": prior_label}
