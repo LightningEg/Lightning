@@ -3612,6 +3612,12 @@ ARABIC_UI = {
     'Fix it': 'صلّحه',
     "Plan this month's {amt}": 'خطط لـ {amt} الشهر ده',
     'This month in detail': 'الشهر ده بالتفصيل',
+    'Looks right': 'تمام كده',
+    'Track it': 'تابعه',
+    'Match to deposit': 'طابقه مع الشهادة',
+    'Looks monthly. Track it so the plan expects it.': 'شكله شهري. تابعه عشان الخطة تتوقعه.',
+    'A payment with no category': 'دفعة من غير فئة',
+    'Search payments': 'دوّر في المدفوعات',
 }
 
 
