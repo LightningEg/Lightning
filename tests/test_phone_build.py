@@ -369,3 +369,26 @@ def test_the_play_bundle_manifest_must_be_a_release_at_the_play_target():
     no_billing = good.replace('<uses-permission android:name="com.android.vending.BILLING"/>\n', '')
     assert "lacks ['com.android.vending.BILLING']" in build.manifest_problems(no_billing, "70", "2.0.0-70+aaaaaaaa")[0]
     assert build.TARGET_SDK in (Path(build.ROOT) / "android/app/build.gradle.kts").read_text()
+
+
+def _elf(alignments: list[int]) -> bytes:
+    """A 64-bit ELF header with one LOAD segment per alignment, and one NOTE segment that is not checked."""
+    import struct
+    header = b"\x7fELF\x02\x01\x01" + bytes(9) + struct.pack("<HHIQQQIHHHHHH", 3, 183, 1, 0, 64, 0, 0, 64, 56, len(alignments) + 1, 64, 0, 0)
+    segments = b"".join(struct.pack("<IIQQQQQQ", 1, 5, 0, 0, 0, 0, 0, a) for a in alignments)
+    return header + segments + struct.pack("<IIQQQQQQ", 4, 4, 0, 0, 0, 0, 0, 4)
+
+
+def test_the_play_bundle_is_refused_when_a_library_needs_pages_smaller_than_16_kb(tmp_path):
+    # Play refuses a bundle that targets Android 15 or later unless every native library loads on 16 KB pages.
+    assert build.load_alignments(_elf([0x4000, 0x10000])) == [0x4000, 0x10000]
+    aab = tmp_path / "app.aab"
+    with zipfile.ZipFile(aab, "w") as bundle:
+        bundle.writestr("base/lib/arm64-v8a/libgood.so", _elf([0x4000, 0x4000]))
+        bundle.writestr("base/assets/notes.so.txt", b"not a library")
+    assert build.page_problems(aab) == []
+    with zipfile.ZipFile(aab, "a") as bundle:
+        bundle.writestr("base/lib/arm64-v8a/libold.so", _elf([0x4000, 0x1000]))
+        bundle.writestr("base/lib/arm64-v8a/libbroken.so", b"oops")
+    problems = build.page_problems(aab)
+    assert len(problems) == 2 and "libold.so" in problems[1] and "0x1000" in problems[1] and "libbroken.so" in problems[0]
