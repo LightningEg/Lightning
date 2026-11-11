@@ -290,7 +290,7 @@ class InvestmentService:
         dividend. ``typed`` holds the figures the event's spec asks for (quantity, price, total, fees, amount, tax)."""
         spec = events.EVENTS.get(event)
         if spec is None:
-            raise ValidationError(f"Unknown investment event: {event}.", "event")
+            raise ValidationError("That investment action is not available.", "event")
         if spec.income_category:
             return self._record_income(event, date, account_id, asset_id, owner_id, notes, typed)
         if spec.units == events.Sign.NEW_BALANCE:

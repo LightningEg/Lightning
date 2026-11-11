@@ -593,7 +593,7 @@ class TransactionService:
                                  changes["counterparty"] if "counterparty" in changes else current.counterparty,
                                  changes["notes"] if "notes" in changes else current.notes)
                 except LightningError as exc:
-                    raise ValidationError(f"{current.ref}: {exc.message}", exc.field) from exc
+                    raise ValidationError(exc.message, exc.field) from exc
                 changed.append(txn_id)
         return changed, skipped
 
