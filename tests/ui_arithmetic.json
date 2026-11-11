@@ -22,7 +22,7 @@
  "routes/analysis.py": 37,
  "routes/bank_imports.py": 26,
  "routes/birdview.py": 11,
- "routes/budget.py": 89,
+ "routes/budget.py": 88,
  "routes/categories.py": 5,
  "routes/counterparties.py": 1,
  "routes/dashboard.py": 28,

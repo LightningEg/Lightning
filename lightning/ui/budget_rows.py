@@ -124,8 +124,6 @@ def last_payments(c, category_id: int, month: str) -> dict:
     earlier = ZERO
     if not rows:
         start, end = parse_month(before)
-        one_offs = c.budgets.one_off_ids()
-        spending = {cid: v for cid, v in c.budgets.owned_spending(start, end).items() if cid not in one_offs}
-        earlier = sum((spending.get(cid, ZERO) for cid in tree_ids(c, category_id)), ZERO)
+        earlier = c.budgets.spent_in(tree_ids(c, category_id), start, end)
     return {"rows": rows, "total": total, "month": month, "last_month": before, "earlier": earlier,
             "see_all": see_all(category_id, month), "see_last": see_all(category_id, before)}

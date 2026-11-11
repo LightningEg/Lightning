@@ -21,5 +21,5 @@ def build(c, day: date) -> TodoScreen:
     bills = bill_state.open_bills(c.planning, day, bill_state.SOON_DAYS)
     away = bill_state.catch_up(c, day, bills)
     last_income = bill_state.last_income_date(c.planning, day)
-    paid_today = bool(last_income and (day - parse_date(last_income)).days <= 1)
+    paid_today = bool(last_income and (day - parse_date(last_income)).days <= 1)  # not money
     return TodoScreen(rows=tuple(todo_rows(c, day, bills, items, away, paid_today)))
