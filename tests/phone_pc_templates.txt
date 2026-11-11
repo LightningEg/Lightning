@@ -10,7 +10,4 @@ bank_import_upload.html
 broker_import.html
 dashboard/welcome.html
 financial_health.html
-money_from_others.html
-physical_account.html
-physical_item_form.html
 reserves.html
