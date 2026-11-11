@@ -105,7 +105,7 @@ The site is honest, quick and in step with the app.
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
 
-Done: 8A, 8B, 8C, 8D, 8E, 8F, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z, 8AA. Next free code: 8AE.
+Done: 8A, 8B, 8C, 8D, 8E, 8F, 8G, 8H, 8I, 8M, 8N, 8O, 8P, 8Q, 8R, 8S, 8U, 8V, 8W, 8X, 8Y, 8Z, 8AA, 8AB. Next free code: 8AE.
 
 ## 9 Later
 
@@ -180,7 +180,6 @@ Kept, not planned: nobody works on these until the owner picks one (set its stat
 - **NF-7AR** [An Upcoming tab shows the month's payments on a calendar, with payday and the day cash runs short](7-planning-import-and-search/NF-7AR-upcoming-payments-calendar.md)
 - **IV-8AC** [For Geeks gets two motion moments that are true - a posting that must balance, and a row that becomes ciphertext](8-website/IV-8AC-for-geeks-two-true-motion-moments.md)
 - **IV-8AD** [A guideline rule for an Arabic page that links to an English page - the label says so and it opens in a new tab](8-website/IV-8AD-arabic-pages-that-link-to-english-pages.md)
-- **NF-8AB** [Link the three comparison pages and add a fourth that compares Lightning with an AI assistant](8-website/NF-8AB-link-the-comparisons-and-compare-with-an-ai.md)
 - **NF-9D** [Hijri dates, and the silver nisab for zakat](9-later/NF-9D-hijri-dates-and-silver-nisab.md)
 - **NF-10A** [Cosmetic parts, account-wide claiming and native acceptance](10-looks-and-store/NF-10A-cosmetic-parts-and-claiming.md)
 - **NF-10B** [Supporter perks still waiting on the app or the owner - app themes for sale, names on About](10-looks-and-store/NF-10B-supporter-perks-app-and-owner.md)
