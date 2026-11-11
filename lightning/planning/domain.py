@@ -216,6 +216,15 @@ class EverydayBudget:
                                                    WorkingRow("Spent", -self.spent, "/budget")), home="/budget")
 
     @property
+    def everyday_left_working(self):
+        """NF-12AB4: the phone Budget hero's figure, Left in plan less the bills still to pay."""
+        from lightning.core.working import Working, WorkingRow
+        return Working("everyday_left", self.everyday_left, (WorkingRow("Planned", self.planned, "/budget"),
+                                                             WorkingRow("Spent", -self.spent, "/budget"),
+                                                             WorkingRow("Bills to pay", -self.bills_to_pay, "/money/bills")),
+                       home="/budget")
+
+    @property
     def per_day(self) -> Decimal | None:
         """Everyday money left for each day still to come, today included."""
         return (self.everyday_left / self.days_left).quantize(Decimal("0.01")) if self.days_left > 0 else None

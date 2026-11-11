@@ -58,7 +58,7 @@ class HomeScreen:
     per_day_days: int                  # the days it is spread over, today included
     per_day_to_payday: bool            # those days run to payday: no payday before the month ends (owner, 2026-11-09)
     meter: PaydayMeter | None          # IV-11D1: under the hero; None with no plan or no everyday money planned
-    working: tuple[tuple[str, Decimal], ...]   # the parts of Safe to spend, for its sheet
+    working: object                            # Safe to spend's working (lightning.core.working), for its sheet
     todo: tuple[TodoRow, ...]          # at most TODO_SHOWN
     todo_total: int
     latest: tuple                      # register rows, at most LATEST
@@ -109,7 +109,7 @@ def build(c, day: date) -> HomeScreen:
                       per_day_days=everyday.days_left if everyday else 0,
                       per_day_to_payday=bool(until) and until <= next_month.isoformat(),
                       meter=None if first_run else payday_meter(everyday),
-                      working=tuple((name, value) for name, value in forecast.safe_to_spend_parts),
+                      working=forecast.safe_to_spend_working,
                       todo=_shown(rows), todo_total=len(rows), latest=latest,
                       spent=c.reporting.cash_flow(day.replace(day=1), day).outflows,
                       left_in_plan=plan["left"] if plan else None, month=month, catch_up=away,
