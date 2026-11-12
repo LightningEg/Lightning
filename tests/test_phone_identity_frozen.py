@@ -17,6 +17,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 APP_ID = "org.lightning.app"
+PLAY_APP_ID = "com.lightningeg"
 CERTIFICATE = "373d6ae1ccf484f2b3400ada865c54037f2b79059445abd4d9cd9d424636c6fb"
 
 
@@ -29,14 +30,15 @@ def _phone_build():
 
 def test_every_build_carries_the_one_application_id():
     gradle = (ROOT / "android" / "app" / "build.gradle.kts").read_text(encoding="utf-8")
-    # One unconditional ID: no build property, flavour or suffix may give some APKs another one.
-    assert re.findall(r"applicationId\s*=\s*(.+)", gradle) == [f'"{APP_ID}"']
+    # The default ID is the one every GitHub APK carries; no build property or suffix may give some APKs another one.
+    # Only the Play flavour has its own, com.lightningeg: the Play Console app was registered under it and Play fixes a
+    # package name for good (owner, 2026-11-12). A Play install and a GitHub APK are therefore different apps to Android.
+    assert re.findall(r"applicationId\s*=\s*(.+)", gradle) == [f'"{APP_ID}"', f'"{PLAY_APP_ID}"']
     assert "applicationIdSuffix" not in gradle
-    # The two store flavours (NF-11B3: github, play) share that one ID: neither may set an ID, a suffix or a version
-    # code of its own, so a Play install and a GitHub APK are the same app to Android.
-    flavours = gradle[gradle.index("productFlavors"):gradle.index("buildTypes")] if "productFlavors" in gradle else ""
-    assert not re.search(r"applicationId|versionCode|versionNameSuffix", flavours)
-    assert _phone_build().APP_ID == APP_ID
+    flavours = gradle[gradle.index("productFlavors"):gradle.index("buildTypes")]
+    assert re.findall(r"applicationId\s*=\s*(.+)", flavours) == [f'"{PLAY_APP_ID}"']
+    assert not re.search(r"versionCode|versionNameSuffix", flavours)
+    assert _phone_build().APP_ID == APP_ID and _phone_build().PLAY_APP_ID == PLAY_APP_ID
 
 
 def test_every_build_is_checked_against_the_one_signing_certificate():

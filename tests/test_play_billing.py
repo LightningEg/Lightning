@@ -70,7 +70,7 @@ def play_answer(envelope=None, status=200, seen=None):
         assert request.full_url == "https://store.example/redeem-play" and request.get_method() == "POST"
         sent = json.loads(request.data)
         assert set(sent) == {"package_name", "product_id", "purchase_token", "items", "profile_id"}
-        assert sent["package_name"] == "org.lightning.app" and sent["profile_id"] == PROFILE
+        assert sent["package_name"] == "com.lightningeg" and sent["profile_id"] == PROFILE
         if seen is not None:
             seen.append(sent)
         if status != 200:

@@ -34,6 +34,7 @@ LOCK = ROOT / "requirements" / "android.lock"
 PERMISSIONS = ROOT / "packaging" / "android-permissions.txt"
 PLAY_PERMISSIONS = {"com.android.vending.BILLING"}  # the play flavour only (NF-11B3); the GitHub APK never asks for it
 APP_ID = "org.lightning.app"
+PLAY_APP_ID = "com.lightningeg"  # the Play bundle only: the Play Console app was registered under this name
 ABI = "arm64-v8a"
 # Play takes new apps and updates only at this target (since 2026-08-31); android/app/build.gradle.kts matches it.
 TARGET_SDK = "36"
@@ -250,7 +251,7 @@ def check(apk: Path, build_tools: Path, code: str, name: str, cert_file: Path | 
 def manifest_problems(manifest: str, code: str, name: str) -> list[str]:
     """What is wrong with the Play bundle's manifest (`bundletool dump manifest`) for this build."""
     problems = []
-    wanted = {"package": APP_ID, "android:versionCode": code, "android:versionName": name,
+    wanted = {"package": PLAY_APP_ID, "android:versionCode": code, "android:versionName": name,
               "android:targetSdkVersion": TARGET_SDK}
     for key, value in wanted.items():
         found = re.search(rf'\b{re.escape(key)}="([^"]*)"', manifest)
@@ -262,7 +263,7 @@ def manifest_problems(manifest: str, code: str, name: str) -> list[str]:
         problems.append("the bundle carries ProbeActivity, a debug-only screen")
     # The Play build asks for the GitHub APK's permissions plus Play Billing's, nothing else (NF-11B3).
     asked = set(re.findall(r'<uses-permission(?:-sdk-23)?\b[^>]*android:name="([^"]+)"', manifest))
-    asked = {p for p in asked if not p.startswith(APP_ID + ".")}  # the app's own, as permissions() leaves out
+    asked = {p for p in asked if not p.startswith(PLAY_APP_ID + ".")}  # the app's own, as permissions() leaves out
     allowed = {line.split("#")[0].strip() for line in PERMISSIONS.read_text(encoding="utf-8").splitlines()} - {""}
     allowed |= PLAY_PERMISSIONS
     if asked != allowed:
@@ -325,7 +326,7 @@ def check_aab(aab: Path, bundletool: Path, code: str, name: str) -> dict:
     problems = manifest_problems(run("dump", "manifest", f"--bundle={aab}"), code, name) + page_problems(aab)
     if problems:
         raise BuildError("The Play bundle is not the build it should be:\n- " + "\n- ".join(problems))
-    return {"file": aab.name, "size": aab.stat().st_size, "sha256": sha256(aab), "application_id": APP_ID,
+    return {"file": aab.name, "size": aab.stat().st_size, "sha256": sha256(aab), "application_id": PLAY_APP_ID,
             "version_code": int(code), "version_name": name, "target_sdk": int(TARGET_SDK)}
 
 

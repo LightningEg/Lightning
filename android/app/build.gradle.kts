@@ -29,7 +29,12 @@ android {
     flavorDimensions += "store"
     productFlavors {
         create("github") { dimension = "store"; isDefault = true }
-        create("play") { dimension = "store" }
+        // The Play Console app was registered as com.lightningeg and Play fixes a package name for good (owner,
+        // 2026-11-12): the bundle carries that ID, the GitHub APK keeps org.lightning.app. Code stays in `namespace`.
+        create("play") {
+            dimension = "store"
+            applicationId = "com.lightningeg"
+        }
     }
 
     buildTypes {
