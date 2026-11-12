@@ -362,3 +362,23 @@ def test_answering_motions_stay_quiet_and_stop_under_reduced_motion():
         fade = pc[pc.index('@view-transition { navigation: auto; }'):]
         assert 'view-transition-name: pc-side' in fade and 'animation-duration: 140ms' in fade
         assert 'prefers-reduced-motion: reduce' in fade and 'animation: none' in fade
+
+
+def test_phone_answering_motions_are_the_phones_own():
+    """Owner, 2026-11-12: animation on the phone is the phone's. The PC dialog rise and button press settle never reach
+    the phone; the phone's sheet travels from the bottom edge (no fade, no scale), a tapped row takes a pigment wash,
+    and all of it is dropped under reduced motion."""
+    materials = (ROOT / 'lightning/ui/static/theme-materials.css').read_text()
+    assert 'html:not(.phone)[data-m-overlays-enter="rise"] dialog.app-popup {' in materials
+    assert 'html:not(.phone)[data-m-controls-press="sheen"] .btn.primary:active' in materials
+    phone = materials[materials.index('Phone: its own answering motions'):]
+    phone = phone[:phone.index('/* ---------- Menus')]
+    assert phone.index('@media (prefers-reduced-motion: no-preference)') < phone.index('dialog.phone-sheet')
+    sheet = phone[phone.index('dialog.phone-sheet {'):phone.index('@starting-style')]
+    assert 'translateY(100%)' in sheet and 'scale' not in sheet and 'opacity' not in sheet
+    assert 'var(--m-pigment-hero, var(--accent)) 7%' in phone and ':active' in phone
+    # An exit needs something to show: the popup keeps its content until it has left, and a swiped sheet closes in one move.
+    app = (ROOT / 'lightning/ui/static/app.js').read_text()
+    assert 'if (reopening || getComputedStyle(dialog).display === "none") content.replaceChildren();' in app
+    gestures = (ROOT / 'lightning/ui/static/phone-gestures.js').read_text()
+    assert 'if (dialog && dialog.open) frame.style.transform = "";' in gestures

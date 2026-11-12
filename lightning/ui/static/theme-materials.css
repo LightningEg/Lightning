@@ -317,10 +317,10 @@ html[data-m-controls-depth="mid"] :is(.btn.primary, .phone-add-disc) { box-shado
 html[data-m-controls-depth="high"] :is(.btn.primary, .phone-add-disc) { box-shadow: inset 0 1px 0 color-mix(in srgb, #FFFFFF 30%, transparent), 0 12px 26px -10px color-mix(in srgb, var(--action) 85%, var(--m-shadow)); }
 /* press sheen: the foil's light slides across on hover, focus and press. */
 html[data-m-controls-press="sheen"] :is(.btn.primary, .phone-add-disc) { transition: background-position .7s var(--m-ease-out); }
-/* Tactile press: the button settles 1px in 90ms and eases back in 220ms (no overshoot). The Add disc is positioned by its own rules
+/* Tactile press (PC only: the phone has its own, below): the button settles 1px in 90ms and eases back in 220ms (no overshoot). The Add disc is positioned by its own rules
    (and sits on the tab bar), so a transform never touches it. */
-html[data-m-controls-press="sheen"] .btn.primary { transition: background-position .7s var(--m-ease-out), transform .22s var(--m-ease-out), box-shadow .22s var(--m-ease-out); }
-html[data-m-controls-press="sheen"] .btn.primary:active { transform: translateY(1px); box-shadow: 0 1px 2px -1px color-mix(in srgb, var(--action) 70%, var(--m-shadow));
+html:not(.phone)[data-m-controls-press="sheen"] .btn.primary { transition: background-position .7s var(--m-ease-out), transform .22s var(--m-ease-out), box-shadow .22s var(--m-ease-out); }
+html:not(.phone)[data-m-controls-press="sheen"] .btn.primary:active { transform: translateY(1px); box-shadow: 0 1px 2px -1px color-mix(in srgb, var(--action) 70%, var(--m-shadow));
   transition: background-position .7s var(--m-ease-out), transform 90ms var(--m-ease-out), box-shadow 90ms var(--m-ease-out); }
 html[data-m-controls-press="sheen"] :is(.btn.primary, .phone-add-disc):is(:hover, :focus-visible, :active) { background-position: 100% 0; }
 /* On satin the finish is a vertical light, so moving it showed nothing: the sheen is its own band over the satin. */
@@ -376,20 +376,55 @@ html[data-m-overlays-finish] :is(.app-popup, .phone-sheet, .phone-period-panel) 
   background-image: var(--m-over-grain), var(--m-over-finish); box-shadow: var(--m-edge-soft), var(--m-over-depth);
 }
 html[data-m-overlays-shade="blur"] dialog::backdrop { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-/* Enter and exit are transitions: the closed dialog rests faded and 6px low, and display and overlay change at the end of
+/* PC dialogs (the phone's sheet has its own motion below). Enter and exit are transitions: the closed dialog rests faded and 6px low, and display and overlay change at the end of
    the fade (allow-discrete), so a closing dialog stays on screen for its 140ms. Opening starts from @starting-style. */
-html[data-m-overlays-enter="rise"] :is(dialog.app-popup, .phone-sheet) {
+html:not(.phone)[data-m-overlays-enter="rise"] dialog.app-popup {
   opacity: 0; transform: translateY(6px);
   transition: opacity .14s var(--m-ease-out), transform .14s var(--m-ease-out), overlay .14s allow-discrete, display .14s allow-discrete;
 }
-html[data-m-overlays-enter="rise"] :is(dialog.app-popup[open], .phone-sheet[open]) {
+html:not(.phone)[data-m-overlays-enter="rise"] dialog.app-popup[open] {
   opacity: 1; transform: none;
   transition: opacity .32s var(--m-ease-out), transform .32s var(--m-ease-out), overlay .32s allow-discrete, display .32s allow-discrete;
 }
-@starting-style { html[data-m-overlays-enter="rise"] :is(dialog.app-popup[open], .phone-sheet[open]) { opacity: 0; transform: translateY(14px) scale(.985); } }
+@starting-style { html:not(.phone)[data-m-overlays-enter="rise"] dialog.app-popup[open] { opacity: 0; transform: translateY(14px) scale(.985); } }
 html[data-m-overlays-enter="rise"] dialog::backdrop { opacity: 0; transition: opacity .16s var(--m-ease-out), overlay .16s allow-discrete, display .16s allow-discrete; }
 html[data-m-overlays-enter="rise"] dialog[open]::backdrop { opacity: 1; transition-duration: .16s; }
 @starting-style { html[data-m-overlays-enter="rise"] dialog[open]::backdrop { opacity: 0; } }
+
+/* ---------- Phone: its own answering motions (owner, 2026-11-12: animation on the phone is the phone's) ----------
+   No hover and no pointer light on a phone, and input comes from the bottom edge, so: a sheet travels up from the edge and
+   back down (solid, never faded or scaled), a tapped row takes a soft wash of the theme's pigment, and a button keeps its
+   sheen (no press travel). Under reduced motion none of these rules apply at all. */
+@media (prefers-reduced-motion: no-preference) {
+  html.phone[data-m-overlays-enter="rise"] dialog.phone-sheet {
+    transform: translateY(100%);
+    transition: transform .18s var(--m-ease-inout), overlay .18s allow-discrete, display .18s allow-discrete;
+  }
+  html.phone[data-m-overlays-enter="rise"] dialog.phone-sheet[open] {
+    transform: none;
+    transition: transform .26s var(--m-ease-out), overlay .26s allow-discrete, display .26s allow-discrete;
+  }
+  @starting-style { html.phone[data-m-overlays-enter="rise"] dialog.phone-sheet[open] { transform: translateY(100%); } }
+  /* The search panel is not a sheet: a plain fade, no travel. */
+  html.phone[data-m-overlays-enter="rise"] dialog.command-bar {
+    opacity: 0; transition: opacity .14s var(--m-ease-out), overlay .14s allow-discrete, display .14s allow-discrete;
+  }
+  html.phone[data-m-overlays-enter="rise"] dialog.command-bar[open] { opacity: 1; }
+  @starting-style { html.phone[data-m-overlays-enter="rise"] dialog.command-bar[open] { opacity: 0; } }
+  /* A tapped row: the wash shows at once and fades out in 300ms. It is a background colour only, so size is untouched;
+     a selected row keeps its own tint. The transaction row already transitions its swipe, so that stays in its list. */
+  html.phone[data-m-cards-hover="light"] :is(a.phone-row, summary.phone-row, button.phone-row, a.phone-txn):not(.is-pick):not(#_) {
+    transition: background-color .3s var(--m-ease-out);
+  }
+  html.phone[data-m-cards-hover="light"] a.phone-txn:not(.is-pick):not(#_) {
+    transition: transform .18s ease, opacity .18s ease, background-color .3s var(--m-ease-out);
+  }
+  html.phone[data-m-cards-hover="light"] :is(a.phone-row, summary.phone-row, button.phone-row, a.phone-txn):not(.is-pick):not(#_):active {
+    background-color: color-mix(in srgb, var(--m-pigment-hero, var(--accent)) 7%, transparent);
+    transition-duration: 60ms;
+  }
+  html.phone[data-m-cards-hover="light"] a.phone-txn:not(.is-pick):not(#_):active { transition-duration: .18s, .18s, 60ms; }
+}
 
 /* ---------- Menus ---------- */
 html[data-m-menus-finish="satin"] { --m-menu-finish: var(--m-satin); }
