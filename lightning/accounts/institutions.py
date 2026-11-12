@@ -1,4 +1,4 @@
-"""Institutions: Egypt's banks, brokers and wallets (a bundled list) plus the ones a person adds.
+"""Institutions and recognizable brands: Egypt's bundled picker plus user additions.
 
 `accounts.institution` stays plain text; the picker writes the institution's name. A logo is a bundled
 file (never fetched while the app runs); without one, or for a custom institution, a monogram tile shows.
@@ -176,6 +176,7 @@ class InstitutionService:
         for item in self.list():
             if normalize(item.name) in seen:
                 continue
-            rows.append({"value": item.name, "label": item.label, "arabic": item.arabic_name, "group": "Institutions",
+            rows.append({"value": item.name, "label": item.label, "arabic": item.arabic_name,
+                         "group": {"supermarket": "Supermarkets", "brand": "Popular brands"}.get(item.kind, "Institutions"),
                          "logo": item.logo_url, "mono": item.mono})
         return rows

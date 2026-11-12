@@ -17,3 +17,11 @@ by: Claude
 Institution-picker monograms remain for brokers other than Thndr and for Arab International Bank, Nasser Social Bank and Egypt Post. Some third-party wallet directory artwork may reflect historic names; verify current branding before public release. Completing the remaining list requires actual marks in `assets/institutions-logos/icons/<code>.png`, matching `lightning/ui/static/institutions/<code>.png` and the CSV `logo` column. Use `tools/fetch_institution_logos.py` for available sites, review trademarks, and verify images in the app.
 
 **Read:** Architecture › Modules (accounts).
+
+## 2026-11-12 · Broader, simpler default picker
+
+- Keep one canonical **Vodafone Cash** entry and logo; the CSV only contains one. Avoid introducing additional Vodafone variants. Existing user-created account names are not altered.
+- Remove 18 niche / bank-specific wallet variants from the *default picker* (including CIB Smart Wallet); their legacy image assets remain in the repository but are no longer linked. Keep banks and well-recognized wallet/fintech providers.
+- Add 11 popular supermarkets and 16 recognizable consumer brands, in separately named picker groups. Non-financial brands do **not** imply BANK/CASH/BROKERAGE account types.
+- Bundle 14 locally stored vector brand marks from credited sources in both the original asset catalog and app static directory. Missing verified marks use existing monogram fallback rather than invented logos. **Retailers still needing verified marks:** Fathalla Market, Kazyon, Hyper One, Seoudi, Spinneys, Metro Markets, Kheir Zaman, Awlad Ragab, Gourmet Egypt, Amazon Egypt, Jumia, Breadfast, Pizza Hut.
+- Follow-up: check these marks against current official visual identity, licensing/attribution requirements, and mobile picker presentation before release. This does not implement automatic transaction-merchant matching or alter existing account records.
