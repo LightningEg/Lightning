@@ -71,7 +71,7 @@ def test_every_long_doc_lists_all_its_sections():
 
 
 def test_generated_pages_are_up_to_date():
-    """STATUS, the pillar pages' work blocks and the AI map are built from the plan: python tools/status.py."""
+    """The AI map is built by python tools/status.py; STATUS and the pillar pages are written by hand and never list open work."""
     from tools import status
     stale = [path.relative_to(ROOT).as_posix() for path, text in status.expected().items()
              if not path.exists() or path.read_text(encoding="utf-8") != text]

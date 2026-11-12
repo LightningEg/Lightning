@@ -24,7 +24,8 @@ from datetime import datetime, timedelta, timezone
 REPO = "LightningEg/Lightning"
 URL = f"https://github.com/{REPO}"
 CLOSES = re.compile(r"\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)", re.I)
-GENERIC_AREAS = {"tests", "none", "see item file", "ai", "docs", "tools"}
+# Too broad to mean "the same files": naming one of these never holds another issue back.
+GENERIC_AREAS = {"tests", "none", "see item file", "ai", "docs", "tools", "lightning", "lightning/ui", "guideline"}
 ORDER = {"launch": 0, "after-launch": 1, "someday": 2, "unsorted": 3}
 PEOPLE = {"owner", "human"}
 

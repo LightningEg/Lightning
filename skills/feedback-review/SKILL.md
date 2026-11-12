@@ -28,7 +28,7 @@ Only stage 3 (one design agent) and stage 4 (one build agent) are agents. Hand e
 1. Input is whatever the owner gives: pasted rows, a CSV, files with screenshots or an explicitly supplied connected source. Use available authorized source tools before asking for missing input. Preserve raw material in its private source. Create the sanitized feedback record first.
 2. Strip what must not be public: names, emails, phone numbers, account numbers, device ids, private links. Say "a user". Keep a screenshot only if it shows dummy or sample data; otherwise describe it in words.
 3. Write one item per ticket in `issues/<n>-<name>/` (code from `python tools/issues.py next <n>`; front matter per `issues/README.md`; `by` is the AI, `skills: feedback-review`). The body: what the person saw, what they want, the screen, and the screenshot if it is kept, as a relative link to `feedback/YYYY-MM-DD-subject/evidence/<observation-id>-<n>.png` (small, dummy data only; retained with the feedback record). Merge tickets that are the same finding into one item.
-4. Merge duplicates into shared implementation items, retaining distinct observations in the feedback record. Mark overlaps with existing items (read `issues/INDEX.md`), drop test and diagnostic rows and say how many. Count observations and known distinct respondents separately.
+4. Merge duplicates into shared implementation items, retaining distinct observations in the feedback record. Mark overlaps with existing items (run `python tools/board.py`), drop test and diagnostic rows and say how many. Count observations and known distinct respondents separately.
 5. Tell the owner: counts by category, the three biggest themes, anything that looks like a wrong number.
 
 ## 2. Investigate (you)

@@ -5,11 +5,11 @@ description: File a bug, improvement, feature, technical task or owner decision 
 
 # Add a plan item
 
-Tool-neutral. Everything still to do is an item in `issues/`; the plan is `issues/INDEX.md`. The repo is public: no names, emails, real financial data or private links.
+Tool-neutral. Everything still to do is an item in `issues/`; what is open is on GitHub (`python tools/board.py`, skill `dispatch`); the file here is the item's design. The repo is public: no names, emails, real financial data or private links.
 
 ## Steps
 
-1. **Duplicate check.** Read `issues/INDEX.md`, then `grep -rln "<key words>" issues`. Add to an existing item when it is the same problem.
+1. **Duplicate check.** Run `python tools/board.py`, then `grep -rln "<key words>" issues`. Add to an existing item when it is the same problem.
 2. **Folder.** Pick the big picture whose goal it serves (`issues/<n>-<name>/README.md` states each goal; a report that started it sits in the same folder). Get the next code: `python tools/issues.py next <n>` (for example `3AN`; it skips codes on NOW.md's `Reserved codes:` line). A report or more than one new item: write your codes on that line and push that commit first; remove them in the pull request that adds the files. A code is never reused and never changes when the item moves.
 3. **File.** `issues/<n>-<name>/<TAG>-<code>-<what-in-hyphens>.md` (the kind tag from the front matter: `python tools/issues.py tag <code>` prints it after the file exists; BV, BT, IV, IT, NF or OW), front matter first:
 
@@ -30,7 +30,7 @@ by: Claude           # the AI or "owner"; never a person's name
 
 4. **Body.** `## Report` (what, where, how to reproduce, evidence: a command and its output or a sample-data screenshot), then `## Fix` (what will change and the test that proves it). Add `post: no` to the front matter if it is sensitive (security, restore, owner-run); say why in a last line.
 5. **Large?** If it is size L, split it now (skill `split-large-item`).
-6. **Regenerate and check.** `python tools/issues.py` then `python tools/status.py`; `python -m pytest tests/test_issues.py tests/test_docs_structure.py -q`.
+6. **Regenerate and check.** `python tools/issues.py --check`; `python -m pytest tests/test_issues.py tests/test_docs_structure.py -q`.
 7. **Commit** with the full code in the subject (`[BT-5J] ...`) and the `Release-note:` and `Detail:` trailers (skill `write-release-notes`; `Release-note: none` for a plan-only change).
 
 A finished item is deleted in the commit that finishes it, and its code is added to `done:` in the folder's README.
