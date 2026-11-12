@@ -89,5 +89,5 @@ def test_budget_settings_inline_links_keep_readable_spaces(c):
     parser.feed(TestClient(create_app(c)).get("/settings?section=budget").text)
     text = "".join(parser.parts)
     assert "the same as Recurring on Categories" in text
-    assert "the same as One-off on Categories" in text
+    assert "The same as One-off on Categories." in text   # IV-12Q5: after the one line that says what ticking does
     assert "income in Recurring instead of the average" in text

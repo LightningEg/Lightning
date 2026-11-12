@@ -78,7 +78,7 @@ SECTIONS: tuple[Section, ...] = (
             gear="/settings?section=budget", gear_label="Budget settings"),
     )),
     Section("plan", "Cash planning", "cash", (          # How much can I spend?
-        Tab("plan", "Plan", "/plan", _I["plan"], ("=/plan", "/plan/items")),
+        Tab("plan", "Plan", "/plan", _I["plan"], ("=/plan", "/plan/items", "/plan/scenarios", "/plan/inputs")),
         Tab("upcoming", "Upcoming", "/plan/upcoming", _I["upcoming"], ("/plan/upcoming",)),
         Tab("recurring", "Recurring", "/plan/recurring", _I["recurring"], ("/plan/recurring", "/setup/salary", "/plan/from-transaction")),
         Tab("loans", "Loans", "/plan/loans", _I["loans"], ("/plan/loans", "/plan/purchases")),

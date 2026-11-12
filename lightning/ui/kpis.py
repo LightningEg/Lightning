@@ -173,8 +173,9 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         elif check.over_by:
             tail = line(f"Plan {fmt(check.over_by, 0)} less to keep {fmt(check.to_save, 0)} a month")
         elif check.unassigned is not None and check.unassigned > 0:
-            # IV-12P: the figure is the Not yet given a job row's own; here it is a link to that row
-            tail = line("Some income has no job yet", "Give it a job", "#budget-unassigned")
+            # IV-12P: the figure is the Not yet given a job row's own (in the Lead, IV-12Q5); the action opens Fill this
+            # month, which opens on a source that has rows (IV-12Q3)
+            tail = line("Some income has no job yet", "Give it a job", f"/budget/fill?month={month}")
         else:
             tail = line(f"{fmt(check.to_save, 0)} a month to save")
         good = not check.over_by
@@ -479,3 +480,48 @@ def currencies(totals: dict, *, start: str, end: str) -> list[dict]:
         cards.append(card(labels["spread"], totals["spread"], compare(f"{start} to {end}"), tone="out",
                           line_=line("Beyond the market rate, on conversions."), key="spread"))
     return row(cards)
+
+
+# ── Fund your payday plan (IV-12Q1) ───────────────────────────────────────────────────────────────────────────
+def payday(allocation: dict) -> tuple[dict, dict | None]:
+    """The Lead (Cash available to assign, against what stays unassigned) and the bar that splits it in four."""
+    pr = allocation["proposal"]
+    available, left = pr["available_before"], pr["unassigned"]
+    if available is None:
+        comparison = compare("Add current exchange rates to work it out.")
+    elif left is not None and left < ZERO:
+        comparison = compare("more than the cash you have", fmt(-left, 0), "bad")
+    else:
+        comparison = compare("stays unassigned after you confirm", fmt(left, 0), "plain")
+    split = None if available is None else segments([
+        ("Bills protected", pr["bills"], "out"), ("To your plan", pr["to_plan"], "hold"),
+        ("Emergency and goals", pr["reserves"], "in"), ("Left unassigned", max(left, ZERO), "neutral")])
+    lead = card(figure_label("cash_available_to_assign"), available, comparison, tone="hold", key="payday")
+    return lead, split
+
+
+# ── Compare scenarios (IV-12Q2) ───────────────────────────────────────────────────────────────────────────────
+def scenario(result) -> tuple[dict | None, dict | None]:
+    """The Lead (Lowest point ahead with the change, against the plan's) and the chart: the plan and the scenario as
+    two lines over the forecast's months, the scenario's lowest month marked."""
+    low = result.plan_low
+    if low is None:
+        return None, None
+    moved = result.scenario_plan_low
+    changed = bool(result.assumptions) and moved is not None
+    value = moved[1] if changed else low.closing
+    if changed:
+        diff = result.change
+        comparison = compare("on your plan's lowest point", _signed(diff),
+                             "bad" if diff < 0 else "good" if diff > 0 else "plain")
+    else:
+        comparison = compare("with your plan as it is")
+    lead = card(figure_label("lowest_point_ahead"), value, comparison, tone="over" if value < 0 else "hold",
+                chip_=chip(moved[0] if changed else low.month), key="scenario")
+    labels = [m for m, _, _ in result.months]
+    series = [{"name": "Your plan", "tone": "reference", "dashed": True, "values": [b for _, b, _ in result.months],
+               "mark_low": not changed}]
+    if changed:
+        series.append({"name": "With this change", "tone": "hold", "values": [c for _, _, c in result.months],
+                       "mark_low": True})
+    return lead, charts.trend(labels, series)

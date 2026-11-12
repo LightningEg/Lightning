@@ -191,3 +191,37 @@ def currencies(n: int, value: Decimal, unrealized: Decimal, complete: bool) -> d
     if unrealized < ZERO:
         return sentence("Your foreign money is worth {amt}, {gain} less than it cost.", amt=fmt(value, 0), gain=fmt(-unrealized, 0))
     return sentence("Your foreign money is worth {amt}.", amt=fmt(value, 0))
+
+
+def payday(available: Decimal | None, unassigned: Decimal | None, enabled: bool, assigned: Decimal | None = None) -> dict:
+    """How do I share out the cash I already have? (IV-12Q1)"""
+    if available is None:
+        return sentence("Add current exchange rates to share out your cash.")
+    if not enabled:
+        return sentence("Turn on cash funding to share out {amt}.", amt=fmt(available, 0))
+    if unassigned is not None and unassigned < ZERO:
+        return sentence("This plan needs {amt} more than the cash you have.", amt=fmt(-unassigned, 0))
+    return sentence("Confirm to give {amt} a job; {left} stays unassigned.", amt=fmt(assigned or ZERO, 0),
+                    left=fmt(unassigned or ZERO, 0))
+
+
+def forecast_inputs(subjects: int) -> dict:
+    """Can I trust the forecast's inputs? (IV-12Q2) Counted by account or currency, as the rows are."""
+    if not subjects:
+        return sentence("Nothing behind the forecast is old or missing.")
+    if subjects == 1:
+        return sentence("One account or currency behind the forecast needs a look.")
+    return sentence("{n} accounts or currencies behind the forecast need a look.", n=subjects)
+
+
+def scenario(changed: bool, plan_low: Decimal | None, diff: Decimal | None) -> dict:
+    """What would this change do to my lowest point ahead? (IV-12Q2)"""
+    if plan_low is None:
+        return sentence("Add your recurring payments to compare scenarios.")
+    if not changed or diff is None:
+        return sentence("Your lowest point ahead is {amt}. Pick a change to compare.", amt=fmt(plan_low, 0))
+    if diff < ZERO:
+        return sentence("This change lowers your lowest point ahead by {amt}.", amt=fmt(-diff, 0))
+    if diff > ZERO:
+        return sentence("This change raises your lowest point ahead by {amt}.", amt=fmt(diff, 0))
+    return sentence("This change leaves your lowest point ahead where it is.")

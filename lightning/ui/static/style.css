@@ -3556,3 +3556,15 @@ p { text-wrap:pretty; }
     outline:2px solid CanvasText!important;
   }
 }
+
+/* IV-12Q3: an empty Fill source's next steps sit in one row */
+.fill-empty-actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.limit-spent { margin:8px 0 16px; }
+/* IV-12Q4: a row's share of its kind on Recurring (soft rose out, green in; A03) */
+.row-share { display:block; width:100%; height:4px; margin-top:6px; max-width:240px; border-radius:2px; background:var(--track, #E6EFEC); overflow:hidden; }
+.row-share i { display:block; height:100%; border-radius:2px; background:var(--tone-spend, #E68CA8); }
+.row-share.is-in i { background:var(--meadow, #14A874); }
+/* IV-12Q5: Budget's AI prompt in the header's More actions: a short note, then Copy and Edit side by side */
+.budget-ai-menu>div { width:320px; padding:12px; }
+.budget-ai-menu>div>p { margin:0 0 8px; padding:0 4px; }
+.budget-ai-menu .ai-prompt-block { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:6px; }

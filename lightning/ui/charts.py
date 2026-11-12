@@ -93,6 +93,8 @@ def trend(labels: list[str], series: list[dict], plan: Decimal | None = None,
                  "change": None if n == 0 else v - pts[n - 1][2],  # since the previous point of this line
                  "pct": None if n == 0 or pts[n - 1][2] == 0 else float((v - pts[n - 1][2]) / abs(pts[n - 1][2]) * 100)}
                 for n, (px, py, v, lab) in enumerate(pts)]
+        if s.get("mark_low") and dots:   # IV-12Q2: the lowest point ahead, marked in Strong rose (A03)
+            min(dots, key=lambda d: d["value"])["low"] = True
         drawn.append({**s, "line": line, "area": area if s.get("area") else "", "dots": dots,
                       "last": dots[-1] if dots else None})
     ticks = [{"value": v, "y": y(v)} for v in sorted({top, (top + bottom) / 2, bottom, ZERO}, reverse=True)

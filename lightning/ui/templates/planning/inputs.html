@@ -1,1 +1,11 @@
-{% extends "base.html" %}{% block title %}{{ 'Forecast inputs'|tr(locale) }}{% endblock %}{% block content %}<section class="card"><h2 id="app-popup-title">{{ 'Forecast inputs'|tr(locale) }}</h2><p>{{ 'The forecast uses confirmed cash and scheduled payments. These notes change no balance or plan.'|tr(locale) }}</p>{% include "partials/freshness.html" %}{% if not notes %}<p>{{ 'No old or missing inputs were found.'|tr(locale) }}</p>{% endif %}<a class="btn" href="/plan">{{ 'Cash planning'|tr(locale) }}</a></section>{% endblock %}
+{% extends "base.html" %}
+{% from "partials/macros.html" import page_title %}{% from "partials/forecast_inputs_rows.html" import input_rows with context %}
+{% block title %}{{ 'Forecast inputs'|tr(locale) }}{% endblock %}
+{% block heading %}{{ page_title('Forecast inputs'|tr(locale), status, as_of|day(locale), 'what the forecast leans on') }}{% endblock %}
+{% block top_actions %}<a class="btn" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>{% endblock %}
+{% block content %}
+{# IV-12Q2: a title, the answer, then one row per account or currency with one action. #}
+<section class="card wide-card" aria-labelledby="inputs-h"><h2 id="inputs-h">{{ ('Old or missing inputs' if notes else 'Nothing old or missing')|tr(locale) }}</h2>
+{% if notes %}<div class="compact-list">{{ input_rows(groups) }}</div>{% else %}<p class="muted">{{ 'No old or missing inputs were found.'|tr(locale) }}</p>{% endif %}
+<p class="muted">{{ 'The forecast uses confirmed cash and scheduled payments. These notes change no balance or plan.'|tr(locale) }}</p></section>
+{% endblock %}

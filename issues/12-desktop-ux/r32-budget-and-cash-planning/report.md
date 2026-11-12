@@ -42,14 +42,14 @@ Severity: high = a wrong figure; medium = a contradiction or an unfinished page;
 
 | ID | Severity | Page | Observation | Follow-up |
 | --- | --- | --- | --- | --- |
-| U1 | medium | Fund your payday plan | No visual, jargon lines, ten stacked boxes with piastres; proposes 60,420 of 67,018 free cash for the emergency fund, 0 left unassigned. [PC](evidence/pc-payday.png), [phone](evidence/phone-payday.png). | IV-12Q1 |
-| U2 | medium | Compare scenarios | A form and a two-row table, no chart; no sidebar item or tab is lit. [Screenshot](evidence/pc-scenarios-and-forecast-inputs.png). | IV-12Q2 |
-| U3 | medium | Forecast inputs | No title, six bullets each ending "Review inputs", nothing lit in the sidebar. | IV-12Q2 |
-| U4 | medium | Change limit | One box, "Amount or %", on an empty page; nothing about what was spent. [Screenshot](evidence/pc-change-limit.png). | IV-12Q3 |
-| U5 | low | Fill this month, Carryover | Empty table, "No base limits from last month are available to copy"; *Give it a job* (13,997) leads here and stops. [Screenshot](evidence/pc-carryover-and-fill.png). | IV-12Q3, NF-12R |
-| U6 | medium | Phone Recurring | A plain list and text rows: no card, no bar. On the PC the bills are listed twice. [Screenshot](evidence/phone-recurring.png). | IV-12Q4 |
-| U7 | low | Phone Cash planning | "Compare scenarios" and "Forecast inputs" are bare underlined links above the content. [Screenshot](evidence/phone-cash-planning.png). | IV-12Q2 |
-| U8 | low | Budget, Budget settings | The Ask-an-AI paragraph and the "Not yet given a job" rows sit bare between cards; settings is 38 checkboxes including "System Categories". [Budget](evidence/pc-budget.png), [settings](evidence/pc-budget-settings.png). | IV-12Q5 |
+| U1 | medium | Fund your payday plan | No visual, jargon lines, ten stacked boxes with piastres; proposes 60,420 of 67,018 free cash for the emergency fund, 0 left unassigned. [PC](evidence/pc-payday.png), [phone](evidence/phone-payday.png). | IV-12Q1 done: `tests/test_payday_proposal_adds_up.py` |
+| U2 | medium | Compare scenarios | A form and a two-row table, no chart; no sidebar item or tab is lit. [Screenshot](evidence/pc-scenarios-and-forecast-inputs.png). | IV-12Q2 done: `tests/test_budget_cash_page_pattern.py` |
+| U3 | medium | Forecast inputs | No title, six bullets each ending "Review inputs", nothing lit in the sidebar. | IV-12Q2 done: `tests/test_budget_cash_page_pattern.py` |
+| U4 | medium | Change limit | One box, "Amount or %", on an empty page; nothing about what was spent. [Screenshot](evidence/pc-change-limit.png). | IV-12Q3 done: `tests/test_budget_cash_page_pattern.py` |
+| U5 | low | Fill this month, Carryover | Empty table, "No base limits from last month are available to copy"; *Give it a job* (13,997) leads here and stops. [Screenshot](evidence/pc-carryover-and-fill.png). | IV-12Q3 done: `tests/test_budget_cash_page_pattern.py`, NF-12R |
+| U6 | medium | Phone Recurring | A plain list and text rows: no card, no bar. On the PC the bills are listed twice. [Screenshot](evidence/phone-recurring.png). | IV-12Q4 done: `tests/test_budget_cash_page_pattern.py` |
+| U7 | low | Phone Cash planning | "Compare scenarios" and "Forecast inputs" are bare underlined links above the content. [Screenshot](evidence/phone-cash-planning.png). | IV-12Q2 done: `tests/test_budget_cash_page_pattern.py` |
+| U8 | low | Budget, Budget settings | The Ask-an-AI paragraph and the "Not yet given a job" rows sit bare between cards; settings is 38 checkboxes including "System Categories". [Budget](evidence/pc-budget.png), [settings](evidence/pc-budget-settings.png). | IV-12Q5 done: `tests/test_budget_cash_page_pattern.py` |
 
 ### Smaller things
 
@@ -86,3 +86,7 @@ history, Arabic, themes, the Android app itself. Safety (Reserves, Limits) was c
 
 - **2026-11-09, owner decisions, second round (question dialog).** Home leads with the everyday budget; Safe to spend
   stays the lead of Cash planning (IV-12P).
+
+- **2026-11-12, IV-12Q finished (Claude).** All five steps built: the payday page is one short step and tops reserves
+  up by their monthly need (`tests/test_payday_proposal_adds_up.py`); scenarios, forecast inputs, change limit, fill,
+  carryover, recurring, Budget and Budget settings follow the page pattern (`tests/test_budget_cash_page_pattern.py`).

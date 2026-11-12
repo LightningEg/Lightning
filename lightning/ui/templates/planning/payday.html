@@ -1,24 +1,21 @@
 {% extends "base.html" %}
+{% from "partials/macros.html" import page_title %}{% from "partials/charts.html" import lead_card %}
 {% block title %}{{ 'Fund your payday plan'|tr(locale) }}{% endblock %}
-{% block heading %}<h1>{{ 'Fund your payday plan'|tr(locale) }}</h1>{% endblock %}
+{% block heading %}{{ page_title('Fund your payday plan'|tr(locale), status, allocation.month|month(locale), 'cash already posted') }}{% endblock %}
 {% block top_actions %}<a class="btn" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>{% endblock %}
 {% block content %}
-<section class="card"><p>{{ 'Assign cash you already own. Expected salary is excluded; reserves and unpaid bills stay protected. This does not change budget limits or move money. Cash in another account or brokerage still needs a transfer before payment.'|tr(locale) }}</p>
-<form method="post" action="/payday/enable"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="enabled" value="{{ '0' if enabled else '1' }}"><button class="btn" type="submit">{{ ('Pause cash funding' if enabled else 'Turn on cash funding')|tr(locale) }}</button></form></section>
+{# IV-12Q1 (owner, 2026-11-09): one short step. The Lead is the cash to share out, its side the proposal and Confirm. #}
 {% set a = allocation %}
-<section class="card"><h2>{{ 'Before your next payday'|tr(locale) }}</h2>
-<p>{{ 'Due before payday'|tr(locale) }} {{ forecast.payments_before_income_total|money(places=0) }} {{ base }} · {{ 'Safe to spend'|tr(locale) }} {{ forecast.safe_to_spend|money(places=0) }} {{ base }}</p>
-{% for payment in forecast.payments_before_income %}<p>{{ payment.item.name }} · {{ payment.due_date }}</p>{% endfor %}
-</section>
-<section class="card"><h2>{{ fig.cash_available_to_assign.label }}</h2><p><b class="{{ 'neg' if a.available is not none and a.available < 0 else '' }}">{{ a.available|money(places=0) if a.available is not none else '—' }} {{ base }}</b> · {{ a.month }}</p>
-<p>{{ 'Owned cash'|tr(locale) }} {{ a.cash|money(places=0) }} · {{ 'Reserves'|tr(locale) }} {{ a.reserved|money(places=0) }} · {{ fig.funded_spending_left.label }} {{ a.funded|money(places=0) }}</p>
 {% if a.missing %}<p class="flash error">{{ 'Add current exchange rates before assigning cash.'|tr(locale) }} {{ a.missing|join(', ') }}</p>{% endif %}
-{% if a.ready is not none and a.ready < 0 %}<p class="flash error">{{ 'Funded spending and obligations exceed owned cash. Reduce assignments before adding more.'|tr(locale) }}</p>{% endif %}
-<p class="muted">{{ 'Amounts below are a preview, with bills due first. Each category includes its children; spending and refunds update its funded cash. Unused funding returns to the pool next month.'|tr(locale) }}</p></section>
-{% if a.ready is not none %}{% include "partials/payday_proposal.html" %}
-<form method="post" action="/payday/apply"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="fingerprint" value="{{ a.token }}">
-<section class="card"><h2>{{ 'Fund spending'|tr(locale) }}</h2>
-{% for row in a.rows %}<label><span class="field-name">{{ row.name }}</span><small class="field-note">{{ fig.funded_spending_left.label }} {{ row.remaining|money(places=0) }} · {{ 'Left in plan'|tr(locale) }} {{ row.target|money(places=0) }}</small><input type="text" inputmode="decimal" name="category_{{ row.id }}" value="{{ row.suggested }}" {{ "" if enabled else "disabled" }} required></label>{% else %}<p>{{ 'Add category limits in Budget to preview cash funding.'|tr(locale) }} <a href="/budget">{{ 'Budget'|tr(locale) }}</a></p>{% endfor %}</section>
-<section class="card"><h2>{{ 'Top up reserves'|tr(locale) }}</h2>{% for row in a.reserves %}<label><span class="field-name">{{ row.name }}</span><small class="field-note">{{ 'Add to assigned cash'|tr(locale) }} · {{ 'Goal still needs'|tr(locale) }} {{ row.gap|money(places=0) }}</small><input type="text" inputmode="decimal" name="reserve_{{ row.id }}" value="{{ row.suggested }}" {{ "" if enabled else "disabled" }} required></label>{% else %}<a href="/reserves">{{ 'Reserves'|tr(locale) }}</a>{% endfor %}</section>
-{% if enabled %}<button class="btn primary" type="submit">{{ 'Confirm cash assignments'|tr(locale) }}</button>{% else %}<p>{{ 'Turn on cash funding to confirm this proposal.'|tr(locale) }}</p>{% endif %}</form>{% endif %}
+{% call lead_card(lead, base) %}{% if a.ready is not none %}{% include "partials/payday_proposal.html" %}{% endif %}{% endcall %}
+{% if a.ready is not none %}{% include "partials/payday_customize.html" %}{% endif %}
+<div class="grid g2">
+<section class="card" aria-labelledby="before-payday-h"><h2 id="before-payday-h">{{ 'Before your next payday'|tr(locale) }}</h2>
+<div class="compact-list">{% for payment in forecast.payments_before_income %}<div class="compact-row"><span>{{ payment.item.name }} <small class="muted">{{ payment.due_date|day(locale) }}</small></span><b>{{ payment.still_owed|money(places=0) }}</b></div>{% else %}<p class="muted">{{ 'Nothing is due before payday.'|tr(locale) }}</p>{% endfor %}</div>
+<p class="muted">{{ 'Due before payday'|tr(locale) }} {{ forecast.payments_before_income_total|money(places=0) }} {{ base }} · {{ 'Safe to spend'|tr(locale) }} {{ forecast.safe_to_spend|money(places=0) }} {{ base }}</p></section>
+<section class="card" aria-labelledby="cash-funding-h"><h2 id="cash-funding-h">{{ 'Cash funding'|tr(locale) }}</h2>
+<div class="settings-row"><div><span class="settings-name">{{ ('Cash funding is on' if enabled else 'Cash funding is off')|tr(locale) }}</span><small>{{ 'Assigns cash you already own; moves no money and changes no budget limit.'|tr(locale) }}</small></div>
+<form method="post" action="/payday/enable"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="enabled" value="{{ '0' if enabled else '1' }}"><button class="btn{{ ' primary' if not enabled }}" type="submit">{{ ('Pause cash funding' if enabled else 'Turn on cash funding')|tr(locale) }}</button></form></div>
+<p class="muted">{{ 'Cash in another account or brokerage still needs a transfer before payment.'|tr(locale) }}</p></section>
+</div>
 {% endblock %}

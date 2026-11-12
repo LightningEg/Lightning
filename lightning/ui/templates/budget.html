@@ -2,20 +2,20 @@
 {% extends "base.html" %}
 {% block title %}Budget{% endblock %}
 {% block period %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/budget", period.key, month, this_month, period.start_text, period.end_text) }}{% endblock %}
-{% block top_actions %}<a class="btn small" href="/budget/fill?month={{ month }}">{{ "Fill this month"|tr(locale) }}</a>{% endblock %}
+{% block top_actions %}<a class="btn small" href="/budget/fill?month={{ month }}">{{ "Fill this month"|tr(locale) }}</a>{% if has_plan and budget_ai_prompt %}{# IV-12Q5: the AI prompt is a page action, behind the header's More actions (A05) #}{% from "partials/icons.html" import icon_more with context %}<details class="action-menu budget-ai-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">{{ icon_more() }}</summary><div><p class="muted small">{{ 'Stuck on how to reach a target? This prompt explains the plan’s own words (pace, rolled over, held for) to your AI tool first, which it cannot guess. Its advice then fits your plan, not a generic budget.'|tr(locale) }}</p>{% set ai_text = budget_ai_prompt %}{% include "partials/ai_prompt.html" %}<a href="/settings/ask-ai">{{ 'Add your numbers with Ask an AI'|tr(locale) }}</a></div></details>{% endif %}{% endblock %}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Budget'|tr(locale), status, period.start_text ~ ' to ' ~ period.end_text, 'so far' if everyday and everyday.current else '') }}{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import key_notes, meter, bullet_row, kpi_row, pace_chart, lead_card %}{% from "partials/macros.html" import needs_rows %}
-{% if lead %}{% call lead_card(lead, base) %}{% if pace %}<div class="lead-side-head" id="budget-pace"><div><h3>{{ 'Is everyday spending on pace?'|tr(locale) }}</h3></div></div>
+{# IV-12Q5: Not yet given a job is a row under the Lead's answer, not a bare row between cards #}
+{% set hero_rows = [] %}{% if lead and has_plan and check and check.unassigned is not none %}{% set hero_rows = [{'label': fig.not_yet_given_a_job.label, 'note': 'Income {income} − Planned {planned} − Goals {goals} − Emergency top-up {fund}'|tr(locale, income=check.income|money(False, 0), planned=check.planned|money(False, 0), goals=check.goals|money(False, 0), fund=check.emergency|money(False, 0)), 'value': check.unassigned|money(False, 0) ~ ' ' ~ base, 'href': '/budget/fill?month=' ~ month if check.unassigned > 0 else ''}] %}{% endif %}
+{% if lead %}{% call lead_card(lead, base, rows=hero_rows) %}{% if pace %}<div class="lead-side-head" id="budget-pace"><div><h3>{{ 'Is everyday spending on pace?'|tr(locale) }}</h3></div></div>
     {{ pace_chart(pace, base, previous_month) }}{% endif %}{% endcall %}
 {{ needs_rows(needs) }}
 {{ kpi_row(kpi_cards, base, 'Budget at a glance') }}
 {% elif kpi_cards %}{{ kpi_row(kpi_cards, base, 'Budget at a glance') }}{% else %}{{ key_notes(notes) }}{% endif %}
 {% if raise_offer and not raise_in_card %}<p class="notice raise-prompt" role="status"><span><b>{{ 'Your income went up'|tr(locale) }}</b> · {{ 'Recurring expects {recurring}, {raise} more than your average.'|tr(locale, recurring=raise_offer.recurring|money(False, 0) ~ ' ' ~ base, raise=raise_offer.raise|money(False, 0)) }}</span> <a class="btn small primary" data-popup-open href="/budget/raise?month={{ raise_offer.month }}">{{ 'Raise the plan'|tr(locale) }}</a> <a class="btn small" href="/plan/reserves">{{ 'Save the difference'|tr(locale) }}</a></p>{% endif %}
 
-{% if has_plan and budget_ai_prompt %}<div class="ai-line"><p class="muted small">{{ 'Stuck on how to reach a target? This prompt explains the plan’s own words (pace, rolled over, held for) to your AI tool first, which it cannot guess. Its advice then fits your plan, not a generic budget.'|tr(locale) }} <a href="/settings/ask-ai">{{ 'Add your numbers with Ask an AI'|tr(locale) }}</a></p>
-{% set ai_text = budget_ai_prompt %}<div class="actions">{% include "partials/ai_prompt.html" %}</div></div>{% endif %}
-{% if has_plan %}{% include 'partials/budget_unassigned.html' %}{% endif %}
+{% if has_plan and not lead %}{% include 'partials/budget_unassigned.html' %}{% endif %}
 {% if funding_adjustment_total %}<p class="muted small">{{ 'Spent {gross} · From monthly plan {plan} · Funded outside the plan {amount}. Past periods reflect current confirmed links.'|tr(locale, gross=gross_period_spending|money, plan=period_actual|money, amount=funding_adjustment_total|money) }}</p>{% endif %}
 {% if error %}<p class="notice error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
 {% if bulk_undo %}<form method="post" action="/budget/bulk/undo" class="notice"><input type="hidden" name="token" value="{{ bulk_undo }}">{{ "Bulk rules applied."|tr(locale) }}<button class="btn small">{{ 'Undo'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}

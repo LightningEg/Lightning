@@ -11,8 +11,8 @@
   </section>
   <section class="phone-section">{% include 'phone/settings/_emergency_basis.html' %}</section>
   <section class="phone-section" aria-labelledby="bs-oneoff"><header class="phone-section-head"><h2 id="bs-oneoff">{{ "One-off categories"|tr(locale) }}</h2></header>
-    <p class="phone-note">{{ "Left out of the budget and estimates · the same as"|tr(locale) }} <a href="/categories">{{ 'One-off'|tr(locale) }}</a> {{ "on Categories"|tr(locale) }}</p>
-    <div class="phone-rows">{% for category in expense_categories if category.active %}<label class="phone-row{{ ' is-inner' if category.depth != 1 }}"><span>{% if category.depth == 1 %}<b>{{ category.name|tr(locale) }}</b>{% else %}{{ category.name|tr(locale) }}{% endif %}</span><input type="checkbox" name="exclusion_category" value="{{ category.id }}" {{ 'checked' if category.id in excluded_categories }}></label>{% endfor %}</div>
+    <p class="phone-note">{{ 'Tick a category to leave it out of the budget, its averages and the forecast.'|tr(locale) }} {{ "The same as"|tr(locale) }} <a href="/categories">{{ 'One-off'|tr(locale) }}</a> {{ "on Categories"|tr(locale) }}.</p>{% for id in kept_income|default([]) %}<input type="hidden" name="income_category" value="{{ id }}">{% endfor %}{% for id in kept_exclusions %}<input type="hidden" name="exclusion_category" value="{{ id }}">{% endfor %}
+    <div class="phone-rows">{% for category in one_off_categories %}<label class="phone-row{{ ' is-inner' if category.depth != 1 }}"><span>{% if category.depth == 1 %}<b>{{ category.name|tr(locale) }}</b>{% else %}{{ category.name|tr(locale) }}{% endif %}</span><input type="checkbox" name="exclusion_category" value="{{ category.id }}" {{ 'checked' if category.id in excluded_categories }}></label>{% endfor %}</div>
   </section>
   <button class="btn primary phone-save">{{ "Save budget settings"|tr(locale) }}</button>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>

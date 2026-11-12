@@ -23,7 +23,6 @@
 <p class="chart-empty">{{ 'No accounts yet.'|tr(locale) }}</p>
 <a class="btn primary phone-save" href="/accounts/new" data-popup-open>{{ 'Add an account'|tr(locale) }}</a>
 {% else %}
-<p><a href="/plan/scenarios">{{ 'Compare scenarios'|tr(locale) }}</a></p><p><a href="/plan/inputs" data-popup-open>{{ 'Forecast inputs'|tr(locale) }}</a></p>
 {% set f = forecast %}{% set p = plan %}
 
 <section class="phone-section phone-plan-coming" id="plan-next" aria-labelledby="coming-section">
@@ -134,5 +133,10 @@
     {% endcall %}
   </div>
 </section>
+{# IV-12Q2: the two tools are rows at the page's end, not bare links above Coming up #}
+<nav class="phone-rows phone-section" aria-label="{{ 'More in Cash planning'|tr(locale) }}">
+  <a class="phone-row" href="/plan/scenarios"><span>{{ 'Compare scenarios'|tr(locale) }}<small>{{ 'What a purchase, a late salary or a bill does to your cash'|tr(locale) }}</small></span><span class="phone-chevron" aria-hidden="true">{{ chevron() }}</span></a>
+  <a class="phone-row" href="/plan/inputs"><span>{{ 'Forecast inputs'|tr(locale) }}<small>{{ 'Old or missing rates and checks'|tr(locale) }}</small></span><span class="phone-chevron" aria-hidden="true">{{ chevron() }}</span></a>
+</nav>
 {% endif %}
 {% endblock %}

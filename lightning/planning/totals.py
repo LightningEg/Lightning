@@ -38,6 +38,17 @@ class RecurringTotals:
     def income_a_month(self) -> Decimal:
         return a_month(sum((e.per_year for e in self.entries if e.item.is_income), ZERO))
 
+    def share_bars(self) -> dict[int, float]:
+        """Each item's bar width, 0 to 100: a month of it against the largest of its own kind, a bill or an income
+        (IV-12Q4). A width, not money."""
+        widths: dict[int, float] = {}
+        for income in (True, False):
+            top = max((e.per_year for e in self.entries if e.item.is_income == income), default=ZERO)
+            for e in self.entries:
+                if e.item.is_income == income:
+                    widths[e.item.id] = float(max(e.per_year, ZERO) / top * 100) if top > 0 else 0.0
+        return widths
+
     @property
     def due_count(self) -> int:
         return sum(len(e.due) for e in self.entries if not e.item.is_income)

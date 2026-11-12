@@ -1,0 +1,4 @@
+{# IV-12Q3: no category carries anything yet: what carryover does, and the one action that turns it on. #}
+<section class="{{ 'phone-section' if phone_mode() else 'card wide-card' }}" aria-labelledby="carry-empty-h"><h2 id="carry-empty-h">{{ 'Carryover is off'|tr(locale) }}</h2>
+<p class="{{ 'phone-note' if phone_mode() else 'muted' }}">{{ 'Turn it on and what is left in a category at the end of a month is added to the next month’s plan; overspending is taken off it.'|tr(locale) }}</p>
+<form method="post" action="/budget/carryover/global" class="{{ 'phone-form' if phone_mode() else '' }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="enabled" value="1"><button class="btn primary{{ ' phone-save' if phone_mode() }}" type="submit">{{ 'Turn on carryover for every category'|tr(locale) }}</button></form></section>
