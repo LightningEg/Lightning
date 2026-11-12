@@ -353,10 +353,10 @@ def _play_permissions():
 def test_the_play_bundle_manifest_must_be_a_release_at_the_play_target():
     """NF-11B1: Play takes a release AAB at API 36; the debug-only probe screen never ships."""
     good = ('<manifest xmlns:android="http://schemas.android.com/apk/res/android" android:versionCode="70" '
-            'android:versionName="2.0.0-70+aaaaaaaa" package="org.lightning.app">\n'
+            'android:versionName="2.0.0-70+aaaaaaaa" package="com.lightningeg">\n'
             '<uses-sdk android:minSdkVersion="24" android:targetSdkVersion="36"/>\n'
             + "".join(f'<uses-permission android:name="{p}"/>\n' for p in sorted(_play_permissions()))
-            + '<uses-permission android:name="org.lightning.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"/>\n'
+            + '<uses-permission android:name="com.lightningeg.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"/>\n'
             + '<application android:label="L">')
     assert build.manifest_problems(good, "70", "2.0.0-70+aaaaaaaa") == []
     bad = good.replace('"36"', '"35"').replace('android:label', 'android:debuggable="true" android:label') \

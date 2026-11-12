@@ -238,7 +238,7 @@ def redeem(code: str, *, opener=None) -> str:
     }, "That code is used or expired. Get a fresh one from your account page.", opener=opener)
 
 
-PLAY_PACKAGE = "org.lightning.app"
+PLAY_PACKAGE = "com.lightningeg"  # the Play build's package name (the GitHub APK is org.lightning.app)
 
 
 def redeem_play(product: str, token: str, *, opener=None) -> str:
