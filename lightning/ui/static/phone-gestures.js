@@ -232,11 +232,14 @@
     if (!drag) return;
     const { frame, dy } = drag;
     drag = null;
-    frame.style.transform = "";
-    if (dy > 110) {
-      const close = document.querySelector("#app-popup [data-popup-close]");
-      if (close) close.click();
-    }
+    const close = dy > 110 && document.querySelector("#app-popup [data-popup-close]");
+    if (!close) { frame.style.transform = ""; return; }
+    close.click();
+    // A closing sheet keeps travelling down from where the finger left it (a theme's sheet exit carries on from there);
+    // springing back first made two moves. A sheet that stayed open (it asked to discard changes) springs back at once.
+    const dialog = frame.closest("dialog");
+    if (dialog && dialog.open) frame.style.transform = "";
+    else setTimeout(() => { frame.style.transform = ""; }, 240);
   });
 })();
 

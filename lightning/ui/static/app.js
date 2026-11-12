@@ -2143,7 +2143,11 @@ initCurrencySearch();
     dialog.close();
     document.documentElement.classList.remove("sheet-open");
     document.body.classList.remove("popup-open");
-    content.replaceChildren();
+    // A theme may give the popup an exit (theme-materials.css): it is then still on screen for a moment after close(),
+    // so its content stays until it has gone; emptied at once it would leave as a blank shell. Reopened meanwhile: kept.
+    const empty = () => { if (!dialog.open) content.replaceChildren(); };
+    if (reopening || getComputedStyle(dialog).display === "none") content.replaceChildren();
+    else setTimeout(empty, 260);
     if (goBack && history.state?.lightningPopup) history.back();
     else if (opener?.isConnected) opener.focus();
     window.scrollTo({ top: baseScroll, behavior: "instant" });
