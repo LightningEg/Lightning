@@ -25,6 +25,7 @@
       <b class="{{ 'pos' if e.incoming else ('is-late' if e.state == 'late' else '') }}">{{ '+' if e.incoming else '−' }}{{ e.amount|money(False, 0) }}</b>
     </a>{% endfor %}</div>
   {% else %}<p class="phone-note">{{ 'Nothing due on this day. Pick a day with a mark to see what it takes.'|tr(locale) }}</p>{% endif %}
+  <p class="phone-note"><a href="/plan/upcoming.ics" download>{{ 'Save the next three months to your calendar'|tr(locale) }}</a></p>
 </section>
 {% else %}
 <p class="phone-note">{{ 'Nothing is planned for this month. Add your rent, bills, subscriptions or a loan, and each one appears on the day it is due.'|tr(locale) }}</p>

@@ -1610,6 +1610,7 @@ SERVICES = {
     "CSV row {n}: account name is ambiguous; use a unique name.": "صف CSV {n}: اسم الحساب مش واضح؛ استخدم اسم مميز.",
     "CSV row {n}: this is an internal transfer. Pick the account the money moved to or from.": "صف CSV {n}: ده تحويل داخلي. لازم اختيار الحساب اللي الفلوس اتحولت له أو منه.",
     "CSV row {n}: choose an entry to link to.": "صف CSV {n}: لازم اختيار قيد للربط.",
+    "CSV row {n}: that purchase is split; set its amount by hand, then link this row to it.": "صف CSV {n}: الشراء ده متقسم؛ عدّل مبلغه بإيدك، وبعدين اربط الصف ده بيه.",
     "CSV row {n}: {why}": "صف CSV {n}: {why}",
     "CSV row {n}: choose another active account for this transfer.": "صف CSV {n}: لازم اختيار حساب شغّال تاني للتحويل ده.",
     "CSV row {n}: choose a saved active Counterparty in Whom.": "صف CSV {n}: لازم اختيار طرف آخر محفوظ وشغّال في خانة مع مين.",
