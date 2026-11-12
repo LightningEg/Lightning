@@ -384,6 +384,54 @@ async def update_other_asset_details(request: Request, account_id: int):
     return redirect(f"/accounts/{account_id}", "Details saved.")
 
 
+def _field(form, name: str) -> str:
+    return str(form.get(name) or "").strip()
+
+
+@router.post("/{account_id:int}/contract")
+async def save_property_contract(request: Request, account_id: int):
+    """NF-12M3: the instalments still to pay the developer for a flat bought off plan."""
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            c.property.save_contract(account_id, _field(form, "instalment"), _field(form, "frequency") or "MONTHLY",
+                                     _field(form, "first_date"), _field(form, "payment_count"),
+                                     _field(form, "funding_account_id"))
+    except LightningError as exc:
+        return redirect(f"/accounts/{account_id}#property-contract", exc.message)
+    return redirect(f"/accounts/{account_id}", "Instalments saved.")
+
+
+@router.post("/{account_id:int}/instalment")
+async def pay_property_instalment(request: Request, account_id: int):
+    """NF-12M3: one instalment moves from your bank into the property; what you paid goes up by it."""
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            c.property.pay_instalment(account_id, _field(form, "due_date"), _field(form, "date") or None,
+                                      _field(form, "amount") or None, _field(form, "from_account_id") or None)
+    except LightningError as exc:
+        return redirect(f"/accounts/{account_id}", exc.message)
+    return redirect(f"/accounts/{account_id}", "Instalment paid.")
+
+
+@router.post("/{account_id:int}/property-flow")
+async def record_property_flow(request: Request, account_id: int):
+    """NF-12M4: rent received or a running cost paid, named as this property's."""
+    c = container(request)
+    form = await request.form()
+    kind = _field(form, "kind") or "rent"
+    try:
+        with settled_save(request, c):
+            c.property.record_flow(account_id, kind, _field(form, "date") or None, _field(form, "amount"),
+                                   _field(form, "cash_account_id"), _field(form, "notes"))
+    except LightningError as exc:
+        return redirect(f"/accounts/{account_id}#property-income", exc.message)
+    return redirect(f"/accounts/{account_id}", "Rent saved." if kind == "rent" else "Cost saved.")
+
+
 def _transaction_popup_context(request, account, values, action, error=None, txn_id=None, split_categories=None):
     c = container(request)
     counterparties = c.counterparties.list_active()

@@ -520,6 +520,9 @@ class PlanningService:
                           if payment.due_date == due), None)
         if scheduled is None:
             raise ValidationError("That date is not on this payment schedule.", "due_date")
+        if self.db.scalar("SELECT 1 FROM property_contracts WHERE planned_item_id=?", (item.id,)):
+            # NF-12M3: an instalment moves money into the property (it adds to what you paid), never spending.
+            raise ValidationError(f"Pay {item.name} from its property's page, so it adds to what you paid.", "due_date")
         if not item.category_id:
             raise ValidationError(f"Give {item.name} a category first, so its payments land in the right place.",
                                   "category_id")

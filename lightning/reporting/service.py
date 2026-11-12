@@ -271,7 +271,7 @@ class ReportingService:
             if account.account_type == AccountType.OTHER_ASSET and is_property(details.get(account.id)):
                 # A flat, a house or land is Real estate, with the price you paid as its cost (NF-12M1).
                 asset_class = real_estate or asset_class
-                paid = property_cost(details[account.id], day)
+                paid = property_cost(details[account.id], day, quantity)
                 cost = None if paid is None else self.valuer.value(asset, paid, day).value
             valuation = self.valuer.value(asset, quantity, day)
             if manual:
