@@ -26,10 +26,10 @@ def rows(issues, prs=()):
 
 def test_a_step_takes_when_can_and_area_from_its_parent_unless_it_says_otherwise():
     got, _ = rows([issue(1, ["when:launch", "can:opus"], "Area: lightning/sync, tests", children=[2, 3]),
-                   issue(2), issue(3, body="Can: sonnet\nArea: lightning/ui")])
+                   issue(2), issue(3, body="Can: sonnet\nArea: lightning/ui/static")])
     assert got[1]["state"] == "group"
     assert (got[2]["when"], got[2]["can"], got[2]["areas"]) == ("launch", "opus", {"lightning/sync"})
-    assert (got[3]["can"], got[3]["areas"]) == ("sonnet", {"lightning/ui"})
+    assert (got[3]["can"], got[3]["areas"]) == ("sonnet", {"lightning/ui/static"})
 
 
 def test_an_open_pull_request_that_closes_it_makes_it_running_and_an_old_one_stale():
@@ -53,12 +53,14 @@ def test_blockers_are_native_ones_an_open_pull_request_or_something_outside():
 
 def test_people_work_is_set_apart_and_the_same_area_is_never_run_twice():
     got, data = rows([issue(1, ["when:launch", "can:owner"]),
-                      issue(2, ["when:launch"], "Area: lightning/ui"),
-                      issue(3, ["when:launch"], "Area: lightning/ui/static, tests"),
+                      issue(2, ["when:launch"], "Area: lightning/ui/static"),
+                      issue(3, ["when:launch"], "Area: lightning/ui/static/app.js, tests"),
+                      issue(7, ["when:launch"], "Area: lightning/ui, lightning/sync/journal"),
                       issue(4, ["when:launch"], "Area: lightning/sync", blocking=2),
                       issue(5, ["when:launch"], "Area: lightning/sync"),
                       issue(6, ["when:after-launch"], "Area: guideline")], [pr(10, "Closes #2")])
     assert got[1]["state"] == "person" and got[3]["state"] == "held"
+    assert got[7]["state"] == "ready", "a whole folder such as lightning/ui is too broad to hold anything back"
     picked = [i["n"] for i in board.pick(board.derive(data), cap=3)]
     assert picked == [4], "one already runs, the most-unblocking goes first, #5 shares its area, #6 is not for launch"
     assert "Start now" in board.tally(data, board.derive(data), 3)
