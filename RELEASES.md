@@ -2,6 +2,127 @@
 
 What changed in each version, in plain words. Generated from `ai/changelog/` by `python tools/release_notes.py`; do not edit by hand. The full detail for each version is in the same folder.
 
+## 2.2.0 · 2026-11-12
+
+**Capture**
+
+- Adding a transaction on the phone is calmer: the amount comes first, your usual entries sit in one row, and there is one Save button.
+- A card purchase in dollars or another currency is kept in that currency, shown in pounds at the day's rate, and the bank's later pound charge replaces the estimate instead of adding a second expense.
+- Search answers a typed question such as "food last month" with the figure, its comparison and the rows.
+- Add investment now opens from the phone too, a certificate asks for your bank and opens its portfolio for you, and gold bars and coins sit in the same table as your jewellery.
+- On the phone, a payment recorded twice shows up in To review, where one tap deletes the copy or keeps both.
+- Search now answers "CIB last month" or "#eid 2026" with the money out, its comparison and the largest payments.
+- Bank messages Lightning is sure about now save themselves; From SMS lists them with Undo.
+- Paste SMS fills what it can, Add can repeat an entry or save and add another, bank balances are checked, and a cash wallet can be adjusted by any amount.
+- the phone Add sheet's date picker no longer closes itself the moment it opens.
+- reviewing a long bank statement opens faster.
+- Importing a statement now asks one question per group, lets you answer small leftovers in one press or one key at a time, and offers Undo on the result.
+- You can save a payment with only its amount and sort it later, more bank and wallet messages are read, and Search answers "food last month" with the figure.
+- Reviewing an imported statement starts with the few questions it asks, and the rows Lightning already placed post with one button.
+
+**Plan**
+
+- Fund your payday plan is one short step: a bar of where your cash goes and one Confirm, and the emergency fund gets its monthly top-up instead of all your spare cash.
+- Compare scenarios shows your plan and the change as two lines with the lowest point marked, and Forecast inputs lists each account or currency once with one thing to do.
+- Changing a category's limit shows what you spent this month, and Fill this month and Carryover tell you what to do when there is nothing to show.
+- Recurring lists each bill once, with a bar showing how big it is next to the others.
+- Budget is tidier: the AI prompt sits in the page menu, money with no job yet sits under the main figure, and Budget settings lists only your spending categories.
+- Upcoming can save your next three months of payments to your phone's or computer's calendar.
+- On the phone, Make my plan and Edit your plan open one list where you type a limit beside each everyday category.
+- Your payday proposal's lines now add up to the cash it shares out, and its plan line is called To your plan.
+- Needs you on the Overview counts the rows you see, once.
+- Reports no longer show a rise against a year you never recorded.
+- Refill on Reserves now offers this month's emergency top-up first, with Safe to spend after it; larger amounts are under Move more.
+- With three or more late bills, Cash planning offers one Catch up that walks through them one at a time, with Undo.
+- Home now leads with what is left for everyday, Cash planning leads with Safe to spend on both apps, and Compare scenarios uses the plan's lowest point.
+- On the phone's Home, Safe to spend sits beside Left for everyday and opens Cash planning.
+- A new Upcoming tab in Cash planning shows on a calendar what you still have to pay this month and on which days, with payday and the day your cash would run short.
+- The Overview shows the payments of the next seven days, and the phone's Money screen shows the next two weeks, each day opening the Upcoming calendar.
+- Fill this month can use your average of the last three months, and Needs you warns before a category runs out of its limit; What you own, Free cash and Net flow open a page that shows their parts.
+- Cash planning shows a late bill once, under Needs you, and Can I afford this? has its own card.
+- Cash planning opens on what is safe to spend and what is due; the forecast and what is promised open when you ask.
+
+**Understand**
+
+- The list of investment sales behind a report figure opens on the phone again.
+- the Overview and Spending stay fast on a long history.
+- The flow chart's last band is now called Kept as cash, so Kept means one thing everywhere.
+- Click Safe to spend, Left in plan or Savings rate to see how it adds up, right under the figure.
+- On the phone, tap Safe to spend, Net worth or Left for everyday to see how it adds up.
+- Screens show dates the way people say them (8 Nov, 1–8 Nov, Today), and Arabic shows ج.م and ٪.
+- Arabic screens now speak to everyone in neutral words instead of masculine commands.
+
+**Own**
+
+- The account picker is simpler and now lists Egyptian supermarkets and popular brands with their logos.
+- A flat, house or land now shows under Real estate on Investments, with its gain from the price you paid.
+- A property's page shows its return and yield, records rent and costs, and pays off-plan instalments that add to what you paid.
+- Gold bars and coins now sit in the same table as your jewellery, valued by the day's karat price, and Investments has an Add investment button on the phone.
+- One theme purchase now unlocks up to five of your profiles; Settings no longer mentions paying a quarter of the price for another profile.
+- Gold holdings use the correct currency when taking a karat price.
+- The Investments summary's Cost, Unrealized gain and Valued by you now add up to your Portfolio value.
+- London's share list will hold many more UK companies priced in pounds.
+- You can add a second gold bar of the same karat, hold money for someone from the Held for others page, and add gold and its purchase in one form.
+- Zakat can use the silver nisab or the lower of gold and silver, with the silver price you type.
+- You can add a certificate you already owned before you started tracking, payouts are forecast exactly as the bank pays them, and Lightning tells you when a certificate matures or unlocks.
+
+**Protect**
+
+- On Windows, turning reminders on now also reminds you once a day of what is due tomorrow, even when Lightning is closed, without showing any amount or name.
+- On Android, reminders that are on now also arrive once a day with Lightning closed, as one notice with no amount or name.
+- If a figure stops adding up, Needs you says so and opens Data checks.
+- Bring in data from an old Lightning install, restore a backup from a USB stick, and go back to your data from before a restore that could not finish.
+
+**Everywhere**
+
+- On the phone, Net worth opens to show it in US dollars and 21K gold, and an account asks first whether your bank shows the same balance.
+- On the phone, Budget shows Plan this month's salary from the day it arrives until you save the month's plan, and This month in detail opens the month's spending.
+- On the phone, To review shows one payment at a time with one clear button (Looks right, Track it, Match to deposit), and Activity has search and Out, In and Transfers.
+- On the phone, Money's report can show any dates you choose, as the old Overview's Custom did.
+- On the phone, Back goes back through the tab you are in, then to Home, and tapping the tab you are on returns to its top.
+- The phone loads a smaller stylesheet of its own, so its pages open faster and look the same.
+- On the phone, paying a bill, a category's sheet, loans, scenarios, categories and a transaction's page now use the phone's own layout instead of the PC's.
+- On the phone, a holding, prices, the planner, targets, trades, recurring items and loans' forms now use the phone's own layout.
+- On the phone, Budget, Zakat, Financial health and currency settings, rules and Move your data now use the phone's own layout.
+- On the phone, error pages, Add your salary, a figure's explanation, carryover and reserve payments now use the phone's own layout.
+- On the phone, Compare periods, a category's twelve months, the spending calendar and Reports now use the phone's own layout.
+- On the phone, a group of decisions, Data checks, Import and a tag's totals now use the phone's own layout, with Not now in place of a snooze form.
+- On the phone, Counterparties lists one row per name with its edits in a sheet, and a counterparty's page uses the phone's own layout.
+- On the phone, Money held for others and a gold-at-home account now use the phone's own layout, each item's purchase, sale and value in its sheet.
+- On the phone, adding or editing an account, converting currency, changing ownership and the first statement import steps now use the phone's own layout.
+- On the phone, Financial health uses the phone's own layout, each limit opening its numbers in a sheet.
+- On the phone, Welcome, Reserves and the import review now use the phone's own layout, so no phone page draws a PC page any more.
+- On the phone, a form opened from a sheet (Pay early, Edit, Mark paid) now responds to taps instead of closing.
+- On the phone, To do's "See all" now opens its own page with every task, and reminders keep a figure-free schedule ready for when the app is closed.
+
+**Feel**
+
+- Dendera and Papyrus respond more smoothly: a soft gold light on cards, a gentle press on buttons, dialogs that fade out, and PC pages that fade into each other.
+- On the phone, Dendera and Papyrus sheets slide up from the bottom and back down, and rows answer a tap with a soft gold wash.
+- On the phone, Dendera and Papyrus keep their drawing behind the Home figure only, so lists read cleanly.
+- Gains and income figures in green are now easy to read in every dark theme.
+- Every PC page now has the same header, with the period, Undo, the page's action and its settings always in the same place.
+- On the Overview, a Needs you row that is only a to-do no longer reads in the warning colour.
+- Overview now shows your free cash without a click, and Investments opens on its holdings without a long scroll.
+- counts now say "1 day left" and "1 category" instead of "1 days" and "1 categories".
+- Arabic counts of accounts, categories, rows, bills, rules, items and years now use the right singular, dual and plural.
+- counts in messages, headings and confirmation questions now read right in English and Arabic, such as "Delete 1 transaction?".
+- Keyboard focus stays clear across the app, including in High Contrast.
+- PC forms, focus rings, type and controls now feel consistent across the app.
+- a blocked or incomplete request now shows Lightning's own error page, in your language, instead of bare text.
+- when something does not save, the page names the problem and gives one Back button instead of "Check your setup".
+- the lock-out wait, a ledger row error, the category delete question and the register tooltip are now fully Arabic and no longer show internal codes.
+- when a bank CSV cannot be read, Lightning says what to do instead of showing a technical message.
+- every message about something that could not be saved, imported or found now has an Arabic version.
+- Every PC tab now says its answer in one sentence under its title, and Ask an AI has its own page.
+- Spending opens on where your money went; the comparisons, calendar and cash flow open when you ask and stay open next time.
+- Papyrus and Dendera now each have a matching banner, frame and name colour, sold together as a set at 80%.
+- Every PC tab is titled with its own name, and Spending opens on this month like the other tabs.
+
+**Build**
+
+- the documented install now brings every package the app needs.
+
 ## 2.1.2 · 2026-11-09
 
 **Capture**

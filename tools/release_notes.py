@@ -63,9 +63,10 @@ def parse_note(text: str) -> tuple[str, str] | None:
     if text.strip().lower() == "none":
         return None
     pillar, sep, sentence = text.partition(":")
-    if not sep or pillar.strip() not in _pillars() or not sentence.strip():
+    pillar = pillar.strip().lower()
+    if not sep or pillar not in _pillars() or not sentence.strip():
         raise ValueError(f"Release-note must be `<pillar>: one sentence` or `none` (pillars: {', '.join(_pillars())}): {text!r}")
-    return pillar.strip(), sentence.strip()
+    return pillar, sentence.strip()
 
 
 def latest_tag() -> str | None:
@@ -99,7 +100,7 @@ def unreleased(since: str | None) -> tuple[list[tuple[str, str]], list[str]]:
     for c in commits(since):
         for text in c["notes"]:
             parsed = parse_note(text)
-            if parsed:
+            if parsed and parsed not in notes:  # a squash keeps every commit's trailers: say each sentence once
                 notes.append(parsed)
         label = " ".join(f"[{code}]" for code in c["codes"]) or c["subject"]
         pr = f" (#{c['pr']})" if c["pr"] else ""
