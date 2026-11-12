@@ -12,6 +12,7 @@ from decimal import Decimal
 
 from lightning.accounts.domain import SIDEBAR_GROUPS, Account, AccountType
 from lightning.accounts.service import AccountService
+from lightning.accounts.property import REAL_ESTATE_CLASS, PropertyBook, is_property, property_cost
 from lightning.accounts.valuations import OtherAssetValuationRepository
 from lightning.assets.service import AssetService
 from lightning.categories.domain import CategoryFamily, IncomeClass, Scope
@@ -41,6 +42,7 @@ class HoldingValue:
     price: Decimal | None = None
     price_date: str | None = None
     price_source: str = ""
+    cost: Decimal | None = None  # what you paid, in the profile currency, where the ledger does not say (a property)
 
 
 @dataclass
@@ -214,6 +216,7 @@ class ReportingService:
         self.money_from_others = money_from_others
         self.valuer = Valuer(self.q, base_currency)
         self.other_asset_values = OtherAssetValuationRepository(db)
+        self.properties = PropertyBook(db)
         self.fx_positions = FxPositions(db, accounts, assets, base_currency, self._balance_and_owned)
         self.base_currency = base_currency
 
@@ -244,6 +247,8 @@ class ReportingService:
         assets = {item.id: item for item in self.assets.list_assets()}
         classes = {item.id: item for item in self.assets.list_classes()}
         rows = [dict(row) for row in self.q.holdings(day)]
+        details = self.properties.details()
+        real_estate = next((item for item in classes.values() if item.code == REAL_ESTATE_CLASS), None)
         # An Other asset valued by a dated estimate counts from that estimate, even when its cash quantity is zero or
         # it has no ledger row at all (opened at zero, valued afterwards): the estimate is not cash (BT-2AG).
         seen = {row["account_id"] for row in rows}
@@ -262,6 +267,12 @@ class ReportingService:
             asset = assets[row["asset_id"]]
             class_id = account.cash_class_id if asset.is_cash else asset.asset_class_id
             asset_class = classes[class_id]
+            cost = None
+            if account.account_type == AccountType.OTHER_ASSET and is_property(details.get(account.id)):
+                # A flat, a house or land is Real estate, with the price you paid as its cost (NF-12M1).
+                asset_class = real_estate or asset_class
+                paid = property_cost(details[account.id], day)
+                cost = None if paid is None else self.valuer.value(asset, paid, day).value
             valuation = self.valuer.value(asset, quantity, day)
             if manual:
                 # The estimate plus what moved in or out after its date, so money taken out later still
@@ -274,7 +285,7 @@ class ReportingService:
                 unvalued.append(f"{account.label} — {valuation.reason}")
             result.append(HoldingValue(account, asset.code, asset_class.code, asset_class.name, quantity,
                                        valuation.value, asset.id, valuation.price, valuation.price_date,
-                                       valuation.source))
+                                       valuation.source, cost))
         return result, unvalued
 
     def stale_prices(self, as_of: date | str, days: int = 62) -> list[dict]:

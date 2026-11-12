@@ -36,7 +36,7 @@ from lightning.core.errors import NotFoundError
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, quantize, round_to_total
 
-from lightning.investments.domain import DEFAULT_SALE_FACTOR
+from lightning.investments.domain import default_sale_factor
 
 from .domain import WhatYouOwe
 from .investment_figures import InvestmentBreakdown, OwnedRow, investment_breakdown
@@ -54,6 +54,7 @@ class OwnedHolding:
     quantity: Decimal
     value: Decimal | None
     unit: str
+    cost: Decimal | None = None  # what you paid, where only the account's details say (a property, NF-12M1)
 
     @property
     def locked_until(self) -> str | None:
@@ -307,7 +308,8 @@ class PositionService:
             if row.asset_class_code == GAMEYA_CLASS and (value or ZERO) < ZERO:
                 continue  # the pot taken early is Gam'eya still to pay (What you owe), not a negative holding
             result.append(OwnedHolding(row.account.id, row.account.label, row.asset_id, asset.name,
-                                       row.asset_class_code, quantity, value, asset.unit))
+                                       row.asset_class_code, quantity, value, asset.unit,
+                                       None if held else row.cost))
         return result, unvalued
 
     def foreign_holdings(self, as_of: date | str, base_currency: str) -> dict[str, tuple[Decimal, bool]]:
@@ -367,12 +369,12 @@ class PositionService:
             if cls is None:
                 continue
             row = rows.setdefault(cls.id, ClassValue(cls.id, cls.code, cls.name, ZERO,
-                                                     factors.get(cls.id, DEFAULT_SALE_FACTOR)))
+                                                     factors.get(cls.id, default_sale_factor(cls.code))))
             row.value += item.value or ZERO
             row.items.append(item)
         for cls in self.assets.investment_classes():
             rows.setdefault(cls.id, ClassValue(cls.id, cls.code, cls.name, ZERO,
-                                               factors.get(cls.id, DEFAULT_SALE_FACTOR)))
+                                               factors.get(cls.id, default_sale_factor(cls.code))))
         return sorted(rows.values(), key=lambda r: (-r.value, r.name.casefold())), unvalued
 
     def reserve_rows(self, as_of: date | str) -> list[dict] | None:

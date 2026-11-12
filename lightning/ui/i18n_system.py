@@ -66,6 +66,7 @@ ASSET_KINDS = {
     "Other Fund": "صندوق آخر",
     "Gold": "الذهب",
     "Other Investments": "استثمارات أخرى",
+    "Real estate": "عقارات",
     "Equity": "أسهم",
     "Fixed income": "دخل ثابت",
     "Cash & bank": "النقدية والبنوك",
