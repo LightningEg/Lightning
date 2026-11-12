@@ -16,7 +16,7 @@ from lightning.core.limits import MAX_WORKSHEET_REQUEST_BYTES, MAX_STATEMENT_UPL
 from lightning.ui.web import create_app
 
 from .http import (MARKET_IMPORT_PATH, PRICE_CSV_PATH, MAX_IMPORT_CONFIRM_BODY, MAX_IMPORT_CONFIRM_FIELDS, MAX_MARKET_IMPORT_BODY,
-                   MAX_IMPORT_MAP_BODY, PROFILE_FILE_PATH, Credentials, Guard,
+                   MAX_IMPORT_MAP_BODY, MAX_WORKBOOK_BODY, PROFILE_FILE_PATH, WORKBOOK_PATHS, Credentials, Guard,
                    body_receiver, configure_memory_only_import_uploads, equal)
 from .devices import Devices, home_state_message
 from .borrow_screens import BorrowScreens, register as register_borrow_screens
@@ -53,6 +53,8 @@ def _form_part_limit(path: str) -> int:
         return MAX_MARKET_IMPORT_BODY
     if path == PRICE_CSV_PATH:
         return MAX_IMPORT_MAP_BODY
+    if path in WORKBOOK_PATHS:
+        return MAX_WORKBOOK_BODY  # the upload, and the review's base64 copy of it
     return 512 * 1024
 
 
@@ -61,7 +63,7 @@ def _form_file_limit(path: str) -> int:
     # part. Rejecting files on every other form avoids creating spooled temporary files on those routes.
     if re.fullmatch(r"/accounts/\d+/import", path):
         return MAX_STATEMENT_UPLOAD_FILES
-    return 1 if path in (MARKET_IMPORT_PATH, PRICE_CSV_PATH, PROFILE_FILE_PATH) else 0
+    return 1 if path in (MARKET_IMPORT_PATH, PRICE_CSV_PATH, PROFILE_FILE_PATH) or path in WORKBOOK_PATHS else 0
 
 
 class SessionGate:

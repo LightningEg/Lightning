@@ -85,12 +85,13 @@ def read_workbook(data):
                             inline = cell.find(NS + 'is')  # an emptied cell may keep the tag with no text
                             value = ''.join(inline.itertext()) if inline is not None else None
                         elif kind == 's':
-
                             try:
                                 value = strings[int(value)]
                             except (ValueError, IndexError):
                                 raise ValueError('Invalid shared-string reference.') from None
-                        elif kind in ('e', 'str'):
+                        elif kind == 'str':
+                            pass  # plain text written without the shared table (Open XML SDK); formulas were refused above
+                        elif kind == 'e':
                             raise ValueError(f'{name}: unsupported cell type; use plain values.')
                         if value is not None and len(str(value)) > 32767:
                             raise ValueError('A workbook cell contains too much text.')
@@ -153,6 +154,15 @@ def _setting_allowed(key):
 def _convert(value, field, table):
     name = field['name']
     if value is None:
+        # Excel cannot keep an empty text: a blank cell in a required column with a default takes that default
+        # (notes '' and the like), so a workbook an AI or a person left blank is not refused.
+        default = field['dflt_value'] if field['notnull'] else None
+        if isinstance(default, str) and len(default) >= 2 and default[0] == default[-1] == "'":
+            return default[1:-1].replace("''", "'")
+        if isinstance(default, str) and re.fullmatch(r'-?[0-9]+', default):
+            return int(default)
+        if field['notnull'] and default is None and field['type'].upper() == 'TEXT':
+            return ''
         return None
     if name.endswith('_e6') or field['type'].upper() == 'INTEGER':
         try:

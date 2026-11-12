@@ -42,6 +42,9 @@ PRICE_CSV_PATH = "/investments/prices/csv"
 # One profile file brought in from outside (BT-2AI2): the encrypted book and its key file, plus the form's envelope.
 PROFILE_FILE_PATH = "/profiles/open-file"
 MAX_PROFILE_FILE_BODY = 256 * 1024 * 1024 + 64 * 1024
+# An Excel workbook moved in (Settings › Move your data): the upload, then the review's base64 copy of it (16 MB file).
+WORKBOOK_PATHS = ("/exports/import", "/exports/starter")
+MAX_WORKBOOK_BODY = (16 * 1024 * 1024 + 2) // 3 * 4 + 64 * 1024
 
 
 def request_body_limit(path: str, method: str = "POST") -> int:
@@ -62,6 +65,8 @@ def request_body_limit(path: str, method: str = "POST") -> int:
         return MAX_CSV_UPLOAD_REQUEST_BYTES
     if path == PROFILE_FILE_PATH:
         return MAX_PROFILE_FILE_BODY
+    if path in WORKBOOK_PATHS:
+        return MAX_WORKBOOK_BODY
     return MAX_BODY
 
 
@@ -74,6 +79,8 @@ def request_too_large_message(path: str) -> str:
         return "This import review is too large to submit at once. Split the CSV into smaller files."
     if path == PROFILE_FILE_PATH:
         return "This profile file is too large to open."
+    if path in WORKBOOK_PATHS:
+        return "Workbooks must be 16 MB or smaller."
     return "This request is too large."
 
 

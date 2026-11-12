@@ -242,3 +242,33 @@ def test_required_currency_and_system_setup_are_validated(c, tmp_path, problem):
         assert target.base_currency == 'EGP'
     finally:
         target.db.close()
+
+
+def test_blank_required_text_and_plain_str_cells_import(c, tmp_path):
+    """A workbook an AI tool filled (Open XML SDK) used t="str" text cells and left notes and an empty
+    setting blank; Excel cannot keep an empty text, so the import refused it. Now it imports."""
+    _source(c)
+    data, _, _ = export_all(c, 'xlsx')
+    data = _change(data, 'accounts', 'notes', None)
+    output = BytesIO()
+    with ZipFile(BytesIO(data)) as source, ZipFile(output, 'w', ZIP_DEFLATED) as result:
+        for name in source.namelist():
+            body = source.read(name)
+            if name.startswith('xl/worksheets/'):
+                body = body.replace(b't="inlineStr"', b't="str"')
+                body = __import__('re').sub(rb'<is><t[^>]*>(.*?)</t></is>', rb'<v>\1</v>', body)
+            result.writestr(name, body)
+    assert read_workbook(output.getvalue())['accounts'][1] == read_workbook(data)['accounts'][1]
+    target = build(tmp_path/'str.db')
+    confirm_import(target, output.getvalue())
+    assert target.db.scalar("SELECT notes FROM accounts WHERE name='Example bank'") == ''
+    target.db.close()
+    bad = BytesIO()  # an error cell (t="e") is still refused
+    with ZipFile(BytesIO(data)) as source, ZipFile(bad, 'w', ZIP_DEFLATED) as result:
+        for name in source.namelist():
+            body = source.read(name)
+            if name.startswith('xl/worksheets/'):
+                body = body.replace(b't="inlineStr"', b't="e"', 1)
+            result.writestr(name, body)
+    with pytest.raises(ValueError, match='unsupported cell type'):
+        read_workbook(bad.getvalue())
