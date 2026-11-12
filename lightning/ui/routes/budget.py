@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from datetime import timedelta
 from decimal import Decimal
 import json
 import uuid
@@ -11,10 +10,11 @@ from lightning.core.dates import fmt_date, month_of, parse_month, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.workflows.ai_prompts import budget_prompt
 from lightning.categories.domain import Movement, Scope
-from lightning.core.money import ZERO, fmt, quantize, to_decimal
+from lightning.core.money import ZERO, fmt, to_decimal
 from lightning.core.plural import counted
 
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
+from lightning.budgeting.period import budget_period, category_pace, over_matters
 from lightning.planning.domain import KIND_LABELS, PaymentStatus
 from lightning.planning.health import PlanCheck
 
@@ -24,7 +24,6 @@ from ..periods import parse_period
 from ..budget_rows import cover_from, last_payments, neighbours, pace_line
 
 router = APIRouter(prefix="/budget")
-SMALL_OVER = Decimal(100)  # BU-2: below this, or under 5% of its plan, an overspend is a rose bar, not a Needs you row
 TRACK_SUGGESTION_PERCENT = Decimal(20)
 
 
@@ -61,57 +60,14 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         period = parse_period({"period": "month", "month": month}, today())
         error = error or exc.message  # say why the month is shown instead of the range asked for
     month = period.end.strftime("%Y-%m")
-    view = c.budgets.month_view(month, schedule=c.schedules.view())
-    cursor = period.start.replace(day=1)
-    month_views = []
-    while cursor <= period.end:
-        key = cursor.strftime("%Y-%m")
-        # A longer period includes only months with a saved plan, matching its spending window.
-        if period.key == "month" or c.budgets.has_plan(key, schedule=c.schedules.view()):
-            month_views.append((key, c.budgets.month_view(key, schedule=c.schedules.view())))
-        cursor = (cursor.replace(day=28) + timedelta(days=4)).replace(day=1)
-    period_base = ZERO
-    period_opening = ZERO
-    period_carryover = ZERO
-    if month_views:
-        period_opening = month_views[0][1].available - month_views[0][1].budget
-        period_carryover = period_opening
-        if period.key == "custom":
-            first_month = parse_month(month_views[0][0])
-            overlap_start, overlap_end = max(first_month[0], period.start), min(first_month[1], period.end)
-            opening_factor = Decimal((overlap_end-overlap_start).days+1) / Decimal((first_month[1]-first_month[0]).days+1)
-            period_opening *= opening_factor
-            period_carryover *= opening_factor
-    period_budgeted = period_base + period_opening
-    group_totals = {}
-    for _, month_view in month_views:
-        m_first, m_last = parse_month(month_view.month)
-        overlap_start, overlap_end = max(m_first, period.start), min(m_last, period.end)
-        # Saved monthly limits stay whole in month, YTD and all-time views; only custom dates prorate them.
-        factor = (Decimal(1) if period.key != "custom" else
-                  Decimal((overlap_end-overlap_start).days+1) / Decimal((m_last-m_first).days+1)
-                  if overlap_end >= overlap_start else ZERO)
-        period_base += month_view.budget * factor
-        for section in month_view.sections:
-            for group in section.groups:
-                row = group_totals.setdefault(group.category_id, {"name": group.name, "section": section.name,
-                    "budgeted": ZERO, "carryover": ZERO, "spent": ZERO, "left": ZERO})
-                row["budgeted"] += (group.budget or ZERO) * factor
-                if month_views and month_view.month == month_views[0][0]:
-                    row["budgeted"] += group.opening_carryover * factor
-                    row["carryover"] += group.opening_carryover * factor
-    for row in group_totals.values():
-        row["left"] = row["budgeted"] - row["spent"]
-    if period.key == "month":
-        for section in view.sections:
-            for group in section.groups:
-                row = group_totals.get(group.category_id)
-                if row:
-                    row["budgeted"] = group.available or ZERO
-                    row["carryover"] = group.opening_carryover
-                    row["left"] = quantize(row["budgeted"], 0) - quantize(row["spent"], 0)
-        # Keep the headline aligned with the L1 group rows, including carryover.
-        period_budgeted = sum((row["budgeted"] for row in group_totals.values()), ZERO)
+    schedule = c.schedules.view()
+    figures = budget_period(c.budgets, c.categories, schedule, key=period.key, start=period.start, end=period.end,
+                            month=month)
+    view, month_views, tracked, by_group = figures.view, figures.month_views, figures.tracked, figures.by_group
+    period_base, period_carryover, period_budgeted = figures.period_base, figures.period_carryover, figures.period_budgeted
+    group_totals, category_periods, period_spending = figures.group_totals, figures.category_periods, figures.period_spending
+    background_counts, background_totals = figures.background_counts, figures.background_totals
+    spending_start, period_income, period_actual = figures.spending_start, figures.period_income, figures.period_actual
     prev_month, next_month = neighbours(month)
     has_plan = c.budgets.has_plan(month, schedule=c.schedules.view())
     suggestions = c.budgets.first_plan_suggestions(month) if not has_plan else {}  # round numbers (BU-3)
@@ -121,108 +77,16 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     for category_id, (name, amount) in suggestions_view.items():
         parts = name.split(" › ")
         suggestion_groups.setdefault(parts[0], []).append((category_id, " › ".join(parts[1:]) or parts[0], amount))
-    tracked = c.budgets.tracked_ids(month, schedule=c.schedules.view())
-    categories = c.categories.tree(Movement.OUTFLOW)
-    children: dict[int, list[int]] = {}
-    for category in categories:
-        if category.parent_id:
-            children.setdefault(category.parent_id, []).append(category.id)
-    def category_tree_ids(category_id):
-        descendants = {category_id}
-        pending = [category_id]
-        while pending:
-            kids = children.get(pending.pop(), [])
-            descendants.update(kids)
-            pending.extend(kids)
-        return descendants
-
     category_averages = c.budgets.category_averages(month, schedule=c.schedules.view())
     averages = {cid: row["average3"] for cid, row in category_averages.items()}
     averages6 = {cid: row["average6"] for cid, row in category_averages.items()}
     average_observations = {cid: row["observed3"] for cid, row in category_averages.items()}
-    by_group = {}
-    for section in view.sections:
-        for group in section.groups:
-            by_group[group.category_id] = sorted(category_tree_ids(group.category_id) - {group.category_id})
     income_basis = c.budgets.budgeting_income(month, schedule=c.schedules.view())
-    background_counts, background_totals = {}, {}
-    for line in c.budgets.background(month, schedule=c.schedules.view()):
-        background_counts[line["group_id"]] = background_counts.get(line["group_id"], 0) + 1
-        background_totals[line["group_id"]] = background_totals.get(line["group_id"], ZERO) + (line["estimate"] or ZERO)
     # A default, not a setting (owner, 2026-10-06): suggest tracking a category that averages a fifth of income.
     tracking_suggestions = [{**row, "reason": f"{row['share']:.1f}% of average monthly income"}
                             for row in c.budgets.tracking_suggestions(month, TRACK_SUGGESTION_PERCENT, schedule=c.schedules.view())]
-
-    # Background estimates are monthly expectations for untracked leaf
-    # categories. Parent direct plans already cap these expenses, so children
-    # under those caps are not added a second time.
-    for _, month_view in month_views:
-        m_first, m_last = parse_month(month_view.month)
-        overlap_start, overlap_end = max(m_first, period.start), min(m_last, period.end)
-        # Saved monthly limits stay whole in month, YTD and all-time views; only custom dates prorate them.
-        factor = (Decimal(1) if period.key != "custom" else
-                  Decimal((overlap_end-overlap_start).days+1) / Decimal((m_last-m_first).days+1)
-                  if overlap_end >= overlap_start else ZERO)
-        for line in c.budgets.background(month_view.month, tracked=tracked, schedule=c.schedules.view()):
-            if line["estimate"] is not None and line["group_id"] in group_totals:
-                group_totals[line["group_id"]]["budgeted"] += line["estimate"] * factor
-                period_base += line["estimate"] * factor
-    period_budgeted = period_base + period_opening
-    one_offs = c.budgets.one_off_ids()
-    # Planned and Spent cover the same months: a long period (YTD, All time, custom) counts spending
-    # from the first month that has a plan, because months before it have nothing planned.
-    plan_months = [key for key, _ in month_views if c.budgets.has_plan(key, schedule=c.schedules.view())]
-    spending_start = period.start
-    if period.key != "month" and plan_months:
-        spending_start = max(period.start, parse_month(plan_months[0])[0])
-    gross_spending = {cid: value for cid, value in c.budgets.owned_spending(spending_start, period.end).items()
-                      if cid not in one_offs}
-    period_spending = {cid: v for cid, v in c.budgets.plan_funded_spending(spending_start, period.end).items()
-                       if cid not in one_offs}  # one-off spending stays in cash flow, out of the budget
-    period_actual = sum(period_spending.values(), ZERO)
-    gross_period_spending = sum(gross_spending.values(), ZERO)
-    funding_adjustment_total = gross_period_spending - period_actual
-    category_periods = {}
-    for _, month_view in month_views:
-        m_first, m_last = parse_month(month_view.month)
-        overlap_start, overlap_end = max(m_first, period.start), min(m_last, period.end)
-        # Saved monthly limits stay whole in month, YTD and all-time views; only custom dates prorate them.
-        factor = (Decimal(1) if period.key != "custom" else
-                  Decimal((overlap_end-overlap_start).days+1) / Decimal((m_last-m_first).days+1)
-                  if overlap_end >= overlap_start else ZERO)
-        for section in month_view.sections:
-            for line in section.lines:
-                if line.depth <= 1:
-                    continue
-                row = category_periods.setdefault(line.category_id, {
-                    "base_budget": ZERO, "carryover": ZERO, "current_budget": ZERO,
-                    "budgeted": ZERO, "spent": ZERO,
-                })
-                row["base_budget"] += (line.budget or ZERO) * factor
-                if month_views and month_view.month == month_views[0][0]:
-                    row["carryover"] += line.opening_carryover * factor
-    for category_id, row in category_periods.items():
-        row["current_budget"] = row["base_budget"] + row["carryover"]
-        row["budgeted"] = row["current_budget"]
-        row["spent"] = sum((period_spending.get(cid, ZERO) for cid in category_tree_ids(category_id)), ZERO)
-        row["gross"] = sum((gross_spending.get(cid, ZERO) for cid in category_tree_ids(category_id)), ZERO)
-        row["funding_adjustment"] = row["gross"] - row["spent"]
-        row["left"] = quantize(row["current_budget"], 0) - quantize(row["spent"], 0)  # as the figures beside it read
-    for group_id, child_ids in by_group.items():
-        row = group_totals.get(group_id)
-        if row:
-            row["spent"] = sum((period_spending.get(cid, ZERO) for cid in child_ids), ZERO)
-            row["left"] = quantize(row["budgeted"], 0) - quantize(row["spent"], 0)
-    period_income = ZERO
-    for key, _ in month_views:
-        basis = c.budgets.budgeting_income(key, schedule=c.schedules.view()) or ZERO
-        m_first, m_last = parse_month(key)
-        overlap_start, overlap_end = max(m_first, period.start), min(m_last, period.end)
-        # Saved monthly limits stay whole in month, YTD and all-time views; only custom dates prorate them.
-        factor = (Decimal(1) if period.key != "custom" else
-                  Decimal((overlap_end-overlap_start).days+1) / Decimal((m_last-m_first).days+1)
-                  if overlap_end >= overlap_start else ZERO)
-        period_income += basis * factor
+    funding_adjustment_total = figures.funding_adjustment_total
+    gross_period_spending = figures.gross_period_spending
     # One savings target for every screen (Financial health › Savings rate limit). A month is checked
     # with its goals below, in the key notes; a longer period against the target alone.
     check = c.health.plan_check(month) if period.key == "month" else None
@@ -231,7 +95,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                        "Planned amounts exceed average monthly income" if period_base > period_income else
                        f"This plan saves less than your {period_check.target_percent.normalize():f}% savings target: "
                        f"plan {fmt(period_check.over_by, 0)} less" if period_check.over_by else "")
-    period_left = period_budgeted-period_actual
+    period_left = figures.period_left
     # Feedback ticket 93: the System group counts as Personal spending, so its section read "Personal" under
     # "System Categories". Say what is in it instead.
     lines = {line.category_id: line for _, view in month_views for section in view.sections
@@ -240,14 +104,15 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     if system_id in group_totals:
         names = [lines[cid].name for cid in by_group.get(system_id, []) if cid in lines
                  and (period_spending.get(cid) or category_periods.get(cid, {}).get("budgeted"))]
-        group_totals[system_id]["note"] = ", ".join(names[:3]) + (f" and {len(names) - 3} more" if len(names) > 3 else "")
+        more = len(names) - 3  # not money
+        group_totals[system_id]["note"] = ", ".join(names[:3]) + (f" and {more} more" if more > 0 else "")  # not money
         # The PC page names the group by what is in it, never by the internal "System Categories" (audit 12, B4).
         if names:
-            group_totals[system_id]["title"] = ", ".join(names[:3]) + (f", +{len(names) - 3}" if len(names) > 3 else "")
+            group_totals[system_id]["title"] = ", ".join(names[:3]) + (f", +{more}" if more > 0 else "")  # not money
     group_rows = sorted(group_totals.items(),
                         key=lambda item: (item[1]["left"] >= ZERO, -item[1]["spent"], item[1]["name"].casefold()))
-    unplanned_spending = period_actual - sum((row["spent"] for row in group_totals.values()), ZERO)
-    plan_outside_groups = period_budgeted - sum((row["budgeted"] for row in group_totals.values()), ZERO)
+    unplanned_spending = figures.unplanned_spending
+    plan_outside_groups = figures.plan_outside_groups
     grouped_category_ids = {category_id for child_ids in by_group.values() for category_id in child_ids}
     outside_spending_rows = sorted(({"id": category_id, "name": c.categories.display_name(category_id),
                                     "amount": amount}
@@ -277,13 +142,13 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     meter_active = [r for r in meter_lines if r["used"] or r["m"]["over"]]
     meter_rest = [r for r in meter_lines if not (r["used"] or r["m"]["over"])]
     month_first, month_last = parse_month(month)
-    days_left = (month_last - today()).days + 1 if month_first <= today() <= month_last else 0
+    days_left = (month_last - today()).days + 1 if month_first <= today() <= month_last else 0  # not money
     # The same Left in plan as the headline and the Overview (background estimates counted in).
     month_left = c.budgets.plan_summary(month, schedule=c.schedules.view())["left"] if c.budgets.has_plan(month, schedule=c.schedules.view()) else ZERO
     notes = keynotes.budget_left(month_left, days_left,
                                  [r["label"] for r in meter_lines if r["m"]["over"]], "#budget-meters") if c.budgets.has_plan(month, schedule=c.schedules.view()) else []
     if check is not None and check.planned is not None:
-        notes = keynotes.plan_check(check) + notes
+        notes = keynotes.plan_check(check) + notes  # not money
     left_note = keynotes.per_day(month_left, days_left) if c.budgets.has_plan(month, schedule=c.schedules.view()) else ""
     # KPI cards (guideline 3.32 A08): every figure against something, two to four in the row. The figures come
     # from the forecaster's EverydayBudget, the same Budget until payday Cash planning shows.
@@ -295,8 +160,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         # BU-2 (3H2): an overspend raises Needs you when it matters: 100 or more and 5% or more of the category's plan.
         # A smaller one still reads rose on its own bar.
         over = sorted(({"name": r["label"], "over": r["b"]["over_by"], "category_id": r["category_id"]}
-                       for r in meter_lines if r["b"]["is_over"]
-                       and r["b"]["over_by"] >= SMALL_OVER and r["b"]["over_by"] >= (r["total"] or ZERO) * Decimal("0.05")),
+                       for r in meter_lines if r["b"]["is_over"] and over_matters(r["b"]["over_by"], r["total"])),
                       key=lambda r: -r["over"])
         kpi_cards = kpis.budget_month(everyday, over=over, check=check, raise_offer=raise_offer,
                                       move=cover_from(c, month, over[0], everyday.room) if over else None, month=month,
@@ -574,14 +438,11 @@ async def category_sheet(request: Request, category_id: int):
     spent = line.planned_actual if line is not None and planned is not None else (line.actual if line is not None else ZERO)
     r = None
     if planned is not None and planned > ZERO:
-        left = quantize(planned, 0) - quantize(spent, 0)
-        share = spent / planned * 100
-        current = first <= today() <= last
-        days = (last - first).days + 1
-        pace = (Decimal((today() - first).days + 1) / days * 100) if current else None
+        figures = category_pace(planned, spent, first, last, today())
+        left, share, current, pace = figures["left"], figures["share"], figures["current"], figures["pace"]
         r = {"category_id": category_id, "over": left < ZERO, "amount": abs(left), "share": share,
              "width": round(float(min(max(share, ZERO), Decimal(100))), 1),
-             "risk": left >= ZERO and pace is not None and share >= pace + 10,
+             "risk": figures["risk"],
              "pace": round(float(pace), 1) if pace is not None else None}
         r["line"] = pace_line(r)
         if r["over"] and current:

@@ -116,7 +116,7 @@ async def financial_health(request: Request):
     worth_values = [month.net_worth for month in trends]
     # Answer first (guideline 3.33): the count within your limits is the Lead, the savings rate over time beside it;
     # each figure outside its limit is a Needs you row; the list below is the one home of every figure.
-    within = sum(1 for item in judged if item.status == "within your limit")
+    within = sum(1 for item in judged if item.status == "within your limit")  # not money
     outside = [item for item in judged if item.band == "alert"]  # Watch stays quiet (A08)
     lead = (kpis.card("Within your limits", Decimal(within), kpis.compare(f"of the {len(judged)} figures you set a limit for"),
                       tone="in" if not outside else "over", kind="count", key="within",

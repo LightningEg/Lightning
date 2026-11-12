@@ -17,6 +17,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from lightning.core.dates import fmt_date, parse_date, parse_month, month_of, today
 from lightning.core.errors import LightningError
 from lightning.core.money import ZERO, fmt
+from lightning.reporting.period_compare import CompareTotals, compare_rows, item_trend
 
 from .. import kpis
 from ..web import container, render
@@ -34,26 +35,26 @@ def _month_bounds(day: date) -> tuple[date, date]:
 
 
 def _shift_months(day: date, months: int) -> date:
-    index = day.year * 12 + day.month - 1 + months
+    index = day.year * 12 + day.month - 1 + months  # not money
     year, month = divmod(index, 12)
-    return date(year, month + 1, min(day.day, calendar.monthrange(year, month + 1)[1]))
+    return date(year, month + 1, min(day.day, calendar.monthrange(year, month + 1)[1]))  # not money
 
 
 def preset_periods(kind: str, now: date | None = None) -> tuple[tuple[date, date], tuple[date, date]]:
     """This period (to date) against the same days of the one before: month, quarter or year."""
     now = now or parse_date(today())
     if kind == "quarter":
-        first = date(now.year, (now.month - 1) // 3 * 3 + 1, 1)
+        first = date(now.year, (now.month - 1) // 3 * 3 + 1, 1)  # not money
         back = _shift_months(first, -3)
-        span = (now - first).days
-        return (first, now), (back, min(back + timedelta(days=span), first - timedelta(days=1)))
+        span = (now - first).days  # not money
+        return (first, now), (back, min(back + timedelta(days=span), first - timedelta(days=1)))  # not money
     if kind == "year":
         first = date(now.year, 1, 1)
-        back = date(now.year - 1, 1, 1)
+        back = date(now.year - 1, 1, 1)  # not money
         return (first, now), (back, _shift_months(now, -12))
     first, _ = _month_bounds(now)
     back = _shift_months(first, -1)
-    return (first, now), (back, min(_shift_months(now, -1), first - timedelta(days=1)))
+    return (first, now), (back, min(_shift_months(now, -1), first - timedelta(days=1)))  # not money
 
 
 def _periods(request: Request) -> tuple[str, tuple[date, date], tuple[date, date]]:
@@ -93,20 +94,8 @@ def compare(c, a: tuple[date, date], b: tuple[date, date], by: str = "category")
         top = c.categories.get_by_code(code) or cat
         return top.code, top.name, top.id  # its own name: never "L1 › L2" (A16)
 
-    rows: dict[str, dict] = {}
-    for which, (start, end) in (("a", a), ("b", b)):
-        for line in _lines(c, start, end):
-            key, name, item_id = key_of(line)
-            row = rows.setdefault(key, {"key": key, "name": name, "id": item_id, "a": ZERO, "b": ZERO})
-            row[which] += line["value"]
-    out = []
-    for row in rows.values():
-        if row["a"] == ZERO and row["b"] == ZERO:
-            continue
-        row["diff"] = row["a"] - row["b"]
-        row["pct"] = (row["diff"] / row["b"] * 100).quantize(Decimal("1")) if row["b"] > ZERO else None
-        out.append(row)
-    return sorted(out, key=lambda r: -abs(r["diff"]))
+    return compare_rows((which, *key_of(line), line["value"])
+                        for which, (start, end) in (("a", a), ("b", b)) for line in _lines(c, start, end))
 
 
 def item_lines(c, kind: str, item, start: date, end: date) -> list[dict]:
@@ -123,27 +112,17 @@ def item_lines(c, kind: str, item, start: date, end: date) -> list[dict]:
 def analyse(c, kind: str, item, now: date | None = None) -> dict:
     """Trend over the last twelve months, total, monthly average, this month against last, top payments."""
     now = now or parse_date(today())
-    first = _shift_months(now.replace(day=1), -(TREND_MONTHS - 1))
+    first = _shift_months(now.replace(day=1), -(TREND_MONTHS - 1))  # not money
     lines = item_lines(c, kind, item, first, now)
-    months: dict[str, Decimal] = {}
+    keys = []
     cursor = first
     while cursor <= now:
-        months[cursor.strftime("%Y-%m")] = ZERO
+        keys.append(cursor.strftime("%Y-%m"))
         cursor = _shift_months(cursor, 1)
-    by_txn: dict[int, dict] = {}
-    for row in lines:
-        months[row["date"][:7]] = months.get(row["date"][:7], ZERO) + row["value"]
-        entry = by_txn.setdefault(row["transaction_id"], {"id": row["transaction_id"], "date": row["date"],
-                                                          "ref": row["ref"], "payee": _payee(row), "value": ZERO})
-        entry["value"] += row["value"]
-    total = sum(months.values(), ZERO)
     this_key, last_key = now.strftime("%Y-%m"), _shift_months(now.replace(day=1), -1).strftime("%Y-%m")
-    peak = max(months.values(), default=ZERO)
-    trend = [{"month": k, "value": v, "pct": int(v / peak * 100) if peak > ZERO else 0} for k, v in months.items()]
-    return {"trend": trend, "total": total, "average": (total / len(months)).quantize(Decimal("0.01")) if months else ZERO,
-            "this_month": months.get(this_key, ZERO), "last_month": months.get(last_key, ZERO),
-            "count": len(by_txn), "date_from": fmt_date(first), "date_to": fmt_date(now),
-            "top": sorted((e for e in by_txn.values() if e["value"] > ZERO), key=lambda e: -e["value"])[:TOP_SHOWN]}
+    data = item_trend(keys, lines, _payee, this_key, last_key, TOP_SHOWN)
+    top = data.pop("top")
+    return {**data, "date_from": fmt_date(first), "date_to": fmt_date(now), "top": top}
 
 
 NUMBER = re.compile(r"-?\d+(\.\d+)?")
@@ -169,23 +148,24 @@ async def compare_page(request: Request):
     kind, a, b = _periods(request)
     by = "payee" if request.query_params.get("by") == "payee" else "category"
     rows = compare(c, a, b, by)
-    total_a, total_b = sum((r["a"] for r in rows), ZERO), sum((r["b"] for r in rows), ZERO)
+    totals = CompareTotals.of(rows)
+    total_a, total_b = totals.total_a, totals.total_b
     if request.query_params.get("format") == "csv":
         return _csv(f"lightning-compare-{fmt_date(a[0])}-{fmt_date(b[0])}.csv",
                     ("item", f"{fmt_date(a[0])} to {fmt_date(a[1])}", f"{fmt_date(b[0])} to {fmt_date(b[1])}", "difference"),
                     [(r["name"], str(r["a"]), str(r["b"]), str(r["diff"])) for r in rows])
     keep = {"a_from": fmt_date(a[0]), "a_to": fmt_date(a[1]), "b_from": fmt_date(b[0]), "b_to": fmt_date(b[1]), "by": by}
-    diff, against = total_a - total_b, {"sa": fmt_date(b[0]), "sb": fmt_date(b[1])}
+    diff, against = totals.diff, {"sa": fmt_date(b[0]), "sb": fmt_date(b[1])}
     # the page's answer in words, under its title (A05)
     status = (f"Money out is the same as {against['sa']} to {against['sb']}." if diff == ZERO else
               f"Money out is {fmt(abs(diff), 0)} {'lower' if diff < 0 else 'higher'} than {against['sa']} to {against['sb']}.")
     movers = sorted(rows, key=lambda r: -abs(r["diff"]))[:8]
     top = max((abs(r["diff"]) for r in movers), default=ZERO) or Decimal(1)
-    moved = {"rows": [{"label": r["name"], "value": r["diff"], "width": float(abs(r["diff"]) / top * 48), "group": "money"}
+    moved = {"rows": [{"label": r["name"], "value": r["diff"], "width": float(abs(r["diff"]) / top * 48), "group": "money"}  # not money
                       for r in movers if r["diff"]]}
     lead = kpis.card("Money out", total_a.quantize(Decimal(1)),
                      kpis.compare(f"against {fmt_date(b[0])} to {fmt_date(b[1])}",
-                                  ("+" if diff > 0 else "−" if diff < 0 else "") + fmt(abs(diff), 0),
+                                  ("+" if diff > 0 else "−" if diff < 0 else "") + fmt(abs(diff), 0),  # not money
                                   "bad" if diff > 0 else "good" if diff < 0 else "plain"), tone="out")
     return render(request, "analysis/compare.html", lead=lead, moved=moved, rows=rows, kind=kind, by=by, a=a, b=b, status=status,
                   total_a=total_a, total_b=total_b, total_diff=diff,
@@ -220,7 +200,7 @@ async def item_page(request: Request, kind: str, item_id: int | None = None):
     if request.query_params.get("format") == "csv":
         return _csv("lightning-item.csv", ("month", "spent"), [(t["month"], str(t["value"])) for t in data["trend"]])
     search = name if kind != "account" else ""
-    edit_href = (f"/accounts/{item.id}?" if kind == "account" else "/transactions?") + urlencode(
+    edit_href = (f"/accounts/{item.id}?" if kind == "account" else "/transactions?") + urlencode(  # not money
         {k: v for k, v in (("q", search), ("date_from", data["date_from"]), ("date_to", data["date_to"])) if v})
     rule_href = "/rules/new?" + urlencode({"counterparty": name} if kind == "payee" else
                                           {"category_id": item.id} if kind == "category" else {"account_id": item.id})
@@ -241,12 +221,13 @@ async def reports_page(request: Request):
         if kind == "quarter" and a[0] == month_start:
             continue  # IV-12AA4: a quarter's first month is This month again, the same figure twice
         rows = compare(c, a, b)
-        total_a, total_b = sum((r["a"] for r in rows), ZERO), sum((r["b"] for r in rows), ZERO)
+        totals = CompareTotals.of(rows)
+        total_a, total_b = totals.total_a, totals.total_b
         # IV-12AA4: nothing recorded by the end of the earlier period is not a rise from zero
         empty = first is None or str(first) > fmt_date(b[1])
         earlier = (str(b[0].year) if kind == "year" else b[0].strftime("%B %Y") if kind == "month" else "last quarter")
         presets.append({"kind": kind, "label": label, "a": a, "b": b, "total_a": total_a, "total_b": total_b,
-                        "diff": total_a - total_b, "mover": rows[0] if rows else None, "empty": empty,
+                        "diff": totals.diff, "mover": rows[0] if rows else None, "empty": empty,
                         "earlier": earlier})
     try:
         views = c.saved_views.list(None)
@@ -256,7 +237,7 @@ async def reports_page(request: Request):
     cards = [kpis.card(p["label"], p["total_a"].quantize(Decimal(1)),
                        kpis.compare(f"No {p['earlier']} to compare with.") if p["empty"] else
                        kpis.compare(f"against {fmt(p['total_b'], 0)} before" + (f" · biggest change {p['mover']['name']}" if p["mover"] else ""),
-                                    ("+" if p["diff"] > 0 else "−" if p["diff"] < 0 else "") + fmt(abs(p["diff"]), 0),
+                                    ("+" if p["diff"] > 0 else "−" if p["diff"] < 0 else "") + fmt(abs(p["diff"]), 0),  # not money
                                     "bad" if p["diff"] > 0 else "good" if p["diff"] < 0 else "plain"),
                        tone="out", visual=kpis.meter(p["total_a"], p["total_b"]) if p["total_b"] else None,
                        href=f"/spending/compare?preset={p['kind']}") for p in presets]

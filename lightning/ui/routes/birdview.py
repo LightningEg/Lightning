@@ -4,6 +4,7 @@ from datetime import date
 from decimal import Decimal
 
 from lightning.core.figures import label
+from lightning.reporting.period_compare import average as average_of, change, ratio, share, total as total_of, usual_over
 from lightning.reporting.spending import partial_months
 from urllib.parse import urlencode
 
@@ -134,8 +135,8 @@ def _expense_stats(a, total, prior, prior_label, largest, selected, first, last,
     def compare(label, now, then):
         if then is None:
             return {"label": label, "text": "nothing to compare yet", "tone": "flat"}
-        diff = now - then
-        pct = f" · {abs(diff) / then * 100:.0f}%" if then else ""
+        diff, percent = change(now, then)
+        pct = f" · {percent:.0f}%" if percent is not None else ""
         return {"label": label, "text": f"{'+' if diff > 0 else '−' if diff < 0 else ''}{fmt(abs(diff), 0)}{pct}",
                 "tone": "flat" if partial_months(first, last) else ("up" if diff > 0 else "down" if diff < 0 else "flat")}
 
@@ -149,20 +150,20 @@ def _expense_stats(a, total, prior, prior_label, largest, selected, first, last,
         start, end = parse_month(key)
         start, end = max(start, first) if key == keys[-1] and months == 1 else start, min(end, last)
         rows = payments(start, end)
-        monthly.append(sum((r["value"] for r in rows), ZERO))
+        monthly.append(total_of(r["value"] for r in rows))
         counts.append(Decimal(len(rows)))
-    stats = [{"key": "out", "surface": "out", "label": label("money_out") + (" so far" if partial_months(first, last) else ""), "value": total, "kind": "money",
+    stats = [{"key": "out", "surface": "out", "label": label("money_out") + (" so far" if partial_months(first, last) else ""), "value": total, "kind": "money",  # not money
               "spark": charts.sparkline(monthly), "spark_tone": "spend", "spark_values": monthly,
               "compare": [compare(f"Against {prior_label}" if prior_label else "Against the period before", total, prior),
                           compare(("Against the same days in earlier months" if partial_months(first, last) else f"Against your usual {'month' if months == 1 else 'months'}"), total,
-                                  usual * months if usual is not None else None)],
+                                  usual_over(usual, months))],
               "href": f"/transactions?{query}"}]
     now_rows = payments(first, last)
     count = len(now_rows)
     stats[0]["payment_count"] = count
     # The average of the payments themselves: refunds are not payments, so they are not divided in
     # (audit 2026-10-05 #12).
-    average = sum((r["value"] for r in now_rows), ZERO) / count if count else None
+    average = average_of((r["value"] for r in now_rows), count)
     before = payments(prior_from, prior_to) if prior_from and prior_to else None
     stats.append({"key": "payments", "surface": "out", "label": "Average payment", "value": average, "kind": "money",
                   "empty": "—", "spark": charts.sparkline(counts), "spark_tone": "spend",
@@ -177,10 +178,10 @@ def _expense_stats(a, total, prior, prior_label, largest, selected, first, last,
     big = largest[0] if largest else None
     if top and big and big["value"] == top["value"] and big.get("category") == top["name"]:
         stats[-1]["single"] = True  # the biggest category is this one payment: Largest payment would repeat it
-    times = big["value"] / average if big and average else None
+    times = ratio(big["value"], average) if big and average else None
     stats.append({"key": "payment", "surface": "out", "label": "Largest payment", "value": big["value"] if big else None,
                   "kind": "money", "empty": "—",
                   "sub": (f"{big['counterparty'] or big['category']} · {big['date']}" + (f" · {times:.1f}× the average" if times else "")) if big else "No payments yet",
-                  "meter": {"width": float(min(Decimal(100), big["value"] / total * 100)), "tone": "spend"} if big and total else None,
+                  "meter": {"width": float(min(Decimal(100), share(big["value"], total))), "tone": "spend"} if big and total else None,
                   "href": f"/t/{big['ref']}" if big and big.get("ref") else ""})
     return stats

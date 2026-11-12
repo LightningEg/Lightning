@@ -232,6 +232,11 @@ class FxPositions:
                 "complete": all(p.value is not None and not p.investments_unpriced for p in positions)}
 
     @staticmethod
+    def held(totals: dict) -> Decimal:
+        """IT-12AE4: Foreign money: the cash and the investments in totals(), in the profile currency."""
+        return totals["value"] + totals["investments"]
+
+    @staticmethod
     def split(positions: list[Position], shown: int = 4) -> tuple[list[Position], Other | None]:
         """Four currencies, then the rest as one *Other* row (guideline A16: five or more names)."""
         head, tail = positions[:shown], positions[shown:]

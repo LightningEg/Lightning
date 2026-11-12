@@ -116,10 +116,24 @@ class CashFlow:
         """Net flow = Money in − Money out."""
         return self.inflows - self.outflows
 
+    def invested_from_net(self, money_added: Decimal) -> Decimal:
+        """The part of Net flow that went into investments: money added, never below zero and never more than
+        Net flow (money from earlier savings is not part of what you kept). Zero when Net flow is not positive."""
+        return min(max(money_added, ZERO), self.net) if self.net > ZERO else ZERO
+
+    def kept_as_cash(self, money_added: Decimal) -> Decimal:
+        """Kept as cash = Net flow − what of it went into investments; zero when Net flow is not positive."""
+        return self.net - self.invested_from_net(money_added) if self.net > ZERO else ZERO
+
     @property
     def savings_rate(self) -> Decimal | None:
         """Savings rate = Net flow ÷ Money in, as a percentage; None without money in."""
         return self.net / self.inflows * 100 if self.inflows > ZERO else None
+
+    @staticmethod
+    def rate_gap(rate: Decimal, other: Decimal) -> Decimal:
+        """IT-12AE4: one savings or investing rate less another, in percentage points."""
+        return rate - other
 
     @property
     def savings_rate_working(self):
@@ -1007,6 +1021,11 @@ class ReportingService:
         """Cash plus holdings at market value."""
         holdings, _ = self.holdings(as_of)
         return sum((h.value or ZERO for h in holdings if h.account.id == account_id), ZERO)
+
+    @staticmethod
+    def balances_total(balances: list[Decimal]) -> Decimal:
+        """IT-12AE4: account balances (account_value each) added up: the total under a list of accounts."""
+        return sum(balances, ZERO)
 
     def account_asset_class_breakdown(self, account_id: int, as_of: date | str) -> list[dict]:
         """Brokerage value, ownership and weight grouped by level-2 asset class."""

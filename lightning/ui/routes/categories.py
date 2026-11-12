@@ -185,21 +185,21 @@ async def category_bulk_action(request: Request):
                 if action == "activate":
                     if not category.active:
                         c.categories.update(category.id, category.name, active=True)
-                    activated += 1
+                    activated += 1  # not money: counts
                 elif action == "archive":
                     if category.active:
                         c.categories.update(category.id, category.name, active=False)
-                    archived += 1
+                    archived += 1  # not money: counts
                 elif c.categories.delete_or_archive(category.id):
-                    archived += 1
+                    archived += 1  # not money: counts
                 else:
-                    deleted += 1
+                    deleted += 1  # not money: counts
         if action == "activate":
             message = f"Activated {activated} categor{'y' if activated == 1 else 'ies'}."
         elif action == "archive":
             message = f"Archived {archived} categor{'y' if archived == 1 else 'ies'}."
         else:
-            message = f"Deleted {deleted}; archived {archived} categor{'y' if deleted + archived == 1 else 'ies'}."
+            message = f"Deleted {deleted}; archived {archived} categor{'y' if deleted + archived == 1 else 'ies'}."  # not money: counts
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose valid categories."
     return redirect("/categories", message)

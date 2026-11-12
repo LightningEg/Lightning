@@ -63,12 +63,12 @@ class MoneyScreen:
 
 def _goals(c) -> tuple[int, int]:
     rows = [r for r in c.reserves.list_active() if r["target"] > ZERO]
-    return sum(1 for r in rows if r["remaining"] <= ZERO), len(rows)
+    return sum(1 for r in rows if r["remaining"] <= ZERO), len(rows)  # not money: a count of goals
 
 
 def _health_watch(c, day: date) -> int | None:
     bands = [f.band for f in c.health.figures(day) if f.band]
-    return sum(1 for b in bands if b != "good") if bands else None
+    return sum(1 for b in bands if b != "good") if bands else None  # not money: a count of figures
 
 
 def net_worth_trend(c, day: date, count: int = TREND_MONTHS) -> dict:
@@ -81,14 +81,10 @@ def net_worth_trend(c, day: date, count: int = TREND_MONTHS) -> dict:
 def own_split(position) -> tuple[dict, ...]:
     """What you own as one bar (A04): cash you own, then each holding class in its family, and the rest (a flat, a
     car) in Other. The parts add to What you own; a part at zero or below is left out of the bar and the rows."""
-    totals = {key: ZERO for key, _ in FAMILIES}
-    totals["cash"] += position.cash_you_own
-    for cls in position.classes:
-        totals[FAMILY_OF_TONE[charts.class_tone(cls.code)]] += cls.value
-    totals["other"] += position.what_you_own - sum(totals.values(), ZERO)
+    totals = position.by_family([key for key, _ in FAMILIES], lambda code: FAMILY_OF_TONE[charts.class_tone(code)])
     shown = [(key, label, totals[key]) for key, label in FAMILIES if totals[key] > ZERO]
-    whole = sum((v for _, _, v in shown), ZERO)
-    return tuple({"key": key, "label": label, "value": value, "share": float(value / whole * 100)}
+    whole = sum((v for _, _, v in shown), ZERO)  # not money: the bar's length, for the shares
+    return tuple({"key": key, "label": label, "value": value, "share": float(value / whole * 100)}  # not money
                  for key, label, value in shown) if whole > ZERO else ()
 
 
@@ -124,10 +120,10 @@ def build(c, day: date) -> MoneyScreen:
     funded, goals = _goals(c)
     return MoneyScreen(
         working=now.net_worth_working, net_worth=now.net_worth, what_you_own=now.what_you_own, what_you_owe=now.what_you_owe, since_start=since,
-        accounts=tuple(rows[:ACCOUNTS_SHOWN]), accounts_more=max(len(rows) - ACCOUNTS_SHOWN, 0),
-        accounts_total=sum((r.balance for r in rows), ZERO), held_for_others=now.held_for_others,
+        accounts=tuple(rows[:ACCOUNTS_SHOWN]), accounts_more=max(len(rows) - ACCOUNTS_SHOWN, 0),  # not money
+        accounts_total=c.reporting.balances_total([r.balance for r in rows]), held_for_others=now.held_for_others,
         coming_up=tuple(b for b in bills if b.state in UPCOMING)[:COMING_UP],
-        late_count=sum(1 for b in bills if b.state in (BillState.LATE, BillState.LATE_STALE)),
+        late_count=sum(1 for b in bills if b.state in (BillState.LATE, BillState.LATE_STALE)),  # not money
         holdings_value=now.holdings_value, has_accounts=bool(c.accounts.list()), zakat=c.zakat.enabled(),
         goals_funded=funded, goals_count=goals, health_watch=_health_watch(c, day),
         trend=net_worth_trend(c, day), own_split=own_split(now), strip=_strip(c, day),
@@ -144,7 +140,7 @@ class AccountsPage:
 def accounts_page(c, day: date) -> AccountsPage:
     """Every balance (the page behind Money's "N more"): the list is the balances themselves, no fields."""
     rows = _balances(c, day)
-    return AccountsPage(tuple(rows), sum((r.balance for r in rows), ZERO), c.position.at(day).held_for_others)
+    return AccountsPage(tuple(rows), c.reporting.balances_total([r.balance for r in rows]), c.position.at(day).held_for_others)
 
 
 @dataclass(frozen=True)

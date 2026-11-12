@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import Decimal
 from dataclasses import replace
-from collections import defaultdict
 from datetime import date, timedelta
 
 from fastapi import APIRouter, Request, Response
@@ -19,7 +18,7 @@ from urllib.parse import urlencode
 
 from ..web import container, redirect, render, ui_locale, settled_save
 from ..i18n import translate
-from ...investments import benchmark as risk_free, events, views as holding_views
+from ...investments import benchmark as risk_free, events, owned, views as holding_views
 from ...assets.catalog import instruments
 from ..periods import parse_period
 from ...investments.report import (PLANNER_MODES, explain_period, build_investment_report, investment_period, reconcile_portfolio,
@@ -50,8 +49,10 @@ async def investment_report_detail(request: Request):
         return render(request, "investments/report_detail.html", title="Owned holdings",
                       rows=report["holdings"], holdings=True, show_popup=True)
     rows = c.investments.report_transactions(kind, start, end)
-    if kind == "dividends":
-        rows = [{**row, "amount": from_e6(row["amount_base_e6"])} for row in rows]
+    rows = [dict(row) for row in rows]  # database rows and money-added dicts alike; every row gets its amount
+    rows = [row if "amount" in row else
+            {**row, "amount": from_e6(row["amount_base_e6"]) if row.get("amount_base_e6") is not None else None}
+            for row in rows]
     return render(request, "investments/report_detail.html", title={"dividends": label("dividends_and_interest"), "sales": label("realized_gain"),
                   "flows": label("new_money_in")}.get(kind, "Investment transactions"),
                   rows=rows, show_amount=kind in {"flows", "dividends"}, show_popup=True)
@@ -93,95 +94,17 @@ async def portfolio(request: Request):
     investment_report = investment_period(c.db, c.accounts, c.assets, c.reporting,
                                           period.start_text, period.end_text)
     p = c.investments.portfolio(day)
-    before_day = fmt_date(period.start.fromordinal(period.start.toordinal()-1))
+    before_day = fmt_date(period.start.fromordinal(period.start.toordinal()-1))  # not money: dates
     investment_report.update(reconcile_portfolio(c.investments, c.accounts, c.reporting, investment_report,
                                                  period.start_text, period.end_text))
     prior = c.investments.portfolio(before_day)
-    prior_by_key={(x.account_id,x.asset_id):x for x in prior.positions}
-    custody = defaultdict(lambda: ZERO)
-    for row in c.money_from_others.investment_positions(day):
-        custody[(row["account_id"], row["asset_id"])] += row["units"]
-    prior_custody = defaultdict(lambda: ZERO)
-    prior_custody_value = ZERO
-    for row in c.money_from_others.investment_positions(before_day):
-        prior_custody[(row["account_id"], row["asset_id"])] += row["units"]
-        valuation = c.reporting.value_of(row["asset_id"], row["units"], before_day)
-        if valuation.value is not None:
-            prior_custody_value += valuation.value
-    starting_owned_value = prior.value - prior_custody_value
-    custody_value = custody_cost = Decimal(0)
-    own_by_holding = {}
-    own_cost_by_holding = {}
-    own_units_by_holding = {}
-    for holding in p.open:
-        units = custody.get((holding.account_id, holding.asset_id), 0)
-        if not units:
-            continue
-        value = c.reporting.value_of(holding.asset_id, units, day).value
-        held_value = value or Decimal(0)
-        if value is not None:
-            custody_value += value
-        if holding.quantity:
-            custody_cost += holding.cost_basis - holding.owned_cost_basis
-        own_by_holding[f"{holding.account_id}:{holding.asset_id}"] = (holding.value or Decimal(0)) - held_value
-        own_cost_by_holding[f"{holding.account_id}:{holding.asset_id}"] = holding.owned_cost_basis
-        own_units_by_holding[f"{holding.account_id}:{holding.asset_id}"] = holding.quantity-units
-    owned_value = p.value - custody_value
-    owned_cost = p.cost_basis - custody_cost
-    owned_unrealized = owned_value - owned_cost
-    owned_positions = [h for h in p.open
-                       if own_units_by_holding.get(f"{h.account_id}:{h.asset_id}", h.quantity) > ZERO]
-    class_totals = defaultdict(lambda: {"total": ZERO, "yours": ZERO, "others": ZERO, "capital": ZERO,
-                                        "starting_capital": ZERO, "unrealized": ZERO, "period_unrealized": ZERO,
-                                        "realized": ZERO, "dividends": ZERO})
-    for holding in p.open:
-        category = holding.asset_class.split(" › ")[-1]
-        total = holding.value or ZERO
-        yours = own_by_holding.get(f"{holding.account_id}:{holding.asset_id}", total)
-        row = class_totals[category]
-        row["total"] += total; row["yours"] += yours; row["others"] += total-yours
-        key = (holding.account_id, holding.asset_id)
-        holding_key = f"{holding.account_id}:{holding.asset_id}"
-        owned_capital = own_cost_by_holding.get(holding_key, holding.cost_basis)
-        row["capital"] += owned_capital
-        row["unrealized"] += yours - owned_capital
-        old = prior_by_key.get(key)
-        old_owned_value, old_owned_capital = ZERO, ZERO
-        if old and old.quantity:
-            old_other_units = prior_custody.get(key, ZERO)
-            old_valuation = c.reporting.value_of(holding.asset_id, old_other_units, before_day)
-            old_owned_value = (old.value or ZERO) - (old_valuation.value or ZERO)
-            old_owned_capital = old.owned_cost_basis
-        row["starting_capital"] += old_owned_capital
-        row["period_unrealized"] += (yours - owned_capital) - (old_owned_value - old_owned_capital)
-        row["realized"] += (holding.owned_realized or ZERO)-((old.owned_realized or ZERO) if old else ZERO)
-        row["dividends"] += holding.owned_net_dividends-(old.owned_net_dividends if old else ZERO)
-    asset_class_rows = sorted(((name, row) for name, row in class_totals.items() if row["yours"] > ZERO),
-                              key=lambda item: (-item[1]["yours"], item[0].casefold()))
-    assets = c.assets.all_investment_preferences()
-    buckets = defaultdict(lambda: ZERO)
-    owned_rows=[]
-    for h in p.open:
-        key=f"{h.account_id}:{h.asset_id}"
-        owned_units = own_units_by_holding.get(key, h.quantity)
-        if owned_units <= ZERO: continue
-        yours = own_by_holding.get(key, h.value) if h.value is not None else None
-        asset=assets.get(h.asset_id)
-        bucket=(asset["allocation_bucket"] if asset else None) or h.asset_class.split(" › ")[-1]
-        horizon=(asset["investment_horizon"] if asset else None) or "Unassigned"
-        if yours is not None:
-            buckets[bucket]+=yours
-        capital=own_cost_by_holding.get(key,h.cost_basis)
-        owned_rows.append((h,yours,bucket,horizon,capital,yours-capital if yours is not None else None,
-                           owned_units))
     targets = c.investments.target_weights()
     allocation_classes=_allocation_classes(c)
-    max_class_result=max((abs(row["period_unrealized"]+row["realized"]+row["dividends"])
-                          for _,row in asset_class_rows),default=ZERO) or Decimal(1)
-    target_total=sum(targets.values(),ZERO)
     interest_id = next((cat.id for cat in c.categories.tree() if cat.code == "EXP.INVEST.INTEREST"), None)
     period_interest = c.investments.period_interest(interest_id, period.start_text, period.end_text)
-    period_distributions = p.owned_dividends-prior.owned_dividends+period_interest
+    own = owned.owned_portfolio(c.reporting, c.money_from_others, c.assets.all_investment_preferences(), p, prior,
+                                day, before_day, period_interest)
+    owned_rows, prior_custody = own.owned_rows, own.prior_custody
     position = c.position.at(period.end)
     class_results, _ = results_by_asset(c.investments, c.money_from_others, c.reporting, before_day, day)
     notes = [n for n in (keynotes.best_class([{"label": k, "result": v} for k, v in class_results.items()]),
@@ -189,7 +112,7 @@ async def portfolio(request: Request):
     extras = _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, investment_report)
     extras.update(_view_extras(c, request, extras, investment_report, day))
     # Everything sold in the period: nothing is held, but the period still has a gain or loss to show.
-    period_activity = bool(investment_report.get("result") or p.owned_realized - prior.owned_realized or period_distributions)
+    period_activity = bool(investment_report.get("result") or own.period_realized or own.period_distributions)
     # Answer first (guideline 3.33): Portfolio value is the Lead and the period's net gain or loss its comparison;
     # the allocation sits beside it. The waffle and Biggest holdings left (A09.2: one home per figure).
     result, value, current = extras["hero_result"], extras["hero_value"], period.end >= today_date
@@ -220,30 +143,30 @@ async def portfolio(request: Request):
         lead = kpis.card(label("portfolio_value"), value, compare, tone="hold", key="value", chip_=kpis.chip(chip_text),
                          visual=kpis.segments([("Cost", parts.cost, "neutral"), ("Unrealized gain", parts.unrealized, "in"),
                                                ("Valued by you", parts.valued_by_you, "hold")]),
-                         line_=kpis.line(part_line + (" · " if part_line and (six or since) else "") + (six or since)))  # the return since purchase is also the table's All holdings row
+                         line_=kpis.line(part_line + (" · " if part_line and (six or since) else "") + (six or since)))  # not money: words; the return since purchase is also the table's All holdings row
     status = page_status.investments(investment_report.get("result"), bool(owned_rows), period.key, current)
     divisor = extras["lens"]["divisor"]   # the USD lens shows the allocation card and brokerage cash in dollars too
-    lensed = lambda amount: None if amount is None else amount / divisor  # noqa: E731
+    lensed = lambda amount: owned.in_lens(amount, divisor)  # noqa: E731
     allocation = {"what_you_own": lensed(position.what_you_own), "after_sale": lensed(position.holdings_after_sale),
                   "cash": lensed(investment_report.get("investment_cash")),
                   "locked": [{"asset": item.asset, "locked_until": item.locked_until, "value": lensed(item.value)}
                              for item in position.locked_holdings]}
     if divisor != 1:
-        extras["biggest"] = {**extras["biggest"], "rows": [{**r, "value": r["value"] / divisor} for r in extras["biggest"]["rows"]]}
-    return render(request, "investments/index.html", p=p, asset_class_rows=asset_class_rows, **extras, lead=lead, status=status,
+        extras["biggest"] = {**extras["biggest"], "rows": [{**r, "value": owned.in_lens(r["value"], divisor)} for r in extras["biggest"]["rows"]]}
+    return render(request, "investments/index.html", p=p, asset_class_rows=own.asset_class_rows, **extras, lead=lead, status=status,
                   explain=explain_period(investment_report, period.start_text, period.end_text),
                   pos=position, notes=notes, investment_donut=visuals.holdings_donut(position, divisor=divisor), allocation=allocation,
                   accounts=c.investments.investment_accounts(),
-                  has_assets=bool(c.assets.investments(active_only=True)), owned_value=owned_value,
-                  owned_cost=owned_cost, owned_unrealized=owned_unrealized, custody_units=custody,
-                  own_by_holding=own_by_holding, period=period, period_realized=p.owned_realized-prior.owned_realized,
-                  period_dividends=period_distributions, since_xirr=(p.xirr if not p.has_other_owners else None),
+                  has_assets=bool(c.assets.investments(active_only=True)), owned_value=own.owned_value,
+                  owned_cost=own.owned_cost, owned_unrealized=own.owned_unrealized, custody_units=own.custody,
+                  own_by_holding=own.own_by_holding, period=period, period_realized=own.period_realized,
+                  period_dividends=own.period_distributions, since_xirr=(p.xirr if not p.has_other_owners else None),
                   since_return=p.display_return if not p.has_other_owners else None,
                   owned_rows=owned_rows, period_activity=period_activity, period_error=period_error,
-                  buckets=buckets, targets=targets, target_total=target_total,
-                  owned_positions=owned_positions, max_class_result=max_class_result,
-                  allocation_classes=allocation_classes, own_units_by_holding=own_units_by_holding,
-                  starting_owned_value=starting_owned_value, period_value_change=owned_value-starting_owned_value,
+                  buckets=own.buckets, targets=targets, target_total=owned.target_total(targets),
+                  owned_positions=own.owned_positions, max_class_result=own.max_class_result,
+                  allocation_classes=allocation_classes, own_units_by_holding=own.own_units_by_holding,
+                  starting_owned_value=own.starting_owned_value, period_value_change=own.period_value_change,
                   investment_report=investment_report, base=c.reporting.base_currency)
 
 
@@ -275,7 +198,7 @@ def _portfolio_value_spark(c, end: date) -> dict:
     months = []
     for _ in range(6):
         months.append(cursor)
-        cursor = (cursor - timedelta(days=1)).replace(day=1)
+        cursor = (cursor - timedelta(days=1)).replace(day=1)  # not money: dates
     for first in reversed(months):
         _, last = parse_month(first.strftime("%Y-%m"))
         # The Position's figure, as on the Overview: deposits are their own figure, not portfolio.
@@ -287,8 +210,8 @@ def _portfolio_value_spark(c, end: date) -> dict:
     if first is not None:
         # Holdings recorded as already owned after that month end were not growth (audit 2026-10-05).
         _, since = parse_month(list(reversed(months))[start].strftime("%Y-%m"))
-        added = c.reporting.holdings_opened_between(since + timedelta(days=1), end) if since < end else ZERO
-        change = latest - first - added
+        added = c.reporting.holdings_opened_between(since + timedelta(days=1), end) if since < end else ZERO  # not money: dates
+        change = owned.six_month_change(latest, first, added)
     return {"spark": charts.sparkline(values), "values": values, "latest": latest, "first": first,
             "change": change, "added": added}
 
@@ -313,24 +236,18 @@ def _page_extras(c, period, p, prior, owned_rows, prior_custody, before_day, rep
                            for g in holding_groups for r in g["rows"] if r["value"]], translate("Other", ui_locale()))
     # Dividends collected this year, per holding (fixed: 1 January to today).
     now = today()
-    year_start = fmt_date(date(now.year, 1, 1) - timedelta(days=1))
+    year_start = fmt_date(date(now.year, 1, 1) - timedelta(days=1))  # not money: dates
     current, before = c.investments.portfolio(fmt_date(now)), c.investments.portfolio(year_start)
-    paid_before = {(x.account_id, x.asset_id): x.owned_dividends for x in before.positions}
-    dividends = charts.bars([{"label": x.asset_name, "value": x.owned_dividends - paid_before.get((x.account_id, x.asset_id), ZERO)}
-                             for x in current.positions], 8)
+    dividends = charts.bars([{"label": name, "value": paid} for name, paid in owned.dividends_since(current, before)], 8)
     # The period's flows: money added and taken out, then how each class's prices moved.
     # Price change per class, the report's own part (what a purchase adds is money in, shown beside, never value
     # gained: r30 N1). Rows are keyed by holding, then folded into the holding's class.
     class_of = {(h.asset_id, h.account_id): h.asset_class.split(" › ")[-1] for h, *_ in owned_rows}
     class_of.update({(x.asset_id, x.account_id): x.asset_class.split(" › ")[-1] for x in prior.positions})
     price_part = next(part for part in explain_period(report, period.start_text, period.end_text)["parts"] if part["key"] == "price")
-    by_class: dict[str, Decimal] = defaultdict(lambda: ZERO)
-    for row in price_part["rows"]:
-        name = class_of.get((row.get("asset_id"), row.get("account_id")))
-        if name:
-            by_class[name] += row["amount"]
+    by_class = owned.by_class(price_part["rows"], class_of)
     class_changes = sorted(by_class.items(), key=lambda item: -abs(item[1]))
-    flow_rows = ([row for row in ({"label": "Money in", "value": report["new_money"], "group": "money"},
+    flow_rows = ([row for row in ({"label": "Money in", "value": report["new_money"], "group": "money"},  # not money: lists joined
                                   {"label": "Money out", "value": -report["withdrawn"], "group": "money"}) if row["value"]]
                  + [{"label": name, "value": change, "group": "class"} for name, change in class_changes if change])
     return {"waffle": waffle,
@@ -394,9 +311,9 @@ def _planner_stack(rows: list[dict], other_label: str) -> list[dict]:
     # An existing Other is already a remainder: include it in the one aggregate, even if large.
     named = [r for r in parts if r["bucket"].casefold() != "other"]
     shown = named[:4]
-    rest = named[4:] + [r for r in parts if r["bucket"].casefold() == "other"]
-    return ([{"label": r["bucket"], "value": r["suggested"], "tone": r["tone"]} for r in shown]
-            + [{"label": other_label, "value": sum((r["suggested"] for r in rest), ZERO), "tone": "reference"}])
+    rest = named[4:] + [r for r in parts if r["bucket"].casefold() == "other"]  # not money: two lists joined
+    return ([{"label": r["bucket"], "value": r["suggested"], "tone": r["tone"]} for r in shown]  # not money: lists joined
+            + [{"label": other_label, "value": owned.suggested_total(rest), "tone": "reference"}])
 
 
 def _planner_phone_groups(rows: list[dict], stack: list[dict]) -> tuple[list[dict], list[dict], Decimal]:
@@ -411,7 +328,7 @@ def _planner_phone_groups(rows: list[dict], stack: list[dict]) -> tuple[list[dic
         if row not in shown and row["bucket"].casefold() != "other":
             shown.append(row)
     rest = [row for row in rows if row not in shown]
-    return shown, rest, sum((row["suggested"] for row in rest), ZERO)
+    return shown, rest, owned.suggested_total(rest)
 
 
 async def _render_planner(request: Request, raw_amount: str="10000"):
@@ -423,17 +340,10 @@ async def _render_planner(request: Request, raw_amount: str="10000"):
     custody={(x["account_id"],x["asset_id"]):Decimal(str(x["units"]))
              for x in c.money_from_others.investment_positions(day)}
     metadata = c.assets.all_investment_preferences()
-    values=defaultdict(lambda:ZERO); total=ZERO
-    for position in portfolio.open:
-        units=max(ZERO,position.quantity-custody.get((position.account_id,position.asset_id),ZERO))
-        value=(position.value or ZERO)*units/position.quantity if position.quantity else ZERO
-        if value<=ZERO: continue
-        meta=metadata.get(position.asset_id)
-        bucket=(meta["allocation_bucket"] if meta else None) or position.asset_class.split(" › ")[-1]
-        values[bucket]+=value; total+=value
+    values, total = owned.owned_by_bucket(portfolio, custody, metadata)
     targets = c.investments.target_weights()
     planning_targets = normalized_target_weights(targets)
-    target_total=sum(targets.values(),ZERO)
+    target_total=owned.target_total(targets)
     by_current_mix = not planning_targets and total > ZERO  # no targets: split by what is held now
     suggestions = (suggest_by_current_mix(dict(values), amount) if by_current_mix
                    else suggest_contributions(dict(values),targets,amount,mode))
@@ -441,15 +351,16 @@ async def _render_planner(request: Request, raw_amount: str="10000"):
     rows=[]
     for bucket in sorted(set(values)|set(targets),key=lambda b:(-values.get(b,ZERO),b.casefold())):
         value=values.get(bucket,ZERO); suggested=suggestions.get(bucket,ZERO)
-        rows.append({"bucket":bucket,"value":value,"weight":value/total*100 if total else ZERO,
+        shares=owned.planner_row(bucket, value, total, suggested, amount)
+        rows.append({"bucket":bucket,"value":value,"weight":shares["weight"],
                      "target":planning_targets.get(bucket),"suggested":suggested,"tone":tones.get(bucket,"other"),
-                     "after":(value+suggested)/(total+amount)*100 if total+amount else ZERO})
+                     "after":shares["after"]})
     stack = _planner_stack(rows, translate("Other", ui_locale()))
     phone_shown, phone_other, phone_other_total = _planner_phone_groups(rows, stack)
     return render(request,"investments/planner.html",amount=amount,mode=mode,rows=rows,target_total=target_total,
                   stack=stack, phone_shown=phone_shown, phone_other=phone_other, phone_other_total=phone_other_total,
                   monthly_goal=c.settings.get("investment_monthly_goal") or "",
-                  planner_ready=bool(planning_targets) or by_current_mix, by_current_mix=by_current_mix,allocation_sum=sum((r["suggested"] for r in rows),ZERO))
+                  planner_ready=bool(planning_targets) or by_current_mix, by_current_mix=by_current_mix,allocation_sum=owned.suggested_total(rows))
 
 
 @router.get("/holding/{asset_id:int}")
@@ -459,39 +370,34 @@ async def holding_detail(request: Request, asset_id: int):
     portfolio=c.investments.portfolio(day); account_id=_int(request.query_params.get("account"))
     h=next((x for x in portfolio.open if x.asset_id==asset_id and (account_id is None or x.account_id==account_id)),None)
     if h is None: raise NotFoundError("No holding found for that asset and account.")
-    factor=(h.owned_quantity or ZERO)/h.quantity if h.quantity else ZERO
-    h=replace(h,quantity=h.owned_quantity or ZERO,cost_basis=h.owned_cost_basis,realized=h.owned_realized,
-              dividends=h.owned_dividends,dividend_tax=h.owned_dividend_tax,
-              value=(h.value*factor if h.value is not None else None),
-              xirr=None if h.has_other_owners else h.xirr,
-              display_return=None if h.has_other_owners else h.display_return)
+    h=h.owned_only()
     asset=c.assets.get_asset(asset_id)
     saved_bucket, saved_horizon = c.assets.investment_preferences(asset_id)
     bucket=saved_bucket or h.asset_class.split(" › ")[-1]
     horizon=saved_horizon or "Unassigned"
-    before=c.investments.portfolio(fmt_date(parse_date(start).fromordinal(parse_date(start).toordinal()-1)))
+    before=c.investments.portfolio(fmt_date(parse_date(start).fromordinal(parse_date(start).toordinal()-1)))  # not money: dates
     previous=next((x for x in before.positions if x.asset_id==asset_id and x.account_id==h.account_id),None)
     if previous:
         previous=replace(previous,realized=previous.owned_realized,dividends=previous.owned_dividends,
                          dividend_tax=previous.owned_dividend_tax)
     journey = visuals.holding_journey(c, h.account_id, asset_id, parse_date(day))
     purchases, sales = holding_views.purchase_returns(h, day)
-    gain_pct = h.unrealized / h.cost_basis * 100 if h.unrealized is not None and h.cost_basis else None
+    gain_pct = h.gain_pct
     total_return = h.total_return
     breakdown = charts.waterfall(("What you paid", h.cost_basis),
                                  [("Price change", h.unrealized or ZERO), ("Gain from sales", h.realized),
                                   ("Dividends and interest", h.dividends),
                                   *((("Tax withheld", -h.dividend_tax),) if h.dividend_tax else ())],
-                                 ("Value plus what it paid you", h.cost_basis + total_return))
+                                 ("Value plus what it paid you", h.value_plus_paid))
     stale_price=any(row["asset_id"]==asset_id for row in c.reporting.stale_prices(day))
     rate_history = risk_free.parse_history(c.settings.get(risk_free.SETTING_KEY))
     bench = None if h.has_other_owners else risk_free.benchmark(list(h.flows), h.value, day, rate_history)
     return render(request,"investments/holding.html",rate_history=rate_history,bench=bench,h=h,asset=asset,bucket=bucket,horizon=horizon,day=day,stale_price=stale_price,
                   journey=journey, purchases=purchases, sales=sales, gain_pct=gain_pct, total_return=total_return, breakdown=breakdown,
-                  xirr_pct=h.xirr * 100 if h.xirr is not None else None,
+                  xirr_pct=h.xirr_pct,
                   display_return=h.display_return,
-                  start=start,period_realized=h.realized-(previous.realized if previous else ZERO),
-                  period_dividends=h.dividends-(previous.dividends if previous else ZERO),
+                  start=start,period_realized=h.realized_since(previous),
+                  period_dividends=h.dividends_since(previous),
                   allocation_classes=sorted({*_allocation_classes(c), bucket}, key=str.casefold),  # its own bucket is always a choice (5K)
                   show_popup=request.headers.get("X-Lightning-Popup")=="1")
 
@@ -500,14 +406,12 @@ def target_plan(c) -> dict:
     """Owned holdings by allocation class (a holding's own class unless reassigned) against targets."""
     from lightning.investments.report import allocation_plan
     prefs = c.assets.all_investment_preferences()
-    values = defaultdict(lambda: ZERO)
     rows, _ = c.position.owned_holdings(today())
-    for row in rows:
-        if row.value is None:
-            continue
+
+    def bucket_of(row):
         pref = prefs.get(row.asset_id)
-        bucket = (pref["allocation_bucket"] if pref else None) or c.assets.get_class_by_code(row.class_code).name
-        values[bucket] += row.value
+        return (pref["allocation_bucket"] if pref else None) or c.assets.get_class_by_code(row.class_code).name
+    values = owned.values_by_bucket(rows, bucket_of)
     return allocation_plan(dict(values), c.investments.target_weights(), _allocation_classes(c))
 
 
@@ -528,9 +432,9 @@ async def save_target(request: Request):
                 c.investments.clear_target_weight(bucket)  # an empty field clears the target
                 return Response(status_code=204) if request.headers.get("X-Requested-With") == "fetch" else redirect("/investments/targets", "Target cleared.")
             value=to_decimal(str(form.get("target_weight","")),"target")
-            others=sum((w for b, w in c.investments.target_weights().items() if b != bucket), ZERO)
-            if others + value > 100:
-                room = max(ZERO, 100 - others)
+            others, left = owned.target_room(c.investments.target_weights(), bucket)
+            if value > left:
+                room = max(ZERO, left)
                 raise LightningError(f"Targets can add up to 100% at most. The others take {others.normalize():f}%, so "
                                      f"{bucket} can be up to {room.normalize():f}%.")
             if bucket not in allowed or value<ZERO or value>100: raise LightningError("Choose an available asset class and a target from 0 to 100.")
@@ -623,7 +527,7 @@ def _save(request: Request, kind: str, v: dict, txn_id: int | None = None):
             units = inv.holding_for_owner(account, asset, v["date"], owner)
             if units <= ZERO:
                 raise LightningError("A dividend requires shares held by the selected owner on that date.", "asset_id")
-            amount = (amount * units).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            amount = owned.per_share_total(amount, units)
         txn = inv.dividend(v["date"], account, asset, amount, v["notes"], owner)
     elif kind == "return_of_capital":
         txn = inv.return_of_capital(v["date"], account, asset, v["amount"], cash, v["notes"], owner)
@@ -829,7 +733,7 @@ async def prices(request: Request, error: str = ""):
                    if valuation.price is None and getattr(asset.exposure, "value", asset.exposure) == "GOLD"
                    and asset.unit == "gram" else None)
         rows.append({"asset": asset, "held": held.get(asset.id),
-                     "price": valuation.price if derived is None else Decimal(derived["price_e6"]) / Decimal(1_000_000),
+                     "price": valuation.price if derived is None else owned.exact_from_e6(derived["price_e6"]),
                      "price_date": valuation.price_date if derived is None else derived["date"],
                      "source": valuation.source if derived is None else derived["source"],
                      "is_certificate": c.assets.get_class(asset.asset_class_id).code == "DEPOSIT.CD"})
@@ -886,7 +790,7 @@ async def _update(c, back: str, request: Request | None = None):
     done = (f"Updated {', '.join(names.get(p, p) for p, files in changed.items() if files)}."
             if any(changed.values()) else "The price files were already up to date.")
     if missing:
-        done += f" Not published yet: {', '.join(names.get(p, p) for p in missing)}."
+        done += f" Not published yet: {', '.join(names.get(p, p) for p in missing)}."  # not money: words
     return _fill_from(c, done, back, request)
 
 
@@ -949,7 +853,7 @@ async def market_import(request: Request):
         if have.get(pack_id, {}).get("created_at", "") > market.created_at[:10]:
             older.append(pack_id)
             continue
-        market.save(local_folder(c.data_dir) / pack_id)
+        market.save(local_folder(c.data_dir) / pack_id)  # not money: a path
         saved.append(pack_id)
         if pack_id not in followed:
             followed.append(pack_id)
@@ -958,7 +862,7 @@ async def market_import(request: Request):
     names = {r["id"]: r["name"] for r in pack_rows(c.data_dir, ())}
     done = f"Imported {', '.join(names.get(p, p) for p in saved)}." if saved else "Nothing was imported."
     if older:
-        done += f" Kept your newer {', '.join(names.get(p, p) for p in older)}."
+        done += f" Kept your newer {', '.join(names.get(p, p) for p in older)}."  # not money: words
     return _fill_from(c, done, request=request)
 
 
@@ -1047,7 +951,7 @@ async def save_prices(request: Request):
                 raise LightningError("A total value needs a positive holding quantity.", "value")
             if asset_id in values:
                 raise LightningError("Enter either a unit price or total value for each investment, not both.", "price")
-            values[asset_id] = to_decimal(str(raw), "value") / position.quantity
+            values[asset_id] = owned.unit_price(to_decimal(str(raw), "value"), position.quantity)
         with settled_save(request, container(request)):
             count = c.assets.set_prices(day, values)
             for key, raw in form.items():
@@ -1056,7 +960,7 @@ async def save_prices(request: Request):
                 asset_text, checkpoint = key[3:].split("_", 1)
                 c.reevaluations.record_manual_price(int(asset_text), checkpoint,
                                                     to_decimal(str(raw), "price"))
-                count += 1
+                count += 1  # not money: a count
             c.reevaluations.process_due()
     except LightningError as exc:
         return redirect(f"/investments/prices?date={day}", exc.message)

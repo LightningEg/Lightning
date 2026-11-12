@@ -5,6 +5,7 @@ from decimal import Decimal, InvalidOperation
 from fastapi import APIRouter, Request, Response
 
 from lightning.accounts.domain import AccountType
+from lightning.accounts import totals as account_totals
 from lightning.core.dates import fmt_date, today
 from lightning.core.errors import LightningError
 from lightning.core.money import ZERO, from_e6, to_decimal
@@ -27,7 +28,7 @@ def _references(c, account, karat=None):
             return []
     rows = [asset for asset in c.assets.investments(active_only=True)
             if asset.exposure.value == "GOLD" and asset.currency == account.currency and asset.purity is not None
-            and (karat is None or asset.purity == Decimal(karat) / Decimal(24))]
+            and (karat is None or asset.purity == Decimal(karat) / Decimal(24))]  # not money: purity
     seen, unique = set(), []
     for asset in rows:
         key = (asset.purity, asset.currency, asset.unit, asset.name.casefold())
@@ -70,9 +71,9 @@ def account_page(request: Request, account_id: int):
     for item in c.physical_items.for_account(account_id):
         position = by_asset.get(item["asset_id"])
         item.update(position=position, held=position.quantity if position else ZERO,
-                    gold_weight=Decimal(item["net_gold_grams_e6"]) / Decimal(1_000_000),
+                    gold_weight=Decimal(item["net_gold_grams_e6"]) / Decimal(1_000_000),  # not money: grams
                     value=position.value if position else ZERO,
-                    fine_gold=(Decimal(item["net_gold_grams_e6"]) / Decimal(1_000_000)
+                    fine_gold=(Decimal(item["net_gold_grams_e6"]) / Decimal(1_000_000)  # not money: grams
                                * Decimal(item["karat"]) / Decimal(24)
                                * (position.quantity if position else ZERO)),
                     valuation=_valuation(position.price_source, position.price_date) if position else None,
@@ -92,7 +93,7 @@ def account_page(request: Request, account_id: int):
         "workmanship_cost": from_e6(row["workmanship_cost_e6"])}
         for row in c.physical_items.trade_details_for_account(account_id)}
     return render(request, "physical_account.html", account=account, items=items, gram_rows=gram_rows,
-                  other_holdings=other_holdings, total=total, owned=owned, held=total-owned,
+                  other_holdings=other_holdings, total=total, owned=owned, held=account_totals.held_for_others(total, owned),
                   account_asset_breakdown=c.reporting.account_asset_class_breakdown(account_id, today()),
                   rows=rows, trade_details=trade_details, counterparties=c.counterparties.list_active(),
                   references=_references(c, account), cash_accounts=c.accounts.list(active_only=True))
@@ -136,7 +137,7 @@ async def edit_item(request: Request, account_id: int, asset_id: int):
         return redirect(f"/accounts/{account_id}", "That item belongs to another account.")
     asset = c.assets.get_asset(asset_id)
     values = {"name": asset.name, "kind": item["item_kind"],
-              "weight": str(Decimal(item["net_gold_grams_e6"]) / Decimal(1_000_000)),
+              "weight": str(Decimal(item["net_gold_grams_e6"]) / Decimal(1_000_000)),  # not money: grams
               "karat": str(item["karat"]), "reference_asset_id": str(item["reference_asset_id"]),
               "details": item["details"], "worn": "1" if item["worn"] else ""}
     return render(request, "physical_item_form.html", account=account, item=item,
@@ -250,7 +251,7 @@ def _price_reference(c, karat: int):
             if a.exposure.value == "GOLD" and a.purity is not None and a.currency == c.base_currency
             and a.code.startswith(("REF:", "GLD:")) and not a.code.startswith("OTH:")]
     rows.sort(key=lambda a: not a.code.startswith("REF:"))  # a price reference first, never a bar that happens to share the karat
-    own = next((a for a in rows if a.purity == Decimal(karat) / Decimal(24)), None)
+    own = next((a for a in rows if a.purity == Decimal(karat) / Decimal(24)), None)  # not money: purity
     return own or next((a for a in rows if a.purity == Decimal(1)), None)
 
 

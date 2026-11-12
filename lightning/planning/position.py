@@ -155,6 +155,21 @@ class Position:
         return self.what_you_own - self.cash_you_own - self.holdings_value
 
     @property
+    def set_aside_or_due(self) -> Decimal:
+        """IT-12AE4: owned cash that is not free: kept apart, in reserves, or owed to bills due."""
+        return (self.kept_apart or ZERO) + (self.reserves or ZERO) + self.bills_due
+
+    def by_family(self, keys, family_of) -> dict:
+        """IT-12AE4: What you own by family (A04): cash you own under ``"cash"``, each holding class under
+        ``family_of(code)``, and the rest under ``"other"``. ``keys`` are every family's key; the parts add to What you own."""
+        totals = {key: ZERO for key in keys}
+        totals["cash"] += self.cash_you_own
+        for cls in self.classes:
+            totals[family_of(cls.code)] += cls.value
+        totals["other"] += self.what_you_own - sum(totals.values(), ZERO)
+        return totals
+
+    @property
     def what_you_owe(self) -> Decimal:
         return self.owe.total + self.gameya_owed + self.you_owe_people
 
@@ -313,6 +328,10 @@ class PositionService:
         classes, _ = self.class_values(fmt_date(parse_date(as_of)))
         return sum((c.value for c in classes), ZERO)
 
+    def portfolio_value_in(self, as_of: date | str, divisor: Decimal) -> Decimal:
+        """IT-12AE4: Portfolio value on a date in another unit (the US dollar lens): the value over ``divisor``."""
+        return self.portfolio_value_at(as_of) / divisor
+
     @request_cached
     def class_values(self, as_of: date | str) -> tuple[list[ClassValue], list[str]]:
         holdings, unvalued = self.owned_holdings(as_of)
@@ -445,3 +464,10 @@ class PositionService:
             owed_to_you=wealth.owed_to_you, you_owe_people=wealth.you_owe_people,
             kept_apart=self.reporting.owned_cash_kept_apart(text),
             bill_reserve_coverage=sum(self.planning.bill_reserve_coverage(day, day).values(), ZERO))
+
+
+def class_group_totals(classes) -> tuple[Decimal, Decimal]:
+    """A group of asset classes together (a top-level class and its children; a class you hold nothing of is None):
+    their owned value and what they would fetch if sold (IT-12AE4: Settings' sale factors read it)."""
+    present = [cls for cls in classes if cls is not None]
+    return sum((cls.value for cls in present), ZERO), sum((cls.after_sale for cls in present), ZERO)

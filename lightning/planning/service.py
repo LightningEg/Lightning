@@ -728,6 +728,24 @@ class PlanningService:
                 row["items"].append(item.name)
         return out
 
+    @staticmethod
+    def still_to_pay_across(progresses: list[dict]) -> Decimal:
+        """IT-12AE4: what is still to pay on several loans, from each one's loan_progress."""
+        return sum((progress["still_to_pay"] for progress in progresses), ZERO)
+
+    def month_fixed_costs(self, payments: list[Payment], month: str, day: date | str) -> tuple[Decimal, Decimal, int]:
+        """IT-12AE4: a month's bill and loan payments in the profile currency: (planned, paid, how many).
+        ``payments`` are EverydayBudget.payments; only those due in ``month`` count."""
+        paid = planned = ZERO
+        count = 0
+        for p in payments:
+            if p.due_date[:7] != month:
+                continue
+            planned += self.amount_in_base(p, p.amount, day)
+            paid += self.amount_in_base(p, p.amount - p.still_owed, day)
+            count += 1
+        return planned, paid, count
+
     def loan_progress(self, item: PlannedItem, as_of: date | None = None) -> dict:
         payments = self.payments(item, "2999-12-31", as_of)
         paid = [p for p in payments if p.status == PaymentStatus.PAID]
