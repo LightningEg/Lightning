@@ -11,6 +11,7 @@ from pathlib import Path
 
 from lightning.accounts.service import AccountService
 from lightning.assets.service import AssetService
+from lightning.accounts.property import PropertyService
 from lightning.budgeting.service import BudgetService
 from lightning.planning.forecast import CashForecaster
 from lightning.planning.freshness import FreshnessService
@@ -82,6 +83,7 @@ class Container:
     investments: InvestmentService
     deposits: DepositService
     gameya: GameyaService
+    property: PropertyService
     people_money: PeopleMoneyService
     account_flows: AccountWorkflows
     integrity: IntegrityService
@@ -306,6 +308,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         investments=investments,
         deposits=deposits,
         gameya=gameya,
+        property=PropertyService(db, accounts, transactions, planning, categories),
         people_money=people_money,
         account_flows=AccountWorkflows(db, accounts, transactions, reporting),
         integrity=IntegrityService(reporting, reserves, budgets, schedules, planning, position, investments),

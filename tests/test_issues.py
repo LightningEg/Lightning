@@ -1,4 +1,4 @@
-"""issues/ holds the plan: milestone folders with well-formed, uniquely coded items, and a current INDEX.md (tools/issues.py)."""
+"""issues/ holds the plan: milestone folders with well-formed, uniquely coded items, checked by tools/issues.py; what is open lives on GitHub (tools/board.py)."""
 import importlib.util
 from pathlib import Path
 
@@ -16,7 +16,6 @@ def test_every_item_is_well_formed_coded_once_and_indexed():
     module = _tool()
     milestones, problems = module.load()
     assert not problems, problems
-    assert (ROOT / "issues" / "INDEX.md").read_text(encoding="utf-8") == module.render(milestones), "run python tools/issues.py"
 
 
 def test_codes_run_a_to_z_then_aa_and_never_reuse_a_done_code():

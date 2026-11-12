@@ -22,7 +22,7 @@ def _phone_register(c, account_id, base_url, keep, kind, month, preset, from_que
 
     def href(changes: dict) -> str:
         params = {k: v for k, v in {**keep, **changes}.items() if v not in ("", None)}
-        return base_url + ("?" + urlencode(params) if params else "")
+        return base_url + ("?" + urlencode(params) if params else "")  # not money
 
     now = fmt_date(today())[:7]
     last = shift_month(now, -1)

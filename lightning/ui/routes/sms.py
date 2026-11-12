@@ -90,14 +90,14 @@ async def allow(request: Request):
 async def paste(request: Request):
     c = container(request)
     form = await request.form()
-    text = str(form.get("messages", ""))[:MAX_TEXT * MAX_PASTE]
+    text = str(form.get("messages", ""))[:MAX_TEXT * MAX_PASTE]  # not money: text length
     messages = [m.strip() for m in re.split(r"\n\s*\n", text) if m.strip()][:MAX_PASTE]
     if not messages:
         return _page(request, c, error="Paste one or more bank messages, a blank line between each.")
     now = datetime.now()
     with settled_save(request, container(request)):
         result = c.sms_imports.read([("", m, now) for m in messages])
-    found = sum(row["_status"] == "REVIEW" for batch in result["staged"].values()
+    found = sum(row["_status"] == "REVIEW" for batch in result["staged"].values()  # not money: counts
                 for row in c.bank_imports.preview(batch)[1])
     parts = []
     if result.get("saved"):

@@ -12,7 +12,7 @@ router = APIRouter()
 @router.get("/transactions/merge-selected")
 async def selected_merge(request: Request):
     ids = list(dict.fromkeys(request.query_params.getlist("txn_ids")))
-    if len(ids) != 2 or any(not value.isdigit() or len(value) > 19 or not 1 <= int(value) <= 2**63 - 1 for value in ids):
+    if len(ids) != 2 or any(not value.isdigit() or len(value) > 19 or not 1 <= int(value) <= 2**63 - 1 for value in ids):  # not money: an id range
         return redirect("/transactions?select=1", "Select two transactions in the register, then choose Merge selected.")
     return redirect(f"/transactions/merge?keep={ids[0]}&drop={ids[1]}")
 

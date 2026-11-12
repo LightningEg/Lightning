@@ -8,7 +8,9 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import ROUND_CEILING, Decimal
 
+from lightning.budgeting.domain import spent_outside
 from lightning.core.dates import month_of, parse_month
+from lightning.planning.domain import plan_parts
 from lightning.planning.salary_day import payday_to_plan
 from lightning.ui.charts import ranked_donut
 
@@ -55,7 +57,7 @@ class BudgetScreen:
 
 def _shift(month: str, step: int) -> str:
     first, _ = parse_month(month)
-    return month_of(first + timedelta(days=32) if step > 0 else first - timedelta(days=1))
+    return month_of(first + timedelta(days=32) if step > 0 else first - timedelta(days=1))  # not money
 
 
 def build(c, day: date, month: str = "") -> BudgetScreen:
@@ -72,8 +74,8 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     e = c.forecaster.everyday(shown, day)
     state = "current" if e.current else ("past" if last < day else "future")
     left = e.everyday_left
-    used = int(e.everyday_spent / e.everyday_plan * 100) if e.everyday_plan > 0 else None
-    pace_pct = Decimal(e.day) / e.days_in_month * 100 if state == "current" and e.days_in_month else None
+    used = int(e.everyday_used_percent) if e.everyday_used_percent is not None else None
+    pace_pct = Decimal(e.day) / e.days_in_month * 100 if state == "current" and e.days_in_month else None  # not money
     rows = []
     view = c.budgets.month_view(shown, schedule=schedule)
     seen = set()
@@ -86,9 +88,9 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
             limit, spent = line.available, line.planned_actual
             if not limit and not spent:
                 continue
-            share = float(min(max(spent / limit * 100, ZERO), Decimal(100))) if limit > 0 else (100.0 if spent > 0 else 0.0)
-            gap = limit - spent
-            ahead = gap > 0 and pace_pct is not None and spent / limit * 100 >= pace_pct + AHEAD_POINTS
+            share = float(min(max(spent / limit * 100, ZERO), Decimal(100))) if limit > 0 else (100.0 if spent > 0 else 0.0)  # not money
+            gap = line.remaining
+            ahead = gap > 0 and pace_pct is not None and spent / limit * 100 >= pace_pct + AHEAD_POINTS  # not money
             kind = "over" if gap < 0 else ("ahead" if ahead else ("done" if limit > 0 and gap == 0 else "ok"))
             rows.append(CategoryRow(line.category_id, line.name, limit, spent, gap, share,
                                     state != "past" and kind in ("over", "ahead"), kind))
@@ -96,17 +98,11 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     needs = [r for r in rows if r.attention]
     shown_needs = tuple(needs[:ATTENTION])
     listed = tuple(r for r in rows if r not in shown_needs)     # a category is never listed twice
-    paid = planned = ZERO
-    for p in e.payments:
-        if p.due_date[:7] != shown:
-            continue
-        planned += c.planning.amount_in_base(p, p.amount, day)
-        paid += c.planning.amount_in_base(p, p.amount - p.still_owed, day)
-    count = sum(1 for p in e.payments if p.due_date[:7] == shown)
+    planned, paid, count = c.planning.month_fixed_costs(e.payments, shown, day)
     move = _cover(c, shown, schedule, [r for r in rows if r.left < 0], e.room) if state == "current" else None
     return BudgetScreen(shown, prev, nxt, state, left, used,
-                        (e.everyday_spent - e.pace) if state == "current" else None, e.per_day,
-                        shown_needs, max(len(needs) - ATTENTION, 0), listed, planned, paid, count,
+                        e.spent_less_pace if state == "current" else None, e.per_day,
+                        shown_needs, max(len(needs) - ATTENTION, 0), listed, planned, paid, count,  # not money
                         move, c.health.raise_offer(shown) if state == "current" else None,
                         month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, e.everyday_spent),
                         working=e.everyday_left_working,
@@ -118,18 +114,18 @@ def month_bar(plan: Decimal, spent: Decimal) -> dict | None:
     Widths are shares of the longer of plan and spent, so an overspent bar shows where the plan ended."""
     if plan <= 0 and spent <= 0:
         return None
-    part_spent, part_left, part_over = min(spent, plan), max(plan - spent, ZERO), max(spent - plan, ZERO)
-    whole = part_spent + part_left + part_over
+    part_spent, part_left, part_over = plan_parts(plan, spent)
+    whole = part_spent + part_left + part_over  # not money: the bar's length, for the widths
     return {"spent": part_spent, "left": part_left, "over": part_over, "plan": plan,
-            "w_spent": float(part_spent / whole * 100), "w_left": float(part_left / whole * 100),
-            "w_over": float(part_over / whole * 100)}
+            "w_spent": float(part_spent / whole * 100), "w_left": float(part_left / whole * 100),  # not money
+            "w_over": float(part_over / whole * 100)}  # not money
 
 
 def spend_donut(rows: list[CategoryRow], spent: Decimal) -> dict | None:
     """IV-11D5, BV-12O: where the month went. Fixed costs paid are already inside their categories (rent in Housing), so
     the slices are the categories alone and any spending they leave out joins Other: the total is the plan's Spent."""
     slices = [{"label": r.name, "value": r.spent} for r in rows]
-    rest = spent - sum((r.spent for r in rows if r.spent > 0), ZERO)
+    rest = spent_outside(spent, [r.spent for r in rows])
     if rest > 0:
         slices.append({"label": "Other", "value": rest, "other": True})
     d = ranked_donut(slices)

@@ -50,6 +50,7 @@ It reads low in every dark theme; the fix belongs to the dark adapter in `theme-
 
 ## 10C4 Owner steps 1-6 in order · owner
 Deploy migrations, open checkout, generate the store key, ship the release, turn on unlock, redeploy `redeem-purchase`.
+Step 1 (migrations) is done: applied live 2026-11-11, including 20261110200000. Steps 2-6 wait for launch (owner, 2026-11-11); do not ask again before launch. 10C5 follows 60 days after the first sale.
 
 ## 10C5 Review prices after 60 days of sales · owner
 As the website's `docs/payment-operations.md` describes.

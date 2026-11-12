@@ -180,4 +180,28 @@ Questions or ideas: hello@lightningeg.com
 
 ## In-app products
 
-One managed product per paid theme, product id = theme id: `cotton`, `dendera` (day and night), `nile`, `papyrus`. Name and description from the theme; price set by the owner in Egyptian pounds. One purchase per person (owner, 2026-11-09): a purchase unlocks every profile opened in the Play build with the buying Google account, up to 10, and each profile's other devices through sync. A refunded or voided purchase unlocks no new profile; licences already issued stay.
+One managed product per paid theme, product id = theme id. Prices (owner, 2026-11-11): one EGP price on Play and the
+website (coins at 5 per EGP), Play's 15% fee absorbed.
+
+| Product id | Name | Tier | Play price | Website |
+|---|---|---|---|---|
+| `nile` | Nile | Palette | 60 EGP | 300 coins |
+| `cotton` | Cotton | Textured | 120 EGP | 600 coins |
+| `papyrus` | Papyrus | Animated | 200 EGP | 1,000 coins |
+| `dendera` | Dendera (day and night) | Animated | 200 EGP | 1,000 coins |
+
+In the Console: Monetize › In-app products › Create product for each row; set the Egypt price by hand (do not let Play
+convert from USD; other countries may follow Play's conversion), then Activate. Check Play's service fee is 15% (the
+first USD 1M a year). Lightning keeps 85% of a Play sale, less any VAT Google pays for Egypt out of the price (the Console's tax page says).
+
+One purchase per person (owner, 2026-11-09; cap 5 from 2026-11-11): a purchase unlocks every profile opened in the Play
+build with the buying Google account, up to 5, and each profile's other devices through sync. A refunded or voided
+purchase unlocks no new profile; licences already issued stay.
+
+How a person gets a theme, by build:
+
+| Build | How they buy | How another profile, a reinstall or a new phone gets it |
+|---|---|---|
+| Play | Settings › Appearance › **Buy** opens Google Play's sheet; the theme is on at once. | Opening Settings asks Play what this Google account owns and unlocks the open profile, no payment. |
+| PC, GitHub APK | Buy on lightningeg.com, press **Get app code** on the theme, paste it in Settings › Unlock a theme you bought. | A fresh code from the same button, any time (single use, ten minutes). |
+| Play, bought on the website | The Play build's **Unlock code** field (it never names the website), or unlock the profile on the PC: the licence travels with the profile. | As above. |

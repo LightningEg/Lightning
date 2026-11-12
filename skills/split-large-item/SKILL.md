@@ -24,4 +24,4 @@ What to build, in a line or two. Done when: <what a reviewer can run or read to 
 5. **Overlap.** If the item overlaps work already built or in progress (another item, an audit), start the step with `Verify first:` and say what to reproduce, and delete the step with the fixing commit's name if it is already fixed.
 6. **Do not split work another AI is building** without asking: check `NOW.md` Claimed. Steps may mirror their claim; they must not redirect it.
 7. **Finishing a step** deletes its heading and says so in the commit; the item's own `done:` entry waits for the last step.
-8. `python tools/issues.py` (INDEX), `python tools/status.py`, `python -m pytest tests/test_issues.py -q`. Then `python tools/issues.py github` shows what the split makes postable (skill `post-contributor-issues`).
+8. `python tools/issues.py --check`, `python -m pytest tests/test_issues.py -q`. Then `python tools/issues.py github` shows what the split makes postable (skill `post-contributor-issues`).

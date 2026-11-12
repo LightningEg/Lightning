@@ -126,6 +126,7 @@ financial_adapters = [
     "lightning.sync.journal.areas.people",
     "lightning.sync.journal.areas.physical",
     "lightning.sync.journal.areas.plans",
+    "lightning.sync.journal.areas.property",
     "lightning.sync.journal.areas.rules",
     "lightning.sync.journal.areas.settings",
     "lightning.sync.journal.areas.sms",

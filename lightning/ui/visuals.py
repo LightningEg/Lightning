@@ -9,6 +9,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 from urllib.parse import urlencode
 
+from lightning.core.figures import label
 from lightning.core.dates import fmt_date, months_back, parse_date, parse_month
 from lightning.core.money import ZERO, fmt, quantize, round_to_total
 
@@ -110,12 +111,11 @@ def money_sankey(c, first: date, last: date, cash_flow, sources_shown: int = 3, 
     rest_out = cash_flow.outflows + refunded - sum((t["value"] for t in targets), ZERO)
     if rest_out > 0:
         targets.append({"label": "Other", "value": rest_out, "tone": "spend"})
-    if cash_flow.net > 0:
-        invested = min(max(money_added, ZERO), cash_flow.net)
-        if invested > 0:
-            targets.append({"label": "Invested", "value": invested, "tone": "hold"})
-        if cash_flow.net - invested > 0:
-            targets.append({"label": "Kept as cash", "value": cash_flow.net - invested, "tone": "in"})
+    invested, kept = cash_flow.invested_from_net(money_added), cash_flow.kept_as_cash(money_added)
+    if invested > 0:
+        targets.append({"label": "Invested", "value": invested, "tone": "hold"})
+    if kept > 0:
+        targets.append({"label": label("kept_as_cash"), "value": kept, "tone": "in"})
     # Shown whole: round both columns to the same whole total so the parts add up to it (largest remainder).
     for column in (sources, targets):
         for row, value in zip(column, round_to_total([r["value"] for r in column])):

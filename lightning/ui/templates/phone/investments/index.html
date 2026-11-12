@@ -22,6 +22,7 @@
   {% set show_kind = with_kind and not same %}
   {% set parts = [] %}
   {% if r.balance %}{% set _ = parts.append((r.kind|tr(locale)) if show_kind else ('Cash in the account'|tr(locale))) %}
+    {% if r.priced and r.gain_pct is not none %}{% set _ = parts.append((r.gain_pct|signed_pct) ~ '%') %}{% endif %}
   {% else %}
     {% if show_kind %}{% set _ = parts.append(r.kind|tr(locale)) %}{% endif %}
     {% if not show_kind and r.gain_pct is not none %}{% set _ = parts.append(r.units|units_of(h.unit)) %}{% endif %}
@@ -32,12 +33,13 @@
     <span class="phone-txn-amount"><b>{{ r.value|money if r.value is not none else 'Unavailable'|tr(locale) }}</b></span></a>
 {% endmacro %}
 {% block content %}
+<a class="btn primary phone-save" href="/investments/add">{{ 'Add investment'|tr(locale) }}</a>
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
 {% if not accounts %}
 <section class="card phone-card"><p class="phone-note">{{ "Investments live in a brokerage account or a physical asset account."|tr(locale) }}</p><a class="btn primary phone-save" href="/accounts/new?type=BROKERAGE">{{ "Add a brokerage account"|tr(locale) }}</a></section>
 {% elif not owned_rows and not period_activity %}
 {{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}
-<section class="card phone-card"><h2 class="phone-card-title">{{ 'No holdings yet'|tr(locale) }}</h2><p class="phone-note">{% if investment_report.investment_cash %}{{ investment_report.investment_cash|money }} {{ base }} of brokerage cash is ready. {% endif %}Record a holding to see its value, result and allocation.</p><a class="phone-quiet" href="/accounts">{{ 'Open accounts'|tr(locale) }}</a></section>
+<section class="card phone-card"><h2 class="phone-card-title">{{ 'No holdings yet'|tr(locale) }}</h2><p class="phone-note">{% if investment_report.investment_cash %}{{ investment_report.investment_cash|money }} {{ base }} of brokerage cash is ready. {% endif %}Record a holding to see its value, result and allocation.</p><div class="phone-rows">{% include "phone/investments/_add_sheet.html" %}</div><a class="phone-quiet" href="/accounts">{{ 'Open accounts'|tr(locale) }}</a></section>
 {% else %}
 {% set ph = invest_phone %}
 {{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}
@@ -48,6 +50,7 @@
 
 <section class="phone-section" aria-labelledby="holdings-heading">
   <header class="phone-section-head"><h2 id="holdings-heading">{{ 'Holdings'|tr(locale) }}</h2>{% if ph.more %}<a class="phone-quiet" href="{{ ph.fewer_link if ph.expanded else ph.all_link }}">{{ ('Show fewer' if ph.expanded else 'See all')|tr(locale) }}</a>{% endif %}</header>
+  <div class="phone-rows">{% include "phone/investments/_add_sheet.html" %}</div>
   {% if ph.expanded %}
   <div class="phone-invest-views" role="group" aria-label="{{ 'Group holdings'|tr(locale) }}">{% for key, text in views.items() %}<a class="phone-invest-chip{{ ' is-chosen' if key == view }}" href="{{ view_links[key] }}#holdings-heading">{{ text|tr(locale) }}</a>{% endfor %}</div>
   {% for g in holding_groups %}

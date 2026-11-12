@@ -5,6 +5,7 @@ from fastapi import Response
 
 from lightning.core.errors import LightningError, ValidationError
 from lightning.investments.domain import DEFAULT_SALE_FACTOR
+from lightning.planning.position import class_group_totals
 from lightning.core.money import ZERO
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
 from lightning.core.dates import today
@@ -107,11 +108,11 @@ async def settings_page(request: Request):
     # then its children. A child's own factor overrides its parent's.
     factor_rows, factor_groups = [], []
     for root in (cls for cls in classes if cls.parent_id is None or cls.parent_id not in {x.id for x in classes}):
-        rows = [factor_row(root)] + [factor_row(cls) for cls in classes if cls.code.startswith(root.code + ".")]
-        factor_rows += rows
-        factor_groups.append({"root": rows[0], "children": rows[1:],
-                              "value": sum((r["value"] for r in rows), ZERO),
-                              "estimate": sum((r["estimate"] for r in rows), ZERO)})
+        members = [root] + [cls for cls in classes if cls.code.startswith(root.code + ".")]  # not money: list glue
+        rows = [factor_row(cls) for cls in members]
+        factor_rows += rows  # not money: list glue
+        value, estimate = class_group_totals([position_classes.get(cls.code) for cls in members])
+        factor_groups.append({"root": rows[0], "children": rows[1:], "value": value, "estimate": estimate})
     income_categories = [x for x in c.categories.tree(Movement.INFLOW) if not x.is_root and x.income_class is not None]
     expense_categories = [x for x in c.categories.tree(Movement.OUTFLOW) if not x.is_root]
     category_ids_by_code = {item.code: item.id for item in c.categories.tree()}
@@ -364,7 +365,7 @@ async def save_locale(request: Request):
     response = redirect("/settings")
     # The profile pages and the locked chooser read this cookie (encrypted settings are closed there),
     # so they follow the language chosen here.
-    response.set_cookie("lightning_ui_locale", locale, max_age=60 * 60 * 24 * 365, httponly=False,
+    response.set_cookie("lightning_ui_locale", locale, max_age=60 * 60 * 24 * 365, httponly=False,  # not money: seconds
                         secure=request.url.scheme == "https", samesite="lax", path="/")
     return response
 

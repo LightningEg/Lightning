@@ -129,6 +129,42 @@ class BudgetMonth:
         return sum((s.one_off for s in self.sections), ZERO)
 
 
+# IT-12AE4: a plan's derived figures, for the screens that read a plan summary rather than a BudgetMonth.
+def left_in_plan(planned: Decimal, spent: Decimal) -> Decimal:
+    """Left in plan: Planned less Spent (below zero when over)."""
+    return planned - spent
+
+
+def used_of_plan(planned: Decimal, left: Decimal) -> Decimal:
+    """What a plan has used: Planned less Left in plan."""
+    return planned - left
+
+
+def over_plan_by(spent: Decimal, planned: Decimal) -> Decimal:
+    """How far spending went past the plan: Spent less Planned."""
+    return spent - planned
+
+
+def share_of_plan(amount: Decimal, planned: Decimal) -> Decimal:
+    """An amount as a percentage of Planned (the caller checks there is a plan)."""
+    return amount / planned * 100
+
+
+def left_per_day(left: Decimal, days_left: int) -> Decimal:
+    """Left in plan spread over the days left, today included (the caller checks there are days)."""
+    return left / days_left
+
+
+def over_plan_total(overs: list[Decimal]) -> Decimal:
+    """Categories' overspends added up: Over plan."""
+    return sum(overs, ZERO)
+
+
+def spent_outside(total: Decimal, by_category: list[Decimal]) -> Decimal:
+    """Spending the listed categories leave out: the total less what they spent (a category under zero counts nothing)."""
+    return total - sum((value for value in by_category if value > 0), ZERO)
+
+
 @dataclass(frozen=True)
 class IncomeAverage:
     """Average monthly income, and the completed months it was averaged over."""

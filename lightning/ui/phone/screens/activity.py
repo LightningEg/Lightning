@@ -40,7 +40,7 @@ def review_items(c, day: date) -> list[dict]:
 
 def _shift(month: str, step: int) -> str:
     first, _ = parse_month(month)
-    return month_of(first + timedelta(days=32) if step > 0 else first - timedelta(days=1))
+    return month_of(first + timedelta(days=32) if step > 0 else first - timedelta(days=1))  # not money
 
 
 def build(c, day: date, tab: str = "all", month: str = "", index: int = 0) -> ActivityScreen:
@@ -54,7 +54,7 @@ def build(c, day: date, tab: str = "all", month: str = "", index: int = 0) -> Ac
     items = review_items(c, day)
     from lightning.ui.phone.screens.review_cards import review_cards
     items = review_cards(c, day, items)   # one row per card, each with its kind's own verb (3AY8); one count on both tabs
-    card = items[min(max(index, 0), len(items) - 1)] if items and tab == "review" else None
+    card = items[min(max(index, 0), len(items) - 1)] if items and tab == "review" else None  # not money
     rows: tuple = ()
     money_in = money_out = Decimal(0)
     more = False
@@ -65,8 +65,8 @@ def build(c, day: date, tab: str = "all", month: str = "", index: int = 0) -> Ac
         flow = c.reporting.cash_flow(start, min(end, day))
         money_in, money_out = flow.inflows, flow.outflows
     top = max(money_in, money_out)
-    in_share = int(round(money_in / top * 100)) if top > 0 else 0
-    out_share = int(round(money_out / top * 100)) if top > 0 else 0
+    in_share = int(round(money_in / top * 100)) if top > 0 else 0  # not money: the bar's width
+    out_share = int(round(money_out / top * 100)) if top > 0 else 0  # not money: the bar's width
     return ActivityScreen(tab=tab, month=shown, prev_month=_shift(shown, -1),
                           next_month="" if shown >= this else _shift(shown, 1), rows=rows,
                           money_in=money_in, money_out=money_out, in_share=in_share, out_share=out_share, review_total=len(items), card=card,

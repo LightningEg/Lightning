@@ -31,7 +31,7 @@ async def list_counterparties(request: Request):
                   aliases_by_id={party["id"]: aliases[party["id"]] for party in parties},
                   alias_limit=MAX_ALIASES_PER_COUNTERPARTY, usual=c.transactions.usual_categories(),
                   merge_choices=[party for party in all_parties if party["active"]],
-                  cleanup_prompt=counterparty_cleanup_prompt(all_parties, known) if sum(1 for p in all_parties if p["active"]) > 1 else "")
+                  cleanup_prompt=counterparty_cleanup_prompt(all_parties, known) if sum(1 for p in all_parties if p["active"]) > 1 else "")  # not money: counts
 
 
 @router.post("")

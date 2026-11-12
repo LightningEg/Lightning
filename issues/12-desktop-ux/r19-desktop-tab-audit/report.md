@@ -4,7 +4,7 @@ Code: r19
 
 Date: 2026-10-30 · Author/reviewer: Claude (guideline-audit skill)
 Repository: app · Reviewed commit: 94499084000e17b2f0c16bf0410df132936cb6db
-Historical ID: audit-12 · Status: **plan for the owner's review; nothing built** · Plan item: [IV-3AM](../IV-3AM-pc-declutter-tab-by-tab.md)
+Historical ID: audit-12 · Status: **built** · Plan item: IV-3AM (done 2026-11-12; O2 `tests/test_needs_you_tone.py`; C2 moved to IV-12Q)
 
 ## Scope and method
 

@@ -90,7 +90,7 @@ def test_a_play_purchase_becomes_the_same_signed_licence(store):
     assert entitlements.owned() == frozenset({"papyrus"}) and seen[0]["purchase_token"] == "token-abcdefghijkl"
 
 
-@pytest.mark.parametrize("status,words", [(410, "refunded"), (409, "10 profiles"), (402, "not finished"),
+@pytest.mark.parametrize("status,words", [(410, "refunded"), (409, "5 profiles"), (402, "not finished"),
                                           (400, "does not know")])
 def test_the_store_refusals_are_said_plainly(store, status, words):
     with pytest.raises(entitlements.UnlockError, match=words):

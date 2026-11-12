@@ -44,7 +44,7 @@ def test_comprehensive_roundtrip_and_legacy_headers(c, tmp_path):
     target = build(tmp_path/'new.db', key=b'k' * 32)
     target.db.execute("INSERT INTO profile_identity(singleton,profile_id) VALUES(1,'00000000-0000-0000-0000-000000000001')")
     prepared = prepare_import(target, data)
-    assert len(prepared) == 60  # foreign_amounts (NF-7AK3) is the 60th
+    assert len(prepared) == 62  # property_contracts and property_flows (NF-12M) are the 60th and 61st, foreign_amounts (NF-7AK3) the 62nd
     assert target.db.scalar('SELECT count(*) FROM transactions') == 0
     confirm_import(target, data)
     assert target.db.scalar('SELECT profile_id FROM profile_identity') == '00000000-0000-0000-0000-000000000001'

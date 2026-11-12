@@ -36,7 +36,7 @@ def _period(c, day: date, key: str, date_from: str = "", date_to: str = ""):
     if key == "custom":   # 3AY10: the report takes your own dates, as the older Overview's Custom did
         return parse_period({"period": "custom", "date_from": date_from, "date_to": date_to}, day, first)
     if key == "last":
-        before = date(day.year - 1, 12, 1) if day.month == 1 else date(day.year, day.month - 1, 1)
+        before = date(day.year - 1, 12, 1) if day.month == 1 else date(day.year, day.month - 1, 1)  # not money
         return parse_period({"period": "month", "month": month_of(before)}, day, first)
     return parse_period({"period": key if key in ("ytd", "all") else "month"}, day, first)
 

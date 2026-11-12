@@ -110,7 +110,7 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6, payments: 
                       "context": "Privacy mode for this profile", "action": "privacy"}
     pages = [p for p in PAGES if p[1] != "/zakat" or c.zakat.enabled()]
     if not needle:  # an empty command bar is a launcher: the main pages and the everyday actions
-        return ([{"label": label, "href": href, "kind": "Page", "context": ""} for label, href, _ in pages[:10]]
+        return ([{"label": label, "href": href, "kind": "Page", "context": ""} for label, href, _ in pages[:10]]  # not money: list glue
                 + [{"label": label, "href": href, "kind": "Action", "context": ""} for label, href, _ in ACTIONS[:3]]
                 + [privacy_action])
     found: list[tuple[float, dict]] = []
@@ -125,10 +125,10 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6, payments: 
     except LightningError:
         pass
     for label, href, words in pages:
-        add(max(_score(needle, label, fuzzy), _score(needle, words, False) * 0.85), label, href, "Page")
+        add(max(_score(needle, label, fuzzy), _score(needle, words, False) * 0.85), label, href, "Page")  # not money: search scores
     for label, href, words in ACTIONS:
-        add(max(_score(needle, label, fuzzy), _score(needle, words, False) * 0.85), label, href, "Action")
-    add(max(_score(needle, privacy_action["label"], fuzzy), _score(needle, "privacy hide show amounts blur", False) * 0.85),
+        add(max(_score(needle, label, fuzzy), _score(needle, words, False) * 0.85), label, href, "Action")  # not money: search scores
+    add(max(_score(needle, privacy_action["label"], fuzzy), _score(needle, "privacy hide show amounts blur", False) * 0.85),  # not money: search scores
         privacy_action["label"], "#", "Action", privacy_action["context"], action="privacy")
     for account in c.accounts.list(active_only=True):
         score = max(_score(needle, account.label, fuzzy, "Account"), _score(needle, account.code, False))
@@ -136,7 +136,7 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6, payments: 
             if hasattr(account.account_type, "label") else account.account_type.value.replace("_", " ").capitalize())
         if account.account_type.value in ("BANK", "CASH", "BROKERAGE"):
             for verb, path in (("Import CSV", "import"), ("Adjust balance", "reconcile")):
-                add(max(_score(needle, f"{verb} {account.label}", fuzzy), _score(needle, verb, False) * 0.85 if score
+                add(max(_score(needle, f"{verb} {account.label}", fuzzy), _score(needle, verb, False) * 0.85 if score  # not money: search scores
                         or len(needle) > 2 else 0), f"{verb} · {account.label}", f"/accounts/{account.id}/{path}", "Action")
     aliases = c.counterparties.aliases_by_counterparty()
     people = {p["id"] for p in c.counterparties.list_people()}
@@ -144,7 +144,7 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6, payments: 
         names = [party["name"], *(row["alias"] for row in aliases.get(party["id"], []))]
         kind = "Person" if party["id"] in people else "Counterparty"
         canonical = _score(needle, party["name"], fuzzy, kind)
-        alias = max((_score(needle, name, fuzzy, kind) * 0.98 for name in names[1:]), default=0)
+        alias = max((_score(needle, name, fuzzy, kind) * 0.98 for name in names[1:]), default=0)  # not money: search scores
         score = max(canonical, alias)
         reason = "confirmed alias" if alias > canonical else "exact" if canonical == 1 else "prefix" if canonical >= 0.9 else "contains" if canonical >= 0.8 else "typo"
         add(score, party["name"], "/transactions?" + urlencode({"q": party["name"]}), kind, "Its transactions", entity_id=party["id"], match_reason=reason)
@@ -179,7 +179,7 @@ def matches(c, query: str, privacy: bool = False, per_group: int = 6, payments: 
                          "entity_id": row.ref, "rank": 0.5, "match_reason": "payment"})
     for group in GROUPS:
         ranked = sorted((pair for pair in found if pair[1]["kind"] == group), key=lambda p: (-p[0], p[1]["label"].casefold()))
-        results += [row for _, row in ranked[:per_group]]
+        results += [row for _, row in ranked[:per_group]]  # not money: list glue
         if group == "Transaction":  # an exact reference first, then the payments that match the words
             results += [row for row in paid if row["href"] not in {r["href"] for r in results}]  # not money
     results.append({"label": f"Find transactions with “{query}”", "href": "/transactions?" + urlencode({"q": query}),

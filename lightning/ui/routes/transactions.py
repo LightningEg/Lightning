@@ -8,6 +8,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse
 
 from lightning.transactions.domain import TxnFilter, TxnStatus
 from lightning.foreign_amounts import ForeignAmounts
+from lightning.transactions.figures import cash_amount
 
 from lightning.core.errors import LightningError
 from lightning.core.dates import fmt_date, parse_date
@@ -112,7 +113,7 @@ async def edit_transaction_popup(request: Request, txn_id: int):
         split_categories = sorted({line.category_id for line in cash_lines if line.category_id})
         is_split = len(cash_lines) > 1
         category_id = "" if is_split else str(source.category_id or "")
-        amount = abs(sum((line.quantity for line in cash_lines), start=0)) if is_split else abs(source.quantity)
+        amount = cash_amount(cash_lines) if is_split else abs(source.quantity)
     owner_id = next((line.owner_id for line in txn.lines if line.owner_id is not None), None)
     values = {"kind": kind, "date": txn.date, "amount": str(amount), "category_id": category_id,
               "counterparty": txn.counterparty or "", "owner_id": str(owner_id or ""),
@@ -414,7 +415,7 @@ def _display_timestamp(value: str) -> str:
         return value
     local = moment.replace(tzinfo=None).isoformat(sep=" ")
     offset = moment.isoformat(sep=" ")[len(local):]
-    return local + (f" UTC{offset}" if offset else "")
+    return local + (f" UTC{offset}" if offset else "")  # not money: text
 
 
 def detail_page(request: Request, txn_id: int, status_code: int = 200, error: str = ""):
@@ -576,7 +577,7 @@ async def categorize_transactions(request: Request):
     name = c.categories.display_name(category_id)   # Personal › Transportation, never just "Transportation"
     message = f"{name} is now the category of {counted(len(changed), 'row', 'rows')}."
     if skipped:
-        message += (f" {len(skipped)} left as {'they were' if len(skipped) != 1 else 'it was'}: transfers, investment rows, "
+        message += (f" {len(skipped)} left as {'they were' if len(skipped) != 1 else 'it was'}: transfers, investment rows, "  # not money: text
                     "split expenses and rows going the other way keep their own category.")
     return redirect(offer or destination, message)
 
@@ -632,7 +633,7 @@ async def bulk_edit_transactions(request: Request):
         return respond(exc.message, error=True)
     message = f"Changed {counted(len(changed), 'row', 'rows')}."
     if skipped:
-        message += (f" {len(skipped)} left as {'they were' if len(skipped) != 1 else 'it was'}: transfers, investment rows, "
+        message += (f" {len(skipped)} left as {'they were' if len(skipped) != 1 else 'it was'}: transfers, investment rows, "  # not money: text
                     "split expenses and rows going the other way keep their own values.")
     return respond(message)
 
