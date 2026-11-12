@@ -3556,3 +3556,12 @@ p { text-wrap:pretty; }
     outline:2px solid CanvasText!important;
   }
 }
+
+/* Page changes fade into each other like the phone's (cross-document view transition, Chromium 126+; older engines just
+   load as before). The sidebar has its own name, so it stays still while the page changes. Nothing here moves layout. */
+@view-transition { navigation: auto; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: 140ms; }
+.side { view-transition-name: pc-side; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root), ::view-transition-group(*) { animation: none; }
+}

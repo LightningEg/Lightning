@@ -338,3 +338,27 @@ def test_add_is_never_rose_and_each_paid_theme_has_a_phone_signature():
     assert '.phone-hero::before' in materials and 'inset: -12px calc(-1 * var(--c-side, 16px)) -12px' in materials
     assert 'html.phone[data-m-hero-sheen="edge-glint"][data-m-header-thread="none"] .phone-appbar' in materials
     assert 'var(--theme-add, var(--c-nile))' in materials
+
+
+def test_answering_motions_stay_quiet_and_stop_under_reduced_motion():
+    """Owner, 2026-11-12: motions that answer you are polished but never flashy. The card light fades to at most 6%,
+    a press is a 1px settle with no scale, a dialog leaves with a short fade, the equip sweep peaks under 20%, and
+    none of them loops or runs under reduced motion. PC pages cross-fade like the phone's."""
+    import re
+    materials = (ROOT / 'lightning/ui/static/theme-materials.css').read_text()
+    motion, reduced = materials.split('@media (prefers-reduced-motion: reduce)')
+    light = [int(n) for n in re.findall(r'--lt-a: (\d+)%', motion)]
+    assert light and max(light) <= 6
+    press = motion[motion.index('.btn.primary:active {'):]
+    assert 'translateY(1px)' in press[:press.index('}')] and 'scale' not in press[:press.index('}')]
+    assert '@starting-style' in motion and 'display .14s allow-discrete' in motion
+    sweep = motion[motion.index('.theme-unveil {'):]
+    assert max(int(n) for n in re.findall(r'(\d+)%, transparent\)', sweep[:sweep.index('}')])) < 20
+    for stopped in ('dialog::backdrop { transition: none', '.btn.primary:active { transform: none; transition: none; }',
+                    'html[data-m-cards-hover="light"]', '.theme-unveil { display: none; }'):
+        assert stopped in reduced
+    for name in ('style.css', 'style.rtl.css'):
+        pc = (ROOT / 'lightning/ui/static' / name).read_text()
+        fade = pc[pc.index('@view-transition { navigation: auto; }'):]
+        assert 'view-transition-name: pc-side' in fade and 'animation-duration: 140ms' in fade
+        assert 'prefers-reduced-motion: reduce' in fade and 'animation: none' in fade

@@ -11,6 +11,8 @@
    tabs   : .period-button.selected, .plan-tab[aria-current], .phone-chip.is-chosen, .phone-invest-seg .is-chosen */
 
 /* ---------- Shared values ---------- */
+/* Two easings for every motion that answers the user (hover, press, dialog, equip): quick out, and soft in-out. */
+html { --m-ease-out: cubic-bezier(.2,.8,.2,1); --m-ease-inout: cubic-bezier(.45,0,.2,1); }
 html[data-m-cards-finish] {
   --m-none: linear-gradient(transparent, transparent);
   --m-satin: linear-gradient(180deg, var(--m-hi), transparent 58%);
@@ -78,8 +80,10 @@ html[data-m-ground-ambient="glow-drift"]::before {
 /* The equip moment: one light sweep across the page when a theme is put on (theme-runtime.js adds the element). */
 .theme-unveil {
   position: fixed; inset: 0; z-index: 2147483000; pointer-events: none;
-  background: linear-gradient(105deg, transparent 35%, color-mix(in srgb, var(--accent) 26%, transparent) 50%, transparent 65%);
-  background-size: 300% 100%; animation: m-unveil 1.2s cubic-bezier(.3,.6,.2,1) forwards;
+  background: linear-gradient(105deg, transparent 30%, color-mix(in srgb, var(--m-pigment-hero, var(--accent)) 8%, transparent) 40%,
+    color-mix(in srgb, var(--m-pigment-hero, var(--accent)) 18%, transparent) 50%,
+    color-mix(in srgb, var(--m-pigment-hero, var(--accent)) 8%, transparent) 60%, transparent 70%);
+  background-size: 300% 100%; animation: m-unveil 1.2s var(--m-ease-inout) forwards;
 }
 @keyframes m-unveil { from { background-position: 100% 0; opacity: 1; } 80% { opacity: 1; } to { background-position: 0 0; opacity: 0; } }
 
@@ -181,15 +185,19 @@ html[data-m-cards-finish] .main :is(.wide-card, .overview-investment-card, #budg
   background-image: var(--m-card-grain), var(--m-card-finish) !important;
 }
 /* hover: lift raises the shadow, light follows the pointer (theme-runtime.js gives --lt-x/--lt-y). */
-html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel, .phone-kpi) { transition: transform .25s ease, box-shadow .25s ease; }
+html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel, .phone-kpi) { transition: transform .25s var(--m-ease-out), box-shadow .25s var(--m-ease-out); }
 /* A card that holds fields does not lift: a transform makes its fixed pick lists measure from the card, not the window. */
 html[data-m-cards-hover="lift"] :is(.card, .kpi-card, .overview-block, .data-panel):hover:not(:has([data-own-suggestions], [data-own-picker])) { transform: translateY(-2px); box-shadow: var(--m-card-edge), var(--m-depth-high); }
 /* The ids outrank the card finish rules above (one holds an id), which otherwise kept the light from ever showing; the
-   import review keeps its plain paint (see above). */
-html[data-m-cards-hover="light"] :is(.card, .kpi-card, .overview-block, .data-panel, .metric-card):not(.lead-card):not(.overview-owned-card):not(.import-review):not(#_):not(#_):not(#_):hover {
-  background-image: radial-gradient(260px circle at var(--lt-x, 50%) var(--lt-y, 0%), color-mix(in srgb, var(--accent) 9%, transparent), transparent 70%),
+   import review keeps its plain paint (see above).
+   The light fades with a registered percentage (--lt-a) that the gradient mixes the theme's gold pigment by. */
+@property --lt-a { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+html[data-m-cards-hover="light"] :is(.card, .kpi-card, .overview-block, .data-panel, .metric-card):not(.lead-card):not(.overview-owned-card):not(.import-review):not(#_):not(#_):not(#_) {
+  background-image: radial-gradient(260px circle at var(--lt-x, 50%) var(--lt-y, 0%), color-mix(in srgb, var(--m-pigment-hero, var(--accent)) var(--lt-a), transparent), transparent 70%),
     var(--m-card-grain), var(--m-card-finish) !important;
+  transition: --lt-a .3s var(--m-ease-out);
 }
+html[data-m-cards-hover="light"] :is(.card, .kpi-card, .overview-block, .data-panel, .metric-card):not(.lead-card):not(.overview-owned-card):not(.import-review):not(#_):not(#_):not(#_):hover { --lt-a: 6%; }
 
 /* ---------- Hero ---------- */
 html[data-m-hero-finish="satin"] { --m-hero-finish: var(--m-satin); }
@@ -205,6 +213,14 @@ html[data-m-hero-artwork]:not([data-m-hero-artwork="none"]) { --m-hero-art: var(
 /* The winged sun disc sits where Dendera carves it, over the doorway: centred across the card's top edge, like a lintel
    (owner, 2026-11-02). Symmetric, so Arabic needs no mirror. */
 html[data-m-hero-artwork="winged-disc"]:not(#_) { --m-hero-art: var(--m-hero-artwork) center top -26px / 280px 112px no-repeat; }
+/* The divider between the lead card's two columns would run through the disc: it starts below it. A gradient border image
+   keeps the same 1px line and the same layout (it paints the side the stylesheet gave the border, so Arabic needs no mirror);
+   on a narrow screen the divider is a top rule and stays whole. */
+@media (min-width: 761px) {
+  html[data-m-hero-artwork="winged-disc"] .main .lead-card .overview-split > section + section:not(#_) {
+    border-image: linear-gradient(to bottom, transparent 30px, var(--line) 30px) 1;
+  }
+}
 /* A theme's own hero artwork replaces Lightning's watermark mark, so the card carries one drawing, not two. */
 html[data-m-hero-artwork]:not([data-m-hero-artwork="none"]) .main .lead-card::after { content: none; }
 html[data-m-hero-finish] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal, .lead-card):not(#_):not(#_) {
@@ -300,7 +316,12 @@ html[data-m-controls-depth="low"] :is(.btn.primary, .phone-add-disc) { box-shado
 html[data-m-controls-depth="mid"] :is(.btn.primary, .phone-add-disc) { box-shadow: inset 0 1px 0 color-mix(in srgb, #FFFFFF 26%, transparent), 0 8px 18px -8px color-mix(in srgb, var(--action) 75%, var(--m-shadow)); }
 html[data-m-controls-depth="high"] :is(.btn.primary, .phone-add-disc) { box-shadow: inset 0 1px 0 color-mix(in srgb, #FFFFFF 30%, transparent), 0 12px 26px -10px color-mix(in srgb, var(--action) 85%, var(--m-shadow)); }
 /* press sheen: the foil's light slides across on hover, focus and press. */
-html[data-m-controls-press="sheen"] :is(.btn.primary, .phone-add-disc) { transition: background-position .7s ease; }
+html[data-m-controls-press="sheen"] :is(.btn.primary, .phone-add-disc) { transition: background-position .7s var(--m-ease-out); }
+/* Tactile press: the button settles 1px in 90ms and eases back in 220ms (no overshoot). The Add disc is positioned by its own rules
+   (and sits on the tab bar), so a transform never touches it. */
+html[data-m-controls-press="sheen"] .btn.primary { transition: background-position .7s var(--m-ease-out), transform .22s var(--m-ease-out), box-shadow .22s var(--m-ease-out); }
+html[data-m-controls-press="sheen"] .btn.primary:active { transform: translateY(1px); box-shadow: 0 1px 2px -1px color-mix(in srgb, var(--action) 70%, var(--m-shadow));
+  transition: background-position .7s var(--m-ease-out), transform 90ms var(--m-ease-out), box-shadow 90ms var(--m-ease-out); }
 html[data-m-controls-press="sheen"] :is(.btn.primary, .phone-add-disc):is(:hover, :focus-visible, :active) { background-position: 100% 0; }
 /* On satin the finish is a vertical light, so moving it showed nothing: the sheen is its own band over the satin. */
 html[data-m-controls-press="sheen"][data-m-controls-finish="satin"] :is(.btn.primary, .phone-add-disc) {
@@ -355,8 +376,20 @@ html[data-m-overlays-finish] :is(.app-popup, .phone-sheet, .phone-period-panel) 
   background-image: var(--m-over-grain), var(--m-over-finish); box-shadow: var(--m-edge-soft), var(--m-over-depth);
 }
 html[data-m-overlays-shade="blur"] dialog::backdrop { -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-html[data-m-overlays-enter="rise"] :is(dialog.app-popup[open], .phone-sheet[open]) { animation: m-rise .32s cubic-bezier(.2,.8,.2,1); }
-@keyframes m-rise { from { opacity: 0; transform: translateY(14px) scale(.985); } }
+/* Enter and exit are transitions: the closed dialog rests faded and 6px low, and display and overlay change at the end of
+   the fade (allow-discrete), so a closing dialog stays on screen for its 140ms. Opening starts from @starting-style. */
+html[data-m-overlays-enter="rise"] :is(dialog.app-popup, .phone-sheet) {
+  opacity: 0; transform: translateY(6px);
+  transition: opacity .14s var(--m-ease-out), transform .14s var(--m-ease-out), overlay .14s allow-discrete, display .14s allow-discrete;
+}
+html[data-m-overlays-enter="rise"] :is(dialog.app-popup[open], .phone-sheet[open]) {
+  opacity: 1; transform: none;
+  transition: opacity .32s var(--m-ease-out), transform .32s var(--m-ease-out), overlay .32s allow-discrete, display .32s allow-discrete;
+}
+@starting-style { html[data-m-overlays-enter="rise"] :is(dialog.app-popup[open], .phone-sheet[open]) { opacity: 0; transform: translateY(14px) scale(.985); } }
+html[data-m-overlays-enter="rise"] dialog::backdrop { opacity: 0; transition: opacity .16s var(--m-ease-out), overlay .16s allow-discrete, display .16s allow-discrete; }
+html[data-m-overlays-enter="rise"] dialog[open]::backdrop { opacity: 1; transition-duration: .16s; }
+@starting-style { html[data-m-overlays-enter="rise"] dialog[open]::backdrop { opacity: 0; } }
 
 /* ---------- Menus ---------- */
 html[data-m-menus-finish="satin"] { --m-menu-finish: var(--m-satin); }
@@ -377,8 +410,10 @@ html[data-m-menus-finish] :is(.pick-list, .pick-results, .dropdown-menu, .contex
   html[data-m-header-thread="pigment-thread"] :is(.main > .topbar, .phone-appbar)::before { animation: none; background-position: 0 0, 0 0; /* the plain pigment seam */ }
   html[data-m-hero-sheen] .main :is(.overview-owned-card, .hero-card, .portfolio-summary, .metric-card--focal, .lead-card),
   html[data-m-hero-sheen] .main .lead-card::before { animation: none; }
-  html[data-m-overlays-enter] :is(dialog.app-popup[open], .phone-sheet[open]) { animation: none; }
+  html[data-m-overlays-enter] :is(dialog.app-popup, .phone-sheet), html[data-m-overlays-enter] dialog::backdrop { transition: none; transform: none; }
   html[data-m-cards-hover] :is(.card, .kpi-card, .overview-block, .data-panel, .phone-kpi) { transition: none; transform: none !important; }
   html[data-m-controls-press] :is(.btn.primary, .phone-add-disc) { transition: none; }
+  html[data-m-controls-press] .btn.primary:active { transform: none; transition: none; }
+  html[data-m-cards-hover="light"] :is(.card, .kpi-card, .overview-block, .data-panel, .metric-card):not(#_):not(#_):not(#_):not(#_):not(#_):not(#_) { transition: none; }
   .theme-unveil { display: none; }
 }
