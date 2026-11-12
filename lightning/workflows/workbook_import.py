@@ -155,9 +155,9 @@ def _from_excel_serial(value, dated):
     """Excel (or an AI tool) turns a typed date or time into a date cell, saved as days since 1899-12-30: put back
     the text Lightning keeps, a yyyy-mm-dd date or a local timestamp. Anything else is left for the checks below."""
     text = str(value)
-    if not re.fullmatch(r'[1-9][0-9]{4}(\.[0-9]+)?', text) or not 20_000 <= float(text) < 80_000:  # 1954 to 2119
+    if not re.fullmatch(r'[1-9][0-9]{4}(\.[0-9]+)?', text) or not 20_000 <= Decimal(text) < 80_000:  # 1954 to 2119
         return value
-    moment = datetime(1899, 12, 30) + timedelta(seconds=round(float(text) * 86_400))
+    moment = datetime(1899, 12, 30) + timedelta(seconds=int((Decimal(text) * 86_400).to_integral_value()))  # not money: seconds
     if dated:
         return moment.date().isoformat()
     return moment.astimezone().isoformat(timespec='seconds')
