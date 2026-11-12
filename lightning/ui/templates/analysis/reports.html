@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Reports'|tr(locale) }}{% endblock %}
-{% block heading %}<div class="birdview-title"><div><h1>{{ 'Reports'|tr(locale) }}</h1>{% set st = page_status.count(views|length, '1 saved report.', '{n} saved reports.', 'No saved reports yet.') %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p></div></div>{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Reports'|tr(locale), page_status.count(views|length, '1 saved report.', '{n} saved reports.', 'No saved reports yet.')) }}{% endblock %}
 {% block top_actions %}<a class="btn" href="/exports/all">{{ 'Export all data (CSV or Excel)'|tr(locale) }}</a><button type="button" class="btn" data-print>{{ 'Print this page'|tr(locale) }}</button><script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelector("[data-print]").addEventListener("click",()=>window.print())</script>{% endblock %}
 {% block content %}<p><a href="/spending/calendar">{{ 'Age of Money and spending calendar'|tr(locale) }}</a></p>
 {% from "partials/charts.html" import kpi_row %}

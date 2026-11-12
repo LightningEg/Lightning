@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Upcoming · Cash planning{% endblock %}
-{% block heading %}<div><h1>{{ 'Upcoming'|tr(locale) }}</h1>{% set st = answer %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p></div>{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Upcoming'|tr(locale), answer) }}{% endblock %}
 {% block top_actions %}<a class="btn{{ '' if phone_mode() else ' primary' }}" data-popup-open href="/plan/items/new?kind=BILL">{{ 'Add recurring item'|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import lead_card %}
