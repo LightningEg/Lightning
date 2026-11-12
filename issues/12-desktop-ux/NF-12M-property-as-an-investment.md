@@ -5,7 +5,7 @@ type: feature
 pillar: own
 size: L
 model: opus
-status: parked
+status: building
 created: 2026-11-09
 by: Claude
 skills: bug-hunt
