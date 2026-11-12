@@ -109,7 +109,8 @@ _TABLE = [
      "you own that is not cash. Cash waiting in a brokerage account counts in Cash you own (owner decisions "
      "2026-10-04).", "Holdings value"),
     ("valued_by_you", "Valued by you", "The part of Portfolio value known only by its balance, with no cost or "
-     "market price (a share of a flat). The Investments Lead is Cost + Unrealized gain + Valued by you (BT-12AC).",
+     "market price (a share of a flat with no purchase price; a property with one counts in Cost and Unrealized "
+     "gain). The Investments Lead is Cost + Unrealized gain + Valued by you (BT-12AC).",
      "Portfolio value − Cost − Unrealized gain"),
     ("holdings_after_sale", "Holdings after sale (estimate)",
      "What your holdings, deposits included, might fetch if sold or cashed in today, after each class's sale "

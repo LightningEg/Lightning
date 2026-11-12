@@ -111,8 +111,9 @@ class TransactionService:
     def record_transfer(self, date: str, from_account_id: int, to_account_id: int, amount,
                         description: str = "", notes: str = "",
                         source: TxnSource = TxnSource.MANUAL, owner_id: int | None = None,
-                        allow_legacy_deposit_cash: bool = False) -> Transaction:
-        """Money moving between your own accounts. Never income, expense or revaluation."""
+                        allow_legacy_deposit_cash: bool = False, into_property: bool = False) -> Transaction:
+        """Money moving between your own accounts. Never income, expense or revaluation. ``into_property``: an
+        instalment into a property (an Other account) bought by instalments, PropertyService only (NF-12M3)."""
         source_account = self.accounts.get(from_account_id)
         destination_account = self.accounts.get(to_account_id)
         if (destination_account.account_type == AccountType.DEPOSIT or
@@ -121,7 +122,7 @@ class TransactionService:
         if allow_legacy_deposit_cash and source_account.account_type != AccountType.DEPOSIT:
             raise ValidationError("Legacy cash can only be moved out of a previous deposit account.")
         day, lines = self._transfer_lines(date, from_account_id, to_account_id, amount,
-                                          allow_legacy_deposit_cash)
+                                          allow_legacy_deposit_cash, into_property)
         lines = [replace(line, owner_id=owner_id) for line in lines]
         return self._create(DocType.TRF, day, lines, description, "", notes, source)
 
@@ -637,7 +638,11 @@ class TransactionService:
     def update_transfer(self, txn_id: int, date: str, from_account_id: int, to_account_id: int, amount,
                         description: str = "", notes: str = "", owner_id: int | None = None) -> Transaction:
         current = self._editable(txn_id, {DocType.TRF})
-        day, lines = self._transfer_lines(date, from_account_id, to_account_id, amount)
+        # An instalment into a property bought by instalments stays editable as one (NF-12M3).
+        into_property = bool(self.db.scalar(
+            "SELECT 1 FROM property_contracts pc JOIN ledger_entries le ON le.account_id=pc.account_id "
+            "WHERE le.transaction_id=? AND pc.account_id=?", (txn_id, int(to_account_id))))
+        day, lines = self._transfer_lines(date, from_account_id, to_account_id, amount, into_property=into_property)
         lines = [replace(line, owner_id=owner_id) for line in lines]
         return self._update(current, day, lines, description, "", notes)
 
@@ -951,7 +956,7 @@ class TransactionService:
                                   "account")
 
     def _transfer_lines(self, date: str, from_id: int, to_id: int, amount,
-                        allow_legacy_deposit_cash: bool = False):
+                        allow_legacy_deposit_cash: bool = False, into_property: bool = False):
         src = self.accounts.require_usable(from_id, "from_account")
         dst = self.accounts.require_usable(to_id, "to_account")
         if src.id == dst.id:
@@ -964,6 +969,8 @@ class TransactionService:
             source_accounts.add(AccountType.DEPOSIT)
         destination_accounts = {AccountType.CASH, AccountType.BANK, AccountType.BROKERAGE, AccountType.GAMEYA,
                                 AccountType.RECEIVABLE}
+        if into_property:
+            destination_accounts = {AccountType.OTHER_ASSET}
         if src.account_type not in source_accounts or dst.account_type not in destination_accounts:
             raise ValidationError("Transfers can move cash from wallets, banks, or legacy deposit balances into liquid accounts.", "to_account")
         if src.currency != dst.currency:

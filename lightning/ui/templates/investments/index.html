@@ -78,7 +78,7 @@
   <td><a class="holding-link" href="/accounts/{{ r.account_id }}">{{ r.name }}</a></td>
   <td class="num">{{ r.cost|money }}</td>
   <td class="num"><b>{{ r.value|money }}</b></td>
-  <td class="num gain">—</td><td class="num">—</td>
+  {% if r.priced %}<td class="num gain"><span class="{{ r.gain|tone }}">{{ r.gain|money(True) }}</span></td><td class="num">{{ pct(r.gain_pct) }}</td>{% else %}<td class="num gain">—</td><td class="num">—</td>{% endif %}
 </tr>{% else %}{% set h = r.h %}<tr data-search="{{ (h.asset_name ~ ' ' ~ h.asset_code ~ ' ' ~ g.name ~ ' ' ~ h.account_label)|lower }}" data-horizon="{{ r.horizon }}">
   <td><a class="holding-link" href="/investments/holding/{{ h.asset_id }}?account={{ h.account_id }}&date={{ period.end_text }}&start={{ period.start_text }}" title="{{ h.asset_name }}">{{ h.short_name }}</a></td>
   <td class="num">{{ r.cost|money }}</td>

@@ -32,7 +32,7 @@ class InvestmentBreakdown:
 class LeadParts:
     """Portfolio value and what it is made of, over the same holdings, so the parts always add up (BT-12AC):
     value = cost + unrealized + valued_by_you. Cost and Unrealized gain cover the priced holdings you bought;
-    Valued by you is what has a balance and no cost or market price (a share of a flat). A holding with no
+    Valued by you is what has a balance and no cost or market price (a share of a flat with no purchase price). A holding with no
     price is in none of them, as it is not in Portfolio value."""
     value: Decimal
     cost: Decimal
@@ -111,12 +111,19 @@ def investment_breakdown(owned_rows: list[OwnedRow], position: Position, report:
                           **_owned_split(splits.get((h.account_id, h.asset_id)), units, h.quantity, unrealized)})
     for name, item in balances:
         g = groups.setdefault(name, {"name": name, "value": ZERO, "cost": ZERO, "gain": ZERO, "invested": ZERO, "rows": []})
+        # A property with a purchase price has a cost and a gain (NF-12M1); anything else known only by its
+        # balance counts at its value, with no gain.
+        paid = item.cost if item.cost is not None else item.value
+        gain = item.value - paid
         g["value"] += item.value
-        g["cost"] += item.value
-        g["invested"] += item.value  # balance-only holdings still belong in the combined return's base
+        g["cost"] += paid
+        g["gain"] += gain
+        g["invested"] += paid  # balance-only holdings still belong in the combined return's base
         g["rows"].append({"h": None, "kind": name, "balance": True, "name": item.account, "account_id": item.account_id,
                           "asset_id": item.asset_id,
-                          "value": item.value, "cost": item.value, "gain": ZERO,
+                          "value": item.value, "cost": paid, "gain": gain,
+                          "gain_pct": gain / paid * 100 if item.cost is not None and paid else None,
+                          "priced": item.cost is not None,
                           "weight": item.value / holdings_total * 100 if holdings_total else ZERO})
     for g in groups.values():
         g["rows"].sort(key=lambda r: (-(r["value"] or ZERO), (r["h"].asset_name if r["h"] else r["name"]).casefold()))
@@ -124,8 +131,9 @@ def investment_breakdown(owned_rows: list[OwnedRow], position: Position, report:
         g["gain_pct"] = g["gain"] / g["invested"] * 100 if g["invested"] else None
     holding_groups = sorted(groups.values(), key=lambda g: (-g["value"], g["name"].casefold()))
     priced = [(yours, capital) for _, yours, _, _, capital, _, _ in owned_rows if yours is not None]
+    priced += [(item.value, item.cost) for _, item in balances if item.cost is not None]  # a property you paid for
     cost = sum((capital for _, capital in priced), ZERO)
     value = sum((yours for yours, _ in priced), ZERO)
-    valued_by_you = sum((item.value for _, item in balances), ZERO)
+    valued_by_you = sum((item.value for _, item in balances if item.cost is None), ZERO)
     lead = LeadParts(value + valued_by_you, cost, value - cost, valued_by_you)
     return InvestmentBreakdown(holding_groups, horizons, balances, holdings_total, lead)

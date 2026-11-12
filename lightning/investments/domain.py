@@ -23,6 +23,13 @@ from .returns import DisplayReturn
 
 # Sale factor (percent of value a class would fetch if sold today) when none is set in Settings.
 DEFAULT_SALE_FACTOR = Decimal(95)
+# Real estate cannot be sold at short notice (NF-12M1): it counts nothing in Holdings after sale unless you set a factor.
+SLOW_TO_SELL = {"REAL_ESTATE": ZERO}
+
+
+def default_sale_factor(class_code: str) -> Decimal:
+    """The sale factor a class uses when neither it nor a parent has one set."""
+    return SLOW_TO_SELL.get(class_code, DEFAULT_SALE_FACTOR)
 
 
 @dataclass
