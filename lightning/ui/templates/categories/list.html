@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import page_header with context %}
 {% block title %}Categories{% endblock %}
-{% block heading %}{{ page_header('Categories'|tr(locale), page_status.count(category_count, '1 category for money out.', '{n} categories for money out.', 'No categories yet.')|status_text) }}{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Categories'|tr(locale), page_status.count(category_count, '1 category for money out.', '{n} categories for money out.', 'No categories yet.')) }}{% endblock %}
 {% block content %}
 
 {% set session = request.state.session_token|default('') %}

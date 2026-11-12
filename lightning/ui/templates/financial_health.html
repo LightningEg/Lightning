@@ -18,7 +18,7 @@
 {# Answers "Am I financially healthy?": four headline figures, how saving and net worth moved, then every figure
    against the limit you set (grouped as cushion, saving, then debt). Limits sit behind the gear. #}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Limits'|tr(locale), status, 'Balances as of {date} · savings rate from {month}'|tr(locale, date=as_of, month=savings_month)) }}{% endblock %}
-{% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/financial-health", period.key, month, this_month, period.start_text, period.end_text) }}{% endblock %}
+{% block period %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/financial-health", period.key, month, this_month, period.start_text, period.end_text) }}{% endblock %}
 {% block content %}
 {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}
 {% if lead %}{% set sm = savings_summary %}{% set side %}<div class="lead-side-head" id="health-over-time-heading"><div><h3>{{ fig.savings_rate.label }} {{ "over time"|tr(locale) }}</h3><p>{{ trends[0].month }} to {{ savings_month }} · {{ 'completed months'|tr(locale) }}</p></div><a class="quiet-link" href="/">{{ 'Overview'|tr(locale) }}</a></div>

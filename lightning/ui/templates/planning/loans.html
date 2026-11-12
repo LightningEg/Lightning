@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Loans · Cash planning{% endblock %}
-{% block heading %}<div><h1>{{ 'Loans'|tr(locale) }}</h1>{% set st = answer %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p></div>{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Loans'|tr(locale), answer) }}{% endblock %}
 {% block top_actions %}<a class="btn primary" data-popup-open href="/plan/items/new?kind=LOAN">{{ "Add loan"|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import kpi_row, lead_card, rate %}
