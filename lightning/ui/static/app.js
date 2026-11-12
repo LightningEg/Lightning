@@ -2502,6 +2502,12 @@ initCurrencySearch();
     const base = new URL(baseUrl, location.href);
     if (base.pathname + base.search + base.hash !== location.pathname + location.search + location.hash) window.lightningReload();
   });
+  // Opening a register row for editing reloads the page with ?edit=; keep the place instead of jumping to the top.
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest?.("a[href*='edit=']");
+    if (!link || event.defaultPrevented || event.button || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    try { if (new URL(link.href, location.href).searchParams.has("edit")) sessionStorage.setItem("lightning-popup-scroll", String(window.scrollY)); } catch (error) { /* keep the default */ }
+  });
   const savedScroll = sessionStorage.getItem("lightning-popup-scroll");
   if (savedScroll !== null) {
     sessionStorage.removeItem("lightning-popup-scroll");
