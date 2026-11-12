@@ -8,6 +8,6 @@
 <form method="post" action="/budget/rule/{{ category.id }}" class="stack">
 <input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
 <div class="field"><label for="category-limit">{{ 'Amount or %'|tr(locale) }}</label><input id="category-limit" name="rule" value="{{ rule }}" inputmode="decimal" autocomplete="off"></div>
-<p class="muted small">{{ 'An empty value clears this category’s limit.'|tr(locale) }}</p>
 <button class="btn primary">{{ 'Save limit'|tr(locale) }}</button>
-</form></section>{% endblock %}
+</form>
+<form method="post" action="/budget/rule/{{ category.id }}"><input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="rule" value=""><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn">{{ 'Stop tracking'|tr(locale) }}</button></form></section>{% endblock %}

@@ -226,6 +226,60 @@ const rankPicker = async (query, choices, kind) => {
     return choices.filter((row) => `${row.label} ${row.context || ""}`.toLocaleLowerCase().includes(query.toLocaleLowerCase())).map((row) => row.id);
   }
 };
+// The Add account form: choosing an institution sets the Type (its kind is decided in Python and sent as data) and
+// suggests the Name; a CD portfolio or gam'eya has no starting balance. In app.js, not inline, because a popup
+// inserts the form as HTML and never runs its inline scripts.
+const initAccountForm = (root = document) => {
+  const type = root.querySelector("#account_type");
+  if (!type || type.dataset.accountFormReady) return;
+  type.dataset.accountFormReady = "1";
+  const opening = root.querySelector("#opening-balance-section");
+  const openingAmount = root.querySelector("#opening_balance");
+  const syncBalance = () => {
+    if (!opening) return;
+    const isPortfolio = type.value === "DEPOSIT" || type.value === "GAMEYA";
+    if (isPortfolio && !opening.hidden && openingAmount && openingAmount.value !== "0") {
+      opening.dataset.previousValue = openingAmount.value;
+      openingAmount.value = "0";
+    } else if (!isPortfolio && opening.hidden && openingAmount && opening.dataset.previousValue) {
+      openingAmount.value = opening.dataset.previousValue;
+      delete opening.dataset.previousValue;
+    }
+    opening.hidden = isPortfolio;
+    opening.style.display = isPortfolio ? "none" : "";
+  };
+  type.addEventListener("change", syncBalance);
+  syncBalance();
+  const institution = root.querySelector("#institution");
+  const nameInput = root.querySelector("#name");
+  const currency = root.querySelector("#currency");
+  let hints = {};
+  try { hints = JSON.parse(type.dataset.institutionHints || "{}"); } catch (error) { hints = {}; }
+  const norm = (value) => (value || "").normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}_&]+/gu, " ").trim().replace(/\s+/g, " ");
+  const hintFor = (value) => hints[value] || hints[norm(value)];
+  let lastInstitution = hintFor(institution ? institution.value : "")?.name || "";
+  let suggestedName = "";
+  const applyInstitution = () => {
+    const hint = hintFor(institution.value);
+    if (!hint) { lastInstitution = ""; return; }
+    if (hint.type && hint.name !== lastInstitution && type.value !== hint.type) {
+      type.value = hint.type;
+      type.dispatchEvent(new Event("change", {bubbles: true}));
+    }
+    lastInstitution = hint.name;
+    if (nameInput && (!nameInput.value.trim() || nameInput.value === suggestedName)) {
+      suggestedName = `${hint.short} \u00b7 ${currency ? currency.value : ""}`;
+      nameInput.value = suggestedName;
+    }
+  };
+  if (institution) {
+    institution.addEventListener("change", applyInstitution);
+    institution.addEventListener("input", applyInstitution);
+  }
+  if (currency) currency.addEventListener("change", () => {
+    if (nameInput && suggestedName && nameInput.value === suggestedName) applyInstitution();
+  });
+};
 let ownPickerId = 0;
 const initOwnDataPickers = (root = document) => {
   const find = (selector) => [
@@ -324,7 +378,13 @@ const initOwnDataPickers = (root = document) => {
       button.addEventListener("click", () => choose(option));
       list.append(button);
     });
-    if (!matches.length) { close(); return; }
+    // data-add-href / data-add-label: the list's own way to add what is missing (a currency), never a sentence under it.
+    if (select.dataset.addHref) {
+      const add = document.createElement("a"); add.className = "counterparty-option picker-add"; add.setAttribute("role", "option");
+      add.href = select.dataset.addHref; add.textContent = t(select.dataset.addLabel || "+ Add");
+      list.append(add);
+    }
+    if (!matches.length && !select.dataset.addHref) { close(); return; }
     list.hidden = false; place(); input.setAttribute("aria-expanded", "true"); active = -1;
   };
   input.value = shown();
@@ -495,6 +555,7 @@ find("input[data-own-suggestions][list]").forEach((input) => {
   });
 };
 initOwnDataPickers();
+initAccountForm();
 
 // A small page jump replaces a sticky header while reading a long register. It stays out of the way: hidden
 // until the pointer nears the bottom-right corner (bottom-left in Arabic) or the page is being scrolled, and gone
@@ -584,7 +645,7 @@ window.askChoice = ({ title, message = "", choices }) => new Promise((resolve) =
   const dialog = document.createElement("dialog");
   dialog.className = "ask-dialog tone-info";
   dialog.setAttribute("aria-labelledby", "ask-title");
-  dialog.innerHTML = '<form method="dialog" class="ask-frame"><div class="ask-text"><h2 id="ask-title"></h2><p id="ask-message"></p></div><div class="ask-actions"></div></form>';
+  dialog.innerHTML = '<form method="dialog" class="ask-frame ask-frame-plain"><div class="ask-text"><h2 id="ask-title"></h2><p id="ask-message"></p></div><div class="ask-actions"></div></form>';
   dialog.querySelector("h2").textContent = title;
   dialog.querySelector("p").textContent = message;
   if (!message) dialog.querySelector("p").remove();
@@ -1092,7 +1153,8 @@ if (ledger) {
       if (asking) return;
       asking = true;
       const submitter = event.submitter;
-      const singleRowChanged = value("amount") !== String(original.amount ?? "").trim()
+      const num = (text) => { const n = Number(String(text ?? "").replace(/[^\d.\-]/g, "")); return Number.isFinite(n) ? n : String(text ?? "").trim(); };
+      const singleRowChanged = num(value("amount")) !== num(original.amount)
         || (editForm.elements.account_id && value("account_id") !== String(original.account_id ?? ""));
       window.askChoice({
         title: t("Change {count} selected rows?", {count: ids.length}),
@@ -1614,8 +1676,8 @@ const initTradeCatalogue = () => {
       positionHint.textContent = exceeds
         ? t("You have {owned} {unit}(s); you cannot sell {quantity}.", {owned: formatted(owned, selected.decimals), unit: selected.unit, quantity: formatted(Math.abs(qty), selected.decimals)})
         : t("You hold {quantity} {unit}(s) here.", {quantity: formatted(owned, selected.decimals), unit: selected.unit});
-    } else if (selected) {
-      positionHint.textContent = t("You hold {quantity} {unit}(s) here.", {quantity: formatted(Number(selected.holding || 0), selected.decimals), unit: selected.unit});
+    } else if (selected && selected.note) {
+      positionHint.textContent = "";
     }
     if (selected && selected.note) positionHint.textContent += ` ${t(selected.note)}`;
     // The live "You pay …" line (display only; the posted amounts are recomputed in Python).
@@ -1662,7 +1724,7 @@ const initTradeCatalogue = () => {
       button.append(name, ticker);
       const choose = () => {
         selected = item; selectedKey.value = item.key;
-        selectedLabel.value = `${item.name} · ${item.ticker}${item.exchange ? ` · ${item.exchange}` : ""}`;
+        selectedLabel.value = item.name;
         search.value = selectedLabel.value;
         results.hidden = true; search.setAttribute("aria-expanded", "false"); sync();
       };
@@ -1717,7 +1779,7 @@ const initTradeCatalogue = () => {
       results.hidden = true; search.setAttribute("aria-expanded", "false");
     }
   });
-  if (selected) { search.value = selectedLabel.value || `${selected.name} · ${selected.ticker}${selected.exchange ? ` · ${selected.exchange}` : ""}`; }
+  if (selected) { search.value = selectedLabel.value || selected.name; }
   sync();
 };
 initTradeCatalogue();
@@ -2184,19 +2246,7 @@ initCurrencySearch();
   };
   const initPopupFields = () => {
     initDateFields(content);
-    const type = content.querySelector("#account_type"), help = content.querySelector("#account-type-help");
-    if (type && help && !type.dataset.popupReady) {
-      type.dataset.popupReady = "1";
-      const update = () => {
-        help.textContent = type.value === "DEPOSIT"
-          ? "Certificate or time deposit: include the term, annual return, and maturity date in Notes."
-          : type.value === "GAMEYA" ? "A gam'eya holds one savings circle's cash. After you add it, enter its terms."
-          : type.value === "PHYSICAL_ASSET" ? "Add named items such as a ring after creating this account."
-          : type.value === "BROKERAGE" ? "Record brokerage cash here before buying investments."
-          : "";
-      };
-      type.addEventListener("change", update); update();
-    }
+    initAccountForm(content);
     content.querySelectorAll("[data-karat-reference]").forEach((select) => {
       if (select.dataset.popupKaratReady) return;
       select.dataset.popupKaratReady = "1";
@@ -2451,6 +2501,12 @@ initCurrencySearch();
     close(false, true);
     const base = new URL(baseUrl, location.href);
     if (base.pathname + base.search + base.hash !== location.pathname + location.search + location.hash) window.lightningReload();
+  });
+  // Opening a register row for editing reloads the page with ?edit=; keep the place instead of jumping to the top.
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest?.("a[href*='edit=']");
+    if (!link || event.defaultPrevented || event.button || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    try { if (new URL(link.href, location.href).searchParams.has("edit")) sessionStorage.setItem("lightning-popup-scroll", String(window.scrollY)); } catch (error) { /* keep the default */ }
   });
   const savedScroll = sessionStorage.getItem("lightning-popup-scroll");
   if (savedScroll !== null) {
