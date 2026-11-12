@@ -1,0 +1,8 @@
+{# IV-12Y3 · The PC page header (A05), one for every tab: the title block, the section's tabs, then the controls in one
+   order at the right: the period control, Undo, the page's action and its ⋯, the tab's gear. When the width cannot
+   hold one row, the controls move to a second row, still at the right; never any other arrangement. Blocks come from
+   base.html (header_heading, header_section_tabs, header_period, header_actions). #}
+{% from "partials/gear.html" import gear_link with context %}
+{% set here = sections_for(request) %}{% set path_parts = request.url.path.split('/') %}
+{% set individual_account = request.url.path.startswith('/accounts/') and path_parts|length == 3 and path_parts[2].isdigit() %}
+<div class="topbar">{% set back = back_url(request) %}{% if back %}<a class="btn page-back" href="{{ back }}" aria-label="Back to the page you came from"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>{{ 'Back'|tr(locale) }}</a>{% endif %}<div class="topbar-main">{{ header_heading }}</div>{{ header_section_tabs }}<div class="actions page-controls">{{ header_period }}{% include "partials/history.html" %}{{ header_actions }}{% if here.section and here.tab and here.tab.gear and not individual_account %}{{ gear_link(here.tab) }}{% endif %}</div></div>

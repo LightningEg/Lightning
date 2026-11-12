@@ -16,7 +16,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r13 | [Store and community: unlocking themes, the market, rewards and staying in Lightning](10-looks-and-store/r13-store-and-community/report.md) | 2026-10-27 | research | 10C |
 | r14 | [Users' main questions: what each screen must answer, with known gaps](3-polish-and-arabic/r14-users-main-questions/report.md) | 2026-10-27 | reference | none |
 | r17 | [Audit 10: the phone, tab by tab - quick actions and the answer first](11-phone-ux/r17-phone-tab-audit/report.md) | 2026-10-29 | audit | none |
-| r19 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](12-desktop-ux/r19-desktop-tab-audit/report.md) | 2026-10-30 | audit | 12Q |
+| r19 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](12-desktop-ux/r19-desktop-tab-audit/report.md) | 2026-10-30 | audit | none |
 | r20 | [Audit 13: the phone for quick jobs - convenience, taps and the look](11-phone-ux/r20-phone-convenience-audit/report.md) | 2026-11-01 | audit | none |
 | r22 | [Code audit: refactoring, loose ends and smart features](9-later/r22-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B |
 | r23 | [CSV import stress test: where it breaks and how to rebuild it](7-planning-import-and-search/r23-csv-import-stress/report.md) | 2026-11-05 | audit | none |
@@ -28,10 +28,10 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r29 | [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](11-phone-ux/r29-google-play-readiness/report.md) | 2026-11-09 | audit | 3BK |
 | r30 | [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](12-desktop-ux/r30-investments-beyond-stocks/report.md) | 2026-11-09 | audit | 12J, 6D |
 | r31 | [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](7-planning-import-and-search/r31-logging-entries/report.md) | 2026-11-09 | audit | none |
-| r32 | [Audit 18: Budget and Cash planning, every tab and sub-page](12-desktop-ux/r32-budget-and-cash-planning/report.md) | 2026-11-09 | audit | 12Q |
+| r32 | [Audit 18: Budget and Cash planning, every tab and sub-page](12-desktop-ux/r32-budget-and-cash-planning/report.md) | 2026-11-09 | audit | none |
 | r33 | [Code review: what is slow, loose, complicated or cut off from the rest](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md) | 2026-11-09 | audit | none |
 | r34 | [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](12-desktop-ux/r34-accounts-and-transactions/report.md) | 2026-11-10 | audit | none |
-| r35 | [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](12-desktop-ux/r35-ux-against-users-questions/report.md) | 2026-11-09 | audit | 12Y, 12AB, 3BH |
+| r35 | [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](12-desktop-ux/r35-ux-against-users-questions/report.md) | 2026-11-09 | audit | 12AB, 3BH |
 | r36 | [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](11-phone-ux/r36-figures-one-owner/report.md) | 2026-11-09 | audit | none |
 
 

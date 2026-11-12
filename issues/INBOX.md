@@ -9,5 +9,5 @@ Things seen, not yet planned. One line each: date, pillar, what and where (a pag
 - Lines older than 30 days that nobody picked are deleted in the next plan sweep.
 
 ## Lines
-- **C2 (from IV-3AM, 2026-11-12):** Cash planning's *What you owe* card stands alone in its row with one loan; pair it or make it a row when IV-12Q gives Cash planning its page pattern. Report: r19 C2.
+- **C2 (from IV-3AM, 2026-11-12):** Cash planning's *What you owe* card stands alone in its row with one loan; pair it or make it a row (IV-12Q gave the unfinished Budget and Cash pages their pattern but left this page alone). Report: r19 C2.
 - **Rose on dark cards (from NF-10C3, 2026-11-12):** the app's rose `#C93D72` (`--rose`, `--neg`) reads about 3.8:1 on every dark theme card; give it a `--theme-rose` the way `--theme-positive` and `--theme-held` are made in `tools/build_themes.py`.

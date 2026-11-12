@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "planning/_macros.html" import status %}
 {% block title %}Recurring · Cash planning{% endblock %}
-{% block heading %}<div><h1>{{ 'Recurring'|tr(locale) }}</h1>{% set st = answer %}<p class="page-status">{{ st.text|tr(locale, **st['values']) }}</p></div>{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Recurring'|tr(locale), answer) }}{% endblock %}
 {% block top_actions %}<a class="btn primary" data-popup-open href="/plan/items/new?kind=BILL">{{ 'Add recurring item'|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import kpi_row %}
@@ -15,24 +15,14 @@
   {% else %}<a class="btn" href="/plan/reserves">{{ "Review reserves"|tr(locale) }}</a>{% endif %}</div>
 </section>
 {% endif %}{% endfor %}
-<section class="plan-section" aria-labelledby="recurring-totals">
-  <header class="overview-section-head"><h2 id="recurring-totals">{{ 'Every month'|tr(locale) }}</h2></header>
-  <article class="card">
-    <div class="section-head"><div><h2>{{ 'Bills and subscriptions'|tr(locale) }}</h2></div></div>
-    {% if not recurring_kpis %}<div class="plan-figure plan-figure-small">{{ monthly_out|money(False, 0) }} <small>{{ base }} a month</small></div>{% endif %}{% if not recurring_kpis and fixed_tiles|length == 1 and fixed_tiles[0].value is not none %}<p class="muted small"><b>{{ '%.1f'|format(fixed_tiles[0].value) }}%</b> {{ fixed_tiles[0].label }} · {{ fixed_tiles[0].sub }}</p>{% endif %}
-    {% if subscriptions_per_year and not recurring_kpis %}<p class="muted small">Subscriptions come to {{ subscriptions_per_year|money(places=0) }} a year.</p>{% endif %}
-    {% from "partials/charts.html" import bars %}{{ bars(bill_bars, 'spend', 'No bills or subscriptions yet.') }}
-  </article>
-</section>
-
 <section class="plan-section" aria-labelledby="recurring-list">
-  <header class="overview-section-head"><h2 id="recurring-list">{{ 'Recurring items'|tr(locale) }}</h2><span>{{ rows|length }} active</span></header>
+  <header class="overview-section-head"><h2 id="recurring-list">{{ 'Recurring items'|tr(locale) }}</h2><span>{{ '{n} active'|tr(locale, n=rows|length) }}</span></header>
   <article class="card">
     {% if rows %}<div class="compact-list">{% for r in rows %}{% set i = r.item %}
       <div class="compact-row plan-item-row">
-        <span><a href="/plan/items/{{ i.id }}/sheet?back=%2Fplan%2Frecurring" data-popup-open><b>{{ i.name }}</b></a><small class="muted">{{ i.kind_label|tr(locale) }} · {{ r.schedule }}{% if r.category %} · {{ r.category }}{% endif %}{% if r.account %} · {{ r.account }}{% endif %}{% if r.bill_reserve %} · {{ "Saved for this bill: {amount} {currency} in {name}."|tr(locale, amount=r.bill_reserve.effective_allocated|money(places=0), currency=base, name=r.bill_reserve.name) }}{% endif %}</small></span>
+        <span><a href="/plan/items/{{ i.id }}/sheet?back=%2Fplan%2Frecurring" data-popup-open><b>{{ i.name }}</b></a><small class="muted">{{ i.kind_label|tr(locale) }} · {{ r.schedule }}{% if r.category %} · {{ r.category }}{% endif %}{% if r.account %} · {{ r.account }}{% endif %}{% if r.bill_reserve %} · {{ "Saved for this bill: {amount} {currency} in {name}."|tr(locale, amount=r.bill_reserve.effective_allocated|money(places=0), currency=base, name=r.bill_reserve.name) }}{% endif %}</small>{# IV-12Q4: the one list carries the bars #}<span class="row-share{{ ' is-in' if i.is_income }}" title="{{ 'About {amount} a month'|tr(locale, amount=r.a_month|money(places=0)) }}"><i style="width:{{ '%.1f'|format([r.share|default(0), 1]|max) }}%"></i></span></span>
         <span class="plan-payment-side">
-          {% if r.due %}<a class="plan-status plan-status-due" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ r.due[0].due_date }}&amp;back=%2Fplan%2Frecurring">{{ r.due|length }} due</a>{% elif r.next %}<small class="muted">Next {{ r.next.due_date }}</small>{% if r.review_next %} <a class="small" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ r.next.due_date }}&amp;back=%2Fplan%2Frecurring">{{ "Possible early/changed payment — review"|tr(locale) }}</a>{% endif %}{% else %}<small class="muted">{{ 'No more payments'|tr(locale) }}</small>{% endif %}{% for p in r.skipped %} <a class="muted small" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ p.due_date }}&amp;back=%2Fplan%2Frecurring">Skipped {{ p.due_date }} · undo</a>{% endfor %}
+          {% if r.due %}<a class="plan-status plan-status-due" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ r.due[0].due_date }}&amp;back=%2Fplan%2Frecurring">{{ '{n} due'|tr(locale, n=r.due|length) }}</a>{% elif r.next %}<small class="muted">{{ 'Next {date}'|tr(locale, date=r.next.due_date) }}</small>{% if r.review_next %} <a class="small" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ r.next.due_date }}&amp;back=%2Fplan%2Frecurring">{{ "Possible early/changed payment — review"|tr(locale) }}</a>{% endif %}{% else %}<small class="muted">{{ 'No more payments'|tr(locale) }}</small>{% endif %}{% for p in r.skipped %} <a class="muted small" data-popup-open href="/plan/items/{{ i.id }}/pay?due={{ p.due_date }}&amp;back=%2Fplan%2Frecurring">Skipped {{ p.due_date }} · undo</a>{% endfor %}
           <b class="{{ 'pos' if i.is_income }}">{{ '+' if i.is_income else '−' }}{{ i.amount|money }}</b>
         </span>
       </div>{% endfor %}</div>

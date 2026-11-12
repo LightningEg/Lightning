@@ -3,7 +3,7 @@
 {# Zakat (Architecture › Zakat): your zakat first, then what counts. An estimate by the common rule, said once at the
    foot. Every figure comes from ZakatService.assess; the settings sit behind the tab's gear. #}
 {% macro amount(value) %}{{ value|money }} <small>{{ base }}</small>{% endmacro %}
-{% block heading %}<h1>{{ 'Zakat'|tr(locale) }}</h1><p class="muted">{{ 'As of {date}'|tr(locale, date=a.as_of) }}{% if a.zakat_day %} · {{ 'zakat day {date}'|tr(locale, date=a.zakat_day) }}{% endif %}</p>{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Zakat'|tr(locale), none, 'As of {date}'|tr(locale, date=a.as_of), ('zakat day {date}'|tr(locale, date=a.zakat_day)) if a.zakat_day else '') }}{% endblock %}
 {% block top_actions %}{% if payment_link %}<a class="btn" href="{{ payment_link }}" data-popup-open>{{ 'Record payment'|tr(locale) }}</a>{% endif %}{% endblock %}
 {% block content %}
 {% if not a.zakat_day %}

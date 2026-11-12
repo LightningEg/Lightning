@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Overview{% endblock %}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Overview'|tr(locale), status, date_from ~ ' to ' ~ date_to, dates_note) }}{% endblock %}
-{% block top_actions %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}{% endblock %}
+{% block period %}{% from "partials/macros.html" import period_control with context %}{{ period_control("/", period.key, month, this_month, request.query_params.get("date_from", "") if period_error and period.key == "custom" else period.start_text, request.query_params.get("date_to", "") if period_error and period.key == "custom" else period.end_text) }}{% endblock %}
 {% block content %}
 {% from "partials/charts.html" import stat_tiles, kpi_row, donut, trend, waterfall, column_waterfall, sankey, day_calendar, saved_split, month_calendar as month_cal %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
