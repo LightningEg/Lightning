@@ -382,3 +382,11 @@ def test_phone_answering_motions_are_the_phones_own():
     assert 'if (reopening || getComputedStyle(dialog).display === "none") content.replaceChildren();' in app
     gestures = (ROOT / 'lightning/ui/static/phone-gestures.js').read_text()
     assert 'if (dialog && dialog.open) frame.style.transform = "";' in gestures
+
+
+def test_the_phone_draws_no_ground_artwork():
+    """Owner, 2026-11-12: on the phone a theme's drawing lives in the hero band only; the ground keeps its texture."""
+    materials = (ROOT / 'lightning/ui/static/theme-materials.css').read_text()
+    assert 'html.phone[data-m-ground-artwork]:not(#_) body::after { content: none; }' in materials
+    assert materials.count('html.phone[data-m-ground-artwork') == 1
+    assert '.phone-hero::before' in materials  # the band that carries the hero's drawing
