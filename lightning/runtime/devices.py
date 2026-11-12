@@ -86,6 +86,7 @@ class Devices:
         self.gate = None         # its SessionGate
         self.loop = None         # the app's event loop, set at startup
         self.server = None
+        self.nearby = None         # answers "is a phone pairing?" while a pairing screen is open (NF-4M)
         self.desk = None
         self._lock = threading.RLock()
         self._nodes: dict[Path, HomeNode] = {}
@@ -261,6 +262,23 @@ class Devices:
             self.server = HomeServer(self.identity(), self.home_nodes, self.desk, host=self.host, port=self.port,
                                      on_authenticated=self._finish_arrival,
                                      arriving=lambda node: not node.live.exists()).start()
+            self._start_nearby()
+
+    def pairing_open(self):
+        """(phone name, TLS port, "pair" or "move") while a pairing screen is open; None otherwise."""
+        import time as _time
+        pending = self.desk.pending if self.desk is not None else None
+        if self.server is None or pending is None or pending.paired_name or _time.monotonic() >= pending.expires:
+            return None
+        return pending.home_name, self.server.port, "move" if pending.node is None else "pair"
+
+    def _start_nearby(self) -> None:
+        from lightning.sync.nearby import NEARBY_PORT, NearbyResponder
+        try:
+            self.nearby = NearbyResponder(self.pairing_open, host=self.host,
+                                          port=0 if self.port == 0 else NEARBY_PORT).start()
+        except OSError:
+            self.nearby = None  # the port is busy: the PC can still type the address
 
     def _finish_arrival(self, node: HomeNode) -> None:
         """The PC that moved this ledger here connected as its borrower: it kept its copy read only, so the
@@ -289,6 +307,9 @@ class Devices:
             if self.server is not None:
                 self.server.stop()
                 self.server = None
+            if self.nearby is not None:
+                self.nearby.stop()
+                self.nearby = None
 
     def address(self) -> str:
         port = self.server.port if self.server is not None else self.port

@@ -3235,3 +3235,13 @@ document.querySelectorAll("[data-unrequires]").forEach((box) => {
   box.addEventListener("change", apply);
   if (box.checked) apply();
 });
+
+// A screen that waits for another device (the phone's two pairing digits, NF-4M) shows its news without a tap: it
+// reloads every few seconds while it is visible, and never while the person is typing in it.
+document.querySelectorAll("[data-refresh-seconds]").forEach((node) => {
+  const seconds = Math.max(2, Number(node.dataset.refreshSeconds) || 3);
+  window.setInterval(() => {
+    const typing = document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+    if (document.visibilityState === "visible" && !typing) window.location.reload();
+  }, seconds * 1000);
+});

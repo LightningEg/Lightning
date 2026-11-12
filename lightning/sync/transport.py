@@ -6,9 +6,10 @@ challenge; a paired PC answers with `Authenticate`, its signature over the chall
 sees, so a relay or a replayed answer fails. Then one request, one answer (plus the ledger bytes after
 `Checkpoint` or `ReturnBegin`), and the connection closes.
 
-Pairing is the one request without a signature: the PC proves it knows the code shown on the phone, bound to
-the certificate it sees (`identity.transcript`), and the phone proves the same back before the PC trusts the
-data key in its reply. Both screens show six check digits from the same transcript.
+Pairing is the one request without a signature: the phone shows two digits and the PC proves it has them, bit by
+bit, in passkey-entry rounds bound to the certificate it sees (`identity.transcript`, `passkey`); the phone proves
+the same back, and its reply is sealed with the key both sides then share, before the PC trusts the data key in it.
+A failed or broken try gives the phone new digits.
 
 Bounded everywhere: 16 KB per message, the declared file size, 30 s per read, four connections at once.
 Nothing about the ledger is logged.
@@ -29,8 +30,9 @@ from .domain import (MAX_MESSAGE_BYTES, Accepted, Authenticate, BorrowActivated,
                      BorrowRequest, Cancelled, Checkpoint, Error, Hello, Message, MoveBegin, MoveDone, PairReply,
                      PairRequest, Prefetch,
                      Received, ReturnBegin, ReturnStatus, Status, StatusReply, decode_message, encode_message)
-from .identity import (DEFAULT_PORT, DeviceIdentity, check_digits, new_pairing_code, normalize_code, proof,
-                       show_code, transcript, verify_signature)
+from .identity import DEFAULT_PORT, DeviceIdentity, transcript, verify_signature
+from .passkey import (V2_MARKER, PasskeyMismatch, new_passkey, normalize_passkey, run_initiator, run_responder,
+                      seal)
 from .service import HomeNode, LinkDown, copy_stream
 from .state import ProtocolError
 
@@ -38,7 +40,7 @@ TIMEOUT = 30
 FIRST_TIMEOUT = 5        # seconds to finish the handshake and say who it is (review S1)
 MAX_CONNECTIONS = 16
 MAX_PER_ADDRESS = 4      # one device on the Wi-Fi cannot take every slot (review S1)
-PAIRING_TOTAL = 20       # wrong codes from all devices before the code closes (review S2)
+PAIRING_TOTAL = 20       # failed tries from all devices before pairing closes (review S2)
 PAIRING_MINUTES = 10
 PAIRING_TRIES = 3
 
@@ -106,20 +108,20 @@ def _send_file(stream, source: BinaryIO, size: int) -> None:
 @dataclass
 class PendingPairing:
     node: HomeNode | None      # None while the phone waits for a PC to move a profile here
-    code: str
+    code: str                  # the two digits the phone shows; new ones after every failed try
     home_name: str
     profile_name: str
     expires: float
-    tries: int = 0             # wrong codes from every address
-    misses: dict = field(default_factory=dict)  # wrong codes per address: three, then that address is refused
-    busy: bool = False         # a move is being received
+    tries: int = 0             # failed tries from every address
+    misses: dict = field(default_factory=dict)  # failed tries per address: three, then that address is refused
+    busy: bool = False         # a try is under way (the rounds, or a move's file arriving)
     paired_name: str = ""      # set when a PC paired: what the phone shows
     digits: str = ""
     receive: Callable | None = None  # for a move: stores the ledger, returns (home_id, lineage_id)
 
 
 class PairingDesk:
-    """At most one open pairing on the phone, for ten minutes, three wrong codes at most, used once."""
+    """At most one open pairing on the phone, for ten minutes, one try at a time, three failed tries per PC, used once."""
 
     def __init__(self):
         self.pending: PendingPairing | None = None
@@ -127,14 +129,14 @@ class PairingDesk:
 
     def open(self, node: HomeNode, *, home_name: str, profile_name: str) -> PendingPairing:
         with self._lock:
-            self.pending = PendingPairing(node, new_pairing_code(), home_name, profile_name,
+            self.pending = PendingPairing(node, new_passkey(), home_name, profile_name,
                                           time.monotonic() + PAIRING_MINUTES * 60)
             return self.pending
 
     def open_move(self, receive: Callable, *, home_name: str) -> PendingPairing:
         """Wait for a PC to move one of its profiles here (task 17). `receive(message, source)` keeps it."""
         with self._lock:
-            self.pending = PendingPairing(None, new_pairing_code(), home_name, "",
+            self.pending = PendingPairing(None, new_passkey(), home_name, "",
                                           time.monotonic() + PAIRING_MINUTES * 60, receive=receive)
             return self.pending
 
@@ -142,70 +144,91 @@ class PairingDesk:
         with self._lock:
             self.pending = None
 
-    def _check_code(self, pending: PendingPairing | None, proof_sent: str, role: str, data: bytes,
-                    address: str = "") -> PendingPairing:
-        if pending is None or pending.paired_name or pending.busy or time.monotonic() >= pending.expires:
-            raise ProtocolError("PAIRING_FAILED", "Open the phone's code screen again and use the code it shows.")
+    def _begin(self, pending: PendingPairing | None, marker: str, address: str = "") -> str:
+        """Under the lock: may this PC try now? Returns the digits for this try and marks the desk busy."""
+        if marker != V2_MARKER:
+            raise ProtocolError("PAIRING_FAILED", "Update Lightning on this PC to the phone's version, then pair again.")
+        if pending is None or pending.paired_name or time.monotonic() >= pending.expires:
+            raise ProtocolError("PAIRING_FAILED", "Open Pair a PC on the phone again and type the digits it shows.")
+        if pending.busy:
+            raise ProtocolError("PAIRING_FAILED", "The phone is pairing another device. Try again in a moment.")
         if pending.misses.get(address, 0) >= PAIRING_TRIES:
-            raise ProtocolError("PAIRING_FAILED", "Three wrong codes from this PC. Open the code screen on the phone "
-                                "again for a new code.")
-        if not secrets.compare_digest(proof(pending.code, role, data), proof_sent):
-            self._wrong(pending, address)
-            raise ProtocolError("PAIRING_FAILED", "That code is not the one on the phone.")
-        return pending
+            raise ProtocolError("PAIRING_FAILED", "Three tries from this PC did not match. Open Pair a PC on the "
+                                "phone again.")
+        pending.busy = True
+        return pending.code
+
+    def _rounds(self, pending: PendingPairing, passkey: str, data: bytes, send, receive, address: str) -> bytes:
+        """The passkey-entry rounds, without the lock. Any failure, a wrong bit or a dropped link, counts as a
+        failed try and gives the phone new digits, so nothing a failed try revealed is ever used again."""
+        try:
+            return run_responder(send, receive, passkey, data)
+        except BaseException as error:
+            with self._lock:
+                pending.busy = False
+                self._wrong(pending, address)
+            if isinstance(error, PasskeyMismatch):
+                raise ProtocolError("PAIRING_FAILED", "Those digits are not the ones on the phone. The phone now "
+                                    "shows new digits: type those.") from None
+            raise
 
     def _wrong(self, pending: PendingPairing, address: str) -> None:
-        """Wrong codes count per address, so another device on the Wi-Fi cannot close the owner's code."""
+        """Failed tries count per address, so another device on the Wi-Fi cannot close the owner's pairing."""
         pending.misses[address] = pending.misses.get(address, 0) + 1
         pending.tries += 1
-        if pending.tries >= PAIRING_TOTAL:
+        pending.code = new_passkey()
+        if pending.tries >= PAIRING_TOTAL and self.pending is pending:
             self.pending = None
 
-    def handle_move(self, request: MoveBegin, home_fingerprint: str, source, address: str = "") -> MoveDone:
-        """Check the code against the file's hash, keep the ledger, and answer with this phone as its home. The
-        desk is not held while the file arrives (review S3)."""
+    def handle_move(self, request: MoveBegin, home_fingerprint: str, source, address: str = "", *,
+                    send: Callable = lambda message: None, receive: Callable = lambda: None) -> MoveDone:
+        """Prove the digits, keep the ledger, and answer with this phone as its home. The desk is not held while the
+        rounds run or the file arrives (review S3)."""
         with self._lock:
             pending = self.pending
             if pending is not None and pending.receive is None:
                 raise ProtocolError("PAIRING_FAILED", "The phone is pairing a PC, not waiting for a profile. On the "
                                     "phone, choose Bring a profile from your PC.")
-            data = move_transcript(request, home_fingerprint)
-            pending = self._check_code(pending, request.proof, "pc-move", data, address)
-            pending.busy = True
+            passkey = self._begin(pending, request.proof, address)
+        data = move_transcript(request, home_fingerprint)
+        key = self._rounds(pending, passkey, data, send, receive, address)
         try:
             home_id, lineage_id = pending.receive(request, source)
         finally:
             pending.busy = False
         with self._lock:
-            pending.paired_name, pending.profile_name = request.device_name, request.profile_name
-            pending.digits = check_digits(data)
+            pending.paired_name, pending.profile_name, pending.digits = request.device_name, request.profile_name, passkey
             done_data = data + f"\n{home_id}\n{lineage_id}".encode("ascii")
-            return MoveDone(request.pairing_id, home_id, pending.home_name, lineage_id,
-                            proof(pending.code, "phone-move", done_data))
+            return MoveDone(request.pairing_id, home_id, pending.home_name, lineage_id, seal(key, "phone-move", done_data))
 
-    def handle(self, request: PairRequest, home_fingerprint: str, address: str = "") -> PairReply:
+    def handle(self, request: PairRequest, home_fingerprint: str, address: str = "", *,
+               send: Callable = lambda message: None, receive: Callable = lambda: None) -> PairReply:
         from .control import Peer
         with self._lock:
             pending = self.pending
             if pending is not None and pending.node is None:
                 raise ProtocolError("PAIRING_FAILED", "The phone is waiting for a profile to move to it, not to pair. "
                                     "On the PC, unlock that profile and choose Profile settings, Move to your phone.")
-            if pending is None or pending.paired_name or time.monotonic() >= pending.expires:
-                raise ProtocolError("PAIRING_FAILED", "Open Pair a PC on the phone and use the code it shows.")
-            data = transcript(request.pairing_id, home_fingerprint, request.device_id, request.public_key)
-            pending = self._check_code(pending, request.proof, "pc", data, address)
-            key = pending.node.bridge.key()
-            if key is None:
+            if pending is not None and pending.node.bridge.key() is None:
                 raise ProtocolError("UNLOCK_NEEDED", "Unlock Lightning on your phone.")
+            passkey = self._begin(pending, request.proof, address)
+        data = transcript(request.pairing_id, home_fingerprint, request.device_id, request.public_key)
+        key = self._rounds(pending, passkey, data, send, receive, address)
+        with self._lock:
+            pending.busy = False
+            if self.pending is not pending or pending.paired_name:
+                raise ProtocolError("PAIRING_FAILED", "Open Pair a PC on the phone again and type the digits it shows.")
             node = pending.node
+            if node.bridge.key() is None:
+                raise ProtocolError("UNLOCK_NEEDED", "Unlock Lightning on your phone.")
             node.pair(Peer(request.device_id, request.device_name, request.public_key, "", ""))
             home = node.model
-            pending.paired_name, pending.digits = request.device_name, check_digits(data)
+            pending.paired_name, pending.digits = request.device_name, passkey
             key_file = (node.live.parent / "keys.json").read_text(encoding="utf-8")
             reply_data = data + f"\n{home.profile_id}\n{_digest(key_file)}".encode("ascii")
             return PairReply(request.pairing_id, home.profile_id, pending.profile_name, home.home_id,
                              pending.home_name, home.lineage_id, key_file, home.compatibility.key_id,
-                             proof(pending.code, "phone", reply_data))
+                             seal(key, "phone", reply_data))
 
 
 class HomeServer:
@@ -334,12 +357,13 @@ class HomeServer:
         send_message(stream, Hello(nonce))
         first = receive_message(stream)
         stream.settimeout(TIMEOUT)
+        rounds = dict(send=lambda message: send_message(stream, message), receive=lambda: receive_message(stream))
         if isinstance(first, PairRequest):
-            send_message(stream, self.desk.handle(first, self.identity.fingerprint, address))
+            send_message(stream, self.desk.handle(first, self.identity.fingerprint, address, **rounds))
             return
         if isinstance(first, MoveBegin):
             send_message(stream, self.desk.handle_move(first, self.identity.fingerprint, _SocketFile(stream),
-                                                       address))
+                                                       address, **rounds))
             return
         if not isinstance(first, Authenticate):
             raise ProtocolError("UNAUTHORIZED", "Pair this PC first.")
@@ -422,10 +446,24 @@ class Paired:
     digits: str
 
 
+def _passkey_rounds(stream, passkey: str, data: bytes) -> bytes:
+    """The PC's side of the rounds; the phone's refusal (an Error) reads as itself."""
+    def receive():
+        message = receive_message(stream)
+        if isinstance(message, Error):
+            raise ProtocolError(message.code, message.message)
+        return message
+    try:
+        return run_initiator(lambda message: send_message(stream, message), receive, passkey, data)
+    except PasskeyMismatch:
+        raise ProtocolError("PAIRING_FAILED", "Those digits are not the ones on the phone. The phone now shows new "
+                            "digits: type those.") from None
+
+
 def pair(endpoint: str, code: str, identity: DeviceIdentity) -> Paired:
-    """Pair this PC with the phone that shows `code`. The data key in the reply is trusted only after the
-    phone proved it knows the same code for the same certificate."""
-    code = normalize_code(code)
+    """Pair this PC with the phone that shows the two digits `code`. The data key in the reply is trusted only
+    after every round proved both sides hold the same digits for the same certificate."""
+    code = normalize_passkey(code)
     stream = _open(endpoint)
     try:
         fingerprint = hashlib.sha256(stream.getpeercert(binary_form=True)).hexdigest()
@@ -433,17 +471,17 @@ def pair(endpoint: str, code: str, identity: DeviceIdentity) -> Paired:
         import uuid
         pairing_id = str(uuid.uuid4())
         data = transcript(pairing_id, fingerprint, identity.device_id, identity.public_key)
-        send_message(stream, PairRequest(pairing_id, identity.device_id, identity.name, identity.public_key,
-                                         proof(code, "pc", data)))
+        send_message(stream, PairRequest(pairing_id, identity.device_id, identity.name, identity.public_key, V2_MARKER))
+        key = _passkey_rounds(stream, code, data)
         reply = _answer(stream, PairReply)
     except (OSError, ConnectionError) as exc:
-        raise LinkDown("The connection to the phone dropped. Try again.") from exc
+        raise LinkDown("The connection to the phone dropped. Try again with the digits it shows.") from exc
     finally:
         stream.close()
     reply_data = data + f"\n{reply.profile_id}\n{_digest(reply.key_file)}".encode("ascii")
-    if reply.pairing_id != pairing_id or not secrets.compare_digest(proof(code, "phone", reply_data), reply.proof):
-        raise ProtocolError("PAIRING_FAILED", "The device that answered is not the phone showing this code.")
-    return Paired(reply, fingerprint, check_digits(data))
+    if reply.pairing_id != pairing_id or not secrets.compare_digest(seal(key, "phone", reply_data), reply.proof):
+        raise ProtocolError("PAIRING_FAILED", "The device that answered is not the phone showing these digits.")
+    return Paired(reply, fingerprint, code)
 
 
 @dataclass(frozen=True)
@@ -455,23 +493,22 @@ class Moved:
 
 def move_profile(endpoint: str, code: str, identity: DeviceIdentity, *, profile_id: str, profile_name: str,
                  key_file: str, key_id: str, ledger_schema: int, ledger: str) -> Moved:
-    """Send this PC's profile to the phone showing `code`. `ledger` is the closed encrypted database file.
-    The phone's answer counts only when it proves the same code for the same certificate and file."""
+    """Send this PC's profile to the phone showing the two digits `code`. `ledger` is the closed encrypted database
+    file. It is sent only after the rounds proved the phone holds the same digits for this certificate and file."""
     import os
     import uuid
     from .copies import sha256_file
-    code = normalize_code(code)
+    code = normalize_passkey(code)
     size, digest = os.path.getsize(ledger), sha256_file(ledger)
     stream = _open(endpoint)
     try:
         fingerprint = hashlib.sha256(stream.getpeercert(binary_form=True)).hexdigest()
         _answer(stream, Hello)
         request = MoveBegin(str(uuid.uuid4()), identity.device_id, identity.name, identity.public_key, profile_id,
-                            profile_name, key_file, key_id, ledger_schema, digest, size, "0" * 64)
+                            profile_name, key_file, key_id, ledger_schema, digest, size, V2_MARKER)
         data = move_transcript(request, fingerprint)
-        from dataclasses import replace
-        request = replace(request, proof=proof(code, "pc-move", data))
         send_message(stream, request)
+        key = _passkey_rounds(stream, code, data)
         with open(ledger, "rb") as source:
             _send_file(stream, source, size)
         done = _answer(stream, MoveDone)
@@ -480,10 +517,10 @@ def move_profile(endpoint: str, code: str, identity: DeviceIdentity, *, profile_
     finally:
         stream.close()
     done_data = data + f"\n{done.home_id}\n{done.lineage_id}".encode("ascii")
-    if done.pairing_id != request.pairing_id or not secrets.compare_digest(proof(code, "phone-move", done_data),
+    if done.pairing_id != request.pairing_id or not secrets.compare_digest(seal(key, "phone-move", done_data),
                                                                             done.proof):
-        raise ProtocolError("PAIRING_FAILED", "The device that answered is not the phone showing this code.")
-    return Moved(done, fingerprint, check_digits(data))
+        raise ProtocolError("PAIRING_FAILED", "The device that answered is not the phone showing these digits.")
+    return Moved(done, fingerprint, code)
 
 
 class TlsLink:
@@ -537,7 +574,7 @@ class TlsLink:
         return self._request(message, (Received, Accepted))
 
 
-__all__ = ["HomeServer", "Moved", "PairingDesk", "Paired", "TlsLink", "move_profile", "pair", "show_code"]
+__all__ = ["HomeServer", "Moved", "PairingDesk", "Paired", "TlsLink", "move_profile", "pair"]
 
 
 # ==================================================================== the PC: keeping a pairing

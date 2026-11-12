@@ -29,6 +29,27 @@ class BorrowScreens:
     open_profile_id: Callable[[], str]
 
 
+def _find(mode: str) -> list[dict]:
+    """The phones on this Wi-Fi with that pairing screen open ("pair" or "move"), for the PC's find screens."""
+    from lightning.sync.nearby import find_phones
+    try:
+        return [phone for phone in find_phones() if phone["mode"] == mode]
+    except OSError:
+        return []
+
+
+def _target(form) -> tuple[str, dict]:
+    """Where to connect: the phone the search found, or the address typed instead, and what to show again on an error
+    (the same phone, so new digits can be typed without searching again)."""
+    endpoint, address = str(form.get("endpoint", "")).strip(), str(form.get("address", "")).strip()
+    phone_name = " ".join(str(form.get("phone_name", "")).split())[:60]
+    if endpoint:
+        return endpoint, dict(phones=[dict(name=phone_name or "Phone", endpoint=endpoint)])
+    if not address:
+        raise ValueError("Choose a phone the search found, or type the phone's address.")
+    return address, dict(address=address, phones=[])
+
+
 def register(app, screens: BorrowScreens) -> None:
     session, devices, page, action = screens.session, screens.devices, screens.page, screens.action
     kept, open_profile_id = screens.kept, screens.open_profile_id
@@ -50,31 +71,32 @@ def register(app, screens: BorrowScreens) -> None:
         if session.container:
             return RedirectResponse("/profiles", 303)
         import socket as _socket
-        return page(request, "connect", pc_name=_socket.gethostname()[:60] or "This PC")
+        phones = await asyncio.to_thread(_find, "pair")
+        return page(request, "connect", pc_name=_socket.gethostname()[:60] or "This PC", phones=phones)
 
     @app.post("/profiles/connect")
     async def connect(request: Request):
-        from lightning.sync.identity import normalize_code
+        from lightning.sync.passkey import normalize_passkey
         from lightning.sync.service import LinkDown
         from lightning.runtime.paths import borrowed_profile
         from lightning.sync.transport import join_home, pair
         if session.container:
             return RedirectResponse("/profiles", 303)
         form = await request.form()
-        address, code = str(form.get("address", "")).strip(), str(form.get("code", ""))
+        code = str(form.get("code", ""))
         pc_name = " ".join(str(form.get("pc_name", "")).split())[:60]
-        values = dict(address=address, pc_name=pc_name)
+        values = dict(pc_name=pc_name, phones=[])
         try:
-            normalize_code(code)
+            address, shown = _target(form)
+            values.update(shown)
+            code = normalize_passkey(code)
             if not pc_name:
                 raise ValueError("Name this PC, so the phone can show it.")
             identity = devices.identity(pc_name)
             paired = await asyncio.to_thread(pair, address, code, identity)
             node = await asyncio.to_thread(join_home, paired, endpoint=address, identity=identity,
                                           borrowed_profile=borrowed_profile, root=devices.root)
-        except (ProfileError, ValueError) as exc:
-            return page(request, "connect", error=str(exc), status=400, **values)
-        except (LinkDown, ProtocolError) as exc:
+        except (ProfileError, ValueError, LinkDown, ProtocolError) as exc:
             return page(request, "connect", error=str(exc), status=400, **values)
         return page(request, "connected", digits=paired.digits, profile_name=paired.reply.profile_name,
                     home_name=paired.reply.home_name, profile_id=node.model.profile_id)
@@ -185,21 +207,32 @@ def register(app, screens: BorrowScreens) -> None:
                         address="")
         return RedirectResponse("/profiles/receive", 303)
 
+    @app.get("/profiles/move")
+    async def move_page(request: Request):
+        import socket as _socket
+        if session.container is None or session.borrowed is not None or not session.role.writable:
+            return RedirectResponse("/profiles", 303)
+        phones = await asyncio.to_thread(_find, "move")
+        return page(request, "move", pc_name=_socket.gethostname()[:60] or "This PC", phones=phones)
+
     @app.post("/profiles/move")
     async def move(request: Request):
         from lightning.security.keys import key_id
         from lightning.sync.copies import ensure_profile_id, schema_version
-        from lightning.sync.identity import normalize_code
+        from lightning.sync.passkey import normalize_passkey
         from lightning.sync.service import LinkDown
         if session.container is None or session.borrowed is not None or not session.role.writable:
             return RedirectResponse("/profiles", 303)
         form = await request.form()
-        address, code = str(form.get("address", "")).strip(), str(form.get("code", ""))
+        code = str(form.get("code", ""))
         pc_name = " ".join(str(form.get("pc_name", "")).split())[:60] or "This PC"
+        values = dict(pc_name=pc_name, phones=[])
         try:
-            normalize_code(code)
+            address, shown = _target(form)
+            values.update(shown)
+            code = normalize_passkey(code)
         except ValueError as exc:
-            return page(request, "manage", error=str(exc), status=400)
+            return page(request, "move", error=str(exc), status=400, **values)
         db = session.container.db
         profile_id = ensure_profile_id(db)
         schema, kid, name, paths = schema_version(db), key_id(session.sync_key), session.name, session.paths
@@ -212,9 +245,8 @@ def register(app, screens: BorrowScreens) -> None:
             return page(request, "unlock", selected=str(paths.db_path), status=400,
                         error=f"{exc} {name} stays on this PC; unlock it to try again.")
         return page(request, "choose", profiles=discover_profiles(session.root), borrowed=devices.borrowed(),
-                    notice=f"{name} now lives on {moved.done.home_name}. Check that it shows {moved.digits[:3]} "
-                           f"{moved.digits[3:]}. Borrow it here under From your phone; the PC's old copy is kept "
-                           "as a backup.")
+                    notice=f"{name} now lives on {moved.done.home_name}. Borrow it here under From your phone; "
+                           "the PC's old copy is kept as a backup.")
 
     @app.post("/profiles/hand-back")
     @app.post("/sync/hand-back")  # the finance pages' banner, which carries the session token
