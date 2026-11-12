@@ -1,5 +1,6 @@
 """Comprehensive workbook portability: values, joins, validation and confirmation."""
 from io import BytesIO
+from datetime import date
 from decimal import Decimal
 from xml.etree import ElementTree as ET
 from zipfile import ZipFile, ZIP_DEFLATED
@@ -272,3 +273,18 @@ def test_blank_required_text_and_plain_str_cells_import(c, tmp_path):
             result.writestr(name, body)
     with pytest.raises(ValueError, match='unsupported cell type'):
         read_workbook(bad.getvalue())
+
+
+def test_dates_and_times_excel_turned_into_serial_numbers_come_back_as_text(c, tmp_path):
+    """Excel saves a typed date or time as days since 1899-12-30; the import kept 46325.77 as a timestamp."""
+    _source(c)
+    data, _, _ = export_all(c, 'xlsx')
+    data = _change(data, 'accounts', 'created_at', '46325.5')
+    rows = read_workbook(data)['transactions']
+    first = date.fromisoformat(rows[1][rows[0].index('date')])
+    data = _change(data, 'transactions', 'date', str((first - date(1899, 12, 30)).days))
+    target = build(tmp_path/'serial.db')
+    confirm_import(target, data)
+    assert target.db.scalar("SELECT created_at FROM accounts WHERE name='Example bank'").startswith('2026-10-30T12:00:00')
+    assert target.db.scalar("SELECT min(date) FROM transactions") == first.isoformat()
+    target.db.close()

@@ -1,7 +1,7 @@
 """Bounded, lossless onboarding of comprehensive Lightning workbooks into unused profiles."""
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
 import posixpath
@@ -151,6 +151,18 @@ def _setting_allowed(key):
         ('budget_', 'investment_', 'emergency_', 'health_', 'financial_health_'))
 
 
+def _from_excel_serial(value, dated):
+    """Excel (or an AI tool) turns a typed date or time into a date cell, saved as days since 1899-12-30: put back
+    the text Lightning keeps, a yyyy-mm-dd date or a local timestamp. Anything else is left for the checks below."""
+    text = str(value)
+    if not re.fullmatch(r'[1-9][0-9]{4}(\.[0-9]+)?', text) or not 20_000 <= float(text) < 80_000:  # 1954 to 2119
+        return value
+    moment = datetime(1899, 12, 30) + timedelta(seconds=round(float(text) * 86_400))
+    if dated:
+        return moment.date().isoformat()
+    return moment.astimezone().isoformat(timespec='seconds')
+
+
 def _convert(value, field, table):
     name = field['name']
     if value is None:
@@ -174,7 +186,10 @@ def _convert(value, field, table):
             return int(number)
         except (InvalidOperation, ValueError):
             raise ValueError(f'{table}.{name}: use a finite number with at most six decimal places.') from None
-    if value and (name == 'date' or name.endswith('_date') or name in ('date_from', 'date_to', 'first_date')):
+    dated = name == 'date' or name.endswith('_date') or name in ('date_from', 'date_to', 'first_date')
+    if (dated or name.endswith('_at')) and field['type'].upper() == 'TEXT':
+        value = _from_excel_serial(value, dated)
+    if value and dated:
         try:
             if date.fromisoformat(str(value)).isoformat() != value:
                 raise ValueError()
