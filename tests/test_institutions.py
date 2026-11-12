@@ -94,11 +94,34 @@ def test_every_catalog_logo_is_an_institution_with_its_tile():
     """Each wallet, fintech or broker mark in assets/institutions-logos/icons is in the picker with its 64 px file."""
     root = institutions.Path(institutions.__file__).parents[2]
     # banks are linked under their CSV codes (abc is bank-abc); Paymob takes payments for shops, nobody holds money there
-    other_names = {"abc", "aib", "albaraka", "ebank", "egbank", "emirates-nbd", "fabmisr", "paymob"}
+    other_names = {"abc", "aib", "albaraka", "ebank", "egbank", "emirates-nbd", "fabmisr", "paymob",
+                   "nbe-phone-cash", "bm-wallet", "cib-smartwallet", "qnb-wallet", "saib-wallet", "aib-wallet", "faisal-cash", "banki-wallet", "qahera-cash", "nbk-wallet", "adib-wallet", "cash2go", "audi2pay", "halan-cash", "easycash", "axis", "e-pocket", "masary"}
     catalog = {p.stem for p in (root / "assets" / "institutions-logos" / "icons").glob("*.png")}
     linked = {i.code: i.logo for i in institutions.builtin()}
     missing = {code for code in catalog - other_names if code not in linked and not any(
         i.logo == f"{code}.png" for i in institutions.builtin())}
     assert missing == set()
-    for code in ("thndr", "vodafone-cash", "telda", "money-fellows", "instapay", "cib-smartwallet"):
+    for code in ("thndr", "vodafone-cash", "telda", "money-fellows", "instapay"):
         assert linked[code] == f"{code}.png"
+
+
+def test_popular_retailers_have_distinct_picker_groups_and_a_single_vodafone_cash(c):
+    codes = [item.code for item in institutions.builtin()]
+    assert codes.count("vodafone-cash") == 1
+    assert not set(["nbe-phone-cash","bm-wallet","cib-smartwallet","qnb-wallet","saib-wallet","aib-wallet","faisal-cash","banki-wallet","qahera-cash","nbk-wallet","adib-wallet","cash2go","audi2pay","halan-cash","easycash","axis","e-pocket","masary"]).intersection(codes)
+    opts = c.institutions.options()
+    assert len([o for o in opts if o["value"] == "Vodafone Cash"]) == 1
+    assert next(o for o in opts if o["value"] == "Carrefour")["group"] == "Supermarkets"
+    assert next(o for o in opts if o["value"] == "McDonald's")["group"] == "Popular brands"
+    for name in ("Carrefour", "BIM", "noon", "Talabat", "McDonald's", "KFC", "Starbucks"):
+        assert institutions.tile(name)["logo"].endswith(".svg"), name
+    assert c.institutions.form_hints()["Carrefour"]["type"] == ""
+
+
+def test_every_linked_retail_logo_is_a_small_offline_asset():
+    static = institutions.Path(institutions.__file__).parents[1] / "ui" / "static" / "institutions"
+    for item in institutions.builtin():
+        if item.kind in ("supermarket", "brand") and item.logo:
+            file = static / item.logo
+            assert file.is_file(), item.code
+            assert file.stat().st_size <= 8 * 1024, item.code

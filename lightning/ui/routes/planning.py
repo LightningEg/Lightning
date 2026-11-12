@@ -305,6 +305,19 @@ def _month_grid(month, first, last, day, show: str, chosen: str) -> list[list[di
     return weeks
 
 
+@router.get("/upcoming.ics")
+async def upcoming_calendar_file(request: Request):
+    """NF-7AR4: the next three months' open payments as a calendar file; it leaves only when the person saves it."""
+    from fastapi.responses import Response
+    from lightning.planning.ics import payments_ics
+    c = container(request)
+    day = today()
+    c.planning.match_payments(day)
+    return Response(payments_ics(c.planning, c.gameya, day), media_type="text/calendar; charset=utf-8",
+                    headers={"Content-Disposition": 'attachment; filename="lightning-payments.ics"',
+                             "Cache-Control": "no-store"})
+
+
 @router.get("/upcoming")
 async def upcoming_page(request: Request):
     """What do I still have to pay this month, and on which days? (NF-7AR)"""
