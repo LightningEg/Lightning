@@ -10,5 +10,3 @@ Things seen, not yet planned. One line each: date, pillar, what and where (a pag
 
 ## Lines
 - **C2 (from IV-3AM, 2026-11-12):** Cash planning's *What you owe* card stands alone in its row with one loan; pair it or make it a row when IV-12Q gives Cash planning its page pattern. Report: r19 C2.
-- **Chart fill on papyrus (theme review, 2026-11-12, feel):** on Dendera day the net-worth chart's azure area fill reads as cool grey on the warm card (PC Overview); r21 F8 left series colours to A12, so only the fill's mix could warm, and that is the owner's pick.
-- **Theme artwork under the phone's Latest list (theme review, 2026-11-12, feel):** Dendera's zodiac ring (day) and star ceiling (night) sit behind the Latest rows on the phone Home, against themes.md §6 "never under a reading"; r21 F10 was not chosen, ask again with the launch checklist.
