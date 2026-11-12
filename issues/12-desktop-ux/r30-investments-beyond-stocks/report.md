@@ -67,12 +67,12 @@ Severity: high = wrong money or a job that cannot be done; medium = a wrong or m
 
 | ID | Severity | Observation and expected behavior | Follow-up |
 | --- | --- | --- | --- |
-| P1 | high | A flat worth 2,500,000, bought for 1,800,000, shows +700,000 on its own page but Cost 2,500,000 and gain "—" on Investments: the gain is in no total or return. [Flat](evidence/flat-account.png), [Investments](evidence/investments-after.png). | NF-12M1 |
-| P2 | medium | A flat can also be an *Other Investments* holding, accepted only inside the stock broker (THNDR's balance became 3,021,108). | NF-12M1 |
-| P3 | medium | No real-estate class: both flats fall under "Other Investments" (95.8%); they count in *Holdings after sale* as if sold today. | NF-12M1 |
-| P4 | medium | The flat's page is a bank register: "Record your first Money out, Money in, or Transfer", bulk category edit, statement import. | NF-12M2 |
-| P5 | high | No way to record a flat bought by instalments (down payment, years of payments, the part still owed). | NF-12M3 |
-| P6 | medium | Rent received and maintenance cannot be tied to the property, so it has no yield or net return. | NF-12M4 |
+| P1 | high | A flat worth 2,500,000, bought for 1,800,000, shows +700,000 on its own page but Cost 2,500,000 and gain "—" on Investments: the gain is in no total or return. [Flat](evidence/flat-account.png), [Investments](evidence/investments-after.png). | done: `tests/test_property_investment.py` |
+| P2 | medium | A flat can also be an *Other Investments* holding, accepted only inside the stock broker (THNDR's balance became 3,021,108). | done: `tests/test_property_investment.py` |
+| P3 | medium | No real-estate class: both flats fall under "Other Investments" (95.8%); they count in *Holdings after sale* as if sold today. | done: `tests/test_property_investment.py` |
+| P4 | medium | The flat's page is a bank register: "Record your first Money out, Money in, or Transfer", bulk category edit, statement import. | done: `tests/test_property_investment.py` |
+| P5 | high | No way to record a flat bought by instalments (down payment, years of payments, the part still owed). | done: `tests/test_property_investment.py` |
+| P6 | medium | Rent received and maintenance cannot be tied to the property, so it has no yield or net return. | done: `tests/test_property_investment.py` |
 | P7 | low | Kinds with no home at all: treasury bills, bonds, a share in a business, an insurance or pension plan. Owner, 2026-11-09: no model of their own; an *Other* holding with a typed value that can be re-appraised. | none (decided) |
 
 ### Figures

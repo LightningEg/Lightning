@@ -48,6 +48,8 @@ MARKS: dict[str, str] = {
     "EXP.INVEST.FEES": _RECEIPT,
     "EXP.INVEST.TAX": _LANDMARK,
     "EXP.INVEST.OTHER": _OTHER,
+    "EXP.INVEST.RENT": "M3 11l9-7 9 7M5 10v10h14V10M10 20v-5h4v5",                                       # house
+    "EXP.INVEST.PROPERTY": "M14 7a4 4 0 0 0-5.5 5.5L3 18l3 3 5.5-5.5A4 4 0 0 0 17 10l-2.5 2.5-3-3z",       # wrench
 }
 
 

@@ -32,6 +32,7 @@ ASSET_CLASSES: list[tuple[str, str]] = [
     ("FUND.OTHER", "Other Fund"),
     ("GOLD", "Gold"),
     ("SILVER", "Silver"),
+    ("REAL_ESTATE", "Real estate"),
     ("OTHER", "Other Investments"),
 ]
 
@@ -89,6 +90,8 @@ CATEGORIES: list[tuple[str, str, dict]] = [
     ("EXP.INVEST.FEES", "Investment Fees", {}),
     ("EXP.INVEST.TAX", "Tax withheld", {}),
     ("EXP.INVEST.OTHER", "Other Investment", {}),
+    ("EXP.INVEST.RENT", "Rent received", {"movement": "INFLOW", "income_class": "INVESTMENT"}),
+    ("EXP.INVEST.PROPERTY", "Property costs", {}),
 ]
 
 

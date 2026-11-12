@@ -22,6 +22,7 @@
   {% set show_kind = with_kind and not same %}
   {% set parts = [] %}
   {% if r.balance %}{% set _ = parts.append((r.kind|tr(locale)) if show_kind else ('Cash in the account'|tr(locale))) %}
+    {% if r.priced and r.gain_pct is not none %}{% set _ = parts.append((r.gain_pct|signed_pct) ~ '%') %}{% endif %}
   {% else %}
     {% if show_kind %}{% set _ = parts.append(r.kind|tr(locale)) %}{% endif %}
     {% if not show_kind and r.gain_pct is not none %}{% set _ = parts.append(r.units|units_of(h.unit)) %}{% endif %}

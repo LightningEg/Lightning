@@ -10,12 +10,14 @@ from __future__ import annotations
 import logging
 from contextlib import nullcontext
 
+from datetime import timedelta
 from decimal import Decimal, ROUND_HALF_UP
 from urllib.parse import urlencode
 
 from fastapi import Request
 
 from lightning.accounts.domain import AccountType, INVESTMENT_ACCOUNT_TYPES
+from lightning.accounts.property import CONTRACT_FREQUENCIES, is_property, property_cost, property_return
 from lightning.accounts.valuations import ASSET_KINDS
 from lightning.planning.domain import PlanKind
 from lightning.reporting import account_figures
@@ -417,11 +419,32 @@ def _asset_view(c, account) -> dict | None:
                     "equity": account_figures.equity(value, left) if loan_currency == account.currency else None}
         except LightningError:
             loan = None
-    return {"details": details, "value": value, "value_date": value_date, "price": price, "change": figures["change"],
+    view = {"details": details, "value": value, "value_date": value_date, "price": price, "change": figures["change"],
             "change_pct": figures["change_pct"],
             "history": list(reversed(rows))[:8], "loan": loan,
             "loans": [{"id": i.id, "name": i.name} for i in c.planning.items((PlanKind.LOAN,))],
-            "kinds": ASSET_KINDS}
+            "kinds": ASSET_KINDS, "property": None}
+    if is_property(details):
+        view["property"] = _property_view(c, account, details, value)
+        contract = view["property"]["contract"]
+        if contract:  # bought by instalments: the change is from what you paid so far, not the contract price
+            change = account_figures.other_asset_figures(value, contract["paid"], history)
+            view.update(change=change["change"], change_pct=change["change_pct"])
+    return view
+
+
+def _property_view(c, account, details, value) -> dict:
+    """NF-12M3/12M4: a property's instalments, its rent and costs, and its return, read from PropertyService."""
+    day = today()
+    paid = c.reporting.account_balance(account.id, day)
+    contract = c.property.contract(account.id, paid, day)
+    cost = property_cost({**details, "contract": contract is not None}, fmt_date(day), paid)
+    year = c.property.flows(account.id, fmt_date(day - timedelta(days=365)), fmt_date(day))  # not money: dates
+    since = c.property.flows(account.id, details.get("purchase_date") or "0001-01-01", fmt_date(day))
+    cash = [a for a in c.accounts.list(active_only=True)
+            if a.account_type in (AccountType.BANK, AccountType.CASH) and a.currency == account.currency]
+    return {"contract": contract, "cost": cost, "year": year, "since": since, "cash_accounts": cash,
+            "returns": property_return(value, cost, year, since), "frequencies": CONTRACT_FREQUENCIES}
 
 
 def page(request: Request, account_id: int | None, entry: dict | None = None, edit_values: dict | None = None,
