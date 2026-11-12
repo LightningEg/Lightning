@@ -19,8 +19,8 @@
     <div class="field {{ 'has-error' if error_field == 'currency' }}">
       <label for="currency">{{ 'Currency'|tr(locale) }}</label>
       {% set chosen = account.currency if account else (values.currency or base) %}
-      <select id="currency" name="currency" data-own-picker {{ 'disabled' if account }} required>{% for currency in currencies %}<option value="{{ currency.code }}" {{ 'selected' if currency.code == chosen }}>{{ currency.code }} — {{ currency.name }}</option>{% endfor %}</select>
-      {% if account %}<div class="help">{{ "An account's currency cannot be changed after it is created."|tr(locale) }}</div>{% else %}<div class="help">{{ 'Only your currencies are listed.'|tr(locale) }} <a href="/settings?section=currencies">{{ 'Add one in Settings, under Currencies.'|tr(locale) }}</a></div>{% endif %}
+      <select id="currency" name="currency" data-own-picker {% if not account %}data-add-href="/settings?section=currencies" data-add-label="+ Add a currency"{% endif %} {{ 'disabled' if account }} required>{% for currency in currencies %}<option value="{{ currency.code }}" {{ 'selected' if currency.code == chosen }}>{{ currency.code }} — {{ currency.name }}</option>{% endfor %}</select>
+      {% if account %}<div class="help">{{ "An account's currency cannot be changed after it is created."|tr(locale) }}</div>{% endif %}
       {% if error_field == 'currency' %}<small class="error">{{ error }}</small>{% endif %}
     </div>
     {{ field('name', 'Name', values, error_field, placeholder='e.g. CIB Current', attrs='required') }}
@@ -42,9 +42,6 @@
       </div>
     </div>
   </section>
-  <div class="field" id="account-type-guidance" data-account-type="{{ values.account_type }}">
-    <div class="help" id="account-type-help"></div>
-  </div>
   <details class="form-more" id="account-more"{{ ' open' if values.owner_id or values.notes or error_field in ('owner_id', 'notes') }}>
     <summary>{{ 'More'|tr(locale) }}</summary>
     <div class="form-grid">
@@ -53,7 +50,6 @@
         <select id="owner_id" name="owner_id" data-own-picker><option value="">{{ 'You'|tr(locale) }}</option>
           {% for person in counterparties %}<option value="{{ person.id }}" {{ 'selected' if values.owner_id == person.id|string }}>{{ person.name }}</option>{% endfor %}
         </select>
-        <small class="muted">{{ 'Leave blank if you own this starting balance.'|tr(locale) }}</small>
       </div>
       <div class="field wide">
         <label for="notes">{{ 'Notes'|tr(locale) }}</label>
@@ -66,69 +62,4 @@
     <a class="btn" href="{{ '/accounts/' ~ account.id if account else '/accounts' }}">{{ 'Cancel'|tr(locale) }}</a>
   </div>
 <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
-<script nonce="{{ request.state.csp_nonce|default('') }}">
-(() => {
-  const type = document.getElementById('account_type');
-  const help = document.getElementById('account-type-help');
-  if (!type || !help) return;
-  const update = () => {
-    if (type.value === 'DEPOSIT') help.textContent = 'A bank-specific CD portfolio holds certificates, not cash. Enter the bank under Institution, then record each CD purchase from a bank or cash account.';
-    else if (type.value === 'GAMEYA') help.textContent = 'A gam\'eya holds one savings circle\'s cash. After you add it, enter its terms; each instalment and your payout are transfers.';
-    else if (type.value === 'PHYSICAL_ASSET') help.textContent = 'Gold purity belongs to the gold holding itself, so choose its karat when you add the gold investment. This account can hold physical assets.';
-    else help.textContent = '';
-  };
-  type.addEventListener('change', update);
-  update();
-  const opening = document.getElementById('opening-balance-section');
-  const openingAmount = document.getElementById('opening_balance');
-  const syncBalance = () => {
-    if (!opening) return;
-    const isPortfolio = type.value === 'DEPOSIT' || type.value === 'GAMEYA';
-    if (isPortfolio && !opening.hidden && openingAmount && openingAmount.value !== '0') {
-      opening.dataset.previousValue = openingAmount.value;
-      openingAmount.value = '0';
-    } else if (!isPortfolio && opening.hidden && openingAmount && opening.dataset.previousValue) {
-      openingAmount.value = opening.dataset.previousValue;
-      delete opening.dataset.previousValue;
-    }
-    opening.hidden = isPortfolio;
-    opening.style.display = isPortfolio ? 'none' : '';
-  };
-  type.addEventListener('change', syncBalance);
-  syncBalance();
-  // Institution first: its kind (decided in Python, sent as data) sets the Type, and the Name is suggested.
-  const institution = document.getElementById('institution');
-  const nameInput = document.getElementById('name');
-  const currency = document.getElementById('currency');
-  let hints = {};
-  try { hints = JSON.parse(type.dataset.institutionHints || '{}'); } catch (e) { hints = {}; }
-  const normInstitution = value => (value || '').normalize('NFKC').toLowerCase().replace(/[^\p{L}\p{N}_&]+/gu, ' ').trim().replace(/\s+/g, ' ');
-  const institutionHint = value => hints[value] || hints[normInstitution(value)];
-  let lastInstitution = institutionHint(institution ? institution.value : '')?.name || '';
-  let suggested = '';
-  const applyInstitution = () => {
-    const hint = institutionHint(institution.value);
-    if (!hint) {
-      lastInstitution = '';
-      return;
-    }
-    if (hint.type && hint.name !== lastInstitution && type.value !== hint.type) {
-      type.value = hint.type;
-      type.dispatchEvent(new Event('change', {bubbles: true}));
-    }
-    lastInstitution = hint.name;
-    if (nameInput && (!nameInput.value.trim() || nameInput.value === suggested)) {
-      suggested = hint.short + ' \u00b7 ' + (currency ? currency.value : '');
-      nameInput.value = suggested;
-    }
-  };
-  if (institution) {
-    institution.addEventListener('change', applyInstitution);
-    institution.addEventListener('input', applyInstitution);
-  }
-  if (currency) currency.addEventListener('change', () => {
-    if (nameInput && suggested && nameInput.value === suggested) applyInstitution();
-  });
-})();
-</script>
 {% endblock %}

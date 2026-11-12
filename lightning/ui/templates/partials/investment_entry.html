@@ -67,7 +67,7 @@
     <div class="form-grid investment-row-foot">
       <div class="field investment-owner-field">
         <label for="investment-whom">{{ 'Held for'|tr(locale) }}</label>
-        <input id="investment-whom" type="text" name="whom" value="{{ investment_entry.get('whom', '') }}" list="counterparty-options" placeholder="{{ 'Blank is you'|tr(locale) }}">
+        <input id="investment-whom" type="text" name="whom" value="{{ investment_entry.get('whom', '') }}" list="counterparty-options" data-own-suggestions autocomplete="off" placeholder="{{ 'Blank is you'|tr(locale) }}">
       </div>
       {% if cash_accounts %}<div class="field investment-cash-source">
         <label for="investment-cash-account">{{ "Cash account"|tr(locale) }}</label>

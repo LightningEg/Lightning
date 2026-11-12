@@ -534,7 +534,7 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     if investment_entry.get("instrument_key") and not investment_entry.get("instrument_label"):
         picked = next((item for item in trade_choices if item["key"] == investment_entry["instrument_key"]), None)
         if picked:
-            investment_entry["instrument_label"] = f"{picked['name']} · {picked['ticker']}" + (f" · {picked['exchange']}" if picked.get("exchange") else "")
+            investment_entry["instrument_label"] = picked["name"]
     keep = {k: v for k, v in (("q", q), ("tag", "" if q.startswith("#") else filter_tag), ("month", month),
                               ("preset", preset), ("date_from", from_query), ("date_to", to_query),
                               ("category_id", str(raw_category_id) if raw_category_id else ""),

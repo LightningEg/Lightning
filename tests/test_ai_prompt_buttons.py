@@ -75,14 +75,14 @@ def test_the_first_import_into_an_account_offers_the_category_mapping_prompt(c, 
     accounts, cats = setup
     client = TestClient(create_app(c))
     page = client.get(f"/accounts/{accounts['cib'].id}/import").text
-    window = _is_hand_off(page, "I am importing my first bank statement from CIB", "First import into this account?")
+    window = _is_hand_off(page, "I am importing my first bank statement from CIB", "Match the bank’s categories to yours")
     label = c.categories.display_name(cats["EXP.PERSONAL.FOOD"].id)
     assert label in window and "(leave blank)" in window
     # Once a statement was posted into the account it is no longer the first import.
     c.db.execute("INSERT INTO bank_import_batches(account_id,file_hash,file_name,status,created_at) VALUES (?,?,?,?,?)",
                  (accounts["cib"].id, "h", "old.csv", "POSTED", "2026-09-01T00:00:00"))
     again = client.get(f"/accounts/{accounts['cib'].id}/import").text
-    assert "I am importing my first bank statement" not in again and "First import into this account?" not in again
+    assert "I am importing my first bank statement" not in again and "Match the bank’s categories to yours" not in again
     other = client.get(f"/accounts/{accounts['wallet'].id}/import").text
     assert "I am importing my first bank statement from Wallet" in other
 
@@ -136,7 +136,7 @@ def test_every_prompt_builder_is_free_of_amounts():
 
 
 WHY_LINES = (
-    "First import into this account? This prompt gives your AI tool what it cannot guess: your category names. It matches the bank’s own category words to them, so the review starts with your categories filled in.",
+    "Match the bank’s categories to yours",
     "This prompt gives your AI tool what it cannot guess: your file’s header, what Lightning rejected and the columns it accepts. It fixes the file for you instead of you hunting for the problem.",
     "This prompt gives your AI tool what it cannot guess: your file’s header, what Lightning rejected on each line and the columns it accepts. It fixes the file for you instead of you hunting for the problem.",
     "Seen the same shop under two spellings? This prompt gives your AI tool your saved names and aliases, which it cannot guess. It answers with a list to paste into Add alias.",

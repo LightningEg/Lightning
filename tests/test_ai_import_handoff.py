@@ -45,7 +45,6 @@ def test_the_import_page_hands_over_the_prompt_as_copy_and_edit_never_open_text(
     assert "data-ai-copy" in page and "data-ai-edit" in page and "Edit prompt" in page
     assert '<textarea id="ai-import-prompt"' not in page  # the text lives in the edit window only
     assert page.index("<dialog") < page.index("data-prompt-text") < page.index("</dialog>")
-    assert "context it cannot guess" in page  # why the prompt helps
     assert "Arabic-Indic digits" in page and "Return only the CSV" in page
 
 
