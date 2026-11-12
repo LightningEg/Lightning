@@ -104,6 +104,25 @@ def test_the_add_sheet_is_amount_first_with_chips_and_no_card(month):
     assert "decreases by" not in sheet and "balance owned by" not in sheet
 
 
+def test_the_add_sheet_is_decluttered_amount_before_usual_and_shortcuts_are_quiet_links(month):
+    """Owner, 2026-11-12: the segment alone on its row, the amount first, one Primary Save, Save and add another and the
+    shortcuts as quiet links, and no placeholder that repeats its label."""
+    c, accounts, _ = month
+    sheet = _phone(c).get(f"/accounts/{accounts['cib'].id}/transaction/new").text
+    top = sheet.split('class="phone-entry-top"')[1].split("</div>\n    </div>")[0]
+    assert "phone-segment" in top and "phone-sms-paste" not in top and "phone-pay-bill" not in top  # nothing beside the segment
+    assert sheet.index('id="popup-amount"') < sheet.index("data-account-chip")
+    if "data-usual-entries" in sheet:
+        assert sheet.index('id="popup-amount"') < sheet.index("data-usual-entries")
+        assert "popup-usual-label" in sheet and 'phone-usual-row' in sheet
+    bar = sheet.split('class="phone-save-bar"')[1]
+    assert bar.count('class="btn primary phone-save"') == 1 and "btn phone-save-again" not in sheet
+    assert 'name="again" value="1" class="phone-quiet phone-save-again"' in bar and "data-sms-paste" not in bar
+    assert sheet.index("data-sms-paste") < sheet.index('class="phone-save-bar"')  # shortcuts end the form, above the bar
+    assert 'class="phone-quiet phone-sms-paste"' in sheet and 'class="phone-chip phone-sms-paste"' not in sheet
+    assert "Who you paid or who paid you" not in sheet.split('id="popup-counterparty"')[1].split(">")[0]
+
+
 def test_add_on_an_account_page_chooses_that_account_and_the_chip_lists_the_rest(month):
     c, accounts, _ = month
     phone = _phone(c)

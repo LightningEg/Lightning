@@ -10,3 +10,4 @@ Things seen, not yet planned. One line each: date, pillar, what and where (a pag
 
 ## Lines
 - **C2 (from IV-3AM, 2026-11-12):** Cash planning's *What you owe* card stands alone in its row with one loan; pair it or make it a row when IV-12Q gives Cash planning its page pattern. Report: r19 C2.
+- **Popup fields at 15px on the phone (Add sheet review, 2026-11-12, capture):** inside the phone's sheets (outside `.main`) Who, Date, Notes and the account select are 15px, not the 16px C05.1 asks for so the phone does not zoom; the `.main`-scoped field rule in phone.css never reaches them.
