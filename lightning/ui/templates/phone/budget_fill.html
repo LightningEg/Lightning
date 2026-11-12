@@ -1,14 +1,15 @@
 {# Fill this month's budget on the phone (3AY15): choose a source, then one row per category with its proposed limit. #}
 {% extends "base.html" %}
-{% block title %}Fill this month's budget{% endblock %}
+{% block title %}{{ "Fill this month's budget"|tr(locale) }}{% endblock %}
 {% block phone_back %}<a class="phone-back" href="/budget?month={{ month }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Budget'|tr(locale) }}</span></a>{% endblock %}
-{% block heading %}<h1>{{ "Fill this month's budget"|tr(locale) }}</h1><p class="phone-note">Review base limits for {{ month }}. Nothing is saved until you apply selected rows.</p>{% endblock %}
+{% block heading %}<h1>{{ "Fill this month's budget"|tr(locale) }}</h1><p class="phone-note">{{ 'Review base limits for {month}. Nothing is saved until you apply selected rows.'|tr(locale, month=month|month(locale)) }}</p>{% endblock %}
 {% block content %}
 {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
 <form method="get" action="/budget/fill" class="phone-form">
   <input type="hidden" name="month" value="{{ month }}">
   <label for="fill-source">{{ "Fill from"|tr(locale) }}</label><select id="fill-source" name="source">
       <option value="last_month" {{ 'selected' if source == 'last_month' }}>{{ "Last month"|tr(locale) }}</option>
+      <option value="average" {{ 'selected' if source == 'average' }}>{{ "Your average"|tr(locale) }}</option>
       <option value="schedule" {{ 'selected' if source == 'schedule' }}>{{ "Schedule"|tr(locale) }}</option>
       <option value="goal" {{ 'selected' if source == 'goal' }}>{{ "Goal"|tr(locale) }}</option>
   </select>
@@ -25,20 +26,20 @@
         <a class="btn phone-save" href="/plan/reserves">{{ "Open Reserves"|tr(locale) }}</a>
       </section>
     {% else %}
-      <p class="phone-note">Proposals use base limits only. Spending and carryover are not copied. Selecting a row replaces that category's limit for {{ month }} only.</p>
+      <p class="phone-note">{{ "Proposals use base limits only. Spending and carryover are not copied. Selecting a row replaces that category's limit for {month} only."|tr(locale, month=month|month(locale)) }}</p>
       <form method="post" action="/budget/fill?month={{ month }}" class="phone-form">
         <input type="hidden" name="source" value="{{ source }}">
         <div class="phone-rows">{% for row in proposal.rows %}
-          <div class="phone-row">{% if row.selectable %}<label><input type="checkbox" name="selected" value="{{ row.category_id }}" {{ 'checked' if row.selected }}> <span>{{ row.category_name }}<small>{{ row.note }}{% if row.current_rule %} · {{ row.current_rule }}{% endif %}{% if row.conflict %} · {{ row.conflict }}{% endif %}</small></span></label>
+          <div class="phone-row">{% if row.selectable %}<label><input type="checkbox" name="selected" value="{{ row.category_id }}" {{ 'checked' if row.selected }}> <span>{{ row.category_name }}<small><span>{{ row.note }}</span>{% if row.current_rule %} · <span>{{ row.current_rule }}</span>{% endif %}{% for part in row.conflict|sentences %} · <span>{{ part }}</span>{% endfor %}</small></span></label>
             <input class="money-input" name="amount_{{ row.category_id }}" type="number" min="0" step="0.01" inputmode="decimal" value="{{ values.get(row.category_id, row.amount|string) if values is defined else row.amount }}" aria-label="Proposed monthly limit for {{ row.category_name }}" data-row-amount>
-            {% else %}<span>{{ row.category_name }}<small>{{ row.note }}{% if row.conflict %} · {{ row.conflict }}{% endif %}</small></span><b>—</b>{% endif %}</div>{% endfor %}
+            {% else %}<span>{{ row.category_name }}<small><span>{{ row.note }}</span>{% for part in row.conflict|sentences %} · <span>{{ part }}</span>{% endfor %}</small></span><b>—</b>{% endif %}</div>{% endfor %}
         </div>
         <button class="btn primary phone-save" type="submit">{{ "Apply selected for this month only"|tr(locale) }}</button>
         <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
       </form>
     {% endif %}
   {% else %}
-    <p class="phone-note">{% if source == 'last_month' %}No base limits from last month are available to copy.{% else %}No scheduled bills or subscriptions have a spending category this month.{% endif %}</p>
+    {% include "partials/budget_fill_empty.html" %}
   {% endif %}
 {% endif %}
 {% endblock %}

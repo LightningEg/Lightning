@@ -2541,6 +2541,10 @@ INSIGHTS = {
     "Child limits total {a}, above the {b} ceiling of {c}.": "مجموع حدود الفروع {a}، فوق سقف {b} وهو {c}.",
     "No resolved monthly amount": "مفيش مبلغ شهري محدد",
     "Matches the current base limit.": "مطابق للحد الأساسي الحالي.",
+    # IV-12Q3: the parts of a fill row's note, translated one by one when a second sentence follows it
+    "Current limit": "الحد الحالي",
+    "{a} fixed": "{a} ثابت",
+    "Applying replaces it for {b} only.": "التطبيق بيستبدله لـ {b} بس.",
     "Current limit: {a}. Applying replaces it for {b} only.": "الحد الحالي: {a}. التطبيق بيستبدله لـ {b} بس.",
     "{a} of scheduled payments are already planned automatically. Applying this amount would replace that automatic line.": "{a} من الدفعات المجدولة متخططة تلقائيًا فعلًا. تطبيق المبلغ ده هيستبدل البند التلقائي ده.",
     "Scheduled: {a}": "المجدول: {a}",

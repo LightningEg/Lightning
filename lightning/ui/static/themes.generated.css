@@ -72,6 +72,7 @@
   --theme-income: #2E7A4F;
   --theme-expense: #B23A5B;
   --theme-held: #004DC1;
+  --theme-positive: #076042;
   --theme-logo: url(/static/lightning-mark.svg);
   --m-shadow: #161616;
   --m-hi: rgb(255 255 255 / 0.6);
@@ -157,6 +158,7 @@
   --theme-income: #4FD8A4;
   --theme-expense: #FF9393;
   --theme-held: #7FB2FF;
+  --theme-positive: #0FC486;
   --theme-logo: url(/static/lightning-mark-on-dark.svg);
   --m-shadow: #000000;
   --m-hi: rgb(242 233 214 / 0.06);
@@ -245,6 +247,7 @@
   --theme-income: #2E7A4F;
   --theme-expense: #B23A5B;
   --theme-held: #004BBC;
+  --theme-positive: #076042;
   --theme-logo: url(/static/lightning-mark.svg);
   --m-shadow: #1E1A14;
   --m-hi: rgb(255 255 255 / 0.6);
@@ -332,6 +335,7 @@
   --theme-income: #4FD8A4;
   --theme-expense: #FF9393;
   --theme-held: #7FB2FF;
+  --theme-positive: #0CA36F;
   --theme-logo: url(/static/lightning-mark-on-dark.svg);
   --m-shadow: #000000;
   --m-hi: rgb(233 237 247 / 0.06);
@@ -414,6 +418,7 @@
   --theme-income: #4FD8A4;
   --theme-expense: #FF9393;
   --theme-held: #7FB2FF;
+  --theme-positive: #0EBA7F;
   --theme-logo: url(/static/lightning-mark-on-dark.svg);
   --m-shadow: #000000;
   --m-hi: rgb(233 237 247 / 0.06);
@@ -501,6 +506,7 @@
   --theme-income: #9ED08A;
   --theme-expense: #EE9A86;
   --theme-held: #7FB2FF;
+  --theme-positive: #0CA36F;
   --theme-logo: url(/static/lightning-mark-on-dark.svg);
   --m-shadow: #000000;
   --m-hi: rgb(243 236 220 / 0.06);

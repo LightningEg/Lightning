@@ -22,6 +22,14 @@ class ScenarioResult:
     assumptions: tuple[str, ...]
     plan_low: object = None       # IV-12P: Cash planning's Lowest point ahead (a ForecastMonth), as the plan shows it
     scenario_plan_low: object = None  # the same months moved by what the scenario changes: (month, closing)
+    months: tuple = ()            # IV-12Q2: every month as (month, plan closing, scenario closing or None), for the chart
+
+    @property
+    def change(self):
+        """IV-12Q2: what the scenario does to the plan's Lowest point ahead (None without both)."""
+        if self.plan_low is None or self.scenario_plan_low is None:
+            return None
+        return self.scenario_plan_low[1] - self.plan_low.closing
 
 
 def _balance_on(projection, on: str):
@@ -30,23 +38,31 @@ def _balance_on(projection, on: str):
     return known[-1].balance if known else None
 
 
+def plan_months(forecast, baseline, projected, end):
+    """IV-12Q2: each month of the cash forecast as (month, plan closing, scenario closing), the scenario closing moved
+    by the scenario's change in scheduled cash at the month's end (None when an exchange rate is missing)."""
+    from lightning.core.dates import parse_month
+    rows = []
+    for month in forecast.months:
+        _, last = parse_month(month.month)
+        on = min(last, end).isoformat()
+        before, after = _balance_on(baseline, on), _balance_on(projected, on)
+        moved = None if before is None or after is None else month.closing + after - before
+        rows.append((month.month, month.closing, moved))
+    return tuple(rows)
+
+
 def plan_lowest(forecast, baseline, projected, end):
     """IV-12P: the plan's Lowest point ahead, with and without the scenario. Each month of the cash forecast keeps its
     closing and moves by the scenario's change in scheduled cash at that month's end (at ``end`` for months after it,
     where a purchase stays spent and a delayed income has arrived). Returns (baseline month, (month, closing)) or
     (None, None) without a forecast or when an exchange rate is missing."""
-    from lightning.core.dates import parse_month
     low = forecast.lowest
     if low is None:
         return None, None
-    moved = []
-    for month in forecast.months:
-        _, last = parse_month(month.month)
-        on = min(last, end).isoformat()
-        before, after = _balance_on(baseline, on), _balance_on(projected, on)
-        if before is None or after is None:
-            return low, None
-        moved.append((month.month, month.closing + after - before))
+    moved = [(month, closing) for month, _, closing in plan_months(forecast, baseline, projected, end)]
+    if any(closing is None for _, closing in moved):
+        return low, None
     return low, min(moved, key=lambda row: row[1])
 
 
@@ -98,6 +114,7 @@ def compare_scenario(forecaster, day, end, *, income='', delay='', purchase='', 
         assumptions.append(f'{account.name}: −{value:f} {account.currency} · {when.isoformat()}')
     baseline = dated_cash_forecast(forecaster.reporting, payments, events, day, end)
     projected = dated_cash_forecast(forecaster.reporting, changed, changed_events, day, end)
-    plan_low, scenario_plan_low = plan_lowest(forecaster.forecast(day, match_payments=False), baseline, projected, end)
+    forecast = forecaster.forecast(day, match_payments=False)
+    plan_low, scenario_plan_low = plan_lowest(forecast, baseline, projected, end)
     return ScenarioResult(baseline, projected, lowest_scheduled_balance(baseline), lowest_scheduled_balance(projected),
-                          tuple(assumptions), plan_low, scenario_plan_low)
+                          tuple(assumptions), plan_low, scenario_plan_low, plan_months(forecast, baseline, projected, end))

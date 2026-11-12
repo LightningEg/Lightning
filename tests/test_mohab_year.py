@@ -514,8 +514,8 @@ def _live_the_year(o: Mohab) -> None:
     o.month("2027-02", salary="50,000")
     o.ask("raise", "Was my raise received, and does the plan know?", "Cash planning", "Recurring")
     o.settle_due_income("ACME Egypt")   # he confirms the 50,000 it suggests
-    o.notes["raise_offered"] = b.go("Cash planning", "Recurring").shows("Use 50,000.00 from now on")
-    b.submit({}, button="Use 50,000.00 from now on")
+    o.notes["raise_offered"] = b.go("Cash planning", "Recurring").shows("Use 50,000 from now on")
+    b.submit({}, button="Use 50,000 from now on")
     o.ask("raise_after", "Is the plan at 50,000 now?", "Cash planning", "Recurring")
     # Needs you notices the raise is not in his average yet; he keeps his plan and saves the 5,000.
     o.ask_needs("income_up", "My pay went up. What should my plan do with it?", "Budget and saving", "Choose")
@@ -568,8 +568,8 @@ def _live_the_year(o: Mohab) -> None:
     o.on("2027-06-30")
     o.month("2027-06", salary="50,000", rent="13,200")
     o.ask("rent", "My rent went up to 13,200. Does the plan know?", "Cash planning", "Recurring")
-    if b.page.shows("Use 13,200.00 from now on"):
-        b.submit({}, button="Use 13,200.00 from now on")
+    if b.page.shows("Use 13,200 from now on"):
+        b.submit({}, button="Use 13,200 from now on")
     o.ask("rent_after", "And now?", "Cash planning", "Recurring")
     o.ask_needs("rent_planned", "Does my budget know the rent went up?", "Budget and saving")
     b.click("Change the plan")
@@ -1104,7 +1104,7 @@ def test_recurring_offers_the_raise_for_later_months(mohab):
 
 
 def test_after_the_raise_the_plan_is_at_50000(mohab):
-    assert re.search(r"ACME Egypt Income [^+]*\+50,000\.00", mohab.answers["raise_after"].screen.text)
+    assert re.search(r"ACME Egypt Income [^+]*\+50,000", mohab.answers["raise_after"].screen.text)
 
 
 def test_an_early_paid_january_is_not_a_month_that_saved_too_little(mohab):
@@ -1217,8 +1217,9 @@ def test_the_insurance_is_paid_from_its_goal(mohab):
 
 
 def test_the_rent_rise_is_offered_and_taken(mohab):
-    assert mohab.answers["rent"].shows("Last paid 13,200.00 Use 13,200.00 from now on")
-    assert mohab.answers["rent_after"].shows("Landlord Subscription · Housing & Rent 13,200.00")
+    assert mohab.answers["rent"].shows("Last paid 13,200 Use 13,200 from now on")
+    # IV-12Q4: one list, the row itself (the doubled bar list above it is gone)
+    assert re.search(r"Landlord Subscription · [^−]*Housing & Rent[^−]*−13,200", mohab.answers["rent_after"].screen.text)
 
 
 def test_the_rent_rise_reaches_the_budget(mohab):

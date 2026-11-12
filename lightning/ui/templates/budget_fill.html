@@ -1,6 +1,7 @@
 {% extends "base.html" %}
-{% block title %}Fill this month's budget{% endblock %}
-{% block heading %}<div class="budget-heading"><div><h1>{{ "Fill this month's budget"|tr(locale) }}</h1><div class="muted">Review base limits for {{ month }}. Nothing is saved until you apply selected rows.</div></div><a class="btn small" href="/budget?month={{ month }}">{{ "Back to Budget"|tr(locale) }}</a></div>{% endblock %}
+{% block title %}{{ "Fill this month's budget"|tr(locale) }}{% endblock %}
+{% block heading %}<div class="page-title"><h1>{{ "Fill this month's budget"|tr(locale) }}</h1><p class="page-status">{{ 'Review base limits for {month}. Nothing is saved until you apply selected rows.'|tr(locale, month=month|month(locale)) }}</p></div>{% endblock %}
+{% block top_actions %}<a class="btn" href="/budget?month={{ month }}">{{ 'Budget'|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% if error %}<p class="notice" role="alert">{{ error|tr(locale) }}</p>{% endif %}
 <form method="get" action="/budget/fill" class="row">
@@ -27,7 +28,7 @@
         <a class="btn" href="/plan/reserves">{{ "Open Reserves"|tr(locale) }}</a>
       </section>
     {% else %}
-      <p class="muted">Proposals use base limits only. Spending and carryover are not copied. Selecting a row replaces that category's limit for {{ month }} only.</p>
+      <p class="muted">{{ "Proposals use base limits only. Spending and carryover are not copied. Selecting a row replaces that category's limit for {month} only."|tr(locale, month=month|month(locale)) }}</p>
       <form method="post" action="/budget/fill?month={{ month }}">
         <input type="hidden" name="source" value="{{ source }}">
         <table class="setup-table"><thead><tr><th>{{ 'Category'|tr(locale) }}</th><th>{{ "Source"|tr(locale) }}</th><th class="num">{{ "Current base limit"|tr(locale) }}</th><th class="num">{{ "Proposed limit"|tr(locale) }}</th><th>{{ 'Review'|tr(locale) }}</th></tr></thead><tbody>
@@ -37,7 +38,7 @@
             <td>{{ row.note }}</td>
             <td class="num">{% if row.current_rule %}{{ row.current_rule }}{% else %}—{% endif %}</td>
             <td class="num">{% if row.selectable %}<input name="amount_{{ row.category_id }}" type="number" min="0" step="0.01" inputmode="decimal" value="{{ values.get(row.category_id, row.amount|string) if values is defined else row.amount }}" aria-label="Proposed monthly limit for {{ row.category_name }}"> {{ base }}{% else %}—{% endif %}</td>
-            <td>{% if row.conflict %}<span class="notice">{{ row.conflict }}</span>{% elif row.current_amount is not none %}Current limit differs.{% else %}New limit{% endif %}</td>
+            <td>{% if row.conflict %}<span class="notice">{% for part in row.conflict|sentences %}<span>{{ part }}</span> {% endfor %}</span>{% elif row.current_amount is not none %}Current limit differs.{% else %}New limit{% endif %}</td>
           </tr>
         {% endfor %}
         </tbody></table>
@@ -46,7 +47,7 @@
       </form>
     {% endif %}
   {% else %}
-    <section class="card wide-card"><p class="empty">{% if source == 'last_month' %}No base limits from last month are available to copy.{% elif source == 'average' %}No spending in the last three months to average yet.{% else %}No scheduled bills or subscriptions have a spending category this month.{% endif %}</p></section>
+    {% include "partials/budget_fill_empty.html" %}
   {% endif %}
 {% endif %}
 {% endblock %}

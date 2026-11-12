@@ -39,6 +39,12 @@ def test_new_workflow_pages_have_no_english_system_text(workflow_sample, phone):
         "/activity",
         f"/activity/{first_id}",
         "/payday",
+        # IV-12Q: the pages of Budget and Cash planning that got the page pattern
+        "/plan/scenarios?what=purchase&purchase=1000&purchase_date=2026-10-10&account_id=1",
+        "/plan/inputs",
+        "/budget/carryover-bridge?month=2026-10",
+        "/budget/fill?month=2026-10&source=average",
+        f"/budget/category/{c.categories.find_by_text('Food & Groceries').id}/edit?month=2026-10",
         "/reimbursements",
         f"/transactions/merge?keep={first_id}&drop={second_id}",
         f"/transactions/views/{view_id}/report",
