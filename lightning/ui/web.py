@@ -193,6 +193,8 @@ def _locale(locale):
 
 templates.env.filters["day_label"] = _day_label
 # Dates read on a screen (A06.1, IV-3BK); fields, files and exports keep yyyy-mm-dd.
+templates.env.filters["dict_day"] = lambda values, locale=None: {
+    k: (day_text(v, _locale(locale)) if k == "date" and v else v) for k, v in values.items()}
 templates.env.filters["day"] = lambda value, locale=None: day_text(value, _locale(locale))
 templates.env.filters["month"] = lambda value, locale=None: month_text(value, _locale(locale))
 templates.env.filters["month_short"] = lambda value, locale=None: month_short(value, _locale(locale))

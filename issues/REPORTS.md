@@ -26,12 +26,12 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r27 | [User journeys and visual unity](12-desktop-ux/r27-journeys-and-visual-unity/report.md) | 2026-11-08 | audit | 3AM |
 | r28 | [International polish: the small things that make Lightning feel finished](3-polish-and-arabic/r28-international-polish/report.md) | 2026-11-08 | audit | 3BH, 3BI, 3BK |
 | r29 | [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](11-phone-ux/r29-google-play-readiness/report.md) | 2026-11-09 | audit | 3BK |
-| r30 | [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](12-desktop-ux/r30-investments-beyond-stocks/report.md) | 2026-11-09 | audit | 12J, 12K, 12L, 12M, 6D |
+| r30 | [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](12-desktop-ux/r30-investments-beyond-stocks/report.md) | 2026-11-09 | audit | 12J, 12M, 6D |
 | r31 | [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](7-planning-import-and-search/r31-logging-entries/report.md) | 2026-11-09 | audit | 7AK |
 | r32 | [Audit 18: Budget and Cash planning, every tab and sub-page](12-desktop-ux/r32-budget-and-cash-planning/report.md) | 2026-11-09 | audit | 12Q |
 | r33 | [Code review: what is slow, loose, complicated or cut off from the rest](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md) | 2026-11-09 | audit | none |
 | r34 | [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](12-desktop-ux/r34-accounts-and-transactions/report.md) | 2026-11-10 | audit | none |
-| r35 | [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](12-desktop-ux/r35-ux-against-users-questions/report.md) | 2026-11-09 | audit | 12Y, 12Z, 12AB, 3BH |
+| r35 | [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](12-desktop-ux/r35-ux-against-users-questions/report.md) | 2026-11-09 | audit | 12Y, 12AB, 3BH |
 | r36 | [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](11-phone-ux/r36-figures-one-owner/report.md) | 2026-11-09 | audit | none |
 
 

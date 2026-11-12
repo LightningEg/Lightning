@@ -7,7 +7,7 @@ Model: the smallest model that can do it alone (Sonnet or Opus); a step may diff
 
 Each code starts with what the item is: **BV** bug, visual · **BT** bug, technical · **IV** improvement, visual · **IT** improvement, technical · **NF** new feature · **OW** owner task.
 
-11 big pictures, 9 open items. Each folder holds its reports and its items.
+11 big pictures, 7 open items. Each folder holds its reports and its items.
 
 ## 1 Easy to contribute
 
@@ -155,12 +155,10 @@ The PC app leads with the answer, works in bulk without surprises, and offers th
 
 | Code | Item | Kind | Pillar | Size | Model | Status |
 |---|---|---|---|---|---|---|
-| **IV-12K** | [One door to add an investment: ask what it is first, and list only what can be chosen](12-desktop-ux/IV-12K-one-door-to-add-an-investment.md) | improvement, visual | Capture | M | Sonnet | ready |
-| **IV-12L** | [Gold: add a piece and its purchase in one step, pick the price by karat, and show bars with the jewellery](12-desktop-ux/IV-12L-gold-one-step-and-one-table.md) | improvement, visual | Own | M | Sonnet | ready |
 
 Reports: [r1](12-desktop-ux/r1-demo-readiness/report.md) · [r19](12-desktop-ux/r19-desktop-tab-audit/report.md) · [r24](12-desktop-ux/r24-desktop-phone-ux/report.md) · [r26](12-desktop-ux/r26-user-test-pc-and-phone/report.md) · [r27](12-desktop-ux/r27-journeys-and-visual-unity/report.md) · [r30](12-desktop-ux/r30-investments-beyond-stocks/report.md) · [r32](12-desktop-ux/r32-budget-and-cash-planning/report.md) · [r34](12-desktop-ux/r34-accounts-and-transactions/report.md) · [r35](12-desktop-ux/r35-ux-against-users-questions/report.md).
 
-Done: 12A, 12B, 12C, 12D, 12E, 12F, 12H, 12N, 12U, 12V, 12W, 12X, 3AZ, IV-3H, BV-12O, IV-12P, IV-12T, NF-12I, NF-12R, NF-12S, BT-12AC, BT-12AD, IT-12AE, IV-12AA. Next free code: 12AC.
+Done: 12A, 12B, 12C, 12D, 12E, 12F, 12H, 12N, 12U, 12V, 12W, 12X, 3AZ, IV-3H, BV-12O, IV-12K, IV-12L, IV-12P, IV-12T, IV-12Z, NF-12I, NF-12R, NF-12S, BT-12AC, BT-12AD, IT-12AE, IV-12AA. Next free code: 12AC.
 
 ## Parked
 
@@ -187,7 +185,6 @@ Kept, not planned: nobody works on these until the owner picks one (set its stat
 - **IV-12J** [Certificates read as certificates: their own holding page, payouts as the bank pays them, value that grows, and a nudge at maturity](12-desktop-ux/IV-12J-certificates-read-as-certificates.md)
 - **IV-12Q** [The unfinished pages of Budget and Cash planning get the page pattern: a lead figure, a visual, cards](12-desktop-ux/IV-12Q-unfinished-budget-and-cash-pages.md)
 - **IV-12Y** [One page skeleton on the PC, kept by a test - every tab has the same title rule, an answer sentence, its dates, and the same controls in the same order](12-desktop-ux/IV-12Y-one-page-skeleton-on-the-pc.md)
-- **IV-12Z** [The answer on one screen, the rest on request - Spending, Cash planning and Investments run 3 to 4 screens and repeat lists](12-desktop-ux/IV-12Z-answer-on-one-screen-on-the-pc.md)
 - **IV-3AM** [PC declutter, tab by tab - the answer above the fold at 1366 x 768, no figure that contradicts another, read views that are not forms](12-desktop-ux/IV-3AM-pc-declutter-tab-by-tab.md)
 - **NF-12AB** [Every headline figure explains itself in place - one gesture and one label instead of "Show the numbers", "How it is worked out", "See details", "See them" and bare chevrons](12-desktop-ux/NF-12AB-every-figure-explains-itself-in-place.md)
 - **NF-12G** [Money lent to others and costs split with others - who owes you what, counted honestly in what you own](12-desktop-ux/NF-12G-money-lent-and-split-with-others.md)

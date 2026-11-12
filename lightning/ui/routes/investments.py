@@ -543,10 +543,35 @@ def _save(request: Request, kind: str, v: dict, txn_id: int | None = None):
 @router.get("/add")
 async def add_investment(request: Request):
     """One door (r30 E1-E4): ask what it is, then go to the short form that fits."""
+    return render(request, "investments/add.html")
+
+
+def _first_cd_portfolio(c):
+    return next((a for a in c.accounts.list(active_only=True) if a.account_type == AccountType.DEPOSIT), None)
+
+
+@router.get("/certificate")
+async def add_certificate(request: Request):
+    """The certificate door: an existing CD portfolio opens; none yet asks for the bank and opens one on the way."""
+    cd = _first_cd_portfolio(container(request))
+    if cd:
+        return redirect(f"/accounts/{cd.id}")
+    return render(request, "investments/add_certificate.html", bank="", error="")
+
+
+@router.post("/certificate")
+async def create_certificate_portfolio(request: Request):
     c = container(request)
-    cd = next((a for a in c.accounts.list(active_only=True) if a.account_type == AccountType.DEPOSIT), None)
-    return render(request, "investments/add.html",
-                  certificate_href=f"/accounts/{cd.id}" if cd else "/accounts/new?type=DEPOSIT")
+    form = await request.form()
+    bank = str(form.get("bank", "")).strip()
+    try:
+        if not bank:
+            raise LightningError("Name the bank that issued the certificate.", "bank")
+        with settled_save(request, c):
+            account = c.account_flows.open_account(f"{bank} CD", "DEPOSIT", today().isoformat(), "0", institution=bank)
+    except LightningError as exc:
+        return render(request, "investments/add_certificate.html", status_code=400, bank=bank, error=exc.message)
+    return redirect(f"/accounts/{account.id}", f"Opened {bank} CD. Add the certificate here.")
 
 
 @router.get("/new")
