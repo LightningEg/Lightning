@@ -537,5 +537,103 @@
     "original": "originals/valu.png",
     "source_url": "https://valugroup.com/icon.svg",
     "source_type": "official"
+  },
+  "carrefour": {
+    "name": "Carrefour",
+    "category": "supermarket",
+    "icon": "icons/carrefour.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/carrefour.svg",
+    "source_type": "Simple Icons"
+  },
+  "bim": {
+    "name": "BIM",
+    "category": "supermarket",
+    "icon": "icons/bim.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/bim.svg",
+    "source_type": "Simple Icons"
+  },
+  "noon": {
+    "name": "noon",
+    "category": "brand",
+    "icon": "icons/noon.svg",
+    "source_url": "https://raw.githubusercontent.com/JabberLabs/awesome-dashboard-icons/main/icons/noon.svg",
+    "source_type": "community icon pack"
+  },
+  "talabat": {
+    "name": "Talabat",
+    "category": "brand",
+    "icon": "icons/talabat.svg",
+    "source_url": "https://raw.githubusercontent.com/Delta-Icons/android/master/resources/vectors/talabat.svg",
+    "source_type": "community icon pack"
+  },
+  "mcdonalds": {
+    "name": "McDonald's",
+    "category": "brand",
+    "icon": "icons/mcdonalds.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/mcdonalds.svg",
+    "source_type": "Simple Icons"
+  },
+  "kfc": {
+    "name": "KFC",
+    "category": "brand",
+    "icon": "icons/kfc.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/kfc.svg",
+    "source_type": "Simple Icons"
+  },
+  "starbucks": {
+    "name": "Starbucks",
+    "category": "brand",
+    "icon": "icons/starbucks.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/starbucks.svg",
+    "source_type": "Simple Icons"
+  },
+  "netflix": {
+    "name": "Netflix",
+    "category": "brand",
+    "icon": "icons/netflix.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/netflix.svg",
+    "source_type": "Simple Icons"
+  },
+  "spotify": {
+    "name": "Spotify",
+    "category": "brand",
+    "icon": "icons/spotify.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/spotify.svg",
+    "source_type": "Simple Icons"
+  },
+  "uber": {
+    "name": "Uber",
+    "category": "brand",
+    "icon": "icons/uber.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/uber.svg",
+    "source_type": "Simple Icons"
+  },
+  "ikea": {
+    "name": "IKEA",
+    "category": "brand",
+    "icon": "icons/ikea.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/ikea.svg",
+    "source_type": "Simple Icons"
+  },
+  "nike": {
+    "name": "Nike",
+    "category": "brand",
+    "icon": "icons/nike.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/nike.svg",
+    "source_type": "Simple Icons"
+  },
+  "adidas": {
+    "name": "adidas",
+    "category": "brand",
+    "icon": "icons/adidas.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/adidas.svg",
+    "source_type": "Simple Icons"
+  },
+  "zara": {
+    "name": "Zara",
+    "category": "brand",
+    "icon": "icons/zara.svg",
+    "source_url": "https://raw.githubusercontent.com/simple-icons/simple-icons/develop/icons/zara.svg",
+    "source_type": "Simple Icons"
   }
 }

@@ -10,6 +10,7 @@ from decimal import Decimal
 from lightning.bank_import_rows import is_balance_row, is_internal, split_category_path
 from lightning.categories.domain import Movement
 from lightning.core.errors import NotFoundError, ValidationError
+from lightning.foreign_amounts import ForeignAmounts
 from lightning.transactions.tags import tags_in
 
 # A bank may post a purchase days after the transaction already in the ledger.
@@ -143,6 +144,8 @@ class ImportProposals:
             parsed = record["parsed"]
             raw = record.get("raw") if isinstance(record.get("raw"), dict) else {}
             parsed["_message"] = str(raw.get("Message", ""))[:1000]  # a bank SMS row keeps its message (IV-3AU)
+            # NF-7AK3: "USD 12.99" paid, Amount its pounds; only SMS batches write the column (a file's own is not read).
+            parsed["_foreign"] = str(raw.get("Foreign", ""))[:40] if batch["file_name"].startswith("SMS ") else ""
             ref_duplicate = bool(row["bank_reference"] and (row["bank_reference"] in seen_refs or (
                 row["bank_reference"] in self._seen["references"] if self._seen is not None else self.db.scalar(
                 "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
@@ -272,12 +275,36 @@ class ImportProposals:
             "ORDER BY abs(julianday(t.date)-julianday(?)), t.id",
             (account_id, account_id, account_id, parsed["Date"], LINK_WINDOW_DAYS, parsed["Date"],
              LINK_WINDOW_DAYS, batch_id, account_id, batch_id, amount_e6, parsed["Date"]))
-        return [{"id": r["id"], "date": r["date"], "type": r["type"],
-                 "counterparty": r["counterparty"] or "", "notes": r["notes"] or "",
-                 "amount": parsed["Amount"], "source_count": r["source_count"],
-                 "conversion": self._conversion_legs(r["id"]) if r["type"] == "CNV" else "",
-                 "source_files": r["source_files"] or "",
-                 "from_sms": any(name.startswith("SMS ") for name in (r["source_files"] or "").split(","))} for r in rows]
+        found = [{"id": r["id"], "date": r["date"], "type": r["type"],
+                  "counterparty": r["counterparty"] or "", "notes": r["notes"] or "",
+                  "amount": parsed["Amount"], "source_count": r["source_count"],
+                  "conversion": self._conversion_legs(r["id"]) if r["type"] == "CNV" else "",
+                  "source_files": r["source_files"] or "",
+                  "from_sms": any(name.startswith("SMS ") for name in (r["source_files"] or "").split(","))} for r in rows]
+        if not parsed.get("_foreign"):
+            found += self._settles(account_id, parsed, batch_id, {r["id"] for r in found})
+        return found
+
+    def _settles(self, account_id: int, parsed: dict, batch_id: int | None, known: set[int]) -> list[dict]:
+        """NF-7AK3: a pound debit that may be the bank's charge for a purchase made in another currency. Offered as
+        that entry; linking it sets the entry to this amount (`ImportPoster._link_import_row`), so it stays one."""
+        found = []
+        for item in ForeignAmounts(self.db).open_near(account_id, parsed["Date"], Decimal(parsed["Amount"])):
+            if item["id"] in known or (batch_id is not None and self.db.scalar(
+                    "SELECT 1 FROM bank_import_rows WHERE transaction_id=? AND batch_id=? AND status IN ('POSTED','LINKED')",
+                    (item["id"], batch_id))):
+                continue
+            txn = self.db.one("SELECT type,counterparty,notes FROM transactions WHERE id=?", (item["id"],))
+            sources = self.db.all("SELECT b.file_name FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
+                                  "WHERE r.transaction_id=? AND r.account_id=? AND r.status IN ('POSTED','LINKED')",
+                                  (item["id"], account_id))
+            found.append({"id": item["id"], "date": item["date"], "type": txn["type"],
+                          "counterparty": txn["counterparty"] or "", "notes": txn["notes"] or "",
+                          "amount": parsed["Amount"], "source_count": len(sources), "conversion": "",
+                          "source_files": ",".join(r["file_name"] for r in sources),
+                          "from_sms": any(r["file_name"].startswith("SMS ") for r in sources),
+                          "settles": item["settles"], "estimate": format(item["estimate"], "f")})
+        return found
 
     def _voided_earlier(self, account_id: int, batch_id: int, reference: str | None, parsed: dict) -> bool:
         """An earlier import of this row was voided: importing it again must not quietly bring it back."""
