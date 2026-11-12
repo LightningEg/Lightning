@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "partials/macros.html" import page_title %}{% from "planning/_inputs_rows.html" import input_rows with context %}
+{% from "partials/macros.html" import page_title %}{% from "partials/forecast_inputs_rows.html" import input_rows with context %}
 {% block title %}{{ 'Forecast inputs'|tr(locale) }}{% endblock %}
 {% block heading %}{{ page_title('Forecast inputs'|tr(locale), status, as_of|day(locale), 'what the forecast leans on') }}{% endblock %}
 {% block top_actions %}<a class="btn" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>{% endblock %}

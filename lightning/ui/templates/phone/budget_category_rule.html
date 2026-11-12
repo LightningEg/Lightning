@@ -2,7 +2,7 @@
 {% extends "base.html" %}
 {% block title %}{{ 'Change limit'|tr(locale) }} · {{ category.name|tr(locale) }}{% endblock %}
 {% block heading %}<h1 id="app-popup-title">{{ category.name }}</h1><p class="phone-note">{{ 'Change the monthly limit for this category only.'|tr(locale) }} {{ month|month(locale) }}</p>{% endblock %}
-{% block content %}{% include "budget/_limit_spent.html" %}<form method="post" action="/budget/rule/{{ category.id }}" class="phone-form">
+{% block content %}{% include "partials/budget_limit_spent.html" %}<form method="post" action="/budget/rule/{{ category.id }}" class="phone-form">
 <input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
 <label for="category-limit">{{ 'Amount or %'|tr(locale) }}</label><input id="category-limit" name="rule" value="{{ rule }}" inputmode="decimal" autocomplete="off">
 <p class="phone-note">{{ 'An empty value clears this category’s limit.'|tr(locale) }}</p>

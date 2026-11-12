@@ -125,6 +125,7 @@ class CashFundingService:
         available = None if ready is None else ready + unfunded_due
         reserves_added = sum((row["suggested"] for row in reserve_rows), ZERO)
         proposal = {"bills": unfunded_due, "to_plan": to_plan, "reserves": reserves_added,
+                    "assigned": unfunded_due + to_plan + reserves_added,   # IV-12Q1: what Confirm gives a job
                     "available_before": available,
                     "unassigned": None if available is None else available - unfunded_due - to_plan - reserves_added}
         return {"month": month, "rows": rows, "reserves": reserve_rows, "cash": own_cash,

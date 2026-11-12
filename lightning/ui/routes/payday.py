@@ -20,7 +20,7 @@ def _page(request, c, **extra):
     pr = allocation["proposal"]
     return render(request, "planning/payday.html", enabled=c.funding.enabled, allocation=allocation,
                   forecast=c.forecaster.forecast(), lead=lead, split=split,
-                  status=status.payday(pr["available_before"], pr["unassigned"], c.funding.enabled), **extra)
+                  status=status.payday(pr["available_before"], pr["unassigned"], c.funding.enabled, pr["assigned"]), **extra)
 
 
 @router.post("/enable")

@@ -113,7 +113,14 @@ async def settings_page(request: Request):
                               "value": sum((r["value"] for r in rows), ZERO),
                               "estimate": sum((r["estimate"] for r in rows), ZERO)})
     income_categories = [x for x in c.categories.tree(Movement.INFLOW) if not x.is_root and x.income_class is not None]
+    system_income = {x.id for x in income_categories if x.is_system}   # IV-12Q5: offered nowhere, kept if chosen
+    income_categories = [x for x in income_categories if not x.is_system]
     expense_categories = [x for x in c.categories.tree(Movement.OUTFLOW) if not x.is_root]
+    # IV-12Q5: the one-off list offers spending categories only: never System Categories (transfers, adjustments,
+    # loan payments), Unaccounted Spending or investments, which the budget never counts anyway.
+    one_off_categories = [x for x in expense_categories if x.active and not x.is_system
+                          and x.code != "EXP.SYSTEM" and not x.code.startswith("EXP.SYSTEM.")
+                          and str(getattr(x.family, "value", x.family)) != "INVESTMENT"]
     category_ids_by_code = {item.code: item.id for item in c.categories.tree()}
 
     def stored_category_ids(key):
@@ -157,6 +164,9 @@ async def settings_page(request: Request):
                   budget_return_to=f"/settings?section=budget&return_to={return_to}",
                   income_categories=income_categories, expense_categories=expense_categories,
                   selected_income=selected_income, excluded_categories=excluded_categories,
+                  one_off_categories=one_off_categories,
+                  kept_exclusions=sorted(excluded_categories - {x.id for x in one_off_categories}),  # not money: ids
+                  kept_income=sorted(selected_income & system_income),
                   carryover=c.settings.get("budget_carryover_global")=="1",
                   income_months=c.settings.get("budget_income_months") or "3",
                   emergency_basis=c.budgets.emergency_basis(),

@@ -1921,6 +1921,9 @@ ARABIC_UI = {
     'Replace in {count} of {selected} selected rows?': 'استبدال في {count} من {selected} صفوف محددة؟',
     'Rows that do not contain the text stay as they are. You can undo this from transaction history.': 'الصفوف التي لا تحتوي النص تبقى كما هي. يمكنك التراجع من سجل المعاملات.',
     'Replace': 'استبدل',
+    # IV-12Q5: Budget and Budget settings
+    'Tick a category to leave it out of the budget, its averages and the forecast.': 'علّم على الفئة عشان تطلّعها من الميزانية ومتوسطاتها والتوقع.',
+    'The same as': 'زي',
     # IV-12Q4: Recurring
     'About {amount} a month': 'حوالي {amount} في الشهر',
     # IV-12Q3: Change limit, Fill this month, Carryover

@@ -265,7 +265,7 @@ async def recurring_page(request: Request):
         top = max((r["per_year"] for r in rows if r["item"].is_income == side), default=ZERO)
         for r in rows:
             if r["item"].is_income == side:
-                r["share"] = float(max(r["per_year"], ZERO) / top * 100) if top > 0 else 0.0
+                r["share"] = float(max(r["per_year"], ZERO) / top * 100) if top > 0 else 0.0  # not money: a bar width
     bill_bars = charts.bars([{"label": r["item"].name, "value": r["per_year"] / 12,
                               "note": r["item"].kind_label + (" · " + r["category"] if r["category"] else "")}
                              for r in rows if not r["item"].is_income])
@@ -877,9 +877,8 @@ async def scenario_page(request: Request):
     payments, _ = c.forecaster.scheduled_inputs(day, end)
     from .. import kpis, status
     lead, chart = kpis.scenario(comparison)
-    moved = comparison.scenario_plan_low
     page_status = status.scenario(bool(comparison.assumptions), comparison.plan_low.closing if comparison.plan_low else None,
-                                  moved[1] if moved else None)
+                                  comparison.change)
     return render(request, "planning/scenarios.html", comparison=comparison, values=values, error=error, what=what,
                   lead=lead, chart=chart, status=page_status,
                   day=str(day), end=str(end), payments=payments, occurrence_key=occurrence_key,

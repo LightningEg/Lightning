@@ -24,6 +24,13 @@ class ScenarioResult:
     scenario_plan_low: object = None  # the same months moved by what the scenario changes: (month, closing)
     months: tuple = ()            # IV-12Q2: every month as (month, plan closing, scenario closing or None), for the chart
 
+    @property
+    def change(self):
+        """IV-12Q2: what the scenario does to the plan's Lowest point ahead (None without both)."""
+        if self.plan_low is None or self.scenario_plan_low is None:
+            return None
+        return self.scenario_plan_low[1] - self.plan_low.closing
+
 
 def _balance_on(projection, on: str):
     """Day-end combined scheduled cash on ``on``: the last point on or before it (None when FX is missing)."""

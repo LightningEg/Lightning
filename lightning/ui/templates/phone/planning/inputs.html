@@ -1,5 +1,5 @@
 {# Forecast inputs on the phone (3AY16, IV-12Q2): one row per account or currency, each with one action. #}
-{% extends "base.html" %}{% from "planning/_inputs_rows.html" import input_rows with context %}
+{% extends "base.html" %}{% from "partials/forecast_inputs_rows.html" import input_rows with context %}
 {% block title %}{{ 'Forecast inputs'|tr(locale) }}{% endblock %}
 {% block phone_back %}<a class="phone-back" href="/plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Cash planning'|tr(locale) }}</span></a>{% endblock %}
 {% block heading %}<h1 id="app-popup-title">{{ 'Forecast inputs'|tr(locale) }}</h1>{% endblock %}

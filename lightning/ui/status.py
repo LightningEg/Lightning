@@ -191,7 +191,7 @@ def currencies(n: int, value: Decimal, unrealized: Decimal, complete: bool) -> d
     return sentence("Your foreign money is worth {amt}.", amt=fmt(value, 0))
 
 
-def payday(available: Decimal | None, unassigned: Decimal | None, enabled: bool) -> dict:
+def payday(available: Decimal | None, unassigned: Decimal | None, enabled: bool, assigned: Decimal | None = None) -> dict:
     """How do I share out the cash I already have? (IV-12Q1)"""
     if available is None:
         return sentence("Add current exchange rates to share out your cash.")
@@ -199,7 +199,7 @@ def payday(available: Decimal | None, unassigned: Decimal | None, enabled: bool)
         return sentence("Turn on cash funding to share out {amt}.", amt=fmt(available, 0))
     if unassigned is not None and unassigned < ZERO:
         return sentence("This plan needs {amt} more than the cash you have.", amt=fmt(-unassigned, 0))
-    return sentence("Confirm to give {amt} a job; {left} stays unassigned.", amt=fmt(available - (unassigned or ZERO), 0),
+    return sentence("Confirm to give {amt} a job; {left} stays unassigned.", amt=fmt(assigned or ZERO, 0),
                     left=fmt(unassigned or ZERO, 0))
 
 
@@ -212,13 +212,12 @@ def forecast_inputs(subjects: int) -> dict:
     return sentence("{n} accounts or currencies behind the forecast need a look.", n=subjects)
 
 
-def scenario(changed: bool, plan_low: Decimal | None, scenario_low: Decimal | None) -> dict:
+def scenario(changed: bool, plan_low: Decimal | None, diff: Decimal | None) -> dict:
     """What would this change do to my lowest point ahead? (IV-12Q2)"""
     if plan_low is None:
         return sentence("Add your recurring payments to compare scenarios.")
-    if not changed or scenario_low is None:
+    if not changed or diff is None:
         return sentence("Your lowest point ahead is {amt}. Pick a change to compare.", amt=fmt(plan_low, 0))
-    diff = scenario_low - plan_low
     if diff < ZERO:
         return sentence("This change lowers your lowest point ahead by {amt}.", amt=fmt(-diff, 0))
     if diff > ZERO:

@@ -168,8 +168,9 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         elif check.over_by:
             tail = line(f"Plan {fmt(check.over_by, 0)} less to keep {fmt(check.to_save, 0)} a month")
         elif check.unassigned is not None and check.unassigned > 0:
-            # IV-12P: the figure is the Not yet given a job row's own; here it is a link to that row
-            tail = line("Some income has no job yet", "Give it a job", "#budget-unassigned")
+            # IV-12P: the figure is the Not yet given a job row's own (in the Lead, IV-12Q5); the action opens Fill this
+            # month, which opens on a source that has rows (IV-12Q3)
+            tail = line("Some income has no job yet", "Give it a job", f"/budget/fill?month={month}")
         else:
             tail = line(f"{fmt(check.to_save, 0)} a month to save")
         good = not check.over_by
@@ -504,7 +505,7 @@ def scenario(result) -> tuple[dict | None, dict | None]:
     changed = bool(result.assumptions) and moved is not None
     value = moved[1] if changed else low.closing
     if changed:
-        diff = moved[1] - low.closing
+        diff = result.change
         comparison = compare("on your plan's lowest point", _signed(diff),
                              "bad" if diff < 0 else "good" if diff > 0 else "plain")
     else:

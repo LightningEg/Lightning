@@ -74,3 +74,27 @@ def test_carryover_off_offers_to_turn_it_on(client):
         assert 'action="/budget/carryover/global"' in page and "Turn on carryover for every category" in page
     else:
         assert "Carried over" in page
+
+
+def test_budget_keeps_the_ai_prompt_in_the_menu_and_the_unassigned_row_in_the_lead(client):
+    """12Q5 (r32 U8): the prompt sits behind the header's More actions, Not yet given a job under the Lead's answer."""
+    c, http = client
+    page = http.get("/budget?month=2026-10").text
+    menu = page[page.index('class="action-menu budget-ai-menu"'):]
+    menu = menu[:menu.index("</details>")]
+    assert "data-ai-copy" in menu and "data-ai-edit" in menu
+    assert page.count("data-ai-copy") == 1 and 'class="ai-line"' not in page
+    lead = page[page.index('class="card lead-card lead-hero"'):]
+    lead = lead[:lead.index("</section>")]
+    assert "Not yet given a job" in lead and 'id="budget-unassigned"' not in page
+
+
+def test_budget_settings_offers_spending_categories_only_and_keeps_hidden_choices(client):
+    c, http = client
+    page = http.get("/settings?section=budget").text
+    assert "System Categories" not in page and "Investment Fees" not in page and "Unaccounted" not in page
+    assert "Tick a category to leave it out of the budget" in page
+    zakat = c.categories.find_by_text("Zakat").id
+    c.settings.set("budget_one_off_exclusions", f"[{zakat}]")
+    page = http.get("/settings?section=budget").text
+    assert f'<input type="hidden" name="exclusion_category" value="{zakat}">' in page   # saving keeps it
