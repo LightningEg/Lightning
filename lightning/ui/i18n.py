@@ -1128,6 +1128,7 @@ ARABIC_UI = {
     'Match the bank’s categories to yours': 'طابق فئات البنك بفئاتك',
     'Recurring counts toward the income average and forecast. One-off stays in cash flow, out of the budget. Changes save as you make them.': 'المتكرر بيدخل في متوسط الدخل والتوقع. لمرة واحدة بيفضل في التدفق النقدي وبره الميزانية. التغييرات بتتحفظ أول بأول.',
     'What do Recurring and One-off mean?': 'يعني إيه متكرر ولمرة واحدة؟',
+    'Stop tracking': 'وقّف المتابعة',
     'Hide amounts': 'إخفاء المبالغ',
     'Show amounts': 'إظهار المبالغ',
     'Profiles & lock': 'الملفات الشخصية والقفل',

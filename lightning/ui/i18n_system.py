@@ -65,6 +65,7 @@ ASSET_KINDS = {
     "Money Market Fund": "صندوق نقدي",
     "Fixed Income Fund": "صندوق دخل ثابت",
     "Gold Fund": "صندوق ذهب",
+    "Cloud": "كلاود",
     "Other Fund": "صندوق آخر",
     "Gold": "الذهب",
     "Other Investments": "استثمارات أخرى",

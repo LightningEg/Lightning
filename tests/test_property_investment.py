@@ -105,9 +105,10 @@ def test_an_older_profile_upgrades_and_takes_the_real_estate_class(monkeypatch, 
     monkeypatch.setattr(migrator, "MIGRATIONS_DIR", bundled)
     migrator.migrate(db)
     assert db.scalar("SELECT name FROM asset_classes WHERE code='REAL_ESTATE'") == "Real estate"
-    assert db.scalar("SELECT COUNT(*) FROM asset_classes") == before + 1
+    # Real estate (0079) and Cloud (0082) are the two classes added after migration 78.
+    assert db.scalar("SELECT COUNT(*) FROM asset_classes") == before + 2
     migrator.migrate(db)
-    assert db.scalar("SELECT COUNT(*) FROM asset_classes") == before + 1
+    assert db.scalar("SELECT COUNT(*) FROM asset_classes") == before + 2
     db.close()
 
 
