@@ -20,6 +20,6 @@ async def integrity_page(request: Request):
     except ValidationError as exc:
         return redirect("/checks", exc.message)
     checks = container(request).integrity.checks(as_of)
-    counts = {status: sum(check.status == status for check in checks)
+    counts = {status: sum(check.status == status for check in checks)  # not money: counts
               for status in ("PASS", "ISSUE", "INCOMPLETE")}
     return render(request, "integrity.html", checks=checks, as_of=as_of, counts=counts)

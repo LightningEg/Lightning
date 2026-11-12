@@ -51,7 +51,7 @@ def _page(request: Request, account_id: int, values=None, error="", status_code=
         legacy = None
     outlooks = {cert.terms.id: c.deposits.maturity_outlook(cert) for cert in certificates}
     interest_receipts = c.deposit_receipts.match_plan(account_id)
-    suggestions = sum(1 for item in interest_receipts if item["suggested"])
+    suggestions = sum(1 for item in interest_receipts if item["suggested"])  # not money: a count
     return render(request, "deposits/detail.html", status_code=status_code, account=account,
                   certificates=certificates, values=values or _values(), error=error,
                   liquid_accounts=liquid, liquid_by_id=liquid_by_id, sale_factor=factor, legacy=legacy,

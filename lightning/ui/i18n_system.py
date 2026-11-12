@@ -48,6 +48,8 @@ CATEGORIES = {
     "Investment Fees": "رسوم الاستثمار",
     "Tax withheld": "ضريبة مخصومة",
     "Other Investment": "استثمار آخر",
+    "Rent received": "إيجار مستلم",
+    "Property costs": "مصاريف العقار",
 }
 
 ASSET_KINDS = {
@@ -66,6 +68,7 @@ ASSET_KINDS = {
     "Other Fund": "صندوق آخر",
     "Gold": "الذهب",
     "Other Investments": "استثمارات أخرى",
+    "Real estate": "عقارات",
     "Equity": "أسهم",
     "Fixed income": "دخل ثابت",
     "Cash & bank": "النقدية والبنوك",

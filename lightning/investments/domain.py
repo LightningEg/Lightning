@@ -13,7 +13,7 @@ Nothing here is stored — it is all recalculated from the ledger.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from decimal import Decimal
 
 from lightning.core.money import ZERO
@@ -23,6 +23,13 @@ from .returns import DisplayReturn
 
 # Sale factor (percent of value a class would fetch if sold today) when none is set in Settings.
 DEFAULT_SALE_FACTOR = Decimal(95)
+# Real estate cannot be sold at short notice (NF-12M1): it counts nothing in Holdings after sale unless you set a factor.
+SLOW_TO_SELL = {"REAL_ESTATE": ZERO}
+
+
+def default_sale_factor(class_code: str) -> Decimal:
+    """The sale factor a class uses when neither it nor a parent has one set."""
+    return SLOW_TO_SELL.get(class_code, DEFAULT_SALE_FACTOR)
 
 
 @dataclass
@@ -99,6 +106,38 @@ class Position:
     @property
     def is_open(self) -> bool:
         return self.quantity != ZERO
+
+    def owned_only(self) -> Position:
+        """This holding with your own units only: their cost, gains, dividends and share of the value. Its
+        return and XIRR stay only when nobody else owns part of it."""
+        factor = (self.owned_quantity or ZERO)/self.quantity if self.quantity else ZERO
+        return replace(self, quantity=self.owned_quantity or ZERO, cost_basis=self.owned_cost_basis,
+                       realized=self.owned_realized, dividends=self.owned_dividends,
+                       dividend_tax=self.owned_dividend_tax,
+                       value=(self.value*factor if self.value is not None else None),
+                       xirr=None if self.has_other_owners else self.xirr,
+                       display_return=None if self.has_other_owners else self.display_return)
+
+    @property
+    def gain_pct(self) -> Decimal | None:
+        """Unrealized gain as a percent of the cost still held."""
+        return self.unrealized / self.cost_basis * 100 if self.unrealized is not None and self.cost_basis else None
+
+    @property
+    def value_plus_paid(self) -> Decimal:
+        """What you paid plus the total return: the value and everything it paid you."""
+        return self.cost_basis + self.total_return
+
+    @property
+    def xirr_pct(self) -> Decimal | None:
+        return self.xirr * 100 if self.xirr is not None else None
+
+    def realized_since(self, previous: Position | None) -> Decimal:
+        """Gain from sales since ``previous`` (this holding on an earlier day; None when it did not exist)."""
+        return self.realized-(previous.realized if previous else ZERO)
+
+    def dividends_since(self, previous: Position | None) -> Decimal:
+        return self.dividends-(previous.dividends if previous else ZERO)
 
 
 @dataclass

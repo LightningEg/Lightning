@@ -30,9 +30,7 @@ REGISTERS = {"transactions", "categories"}  # long lists by nature (IV-12Z1)
 ORDER = ("period", "undo", "action", "gear")  # A05 · IV-12Y3: the header's controls, left to right
 
 # (rule, tab key) -> the item that fixes it. Remove an entry in the commit that fixes it.
-ALLOWED: dict[tuple[str, str], str] = {
-    ("length", "holdings"): "IV-12Z4",
-}
+ALLOWED: dict[tuple[str, str], str] = {}
 
 MEASURE = """() => {
   const top = document.querySelector('.topbar');

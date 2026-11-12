@@ -7,6 +7,7 @@ from urllib.parse import urlencode
 from fastapi import Request
 
 from lightning.core.refs import DOC_LABELS
+from lightning.transactions.figures import cash_amount
 
 FAR_PAST, FAR_FUTURE = "1900-01-01", "9999-12-31"
 
@@ -59,7 +60,7 @@ def sheet_context(request: Request, c, txn) -> dict:
     account = c.accounts.get(source.account_id)
     target = next((c.accounts.get(line.account_id) for line in cash if line.account_id != source.account_id), None) \
         if transfer else None
-    amount = abs(source.quantity) if transfer else abs(sum((line.quantity for line in cash), start=0))
+    amount = abs(source.quantity) if transfer else cash_amount(cash)
     category_ids = sorted({line.category_id for line in cash if line.category_id})
     category = c.categories.get(category_ids[0]) if len(category_ids) == 1 else None
     unsorted = not transfer and (not category_ids or (category is not None and category.code.endswith("UNACCOUNTED")))
@@ -75,7 +76,7 @@ def sheet_context(request: Request, c, txn) -> dict:
         pickable = {item.id for item in c.categories.pickable()}
         learned = category_for_party(party, c.transactions.usual_categories(), pickable)
         if learned and c.categories.get(learned).movement.value == ("OUTFLOW" if movement == "out" else "INFLOW"):
-            usual = [learned] + [item for item in usual if item != learned]
+            usual = [learned] + [item for item in usual if item != learned]  # not money: list glue
         chips = [{"id": item, "label": c.categories.get(item).name} for item in usual[:5]]
         other = [item for item in c.categories.pickable()
                  if item.movement.value == ("OUTFLOW" if movement == "out" else "INFLOW") and not item.is_system]

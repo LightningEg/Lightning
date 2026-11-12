@@ -8,8 +8,8 @@ from decimal import Decimal
 from urllib.parse import urlencode
 
 from lightning.core.dates import fmt_date, month_of, today
-from lightning.core.money import ZERO, fmt
-from lightning.reporting.spending import partial_months
+from lightning.core.money import fmt
+from lightning.reporting.spending import average, change, change_percent, partial_months, rest_of, usual_for
 from lightning.ui import spending_page, visuals
 
 
@@ -18,8 +18,8 @@ def _compare(label: str, now: Decimal, then: Decimal | None, first, last) -> dic
     reads flat (same days, so far)."""
     if then is None:
         return {"label": label, "text": "nothing to compare yet", "tone": "flat"}
-    diff = now - then
-    pct = f" · {abs(diff) / then * 100:.0f}%" if then else ""
+    diff = change(now, then)
+    pct = f" · {change_percent(now, then):.0f}%" if then else ""
     return {"label": label, "text": f"{'+' if diff > 0 else '−' if diff < 0 else ''}{fmt(abs(diff), 0)}{pct}",
             "tone": "flat" if partial_months(first, last) else ("up" if diff > 0 else "down" if diff < 0 else "flat")}
 
@@ -39,18 +39,19 @@ def build(request, c) -> dict:
     partial = partial_months(first, last)
     compare = [_compare("Against the same days in earlier months" if partial else
                         f"Against your usual {'month' if months == 1 else 'months'}",
-                        total, usual * months if usual is not None else None, first, last),
+                        total, usual_for(usual, months) if usual is not None else None, first, last),
                _compare(f"Against {prior_label}" if prior_label else "Against the period before", total, prior_total,
                         first, last)]
     query = (f"category_id={category_filter}&" if category_filter else "") + f"date_from={fmt_date(first)}&date_to={fmt_date(last)}"
     named = [r for r in analysis["rows"] if not r.get("others")]
-    rest = named[PHONE_CATEGORIES:] + [r for r in analysis["rows"] if r.get("others")]
-    other = ({"name": "Other", "value": sum((r["value"] for r in rest), ZERO), "share": sum((r["share"] for r in rest), ZERO),
+    rest = named[PHONE_CATEGORIES:] + [r for r in analysis["rows"] if r.get("others")]  # not money: rows
+    rest_value, rest_share = rest_of(rest)
+    other = ({"name": "Other", "value": rest_value, "share": rest_share,
               "href": f"/transactions?{query}"} if rest else None)
     earlier = None
     if total == 0 and selected.key == "month" and not category_filter:
-        start = (first - timedelta(days=1)).replace(day=1)
-        spent = c.reporting.cash_flow(start, first - timedelta(days=1)).outflows
+        start = (first - timedelta(days=1)).replace(day=1)  # not money
+        spent = c.reporting.cash_flow(start, first - timedelta(days=1)).outflows  # not money: the dates
         if spent > 0:
             earlier = {"month": month_of(start), "value": spent,
                        "href": f"/birdview/expenses?period=month&month={month_of(start)}"}
@@ -75,6 +76,6 @@ def more(request, c) -> dict:
     payments = [r["value"] for r in c.reporting.largest_payments(first, last, 10 ** 6)] if not category_code else []
     flows = visuals.cash_flow_charts(c, first, last, selected.key == "month", today()) if not category_filter else {}
     return dict(**flows, analysis=analysis, largest=largest,
-                  average=(sum(payments, ZERO) / len(payments)) if payments else None, payment_count=len(payments),
+                  average=average(payments), payment_count=len(payments),
                   calendar=visuals.day_calendars(c, first, last, category_code), date_from=fmt_date(first),
                   date_to=fmt_date(last), base=c.reporting.base_currency, category_filter=category_filter)

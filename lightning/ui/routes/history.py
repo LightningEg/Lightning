@@ -30,7 +30,7 @@ async def replay(request: Request, operation: str):
     if not back.startswith("/") or back.startswith("//") or "\\" in back or any(ord(char) < 32 for char in back):
         back = "/"
     if getattr(c, "is_journal", False) and not c.history_is_home:
-        target = back + ("&" if "?" in back else "?") + urlencode(
+        target = back + ("&" if "?" in back else "?") + urlencode(  # not money: a link
             {"msg": "Undo and redo are available on the journal home."})
         return RedirectResponse(target, status_code=303)
     if operation not in {"undo", "redo"} or c.undo is None:

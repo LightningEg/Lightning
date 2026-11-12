@@ -32,7 +32,7 @@ def _plain(*allowed: str, when=None, any_query: bool = False) -> type[APIRoute]:
             match, child = super().matches(scope)
             if match == Match.FULL:
                 keys = {part.split("=", 1)[0] for part in scope.get("query_string", b"").decode().split("&") if part}
-                if not any_query and keys - set(allowed):
+                if not any_query and keys - set(allowed):  # not money: query keys
                     return Match.NONE, {}
                 if when is not None:
                     try:
@@ -194,7 +194,7 @@ def phone_router() -> APIRouter:
         day = today()
         try:
             ReviewInbox(container(request)).decide(str(form.get("identity", "")), "snoozed", day,
-                                                   (day + timedelta(days=1)).isoformat())
+                                                   (day + timedelta(days=1)).isoformat())  # not money
         except LightningError as exc:
             return redirect("/activity?tab=review", exc.message)
         return redirect("/activity?tab=review")
@@ -312,4 +312,4 @@ def mount_phone(app: FastAPI, router: APIRouter | None = None) -> None:
     existing = list(app.router.routes)
     app.include_router(router if router is not None else phone_router())
     added = [route for route in app.router.routes if route not in existing]
-    app.router.routes[:] = added + existing
+    app.router.routes[:] = added + existing  # not money: routes

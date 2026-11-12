@@ -3,11 +3,5 @@
 {% block title %}{{ 'Add investment'|tr(locale) }}{% endblock %}
 {% block heading %}{{ page_header('Add investment', 'What is it?') }}{% endblock %}
 {% block content %}
-<section class="card wide-card"><ul class="choice-list">
-  <li><a class="btn" href="/investments/new?kind=buy"><b>{{ 'Stock or fund'|tr(locale) }}</b><span class="muted">{{ 'Shares and funds you buy through a broker'|tr(locale) }}</span></a></li>
-  <li><a class="btn" href="{{ certificate_href }}"><b>{{ 'Certificate'|tr(locale) }}</b><span class="muted">{{ 'A bank certificate in a CD portfolio'|tr(locale) }}</span></a></li>
-  <li><a class="btn" href="/investments/gold/new"><b>{{ 'Gold'|tr(locale) }}</b><span class="muted">{{ 'A bar, a coin or a piece of jewellery'|tr(locale) }}</span></a></li>
-  <li><a class="btn" href="/accounts/new?type=OTHER_ASSET"><b>{{ 'Property'|tr(locale) }}</b><span class="muted">{{ 'A flat, land or anything you value by estimate'|tr(locale) }}</span></a></li>
-  <li><a class="btn" href="/investments/assets/new?class=OTHER"><b>{{ 'Something else'|tr(locale) }}</b><span class="muted">{{ 'A private stake, a collectible or any other holding'|tr(locale) }}</span></a></li>
-</ul></section>
+<section class="card wide-card">{% include "partials/invest_doors.html" %}</section>
 {% endblock %}

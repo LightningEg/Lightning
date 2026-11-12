@@ -592,3 +592,36 @@ class CashReserveService:
         year, month = divmod(month_index, 12)
         day = min(int(reserve.get("recurrence_day") or current.day), calendar.monthrange(year, month + 1)[1])
         return date(year, month + 1, day).isoformat()
+
+
+def would_exceed_cash(assigned: Decimal, old_effective: Decimal, new_effective: Decimal, cash: Decimal) -> bool:
+    """True when one reserve going from ``old_effective`` to ``new_effective`` would set aside more than the cash."""
+    return assigned - old_effective + new_effective > cash
+
+
+def effective_after(allocated: Decimal, spent: Decimal) -> Decimal:
+    """What a reserve still holds once what it has paid for is taken out of its allocation."""
+    return max(allocated - spent, ZERO)
+
+
+class EmergencyRefill:
+    """The emergency fund below its target: what fits, and where each amount moved would leave the fund (IT-12AE4)."""
+
+    def __init__(self, set_aside: Decimal, target: Decimal):
+        self.set_aside = set_aside
+        self.target = target
+
+    @property
+    def gap(self) -> Decimal:
+        return self.target - self.set_aside
+
+    def room(self, free_cash: Decimal) -> Decimal:
+        """The most a refill can move: the gap, or the free cash when that is less."""
+        return min(self.gap, free_cash)
+
+    def to(self, amount: Decimal) -> Decimal:
+        """The fund after ``amount`` is moved into it."""
+        return self.set_aside + amount
+
+    def fills(self, amount: Decimal) -> bool:
+        return self.to(amount) >= self.target

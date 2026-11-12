@@ -32,7 +32,7 @@ def _phone_cash(c, f, next_payments, late, position, day) -> dict:
             return p.still_owed
 
     def when(date_text: str) -> dict:
-        days = (parse_date(date_text) - day).days
+        days = (parse_date(date_text) - day).days  # not money
         return sentence("today") if days <= 0 else sentence("tomorrow") if days == 1 else sentence("in {n} days", n=days)
 
     def row(p) -> dict:
@@ -76,7 +76,7 @@ def _phone_cash(c, f, next_payments, late, position, day) -> dict:
                               amt=fmt(base(following), 0), date=following.due_date))
     if due > ZERO:
         lines.append(sentence("All covered by free cash.") if f.free_cash >= due else
-                     sentence("Free cash is {amt} short of what is due.", amt=fmt(due - f.free_cash, 0)))
+                     sentence("Free cash is {amt} short of what is due.", amt=fmt(f.free_cash_short_of(due), 0)))
     if late:
         lines.append(sentence("1 payment is already late." if len(late) == 1 else "{n} payments are already late.", n=len(late)))
 
@@ -84,7 +84,7 @@ def _phone_cash(c, f, next_payments, late, position, day) -> dict:
     # emergency fund in months (the figure Reserves already shows).
     fund = emergency_fund(c.reserves, c.budgets, month_of(day), c.schedules.view())
     reserves = position.reserves
-    after = fmt(f.free_cash - due, 0).replace("-", "−")
+    after = fmt(f.free_cash_after(due), 0).replace("-", "−")
     free_sub = f"After bills: {after}" if due > ZERO else ""
     reserve_sub = (f"Emergency fund {fund.months:.1f} months" if fund.months is not None
                    else "Set aside, not spendable" if reserves else "Nothing set aside yet")
@@ -93,7 +93,7 @@ def _phone_cash(c, f, next_payments, late, position, day) -> dict:
              {"key": "reserves", "surface": "hold", "label": label("reserves"), "value": reserves, "kind": "money",
               "empty": "—", "sub": reserve_sub, "href": "/plan/reserves"}]
     return {"due": due, "lines": lines, "now": now, "ahead": ahead, "payday": payday, "rest": rest[:PHONE_ROWS_SHOWN],
-            "rest_more": max(len(rest) - PHONE_ROWS_SHOWN, 0), "tiles": tiles}
+            "rest_more": max(len(rest) - PHONE_ROWS_SHOWN, 0), "tiles": tiles}  # not money
 
 
 def present(request, c, context: dict) -> dict:

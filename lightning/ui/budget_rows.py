@@ -3,13 +3,15 @@ phone layer never imports the PC routes."""
 from __future__ import annotations
 
 from datetime import timedelta
-from decimal import ROUND_CEILING, ROUND_HALF_UP, Decimal
+from decimal import ROUND_CEILING, Decimal
 from math import pi
 from urllib.parse import quote
 
 from lightning.core.money import ZERO, fmt, quantize
 from lightning.core.dates import fmt_date, month_of, parse_month, today
 from lightning.categories.domain import Movement
+from lightning.budgeting.period import spent_percent
+from lightning.planning.totals import bills_by_category
 from lightning.transactions.domain import TxnFilter
 
 from . import status as page_status
@@ -17,9 +19,9 @@ from . import status as page_status
 
 def neighbours(month: str) -> tuple[str, str]:
     first, last = parse_month(month)
-    previous = month_of(first - timedelta(days=1))
+    previous = month_of(first - timedelta(days=1))  # not money
     try:
-        following = month_of(last + timedelta(days=1))
+        following = month_of(last + timedelta(days=1))  # not money
     except OverflowError:
         following = month
     return previous, following
@@ -44,10 +46,10 @@ def plan_ring(budgeted: Decimal, spent: Decimal, left: Decimal) -> dict | None:
     None when nothing is planned, so there is no share to draw."""
     if budgeted <= ZERO:
         return None
-    pct = max(int((spent / budgeted * 100).quantize(Decimal(1), rounding=ROUND_HALF_UP)), 0)
-    circumference = 2 * pi * RING_RADIUS
+    pct = spent_percent(spent, budgeted)
+    circumference = 2 * pi * RING_RADIUS  # not money
     return {"pct": min(pct, 999), "wide": pct >= 100, "over": quantize(left, 0) < 0, "amount": abs(left),
-            "arc": round(circumference * min(pct, 100) / 100, 2), "circumference": round(circumference, 2)}
+            "arc": round(circumference * min(pct, 100) / 100, 2), "circumference": round(circumference, 2)}  # not money
 
 
 def plain(amount: Decimal | None) -> str:
@@ -72,17 +74,9 @@ def pace_line(r: dict) -> dict | None:
 def month_bills(c, everyday, month: str) -> dict[int, tuple[Decimal, Decimal]]:
     """The month's scheduled bills, subscriptions and loan payments by category: what is scheduled and what of it is
     paid, in the base currency (BV-3AR). Read from the payments Everyday spending already counts."""
-    out: dict[int, tuple[Decimal, Decimal]] = {}
     if everyday is None or not everyday.current:
-        return out
-    day = today()
-    for p in everyday.payments:
-        if p.due_date[:7] != month:
-            continue
-        scheduled, paid = out.get(p.item.category_id, (ZERO, ZERO))
-        out[p.item.category_id] = (scheduled + c.planning.amount_in_base(p, p.amount, day),
-                                   paid + c.planning.amount_in_base(p, p.amount - p.still_owed, day))
-    return out
+        return {}
+    return bills_by_category(c.planning, everyday.payments, month, today())
 
 
 def cover_from(c, month: str, target: dict, room: dict[int, Decimal]) -> dict | None:

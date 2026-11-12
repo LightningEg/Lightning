@@ -22,7 +22,7 @@ Reserved codes: none
 
 - **r28 (Codex):** 3BC, 3BD and 3BF done. **Read:** r28.
 
-- **Docs spine (2026-10-31):** trailers per AGENTS §3; `python tools/status.py` after plan changes. Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
+- **Docs spine (2026-10-31):** trailers per AGENTS §3; Next: 1N (posting waits for the owner), 8AA (owner signs off the ratings). **Read:** 1N.
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
@@ -30,9 +30,8 @@ Reserved codes: none
 - **Upcoming (11-11, Claude):** 7AR1-3 built (owner: PC+phone check); 7AR4 .ics later. **Read:** 7AR.
 - **O1:** owner checks Home. **Read:** Overview §7.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
-- **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 
-- **Store (11-10, Claude):** 10D sets built (site #189: Papyrus 1,320, Dendera 1,280); owner runs migration 20261110200000 live. 10H3 built (site #186). Left: owner 10H4 prices, 10H5 old seats. **Read:** 10H.
+- **Store (11-11, Claude):** prices 60/120/200, cap 5 (site PR). 20261110200000 is live; owner: migration 20261111120000, deploy redeem fns; 10H4 at launch. Next 10H6. **Read:** 10H.
 
 - **10A/10C app themes:** ready to sell, Dendera included; owner steps in 10C4. Dendera's premium pass (10F) is built; the site's demo shots are current (site #159). New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md`.
 
@@ -41,7 +40,7 @@ Reserved codes: none
 - **Import:** 7AB, 7AN, 7AK1-2, 7AK4, 7AO, 7AQ1-5 built (owner: PC+phone, 7AQ5 Arabic). Next 7AK3.**Read:** 7AK.
 
 
-Plan: `issues/INDEX.md`.
+Plan: `python tools/board.py` (GitHub issues; skill `dispatch`).
 
 1. **Report work paused** (owner); branches wait on native checks. **Read:** `issues/9-later/r22-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.
 2. **Report fixes:** 1G, 2AB, 3J, 4K, 7M, 7S built. **Read:** `issues/REPORTS.md`.

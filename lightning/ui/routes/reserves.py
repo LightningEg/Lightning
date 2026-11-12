@@ -14,6 +14,7 @@ from lightning.core.refs import DocType, parse_row_id
 from lightning.categories.domain import Movement
 from lightning.planning.emergency_context import emergency_liquidity_context
 from lightning.planning.domain import PlanKind
+from lightning.reserves import EmergencyRefill, effective_after, would_exceed_cash
 
 from .. import charts, keynotes, status as page_status
 from ..web import container, redirect, render, ui_locale, settled_save
@@ -27,8 +28,8 @@ def _allocate(c, reserve_id: int, amount: str):
     value = to_decimal(amount, "allocated")
     cash = c.reporting.owned_liquid_cash(today())
     assigned = c.reserves.cash_summary(cash)["allocated"]
-    next_effective = max(value - current["spent"], ZERO)
-    if assigned - current["effective_allocated"] + next_effective > cash:
+    next_effective = effective_after(value, current["spent"])
+    if would_exceed_cash(assigned, current["effective_allocated"], next_effective, cash):
         raise LightningError("Reserves cannot be more than the cash you own.")
     return c.reserves.allocate(reserve_id, value)
 
@@ -68,20 +69,21 @@ def _context(request: Request, error: str = ""):
     # Refill prompt (PC roadmap P5): below target with free cash to spare, one button moves what fits.
     refill = None
     if fund.target and set_aside < fund.target and position.free_cash and position.free_cash > ZERO:
-        room = min(fund.target - set_aside, position.free_cash)
+        fill = EmergencyRefill(set_aside, fund.target)
+        room = fill.room(position.free_cash)
         # BT-2AH: the suggestion keeps Safe to spend at or above zero; moving all of it is a separate, explicit choice.
         # IV-12AA2 (owner, 2026-11-10): the filled button offers the plan's monthly top-up, the modest amount; the
         # largest safe amount stays under "Move more". Both say what Safe to spend (Home's lead) is afterwards.
         options = c.forecaster.refill_options(today(), room, top_up=fund.top_up)
         safe, move = options["safe"], options["first"]
-        refill = {"move": move, "to": set_aside + move, "full": set_aside + move >= fund.target,
+        refill = {"move": move, "to": fill.to(move), "full": fill.fills(move),
                   "after": options["first_after"], "until": options["until"], "before": options["before"],
                   "is_top_up": ZERO < move < safe,
-                  "safe": safe, "safe_to": set_aside + safe, "safe_after": options["safe_after"],
-                  "all": room, "all_to": set_aside + room, "all_after": options["all_after"],
+                  "safe": safe, "safe_to": fill.to(safe), "safe_after": options["safe_after"],
+                  "all": room, "all_to": fill.to(room), "all_after": options["all_after"],
                   "all_is_safe": options["all_after"] >= ZERO}
     if refill is not None:
-        gap = fund.target - set_aside
+        gap = fill.gap
         # NF-3AZ7: when one move now does not fill the fund, the same refill as instalments after the upcoming needs.
         refill["schedule"] = c.forecaster.refill_schedule(today(), gap, options) if refill["safe"] < gap else []
         # Or the person's own amount, previewed with the same forecast before anything moves.
@@ -93,7 +95,7 @@ def _context(request: Request, error: str = ""):
             except ArithmeticError:
                 amount = ZERO
             if ZERO < amount <= position.free_cash:
-                refill["manual"] = {"amount": amount, "to": set_aside + amount,
+                refill["manual"] = {"amount": amount, "to": fill.to(amount),
                                     "after": c.forecaster.forecast(today(), refill=amount).safe_to_spend}
             refill["manual_raw"] = raw
     bills = c.planning.items((PlanKind.BILL, PlanKind.SUBSCRIPTION))
@@ -161,7 +163,7 @@ async def save_emergency_fund(request: Request):
         assigned = c.reserves.cash_summary(c.reporting.owned_liquid_cash(today()))["allocated"]
         value = to_decimal(amount, "allocated")
         old_effective = existing["effective_allocated"] if existing else ZERO
-        if assigned - old_effective + value > c.reporting.owned_liquid_cash(today()):
+        if would_exceed_cash(assigned, old_effective, value, c.reporting.owned_liquid_cash(today())):
             raise LightningError("Reserves cannot be more than the cash you own.")
         with settled_save(request, container(request)):
             reserve = c.reserves.set_emergency_fund(amount, salary_target)

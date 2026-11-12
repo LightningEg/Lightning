@@ -34,6 +34,7 @@ from lightning.core.figures import FIGURES
 from lightning.core.memo import request_cache
 from lightning.core.money import ZERO, fmt, quantize, signed_pct as _signed_pct, to_decimal
 from lightning.workflows import live_prices
+from lightning.transactions.figures import day_nets, group_value_updates
 from lightning.ui import charts, sections
 from lightning.ui.themes import theme_id
 from lightning.ui.entitlements import marketplace_url, owned as owned_themes, store_themes
@@ -169,7 +170,7 @@ def _phone_chip(text) -> str:
     if found := _re.fullmatch(r"(?:until |to )(\d{4}-\d{2}-\d{2})", value):
         return found.group(1)
     if found := _re.fullmatch(r"(\d{4})-(\d{2})(?:-\d{2})? to (\d{4})-(\d{2})(?:-\d{2})?", value):
-        months = (int(found.group(3)) - int(found.group(1))) * 12 + int(found.group(4)) - int(found.group(2)) + 1
+        months = (int(found.group(3)) - int(found.group(1))) * 12 + int(found.group(4)) - int(found.group(2)) + 1  # not money: a month count
         return f"{months} months" if months > 1 else f"{found.group(1)}-{found.group(2)}"
     return value if len(value) <= 10 and not (" " in value and len(value) > 8) else ""
 
@@ -192,56 +193,23 @@ def _locale(locale):
 
 templates.env.filters["day_label"] = _day_label
 # Dates read on a screen (A06.1, IV-3BK); fields, files and exports keep yyyy-mm-dd.
+templates.env.filters["dict_day"] = lambda values, locale=None: {
+    k: (day_text(v, _locale(locale)) if k == "date" and v else v) for k, v in values.items()}
 templates.env.filters["day"] = lambda value, locale=None: day_text(value, _locale(locale))
 templates.env.filters["month"] = lambda value, locale=None: month_text(value, _locale(locale))
 templates.env.filters["month_short"] = lambda value, locale=None: month_short(value, _locale(locale))
 templates.env.filters["day_range"] = lambda start, end, locale=None: range_text(start, end, _locale(locale))
 
 
-def _day_nets(rows, show_account: bool = False) -> dict[str, Decimal]:
-    """Each day's net on a phone list (phone overhaul 2026-10-22): money in less money out, in the base currency.
-    Transfers, investment rows and value updates move nothing in or out, so they are left out. A day's net is shown only
-    for a day with two or more rows (3AN12): one row already says it. show_account: the all-accounts list shows a
-    transfer once, so its second leg is not a row."""
-    nets: dict[str, Decimal] = {}
-    counts: dict[str, int] = {}
-    for r in rows:
-        if show_account and getattr(r, "type", "") == "TRF" and r.amount > 0:
-            continue
-        counts[r.date] = counts.get(r.date, 0) + 1
-        if getattr(r, "type", "") in ("IN", "OUT"):
-            nets[r.date] = nets.get(r.date, ZERO) + (r.amount_base or r.amount)
-    return {day: net for day, net in nets.items() if counts.get(day, 0) >= 2}
-
-
-def _group_value_updates(rows) -> list:
-    """A day's value updates (revaluations) become one "Investments moved" row on a phone list, so a month-end
-    re-pricing never crowds out the money that moved. Other rows pass through unchanged."""
-    from types import SimpleNamespace
-    out: list = []
-    for r in rows:
-        if r.type != "VAL":
-            out.append(r)
-            continue
-        last = out[-1] if out else None
-        if last is not None and last.type == "VALS" and last.date == r.date:
-            last.count += 1
-            last.amount += r.amount_base or r.amount
-        else:
-            out.append(SimpleNamespace(type="VALS", date=r.date, txn_id=r.txn_id, count=1, amount=r.amount_base or r.amount,
-                                       balance=None))
-    return out
-
-
 def _shift_month(month: str, months: int) -> str:
     """yyyy-mm moved by a number of months: the phone's period sheet names last month."""
     year, number = (int(part) for part in str(month)[:7].split("-"))
-    index = year * 12 + number - 1 + months
-    return f"{index // 12:04d}-{index % 12 + 1:02d}"
+    index = year * 12 + number - 1 + months  # not money: dates
+    return f"{index // 12:04d}-{index % 12 + 1:02d}"  # not money: dates
 
 
-templates.env.globals["day_nets"] = _day_nets
-templates.env.filters["group_value_updates"] = _group_value_updates
+templates.env.globals["day_nets"] = day_nets
+templates.env.filters["group_value_updates"] = group_value_updates
 templates.env.globals["shift_month"] = _shift_month
 templates.env.filters["keep_dates"] = _keep_dates
 templates.env.filters["isolate_dates"] = _isolate_dates
@@ -279,14 +247,14 @@ def _compact(value) -> str:
     thousand, million = ("ألف", "مليون") if arabic else ("k", "M")
     sign, v = ("−" if v < 0 else ""), abs(v)
     if v >= 1_000_000:
-        amount, unit = v / 1_000_000, million
+        amount, unit = v / 1_000_000, million  # not money: scales a figure for display
     elif v >= 1000:
-        amount = quantize(v / 1000, 0) if v >= 10_000 else v / 1000
+        amount = quantize(v / 1000, 0) if v >= 10_000 else v / 1000  # not money: scales a figure for display
         unit = thousand
     else:
         return sign + f"{quantize(v, 0):.0f}"
     text = f"{amount:.1f}".removesuffix(".0")
-    return sign + text + ((" " + unit) if arabic else unit)
+    return sign + text + ((" " + unit) if arabic else unit)  # not money: text
 
 
 templates.env.filters["compact"] = _compact
@@ -317,7 +285,7 @@ def _back_url(request) -> str:
     if not path.startswith("/") or path.startswith("//") or path == request.url.path:
         return ""
     query = "&".join(q for q in parts.query.split("&") if q and not q.startswith("popup="))
-    return path + (f"?{query}" if query else "")
+    return path + (f"?{query}" if query else "")  # not money: a link
 
 
 templates.env.globals["back_url"] = _back_url
@@ -470,7 +438,7 @@ def _render_page(request, name, status_code, c, total, owned_total, groups, cont
 
 @functools.lru_cache(maxsize=None)
 def _asset_hash(name: str) -> str:
-    return hashlib.sha256((UI_DIR / "static" / name).read_bytes()).hexdigest()[:12]
+    return hashlib.sha256((UI_DIR / "static" / name).read_bytes()).hexdigest()[:12]  # not money: a path
 
 
 def static_url(name: str) -> str:
@@ -497,7 +465,7 @@ PHONE_CSS = ("phone-base{rtl}.css", "phone{rtl}.css", "themes.generated.css", "t
 
 
 def _phone_bundle(rtl: str) -> bytes:
-    parts = [f"/* {name.format(rtl=rtl)} */\n" + (UI_DIR / "static" / name.format(rtl=rtl)).read_text(encoding="utf-8")
+    parts = [f"/* {name.format(rtl=rtl)} */\n" + (UI_DIR / "static" / name.format(rtl=rtl)).read_text(encoding="utf-8")  # not money: text
              for name in PHONE_CSS]
     return "\n".join(parts).encode("utf-8")
 
@@ -556,8 +524,8 @@ def redirect(url: str, msg: str = "") -> RedirectResponse:
         url = "/"
     if msg:
         path, fragment_mark, fragment = url.partition("#")
-        path += ("&" if "?" in path else "?") + "msg=" + quote(msg)
-        url = path + (fragment_mark + fragment if fragment_mark else "")
+        path += ("&" if "?" in path else "?") + "msg=" + quote(msg)  # not money: a link
+        url = path + (fragment_mark + fragment if fragment_mark else "")  # not money: a link
     return RedirectResponse(url, status_code=303)
 
 

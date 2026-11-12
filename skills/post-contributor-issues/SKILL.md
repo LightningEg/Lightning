@@ -24,7 +24,7 @@ Tool-neutral. Posting is public, and a `coins:<n>` label also publishes the issu
 4. **Coins** follow size (S 200, M 500, L 800). Raise with `coins: 800` in the item's front matter (a multiple of 100, never below the size's) for work that is risky, needs a device, or is money logic.
 5. **Owner approval** for the list unless the owner has already named the groups. State the count and total coins first.
 6. **Post** each with the GitHub issue tool: title `[BT-5J] ...`, the generated body, labels `coins:<n>`, `pillar:<p>`, `kind:<k>` (and `good first issue` for S). Independent issues can go in one batch.
-7. **Write the numbers back:** `github: <n>` in the front matter of an item with no steps; ` · #<n>` at the end of each step heading. `python tools/issues.py` and `python tools/status.py`; the dry run no longer lists them.
+7. **Write the numbers back:** `github: <n>` in the front matter of an item with no steps; ` · #<n>` at the end of each step heading. `python tools/issues.py --check`; the dry run no longer lists them. Create the issue as a sub-issue of its item's issue, with only its `coins:` label (skill `dispatch`).
 8. Commit with the trailers, open the pull request, merge when CI is green (skill `ship-pr`).
 
 Item 1N stays open until every contributor-safe item is posted.

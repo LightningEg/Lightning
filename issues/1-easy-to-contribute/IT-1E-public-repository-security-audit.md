@@ -83,21 +83,14 @@ Remaining: deploy/verify the live Apps Script receiver and verify the replacemen
 
 Each step below is one pull request or one owner action. **A real finding is never written in a public issue, pull request, commit message, `NOW.md` or this file** (skill `security-sweep` › After): it goes to a private GitHub security advisory and the owner hears of it in the question tool; the public line says only "checked, N findings filed privately". Read `skills/security-sweep/SKILL.md` first. Run `python -m pytest tests/test_issues.py -q` after editing this file, and delete a step's heading in the same commit that finishes it.
 
-## 1E3 Owner: deploy the website receiver and rotate the analytics key · owner
-Verify first: in the website repository, is PR #19 merged, and does the live site still post to an Apps Script receiver (`skills/website-sync/SKILL.md` step 6)? If the receiver has been replaced (for example by Supabase), say so here and delete this step and 1E4.
-Then, as the website's `OWNER.md` describes: deploy the Apps Script source and its `doPost` router, rotate the analytics read key (a new value only in the `website-analytics` environment), then publish the dashboard. (a) *(Recommended)* Do it in one sitting in that order, then hand 1E4 to an AI. (b) Turn the analytics dashboard off until there is time: no key in use, no dashboard.
-
 ## 1E4 Check the live website receivers against formula injection and key leaks · S · opus
-Needs 1E3 done first.
-Files: the website repository's `apps-script/` and `analytics/dashboard.html` (read-only), its tests named in website PR #19.
-Do: with the deployed receiver, send one benign formula-shaped value (`=1+1`) through each public form (feedback, UX tests, survey, signup) and check the sheet stores it as text; load the dashboard and check in the browser's network panel that the key travels only in a POST body and is not in `localStorage` or any log. Report pass/fail per form to the owner in the question tool; a failure goes to a private advisory.
+1E3 done 2026-11-11 (owner: receiver deployed, analytics key rotated, secret updated).
+Files: the website repository's `apps-script/` (read-only), its tests named in website PR #19.
+Do: with the deployed receiver, send one benign formula-shaped value (`=1+1`) through each public form (feedback, UX tests, survey, signup) and check the sheet stores it as text. The dashboard half is dropped: analytics now live in the owner console on Supabase (owner, 2026-11-11) and `analytics/dashboard.html` only redirects, so no read key travels through a page. Report pass/fail per form to the owner in the question tool; a failure goes to a private advisory.
 Done when: the owner has the pass/fail list, and this file has one dated line "1E4 checked, N findings filed privately".
 
-## 1E5 Owner: apply the repository protections · owner
-Run `python tools/security_setup.py` (it only previews) and read its planned writes; then (a) *(Recommended)* `python tools/security_setup.py --apply` with your own `gh` login, and add yourself as reviewer of the `production-release` environment when it asks; (b) apply it later: the downloads, market-data and website `main` branches stay unprotected until then, and the public Windows ZIP can be replaced by any account with write access. (`--app-actions-only` changes only the app's allowed-actions list; it is not a partial setup.) Afterwards turn on GitHub *Secret scanning* and *Push protection* for all four repositories (Settings › Code security). Tell the AI the date it was applied.
-
 ## 1E7 Scan every repository's full history for secrets · M · opus
-Needs 1E5 done first (secret scanning on), so GitHub's own alerts can be compared.
+1E5 done 2026-11-11 (owner: protections applied, secret scanning and push protection on). GitHub's own alerts can be compared.
 Files: none changed in the repositories; the scan runs in the scratchpad.
 Do: clone each of the four repositories with all refs (`git clone --mirror`), run `gitleaks detect --source <mirror> --log-opts="--all"` (install the pinned release binary in the scratchpad; do not add it to the repository), plus `git log --all -p | grep -nE "(BEGIN [A-Z ]*PRIVATE KEY|ghp_|github_pat_|AKIA[0-9A-Z]{16})"`. Triage each hit as test/dummy, public-by-design (IndexNow token, public update and store keys in `lightning/security/*.json`), or real. Real ones: rotate first (owner, through the question tool), then a private advisory.
 Done when: this file has one dated line per repository: "history scanned, N real findings filed privately"; nothing else about them is public.

@@ -109,7 +109,8 @@ _TABLE = [
      "you own that is not cash. Cash waiting in a brokerage account counts in Cash you own (owner decisions "
      "2026-10-04).", "Holdings value"),
     ("valued_by_you", "Valued by you", "The part of Portfolio value known only by its balance, with no cost or "
-     "market price (a share of a flat). The Investments Lead is Cost + Unrealized gain + Valued by you (BT-12AC).",
+     "market price (a share of a flat with no purchase price; a property with one counts in Cost and Unrealized "
+     "gain). The Investments Lead is Cost + Unrealized gain + Valued by you (BT-12AC).",
      "Portfolio value − Cost − Unrealized gain"),
     ("holdings_after_sale", "Holdings after sale (estimate)",
      "What your holdings, deposits included, might fetch if sold or cashed in today, after each class's sale "
@@ -168,6 +169,9 @@ _TABLE = [
      "for a partial period. It needs three of them."),
     ("investing_rate", "Investing rate", "The share of what you kept (net flow) that you moved into investments. "
      "Money from earlier savings does not count, so it is never more than 100%.", "Money added ÷ Net flow"),
+    ("kept_as_cash", "Kept as cash", "The part of what you kept (net flow) that you did not move into investments; "
+     "the last band of the money flow chart. Money added beyond what you kept came from earlier savings, so it "
+     "is never below zero.", "Net flow − Money added"),
     ("average_monthly_income", "Average monthly income",
      "Income in your chosen income categories, averaged over the last 3 or 6 completed months that had any "
      "(Settings › Budget). Until a completed month has income, the income set up in Recurring stands in. "
@@ -326,6 +330,7 @@ _SOURCES = {
     "typical_move": (LEDGER, "lightning.investments.journey.holding_history"),
     "fall_from_high": (LEDGER, "lightning.investments.journey.holding_history"),
     "investing_rate": (LEDGER, f"{INV}.investing_rate"),
+    "kept_as_cash": (LEDGER, f"{CF}.kept_as_cash"),
     "average_monthly_income": (LEDGER, "lightning.budgeting.service.BudgetService.income_average"),
     "average_monthly_spending": (LEDGER, "lightning.budgeting.service.BudgetService.spending_average"),
     "base_budget": (PLAN, f"{BL}.budget"),

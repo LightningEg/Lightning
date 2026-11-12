@@ -27,7 +27,7 @@ def present(request, c, context: dict) -> dict:
     for group in context["groups"]:
         if group["title"] == "Saving":
             keys = [entry["item"].key for entry in group["items"]]
-            at = keys.index(AFTER) + 1 if AFTER in keys else len(keys)
+            at = keys.index(AFTER) + 1 if AFTER in keys else len(keys)  # not money
             group = {**group, "items": [*group["items"][:at], row, *group["items"][at:]]}
         groups.append(group)
     return {"figures": (*context["figures"], figure), "groups": groups}
