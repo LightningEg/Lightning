@@ -67,14 +67,15 @@ def under_artwork(surface, p, name):
     return min(marks, key=lambda colour: contrast(p["text"], colour))
 
 HELD = "#7FB2FF"  # Azure held (guideline A03) as themes wear it on their own surfaces: its hue never moves
-HELD_TINT = 16  # theme-surfaces.css lays held at 16% over the card for its tint (--theme-tint-info)
+POSITIVE = "#097852"  # the app's own green for gains and income text (A03 --positive): its hue never moves
+HELD_TINT = 16  # theme-surfaces.css lays a money colour at 16% over the card for its tint (--theme-tint-info, -good)
 
-def held(card):
-    """Azure held for this card: the same hue and saturation, darker on a light card and lighter on a dark one, until
-    the held glyph reads at 4.5:1 on the card and on its own tint. A money meaning keeps its colour family; only its
-    lightness answers the ground (BT-8U4)."""
+def readable(base, card):
+    """A money colour for this card: the same hue and saturation, darker on a light card and lighter on a dark one,
+    until its glyph reads at 4.5:1 on the card and on its own tint. A money meaning keeps its colour family; only its
+    lightness answers the ground (BT-8U4, NF-10C3)."""
     import colorsys
-    r, g, b = (int(HELD[i:i+2], 16) / 255 for i in (1, 3, 5))
+    r, g, b = (int(base[i:i+2], 16) / 255 for i in (1, 3, 5))
     hue, light, sat = colorsys.rgb_to_hls(r, g, b)
     step = -0.01 if contrast(card, "#FFFFFF") < contrast(card, "#000000") else 0.01
     while 0 <= light <= 1:
@@ -82,7 +83,11 @@ def held(card):
         if min(contrast(colour, card), contrast(colour, mix(card, colour, HELD_TINT))) >= 4.5:
             return colour
         light += step
-    raise ValueError(f"Azure held cannot reach 4.5:1 on {card}")
+    raise ValueError(f"{base} cannot reach 4.5:1 on {card}")
+
+def held(card):
+    """Azure held for this card (BT-8U4)."""
+    return readable(HELD, card)
 
 TIERS = ("palette", "texture", "motion")  # the store's tiers (themes.md section 7: recolour, texture, animation)
 NEUTRAL = {"none", "flat", "hairline", "bar", "dim", "subtle"}  # material values that add no material
@@ -299,7 +304,9 @@ def compile_theme(manifest, parts, contract):
                                                    else (fill, p[parts["controls"]["label"]]))
     # The manifest's own money colours, for tints on its dark surfaces (theme-surfaces.css); the default keeps its paint.
     values.update({"theme-income": p["income"], "theme-expense": p["expense"]})
-    values["theme-held"] = held(worst(p, parts, "cards", p[parts["cards"]["surface"]], contract["limits"]))
+    card = worst(p, parts, "cards", p[parts["cards"]["surface"]], contract["limits"])
+    values["theme-held"] = held(card)
+    values["theme-positive"] = readable(POSITIVE, card)  # the app's green, lightened until it reads on dark cards
     values["theme-logo"] = "url(/static/lightning-mark-on-dark.svg)" if parts["brand"]["logoVariant"] == "on-dark" else "url(/static/lightning-mark.svg)"
     scheme = "dark" if contrast(p["background"], "#FFFFFF") > contrast(p["background"], "#000000") else "light"
     values.update(material_values(parts, contract, scheme))

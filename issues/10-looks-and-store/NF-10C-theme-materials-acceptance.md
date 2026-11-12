@@ -32,8 +32,7 @@ repo: app
 
 1. Native acceptance (10A): WebView2 and Android paint, cost of grain and blur on a low-end phone, Arabic mirroring of artwork and glow, forced colours; Dendera's frieze and pigment thread on a low-end phone.
 2. Royal Obsidian & Gold needs a website version before it can be sold.
-3. Pre-existing: the app's own green on dark cards reads low in every dark theme; the fix belongs to the dark adapter in `theme-surfaces.css`.
-4. After 60 days of sales, review prices as `docs/payment-operations.md` (website) › Pricing describes.
+3. After 60 days of sales, review prices as `docs/payment-operations.md` (website) › Pricing describes.
 
 ## Done when
 
@@ -44,9 +43,6 @@ WebView2 and Android paint, grain and blur cost on a low-end phone, Arabic mirro
 
 ## 10C2 Royal Obsidian & Gold needs a website version · M
 Before it can be sold.
-
-## 10C3 Fix the app's own green on dark cards · S
-It reads low in every dark theme; the fix belongs to the dark adapter in `theme-surfaces.css`.
 
 ## 10C4 Owner steps 1-6 in order · owner
 Deploy migrations, open checkout, generate the store key, ship the release, turn on unlock, redeploy `redeem-purchase`.
