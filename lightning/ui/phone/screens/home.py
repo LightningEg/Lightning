@@ -46,7 +46,7 @@ def payday_meter(everyday) -> PaydayMeter | None:
     spent, pace = everyday.spent_share, everyday.pace_share
     if spent is None or pace is None:
         return None
-    return PaydayMeter(round(float(spent * 100), 1), round(float(pace * 100), 1), everyday.pace_gap > 0)
+    return PaydayMeter(round(float(spent * 100), 1), round(float(pace * 100), 1), everyday.pace_gap > 0)  # not money: the fill
 
 
 @dataclass(frozen=True)
@@ -81,7 +81,7 @@ def build(c, day: date) -> HomeScreen:
     bills = bill_state.open_bills(c.planning, day, bill_state.SOON_DAYS)
     away = bill_state.catch_up(c, day, bills)
     last_income = bill_state.last_income_date(c.planning, day)
-    paid_today = bool(last_income and (day - parse_date(last_income)).days <= 1)  # income arrived today or yesterday
+    paid_today = bool(last_income and (day - parse_date(last_income)).days <= 1)  # not money: income arrived today or yesterday
     rows = todo_rows(c, day, bills, items, away, paid_today)
     safe = forecast.safe_to_spend
     until = forecast.next_income_date or ""
@@ -92,7 +92,7 @@ def build(c, day: date) -> HomeScreen:
     # Safe to spend divided by the days: two figures a day would answer one question twice.
     everyday = c.forecaster.everyday(month, day) if plan else None
     per_day = everyday.per_day if everyday else None
-    next_month = (day.replace(day=28) + timedelta(days=4)).replace(day=1)
+    next_month = (day.replace(day=28) + timedelta(days=4)).replace(day=1)  # not money
     recent, total, _ = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 30)
     latest = tuple([r for r in recent if r.type != DocType.VAL][:LATEST])
     if _first_run(c):

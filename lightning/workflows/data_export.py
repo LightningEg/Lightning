@@ -15,7 +15,7 @@ TABLES = ("profile_identity", "accounts", "asset_classes", "financial_assets", "
           "loan_extra_payments", "installment_purchases", "cd_terms", "cd_certificates", "cd_redemptions",
           "gameya_terms", "owed_to_you_accounts", "money_from_others", "investment_custody_events", "investment_dividend_assets",
           "investment_liquidation_factors", "investment_targets", "physical_items", "physical_item_valuations",
-          "physical_item_trade_details", "other_asset_valuations", "other_asset_details", "rules", "rule_conditions", "rule_actions",
+          "physical_item_trade_details", "other_asset_valuations", "other_asset_details", "property_contracts", "property_flows", "rules", "rule_conditions", "rule_actions",
           "bank_import_batches", "bank_import_rows", "bank_import_column_maps", "reevaluation_periods",
           "reevaluation_entries", "reevaluation_account_posts", "reevaluation_suppressed_accounts", "zakat_settings",
           "reconciled_through", "saved_views", "reimbursement_claims", "reimbursement_receipts",

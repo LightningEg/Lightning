@@ -19,9 +19,13 @@ from __future__ import annotations
 from datetime import date, timedelta
 from decimal import Decimal
 
+from lightning.budgeting.domain import left_in_plan, over_plan_total, share_of_plan, used_of_plan
 from lightning.core.dates import month_of, parse_date, parse_month
 from lightning.core.figures import FIGURES, label as figure_label
 from lightning.core.money import ZERO, fmt, signed_pct
+from lightning.planning.domain import a_month, a_year
+from lightning.reporting.fx_positions import FxPositions
+from lightning.reporting.service import CashFlow
 
 from . import charts
 from lightning.core.plural import counted
@@ -74,18 +78,18 @@ def spark(values: list[Decimal | None], mark: str = "last") -> dict | None:
 def meter(used: Decimal, total: Decimal, tick: Decimal | None = None, tick_label: str = "") -> dict | None:
     if not total or total <= 0:
         return None
-    width = float(max(min(used / total * 100, Decimal(100)), ZERO))
-    at = float(max(min(tick / total * 100, Decimal(100)), ZERO)) if tick is not None else None
+    width = float(max(min(used / total * 100, Decimal(100)), ZERO))  # not money: the fill
+    at = float(max(min(tick / total * 100, Decimal(100)), ZERO)) if tick is not None else None  # not money: the tick
     return {"kind": "meter", "width": width, "tick": at, "tick_label": tick_label, "over": used > total}
 
 
 def segments(parts: list[tuple[str, Decimal, str]]) -> dict | None:
     """What the figure is made of: (name, value, tone) for two to four parts; empty parts are left out."""
     shown = [(name, value, tone) for name, value, tone in parts if value and value > 0]
-    total = sum((value for _, value, _ in shown), ZERO)
+    total = sum((value for _, value, _ in shown), ZERO)  # not money: the bar's length, for the shares
     if len(shown) < 2 or not total:
         return None
-    return {"kind": "segments", "parts": [{"name": name, "value": value, "tone": tone, "share": float(value / total * 100)}
+    return {"kind": "segments", "parts": [{"name": name, "value": value, "tone": tone, "share": float(value / total * 100)}  # not money
                                          for name, value, tone in shown]}
 
 
@@ -94,8 +98,8 @@ def timeline(day: date, until: str | None, late: list, ahead: list) -> dict | No
     if not late and not ahead:
         return None
     end = parse_date(until) if until else None
-    span = max((end - day).days, 1) if end else max([(parse_date(p.due_date) - day).days for p in ahead] + [1])
-    dots = [{"x": 18 + 80 * max((parse_date(p.due_date) - day).days, 0) / span, "late": False,
+    span = max((end - day).days, 1) if end else max([(parse_date(p.due_date) - day).days for p in ahead] + [1])  # not money
+    dots = [{"x": 18 + 80 * max((parse_date(p.due_date) - day).days, 0) / span, "late": False,  # not money: x positions
              "title": f"{p.item.name} · {p.due_date}"} for p in ahead]
     return {"kind": "timeline", "late": min(len(late), 3), "dots": dots, "payday": bool(end)}
 
@@ -105,8 +109,8 @@ def columns(values: list[Decimal], running: bool = False) -> dict | None:
     if len(values) < 2:
         return None
     top = max((abs(v) for v in values), default=ZERO) or Decimal(1)
-    return {"kind": "columns", "bars": [{"height": float(abs(v) / top * 100), "negative": v < 0,
-                                         "running": running and i == len(values) - 1} for i, v in enumerate(values)]}
+    return {"kind": "columns", "bars": [{"height": float(abs(v) / top * 100), "negative": v < 0,  # not money: heights
+                                         "running": running and i == len(values) - 1} for i, v in enumerate(values)]}  # not money
 
 
 # ── Budget ─────────────────────────────────────────────────────────────────────────────────────────────────
@@ -114,14 +118,14 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
     """A month's four cards: Left in plan, Everyday spending, Over plan (only when something is) and what the
     plan leaves to save. ``e`` is the forecaster's EverydayBudget; ``over`` the categories over plan, largest
     first, each {"name", "over"}; ``move`` the room to cover the largest from, {"href", "name", "amount"}."""
-    previous = month_of(parse_month(month)[0] - timedelta(days=1))
+    previous = month_of(parse_month(month)[0] - timedelta(days=1))  # not money
     if e.left < 0:
         left_compare = compare("over the plan", fmt(-e.left, 0), "bad")
     elif e.current and e.days_left:
         left_compare = (compare(f"for everyday, about {fmt(e.per_day, 0)} a day", fmt(e.everyday_left, 0), "good") if e.everyday_left > 0
                         else compare("for everyday: bills take the rest", "0", "bad"))
     else:
-        left_compare = compare("of the plan spent", f"{e.spent / e.planned * 100:.0f}%" if e.planned else "—")
+        left_compare = compare("of the plan spent", f"{e.spent_percent:.0f}%" if e.spent_percent is not None else "—")
     spent_label = "From monthly plan" if funded_elsewhere else "Spent"
     left_visual = (segments([(spent_label, e.spent, "out"), ("Bills to pay", e.bills_to_pay, "neutral"), ("Everyday", e.everyday_left, "in")])
                    if e.current else segments([(spent_label, min(e.spent, e.planned), "out"), ("Left", max(e.left, ZERO), "in")]))
@@ -134,26 +138,27 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         gap = e.pace_gap
         pace_compare = (compare("under the plan's pace", fmt(-gap, 0), "good") if gap <= 0
                         else compare("over the plan's pace", fmt(gap, 0), "bad"))
-        before = e.last_month_same_day
-        tail = (line(f"{_signed(e.everyday_spent - before)} against {previous} by day {e.day}") if before is not None
+        against = e.against_last_month_same_day
+        tail = (line(f"{_signed(against)} against {previous} by day {e.day}") if against is not None
                 else line(f"Everyday plan {fmt(e.everyday_plan, 0)}"))
         cards.append(card("Everyday spending", e.everyday_spent, pace_compare, tone="out", key="everyday",
                           chip_=chip(f"by day {e.day}"), visual=None,  # the pace chart beside it is its picture (audit 12, B1)
                           line_=tail, href="#budget-pace"))
     elif e.day:
         before = e.last_month_by_day[-1] if e.last_month_by_day else None
-        change = (compare(f"against {previous}", _signed(e.everyday_spent - before), "good" if e.everyday_spent <= before else "bad")
-                  if before is not None else compare("of the everyday plan", f"{e.everyday_spent / e.everyday_plan * 100:.0f}%" if e.everyday_plan > 0 else "—"))
+        used = e.everyday_used_percent
+        change = (compare(f"against {previous}", _signed(e.against_last_month), "good" if e.everyday_spent <= before else "bad")
+                  if before is not None else compare("of the everyday plan", f"{used:.0f}%" if used is not None else "—"))
         cards.append(card("Everyday spending", e.everyday_spent, change, tone="out", key="everyday", chip_=chip(month),
                           visual=meter(e.everyday_spent, e.everyday_plan), line_=line(f"Everyday plan {fmt(e.everyday_plan, 0)}"),
                           href="#budget-pace"))
 
     if over:
-        total = sum((row["over"] for row in over), ZERO)
+        total = over_plan_total([row["over"] for row in over])
         names = len(over)
         parts = [(row["name"], row["over"], "over" if i == 0 else "out") for i, row in enumerate(over[:3])]
         if len(over) > 3:
-            parts.append(("Other", sum((row["over"] for row in over[3:]), ZERO), "neutral"))
+            parts.append(("Other", over_plan_total([row["over"] for row in over[3:]]), "neutral"))
         act = (line(action=f"Move {fmt(move['amount'], 0)} from {move['name']}", href=move["href"], popup=True) if move
                else line(action="See categories", href="#budget-meters"))
         cards.append(card("Over plan", total, compare("over their plan", f"{names} categor{'y' if names == 1 else 'ies'}", "bad"),
@@ -162,7 +167,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
 
     if check is not None and check.planned is not None and check.plan_saves is not None and check.planned_savings_rate is not None:
         rate, target = check.planned_savings_rate, check.target_percent
-        scale = max(rate, target, Decimal(1)) * Decimal("1.4")
+        scale = max(rate, target, Decimal(1)) * Decimal("1.4")  # not money: the meter's scale
         if raise_offer:
             tail = line(f"Income up {fmt(raise_offer['raise'], 0)}", "Raise the plan", f"/budget/raise?month={month}", popup=True)
         elif check.over_by:
@@ -188,17 +193,17 @@ def budget_period(spent: Decimal, planned: Decimal, months: list[tuple[str, Deci
     within it. ``months`` is (yyyy-mm, left in plan, finished) for each month with a plan; the running one is hatched."""
     if not planned or planned <= 0:
         return []
-    left = planned - spent
+    left = left_in_plan(planned, spent)
     ended = [value for _, value, finished in months if finished]
-    within = sum(1 for value in ended if value >= 0)
-    cards = [card("From monthly plan" if funded_elsewhere else "Spent", spent, compare(f"of the {fmt(planned, 0)} plan", f"{spent / planned * 100:.0f}%",
+    within = sum(1 for value in ended if value >= 0)  # not money: months within plan
+    cards = [card("From monthly plan" if funded_elsewhere else "Spent", spent, compare(f"of the {fmt(planned, 0)} plan", f"{share_of_plan(spent, planned):.0f}%",
                                           "good" if spent <= planned else "bad"),
                   tone="out", key="spent", chip_=chip(period_label), visual=meter(spent, planned),
                   line_=line(f"Planned {fmt(planned, 0)}"), href="#budget-meters"),
              card(figure_label("left_in_plan"), left,
                   compare("ended within plan", f"{within} of {len(ended)} month{'' if len(ended) == 1 else 's'}",
                           "good" if within == len(ended) else "bad")
-                  if ended else compare("of the plan left", f"{max(left, ZERO) / planned * 100:.0f}%"),
+                  if ended else compare("of the plan left", f"{share_of_plan(max(left, ZERO), planned):.0f}%"),
                   tone="in" if left >= 0 else "over", key="left", chip_=chip(period_label),
                   visual=columns([value for _, value, _ in months], running=bool(months) and not months[-1][2]),
                   line_=line("Each month's left in plan"),
@@ -215,11 +220,11 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
     if f.safe_to_spend < 0:
         safe_compare = compare("more is promised than your free cash", fmt(-f.safe_to_spend, 0), "bad")
     elif f.free_cash > 0:
-        safe_compare = compare("of your free cash", f"{f.safe_to_spend / f.free_cash * 100:.0f}%", "hold")
+        safe_compare = compare("of your free cash", f"{f.safe_percent_of_free_cash:.0f}%", "hold")
     else:
         safe_compare = compare("No free cash today")
-    saving = sum((-parts.get(figure_label(k), ZERO) for k in ("saving_for_goals", "emergency_top_up", "savings_target_rest")), ZERO)
-    due = -parts.get(figure_label("payments_before_next_income"), ZERO) - parts.get("Gam'eya instalments before next income", ZERO)
+    saving = f.taken_off(*(figure_label(k) for k in ("saving_for_goals", "emergency_top_up", "savings_target_rest")))
+    due = f.taken_off(figure_label("payments_before_next_income"), "Gam'eya instalments before next income")
     cards = [card(figure_label("safe_to_spend"), f.safe_to_spend, safe_compare, tone="hold" if f.safe_to_spend >= 0 else "over",
                   key="safe", chip_=chip(f"until {until}" if until else "3 months"),
                   visual=segments([("Safe", max(f.safe_to_spend, ZERO), "hold"),
@@ -228,12 +233,12 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
                   line_=line("On top of your plan"), working=f.safe_to_spend_working)]
 
     if free_then is not None:
-        change = f.free_cash - free_then
+        change = f.free_cash_change(free_then)
         free_compare = compare(f"since {then}", _signed(change), "good" if change >= 0 else "bad")
         free_chip = chip(month_of(day), "good" if change >= 0 else "bad", "up" if change > 0 else "down" if change < 0 else None)
     else:
         free_compare, free_chip = compare("Your first month: nothing to compare yet"), chip(month_of(day))
-    held = (position.kept_apart or ZERO) + (position.reserves or ZERO) + position.bills_due
+    held = position.set_aside_or_due
     cards.append(card(figure_label("free_cash"), f.free_cash, free_compare, tone="hold", key="free", chip_=free_chip,
                       visual=spark([*past_free, f.free_cash]),
                       line_=line(f"Cash you own {fmt(position.cash_you_own, 0)}, including {fmt(position.brokerage_cash, 0)} in your brokerage"
@@ -256,9 +261,10 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
 
     low = f.lowest if has_income else None
     if low is not None:
-        drop = f.free_cash - low.closing
+        drop = f.drop_to_lowest
         low_compare = (compare("below today", fmt(drop, 0)) if drop > 0 else compare("above today", fmt(-drop, 0), "good"))
-        months_text = (f"{low.closing / monthly_spending:.1f} months of spending at its lowest" if monthly_spending and low.closing > 0
+        in_months = f.lowest_in_months(monthly_spending)
+        months_text = (f"{in_months:.1f} months of spending at its lowest" if in_months is not None
                        else "Runs short: the month ends below zero" if low.closing < 0 else "")
         cards.append(card("Lowest point ahead", low.closing, low_compare, tone="over" if low.closing < 0 else "hold", key="low",
                           chip_=chip(low.month, "over" if low.closing < 0 else "quiet"),
@@ -271,7 +277,7 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
 
 
 def _signed(value: Decimal) -> str:
-    return ("+" if value > 0 else "−" if value < 0 else "") + fmt(abs(value), 0)
+    return ("+" if value > 0 else "−" if value < 0 else "") + fmt(abs(value), 0)  # not money: a sign and its figure
 
 
 # ── Overview ───────────────────────────────────────────────────────────────────────────────────────────────
@@ -298,7 +304,7 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
                           line_=line(f"Money out {fmt(flow.outflows, 0)}")))
     else:
         if usual is not None:
-            gap = rate - usual
+            gap = CashFlow.rate_gap(rate, usual)
             savings_compare = compare(f"on your usual {usual:.1f}%", f"{signed_pct(gap)} points", "good" if gap >= 0 else "bad")
             arrow = "up" if gap > 0 else "down" if gap < 0 else None
             savings_chip = chip(period_chip, "good" if gap >= 0 else "bad", arrow)
@@ -312,8 +318,8 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
 
     if forecast is not None:
         f, until = forecast, forecast.next_income_date
-        promised = max(f.free_cash - f.safe_to_spend, ZERO)
-        safe_compare = (compare("of your free cash", f"{f.safe_to_spend / f.free_cash * 100:.0f}%", "hold") if f.free_cash > 0 and f.safe_to_spend >= 0
+        promised = f.promised
+        safe_compare = (compare("of your free cash", f"{f.safe_percent_of_free_cash:.0f}%", "hold") if f.free_cash > 0 and f.safe_to_spend >= 0
                         else compare("more is promised than your free cash", fmt(-f.safe_to_spend, 0), "bad") if f.safe_to_spend < 0
                         else compare("No free cash today"))
         cards.append(card(figure_label("safe_to_spend"), f.safe_to_spend, safe_compare, tone="hold" if f.safe_to_spend >= 0 else "over",
@@ -323,9 +329,9 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
 
     if plan is not None:
         planned, left = plan["planned"], plan["left"]
-        used = planned - left
+        used = used_of_plan(planned, left)
         plan_compare = (compare("over the plan", fmt(-left, 0), "bad") if left < 0
-                        else compare(f"of the {fmt(planned, 0)} plan used", f"{used / planned * 100:.0f}%" if planned > 0 else "—"))
+                        else compare(f"of the {fmt(planned, 0)} plan used", f"{share_of_plan(used, planned):.0f}%" if planned > 0 else "—"))
         cards.append(card(figure_label("left_in_plan"), left if left >= 0 else -left, plan_compare,
                           tone="over" if left < 0 else "out", needs=left < 0, key="plan",
                           chip_=chip("Over plan", "over") if left < 0 else chip(month), visual=meter(used, planned),
@@ -345,7 +351,7 @@ def _investing(flow, invest, invest_before, before_label: str, money_added: Deci
         return card(label_, None, compare(f"Nothing invested yet this period. {last}"), tone="in", key="investing",
                     chip_=chip(period_chip), line_=line(action="Plan to invest", href="/investments/planner"), href=href)
     if invest is not None and invest_before is not None:
-        gap = invest - invest_before
+        gap = CashFlow.rate_gap(invest, invest_before)
         comparison = compare(f"on {before_label} ({invest_before:.1f}%)", f"{signed_pct(gap)} points", "good" if gap >= 0 else "bad")
     elif invest is not None:
         comparison = compare(f"Nothing was kept in {before_label} to compare with")
@@ -429,7 +435,7 @@ def recurring(*, monthly_out: Decimal, fixed, limit: Decimal | None, band: str |
               due_count: int, due_total: Decimal) -> list[dict]:
     """Cash planning › Recurring (3Q1): what repeats a month, its share of income against your limit, subscriptions
     and what is due now. ``fixed`` is FinancialHealth's fixed_costs_to_income ratio."""
-    cards = [card("Bills and subscriptions", monthly_out, compare(f"{fmt(monthly_out * 12, 0)} a year"), tone="out",
+    cards = [card("Bills and subscriptions", monthly_out, compare(f"{fmt(a_year(monthly_out), 0)} a year"), tone="out",
                   line_=line("a month"), href="#recurring-totals", key="bills")]
     pct = fixed.percent
     text, tone = _BAND_CHIP.get(band, ("", "quiet"))
@@ -442,7 +448,7 @@ def recurring(*, monthly_out: Decimal, fixed, limit: Decimal | None, band: str |
                       line_=line(f"Your limit {limit:.0f}%" if limit is not None else "No limit set"),
                       needs=band == "alert", key=fixed.key))
     if subscriptions_per_year:
-        cards.append(card("Subscriptions", subscriptions_per_year / 12, compare(f"{fmt(subscriptions_per_year, 0)} a year"),
+        cards.append(card("Subscriptions", a_month(subscriptions_per_year), compare(f"{fmt(subscriptions_per_year, 0)} a year"),
                           tone="out", line_=line("a month"), key="subscriptions"))
     if due_count:
         cards.append(card("Due now", due_total, compare(f"in {counted(due_count, 'payment', 'payments')}"),
@@ -457,7 +463,7 @@ def currencies(totals: dict, *, start: str, end: str) -> list[dict]:
     labels = {"unrealized": figure_label("unrealized_fx_gain"), "realized": figure_label("realized_fx_gain"),
               "spread": figure_label("spread_paid")}
     complete = totals["complete"]
-    held = totals["value"] + totals["investments"] if complete else None
+    held = FxPositions.held(totals) if complete else None
     cards = [card("Foreign money", held,
                   compare(f"Cash {fmt(totals['value'], 0)} · investments {fmt(totals['investments'], 0)}"
                           if complete and totals["investments"] else

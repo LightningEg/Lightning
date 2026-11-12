@@ -65,7 +65,7 @@ def _page(request: Request, account_id: int, *, values=None, record=None, error=
     return render(request, "gameya/detail.html", status_code=status_code, account=account, terms=terms,
                   progress=progress, cash_accounts=cash, values=values or _term_values(terms), prefill=prefill,
                   counterparties=c.counterparties.list_active(), error=error, error_form=error_form,
-                  today_iso=fmt_date(now), pot=(terms.installment * terms.members if terms else None))
+                  today_iso=fmt_date(now), pot=(terms.pot if terms else None))
 
 
 @router.get("/{account_id:int}")

@@ -1,7 +1,7 @@
-"""Check every item in issues/ and rebuild issues/INDEX.md, the plan: milestones in order, their items under them.
+"""Check every design file in issues/ and print them by milestone. What is open lives on GitHub: tools/board.py.
 
-    python tools/issues.py            # rewrite issues/INDEX.md
-    python tools/issues.py --check    # exit 1 if an item is malformed or INDEX.md is out of date; warnings never fail
+    python tools/issues.py            # print the design files by milestone (nothing is written)
+    python tools/issues.py --check    # exit 1 if an item is malformed; warnings never fail
     python tools/issues.py next 3     # the next free code in milestone 3, e.g. 3K
     python tools/issues.py tag 3B     # its full code with the kind tag, e.g. BV-3B
 
@@ -428,20 +428,14 @@ def main() -> int:
             return 1
         print(f"{wanted[0]['tag']}-{wanted[0]['code']}")
         return 0
-    text = render(milestones)
-    index = ISSUES / "INDEX.md"
     if "--check" in sys.argv:
-        if not index.exists() or index.read_text(encoding="utf-8") != text:
-            problems.append("issues/INDEX.md is out of date: run python tools/issues.py")
         print("\n".join(warnings(milestones) + problems) or "issues fine")
         return 1 if problems else 0
     if problems:
         print("\n".join(problems))
         return 1
-    index.write_text(text, encoding="utf-8")
-    print(f"issues/INDEX.md: {len(milestones)} milestones, {sum(len(m['items']) for m in milestones)} items")
+    print(render(milestones))
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())

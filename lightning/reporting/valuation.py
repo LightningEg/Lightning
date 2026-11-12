@@ -89,7 +89,7 @@ class Valuer:
                     return Valuation((quantity * unit_cost).quantize(Decimal("0.000001")), unit_cost,
                                      cost_date, "", "COST")
                 return Valuation(None, None, None, f"No gold reference or recorded cost for {asset.name}")
-            found = self._price(asset, day)
+            found = self._gold_price(asset, day) or self._price(asset, day)
             if found is None:
                 return Valuation(None, None, None, f"No price for {asset.label} on or before {day}")
             price, price_date, source = found
@@ -116,8 +116,26 @@ class Valuer:
             if found:
                 derived = Decimal(found["price_e6"]) * Decimal(target) / Decimal(other["purity_e6"])
                 karat = round(Decimal(other["purity_e6"]) * 24 / Decimal(1_000_000))
-                return {"price_e6": int(derived), "date": found["date"], "source": f"{karat}K by purity"}
+                return {"price_e6": int(derived), "date": found["date"], "source": f"{karat}K by purity",
+                        "currency": found.get("currency", self.base)}
         return None
+
+    def _gold_price(self, asset: FinancialAsset, day: str) -> tuple[Decimal, str, str] | None:
+        """IV-12L: gold held by the gram (a bar, a coin) is valued by the dated karat price, like a jewellery item, not
+        by what the last purchase paid; with no karat price at all it falls back to the usual order."""
+        if asset.exposure.value != "GOLD" or asset.unit != "gram" or asset.purity is None:
+            return None
+        found = self.reference_price(asset.id, day)
+        if not found:
+            return None
+        price = from_e6(found["price_e6"])
+        currency = found.get("currency", self.base)
+        if currency != asset.currency:
+            reference_rate, asset_rate = self.fx(currency, day), self.fx(asset.currency, day)
+            if reference_rate is None or asset_rate is None:
+                return None
+            price = price * reference_rate.rate / asset_rate.rate
+        return price, found["date"], found["source"]
 
     def _price(self, asset: FinancialAsset, day: str) -> tuple[Decimal, str, str] | None:
         """Newest price wins; on one day the order is ``SOURCE_RANK`` (a price you typed, then a buy or sell, then the

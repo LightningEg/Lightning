@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import page_header with context %}
+{% block title %}{{ 'Add a certificate'|tr(locale) }}{% endblock %}
+{% block heading %}{{ page_header('Add a certificate', 'Certificates are held in a CD portfolio, one per bank. Name the bank to open yours.') }}{% endblock %}
+{% block content %}
+<form method="post" class="card" style="max-width:520px">
+  {% if error %}<p class="error">{{ error|tr(locale) }}</p>{% endif %}
+  <div class="field"><label for="bank">{{ 'Bank'|tr(locale) }}</label><input id="bank" name="bank" value="{{ bank }}" placeholder="{{ 'e.g. CIB'|tr(locale) }}" required></div>
+  <button class="btn primary phone-save">{{ 'Open CD portfolio'|tr(locale) }}</button>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+</form>
+{% endblock %}

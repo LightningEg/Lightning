@@ -10,6 +10,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from lightning.accounts.domain import DEFAULT_CASH_CLASS, OFFERED_TYPES, SIDEBAR_GROUPS, TYPE_LABELS
+from lightning.accounts import totals as account_totals
 from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.figures import label
@@ -111,18 +112,10 @@ async def list_accounts(request: Request):
                 has_unavailable = True
         rows.append((account, balance, owned, c.transactions.count_for_account(account.id)))
     # One row per broker (owner decision 2026-10-16): each currency pocket adds to its broker's row.
-    by_id = {row[0].id: i for i, row in enumerate(rows)}
-    for account, balance, owned, count in [row for row in rows if row[0].parent_id]:
-        i = by_id.get(account.parent_id)
-        if i is None:
-            continue
-        parent, p_balance, p_owned, p_count = rows[i]
-        add = lambda a, b: None if a is None or b is None else a + b  # noqa: E731
-        rows[i] = (parent, add(p_balance, balance), add(p_owned, owned), p_count + count)
-    rows = [row for row in rows if not row[0].parent_id or row[0].parent_id not in by_id]
+    rows = account_totals.roll_up_pockets(rows)
     net_worth = c.reporting.net_worth(today())
     gross_total = (None if has_unavailable else
-                   sum((row[1] for row in rows if row[0].active), start=0))
+                   account_totals.active_total(rows))
     # Answer first (guideline 3.33): What you own is the Lead, In your accounts and Held for others beside it; the
     # accounts follow in the groups the sidebar uses, each with its total.
     held = c.reporting.money_from_others_total(fmt_date(today()))
@@ -134,13 +127,7 @@ async def list_accounts(request: Request):
                          kpis.compare("is held for others, not yours", fmt(held, 0), "hold") if held
                          else kpis.compare("All of it is yours"), tone="hold", key="own",
                          line_=kpis.line(f"Across {counted(len(active), 'account', 'accounts')}"))
-    groups: dict[str, dict] = {}
-    for row in rows:
-        group = groups.setdefault(SIDEBAR_GROUPS[row[0].account_type], {"rows": [], "balance": ZERO, "owned": ZERO})
-        group["rows"].append(row)
-        if row[0].active:
-            group["balance"] = None if group["balance"] is None or row[1] is None else group["balance"] + row[1]
-            group["owned"] = None if group["owned"] is None or row[2] is None else group["owned"] + row[2]
+    groups = account_totals.group_totals(rows, lambda account: SIDEBAR_GROUPS[account.account_type])
     order = list(dict.fromkeys(SIDEBAR_GROUPS.values()))
     groups = sorted(groups.items(), key=lambda item: order.index(item[0]))
     return render(request, "accounts/list.html", rows=rows, net_worth=net_worth, gross_total=gross_total,
@@ -180,7 +167,7 @@ async def currency_accounts(request: Request):
         for point in points:
             invested, unpriced = c.position.foreign_holdings(point.day, c.base_currency).get(
                 chosen.currency, (ZERO, False))
-            values.append(None if unpriced or point.value is None else point.value + invested)
+            values.append(account_totals.with_investments(point.value, invested, unpriced))
         # Never bridge an unknown valuation with a line that suggests a known history.
         combined_unavailable = any(value is None for value in values)
         combined_trend = charts.trend([point.day[:7] for point in points], [
@@ -397,6 +384,54 @@ async def update_other_asset_details(request: Request, account_id: int):
     return redirect(f"/accounts/{account_id}", "Details saved.")
 
 
+def _field(form, name: str) -> str:
+    return str(form.get(name) or "").strip()
+
+
+@router.post("/{account_id:int}/contract")
+async def save_property_contract(request: Request, account_id: int):
+    """NF-12M3: the instalments still to pay the developer for a flat bought off plan."""
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            c.property.save_contract(account_id, _field(form, "instalment"), _field(form, "frequency") or "MONTHLY",
+                                     _field(form, "first_date"), _field(form, "payment_count"),
+                                     _field(form, "funding_account_id"))
+    except LightningError as exc:
+        return redirect(f"/accounts/{account_id}#property-contract", exc.message)
+    return redirect(f"/accounts/{account_id}", "Instalments saved.")
+
+
+@router.post("/{account_id:int}/instalment")
+async def pay_property_instalment(request: Request, account_id: int):
+    """NF-12M3: one instalment moves from your bank into the property; what you paid goes up by it."""
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            c.property.pay_instalment(account_id, _field(form, "due_date"), _field(form, "date") or None,
+                                      _field(form, "amount") or None, _field(form, "from_account_id") or None)
+    except LightningError as exc:
+        return redirect(f"/accounts/{account_id}", exc.message)
+    return redirect(f"/accounts/{account_id}", "Instalment paid.")
+
+
+@router.post("/{account_id:int}/property-flow")
+async def record_property_flow(request: Request, account_id: int):
+    """NF-12M4: rent received or a running cost paid, named as this property's."""
+    c = container(request)
+    form = await request.form()
+    kind = _field(form, "kind") or "rent"
+    try:
+        with settled_save(request, c):
+            c.property.record_flow(account_id, kind, _field(form, "date") or None, _field(form, "amount"),
+                                   _field(form, "cash_account_id"), _field(form, "notes"))
+    except LightningError as exc:
+        return redirect(f"/accounts/{account_id}#property-income", exc.message)
+    return redirect(f"/accounts/{account_id}", "Rent saved." if kind == "rent" else "Cost saved.")
+
+
 def _transaction_popup_context(request, account, values, action, error=None, txn_id=None, split_categories=None):
     c = container(request)
     counterparties = c.counterparties.list_active()
@@ -577,7 +612,7 @@ async def save_transaction_popup(request: Request, account_id: int):
         if matched_reserve < 0:
             feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
         response = redirect(values["return_to"], f"Saved. {feedback}".strip())
-        response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,  # the stored id
+        response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,  # not money: seconds; the stored id
                             httponly=True, samesite="lax")
         return response
     except (LightningError, ValueError) as exc:
@@ -863,7 +898,7 @@ async def broker_import(request: Request, account_id: int):
             data = await upload.read()
         else:
             data = base64.b64decode(str(form.get("statement", "")), validate=True)
-        if len(data) > 5 * 1024 * 1024:
+        if len(data) > 5 * 1024 * 1024:  # not money: bytes
             raise ValidationError("Statements up to 5 MB are supported.", "file")
         statement = read_ibkr(data)
         work = BrokerImport(c)

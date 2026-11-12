@@ -9,4 +9,4 @@ Things seen, not yet planned. One line each: date, pillar, what and where (a pag
 - Lines older than 30 days that nobody picked are deleted in the next plan sweep.
 
 ## Lines
-
+- **C2 (from IV-3AM, 2026-11-12):** Cash planning's *What you owe* card stands alone in its row with one loan; pair it or make it a row when IV-12Q gives Cash planning its page pattern. Report: r19 C2.

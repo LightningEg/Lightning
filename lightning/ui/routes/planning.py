@@ -19,6 +19,8 @@ from lightning.planning.domain import (FREQUENCY_LABELS, KIND_LABELS, RECURRING_
 from lightning.planning.bill_state import CATCH_UP_FROM, late_payments
 from lightning.planning.schedule import describe
 from lightning.planning.service import LOAN_CATEGORY
+from lightning.planning.totals import (LoanTotals, RecurringEntry, RecurringTotals, a_month, budget_effect,
+                                       reserve_effect, total)
 
 from .. import charts, keynotes, kpis, visuals, status as page_status
 from ..web import container, redirect, render, settled_save
@@ -52,7 +54,7 @@ def _labels(c) -> dict:
 
 
 def _row(c, item, labels, as_of, linked):
-    horizon = as_of + timedelta(days=400)
+    horizon = as_of + timedelta(days=400)  # not money
     payments = c.planning.payments(item, item.end_date or fmt_date(horizon), as_of)
     upcoming = next((p for p in payments if p.outstanding), None)
     due = [p for p in payments if p.status == PaymentStatus.DUE]
@@ -60,7 +62,7 @@ def _row(c, item, labels, as_of, linked):
     review_next = bool(upcoming and upcoming.status == PaymentStatus.UPCOMING and any(
         candidate["id"] not in linked for candidate in c.planning.plausible_candidates(upcoming, as_of)))
     per_year = c.planning.amount_in_base(item, _per_year(item), as_of)
-    recent = fmt_date(as_of - timedelta(days=62))
+    recent = fmt_date(as_of - timedelta(days=62))  # not money
     skipped = [p for p in payments if p.status == PaymentStatus.SKIPPED and p.due_date >= recent]
     reserve_links = c.reserves.links_for_transaction(last.transaction_id) if last and last.transaction_id else []
     return {"item": item, "schedule": describe(item), "next": upcoming, "due": due, "last_paid": last, "skipped": skipped,
@@ -124,7 +126,7 @@ async def plan_page(request: Request):
     day = today()
     forecast = c.forecaster.forecast(day)
     owe = c.planning.what_you_owe(day)
-    window_end = day + timedelta(days=30)
+    window_end = day + timedelta(days=30)  # not money
     next_payments = [p for p in c.planning.all_payments(window_end, day)
                      if p.status in (PaymentStatus.DUE, PaymentStatus.UPCOMING)]
     # Late payments first, each with its days late (computed here, not in the template).
@@ -251,7 +253,8 @@ async def recurring_page(request: Request):
                               row["item"].name.casefold()))
     stopped = c.planning.items(RECURRING_KINDS, active_only=False)
     stopped = [i for i in stopped if not i.active]
-    subscriptions = sum((r["per_year"] for r in rows if r["item"].kind == PlanKind.SUBSCRIPTION), ZERO)
+    totals = RecurringTotals([RecurringEntry(r["item"], r["per_year"], r["due"]) for r in rows])
+    subscriptions = totals.subscriptions_per_year
     health = c.health.at(day)
     monthly_out = health.bills_a_month
     fixed = health.fixed_costs_to_income
@@ -259,15 +262,13 @@ async def recurring_page(request: Request):
                                f"{fmt(fixed.part, 0)} a month of {fmt(fixed.whole or ZERO, 0)} income · bills, subscriptions and loans",
                                "Set your income categories to measure it" if fixed.part else "No bills, subscriptions or loans yet",
                                "#recurring-totals")]
-    monthly_in = sum((r["per_year"] for r in rows if r["item"].is_income), ZERO) / 12
-    # IV-12Q4: one list per device, each row with its share bar: a month of it against the largest of its kind.
-    for side in (True, False):
-        top = max((r["per_year"] for r in rows if r["item"].is_income == side), default=ZERO)
-        for r in rows:
-            if r["item"].is_income == side:
-                r["share"] = float(max(r["per_year"], ZERO) / top * 100) if top > 0 else 0.0  # not money: a bar width
-    bill_bars = charts.bars([{"label": r["item"].name, "value": r["per_year"] / 12,
-                              "note": r["item"].kind_label + (" · " + r["category"] if r["category"] else "")}
+    monthly_in = totals.income_a_month
+    # IV-12Q4: each row of the one list carries its share bar and its month (worked out in planning/totals.py).
+    shares = totals.share_bars()
+    for r in rows:
+        r["share"], r["a_month"] = shares[r["item"].id], a_month(r["per_year"])
+    bill_bars = charts.bars([{"label": r["item"].name, "value": a_month(r["per_year"]),
+                              "note": r["item"].kind_label + (" · " + r["category"] if r["category"] else "")}  # not money
                              for r in rows if not r["item"].is_income])
     return render(request, "planning/recurring.html", tabs=TABS, plan_tab="recurring", rows=rows, stopped=stopped,
                   answer=page_status.recurring(monthly_out, fixed.percent),
@@ -276,9 +277,7 @@ async def recurring_page(request: Request):
                       monthly_out=monthly_out, fixed=fixed, limit=c.health.limit_values().get(fixed.key),
                       band=c.health.band(fixed.key, fixed.percent) if fixed.percent is not None else None,
                       subscriptions_per_year=subscriptions,
-                      due_count=sum(len(r["due"]) for r in rows if not r["item"].is_income),
-                      due_total=sum((c.planning.amount_in_base(r["item"], p.amount, day)
-                                     for r in rows if not r["item"].is_income for p in r["due"]), ZERO)),
+                      due_count=totals.due_count, due_total=totals.due_total(c.planning, day)),
                   suggestions=c.planning.suggestions(day), dismissed=c.planning.dismissed_suggestions(),
                   subscriptions_per_year=subscriptions,
                   monthly_out=monthly_out, monthly_in=monthly_in, labels=labels, as_of=fmt_date(day))
@@ -366,13 +365,13 @@ async def loans_page(request: Request):
         entry["meter"] = charts.meter(entry["progress"]["paid_amount"], entry["progress"]["total_amount"])
     summary = keynotes.loans_summary(loans)  # its words become the Lead's line; a note never forms a row (A09)
     still_to_pay = c.planning.what_you_owe(day).loans_still_to_pay
-    paid = sum((e["progress"]["paid_amount"] for e in loans), ZERO)
-    borrowed = sum((e["progress"]["total_amount"] for e in loans), ZERO)
+    loan_totals = LoanTotals.of(e["progress"] for e in loans)
+    paid, borrowed = loan_totals.paid, loan_totals.borrowed
     # The page's answer is a Lead (A07): what is left to pay, against what was borrowed, paid and left as its picture.
     lead = kpis.card("Loans still to pay", still_to_pay,
                      kpis.compare(f"of {fmt(borrowed, 0)} in {counted(len(loans), 'loan', 'loans')}",
                                   f"{fmt(paid, 0)} paid", "good"),
-                     tone="out", visual=kpis.segments([("Paid", paid, "hold"), ("Left", borrowed - paid, "out")]),
+                     tone="out", visual=kpis.segments([("Paid", paid, "hold"), ("Left", loan_totals.left, "out")]),
                      line_=kpis.line(summary["title"] if summary else ""),  # "Paid off on …" or "2 loan payments due now"
                      needs=bool(summary and summary["tone"] == "attention")) if loans else None
     health = c.health
@@ -532,7 +531,7 @@ async def promote_transaction(request: Request, txn_id: int):
             if str(form.get("past_due", "paid")) == "paid":
                 moved = c.planning.start_after_paid(item_id)
                 if moved:
-                    message += f" Already paid, so the next one is due {moved}."
+                    message += f" Already paid, so the next one is due {moved}."  # not money
     except LightningError as exc:
         return _item_form(request, c, values, error=exc.message, error_field=exc.field or "", status_code=400,
                           back=back, form_action=f"/plan/from-transaction/{txn_id}", promotion=source)
@@ -687,7 +686,7 @@ def _afford_account_answer(c, request, afford, day):
     except (ValueError, LightningError):
         return None
     on = max(on, day)
-    end = max(on, day + timedelta(days=90))
+    end = max(on, day + timedelta(days=90))  # not money
     payments, events = c.forecaster.scheduled_inputs(day, end)
     projection = dated_cash_forecast(c.reporting, payments, events, day, end)
     answer = account_check(projection.account_series, account.id, fmt_date(on), afford.amount, account.name)
@@ -703,16 +702,13 @@ def _payment_effects(c, item, payment, paid_on) -> dict:
     reserve = c.reserves.bill_reserve(item.id)
     effects = {"owed": owed, "reserve": None, "budget": None}
     if reserve:
-        used = min(reserve["effective_allocated"], owed)
-        effects["reserve"] = {"name": reserve["name"], "before": reserve["effective_allocated"], "used": used,
-                              "after": reserve["effective_allocated"] - used}
+        effects["reserve"] = reserve_effect(reserve, owed)
     if item.category_id and not item.is_income:
         month = str(paid_on)[:7]
         view = c.budgets.month_view(month, schedule=c.schedules.view())
         line = next((l for sec in view.sections for l in sec.lines if l.category_id == item.category_id), None)
         if line is not None and line.budget is not None:
-            effects["budget"] = {"name": line.name, "month": month, "left_before": line.remaining,
-                                 "left_after": line.remaining - owed, "over": line.remaining - owed < 0}
+            effects["budget"] = budget_effect(line, month, owed)
     return effects
 
 
@@ -761,7 +757,7 @@ async def settle_payment(request: Request, item_id: int):
                 message = f"{item.name} · {due} recorded and marked paid."
                 paid = to_decimal(str(form.get("amount", "")), "amount")
                 if paid != item.amount and item.frequency != Frequency.ONCE:
-                    message += (f" You paid {fmt(paid)} instead of {fmt(item.amount)}; Recurring offers to use "
+                    message += (f" You paid {fmt(paid)} instead of {fmt(item.amount)}; Recurring offers to use "  # not money
                                 f"{fmt(paid)} from now on.")
             elif action == "skip":
                 c.planning.skip(item_id, due)
@@ -826,7 +822,7 @@ async def catch_up(request: Request):
     for r in summary["paid"]:
         p = r["payment"]
         r["paid"] = c.planning.amount_in_base(p, p.paid_amount if p.paid_amount is not None else p.amount, day)
-    summary["paid_total"] = sum((r["paid"] for r in summary["paid"]), ZERO)
+    summary["paid_total"] = total(r["paid"] for r in summary["paid"])
     return render(request, "planning/catch_up.html", step=None, summary=summary, total=len(rows), here=here)
 
 
@@ -861,7 +857,7 @@ async def forecast_inputs(request: Request):
 async def scenario_page(request: Request):
     from lightning.planning.scenarios import compare_scenario, occurrence_key
     c = container(request)
-    day, end = today(), today() + timedelta(days=90)
+    day, end = today(), today() + timedelta(days=90)  # not money
     values = {key: str(request.query_params.get(key, '')) for key in
               ('income', 'delay', 'purchase', 'purchase_date', 'account_id', 'bill', 'bill_amount')}
     # One question at a time (F10, r24): the chosen kind, else the one that already has values, else a purchase.

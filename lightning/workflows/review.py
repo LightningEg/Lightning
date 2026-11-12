@@ -104,6 +104,8 @@ def grouped(items: list[dict]) -> list[dict]:
     for group in groups.values():
         first = group["items"][0]
         group["priority"] = min(item["priority"] for item in group["items"])
+        # IV-3AM O2: Strong rose means Needs you as a problem (A03); a group with no money at risk is a to-do
+        group["risk"] = any(consequence_of(item) == "risk" for item in group["items"])
         if len(group["items"]) == 1:  # shown as itself: its own words, detail and action
             group.update(label=first["label"], detail=first["detail"], href=first["href"],
                          popup=bool(first.get("popup")), action=first.get("action") or "Review", count=1,

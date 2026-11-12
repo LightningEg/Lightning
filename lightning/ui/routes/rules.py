@@ -13,8 +13,8 @@ from ..web import container, redirect, render, settled_save
 
 router = APIRouter(prefix="/rules")
 
-FIELDS = ("name", "match", "counterparty_op", "counterparty", "notes", "amount_op", "amount", "amount_to", "account_id",
-          "direction", "category_id", "tag") + tuple(f"part_{k}_{i}" for i in range(1, MAX_PARTS + 1)
+FIELDS = ("name", "match", "counterparty_op", "counterparty", "notes", "amount_op", "amount", "amount_to", "account_id",  # not money: field names
+          "direction", "category_id", "tag") + tuple(f"part_{k}_{i}" for i in range(1, MAX_PARTS + 1)  # not money: field names
                                                     for k in ("category", "value"))
 PAST_SHOWN = 20
 
@@ -25,7 +25,7 @@ def _form(request: Request, c, values: dict, rule=None, error: str = "", error_f
                   categories=[cat.id for cat in pickable],
                   spending=[cat.id for cat in pickable if cat.movement == Movement.OUTFLOW],
                   accounts=c.accounts.list(active_only=True), counterparties=c.counterparties.list_active(),
-                  rule_parts=range(1, MAX_PARTS + 1),
+                  rule_parts=range(1, MAX_PARTS + 1),  # not money: form slots
                   error=error, error_field=error_field)
 
 
@@ -104,7 +104,7 @@ async def offer_rule(request: Request):
     if offer is None:
         return redirect(back, "")
     return render(request, "rules/offer.html", offer=offer, changes=offer["past"][:PAST_SHOWN],
-                  more=max(len(offer["past"]) - PAST_SHOWN, 0), back=back)
+                  more=max(len(offer["past"]) - PAST_SHOWN, 0), back=back)  # not money: counts
 
 
 @router.post("/offer")
@@ -145,7 +145,7 @@ async def past_matches(request: Request, rule_id: int):
     if not changes:
         return redirect("/rules", request.query_params.get("msg", "") or "Rule saved.")
     return render(request, "rules/past.html", rule=rule, words=c.rules.describe(rule), changes=changes[:PAST_SHOWN],
-                  total=len(changes), more=max(len(changes) - PAST_SHOWN, 0), fingerprint=c.rules.past_token(rule_id, changes))
+                  total=len(changes), more=max(len(changes) - PAST_SHOWN, 0), fingerprint=c.rules.past_token(rule_id, changes))  # not money: counts
 
 
 @router.post("/{rule_id:int}/apply")

@@ -9,6 +9,8 @@ from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 
+from lightning.budgeting.period import plan_used
+from lightning.planning.totals import share_of_free_cash
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, month_of, parse_date, today
 from lightning.core.errors import LightningError, ValidationError
@@ -65,10 +67,10 @@ async def dashboard(request: Request):
         base = c.base_currency
         common = ["USD", "EUR", "SAR", "AED", "GBP", "KWD"]
         names = {row["code"]: row["name"] for row in registry.suggestions()}
-        order = [code for code in common if code in names] + [code for code in names if code not in common]
+        order = [code for code in common if code in names] + [code for code in names if code not in common]  # not money
         return render(request, "dashboard/welcome.html", base=base, currencies=c.profile_currencies,
                       currency_choices=[(code, names[code]) for code in order],
-                      held_currencies=[base] + [code for code in held if code != base],
+                      held_currencies=[base] + [code for code in held if code != base],  # not money
                       extra_currencies=[code for code in held if code != base],
                       currencies_done=c.settings.get("setup_currencies_done") == "1",
                       editing_currencies=request.query_params.get("currencies") == "edit",
@@ -107,9 +109,9 @@ async def dashboard(request: Request):
         "portfolio_value": portfolio_value, "new_money": closing_report["net_money"],
         "income_collected": closing_report["dividends"],
         "period_result": period_result, "period_result_available": period_result is not None,
-        "missing": closing_report["missing"] + opening_report["missing"],
+        "missing": closing_report["missing"] + opening_report["missing"],  # not money
         "at_cost": closing_report["at_cost"],
-        "holdings_count": sum(1 for row in closing_report["holdings"] if row["price_source"] != "CASH"),
+        "holdings_count": sum(1 for row in closing_report["holdings"] if row["price_source"] != "CASH"),  # not money
     }
     networth_trend = visuals.net_worth_trend(c, as_of)
     stats = _period_stats(c, period, first, as_of, period_position, cash_flow, change, change_reason,
@@ -124,15 +126,15 @@ async def dashboard(request: Request):
     lead_amount = position.net_worth if position.what_you_owe > 0 else position.what_you_own
     worth_units = c.position.in_other_units(lead_amount, position_day, c.zakat.gold_price_24k(fmt_date(position_day)))
     if position_is_today := position_day == today():
-        stats.insert(len(stats) - 1, _safe_tile(inbox.forecast))  # the phone's tiles (C06.1)
+        stats.insert(len(stats) - 1, _safe_tile(inbox.forecast))  # the phone's tiles (C06.1)  # not money
     # The PC's row is A08 cards, each against something: the savings rate against your usual one, the investing
     # rate against the period before, Safe to spend against free cash, Left in plan against the plan.
     if period.key == "month":
-        before_to = first - timedelta(days=1)
+        before_to = first - timedelta(days=1)  # not money
         before_from, before_label = before_to.replace(day=1), month_of(before_to)
     else:
-        before_to = first - timedelta(days=1)
-        before_from, before_label = before_to - (as_of - first), "the period before"
+        before_to = first - timedelta(days=1)  # not money
+        before_from, before_label = before_to - (as_of - first), "the period before"  # not money
     flow_before = c.reporting.cash_flow(before_from, before_to)
     added_before = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(before_from), fmt_date(before_to))["net_money"]
     plan_month = month_of(as_of)
@@ -179,7 +181,7 @@ async def dashboard(request: Request):
         investment_report=investment_report, cash_flow=cash_flow,
     )
     response.set_cookie(SEEN_COOKIE, datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                        max_age=365 * 24 * 3600, httponly=True, samesite="lax")
+                        max_age=365 * 24 * 3600, httponly=True, samesite="lax")  # not money
     return response
 
 
@@ -205,7 +207,7 @@ async def set_welcome_currency(request: Request):
         if getattr(c, "is_journal", False):
             with settled_save(request, c):
                 c.journal_workflows.setup_currencies(code=code, extras=extras, was_empty=not bool(c.accounts.list()))
-            return redirect("/", f"Currencies saved: {' · '.join([c.base_currency] + extras)}.")
+            return redirect("/", f"Currencies saved: {' · '.join([c.base_currency] + extras)}.")  # not money
         with settled_save(request, container(request)):
             if not c.accounts.list():
                 c.currencies.register(code)
@@ -216,7 +218,7 @@ async def set_welcome_currency(request: Request):
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else str(exc)
         return redirect("/", message)
-    return redirect("/", f"Currencies saved: {' · '.join([c.base_currency] + extras)}.")
+    return redirect("/", f"Currencies saved: {' · '.join([c.base_currency] + extras)}.")  # not money
 
 
 @router.post("/setup/guide")
@@ -307,7 +309,7 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
     lead = "net_worth" if owes else "what_you_own"
     stats = [{
         "key": "change", "surface": "hold", "label": label("change_in_net_worth" if owes else "change_in_what_you_own"),
-        "value": nw_change, "kind": "money", "badge": {"tone": "flat" if as_of.day < calendar.monthrange(as_of.year, as_of.month)[1] else sign(nw_change), "text": period_name + (" so far" if as_of.day < calendar.monthrange(as_of.year, as_of.month)[1] else "")},
+        "value": nw_change, "kind": "money", "badge": {"tone": "flat" if as_of.day < calendar.monthrange(as_of.year, as_of.month)[1] else sign(nw_change), "text": period_name + (" so far" if as_of.day < calendar.monthrange(as_of.year, as_of.month)[1] else "")},  # not money
         "sub": nw_reason if nw_change is None else f"{label(lead)} {fmt(position.net_worth if owes else position.what_you_own, 0)}",
         "spark": visuals.trend_spark(networth_trend), "spark_tone": "hold", "href": "#owned-heading",
     }]
@@ -329,7 +331,7 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
         "key": "savings", "surface": "over" if thin or overspent else "in",
         "label": "Spent over money in" if overspent else label("savings_rate"),
         "value": -rate if overspent else None if thin else rate, "kind": "rate", "empty": "—" if thin else None,
-        "badge": {"tone": sign(cash_flow.net), "text": period_name + (" so far" if as_of.day < calendar.monthrange(as_of.year, as_of.month)[1] else "")},
+        "badge": {"tone": sign(cash_flow.net), "text": period_name + (" so far" if as_of.day < calendar.monthrange(as_of.year, as_of.month)[1] else "")},  # not money
         "figure": cash_flow.net, "sub": savings_sub,
         "spark": visuals.savings_rate_spark(c, as_of), "spark_tone": "in",
         "href": "#savings-squares",  # the waffle lives behind the Savings rate (owner, 2026-10-19)
@@ -337,7 +339,7 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
     invest = investing_rate(money_added, cash_flow.net)
     stats.append({
         "key": "investing", "surface": "in", "label": label("investing_rate"), "value": invest, "kind": "rate",
-        "badge": {"tone": sign(money_added), "text": period_name + (" so far" if as_of.day < calendar.monthrange(as_of.year, as_of.month)[1] else "")},
+        "badge": {"tone": sign(money_added), "text": period_name + (" so far" if as_of.day < calendar.monthrange(as_of.year, as_of.month)[1] else "")},  # not money
         "figure": money_added, "sub": label("new_money_in").lower() if invest is not None else "Nothing kept this period",
         "meter": {"width": float(max(min(invest, 100), 0)) if invest is not None else 0.0, "tone": "hold"},
         "href": f"/investments?{period_query}",
@@ -346,8 +348,7 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
     if c.budgets.has_plan(month, schedule=c.schedules.view()):
         summary = c.budgets.plan_summary(month, schedule=c.schedules.view())  # the same figures as the Budget tab
         planned, left = summary["planned"], summary["left"]
-        used = planned - left
-        share = used / planned * 100 if planned > 0 else None
+        used, share = plan_used(planned, left)
         stats.append({
             "key": "plan", "surface": "over" if left < 0 else "out",
             "label": f"Over plan · {month}" if left < 0 else f"{label('left_in_plan')} · {month}",
@@ -368,7 +369,7 @@ def _period_stats(c, period, first, as_of, position, cash_flow, change, change_r
 def _period_chip(period, first, as_of) -> str:
     """The period, short, as every card's chip names it."""
     partial = as_of.day < calendar.monthrange(as_of.year, as_of.month)[1]
-    return {"month": month_of(first) + (" so far" if partial else ""), "ytd": "Year to date",
+    return {"month": month_of(first) + (" so far" if partial else ""), "ytd": "Year to date",  # not money
             "all": "All time"}.get(period.key, f"{fmt_date(first)} to {fmt_date(as_of)}")
 
 
@@ -376,7 +377,7 @@ def _safe_tile(f) -> dict:
     """Safe to spend on the Overview: the Cash planning figure (its home), as a card that opens it. ``f`` is today's
     forecast, the one Needs you already worked out."""
     until = f.next_income_date
-    share = f"{f.safe_to_spend / f.free_cash * 100:.0f}% of your {fmt(f.free_cash, 0)} free cash" if f.free_cash > 0 else "No free cash today"
+    share = f"{share_of_free_cash(f.safe_to_spend, f.free_cash):.0f}% of your {fmt(f.free_cash, 0)} free cash" if f.free_cash > 0 else "No free cash today"
     return {"key": "safe", "surface": "over" if f.safe_to_spend < 0 else "hold", "label": label("safe_to_spend"),
             "value": f.safe_to_spend, "kind": "money",
             "badge": {"tone": "over" if f.safe_to_spend < 0 else "flat", "text": f"until {until}" if until else "3 months"},
@@ -435,7 +436,7 @@ async def sample_file(request: Request, name: str):
     base = os.path.normpath(str(MOHAB_2026))
     full = os.path.normpath(os.path.join(base, name))
     # A listed name, and a file that really sits inside the samples folder (never a path that climbs out of it).
-    if name not in FILES or not full.startswith(base + os.sep) or not os.path.isfile(full):
+    if name not in FILES or not full.startswith(base + os.sep) or not os.path.isfile(full):  # not money
         return redirect("/", "There is no such sample file.")
     return FileResponse(full, media_type="text/csv; charset=utf-8", filename=name)
 
@@ -472,7 +473,7 @@ async def explain_overview_figure(request: Request, kind: str):
     elif kind == "free-cash":
         title = label("free_cash")
         figure = "free_cash"
-        explanation = (FIGURES["free_cash"].meaning + " " + FIGURES["bills_due"].meaning
+        explanation = (FIGURES["free_cash"].meaning + " " + FIGURES["bills_due"].meaning  # not money
                        + " Brokerage cash counts, but move it to a bank or wallet before everyday spending.")
         rows = [{"label": label("bank_and_wallet_cash"), "value": position.bank_and_wallet_cash},
                 {"label": label("brokerage_cash"), "value": position.brokerage_cash}]
@@ -489,7 +490,7 @@ async def explain_overview_figure(request: Request, kind: str):
         title = label("net_flow")
         figure = "net_flow"
         flow = c.reporting.cash_flow(first, day)
-        explanation = FIGURES["money_in"].meaning + " " + FIGURES["money_out"].meaning
+        explanation = FIGURES["money_in"].meaning + " " + FIGURES["money_out"].meaning  # not money
         rows = [{"label": label("money_in"), "value": flow.inflows}, {"label": label("money_out"), "value": -flow.outflows}]
         total = flow.net
         foot = f"{first} to {day}. This is cash flow, not wealth change or investment return."
@@ -505,11 +506,11 @@ async def explain_overview_figure(request: Request, kind: str):
 async def needs_you_inbox(request: Request):
     items = ReviewInbox(container(request)).items(today(), include_handled=True)
     handled = request.query_params.get("tab") == "handled"
-    counts = {state: sum(item["review_state"] == state for item in items)
+    counts = {state: sum(item["review_state"] == state for item in items)  # not money
               for state in ("active", "reviewed", "snoozed")}
     selected = [item for item in items if (item["review_state"] != "active") == handled]
     return render(request, "needs_you.html", label="Needs you", items=selected, counts=counts,
-                  sections=by_consequence(selected), handled=handled, snooze_default=(today() + timedelta(days=7)).isoformat())
+                  sections=by_consequence(selected), handled=handled, snooze_default=(today() + timedelta(days=7)).isoformat())  # not money
 
 
 @router.post("/needs-you/state")
@@ -530,7 +531,7 @@ async def needs_you_group(request: Request, key: str):
     c = container(request)
     items = [item for item in ReviewInbox(c).items(today()) if group_of(item) == key]
     return render(request, "needs_you.html", label=GROUP_LABELS.get(key, "Other"), items=items,
-                  snooze_default=(today() + timedelta(days=7)).isoformat())
+                  snooze_default=(today() + timedelta(days=7)).isoformat())  # not money
 
 
 @router.get("/money-from-others")

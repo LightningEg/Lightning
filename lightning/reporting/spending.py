@@ -38,6 +38,37 @@ def partial_months(first: date, last: date) -> bool:
     return first.day != 1 or last.day != calendar.monthrange(last.year, last.month)[1]
 
 
+# IT-12AE4: spending's comparisons, worked out here so the Spending screens only phrase them.
+def change(now: Decimal, then: Decimal) -> Decimal:
+    """Spending now less spending then (above zero when it rose)."""
+    return now - then
+
+
+def change_percent(now: Decimal, then: Decimal) -> Decimal:
+    """How far spending moved, as a percentage of what it was then (the caller checks ``then`` is not zero)."""
+    return abs(now - then) / then * 100
+
+
+def share_of(part: Decimal, total: Decimal) -> Decimal:
+    """One part of spending as a percentage of the total (the caller checks there is a total)."""
+    return part / total * 100
+
+
+def usual_for(usual: Decimal, months: int) -> Decimal:
+    """A usual month's spending over ``months`` months."""
+    return usual * months
+
+
+def rest_of(rows: list[dict]) -> tuple[Decimal, Decimal]:
+    """The rows past the named ones as one Other row: their spending and their share added up."""
+    return sum((r["value"] for r in rows), ZERO), sum((r["share"] for r in rows), ZERO)
+
+
+def average(values: list[Decimal]) -> Decimal | None:
+    """The average of some amounts; None without any."""
+    return sum(values, ZERO) / len(values) if values else None
+
+
 def _median(values: list[Decimal]) -> Decimal | None:
     ordered = sorted(values)
     if not ordered:

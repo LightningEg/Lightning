@@ -26,7 +26,7 @@ from lightning.transactions.domain import Transaction
 from lightning.transactions.service import TransactionService
 
 from . import events
-from .domain import DEFAULT_SALE_FACTOR, Portfolio, Position
+from .domain import Portfolio, Position, default_sale_factor
 from .lots import SPLIT_MARK, LotLine, build_lots, lot_type
 from .xirr import solve_xirr
 from .returns import display_return
@@ -88,7 +88,8 @@ class InvestmentService:
             current = cls
             while current is not None and current.id not in own:
                 current = classes.get(current.parent_id) if current.parent_id else None
-            result[cls.id] = (own[current.id], current.id) if current is not None else (DEFAULT_SALE_FACTOR, None)
+            result[cls.id] = ((own[current.id], current.id) if current is not None
+                              else (default_sale_factor(cls.code), None))
         return result
 
     def set_all_liquidation_factors(self, factor) -> None:

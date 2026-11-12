@@ -93,3 +93,8 @@ class GameyaTerms:
     annual_rate: Decimal  # percentage points; 0 means no interest
     funding_account_id: int
     payout_account_id: int
+
+    @property
+    def pot(self) -> Decimal:
+        """What one turn collects: every member's instalment."""
+        return self.installment * self.members
