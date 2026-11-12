@@ -30,7 +30,6 @@ Reserved codes: none
 - **Upcoming (11-11, Claude):** 7AR1-3 built (owner: PC+phone check); 7AR4 .ics later. **Read:** 7AR.
 - **O1:** owner checks Home. **Read:** Overview §7.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
-- **IV-3AM PC declutter:** 3AM3 built 2026-11-05; left C2 (What you owe alone) and O2; the owner checks it on the PC. **Read:** 3AM.
 
 - **Store (11-11, Claude):** prices 60/120/200, cap 5 (site PR). 20261110200000 is live; owner: migration 20261111120000, deploy redeem fns; 10H4 at launch. Next 10H6. **Read:** 10H.
 
