@@ -16,7 +16,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r13 | [Store and community: unlocking themes, the market, rewards and staying in Lightning](10-looks-and-store/r13-store-and-community/report.md) | 2026-10-27 | research | 10C |
 | r14 | [Users' main questions: what each screen must answer, with known gaps](3-polish-and-arabic/r14-users-main-questions/report.md) | 2026-10-27 | reference | none |
 | r17 | [Audit 10: the phone, tab by tab - quick actions and the answer first](11-phone-ux/r17-phone-tab-audit/report.md) | 2026-10-29 | audit | none |
-| r19 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](12-desktop-ux/r19-desktop-tab-audit/report.md) | 2026-10-30 | audit | 12Q |
+| r19 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](12-desktop-ux/r19-desktop-tab-audit/report.md) | 2026-10-30 | audit | none |
 | r20 | [Audit 13: the phone for quick jobs - convenience, taps and the look](11-phone-ux/r20-phone-convenience-audit/report.md) | 2026-11-01 | audit | none |
 | r22 | [Code audit: refactoring, loose ends and smart features](9-later/r22-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B |
 | r23 | [CSV import stress test: where it breaks and how to rebuild it](7-planning-import-and-search/r23-csv-import-stress/report.md) | 2026-11-05 | audit | none |
