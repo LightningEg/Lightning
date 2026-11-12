@@ -50,8 +50,9 @@ html[data-theme]:not([data-theme="lightning-default"]) :is(.main .plan-tab[aria-
 /* Dark-theme readability adapters (2026-10-25). Found by screenshotting the real app in every non-default theme:
    light tints and fills hard-coded for the default paint stayed light while text turned light, so labels vanished.
    Money tints come from the theme's own income and expense colours (--theme-income and --theme-expense, from tools/build_themes.py);
-   Azure held is --theme-held, the same hue at a lightness that reads at 4.5:1 on that theme's cards.
-   Only paint changes here: no size, spacing, order or money colour. */
+   Azure held is --theme-held and the app's green is --theme-positive: the same hue at a lightness that reads at 4.5:1
+   on that theme's cards (NF-10C3: #097852 read about 3:1 on dark cards). Only paint changes here: no size, spacing,
+   order or money hue. */
 html[data-theme]:not([data-theme="lightning-default"]) {
   --theme-tint: color-mix(in srgb, var(--accent) 14%, var(--theme-card));
   --theme-tint-good: color-mix(in srgb, var(--theme-income) 16%, var(--theme-card));
@@ -59,6 +60,7 @@ html[data-theme]:not([data-theme="lightning-default"]) {
   --theme-tint-info: color-mix(in srgb, var(--theme-held) 16%, var(--theme-card));
   --tint-growth: var(--theme-tint); --ok-bg: var(--theme-tint-good); --mint-50: var(--theme-tint-good);
   --rose-soft: var(--theme-tint-bad); --coral-50: var(--theme-tint-bad);
+  --positive: var(--theme-positive); --pos: var(--theme-positive); --mint-700: var(--theme-positive);
 }
 /* Sidebar search, privacy and the active page */
 html[data-theme]:not([data-theme="lightning-default"]) :is(.side-search, .side-privacy) {

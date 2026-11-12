@@ -257,6 +257,26 @@ class ThemeBuildTests(unittest.TestCase):
         self.assertNotIn('#7FB2FF', surfaces.upper())
         self.assertIn('var(--theme-held)', surfaces)
 
+    def test_positive_keeps_its_hue_and_reads_on_every_theme_card(self):
+        """NF-10C3: the app's green is generated per theme, same hue, at 4.5:1 on the card's worst point, and the
+        surface adapter wears it for gains and income text."""
+        import colorsys
+        contract = json.loads((builder.SOURCE / 'slots.json').read_text())
+        hls = lambda h: colorsys.rgb_to_hls(*(int(h[i:i+2], 16) / 255 for i in (1, 3, 5)))
+        for path in sorted(builder.SOURCE.glob('*.json')):
+            if path.name in ('slots.json', 'lightning-default.json'):
+                continue
+            manifest, parts = builder.load(path)
+            p = parts['palette']
+            card = builder.worst(p, parts, 'cards', p[parts['cards']['surface']], contract['limits'])
+            colour = builder.compile_theme(manifest, parts, contract).split('--theme-positive: ')[1][:7]
+            with self.subTest(theme=manifest['id']):
+                self.assertAlmostEqual(hls(colour)[0], hls(builder.POSITIVE)[0], delta=0.01)
+                self.assertGreaterEqual(builder.contrast(colour, card), 4.5)
+        surfaces = (ROOT / 'lightning/ui/static/theme-surfaces.css').read_text()
+        for token in ('--positive', '--pos'):
+            self.assertIn(f'{token}: var(--theme-positive)', surfaces)
+
     def test_money_is_not_recoloured(self):
         self.manifest['parts']['cards']['border'] = 'accent'
         manifest, parts = self.validate()
