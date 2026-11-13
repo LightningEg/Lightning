@@ -1,6 +1,6 @@
 {% from "partials/chevron.html" import chevron with context %}
 <!doctype html>
-{% set on_phone = request.state.phone|default(false) %}<html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}"{% if on_phone %} class="phone"{% endif %}>
+{% set on_phone = request.state.phone|default(false) %}<html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}" data-week-start="{{ week_start }}"{% if on_phone %} class="phone"{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1{{ ', viewport-fit=cover' if on_phone }}">

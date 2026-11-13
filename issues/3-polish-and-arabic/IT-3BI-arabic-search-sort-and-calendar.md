@@ -36,11 +36,6 @@ Files: `lightning/planning/repository.py:35`, `lightning/reporting/service.py:42
 Do: in Python, sort lists of names with `key=lambda n: fold_search_text(n)` after fetching (not in SQL); in JS, `a.localeCompare(b, document.documentElement.lang, {sensitivity: "base"})`.
 Done when: a test sorts ["إيمان", "احمد", "Zed", "ahmed"] the same way both places (folded order) and `grep -n "localeCompare(" lightning/ui/static/app.js` shows a locale argument on every call.
 
-## 3BI3 One week start · S · #406
-Files: `lightning/ui/visuals.py` (~line 247, the heatmap's first weekday), `lightning/ui/static/app.js` (~line 652, the date picker).
-Do: a constant `WEEK_STARTS = 5` (Saturday, Python's `weekday()` numbering) in `lightning/core/dates.py`, used by the heatmap; pass it to the page (a `data-week-start="6"` attribute on `<html>` in both bases, JS `getDay()` numbering, where Saturday is 6) and have the date picker read it.
-Done when: a test renders the date picker on `/accounts/1/transaction/new` and finds Saturday as the first column header, and the heatmap test (find it: `grep -rln "heatmap" tests`) still passes.
-
 ## 3BI4 One clock · S · #407
 Files: `lightning/ui/routes/sms.py:92`, `lightning/sms_imports.py:125,408`, `lightning/desktop/window.py:82`, and the rest from `grep -rn "datetime.now()\|date.today()" lightning --include=*.py`.
 Do: use `lightning.core.dates.today()` for dates and add `now()` beside it (honouring `LIGHTNING_TODAY` for the date part) for timestamps; replace each call. Leave sync/journal timestamps that must be real wall-clock time, and say so in a comment.

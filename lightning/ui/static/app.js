@@ -888,12 +888,13 @@ const isoDate = (value) => {
 // calendar button. Plain [data-smart-date] boxes and leftover native date
 // inputs are upgraded here, so templates only need a text input.
 const DATE_ERROR = "Use yyyy-mm-dd, like 2026-01-31.";
-// Our calendar for every date field (App guideline · Fields): a month at a time, weeks from Monday,
+// Our calendar for every date field (App guideline · Fields): a month at a time, the shared week start,
 // today ringed, the chosen day in Nile. It writes yyyy-mm-dd into the text field, which stays typeable.
 const CALENDAR_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
 const CALENDAR_LOCALE = document.documentElement.lang || "en";
+const WEEK_START = Number(document.documentElement.dataset.weekStart);
 const MONTH_NAMES = Array.from({length: 12}, (_, month) => new Intl.DateTimeFormat(CALENDAR_LOCALE, {month: "long"}).format(new Date(2024, month, 1)));
-const WEEKDAY_NAMES = Array.from({length: 7}, (_, day) => new Intl.DateTimeFormat(CALENDAR_LOCALE, {weekday: "short"}).format(new Date(2024, 0, 1 + day)));
+const WEEKDAY_NAMES = Array.from({length: 7}, (_, day) => new Intl.DateTimeFormat(CALENDAR_LOCALE, {weekday: "short"}).format(new Date(2024, 0, 7 + WEEK_START + day)));
 const isoOf = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const MONTH_SHORT = Array.from({length: 12}, (_, month) => new Intl.DateTimeFormat(CALENDAR_LOCALE, {month: "short"}).format(new Date(2024, month, 1)));
 let openCal = null;
@@ -942,7 +943,7 @@ const openCalendar = (text, button) => {
     if (level === "years") { drawYears(); return; }
     const year = view.getFullYear(), month = view.getMonth();
     const first = new Date(year, month, 1);
-    const lead = (first.getDay() + 6) % 7;  // Monday first
+    const lead = (first.getDay() - WEEK_START + 7) % 7;
     const cells = [];
     for (let i = 0; i < 42; i += 1) cells.push(new Date(year, month, 1 - lead + i));
     const rows = cells[35].getMonth() !== month ? 5 : 6;

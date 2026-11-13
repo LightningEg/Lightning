@@ -28,7 +28,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from lightning import DISPLAY_VERSION
 from lightning.bootstrap import Container
-from lightning.core.dates import fmt_date, month_of, today
+from lightning.core.dates import WEEK_STARTS, fmt_date, month_of, today
 from lightning.ui.date_text import day_text, human_dates, month_short, month_text, range_text
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.figures import FIGURES
@@ -43,6 +43,7 @@ from lightning.ui.i18n import BROWSER_UI, _COUNTED, counted, localize_html, loca
 
 UI_DIR = Path(__file__).parent
 templates = Jinja2Templates(directory=str(UI_DIR / "templates"))
+templates.env.globals["week_start"] = (WEEK_STARTS + 1) % 7  # not money: JavaScript getDay() has Sunday as 0
 
 
 def _minus(text: str) -> str:
