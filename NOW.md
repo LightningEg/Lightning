@@ -6,6 +6,7 @@ Reserved codes: none
 
 | Who | Work | Files | Since |
 |---|---|---|---|
+| Codex | IV-3BH6 (#427): sentence-case default categories. Read: issues/3-polish-and-arabic/IV-3BH-one-name-per-thing-no-jargon.md | `lightning/database/seed.py`, migration 0083, category translation keys | 2026-11-13 |
 | Claude | O5 | `lightning/deposits/` | 2026-11-10 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
