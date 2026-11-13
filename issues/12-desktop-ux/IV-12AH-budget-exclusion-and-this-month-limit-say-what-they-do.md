@@ -5,6 +5,7 @@ look: visual
 pillar: plan
 size: M
 model: sonnet
+github: 634
 status: ready
 created: 2026-11-13
 by: Claude

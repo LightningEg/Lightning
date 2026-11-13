@@ -4,6 +4,7 @@ type: feature
 pillar: plan
 size: M
 model: opus
+github: 635
 status: ready
 created: 2026-11-13
 by: Claude
