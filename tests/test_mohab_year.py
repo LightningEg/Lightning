@@ -234,21 +234,21 @@ class Mohab:
         """An ordinary month, typed into the registers: pay, rent, the car loan, food, phone, internet,
         electricity, the monthly gift to Mom and the bank fee."""
         rows = [(1, "CIB Payroll", employer, "Salary", salary),
-                (2, "CIB Payroll", "Carrefour", "Food & Groceries", "-3,250"),
-                (3, "CIB Payroll", "Landlord", "Housing & Rent", f"-{rent}"),
+                (2, "CIB Payroll", "Carrefour", "Food & groceries", "-3,250"),
+                (3, "CIB Payroll", "Landlord", "Housing & rent", f"-{rent}"),
                 (5, "CIB Payroll", "Cash wallet", "", "-3,000"),
                 (5, "CIB Payroll", "Toyota Finance", "Loan payments", "-2,500"),
                 (7, "CIB Payroll", "Vodafone Cash", "", "-1,000"),
-                (9, "Vodafone Cash", "Vodafone", "Utilities & Bills", "-350"),
-                (10, "CIB Payroll", "Talabat", "Eating Out", "-480"),
+                (9, "Vodafone Cash", "Vodafone", "Utilities & bills", "-350"),
+                (10, "CIB Payroll", "Talabat", "Eating out", "-480"),
                 (12, "Cash wallet", "Microbus", "Personal › Transportation", "-80"),
                 (15, "CIB Payroll", "NBE", "Interest", "1,833.33"),
-                (16, "Cash wallet", "Koshary El Tahrir", "Eating Out", "-190"),
-                (20, "CIB Payroll", "WE Internet", "Utilities & Bills", "-650"),
-                (22, "CIB Payroll", "Seoudi", "Food & Groceries", "-1,420"),
-                (24, "CIB Payroll", "North Cairo Electricity", "Utilities & Bills", "-480"),
-                (25, "CIB Payroll", "Mom", "Gifts & Donations", "-2,000"),
-                (28, "CIB Payroll", "CIB", "Fees & Charges", "-15")]
+                (16, "Cash wallet", "Koshary El Tahrir", "Eating out", "-190"),
+                (20, "CIB Payroll", "WE Internet", "Utilities & bills", "-650"),
+                (22, "CIB Payroll", "Seoudi", "Food & groceries", "-1,420"),
+                (24, "CIB Payroll", "North Cairo Electricity", "Utilities & bills", "-480"),
+                (25, "CIB Payroll", "Mom", "Gifts & donations", "-2,000"),
+                (28, "CIB Payroll", "CIB", "Fees & charges", "-15")]
         if m >= "2027-04":
             rows.append((15, "CIB Payroll", "valU", "Loan payments", "-2,000"))
         for day, account, party, category, amount in rows:
@@ -278,19 +278,19 @@ def _statement() -> bytes:
 # What Mohab answers for each imported name: (counterparty, category, transfer to, held for). None = skip.
 IMPORT_DECISIONS = {
     "ACME EGYPT PAYROLL": ("ACME Egypt", "Salary", None, None),
-    "CARREFOUR MAADI": ("Carrefour", "Food & Groceries", None, None),
-    "TRANSFER TO LANDLORD": ("Landlord", "Housing & Rent", None, None),
+    "CARREFOUR MAADI": ("Carrefour", "Food & groceries", None, None),
+    "TRANSFER TO LANDLORD": ("Landlord", "Housing & rent", None, None),
     "ATM WITHDRAWAL": ("", None, "Cash wallet", None),
     "TOYOTA FINANCE": ("Toyota Finance", "Loan payments", None, None),
     "VODAFONE CASH TOPUP": ("", None, "Vodafone Cash", None),
-    "TALABAT": ("Talabat", "Eating Out", None, None),
+    "TALABAT": ("Talabat", "Eating out", None, None),
     "NBE CD INTEREST": ("NBE", "Interest", None, None),
-    "WE INTERNET": ("WE Internet", "Utilities & Bills", None, None),
-    "SEOUDI MARKET": ("Seoudi", "Food & Groceries", None, None),
-    "NORTH CAIRO ELECTRICITY": ("North Cairo Electricity", "Utilities & Bills", None, None),
-    "INSTAPAY MOM": ("Mom", "Gifts & Donations", None, None),
-    "CIB MONTHLY FEE": ("CIB", "Fees & Charges", None, None),
-    "INSTAPAY FROM MOM": ("Mom", "Money Held for Others", None, "Mom"),
+    "WE INTERNET": ("WE Internet", "Utilities & bills", None, None),
+    "SEOUDI MARKET": ("Seoudi", "Food & groceries", None, None),
+    "NORTH CAIRO ELECTRICITY": ("North Cairo Electricity", "Utilities & bills", None, None),
+    "INSTAPAY MOM": ("Mom", "Gifts & donations", None, None),
+    "CIB MONTHLY FEE": ("CIB", "Fees & charges", None, None),
+    "INSTAPAY FROM MOM": ("Mom", "Money held for others", None, "Mom"),
     "TRANSFER TO THNDR": ("", None, "THNDR", None),
     "AMAZON.EG": ("Amazon", "Shopping", None, None),
     "L AZURDE": None,  # the ring: he records it from Gold at home instead, so it is not counted twice
@@ -378,9 +378,9 @@ def _first_evening(o: Mohab) -> None:
 
     # Cash and Vodafone Cash never reach a statement: he types them in.
     for month, koshary, microbus in (("7", "180", "60"), ("8", "210", "75"), ("9", "165", "90")):
-        o.enter("Cash wallet", f"16/{month}", "Koshary El Tahrir", "Eating Out", f"-{koshary}")
+        o.enter("Cash wallet", f"16/{month}", "Koshary El Tahrir", "Eating out", f"-{koshary}")
         o.enter("Cash wallet", f"12/{month}", "Microbus", "Personal › Transportation", f"-{microbus}")
-        o.enter("Vodafone Cash", f"9/{month}", "Vodafone", "Utilities & Bills", "-350")
+        o.enter("Vodafone Cash", f"9/{month}", "Vodafone", "Utilities & bills", "-350")
 
     for when, typed in (("31/7", {"21K gold": "3,900"}),
                         ("31/8", {"Commercial International": "84.20", "Fawry": "9.10", "21K gold": "4,200"}),
@@ -461,12 +461,12 @@ def _live_the_year(o: Mohab) -> None:
 
     o.on("2026-10-31")
     o.month("2026-10", skip=("ACME Egypt", "Landlord", "Toyota Finance"))   # those three went in from the popups
-    o.enter("CIB Payroll", "2026-10-10", "Talabat", "Eating Out", "-480")      # the same order typed twice
+    o.enter("CIB Payroll", "2026-10-10", "Talabat", "Eating out", "-480")      # the same order typed twice
     o.delete_newest("CIB Payroll", "Talabat")
-    o.enter("CIB Payroll", "2026-10-26", "Carrefour", "Food & Groceries", "-4,600")  # meant 4,060
+    o.enter("CIB Payroll", "2026-10-26", "Carrefour", "Food & groceries", "-4,600")  # meant 4,060
     o.fix_amount("CIB Payroll", "Carrefour", "-4,060")
     o.enter("CIB Payroll", "2026-10-10", "Cash wallet", "", "-2,000")          # ATM
-    o.enter("CIB Payroll", "2026-10-10", "CIB", "Fees & Charges", "-25")      # and its fee
+    o.enter("CIB Payroll", "2026-10-10", "CIB", "Fees & charges", "-25")      # and its fee
     o.enter("CIB Payroll", "2026-10-15", "Amazon", "Shopping", "1,299", refund=True)        # August's purchase returned
     o.enter("CIB Payroll", "2026-10-18", "Al Mansour Service", "Personal › Transportation", "-6,500")
     o.to_reserve("CIB Payroll", "Al Mansour Service", "Emergency Fund")                         # paid from the emergency fund
@@ -525,8 +525,8 @@ def _live_the_year(o: Mohab) -> None:
     # ============================================================== March: Eid, and a phone on installments
     o.on("2027-03-31")
     o.month("2027-03", salary="50,000")
-    o.enter("Cash wallet", "2027-03-09", "Eidiya", "Gifts & Donations", "-3,000", notes="For the nephews #Eid")
-    o.enter("Cash wallet", "2027-03-10", "Uncle Hassan", "Gifts Received", "1,000", notes="#eid")
+    o.enter("Cash wallet", "2027-03-09", "Eidiya", "Gifts & donations", "-3,000", notes="For the nephews #Eid")
+    o.enter("Cash wallet", "2027-03-10", "Uncle Hassan", "Gifts received", "1,000", notes="#eid")
     o.add_loan("Phone installments", "valU", "2,000", "2027-04-15", "12", "24,000")
     o.ask("owe_more", "With the phone, what do I owe now?", "Loans still to pay")
     o.ask("eid", "What did Eid cost me?", "Spending")
@@ -573,7 +573,7 @@ def _live_the_year(o: Mohab) -> None:
     o.ask("rent_after", "And now?", "Cash planning", "Recurring")
     o.ask_needs("rent_planned", "Does my budget know the rent went up?", "Budget and saving")
     b.click("Change the plan")
-    o.notes["rent_replanned"] = o.plan_category("Housing & Rent", "13,200")
+    o.notes["rent_replanned"] = o.plan_category("Housing & rent", "13,200")
     o.ask("rent_planned_after", "And now?")
 
     # ============================================================== July and August: Sahel, and a new job
@@ -743,7 +743,7 @@ def _exercise_cash_ownership(o: Mohab) -> None:
     b.click("Change ownership")
     external_expense = b.submit({"mode": Choose("Someone paid an expense for you"), "date": "2027-09-30",
                                  "amount": "400", "from_owner_id": Choose("You"),
-                                 "to_owner_id": Choose("Mom"), "category_id": Choose("Food & Groceries"),
+                                 "to_owner_id": Choose("Mom"), "category_id": Choose("Food & groceries"),
                                  "notes": "Mom paid for groceries"}, button="Save")
     gross_after_expense = money(b.go("CIB Payroll").after("In this account"))
     o.notes["cash_ownership"] = {"assignment": assignment, "expense": external_expense,
@@ -791,7 +791,7 @@ def _the_feedback_round(o: Mohab) -> None:
     talabat = re.findall(r'class="transaction-select"[^>]*value="(\d+)"', found.html) or \
         re.findall(r'value="(\d+)"[^>]*class="transaction-select"', found.html)
     o.notes["bulk_rows"] = len(talabat)
-    o.notes["bulk_done"] = b.submit({"txn_ids": talabat, "category_id": Choose("Food & Groceries"),
+    o.notes["bulk_done"] = b.submit({"txn_ids": talabat, "category_id": Choose("Food & groceries"),
                                      "back": found.path}, action="/transactions/bulk-category")
     # Talabat is food now, so Food runs over its plan every month; Needs you offers room from Shopping.
     o.ask_needs("food_over", "Food is over its plan every month now. What can I do?", "Budget and saving")
@@ -960,9 +960,9 @@ def test_free_cash_shows_what_was_taken_off(mohab):
 def test_september_spending_by_category(mohab):
     answer = mohab.answers["where"]
     assert route(mohab, "where") == ["/", "/birdview/expenses"]
-    assert answer.shows("Money out 23,390 EGP −1,364 · 6% Against 2026-08", "Housing & Rent 12,000 · 51%")
+    assert answer.shows("Money out 23,390 EGP −1,364 · 6% Against 2026-08", "Housing & rent 12,000 · 51%")
     # Rent did not change and food moved by 5 EGP: both read 0%, never "+0%" or "−0%".
-    assert answer.shows("Housing & Rent 12,000 12,000 0%", "Food & Groceries 4,666 4,671 0%")
+    assert answer.shows("Housing & rent 12,000 12,000 0%", "Food & groceries 4,666 4,671 0%")
 
 
 def test_the_budget_says_what_is_over(mohab):
@@ -973,8 +973,8 @@ def test_the_budget_says_what_is_over(mohab):
     # BU-2 (3H2): Transportation 40 over its 50 is small (under 100): it reads rose and "over" on its bar and raises
     # no Needs you row (an overspend needs 100 or more and 5% of its plan for that); Food is now inside its 4,700.
     assert not answer.shows("Needs you ·")
-    assert answer.shows("Transportation 90 of 50 40 over") and answer.shows("Food & Groceries 4,671 of 4,700 29 left")
-    assert answer.shows("Eating Out 634 of 650 16 left", "Fees & Charges 15 of 50 35 left", "Shopping 0 of 1,300")
+    assert answer.shows("Transportation 90 of 50 40 over") and answer.shows("Food & groceries 4,671 of 4,700 29 left")
+    assert answer.shows("Eating out 634 of 650 16 left", "Fees & charges 15 of 50 35 left", "Shopping 0 of 1,300")
     # Each "80 of 67 · 13 over" adds up as he reads it: plans built from his spending are whole EGP.
     for spent, planned, gap, word in re.findall(r"([\d,]+) of ([\d,]+) ([\d,]+) (over|left)", answer.screen.text):
         spent, planned, gap = (money(x) for x in (spent, planned, gap))
@@ -1016,14 +1016,14 @@ def test_paying_from_the_overview_moves_net_worth_only_by_the_salary(mohab):
 
 def test_a_mistake_is_fixed_in_place_and_a_double_entry_deleted(mohab):
     register = mohab.answers["fixed"]
-    assert register.shows("2026-10-26 Carrefour Food & Groceries — −4,060")
+    assert register.shows("2026-10-26 Carrefour Food & groceries — −4,060")
     assert "−4,600" not in register.screen.text
-    assert register.screen.text.count(register.screen.said("2026-10-10 Talabat Eating Out")) == 1
+    assert register.screen.text.count(register.screen.said("2026-10-10 Talabat Eating out")) == 1
 
 
 def test_the_atm_fee_is_only_inside_others(mohab):
     # Four, then Other (guideline 3.6): the fees (the monthly 15 and the ATM's 25) are inside Other, with
-    # Eating Out 670, Utilities & Bills 1,480 and Gifts & Donations 2,000.
+    # Eating out 670, Utilities & bills 1,480 and Gifts & donations 2,000.
     assert mohab.answers["atm"].shows("Other 4,190")
 
 
@@ -1039,7 +1039,7 @@ def test_where_it_went_adds_up_to_money_out(mohab):
     rows = re.findall(r"([−+]?[\d,]+(?:\.\d\d)?) [−]?[\d.]+%", body)
     assert sum(money(m) for m in rows) == D("32701") == money(footer)
     assert "Refunds took 1,299 off money out: Shopping" in text
-    assert "Housing & Rent 12,000 · 37%" in text      # 12,000 of 32,701, not of 34,000
+    assert "Housing & rent 12,000 · 37%" in text      # 12,000 of 32,701, not of 34,000
 
 
 def test_a_repair_paid_from_the_emergency_fund(mohab):
@@ -1196,7 +1196,7 @@ def test_installments_are_owed_like_a_loan(mohab):
 
 
 def test_eid_gifts_given_are_spending_and_gifts_received_are_not(mohab):
-    assert mohab.answers["eid"].shows("Money out 26,415 EGP", "Gifts & Donations 5,000 · 19%")
+    assert mohab.answers["eid"].shows("Money out 26,415 EGP", "Gifts & donations 5,000 · 19%")
 
 
 def test_a_tag_in_a_note_gathers_eid(mohab):
@@ -1219,11 +1219,11 @@ def test_the_insurance_is_paid_from_its_goal(mohab):
 def test_the_rent_rise_is_offered_and_taken(mohab):
     assert mohab.answers["rent"].shows("Last paid 13,200 Use 13,200 from now on")
     # IV-12Q4: one list, the row itself (the doubled bar list above it is gone)
-    assert re.search(r"Landlord Subscription · [^−]*Housing & Rent[^−]*−13,200", mohab.answers["rent_after"].screen.text)
+    assert re.search(r"Landlord Subscription · [^−]*Housing & rent[^−]*−13,200", mohab.answers["rent_after"].screen.text)
 
 
 def test_the_rent_rise_reaches_the_budget(mohab):
-    assert mohab.answers["rent_planned"].shows("Housing & Rent is planned below its bills Planned 12,000 EGP; "
+    assert mohab.answers["rent_planned"].shows("Housing & rent is planned below its bills Planned 12,000 EGP; "
                                                "bills and loan payments scheduled this month come to 13,200.")
     assert mohab.notes["rent_replanned"].shows("Budget saved.")
     assert not mohab.answers["rent_planned_after"].shows("planned below its bills")
@@ -1310,7 +1310,7 @@ def test_the_year_on_the_overview(mohab):
 
 
 def test_the_years_spending(mohab):
-    assert mohab.answers["year_spending"].shows("Money out 333,266 EGP", "Housing & Rent 148,800 · 45%")
+    assert mohab.answers["year_spending"].shows("Money out 333,266 EGP", "Housing & rent 148,800 · 45%")
 
 
 def test_the_years_investments(mohab):
@@ -1329,7 +1329,7 @@ def test_data_checks_pass_after_a_year(mohab):
 def test_cash_ownership_and_external_expense_keep_the_account_total(mohab):
     flow = mohab.notes["cash_ownership"]
     assert flow["assignment"].shows("Ownership change")
-    assert flow["expense"].shows("Expense paid for you", "Food & Groceries", "Mom")
+    assert flow["expense"].shows("Expense paid for you", "Food & groceries", "Mom")
     assert flow["gross_before"] == flow["gross_after_assignment"] == flow["gross_after_expense"]
 
 
@@ -1458,17 +1458,17 @@ def test_selected_rows_can_be_edited_together(mohab):
     rows = mohab.notes["bulk_rows"]
     assert rows >= 12   # one Talabat order a month, and the doubled one he deleted is gone
     done = mohab.notes["bulk_done"]
-    assert done.shows(f"Food & Groceries is now the category of {rows} rows.")
-    assert done.shows("Talabat Food & Groceries") and "Talabat Eating Out" not in done.text
+    assert done.shows(f"Food & groceries is now the category of {rows} rows.")
+    assert done.shows("Talabat Food & groceries") and "Talabat Eating out" not in done.text
 
 
 def test_food_over_plan_two_months_running_gets_room_from_shopping(mohab):
     # Talabat is Food now (the bulk change above), so July and August ran up to 450 over its round 4,700 plan (BU-3): one move fixes September on.
     answer = mohab.answers["food_over"]
-    assert answer.shows("Food & Groceries over plan two months running Over its plan in July and August, by up to "
+    assert answer.shows("Food & groceries over plan two months running Over its plan in July and August, by up to "
                         "450 EGP. Move 450 from Shopping, which had that left both months. Move it")
-    assert mohab.notes["move_popup"].shows("Move plan to Food & Groceries", "From 2027-09 on · the total plan stays the same")
-    assert mohab.notes["moved"].shows("Moved plan from Shopping to Food & Groceries from 2027-09 on.")
+    assert mohab.notes["move_popup"].shows("Move plan to Food & groceries", "From 2027-09 on · the total plan stays the same")
+    assert mohab.notes["moved"].shows("Moved plan from Shopping to Food & groceries from 2027-09 on.")
     assert not mohab.answers["food_over_after"].shows("over plan two months running")
 
 
@@ -1528,7 +1528,7 @@ def test_a_small_difference_from_the_bank_is_one_adjustment(mohab):
     check = mohab.notes["wallet_check"]
     assert check.shows("A small difference", "Lightning is 30.00 EGP above your bank", "Post adjustment of −30.00")
     assert mohab.notes["wallet_adjusted"].shows("Balance adjustment", "The account now matches your bank")
-    assert mohab.notes["wallet_adjusted"].shows("2027-09-30 Balance adjustment Unaccounted Spending Bank showed",
+    assert mohab.notes["wallet_adjusted"].shows("2027-09-30 Balance adjustment Unaccounted spending Bank showed",
                                                 "−30 Edit 42,950")
     assert mohab.notes["wallet_rechecked"].shows("It matches")
 
@@ -1664,7 +1664,7 @@ def test_a_rule_files_a_new_phone_as_shopping_and_keeps_the_monthly_bill(mohab):
     assert route(mohab, "rule_filed") == ["/", "/accounts/1"]
     answer = mohab.answers["rule_filed"]
     assert answer.shows("2027-09-30 Vodafone Shopping new phone −12,000",
-                        "2027-09-30 Vodafone Utilities & Bills — −350")
+                        "2027-09-30 Vodafone Utilities & bills — −350")
 
 
 # ------------------------------------------------------------------ US stocks (v1.1)
@@ -1817,7 +1817,7 @@ def test_the_starter_workbook_fills_an_empty_lightning_and_hands_the_codes_back(
                                          (None, "Wallet", "Cash", "EGP", 800, "2026-07-01", None)]),
                            ("Categories", [(None, "Personal", "Pets", "Spending", None)]),
                            ("Entries", [(None, "2026-07-28", "CIB Payroll", "Salary", "ACME", 30000, "EGP", "July", None),
-                                        (None, "2026-07-30", "Wallet", "Food & Groceries", "Corner shop", -185.5, "EGP", None, None),
+                                        (None, "2026-07-30", "Wallet", "Food & groceries", "Corner shop", -185.5, "EGP", None, None),
                                         (None, "2026-08-02", "CIB Payroll", "Pets", "Vet", -420, "EGP", None, None),
                                         (None, "2026-08-03", "Wallet", "Mystery", "x", -5, "EGP", None, None)])):
             sheet = book.create_sheet(name)

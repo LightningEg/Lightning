@@ -29,7 +29,7 @@ def test_ahead_of_pace_names_the_day_and_a_category_to_move_from(c, setup):
     [row] = c.budgets.running_out(MONTH, DAY, schedule=c.schedules.view())
     assert (row["category_id"], row["day"], row["limit"]) == (food, 20, Decimal("3000"))
     assert row["amount"] == Decimal("1650") and row["can_move"] and row["from_id"] == transport
-    item = {i["label"]: i for i in ReviewInbox(c).items(DAY)}["Food & Groceries will run out around the 20th"]
+    item = {i["label"]: i for i in ReviewInbox(c).items(DAY)}["Food & groceries will run out around the 20th"]
     assert item["action"] == "Move room" and item["href"].startswith(f"/budget/move?month={MONTH}&to={food}&from={transport}")
     assert item["alt"]["label"] == "Raise"
 

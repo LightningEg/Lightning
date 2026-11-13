@@ -43,7 +43,7 @@ EXAMPLES = {
     ],
     "Entries": [
         (EXAMPLE, "2026-01-28", "Salary account", "Salary", "My employer", 30000, "EGP", "January salary", None),
-        (EXAMPLE, "2026-01-30", "Wallet", "Food & Groceries", "Corner shop", -185.5, "EGP", None, None),
+        (EXAMPLE, "2026-01-30", "Wallet", "Food & groceries", "Corner shop", -185.5, "EGP", None, None),
         (EXAMPLE, "2026-02-02", "Salary account", "Pets", "Vet", -420, "EGP", "New category from the sheet above", None),
     ],
 }
@@ -59,7 +59,7 @@ READ_ME = [
      "Leave the Code and Reference columns empty: you get them back in a file afterwards, and can then use them in later batches.", False),
     ("2. Rows that say Example are examples. Lightning ignores them, so you can overwrite them, delete them or leave them.", False),
     ("3. Accounts: one row per place your money sits (a bank account, a wallet). Opening balance is what it held on the opening date.", False),
-    ("4. Categories: only the ones you want to add. Lightning already has the usual ones (Food & Groceries, Salary, Housing & Rent...): "
+    ("4. Categories: only the ones you want to add. Lightning already has the usual ones (Food & groceries, Salary, Housing & rent...): "
      "just use their names in the Entries sheet.", False),
     ("5. Entries: Amount is negative when money went out and positive when it came in. Write dates as yyyy-mm-dd (2026-03-15). "
      "Use an account and a category name from the other sheets, or one you already have in Lightning.", False),

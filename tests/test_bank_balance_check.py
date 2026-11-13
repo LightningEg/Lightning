@@ -65,12 +65,12 @@ def test_a_cash_wallet_adjusts_any_size_and_a_bank_still_refuses(c, setup):
     wallet, cib = accounts["wallet"].id, accounts["cib"].id
     before = c.reconciliation.balance(wallet, "2026-09-30")
     check = c.reconciliation.check(wallet, "2026-09-30", before - D("900"))
-    assert not check.small and check.adjustable and check.filed_under == "Unaccounted Spending"
+    assert not check.small and check.adjustable and check.filed_under == "Unaccounted spending"
     txn = c.reconciliation.adjust(wallet, "2026-09-30", before - D("900"))
     assert c.categories.get(txn.lines[0].category_id).code == "EXP.UNACCOUNTED"
     assert c.reconciliation.balance(wallet, "2026-09-30") == before - D("900")
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
     page = client.get(f"/accounts/{wallet}/reconcile?date=2026-09-30&balance={before + D('5000')}").text
-    assert "Post adjustment of" in page and "Unaccounted Money Found" in page and "Latest rows" in page
+    assert "Post adjustment of" in page and "Unaccounted money found" in page and "Latest rows" in page
     with pytest.raises(ValidationError, match="too big"):
         c.reconciliation.adjust(cib, "2026-09-30", D("45000"))

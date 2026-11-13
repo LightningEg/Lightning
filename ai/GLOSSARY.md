@@ -339,7 +339,7 @@ These names no longer appear on screens. Each is now called:
 | Level | Meaning |
 |---|---|
 | **L1 Activity family** | Personal, Work, Investment. |
-| **L2 Broad category** | The analysis bucket inside one family (Personal › Food & Groceries, Work › Salary, Investment › Dividends). |
+| **L2 Broad category** | The analysis bucket inside one family (Personal › Food & groceries, Work › Salary, Investment › Dividends). |
 | **L3 Detail** | Unused and empty; add only when a user chooses more detail. |
 
 Categories are not split into income and expense trees: pick the activity that explains the event whatever its sign (a refund keeps the original category). A Counterparty may suggest a category; the user can change it. Categories are picked from a list, never created by typing. A used category is archived, not deleted: readable on old transactions, not selectable for new ones. Sibling names are unique; one name may sit under different families.

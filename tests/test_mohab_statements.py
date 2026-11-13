@@ -28,7 +28,7 @@ def test_mohab_brings_a_statement_through_the_existing_review(c,setup,document):
     for key,value in form.fields.items():
         if not key.startswith('amount_'):continue
         rid=key.split('_',1)[1]
-        answers[f'category_{rid}']=Choose('Food & Groceries' if Decimal(value)<0 else 'Salary')
+        answers[f'category_{rid}']=Choose('Food & groceries' if Decimal(value)<0 else 'Salary')
         party=form.fields.get('counterparty_'+rid,'')
         if party:answers['counterparty_pick_'+rid]='new:'+party
     assert answers
@@ -49,7 +49,7 @@ def test_mohab_selects_a_worksheet_and_reviews_excel_serial_dates(c, setup):
     sheet = book.create_sheet('September cash')
     sheet.append(['Date', 'Amount', 'Counterparty', 'Category'])
     serial = (date(2026, 9, 20) - date(1899, 12, 30)).days
-    sheet.append([serial, -12, 'Example shop', 'Food & Groceries'])
+    sheet.append([serial, -12, 'Example shop', 'Food & groceries'])
     out = BytesIO()
     book.save(out)
     book.close()
@@ -65,6 +65,6 @@ def test_mohab_selects_a_worksheet_and_reviews_excel_serial_dates(c, setup):
     date_key = next(key for key in form.fields if key.startswith('date_'))
     assert form.fields[date_key] == '2026-09-20'
     row = date_key.split('_', 1)[1]
-    b.submit({f'category_{row}': Choose('Food & Groceries'), f'counterparty_pick_{row}': 'new:Example shop'},
+    b.submit({f'category_{row}': Choose('Food & groceries'), f'counterparty_pick_{row}': 'new:Example shop'},
              button='Post ready rows')
     assert c.reporting.account_balance(bank.id) == before - 12

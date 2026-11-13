@@ -52,7 +52,7 @@ def test_inputs_is_one_row_per_subject_with_one_action(client):
 
 def test_change_limit_shows_spent_with_a_bar(client):
     c, http = client
-    food = c.categories.find_by_text("Food & Groceries").id
+    food = c.categories.find_by_text("Food & groceries").id
     page = http.get(f"/budget/category/{food}/edit?month=2026-10").text
     assert "Spent this month" in page and 'class="chart-meter-track"' in page and "Save limit" in page
 
@@ -92,7 +92,7 @@ def test_budget_keeps_the_ai_prompt_in_the_menu_and_the_unassigned_row_in_the_le
 def test_budget_settings_offers_spending_categories_only_and_keeps_hidden_choices(client):
     c, http = client
     page = http.get("/settings?section=budget").text
-    assert "System Categories" not in page and "Investment Fees" not in page and "Unaccounted" not in page
+    assert "System categories" not in page and "Investment fees" not in page and "Unaccounted" not in page
     assert "Tick a category to leave it out of the budget" in page
     zakat = c.categories.find_by_text("Zakat").id
     c.settings.set("budget_one_off_exclusions", f"[{zakat}]")
