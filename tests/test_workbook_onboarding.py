@@ -369,3 +369,34 @@ def test_the_review_lists_what_comes_in_not_table_names(c, tmp_path):  # BT-7AS2
     page = client.post('/exports/import', files={'workbook': ('w.xlsx', data)})
     assert page.status_code == 200 and 'ledger_entries' not in page.text and 'bank_import_rows' not in page.text
     assert 'Bills and plans' in page.text
+
+
+def test_what_excel_and_ai_tools_do_to_plain_values_is_put_back(c, tmp_path):  # BT-7AS3
+    """A workbook shaped like an AI-filled one (made here, no real data): TRUE/FALSE for yes/no columns, numbers with
+    thousands separators, spaces and Arabic digits, loose dates, a blank where Excel cannot keep an empty text."""
+    _source(c)
+    legacy = tabular_workbook_bytes([(name[:31], headers, rows, widths) for name, headers, rows, widths in _raw_tables(c)])
+    sheets = read_workbook(legacy)
+    ledger = sheets['ledger_entries']
+    amount = Decimal(ledger[1][ledger[0].index('amount')])
+    assert abs(amount) >= 1000
+    target = build(tmp_path / 'new.db')
+    quirky = _edit(legacy, [
+        ('accounts', 2, 'active', 'TRUE'), ('accounts', 2, 'is_system', 'FALSE'), ('accounts', 2, 'cash_at_hand', ' no '),
+        ('accounts', 2, 'opening_date', '2026/1/1'), ('accounts', 2, 'notes', None),
+        ('ledger_entries', 2, 'amount', f' {amount:,.2f} '),
+        ('ledger_entries', 2, 'quantity', f'{amount:,.2f}'.translate(str.maketrans('0123456789', '٠١٢٣٤٥٦٧٨٩')).replace(',', '٬').replace('.', '٫')),
+    ])
+    assert prepare_import(target, quirky) == prepare_import(target, legacy)
+    confirm_import(target, quirky)
+    assert target.db.scalar("SELECT active FROM accounts WHERE name='Example bank'") == 1
+
+
+def test_a_cell_of_spaces_is_a_blank_cell_not_a_number_error(c, tmp_path):  # BT-7AS3
+    from lightning.workflows.workbook_import import WorkbookProblems
+    _source(c)
+    legacy = tabular_workbook_bytes([(name[:31], headers, rows, widths) for name, headers, rows, widths in _raw_tables(c)])
+    target = build(tmp_path / 'new.db')
+    with pytest.raises(WorkbookProblems) as caught:
+        prepare_import(target, _edit(legacy, [('ledger_entries', 2, 'account_id', '   ')]))
+    assert 'Sheet "ledger_entries", row 2, column "account_id": this cannot be empty' in caught.value.problems[0]

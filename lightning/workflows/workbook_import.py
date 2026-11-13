@@ -200,8 +200,38 @@ def _from_excel_serial(value, dated):
     return moment.astimezone().isoformat(timespec='seconds')
 
 
+_ARABIC_DIGITS = str.maketrans('٠١٢٣٤٥٦٧٨٩۰۱۲۳۴۵۶۷۸۹٫٬', '01234567890123456789.,')
+_YES, _NO = {'true', 'yes', 'y', '1'}, {'false', 'no', 'n', '0'}
+
+
+def _tidy(value, field, dated):
+    """What Excel and AI tools do to plain values, put back before the checks (BT-7AS3): spaces around a cell, Arabic
+    digits, 1,234.50 with separators, TRUE/FALSE for a yes/no column, and a date written 2026-3-5 or 2026/03/05."""
+    if not isinstance(value, str):
+        return value
+    text = value.translate(_ARABIC_DIGITS).replace('\u00a0', ' ').strip()
+    numeric = field['name'].endswith('_e6') or field['type'].upper() == 'INTEGER'
+    if numeric:
+        lowered = text.casefold()
+        if field['type'].upper() == 'INTEGER' and not field['name'].endswith('_e6') and lowered in _YES | _NO:
+            return '1' if lowered in _YES else '0'
+        if re.fullmatch(r'[-+]?\d{1,3}(,\d{3})+(\.\d+)?', text):
+            text = text.replace(',', '')
+        return text
+    if dated:
+        found = re.fullmatch(r'(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})', text)
+        if found:
+            return f'{found[1]}-{int(found[2]):02d}-{int(found[3]):02d}'
+        return text
+    return value
+
+
 def _convert(value, field, table):
     name = field['name']
+    dated_name = name == 'date' or name.endswith('_date') or name in ('date_from', 'date_to', 'first_date')
+    value = _tidy(value, field, dated_name)
+    if value == '' and field['type'].upper() != 'TEXT':
+        value = None  # a cell holding only spaces is a blank cell
     if value is None:
         # Excel cannot keep an empty text: a blank cell in a required column with a default takes that default
         # (notes '' and the like), so a workbook an AI or a person left blank is not refused.
