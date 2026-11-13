@@ -410,3 +410,26 @@ def test_the_phone_draws_no_ground_artwork():
     assert 'html.phone[data-m-ground-artwork]:not(#_) body::after { content: none; }' in materials
     assert materials.count('html.phone[data-m-ground-artwork') == 1
     assert '.phone-hero::before' in materials  # the band that carries the hero's drawing
+
+
+def test_the_phone_header_moves_on_the_compositor_only():
+    """Owner, 2026-11-13: the sticky phone bar repainted every frame while its thread moved a background. Each looping
+    motion on the phone's bar now slides its own pseudo-element by transform; the bar itself never animates."""
+    import re
+    materials = (ROOT / 'lightning/ui/static/theme-materials.css').read_text()
+    body = materials[:materials.index('@media (prefers-reduced-motion: reduce)')]
+    keyframes = dict(re.findall(r'@keyframes ([\w-]+) \{(.*?)\}\s*\}', body, re.S))
+    moving = 0
+    for selectors, rule in re.findall(r'([^{}]+)\{([^{}]*)\}', re.sub(r'@keyframes [\w-]+ \{.*?\}\s*\}', '', body, flags=re.S)):
+        found = re.search(r'animation:\s*([\w-]+)', rule)
+        if '.phone-appbar' not in selectors or not found:
+            continue
+        for selector in selectors.split(','):
+            if '.phone-appbar' in selector:
+                assert re.search(r'\.phone-appbar(:not\(#_\))?::(before|after)\s*$', selector.strip()), selector
+        frames = keyframes[found.group(1)]
+        assert set(re.findall(r'([a-z-]+)\s*:', frames)) == {'transform'}, found.group(1)
+        moving += 1
+    assert moving == 2  # security-thread (Papyrus's edge-glint carries it) and pigment-thread
+    reduced = materials[materials.index('@media (prefers-reduced-motion: reduce)'):]
+    assert '.phone-appbar::after { animation: none; }' in reduced

@@ -6,7 +6,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const document = {
-  documentElement: { lang: 'en', dataset: {}, classList: { contains: () => false, toggle() {} } },
+  documentElement: { lang: 'en', dataset: { weekStart: '6' }, classList: { contains: () => false, toggle() {} } },
   querySelectorAll: () => [], querySelector: () => null, getElementById: () => null,
   addEventListener() {}, createTreeWalker: () => ({ nextNode: () => false }),
 };

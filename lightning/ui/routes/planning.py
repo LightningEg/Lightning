@@ -9,7 +9,7 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Request
 
 from lightning.categories.domain import Direction, Movement
-from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
+from lightning.core.dates import WEEK_STARTS, fmt_date, month_of, parse_date, parse_month, today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.figures import label
 from lightning.core.money import ZERO, fmt, to_decimal
@@ -289,7 +289,7 @@ MARKS_PER_DAY = 3  # a day cell shows three marks, then "+n"
 
 def _month_grid(month, first, last, day, show: str, chosen: str) -> list[list[dict | None]]:
     """The month as weeks starting Saturday (A12.1.12): each day with its marks; figures come from the service."""
-    order = [(visuals.WEEK_STARTS_ON + i) % 7 for i in range(7)]  # not money
+    order = [(WEEK_STARTS + i) % 7 for i in range(7)]  # not money
     weeks, week = [], [None] * order.index(first.weekday())  # not money
     cursor, today_text = first, fmt_date(day)
     paydays = set(month.paydays)
@@ -359,7 +359,7 @@ async def upcoming_page(request: Request):
     back = urlencode({"month": month, "day": chosen, **({"show": show} if show != "all" else {})})
     return render(request, "planning/upcoming.html", tabs=TABS, plan_tab="upcoming", cal=cal, lead=lead,
                   answer=page_status.upcoming(cal.left_to_pay, name, cal.days_to_pay),
-                  weeks=_month_grid(cal, first, last, day, show, chosen), weekdays=[visuals.WEEKDAYS[(visuals.WEEK_STARTS_ON + i) % 7] for i in range(7)],  # not money
+                  weeks=_month_grid(cal, first, last, day, show, chosen), weekdays=[visuals.WEEKDAYS[(WEEK_STARTS + i) % 7] for i in range(7)],  # not money
                   month=month, month_name=f"{name} {first.year}", show=show, groups=UPCOMING_GROUPS,
                   chosen=chosen, shown=shown, day_back="/plan/upcoming?" + back,
                   previous_month=month_of(first - timedelta(days=1)), next_month=month_of(last + timedelta(days=1)),  # not money
