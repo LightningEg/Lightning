@@ -1,6 +1,6 @@
 """The board: what is open, who can take it, what blocks what. Read from GitHub; nothing is stored in the repo.
 
-    python tools/board.py              the tally: shipped, running, ready, needs a person, blocked
+    python tools/board.py              the tally: three lists - ready, blocked, parked
     python tools/board.py --next       the issues to start now, with the model for each (at most --cap, default 2)
     python tools/board.py --html FILE  the roadmap page
     python tools/board.py --json       everything, for another tool
@@ -142,7 +142,7 @@ def pick(rows: list[dict], cap: int) -> list[dict]:
     for i in rows:
         if len(chosen) >= room:
             break
-        if i["state"] == "ready" and i["when"] == "launch" and not any(_overlap(i["areas"], c["areas"]) for c in chosen):
+        if i["state"] == "ready" and i["when"] == "launch" and bucket(i) == "ready" and not any(_overlap(i["areas"], c["areas"]) for c in chosen):
             chosen.append(i)
     return chosen
 
@@ -151,30 +151,38 @@ def _short(i: dict) -> str:
     return f"#{i['n']} {i['title'][:78]}"
 
 
+def bucket(i: dict) -> str:
+    """The three lists the owner reads (owner, 2026-11-13): ready, blocked or parked.
+
+    The owner can set it by hand with a label `status:ready`, `status:blocked` or `status:parked` (the roadmap page
+    on the website writes it); that always wins. Otherwise it is worked out: *parked* = not launch work (after
+    launch, someday, or no `when:` yet); *blocked* = an open blocker, or a running issue in the same area; *ready* =
+    the rest, including work already claimed (marked with its pull request) and work for a person."""
+    chosen = _label(i["labels"], "status")
+    if chosen in ("ready", "blocked", "parked"):
+        return chosen
+    if i["when"] != "launch":
+        return "parked"
+    return "blocked" if i["state"] in ("blocked", "held") else "ready"
+
+
 def tally(data: dict, rows: list[dict], cap: int) -> str:
-    since = datetime.fromisoformat(data["now"]) - timedelta(hours=24)
-    shipped = [p for p in data["merged"] if datetime.fromisoformat(p["merged"].replace("Z", "+00:00")) > since]
-    out = [f"Board {data['now'][:16]}Z: {sum(i['when'] == 'launch' and i['state'] != 'group' for i in rows)} launch "
-           f"issues open, {len(rows)} in all.", "", f"Shipped in the last 24 hours ({len(shipped)}):"]
-    out += [f"  PR #{p['n']} {p['title'][:80]}" for p in shipped[:8]] or ["  nothing"]
-    if len(shipped) > 8:
-        out.append(f"  and {len(shipped) - 8} more")
+    work = [i for i in rows if i["state"] != "group"]
+    got = {k: [i for i in work if bucket(i) == k] for k in ("ready", "blocked", "parked")}
+    out = [f"Board {data['now'][:16]}Z: {len(got['ready'])} ready, {len(got['blocked'])} blocked, "
+           f"{len(got['parked'])} parked ({len(work)} open)."]
 
-    def block(title: str, pred, extra=lambda i: ""):
-        got = [i for i in rows if pred(i)]
-        out.extend(["", f"{title} ({len(got)}):"] + ([f"  {_short(i)}{extra(i)}" for i in got] or ["  nothing"]))
+    def mark(i: dict) -> str:
+        if i["prs"] or i["assignees"]:
+            return "  [taken: " + ", ".join(f"PR #{p['n']}" for p in i["prs"]) + " ".join(i["assignees"]) + "]"
+        return f"  [{i['can']}]"
 
-    block("Running", lambda i: i["state"] == "running",
-          lambda i: "  <- " + ", ".join(f"PR #{p['n']} ({p['branch']})" for p in i["prs"]) + " ".join(i["assignees"]))
-    block("Stale claims, no activity for 48 hours", lambda i: i["state"] == "stale")
-    out += ["", f"Start now (cap {cap}):"] + ([f"  {_short(i)}  [{i['can']}]" for i in pick(rows, cap)] or ["  nothing"])
-    block("Ready, launch", lambda i: i["state"] == "ready" and i["when"] == "launch", lambda i: f"  [{i['can']}]")
-    block("Needs a person", lambda i: i["state"] == "person" and i["when"] == "launch", lambda i: f"  [{i['can']}]")
-    block("Blocked or held, launch", lambda i: i["state"] in ("blocked", "held") and i["when"] == "launch",
-          lambda i: "  <- " + "; ".join(i["why"])[:90])
-    later = [i for i in rows if i["when"] != "launch" and i["state"] != "group"]
-    out += ["", f"Not for launch: {sum(i['when'] == 'after-launch' for i in later)} after launch, "
-                f"{sum(i['when'] == 'someday' for i in later)} someday, {sum(i['when'] == 'unsorted' for i in later)} unsorted."]
+    out += ["", f"Ready ({len(got['ready'])}): start with the first free one"]
+    out += [f"  {_short(i)}{mark(i)}" for i in got["ready"]] or ["  nothing"]
+    out += ["", f"Blocked ({len(got['blocked'])}):"]
+    out += [f"  {_short(i)}  <- {'; '.join(i['why'])[:90]}" for i in got["blocked"]] or ["  nothing"]
+    out += ["", f"Parked ({len(got['parked'])}): waiting for the owner's pick"]
+    out += [f"  {_short(i)}  [{i['when']}]" for i in got["parked"]] or ["  nothing"]
     return "\n".join(out)
 
 
@@ -192,7 +200,7 @@ h2{font-size:16px;margin:0 0 10px}h2 small{color:var(--mute);font-weight:500;mar
 .card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:0 0 8px;min-width:0}
 .card.kid{margin-left:16px}.card a{color:var(--ink);font-weight:500;text-decoration:none;overflow-wrap:anywhere}
 .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.pill{border-radius:999px;padding:1px 9px;font-size:12px;background:var(--chip);color:var(--mute)}
-.ready{color:var(--green)}.running{color:var(--blue)}.blocked,.held,.stale{color:var(--red)}.person{color:var(--amber)}
+.ready{color:var(--green)}.parked{color:var(--amber)}.blocked{color:var(--red)}
 .why{font-size:12px;color:var(--red);margin-top:5px}
 </style><main><h1>Lightning Roadmap</h1><p class="sub">__SUB__</p><div class="lanes">__LANES__</div></main>"""
 
@@ -210,11 +218,11 @@ def page(data: dict, rows: list[dict]) -> str:
                 state = f'{len(i["children"])} open steps' if i["state"] == "group" else i["state"]
                 cards.append(f'<div class="card{" kid" if kid else ""}"><a href="{URL}/issues/{i["n"]}" target="_blank" '
                              f'rel="noopener">{e(i["title"])}</a><div class="meta"><span class="pill">#{i["n"]}</span>'
-                             f'<span class="pill">{e(i["can"])}</span><span class="pill {i["state"]}">{state}</span>'
+                             f'<span class="pill">{e(i["can"])}</span><span class="pill {bucket(i)}">{state if i["state"] == "group" else bucket(i)}</span>'
                              f'</div>{why}</div>')
         lanes.append(f'<section><h2>{name}<small>{sum(i["state"] != "group" for i in mine)} open</small></h2>'
                      f'{"".join(cards)}</section>')
-    sub = f"From GitHub at {data['now'][:16]}Z. Red is blocked, held or stale; amber needs a person."
+    sub = f"From GitHub at {data['now'][:16]}Z. Green is ready, red is blocked, amber is parked."
     return PAGE.replace("__SUB__", sub).replace("__LANES__", "".join(lanes))
 
 

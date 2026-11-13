@@ -24,15 +24,15 @@ already authenticated (the digits come from both sides' keys, as `check_digits` 
 per offer, the short offer lifetime, the profile password proof and the home's confirmation of the named device all
 kept. If that cannot hold, ask the owner before shipping.
 
-## 4M1 Discovery is the first way · M
+## 4N1 Discovery is the first way · M
 "Pair a PC" on the phone opens pairing and is found by "Find your phone or PC" on the PC with no other step; the PC
 shows the phone by name. Say plainly when the network blocks discovery and offer the fallback.
 
-## 4M2 Two typed digits · M
+## 4N2 Two typed digits · M
 Replace the three six-digit choices and the 12-character code with two digits typed on the PC, derived from the
 exchange; three wrong tries close the offer. Update `lightning/sync/journal/pairing.py` and its tests.
 
-## 4M3 The fallback is short · S
+## 4N3 The fallback is short · S
 The fallback address is pre-filled from the PC's own network (only the last part to type) and the code is the same
 two digits plus nothing else where the protocol allows.
 

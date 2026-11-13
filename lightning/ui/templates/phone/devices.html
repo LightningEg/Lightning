@@ -20,35 +20,30 @@
 </section>
 {% else %}
 {% if pending %}
-<section class="card phone-card" aria-labelledby="pair-heading">
+<section class="card phone-card" aria-labelledby="pair-heading"{% if not pending.paired_name %} data-refresh-seconds="3"{% endif %}>
   <h2 id="pair-heading" class="phone-card-title">{% if pending.paired_name %}{{ 'Paired with {name}'|tr(locale, name=pending.paired_name) }}{% else %}{{ 'Pair a PC'|tr(locale) }}{% endif %}</h2>
   {% if pending.paired_name %}
-  <p class="phone-note">{{ 'Check that the PC shows the same digits. If they differ, revoke it below.'|tr(locale) }}</p>
-  <p class="phone-lead">{{ pending.digits[:3] }} {{ pending.digits[3:] }}</p>
+  <p class="phone-note">{{ '{name} can now borrow this ledger. If you do not know it, revoke it below.'|tr(locale, name=pending.paired_name) }}</p>
   {% else %}
-  <p class="phone-note">{{ 'On the PC: Connect to your phone, then type these. Same Wi-Fi; keep this page open. The code works once, for ten minutes.'|tr(locale) }}</p>
-  <div class="phone-rows">
-    <div class="phone-row"><span>{{ 'Phone address'|tr(locale) }}</span><b dir="ltr">{{ address }}</b></div>
-    <div class="phone-row"><span>{{ 'Code'|tr(locale) }}</span><b dir="ltr">{{ pending.code[:4] }}-{{ pending.code[4:8] }}-{{ pending.code[8:] }}</b></div>
-  </div>
+  <p class="phone-note">{{ 'On the PC: Connect to your phone. When it finds this phone, type these two digits.'|tr(locale) }}</p>
+  <p class="phone-lead" dir="ltr" aria-label="{{ 'Pairing digits'|tr(locale) }}">{{ pending.code }}</p>
+  <p class="phone-note">{{ 'Same Wi-Fi; keep this page open. New digits appear after a wrong try.'|tr(locale) }}</p>
+  <details class="phone-more"><summary>{{ 'The PC does not find this phone?'|tr(locale) }}</summary>
+    <div class="phone-rows"><div class="phone-row"><span>{{ 'Phone address'|tr(locale) }}</span><b dir="ltr">{{ address }}</b></div></div>
+  </details>
   {% endif %}
   <form method="post" action="/profiles/devices/stop-pairing" class="phone-form"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="btn phone-save" type="submit">{{ 'Done' if pending.paired_name else 'Stop pairing'|tr(locale) }}</button></form>
 </section>
 {% else %}
 <section class="card phone-card" aria-labelledby="new-pair-heading">
   <h2 id="new-pair-heading" class="phone-card-title">{{ 'Pair a PC'|tr(locale) }}</h2>
-  {% if not lent_to %}
-  <p class="phone-note">{{ 'Set up device editing once to find nearby devices automatically.'|tr(locale) }}</p>
-  <a class="btn primary phone-save" href="/profiles/journal/setup">{{ 'Set up nearby pairing'|tr(locale) }}</a>
-  <details class="phone-more"><summary>{{ 'Connect with an address and code'|tr(locale) }}</summary>
-  {% endif %}
-  <p class="phone-note">{{ 'The PC can then borrow this ledger, edit it and hand it back. One device edits at a time.'|tr(locale) }}</p>
+  <p class="phone-note">{{ 'The PC finds this phone on the same Wi-Fi; you type two digits. It can then borrow this ledger, edit it and hand it back. One device edits at a time.'|tr(locale) }}</p>
   <form method="post" action="/profiles/devices/pair" class="phone-form">
     <input type="hidden" name="csrf" value="{{ csrf }}">
     <div class="field"><label for="phone-name">{{ 'This phone\'s name'|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off" enterkeyhint="done"></div>
-    <button class="btn primary phone-save" type="submit">{{ 'Show a pairing code'|tr(locale) }}</button>
+    <button class="btn primary phone-save" type="submit">{{ 'Pair a PC'|tr(locale) }}</button>
   </form>
-  {% if not lent_to %}</details>{% endif %}
+  {% if not lent_to %}<p class="phone-note"><a href="/profiles/journal/setup">{{ 'Edit from your devices'|tr(locale) }}</a></p>{% endif %}
 </section>
 {% endif %}
 {% if peers %}

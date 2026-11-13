@@ -33,7 +33,7 @@ Each fact lives in one file; link to it, never copy it. Start at [the documentat
 
 Never at the cost of a test, a required check, or a read you need.
 
-- **Start:** `python tools/board.py` (what is ready, running, blocked and waiting for a person, read from GitHub) + `git log --oneline -15`. Then the one issue you take and its **Read:** line. `NOW.md` holds only messages.
+- **Start:** `python tools/board.py` (three lists read from GitHub: ready, blocked, parked) + `git log --oneline -15`. Then the one issue you take and its **Read:** line. `NOW.md` holds only messages.
 - **Read sections, not files:** `grep -n '^## ' <file>`, then read that range. Guideline: never open whole; `python tools/guideline.py` lists sections, `python tools/guideline.py A12` prints one.
 - **Grep before reading.** Don't re-read what you just edited or read code you aren't changing.
 - **Skip unless needed:** `ai/archive/`, `ai/changelog/` files other than the newest, long designs in `issues/` other than yours, `Claude outputs/`, the Glossary's figures table.

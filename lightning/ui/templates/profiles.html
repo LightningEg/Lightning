@@ -1,6 +1,6 @@
 {% from "partials/chevron.html" import chevron with context %}
 <!doctype html>
-{% set on_phone = request.state.phone|default(false) %}<html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}"{% if on_phone %} class="phone"{% endif %}>
+{% set on_phone = request.state.phone|default(false) %}<html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}" data-week-start="{{ week_start }}"{% if on_phone %} class="phone"{% endif %}>
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1{{ ', viewport-fit=cover' if on_phone }}">
@@ -73,8 +73,13 @@
       {% if selected and not on_phone %}<p class="selected-database">{{ 'Selected database:'|tr(locale) }} <code>{{ selected }}</code></p>{% endif %}
 
       {% if mode == 'choose' %}
+        {% if on_phone %}
         <p><a class="button button-primary" href="/profiles/journal/join">{{ 'Find your phone or PC'|tr(locale) }}</a></p>
         <p>{{ 'Open pairing on the device with your profile.'|tr(locale) }}</p>
+        {% else %}
+        <p><a class="button button-primary" href="/profiles/connect">{{ 'Connect to your phone'|tr(locale) }}</a></p>
+        <p>{{ 'On the phone: Profile settings, Devices, Pair a PC. You type two digits here.'|tr(locale) }} <a class="text-link" href="/profiles/journal/join">{{ 'Find your phone or PC'|tr(locale) }}</a></p>
+        {% endif %}
         <section class="panel" aria-labelledby="profiles-heading">
           <div class="panel-heading"><div><h2 id="profiles-heading">{{ 'Available profiles'|tr(locale) }}</h2><p>{{ 'Choose one to continue.'|tr(locale) }}</p></div></div>
           {% if profiles %}
@@ -116,7 +121,7 @@
           {% else %}
             <p class="empty-note">{{ 'Keep your ledger on your phone and borrow it here when you work on the PC.'|tr(locale) }}</p>
           {% endif %}
-          <details><summary class="button button-secondary">{{ 'Connect with an address and code'|tr(locale) }}</summary><p><a class="button button-secondary" href="/profiles/connect">{{ 'Connect to your phone'|tr(locale) }}</a></p></details>
+          <p><a class="button button-secondary" href="/profiles/connect">{{ 'Connect to your phone'|tr(locale) }}</a></p>
         </section>{% endif %}
 
         {% if not on_phone %}<section class="panel panel-secondary" aria-labelledby="other-location-heading">
@@ -288,35 +293,30 @@
           </section>
         {% else %}
         {% if pending %}
-          <section class="panel form-panel" aria-labelledby="pair-heading">
+          <section class="panel form-panel" aria-labelledby="pair-heading"{% if not pending.paired_name %} data-refresh-seconds="3"{% endif %}>
             <h2 id="pair-heading">{% if pending.paired_name %}{{ 'Paired with {name}'|tr(locale, name=pending.paired_name) }}{% else %}{{ 'Pair a PC'|tr(locale) }}{% endif %}</h2>
             {% if pending.paired_name %}
-              <p>{{ 'Check that the PC shows the same digits:'|tr(locale) }} <strong class="suggestion-value" dir="ltr">{{ pending.digits[:3] }} {{ pending.digits[3:] }}</strong>. {{ 'If they differ, revoke it below.'|tr(locale) }}</p>
+              <p>{{ '{name} can now borrow this ledger. If you do not know it, revoke it below.'|tr(locale, name=pending.paired_name) }}</p>
             {% else %}
-              <p>{{ 'On the PC, open Lightning, choose Connect to your phone and type:'|tr(locale) }}</p>
-              <dl class="pair-values">
-                <dt>{{ 'Phone address'|tr(locale) }}</dt><dd><strong class="suggestion-value" dir="ltr">{{ address }}</strong></dd>
-                <dt>{{ 'Code'|tr(locale) }}</dt><dd><strong class="suggestion-value" dir="ltr">{{ pending.code[:4] }}-{{ pending.code[4:8] }}-{{ pending.code[8:] }}</strong></dd>
-              </dl>
-              <p>{{ 'Keep this page open; both devices on the same Wi-Fi. The code works once, for ten minutes.'|tr(locale) }}</p>
+              <p>{{ 'On the PC: Connect to your phone. When it finds this phone, type these two digits.'|tr(locale) }}</p>
+              <div class="recovery-value" dir="ltr" aria-label="{{ 'Pairing digits'|tr(locale) }}">{{ pending.code }}</div>
+              <p>{{ 'Same Wi-Fi; keep this page open. New digits appear after a wrong try.'|tr(locale) }}</p>
+              <details><summary class="text-link">{{ 'The PC does not find this phone?'|tr(locale) }}</summary>
+                <p>{{ 'Phone address'|tr(locale) }}: <strong class="suggestion-value" dir="ltr">{{ address }}</strong></p>
+              </details>
             {% endif %}
             <form method="post" action="/profiles/devices/stop-pairing"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="button button-secondary" type="submit">{{ ('Done' if pending.paired_name else 'Stop pairing')|tr(locale) }}</button></form>
           </section>
         {% else %}
           <section class="panel form-panel" aria-labelledby="new-pair-heading">
             <h2 id="new-pair-heading">{{ 'Pair a PC'|tr(locale) }}</h2>
-            {% if not lent_to %}
-            <p>{{ 'Set up device editing once to find nearby devices automatically.'|tr(locale) }}</p>
-            <p><a class="button button-primary" href="/profiles/journal/setup">{{ 'Set up nearby pairing'|tr(locale) }}</a></p>
-            <details><summary class="button button-secondary">{{ 'Connect with an address and code'|tr(locale) }}</summary>
-            {% endif %}
-            <p>{{ 'The PC can then borrow this ledger, edit it and hand it back. Only one device edits at a time.'|tr(locale) }}</p>
+            <p>{{ 'The PC finds this phone on the same Wi-Fi; you type two digits. It can then borrow this ledger, edit it and hand it back. One device edits at a time.'|tr(locale) }}</p>
             <form method="post" action="/profiles/devices/pair" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
               <div class="field"><label for="phone-name">{{ "This phone's name"|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off"></div>
-              <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Show a pairing code'|tr(locale) }}</button></div>
+              <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Pair a PC'|tr(locale) }}</button></div>
             </form>
-            {% if not lent_to %}</details>{% endif %}
+            {% if not lent_to %}<p><a class="text-link" href="/profiles/journal/setup">{{ 'Edit from your devices'|tr(locale) }}</a></p>{% endif %}
           </section>
         {% endif %}
         {% if peers %}
@@ -345,26 +345,27 @@
 
       {% elif mode == 'connect' %}
         <section class="panel form-panel" aria-labelledby="connect-heading">
-          <h2 id="connect-heading">{{ 'Find your phone or PC'|tr(locale) }}</h2>
-          <p>{{ 'On the device with your profile, open Profile settings, Edit from your devices, then Devices.'|tr(locale) }}</p>
-          <p><a class="button button-primary" href="/profiles/journal/join">{{ 'Find your phone or PC'|tr(locale) }}</a></p>
-          <details{% if error %} open{% endif %}><summary class="button button-secondary">{{ 'Connect with an address and code'|tr(locale) }}</summary>
-          <p>{{ 'On the phone, open Lightning, then Profile settings, Devices, Pair a PC. Type what it shows. The profile opens here with its own password.'|tr(locale) }}</p>
+          <h2 id="connect-heading">{{ 'Connect to your phone'|tr(locale) }}</h2>
+          <p>{{ 'On the phone: Profile settings, Devices, Pair a PC. It shows two digits; type them here. The profile then opens here with its own password.'|tr(locale) }}</p>
+          {% set find_route = 'connect' %}
+          {% include "partials/find_phone.html" %}
           <p class="key-warning">{{ 'Moving a profile from this PC to the phone instead? Unlock it here and choose Profile settings, Move to your phone.'|tr(locale) }}</p>
-          <form method="post" action="/profiles/connect" class="form-stack">
-            <input type="hidden" name="csrf" value="{{ csrf }}">
-            <div class="field"><label for="phone-address">{{ 'Phone address'|tr(locale) }}</label><input id="phone-address" name="address" type="text" required value="{{ address|default('') }}" placeholder="192.168.1.20:47513" autocomplete="off" spellcheck="false"></div>
-            <div class="field"><label for="pair-code">{{ 'Code'|tr(locale) }}</label><input id="pair-code" name="code" type="text" required autocomplete="off" spellcheck="false" autocapitalize="characters"></div>
-            <div class="field"><label for="pc-name">{{ "This PC's name"|tr(locale) }}</label><input id="pc-name" name="pc_name" type="text" required maxlength="60" value="{{ pc_name|default('') }}" autocomplete="off"></div>
-            <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Connect'|tr(locale) }}</button></div>
-          </form>
-          </details>
+          <p><a class="text-link" href="/profiles/journal/join">{{ 'Using Edit from your devices? Find your phone or PC'|tr(locale) }}</a></p>
+        </section>
+
+      {% elif mode == 'move' %}
+        <section class="panel form-panel" aria-labelledby="move-find-heading">
+          <h2 id="move-find-heading">{{ 'Move {name} to your phone'|tr(locale, name=active_name) }}</h2>
+          <p>{{ "The phone becomes this profile's home and this PC borrows it from there. On the phone, open Lightning and choose Bring a profile from your PC. It shows two digits; type them here."|tr(locale) }}</p>
+          {% set find_route = 'move' %}
+          {% include "partials/find_phone.html" %}
+          <p><a class="text-link" href="/profiles">{{ 'Back'|tr(locale) }}</a></p>
         </section>
 
       {% elif mode == 'connected' %}
         <section class="panel form-panel" aria-labelledby="connected-heading">
           <h2 id="connected-heading">{{ 'Connected to {name}'|tr(locale, name=home_name) }}</h2>
-          <p>{{ 'Check that the phone shows the same digits:'|tr(locale) }} <strong class="suggestion-value" dir="ltr">{{ digits[:3] }} {{ digits[3:] }}</strong>. {{ 'If they differ, revoke this PC on the phone.'|tr(locale) }}</p>
+          <p>{{ 'This PC can now borrow the ledger from the phone, one device editing at a time.'|tr(locale) }}</p>
           <a class="button button-primary" href="/profiles/borrowed?id={{ profile_id|urlencode }}">{{ 'Open {name}'|tr(locale, name=profile_name) }}</a>
         </section>
 
@@ -389,23 +390,23 @@
             <a class="button button-secondary" href="/profiles/receive">{{ "Check again"|tr(locale) }}</a>
           {% elif pending and pending.paired_name %}
             <h2 id="receive-heading">{{ '{name} is here'|tr(locale, name=pending.profile_name) }}</h2>
-            <p>{{ 'It came from {name}, which now borrows it from this phone. Check that the PC shows'|tr(locale, name=pending.paired_name) }} <strong class="suggestion-value" dir="ltr">{{ pending.digits[:3] }} {{ pending.digits[3:] }}</strong>.</p>
+            <p>{{ 'It came from {name}, which now borrows it from this phone.'|tr(locale, name=pending.paired_name) }}</p>
             <a class="button button-primary" href="/profiles">{{ "Unlock it"|tr(locale) }}</a>
           {% elif pending %}
-            <h2 id="receive-heading">{{ "Type this on the PC"|tr(locale) }}</h2>
-            <p>{{ "On the PC: Profile settings, Move to your phone. Same Wi-Fi; keep this page open."|tr(locale) }}</p>
-            <dl class="pair-values">
-              <dt>{{ 'Phone address'|tr(locale) }}</dt><dd><strong class="suggestion-value" dir="ltr">{{ address }}</strong></dd>
-              <dt>{{ 'Code'|tr(locale) }}</dt><dd><strong class="suggestion-value" dir="ltr">{{ pending.code[:4] }}-{{ pending.code[4:8] }}-{{ pending.code[8:] }}</strong></dd>
-            </dl>
-            <a class="button button-secondary" href="/profiles/receive">{{ "Check again"|tr(locale) }}</a>
+            <h2 id="receive-heading" data-refresh-seconds="3">{{ "Type these two digits on the PC"|tr(locale) }}</h2>
+            <p>{{ "On the PC: Profile settings, Move to your phone. When it finds this phone, type:"|tr(locale) }}</p>
+            <div class="recovery-value" dir="ltr" aria-label="{{ 'Pairing digits'|tr(locale) }}">{{ pending.code }}</div>
+            <p>{{ 'Same Wi-Fi; keep this page open. New digits appear after a wrong try.'|tr(locale) }}</p>
+            <details><summary class="text-link">{{ 'The PC does not find this phone?'|tr(locale) }}</summary>
+              <p>{{ 'Phone address'|tr(locale) }}: <strong class="suggestion-value" dir="ltr">{{ address }}</strong></p>
+            </details>
           {% else %}
             <h2 id="receive-heading">{{ "This phone becomes its home"|tr(locale) }}</h2>
             <p>{{ "The profile keeps its password. Afterwards the PC borrows it from here, one device editing at a time."|tr(locale) }}</p>
             <form method="post" action="/profiles/receive" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
               <div class="field"><label for="receive-name">{{ "This phone's name"|tr(locale) }}</label><input id="receive-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off"></div>
-              <div class="form-actions"><button class="button button-primary" type="submit">{{ "Show a code"|tr(locale) }}</button></div>
+              <div class="form-actions"><button class="button button-primary" type="submit">{{ "Show the digits"|tr(locale) }}</button></div>
             </form>
           {% endif %}
         </section>
@@ -420,13 +421,7 @@
         {% if not on_phone and not journal_enabled %}<section class="panel form-panel" aria-labelledby="move-heading">
           <h2 id="move-heading">{{ "Move to your phone"|tr(locale) }}</h2>
           <p>{{ "The phone becomes this profile's home and this PC borrows it from there. On the phone, open Lightning and choose Bring a profile from your PC."|tr(locale) }}</p>
-          <form method="post" action="/profiles/move" class="form-stack">
-            <input type="hidden" name="csrf" value="{{ csrf }}">
-            <div class="field"><label for="move-address">{{ 'Phone address'|tr(locale) }}</label><input id="move-address" name="address" type="text" required placeholder="192.168.1.20:47513" autocomplete="off" spellcheck="false"></div>
-            <div class="field"><label for="move-code">{{ 'Code'|tr(locale) }}</label><input id="move-code" name="code" type="text" required autocomplete="off" spellcheck="false" autocapitalize="characters"></div>
-            <div class="field"><label for="move-pc-name">{{ "This PC's name"|tr(locale) }}</label><input id="move-pc-name" name="pc_name" type="text" required maxlength="60" value="This PC" autocomplete="off"></div>
-            <div class="form-actions"><button class="button button-secondary" type="submit">{{ "Move to the phone"|tr(locale) }}</button></div>
-          </form>
+          <p><a class="button button-secondary" href="/profiles/move">{{ "Find your phone"|tr(locale) }}</a></p>
         </section>{% endif %}
         {% if new_recovery %}
         <section class="panel form-panel" aria-labelledby="new-key-heading">

@@ -9,6 +9,8 @@
   let current = null;
   let describedBy = null;
   const close = () => {
+    // Nothing shown: touch nothing. Scroll calls this on every event, and re-setting `hidden` restyled the page each time.
+    if (!current && tip.hidden) return;
     if (current) {
       if (describedBy === null) current.removeAttribute("aria-describedby");
       else current.setAttribute("aria-describedby", describedBy);

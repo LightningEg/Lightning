@@ -32,8 +32,6 @@ from lightning.security.device_credentials import DeviceCredentialError, Protect
 
 from .domain import _name
 
-PAIRING_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"  # no I, O, 0 or 1 to misread
-PAIRING_CODE_LENGTH = 12                                 # 60 bits, typed as three groups of four
 DEFAULT_PORT = 47513
 
 
@@ -243,29 +241,9 @@ def load_or_create(folder: str | Path, name: str, *, protector: Protector | None
 
 # ------------------------------------------------------------ pairing secrets and proofs
 
-def new_pairing_code() -> str:
-    return "".join(secrets.choice(PAIRING_ALPHABET) for _ in range(PAIRING_CODE_LENGTH))
-
-
-def normalize_code(text: str) -> str:
-    code = "".join(ch for ch in str(text).upper() if not ch.isspace() and ch != "-")
-    if len(code) != PAIRING_CODE_LENGTH or any(ch not in PAIRING_ALPHABET for ch in code):
-        raise ValueError("Type the 12 letters and digits shown on the phone.")
-    return code
-
-
-def show_code(code: str) -> str:
-    return "-".join(code[i:i + 4] for i in range(0, len(code), 4))
-
-
 def transcript(pairing_id: str, home_fingerprint: str, device_id: str, public_key: str) -> bytes:
     """What both sides bind their proofs to: a relay presenting another certificate cannot match it."""
     return "\n".join(("lightning-pair-v1", pairing_id, home_fingerprint, device_id, public_key)).encode("ascii")
-
-
-def proof(code: str, role: str, data: bytes) -> str:
-    return hmac.new(normalize_code(code).encode("ascii"), role.encode("ascii") + b"\n" + data,
-                    hashlib.sha256).hexdigest()
 
 
 def check_digits(data: bytes) -> str:
