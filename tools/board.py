@@ -142,7 +142,7 @@ def pick(rows: list[dict], cap: int) -> list[dict]:
     for i in rows:
         if len(chosen) >= room:
             break
-        if i["state"] == "ready" and i["when"] == "launch" and not any(_overlap(i["areas"], c["areas"]) for c in chosen):
+        if i["state"] == "ready" and i["when"] == "launch" and bucket(i) == "ready" and not any(_overlap(i["areas"], c["areas"]) for c in chosen):
             chosen.append(i)
     return chosen
 
@@ -152,11 +152,15 @@ def _short(i: dict) -> str:
 
 
 def bucket(i: dict) -> str:
-    """The three lists the owner reads (owner, 2026-11-13): ready, blocked or parked. Worked out, never typed.
+    """The three lists the owner reads (owner, 2026-11-13): ready, blocked or parked.
 
-    *parked*: not launch work (after launch, someday, or no `when:` yet) - it waits for the owner's pick.
-    *blocked*: an open blocker, or a running issue in the same area. *ready*: everything else, including work
-    that is already claimed (marked with its pull request) and work for a person (marked `[owner]`/`[human]`)."""
+    The owner can set it by hand with a label `status:ready`, `status:blocked` or `status:parked` (the roadmap page
+    on the website writes it); that always wins. Otherwise it is worked out: *parked* = not launch work (after
+    launch, someday, or no `when:` yet); *blocked* = an open blocker, or a running issue in the same area; *ready* =
+    the rest, including work already claimed (marked with its pull request) and work for a person."""
+    chosen = _label(i["labels"], "status")
+    if chosen in ("ready", "blocked", "parked"):
+        return chosen
     if i["when"] != "launch":
         return "parked"
     return "blocked" if i["state"] in ("blocked", "held") else "ready"

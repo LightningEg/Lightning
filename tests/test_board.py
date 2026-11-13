@@ -79,3 +79,10 @@ def test_every_open_issue_lands_in_ready_blocked_or_parked():
     text = board.tally(data, board.derive(data), 2)
     assert "[taken: PR #10]" in text and "[owner]" in text
     assert text.index("Ready (") < text.index("Blocked (") < text.index("Parked (")
+
+
+def test_a_status_label_set_by_the_owner_wins_over_the_worked_out_list():
+    got, data = rows([issue(1, ["when:launch", "status:parked"]), issue(2, ["when:after-launch", "status:ready"]),
+                      issue(3, ["when:launch", "status:blocked"]), issue(4, ["when:launch"])])
+    assert {n: board.bucket(r) for n, r in got.items()} == {1: "parked", 2: "ready", 3: "blocked", 4: "ready"}
+    assert [i["n"] for i in board.pick(board.derive(data), cap=4)] == [4], "a parked or blocked pick is never started"
