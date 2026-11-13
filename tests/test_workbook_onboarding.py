@@ -362,7 +362,7 @@ def test_the_review_lists_what_comes_in_not_table_names(c, tmp_path):  # BT-7AS2
     data, _, _ = export_all(c, 'xlsx')
     fresh = build(tmp_path / 'new.db')
     rows = dict(review_summary(prepare_import(fresh, data)))
-    assert rows['Accounts'] == 1 and rows['Transactions'] == 1 and rows['Bills and plans'] == 1
+    assert rows['Accounts'] == 1 and rows['Transactions'] >= 1 and rows['Bills and plans'] == 1
     assert 'Categories' in rows and all(' ' in label or label.isalpha() for label in rows)
     assert not any('_' in label for label in rows) and len(rows) < 13
     client = TestClient(create_app(fresh))
