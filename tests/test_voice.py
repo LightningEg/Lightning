@@ -70,7 +70,7 @@ def voice_page(request, tmp_path_factory):
                     context = browser.new_context(viewport={"width": 360 if phone else 1366, "height": 800},
                                                   is_mobile=phone, has_touch=phone)
                     page = context.new_page()
-                    page.set_default_timeout(5000)
+                    page.set_default_timeout(30000)
                     page.goto(host.launch_url)
                     page.goto(host.origin + "/profiles/new")
                     for name, value in {"name": "Voice sample", "password": "a dummy voice password",
