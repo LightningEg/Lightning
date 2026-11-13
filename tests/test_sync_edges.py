@@ -9,7 +9,7 @@ import pytest
 from lightning.sync import service, transport
 from lightning.sync.control import new_id
 from lightning.sync.domain import Accepted, BorrowActivated, ReturnStatus, Status
-from lightning.sync.identity import load_or_create, show_code
+from lightning.sync.identity import load_or_create
 from lightning.sync.service import LinkDown, require_space
 from lightning.sync.state import BorrowerState, HomeState, ProtocolError
 from lightning.sync.transport import link_to_home, pair as pair_with
@@ -86,8 +86,8 @@ def test_a_pairing_code_older_than_ten_minutes_is_refused_and_no_pc_is_saved(pho
     monkeypatch.setattr(transport, "time",
                         types.SimpleNamespace(monotonic=lambda: later() + transport.PAIRING_MINUTES * 60))
     pc_id = load_or_create(tmp_path / "pc", "Office PC")
-    error = refused("PAIRING_FAILED", pair_with, phone.endpoint, show_code(pending.code), pc_id)
-    assert str(error) == "Open Pair a PC on the phone and use the code it shows."
+    error = refused("PAIRING_FAILED", pair_with, phone.endpoint, pending.code, pc_id)
+    assert str(error) == "Open Pair a PC on the phone again and type the digits it shows."
     assert pc_id.device_id not in phone.pair.home.model.paired_devices
     assert phone.pair.home.store.peer(pc_id.device_id) is None
     assert pending.paired_name == ""

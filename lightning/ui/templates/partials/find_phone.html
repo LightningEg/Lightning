@@ -1,0 +1,27 @@
+{# The PC finds a phone with a pairing screen open and asks only for its two digits (NF-4M). Needs: find_route
+   ("connect" or "move": /profiles/<route> takes the form and is the page to search again), phones, csrf, pc_name, address, error, endpoint, phone_name. #}
+{% if phones %}
+  {% for phone in phones %}
+  <form method="post" action="/profiles/{{ find_route }}" class="form-stack">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <input type="hidden" name="endpoint" value="{{ phone.endpoint }}">
+    <input type="hidden" name="phone_name" value="{{ phone.name }}">
+    <div class="field"><label for="pair-digits-{{ loop.index }}">{{ 'The two digits on {name}'|tr(locale, name=phone.name) }}</label>
+      <input id="pair-digits-{{ loop.index }}" name="code" type="text" inputmode="numeric" pattern="[0-9٠-٩۰-۹ ]{2,3}" maxlength="3" required autocomplete="one-time-code" dir="ltr"{% if loop.first %} autofocus{% endif %}></div>
+    <div class="field"><label for="pair-pc-{{ loop.index }}">{{ "This PC's name"|tr(locale) }}</label><input id="pair-pc-{{ loop.index }}" name="pc_name" type="text" required maxlength="60" value="{{ pc_name|default('') }}" autocomplete="off"></div>
+    <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Connect'|tr(locale) }}</button></div>
+  </form>
+  {% endfor %}
+{% else %}
+  <p class="empty-note">{{ 'No phone found yet. On the phone, open the screen named above; both devices on the same Wi-Fi.'|tr(locale) }}</p>
+{% endif %}
+<p><a class="button button-secondary" href="/profiles/{{ find_route }}">{{ 'Search again'|tr(locale) }}</a></p>
+<details{% if error and not phones %} open{% endif %}><summary class="text-link">{{ 'Type the phone address instead'|tr(locale) }}</summary>
+  <form method="post" action="/profiles/{{ find_route }}" class="form-stack">
+    <input type="hidden" name="csrf" value="{{ csrf }}">
+    <div class="field"><label for="phone-address">{{ 'Phone address'|tr(locale) }}</label><input id="phone-address" name="address" type="text" required value="{{ address|default('') }}" placeholder="192.168.1.20:47513" autocomplete="off" spellcheck="false" dir="ltr"></div>
+    <div class="field"><label for="pair-code">{{ 'The two digits on the phone'|tr(locale) }}</label><input id="pair-code" name="code" type="text" inputmode="numeric" maxlength="3" required autocomplete="one-time-code" dir="ltr"></div>
+    <div class="field"><label for="pc-name">{{ "This PC's name"|tr(locale) }}</label><input id="pc-name" name="pc_name" type="text" required maxlength="60" value="{{ pc_name|default('') }}" autocomplete="off"></div>
+    <div class="form-actions"><button class="button button-secondary" type="submit">{{ 'Connect'|tr(locale) }}</button></div>
+  </form>
+</details>

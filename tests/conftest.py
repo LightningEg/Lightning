@@ -58,6 +58,14 @@ def cheap_key_locks(request, monkeypatch):
 
 
 @pytest.fixture(autouse=True)
+def nearby_on_this_machine(monkeypatch):
+    """The PC's phone search (NF-4M) asks only this machine and briefly: the suite never broadcasts to the network."""
+    from lightning.sync import nearby
+    monkeypatch.setattr(nearby, "destinations", lambda: ["127.0.0.1"])
+    monkeypatch.setattr(nearby, "SEARCH_SECONDS", 0.15)
+
+
+@pytest.fixture(autouse=True)
 def fixed_audit_clock(monkeypatch):
     # Historical fixtures also depend on record creation timestamps, not only
     # LIGHTNING_TODAY. Keep them independent of the host clock and timezone.

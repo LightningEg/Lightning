@@ -29,7 +29,10 @@ def add_account(browser, name):
                                                "opening_date": "2026-09-30"})
 
 
-def test_pair_borrow_edit_hand_back_and_seal_through_the_screens(tmp_path):
+DIGITS = re.compile(r'aria-label="Pairing digits"[^>]*>(?:<strong[^>]*>)?(\d{2})<')
+
+
+def test_pair_borrow_edit_hand_back_and_seal_through_the_screens(tmp_path, monkeypatch):
     phone, phone_app, phone_cfg, phone_devices = app_for(tmp_path, "phone", 9871)
     pc, pc_app, pc_cfg, pc_devices = app_for(tmp_path, "pc", 9872)
     with phone, pc:
@@ -38,19 +41,24 @@ def test_pair_borrow_edit_hand_back_and_seal_through_the_screens(tmp_path):
         create(phone, "Mohab")
         assert add_account(phone, "Phone wallet").status_code == 200
 
-        # The phone shows a code; the PC types it.
+        # The phone shows two digits; the PC finds the phone by itself and asks only for them (NF-4M).
+        from lightning.sync import nearby
         page = phone.get("/profiles/devices")
         assert "Pair a PC" in page.text
+        assert pc.get("/profiles/connect").text.count('name="endpoint"') == 0  # no phone is pairing yet
         phone.post("/profiles/devices/pair", data={"csrf": token(page.text), "phone_name": "My phone"})
         page = phone.get("/profiles/devices")
-        code = re.search(r"([A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4})", page.text).group(1)
-        address = f"127.0.0.1:{phone_devices.server.port}"
+        code = DIGITS.search(page.text).group(1)
+        assert 'data-refresh-seconds="3"' in page.text  # new digits after a wrong try show without a tap
+        monkeypatch.setattr(nearby, "NEARBY_PORT", phone_devices.nearby.port)
         page = pc.get("/profiles/connect")
-        page = pc.post("/profiles/connect", data={"csrf": token(page.text), "address": address, "code": code,
-                                                  "pc_name": "Office PC"})
+        assert "The two digits on My phone" in page.text
+        endpoint = re.search(r'name="endpoint" value="([^"]+)"', page.text).group(1)
+        assert endpoint == f"127.0.0.1:{phone_devices.server.port}"
+        page = pc.post("/profiles/connect", data={"csrf": token(page.text), "endpoint": endpoint, "phone_name": "My phone",
+                                                  "code": code, "pc_name": "Office PC"})
         assert "Connected to My phone" in page.text, page.text[-2000:]
-        digits = re.search(r"(\d{3} \d{3})", page.text).group(1)
-        assert digits in phone.get("/profiles/devices").text  # both screens show the same check digits
+        assert "Paired with Office PC" in phone.get("/profiles/devices").text
 
         # The PC borrows: it edits, the phone reads.
         listing = pc.get("/profiles").text
@@ -102,6 +110,8 @@ def test_wrong_pc_password_and_wrong_code_are_explained(tmp_path):
         phone.post("/profiles/devices/pair", data={"csrf": token(page.text), "phone_name": "My phone"})
         address = f"127.0.0.1:{phone_devices.server.port}"
         page = pc.get("/profiles/connect")
+        shown = DIGITS.search(phone.get("/profiles/devices").text).group(1)
         wrong = pc.post("/profiles/connect", data={"csrf": token(page.text), "address": address,
-                                                   "code": "AAAA-BBBB-CCCC", "pc_name": "Office PC"})
-        assert wrong.status_code == 400 and "not the one on the phone" in wrong.text
+                                                   "code": f"{(int(shown) + 1) % 100:02d}", "pc_name": "Office PC"})
+        assert wrong.status_code == 400 and "not the ones on the phone" in wrong.text
+        assert 'value="' + address + '"' in wrong.text  # the address stays typed for the next try

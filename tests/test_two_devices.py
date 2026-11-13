@@ -34,7 +34,7 @@ from test_mohab_phone import PhoneBrowser, PhoneMohab
 from test_mohab_year import Mohab
 from test_profile_app import PASSWORD, create
 
-CODE = re.compile(r"[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}")
+CODE = re.compile(r'aria-label="Pairing digits"[^>]*>(?:<strong[^>]*>)?(\d{2})<')  # the two digits (NF-4M)
 
 
 def free_port() -> int:
@@ -135,19 +135,20 @@ class Device:
 
 
 def typed_address(shown: screens.Screen) -> str:
-    """He types the address the phone shows; in this test the Wi-Fi is this machine, so its port on 127.0.0.1."""
-    return "127.0.0.1:" + re.search(r"Phone address \S+:(\d+)", shown.text).group(1)
+    """The phone's address under "The PC does not find this phone?"; in this test the Wi-Fi is this machine. The
+    search itself is tested in test_devices_app: here other tests' phones may answer it at the same time."""
+    return "127.0.0.1:" + re.search(r"Phone address:? \S+:(\d+)", shown.text).group(1)
 
 
 def pair_phone(phone: Device, pc: Device, pc_name: str) -> screens.Screen:
-    """Phone: Devices › Show a pairing code. PC: Profiles › Connect to your phone › type it."""
+    """Phone: Devices › Pair a PC, which shows two digits. PC: Profiles › Connect to your phone › type them."""
     phone.b.open("/profiles/devices")
-    shown = phone.b.submit({}, button="Show a pairing code")
-    code = CODE.search(shown.text).group(0)
+    shown = phone.b.submit({}, button="Pair a PC")
+    code = CODE.search(shown.html).group(1)
     phone.address = typed_address(shown)
     pc.b.open("/profiles")
     pc.b.click("Connect to your phone")
-    return pc.b.submit({"address": phone.address, "code": code, "pc_name": pc_name}, button="Connect")
+    return pc.b.submit({"address": phone.address, "code": code, "pc_name": pc_name})
 
 
 def borrow(pc: Device, password: str = PASSWORD, expect: int = 200) -> screens.Screen:
@@ -180,11 +181,12 @@ def mohab(tmp_path):
 def move_to_phone(phone: Device, pc: Device) -> screens.Screen:
     phone.b.open("/profiles")
     phone.b.click("Bring a profile from your PC")
-    shown = phone.b.submit({"phone_name": "My phone"}, button="Show a code")
-    code = CODE.search(shown.text).group(0)
+    shown = phone.b.submit({"phone_name": "My phone"}, button="Show the digits")
+    code = CODE.search(shown.html).group(1)
     phone.address = typed_address(shown)
     pc.b.go("Profiles & lock")
-    return pc.b.submit({"address": phone.address, "code": code, "pc_name": "Office PC"}, button="Move to the phone")
+    pc.b.click("Find your phone")
+    return pc.b.submit({"address": phone.address, "code": code, "pc_name": "Office PC"})
 
 
 def moved(phone: Device, pc: Device) -> None:
@@ -198,12 +200,11 @@ def test_1_a_pc_profile_moves_to_the_phone_with_every_row_and_figure(mohab):
     before = pc.owns()
     assert before == "650"  # 1,000 opening, less 200 and 150
     done = move_to_phone(phone, pc)
-    digits = re.search(r"shows (\d{3} \d{3})", done.text).group(1)
     assert done.shows("Mohab now lives on My phone", "From your phone", "On My phone")
     # The PC's old copy is never offered to open: only the phone's, to borrow.
     assert not [l for l in done.links if "/profiles/unlock" in l.href]
     arrived = phone.b.open("/profiles/receive")
-    assert arrived.shows("Mohab is here", "Office PC", digits)  # both screens show the same check digits
+    assert arrived.shows("Mohab is here", "Office PC")
 
     phone.b.click("Unlock it")          # back to the chooser, where Mohab now waits
     phone.unlock()
@@ -404,8 +405,7 @@ def test_7_a_second_pc_waits_its_turn_and_a_wrong_password_borrows_nothing(mohab
     home = Device(tmp_path, "home", 9703, phone=False)
     try:
         connected = pair_phone(phone, home, "Home laptop")
-        digits = re.search(r"(\d{3} \d{3})", connected.text).group(1)
-        assert connected.shows("Connected to My phone") and phone.b.open("/profiles/devices").shows(digits)
+        assert connected.shows("Connected to My phone") and phone.b.open("/profiles/devices").shows("Paired with Home laptop")
         wrong = borrow(home, password="not my password", expect=400)
         assert wrong.shows("The password is incorrect. It is the profile's password, the same as on the phone.")
         busy = borrow(home, expect=400)

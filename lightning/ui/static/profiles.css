@@ -147,9 +147,6 @@ input:focus { background: #F5EFCF; }
 }
 
 /* Devices: the address and code the PC types, label above value. */
-.pair-values { display: grid; gap: 4px 0; margin: 0 0 16px; }
-.pair-values dt { color: var(--ink-2); font-size: 13px; font-weight: 700; }
-.pair-values dd { margin: 0 0 8px; }
 .backup-list form { margin: 0; }
 
 /* On the phone app (guideline C02, C09.6): clear of the status and gesture bars. */
