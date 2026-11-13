@@ -2,7 +2,7 @@
 
 ## Claimed
 
-Reserved codes: IV-12AH, NF-12AI, NF-12AJ, NF-12AK, NF-12AL (Claude, #626)
+Reserved codes: none
 
 | Who | Work | Files | Since |
 |---|---|---|---|
