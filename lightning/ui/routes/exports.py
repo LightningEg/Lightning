@@ -183,7 +183,6 @@ def _full_preview(request, c, data):
 async def preview_workbook_import(request: Request):
     import base64
     import hashlib
-    import secrets
     import time
     from lightning.workflows.workbook_import import MAX_UPLOAD, SETUP_PROMPT, confirm_import, workbook_kind
     c = container(request)
