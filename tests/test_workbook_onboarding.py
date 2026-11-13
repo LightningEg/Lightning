@@ -70,7 +70,7 @@ def test_invalid_workbook_is_atomic_and_readable_values_cannot_disagree(c, tmp_p
     with pytest.raises(ValueError, match='differs'):
         confirm_import(target, invalid)
     legacy = tabular_workbook_bytes([(name[:31], headers, rows, widths) for name, headers, rows, widths in _raw_tables(c)])
-    for column, value, error in [('account_id','99999','missing reference'), ('fx_rate','0','inconsistent'),
+    for column, value, error in [('account_id','99999','points to a record'), ('fx_rate','0','inconsistent'),
                                   ('amount_base','999','base amount'), ('date','2026-02-30','real date'),
                                   ('asset_id', str(c.assets.cash_asset('USD').id), 'cash asset currency')]:
         with pytest.raises(ValueError, match=error):
@@ -288,3 +288,130 @@ def test_dates_and_times_excel_turned_into_serial_numbers_come_back_as_text(c, t
     assert target.db.scalar("SELECT created_at FROM accounts WHERE name='Example bank'").startswith('2026-10-30T12:00:00')
     assert target.db.scalar("SELECT min(date) FROM transactions") == first.isoformat()
     target.db.close()
+
+
+def _edit(data, edits):
+    """Change several cells at once: edits is [(sheet, row number, column, value)] with row 2 the first data row."""
+    sheets = read_workbook(data)
+    for sheet, number, column, value in edits:
+        sheets[sheet][number - 1][sheets[sheet][0].index(column)] = value
+    return tabular_workbook_bytes([(name, rows[0], [tuple(row) for row in rows[1:]], [22] * len(rows[0]))
+                                  for name, rows in sheets.items()])
+
+
+def test_every_problem_is_listed_with_its_sheet_row_and_column(c, tmp_path):  # BT-7AS1
+    from lightning.workflows.workbook_import import WorkbookProblems
+    _source(c)
+    data, _, _ = export_all(c, 'xlsx')
+    target = build(tmp_path / 'new.db', key=b'k' * 32)
+    bad = _edit(data, [('transactions', 2, 'date', '31/12/2026'), ('accounts', 2, 'opening_date', 'soon'),
+                       ('ledger_entries', 2, 'quantity', 'twelve')])
+    with pytest.raises(WorkbookProblems) as caught:
+        prepare_import(target, bad)
+    lines = caught.value.problems
+    assert len(lines) == 3 and "3 things" in str(caught.value)
+    assert any(l.startswith('Sheet "transactions", row 2, column "date"') for l in lines)
+    assert any(l.startswith('Sheet "accounts", row 2, column "opening_date"') for l in lines)
+    assert any(l.startswith('Sheet "ledger_entries", row 2, column "quantity"') for l in lines)
+    assert not any('NOT NULL' in l or 'constraint' in l for l in lines)
+    assert target.db.scalar('SELECT count(*) FROM transactions') == 0
+
+
+def test_a_blank_required_cell_and_a_repeated_id_are_named(c, tmp_path):  # BT-7AS1
+    from lightning.workflows.workbook_import import WorkbookProblems
+    _source(c)
+    data, _, _ = export_all(c, 'xlsx')
+    c.account_flows.open_account('Second bank', 'BANK', '2026-01-01', '5')
+    data, _, _ = export_all(c, 'xlsx')
+    rows = read_workbook(data)['accounts']
+    target = build(tmp_path / 'new.db', key=b'k' * 32)
+    first_id = rows[1][rows[0].index('id')]
+    bad = _edit(data, [('accounts', 3, 'id', first_id), ('ledger_entries', 2, 'account_id', None)])
+    with pytest.raises(WorkbookProblems) as caught:
+        prepare_import(target, bad)
+    text = ' | '.join(caught.value.problems)
+    assert 'Sheet "accounts", row 3, column "id"' in text and 'already used in row 2' in text
+    assert 'Sheet "ledger_entries", row 2, column "account_id": this cannot be empty' in text
+
+
+def test_a_missing_reference_names_the_sheet(c, tmp_path):  # BT-7AS1
+    from lightning.workflows.workbook_import import WorkbookProblems
+    _source(c)
+    legacy = tabular_workbook_bytes([(name[:31], headers, rows, widths) for name, headers, rows, widths in _raw_tables(c)])
+    target = build(tmp_path / 'new.db', key=b'k' * 32)
+    bad = _edit(legacy, [('ledger_entries', 2, 'account_id', 99999)])
+    with pytest.raises(WorkbookProblems) as caught:
+        prepare_import(target, bad)
+    assert any('points to a record that is not on sheet "accounts"' in l for l in caught.value.problems)
+
+
+def test_the_preview_page_lists_every_problem(c, tmp_path):  # BT-7AS1
+    _source(c)
+    data, _, _ = export_all(c, 'xlsx')
+    bad = _edit(data, [('transactions', 2, 'date', 'nope'), ('accounts', 2, 'opening_date', 'soon')])
+    fresh = build(tmp_path / 'new.db')
+    client = TestClient(create_app(fresh))
+    page = client.post('/exports/import', files={'workbook': ('w.xlsx', bad)})
+    assert page.status_code == 400
+    assert 'import-problems' in page.text and 'row 2, column &#34;date&#34;' in page.text or 'row 2, column "date"' in page.text
+
+
+def test_the_review_lists_what_comes_in_not_table_names(c, tmp_path):  # BT-7AS2
+    from lightning.workflows.workbook_import import review_summary
+    _source(c)
+    data, _, _ = export_all(c, 'xlsx')
+    fresh = build(tmp_path / 'new.db')
+    rows = dict(review_summary(prepare_import(fresh, data)))
+    assert rows['Accounts'] == 1 and rows['Transactions'] >= 1 and rows['Bills and plans'] == 1
+    assert 'Categories' in rows and all(' ' in label or label.isalpha() for label in rows)
+    assert not any('_' in label for label in rows) and len(rows) < 13
+    client = TestClient(create_app(fresh))
+    page = client.post('/exports/import', files={'workbook': ('w.xlsx', data)})
+    assert page.status_code == 200 and 'ledger_entries' not in page.text and 'bank_import_rows' not in page.text
+    assert 'Bills and plans' in page.text
+
+
+def test_what_excel_and_ai_tools_do_to_plain_values_is_put_back(c, tmp_path):  # BT-7AS3
+    """A workbook shaped like an AI-filled one (made here, no real data): TRUE/FALSE for yes/no columns, numbers with
+    thousands separators, spaces and Arabic digits, loose dates, a blank where Excel cannot keep an empty text."""
+    _source(c)
+    legacy = tabular_workbook_bytes([(name[:31], headers, rows, widths) for name, headers, rows, widths in _raw_tables(c)])
+    sheets = read_workbook(legacy)
+    ledger = sheets['ledger_entries']
+    amount = Decimal(ledger[1][ledger[0].index('amount')])
+    assert abs(amount) >= 1000
+    target = build(tmp_path / 'new.db')
+    quirky = _edit(legacy, [
+        ('accounts', 2, 'active', 'TRUE'), ('accounts', 2, 'is_system', 'FALSE'), ('accounts', 2, 'cash_at_hand', ' no '),
+        ('accounts', 2, 'opening_date', '2026/1/1'), ('accounts', 2, 'notes', None),
+        ('ledger_entries', 2, 'amount', f' {amount:,.2f} '),
+        ('ledger_entries', 2, 'quantity', f'{amount:,.2f}'.translate(str.maketrans('0123456789', '٠١٢٣٤٥٦٧٨٩')).replace(',', '٬').replace('.', '٫')),
+    ])
+    assert prepare_import(target, quirky) == prepare_import(target, legacy)
+    confirm_import(target, quirky)
+    assert target.db.scalar("SELECT active FROM accounts WHERE name='Example bank'") == 1
+
+
+def test_a_cell_of_spaces_is_a_blank_cell_not_a_number_error(c, tmp_path):  # BT-7AS3
+    from lightning.workflows.workbook_import import WorkbookProblems
+    _source(c)
+    legacy = tabular_workbook_bytes([(name[:31], headers, rows, widths) for name, headers, rows, widths in _raw_tables(c)])
+    target = build(tmp_path / 'new.db')
+    with pytest.raises(WorkbookProblems) as caught:
+        prepare_import(target, _edit(legacy, [('ledger_entries', 2, 'account_id', '   ')]))
+    assert 'Sheet "ledger_entries", row 2, column "account_id": this cannot be empty' in caught.value.problems[0]
+
+
+def test_either_workbook_goes_to_its_own_review_from_either_page(c, tmp_path):  # BT-7AS4
+    from lightning.workflows import starter_workbook
+    from lightning.workflows.workbook_import import workbook_kind
+    _source(c)
+    full, _, _ = export_all(c, 'xlsx')
+    starter = starter_workbook.starter_workbook(c)
+    assert workbook_kind(full) == 'full' and workbook_kind(starter) == 'starter'
+    fresh = build(tmp_path / 'new.db')
+    client = TestClient(create_app(fresh))
+    wrong = client.post('/exports/starter', files={'workbook': ('full.xlsx', full)})  # a full workbook on the starter page
+    assert wrong.status_code == 200 and 'Coming in' in wrong.text and 'no Entries sheet' not in wrong.text
+    wrong = client.post('/exports/import', files={'workbook': ('starter.xlsx', starter)})  # a starter on the full page
+    assert wrong.status_code == 200 and 'Unsupported sheet' not in wrong.text and 'not one of Lightning' not in wrong.text
