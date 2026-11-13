@@ -2358,6 +2358,7 @@ ARABIC_UI = {
     'This is not a Lightning profile file.': 'ده مش ملف بروفايل من لايتنينج.',
     'This profile file is damaged. Use another copy.': 'ملف البروفايل تالف. استخدم نسخة تانية.',
     'This profile file is too large to open.': 'ملف البروفايل أكبر من إنه يتفتح.',
+    'Workbooks must be 16 MB or smaller.': 'ملف الإكسل لازم يكون 16 ميجا أو أقل.',
     'This profile file is damaged, or it was made by a newer Lightning. Update Lightning and try again.': 'ملف البروفايل تالف، أو معمول بنسخة أحدث من لايتنينج. حدّث لايتنينج وجرّب تاني.',
     'Already keep Lightning on a PC? Move that profile here. The phone becomes its home; the PC borrows it.': 'عندك Lightning على كمبيوتر؟ انقل الملف هنا. الموبايل هيبقى الجهاز الأساسي والكمبيوتر يستعيره.',
     'From your phone': 'من الموبايل',

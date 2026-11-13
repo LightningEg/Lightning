@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import html
 import hmac
 import secrets
 import socket
@@ -42,6 +43,28 @@ PRICE_CSV_PATH = "/investments/prices/csv"
 # One profile file brought in from outside (BT-2AI2): the encrypted book and its key file, plus the form's envelope.
 PROFILE_FILE_PATH = "/profiles/open-file"
 MAX_PROFILE_FILE_BODY = 256 * 1024 * 1024 + 64 * 1024
+# An Excel workbook moved in (Settings › Move your data): the upload, then the review's base64 copy of it (16 MB file).
+WORKBOOK_PATHS = ("/exports/import", "/exports/starter")
+MAX_WORKBOOK_BODY = (16 * 1024 * 1024 + 2) // 3 * 4 + 64 * 1024
+
+
+def _back_path(request: Request, origin: str) -> str:
+    """The page the person came from, on this app only; the dashboard otherwise."""
+    referer = request.headers.get("referer", "")
+    if referer.startswith(origin + "/"):
+        path = referer[len(origin):]
+        if not path.startswith("//") and not path.startswith("/__launch"):
+            return path
+    return "/"
+
+
+def refusal_page(text: str, back: str) -> str:
+    """A plain refusal as a calm page with a way back and a way home: the window has no Back button."""
+    text, back = html.escape(text.strip() or "That request could not be completed."), html.escape(back, quote=True)
+    return ("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
+            "<title>Lightning</title><body style='font:16px system-ui;margin:12vh auto;max-width:28rem;padding:0 24px;"
+            "color:#0D2233;background:#F5F8F7'><h1 style='font-size:22px'>That did not go through</h1>"
+            f"<p>{text}</p><p style='display:flex;gap:16px'><a href='{back}'>Go back</a><a href='/'>Home</a></p>")
 
 
 def request_body_limit(path: str, method: str = "POST") -> int:
@@ -62,6 +85,8 @@ def request_body_limit(path: str, method: str = "POST") -> int:
         return MAX_CSV_UPLOAD_REQUEST_BYTES
     if path == PROFILE_FILE_PATH:
         return MAX_PROFILE_FILE_BODY
+    if path in WORKBOOK_PATHS:
+        return MAX_WORKBOOK_BODY
     return MAX_BODY
 
 
@@ -74,6 +99,8 @@ def request_too_large_message(path: str) -> str:
         return "This import review is too large to submit at once. Split the CSV into smaller files."
     if path == PROFILE_FILE_PATH:
         return "This profile file is too large to open."
+    if path in WORKBOOK_PATHS:
+        return "Workbooks must be 16 MB or smaller."
     return "This request is too large."
 
 
@@ -140,7 +167,25 @@ class Guard:
         request = Request(scope)
         scope.setdefault("state", {})["csp_nonce"] = cfg.nonce
 
+        navigation = request.headers.get("sec-fetch-mode") == "navigate" and request.headers.get("x-requested-with") != "fetch"
+        held = {}
+
         async def secured_send(message):
+            # A refusal in plain text (form expired, profile changed, too large...) on a page the person opened:
+            # the Windows window has no Back button, so wrap it in a page with a way back (owner, 2026-11-12).
+            if navigation and message["type"] == "http.response.start" and message.get("status", 200) >= 400 and any(
+                    k.lower() == b"content-type" and v.startswith(b"text/plain") for k, v in message.get("headers", [])):
+                held["start"], held["body"] = message, b""
+                return
+            if "start" in held and message["type"] == "http.response.body":
+                held["body"] += message.get("body", b"")
+                if message.get("more_body", False):
+                    return
+                page = refusal_page(held["body"].decode("utf-8", "replace"), _back_path(request, cfg.origin)).encode("utf-8")
+                start = {**held.pop("start"), "headers": [(b"content-type", b"text/html; charset=utf-8"),
+                                                          (b"content-length", str(len(page)).encode("ascii"))]}
+                await secured_send(start)
+                message = {"type": "http.response.body", "body": page}
             if message["type"] == "http.response.start":
                 csp = ("default-src 'none'; script-src 'self' 'nonce-" + cfg.nonce + "'; "
                        "script-src-attr 'none'; style-src 'self' 'unsafe-inline'; "
