@@ -650,31 +650,31 @@ def create_app(c: Container | None = None) -> FastAPI:
     @app.middleware("http")
     async def stay_shown_page(request: Request, call_next):
         response = await call_next(request)
-        if (request.method != "POST" or not request.headers.get("x-lightning-stay") or 300 <= response.status_code < 400
-                or not response.headers.get("content-type", "").startswith("text/html")):
+        if (request.method != "POST" or not request.headers.get("x-lightning-stay") or 300 <= response.status_code < 400  # not money
+                or not response.headers.get("content-type", "").startswith("text/html")):  # not money
             return response
         body = b"".join([chunk async for chunk in response.body_iterator])
         now = time.monotonic()
-        for key in [k for k, (at, *_rest) in shown.items() if now - at > 600] + list(shown)[:-15]:
+        for key in [k for k, (at, *_rest) in shown.items() if now - at > 600] + list(shown)[:-15]:  # not money
             shown.pop(key, None)
         token = secrets.token_urlsafe(16)
-        shown[token] = (now, response.status_code, body, request.url.path + (f"?{request.url.query}" if request.url.query else ""))
-        return RedirectResponse(f"/__shown/{token}", status_code=303)
+        shown[token] = (now, response.status_code, body, request.url.path + (f"?{request.url.query}" if request.url.query else ""))  # not money
+        return RedirectResponse(f"/__shown/{token}", status_code=303)  # not money
 
-    @app.get("/__shown/{token}", include_in_schema=False)
+    @app.get("/__shown/{token}", include_in_schema=False)  # not money
     async def stay_shown(request: Request, token: str):
         entry = shown.get(token)
-        if entry is None or time.monotonic() - entry[0] > 600:
-            return RedirectResponse("/", status_code=303)
+        if entry is None or time.monotonic() - entry[0] > 600:  # not money
+            return RedirectResponse("/", status_code=303)  # not money
         _at, status, body, path = entry
         # The page is the answer to a post to `path`: the address says so, as it would after an ordinary post, so a
         # form on it without its own action posts back to the same place.
         nonce = getattr(request.state, "csp_nonce", "") or ""
         address = json.dumps(path).replace("<", "\\u003c")
-        note = f'<script nonce="{escape(nonce)}">history.replaceState(history.state, "", {address});</script>'.encode("utf-8")
+        note = f'<script nonce="{escape(nonce)}">history.replaceState(history.state, "", {address});</script>'.encode("utf-8")  # not money
         head = body.find(b"<head>")
         if head >= 0:
-            body = body[:head + 6] + note + body[head + 6:]
+            body = body[:head + 6] + note + body[head + 6:]  # not money
         return HTMLResponse(body, status_code=status)
 
     @app.get("/__health", include_in_schema=False)

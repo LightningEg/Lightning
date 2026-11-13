@@ -152,6 +152,8 @@ const RELOAD_ONLY = [
   ".import-transfer-suggestion", ".investment-entry-form", ".quantity-input", "[data-unrequires]",
   "select[data-chip-add]", "[data-command-open]", "[data-fullscreen-toggle]", "#page-jump", "input[data-strength]",
 ].join(", ");
+const listensOnPage = (root) => [...root.querySelectorAll("script:not([src])")].some((script) =>
+  /(document|window)\.addEventListener|setInterval/.test(script.textContent));
 // What the server writes that a running page cannot take over in place: the language and direction, Hide amounts,
 // and the theme the profile has chosen (theme-runtime.js applies it from these metas when a page opens).
 const pageLook = (d) => [d.documentElement.getAttribute("lang"), d.documentElement.getAttribute("dir"),
@@ -170,8 +172,7 @@ window.lightningRefreshInPlace = async (source = location.href) => {
   if (!parts.length || parts.some((part) => !freshPart(part))) return false;
   if (parts.some((part) => part.querySelector(RELOAD_ONLY) || freshPart(part).querySelector(RELOAD_ONLY))) return false;
   // A page script that listens on the whole document or window, or ticks on a timer, would do it twice after a swap.
-  if (parts.some((part) => [...freshPart(part).querySelectorAll("script:not([src])")].some((script) =>
-      /(document|window)\.addEventListener|setInterval/.test(script.textContent)))) return false;
+  if (parts.some((part) => listensOnPage(freshPart(part)))) return false;
   if (pageLook(document) !== pageLook(doc)) return false;
   const sideFigures = document.querySelectorAll("aside.side .num"), freshSideFigures = doc.querySelectorAll("aside.side .num");
   if (sideFigures.length !== freshSideFigures.length) return false;
@@ -255,11 +256,15 @@ const saveDownload = async (response) => {
 // refreshes in place, so a save keeps you where you were (Edit plan stays open, the row you edited stays in view).
 // When it sends you to another page, you go there; when it answers with a page of its own (an error on the form, an
 // import step), web.stay_shown_page keeps that page and the browser opens it as an ordinary page.
-document.addEventListener("submit", (event) => {
+// On window, so it runs after every listener on the document: a "Delete?" question or a check that stops the post
+// has had its say first (event.defaultPrevented).
+window.addEventListener("submit", (event) => {
   const form = event.target;
   // Attributes, not form.action and form.method: a button named "action" (Track, Not now) hides the form's own.
   const method = (event.submitter?.getAttribute("formmethod") || form.getAttribute("method") || "get").toLowerCase();
-  if (event.defaultPrevented || !form.closest("[data-refresh][data-stay]") || method !== "post"
+  const part = form.closest("[data-refresh][data-stay]");
+  // A page that loads whole after a save anyway (see lightningRefreshInPlace) posts the ordinary way, as it always has.
+  if (event.defaultPrevented || !part || part.querySelector(RELOAD_ONLY) || listensOnPage(part) || method !== "post"
       || form.hasAttribute("data-popup-return") || form.hasAttribute("target") || event.submitter?.hasAttribute("formtarget")
       || (event.submitter?.getAttribute("formenctype") || form.getAttribute("enctype") || "") === "multipart/form-data") return;
   event.preventDefault();

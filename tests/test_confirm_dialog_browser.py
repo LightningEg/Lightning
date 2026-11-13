@@ -67,7 +67,8 @@ def test_category_delete_enter_cancels_and_click_confirms(delete_page, c, locale
     button.click()
     with page.expect_request(lambda request: request.method == "POST" and request.url == host.origin + action):
         dialog.locator('[data-ask="yes"]').click()
-    page.wait_for_load_state("networkidle")
+    # BV-12AG: the page refreshes in place, so wait for the server's message rather than a page load.
+    expect(page.locator("main > .flash").first).not_to_be_empty()
     assert posts.count(host.origin + action) == 1
     expect(page.locator("dialog.ask-dialog[open]")).to_have_count(0)
 
