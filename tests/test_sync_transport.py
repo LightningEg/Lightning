@@ -11,7 +11,8 @@ import pytest
 from lightning.runtime.paths import borrowed_profile
 from lightning.security.keys import unwrap_key
 from lightning.sync.domain import Accepted, Hello, Status
-from lightning.sync.identity import load_or_create, normalize_code, show_code
+from lightning.sync.identity import load_or_create
+from lightning.sync.passkey import normalize_passkey
 from lightning.sync.service import LinkDown
 from lightning.sync.state import BorrowerState, HomeState, ProtocolError
 from lightning.sync.transport import (HomeServer, PairingDesk, TlsLink, join_home, link_to_home, pair, receive_message)
@@ -41,8 +42,9 @@ def phone(tmp_path):
 def join(phone, tmp_path, name="Office PC"):
     pending = phone.open_pairing()
     pc_id = load_or_create(tmp_path / f"pc-id-{name}", name)
-    paired = pair(phone.endpoint, show_code(pending.code), pc_id)
-    assert paired.digits == pending.digits and pending.paired_name == name  # both screens show the same digits
+    assert len(pending.code) == 2 and pending.code.isdigit()  # the phone shows two digits
+    paired = pair(phone.endpoint, pending.code, pc_id)
+    assert paired.digits == pending.digits and pending.paired_name == name
     node = join_home(paired, endpoint=phone.endpoint, identity=pc_id, borrowed_profile=borrowed_profile,
                      root=tmp_path / f"pc-data-{name}")
     return node, pc_id
@@ -72,17 +74,38 @@ def test_pair_then_lend_edit_and_hand_back_over_tls(phone, tmp_path):
     assert counterparties(phone.pair.live) == ["PC"]
 
 
-def test_wrong_code_three_times_closes_the_pairing(phone, tmp_path):
+def test_wrong_digits_give_new_digits_and_three_misses_close_this_pc(phone, tmp_path):
     pending = phone.open_pairing()
     pc_id = load_or_create(tmp_path / "pc", "Office PC")
-    wrong = "".join("A" if c != "A" else "B" for c in pending.code)
+    seen = set()
     for _ in range(3):
+        shown = pending.code
+        seen.add(shown)
+        wrong = f"{(int(shown) + 1) % 100:02d}"
         with pytest.raises(ProtocolError) as refused:
             pair(phone.endpoint, wrong, pc_id)
-        assert refused.value.code == "PAIRING_FAILED"
-    with pytest.raises(ProtocolError):
-        pair(phone.endpoint, pending.code, pc_id)  # even the right code: the desk closed
+        assert refused.value.code == "PAIRING_FAILED" and "new digits" in str(refused.value)
+        assert not pending.busy  # the next try may start
+    with pytest.raises(ProtocolError) as closed:
+        pair(phone.endpoint, pending.code, pc_id)  # even the right digits: three misses from this PC
+    assert "Three tries" in str(closed.value)
     assert pc_id.device_id not in phone.pair.home.model.paired_devices
+
+
+def test_a_failed_try_never_reuses_its_digits(phone, tmp_path):
+    pending = phone.open_pairing()
+    pc_id = load_or_create(tmp_path / "pc", "Office PC")
+    before = pending.code
+    with pytest.raises(ProtocolError):
+        pair(phone.endpoint, f"{(int(before) + 1) % 100:02d}", pc_id)
+    # new digits are drawn at random: the same pair comes back one time in a hundred, so retry the draw a few times
+    for _ in range(5):
+        if pending.code != before:
+            break
+        phone.desk._wrong(pending, "elsewhere")
+    assert pending.code != before
+    pair(phone.endpoint, pending.code, pc_id)  # the new digits pair
+    assert pc_id.device_id in phone.pair.home.model.paired_devices
 
 
 def test_code_is_used_once_and_needs_an_unlocked_phone(phone, tmp_path):
@@ -152,10 +175,11 @@ def test_oversized_or_garbage_frames_are_refused_without_harm(phone):
     assert phone.pair.home.model.state is HomeState.AT_HOME
 
 
-def test_codes_are_typed_forgivingly():
-    assert normalize_code("abcd efgh-jkmn") == "ABCDEFGHJKMN"
-    with pytest.raises(ValueError):
-        normalize_code("ABCD-EFGH-JKL0")  # 0 is never in a code
+def test_digits_are_typed_forgivingly():
+    assert normalize_passkey(" 0 7 ") == "07" and normalize_passkey("٤٢") == "42" and normalize_passkey("۰۹") == "09"
+    for bad in ("7", "123", "ab", "", "4-2x"):
+        with pytest.raises(ValueError):
+            normalize_passkey(bad)
 
 
 def test_codes_from_the_wrong_screen_say_which_screen_to_use(phone, tmp_path):

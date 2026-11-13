@@ -108,6 +108,7 @@ allow_indirect_imports = true
 [tool.lightning-sync-policy]
 protocol = [
     "lightning.sync.domain",
+    "lightning.sync.passkey",
     "lightning.sync.journal.areas.spec",
     "lightning.sync.journal.codec",
     "lightning.sync.journal.errors",
@@ -146,6 +147,7 @@ runtime_boundary = [
     "lightning.sync.control",
     "lightning.sync.copies",
     "lightning.sync.identity",
+    "lightning.sync.nearby",
     "lightning.sync.journal.__main__",
     "lightning.sync.journal.authority",
     "lightning.sync.journal.backups",

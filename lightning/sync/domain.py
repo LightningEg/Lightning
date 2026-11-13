@@ -78,6 +78,8 @@ class MessageKind(StrEnum):
     AUTHENTICATE = "Authenticate"
     MOVE_BEGIN = "MoveBegin"
     MOVE_DONE = "MoveDone"
+    PASSKEY_COMMIT = "PasskeyCommit"
+    PASSKEY_REVEAL = "PasskeyReveal"
 
 
 @dataclass(frozen=True)
@@ -351,6 +353,28 @@ class ReturnStatus:
 
 
 @dataclass(frozen=True)
+class PasskeyCommit:
+    """One round of two-digit pairing (`lightning.sync.passkey`): a commitment to one bit of the code."""
+    index: int
+    commitment: str
+
+    def __post_init__(self) -> None:
+        _natural(self.index, "index", maximum=6)
+        _hex32(self.commitment, "commitment")
+
+
+@dataclass(frozen=True)
+class PasskeyReveal:
+    """The nonce that opens the same round's commitment."""
+    index: int
+    nonce: str
+
+    def __post_init__(self) -> None:
+        _natural(self.index, "index", maximum=6)
+        _hex32(self.nonce, "nonce")
+
+
+@dataclass(frozen=True)
 class Hello:
     """The home's first frame on every connection: a fresh challenge for the PC to sign."""
     nonce: str
@@ -444,7 +468,7 @@ class Error:
 
 Message = (BorrowRequest | BorrowGrant | BorrowActivated | BorrowCancel | Cancelled | ReturnBegin | Received | Accepted
            | PairRequest | PairReply | PairConfirm | Status | StatusReply | Prefetch | Checkpoint | ReturnStatus | Error
-           | Hello | Authenticate | MoveBegin | MoveDone)
+           | Hello | Authenticate | MoveBegin | MoveDone | PasskeyCommit | PasskeyReveal)
 _TYPES: dict[MessageKind, type] = {
     MessageKind.BORROW_REQUEST: BorrowRequest,
     MessageKind.BORROW_GRANT: BorrowGrant,
@@ -467,6 +491,8 @@ _TYPES: dict[MessageKind, type] = {
     MessageKind.AUTHENTICATE: Authenticate,
     MessageKind.MOVE_BEGIN: MoveBegin,
     MessageKind.MOVE_DONE: MoveDone,
+    MessageKind.PASSKEY_COMMIT: PasskeyCommit,
+    MessageKind.PASSKEY_REVEAL: PasskeyReveal,
 }
 _KINDS = {value: key for key, value in _TYPES.items()}
 

@@ -1,4 +1,6 @@
-"""Nearby pairing is the primary path; existing address/code sessions remain usable (BT-4L)."""
+"""Pairing entry points (BT-4L, NF-4M). On a PC, Connect to your phone leads: it finds the phone and asks for two
+digits (owner, 2026-11-12); the typed address is the fallback. Edit from your devices stays one tap away, and no screen
+converts a profile on its own."""
 import re
 from html.parser import HTMLParser
 
@@ -49,9 +51,11 @@ def test_locked_picker_leads_to_nearby_pairing(device, locale):
     client.cookies.set('lightning_ui_locale', locale)
     page = client.get('/profiles')
     links = Links(page.text).links
-    assert ('/profiles/journal/join', 'button button-primary', ()) in links
-    if not phone:
-        assert ('/profiles/connect', 'button button-secondary', (False,)) in links
+    if phone:
+        assert ('/profiles/journal/join', 'button button-primary', ()) in links
+    else:
+        assert ('/profiles/connect', 'button button-primary', ()) in links
+        assert ('/profiles/journal/join', 'text-link', ()) in links
     assert ('دور على موبايلك أو الكمبيوتر' if locale == 'ar' else 'Find your phone or PC') in page.text
     assert app.session.journal is None and app.session.container is None
 
@@ -60,11 +64,12 @@ def test_old_connect_address_keeps_manual_form_secondary_and_errors_visible(devi
     client, app, _, _ = device
     page = client.get('/profiles/connect')
     parsed = Links(page.text)
-    assert ('/profiles/journal/join', 'button button-primary', ()) in parsed.links
-    assert ('/profiles/connect', (False,)) in parsed.forms
+    assert ('/profiles/journal/join', 'text-link', ()) in parsed.links
+    assert ('/profiles/connect', 'button button-secondary', ()) in parsed.links  # Search again
+    assert ('/profiles/connect', (False,)) in parsed.forms  # the typed address, folded away
     assert 'name="address"' in page.text and 'name="code"' in page.text
     refused = client.post('/profiles/connect', data={'csrf': token(page.text), 'address': '', 'code': '', 'pc_name': 'PC'})
-    assert refused.status_code == 400
+    assert refused.status_code == 400 and "Choose a phone the search found" in refused.text
     assert ('/profiles/connect', (True,)) in Links(refused.text).forms
     assert app.session.journal is None
 
@@ -80,9 +85,9 @@ def test_existing_profile_gets_explicit_setup_without_conversion(device, locale)
     page = client.get('/profiles/devices')
     parsed = Links(page.text)
     setup = [item for item in parsed.links if item[0] == '/profiles/journal/setup']
-    assert len(setup) == 1 and 'primary' in setup[0][1] and setup[0][2] == ()
-    assert ('/profiles/devices/pair', (False,)) in parsed.forms
-    assert ('جهّز الاقتران بالأجهزة القريبة' if locale == 'ar' else 'Set up nearby pairing') in page.text
+    assert len(setup) == 1 and setup[0][2] == ()  # one tap away, never inside a fold
+    assert ('/profiles/devices/pair', ()) in parsed.forms  # Pair a PC leads
+    assert ('التعديل من أجهزتك' if locale == 'ar' else 'Edit from your devices') in page.text
     assert client.get('/profiles/journal/setup').status_code == 200
     assert app.session.journal is None
     if phone:
@@ -96,7 +101,7 @@ def test_pending_pairing_and_damaged_record_keep_the_existing_flow(device, monke
     page = client.get('/profiles/devices')
     pending = client.post('/profiles/devices/pair', data={'csrf': token(page.text), 'phone_name': 'Phone'})
     assert pending.status_code == 200
-    assert re.search(r'[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}', pending.text)
+    assert re.search(r'aria-label="Pairing digits"[^>]*>(?:<strong[^>]*>)?\d{2}<', pending.text)
     assert not any(link[0] == '/profiles/journal/setup' for link in Links(pending.text).links)
     monkeypatch.setattr(devices, 'lending_state', lambda paths: 'damaged')
     damaged = client.get('/profiles/devices')
@@ -117,7 +122,7 @@ def test_lent_profile_keeps_recovery_without_offering_conversion(device, tmp_pat
         pc.get('/__launch', params={'code': cfg.launch_code})
         page = home.get('/profiles/devices')
         pairing = home.post('/profiles/devices/pair', data={'csrf': token(page.text), 'phone_name': 'Home'})
-        code = re.search(r'[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}', pairing.text).group()
+        code = re.search(r'aria-label="Pairing digits"[^>]*>(?:<strong[^>]*>)?(\d{2})<', pairing.text).group(1)
         connect = pc.get('/profiles/connect')
         paired = pc.post('/profiles/connect', data={'csrf': token(connect.text), 'address': f'127.0.0.1:{devices.server.port}',
                                                     'code': code, 'pc_name': 'Other PC'})

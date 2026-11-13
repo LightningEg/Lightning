@@ -11,6 +11,7 @@ from contextlib import contextmanager
 
 import re
 import secrets
+import time
 from decimal import Decimal, InvalidOperation
 from pathlib import Path
 from urllib.parse import parse_qsl, quote, urlencode, urlparse, urlsplit
@@ -27,7 +28,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from lightning import DISPLAY_VERSION
 from lightning.bootstrap import Container
-from lightning.core.dates import fmt_date, month_of, today
+from lightning.core.dates import WEEK_STARTS, fmt_date, month_of, today
 from lightning.ui.date_text import day_text, human_dates, month_short, month_text, range_text
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.figures import FIGURES
@@ -42,6 +43,7 @@ from lightning.ui.i18n import BROWSER_UI, _COUNTED, counted, localize_html, loca
 
 UI_DIR = Path(__file__).parent
 templates = Jinja2Templates(directory=str(UI_DIR / "templates"))
+templates.env.globals["week_start"] = (WEEK_STARTS + 1) % 7  # not money: JavaScript getDay() has Sunday as 0
 
 
 def _minus(text: str) -> str:
@@ -639,6 +641,42 @@ def create_app(c: Container | None = None) -> FastAPI:
             response.set_cookie(PERIOD_COOKIE, urlencode({**picked, "seen_in": month_of(today())}),
                                 httponly=True, samesite="strict")
         return response
+
+    # BV-12AG · Save in place. A page's form posts in the background (app.js, X-Lightning-Stay) and the page refreshes
+    # in place when the answer is a redirect. When the answer is a page itself (an error shown on the form, an import
+    # step), the browser must show exactly that page: it is kept here for ten minutes and the post is sent to it, so the
+    # browser opens it as an ordinary page. Each answer is for the session that posted it; nothing is written to disk.
+    shown: dict[str, tuple[float, int, bytes, str]] = {}
+
+    @app.middleware("http")
+    async def stay_shown_page(request: Request, call_next):
+        response = await call_next(request)
+        if (request.method != "POST" or not request.headers.get("x-lightning-stay") or 300 <= response.status_code < 400  # not money
+                or not response.headers.get("content-type", "").startswith("text/html")):  # not money
+            return response
+        body = b"".join([chunk async for chunk in response.body_iterator])
+        now = time.monotonic()
+        for key in [k for k, (at, *_rest) in shown.items() if now - at > 600] + list(shown)[:-15]:  # not money
+            shown.pop(key, None)
+        token = secrets.token_urlsafe(16)
+        shown[token] = (now, response.status_code, body, request.url.path + (f"?{request.url.query}" if request.url.query else ""))  # not money
+        return RedirectResponse(f"/__shown/{token}", status_code=303)  # not money
+
+    @app.get("/__shown/{token}", include_in_schema=False)  # not money
+    async def stay_shown(request: Request, token: str):
+        entry = shown.get(token)
+        if entry is None or time.monotonic() - entry[0] > 600:  # not money
+            return RedirectResponse("/", status_code=303)  # not money
+        _at, status, body, path = entry
+        # The page is the answer to a post to `path`: the address says so, as it would after an ordinary post, so a
+        # form on it without its own action posts back to the same place.
+        nonce = getattr(request.state, "csp_nonce", "") or ""
+        address = json.dumps(path).replace("<", "\\u003c")
+        note = f'<script nonce="{escape(nonce)}">history.replaceState(history.state, "", {address});</script>'.encode("utf-8")  # not money
+        head = body.find(b"<head>")
+        if head >= 0:
+            body = body[:head + 6] + note + body[head + 6:]  # not money
+        return HTMLResponse(body, status_code=status)
 
     @app.get("/__health", include_in_schema=False)
     async def health():

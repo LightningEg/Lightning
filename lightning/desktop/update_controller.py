@@ -1,6 +1,7 @@
 """What the Settings "Lightning version" block shows and does (NF-9B4): one small state machine over update.py,
 update_guard.py and update_helper.py. Nothing runs until the person presses a button; the work happens on a worker
-thread; the page polls `status()`. No figure here is money.
+thread; the page polls `status()`. No figure here is money. Besides the button, the app checks (never downloads) once a
+day on its own (owner, 2026-11-12): `start_daily()`; an offline day stays quiet and is tried again an hour later.
 
 States: idle, checking, up_to_date, available, working, ready, refused_lend, refused_move, refused_folder, failed.
 Every outside effect (network, disk, locking the profile, starting the helper, quitting) is injected, so the whole
@@ -13,6 +14,7 @@ import shutil
 import sys
 import tempfile
 import threading
+import time
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
@@ -56,6 +58,7 @@ class UpdateController:
     spawn: Callable[[list[str]], None] = lambda command: None
     quit: Callable[[], None] = lambda: None
     run_async: Callable[[Callable[[], None]], None] = lambda work: threading.Thread(target=work, daemon=True).start()
+    clock: Callable[[], float] = time.time
     _state: dict = field(default_factory=lambda: {"state": "idle"})
     _lock: threading.Lock = field(default_factory=threading.Lock)
     _found: object = None
@@ -91,15 +94,57 @@ class UpdateController:
         self._set(state="checking")
         self.run_async(self._check)
 
-    def _check(self) -> None:
+    def _check(self, quiet: bool = False) -> None:
         result = self.check(current=self.current)
         if isinstance(result, up.UpToDate):
+            self._stamp()
             self._set(state="up_to_date")
         elif isinstance(result, up.Available):
+            self._stamp()
             self._found = result
             self._set(state="available", version=result.version, size_mb=max(1, round(result.size / 1_000_000)))
+        elif quiet:
+            self._set(state="idle")  # offline or the site is down: say nothing, try again later
         else:
             self._set(state="failed", reason=result.reason)
+
+    # --------------------------------------------------------------- the daily check
+    DAY = 24 * 60 * 60  # not money: seconds
+
+    @property
+    def _stamp_file(self) -> Path:
+        return self.updates / "last-check"
+
+    def _stamp(self) -> None:
+        try:
+            self.updates.mkdir(parents=True, exist_ok=True)
+            self._stamp_file.write_text(str(int(self.clock())), encoding="utf-8")
+        except OSError:
+            pass
+
+    def due(self) -> bool:
+        try:
+            last = int(self._stamp_file.read_text(encoding="utf-8").strip())
+        except (OSError, ValueError):
+            return True
+        return not 0 <= self.clock() - last < self.DAY
+
+    def daily_check(self) -> None:
+        """Check on its own when the last good check is a day old, and only when nothing else is under way."""
+        if self.status()["state"] in ("idle", "up_to_date") and self.due():
+            self._set(state="checking")
+            self.run_async(lambda: self._check(quiet=True))
+
+    def start_daily(self, every: float = 60 * 60) -> None:
+        """At start, then every hour while the app stays open, see whether a day has passed since the last check."""
+        def loop() -> None:
+            while True:
+                try:
+                    self.daily_check()
+                except Exception:  # noqa: BLE001 - a background check never takes the app down
+                    pass
+                time.sleep(every)
+        threading.Thread(target=loop, daemon=True, name="lightning-daily-update-check").start()
 
     def start_download(self) -> None:
         found = self._found

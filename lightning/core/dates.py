@@ -11,6 +11,8 @@ from datetime import date, datetime, timedelta
 from .errors import ValidationError
 from .money import ascii_digits
 
+WEEK_STARTS = 5  # Saturday, in Python's weekday() numbering (Monday is 0).
+
 _ISO_DATE_RE = re.compile(r"^(\d{4})-(\d{1,2})-(\d{1,2})$")
 _DAY_FIRST_DATE_RE = re.compile(r"^(\d{1,2})/(\d{1,2})(?:/(\d{2}|\d{4}))?$")
 _MONTH_RE = re.compile(r"^\d{4}-\d{2}$")

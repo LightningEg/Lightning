@@ -140,19 +140,42 @@ window.lightningRememberPlace = () => {
   } catch (error) { /* private mode: the page simply starts at the top */ }
 };
 window.lightningReload = () => { window.lightningRememberPlace(); location.reload(); };
-// BV-12AF · Save in place (owner, 2026-11-12: no reload on save; stay where you are). A page marks the part that a save
-// changes with data-refresh="name"; this fetches the page again and swaps only those parts, the page title's status, the
-// Undo pills and the message, then runs the part's own scripts on the new nodes. Scroll, open sections, the field you
-// are in and what you typed there are kept. Returns false when the fresh page has no such part (the caller reloads).
+// BV-12AF, BV-12AG · Save in place (owner, 2026-11-12: no reload on save, anywhere; stay where you are). Every page's
+// content is one part, data-refresh="page" (base.html). After a save this fetches the page again and swaps only that
+// part, the page title, the Undo pills, the message and the sidebar's figures, sets the part's fields up again and runs
+// its own scripts on the new nodes. Scroll, open sections, the field you are in and what you typed there are kept.
+// It returns false, and the caller loads the page the ordinary way, when a swap could not be faithful: the language,
+// theme or Hide amounts changed, the sidebar's list changed, or the part holds a control that app.js sets up only when
+// a page first opens (RELOAD_ONLY; tests/test_save_in_place_everywhere.py lists the pages this leaves).
+const RELOAD_ONLY = [
+  ".ledger", ".transaction-select", ".category-input", ".counterparty-input", ".import-category",
+  ".import-transfer-suggestion", ".investment-entry-form", ".quantity-input", "[data-unrequires]",
+  "select[data-chip-add]", "[data-command-open]", "[data-fullscreen-toggle]", "#page-jump", "input[data-strength]",
+].join(", ");
+const listensOnPage = (root) => [...root.querySelectorAll("script:not([src])")].some((script) =>
+  /(document|window)\.addEventListener|setInterval/.test(script.textContent));
+// What the server writes that a running page cannot take over in place: the language and direction, Hide amounts,
+// and the theme the profile has chosen (theme-runtime.js applies it from these metas when a page opens).
+const pageLook = (d) => [d.documentElement.getAttribute("lang"), d.documentElement.getAttribute("dir"),
+  d.documentElement.classList.contains("privacy"),
+  ...["lightning-theme", "lightning-owned", "lightning-follow-night"].map((name) => d.querySelector(`meta[name="${name}"]`)?.content ?? "")].join("|");
 window.lightningRefreshInPlace = async (source = location.href) => {
   let doc = source;
   if (typeof source === "string") {
     const response = await fetch(source, { headers: { "X-Lightning-Refresh": "1" } });
-    if (!response.ok) return false;
+    if (!response.ok || !(response.headers.get("content-type") || "").startsWith("text/html")) return false;
+    if (new URL(response.url).pathname !== location.pathname) return false;  // the page itself sent you elsewhere
     doc = new DOMParser().parseFromString(await response.text(), "text/html");
   }
   const parts = [...document.querySelectorAll("[data-refresh]")];
-  if (!parts.length || parts.some((part) => !doc.querySelector(`[data-refresh="${CSS.escape(part.dataset.refresh)}"]`))) return false;
+  const freshPart = (part) => doc.querySelector(`[data-refresh="${CSS.escape(part.dataset.refresh)}"]`);
+  if (!parts.length || parts.some((part) => !freshPart(part))) return false;
+  if (parts.some((part) => part.querySelector(RELOAD_ONLY) || freshPart(part).querySelector(RELOAD_ONLY))) return false;
+  // A page script that listens on the whole document or window, or ticks on a timer, would do it twice after a swap.
+  if (parts.some((part) => listensOnPage(freshPart(part)))) return false;
+  if (pageLook(document) !== pageLook(doc)) return false;
+  const sideFigures = document.querySelectorAll("aside.side .num"), freshSideFigures = doc.querySelectorAll("aside.side .num");
+  if (sideFigures.length !== freshSideFigures.length) return false;
   const active = document.activeElement;
   const FIELDS = "input:not([type=hidden]), select, textarea, button, a[href], summary";
   const holder = parts.find((part) => part.contains(active));
@@ -164,28 +187,35 @@ window.lightningRefreshInPlace = async (source = location.href) => {
   const open = new Map();
   placeBoxes().forEach((box) => open.set(box.id || placeLabel(box), [...(open.get(box.id || placeLabel(box)) || []), box.open]));
   const swap = (old, fresh) => { if (old && fresh) old.replaceWith(document.importNode(fresh, true)); };
+  if (doc.title) document.title = doc.title;
   swap(document.querySelector("main .page-title"), doc.querySelector("main .page-title"));
   const oldHistory = document.querySelectorAll("main .history-form"), freshHistory = doc.querySelectorAll("main .history-form");
   oldHistory.forEach((form, i) => swap(form, freshHistory[i]));
+  sideFigures.forEach((figure, i) => {
+    figure.textContent = freshSideFigures[i].textContent;
+    figure.className = freshSideFigures[i].className;
+  });
   document.querySelectorAll("main > .flash:not(.device-line)").forEach((flash) => flash.remove());
   const main = document.querySelector("main.main") || document.querySelector("main");
   const anchor = main?.querySelector(":scope > .flash.device-line") || null;
-  doc.querySelectorAll("main > .flash:not(.device-line)").forEach((flash) => {
+  [...doc.querySelectorAll("main > .flash:not(.device-line)")].reverse().forEach((flash) => {
     const node = document.importNode(flash, true);
     if (anchor) anchor.after(node); else main?.querySelector("[data-refresh]")?.before(node);
     initFlashMessages(node, true);
   });
   const nonce = document.querySelector("script[nonce]")?.nonce || "";
   parts.forEach((part) => {
-    const node = document.importNode(doc.querySelector(`[data-refresh="${CSS.escape(part.dataset.refresh)}"]`), true);
+    const node = document.importNode(freshPart(part), true);
     part.replaceWith(node);
-    initOwnDataPickers(node);
-    initDateFields(node);
+    initAccountForm(node);
     // Scripts brought in from another document never run by themselves; each is made again with this page's nonce.
-    node.querySelectorAll("script:not([src])").forEach((old) => {
+    // A page's own script runs in a block of its own, so its const and let do not meet the ones of its first run.
+    node.querySelectorAll("script").forEach((old) => {
       const script = document.createElement("script");
       script.nonce = nonce;
-      script.textContent = old.textContent;
+      [...old.attributes].forEach((attr) => { if (attr.name !== "nonce" && attr.name !== "defer") script.setAttribute(attr.name, attr.value); });
+      if (old.src) script.async = false;
+      else script.textContent = `{\n${old.textContent}\n}`;
       old.replaceWith(script);
     });
   });
@@ -203,23 +233,52 @@ window.lightningRefreshInPlace = async (source = location.href) => {
       try { field.setSelectionRange(kept.start, kept.end); } catch (error) { /* not a text field */ }
     }
   }
+  // What a first page load sets up, set up again on the new nodes: the same event a phone page swapped in by
+  // phone-nav.js sends (app.js, phone-fields.js, theme-runtime.js listen for it).
+  document.querySelectorAll("[data-refresh]").forEach((root) => document.dispatchEvent(new CustomEvent("lightning:page", { detail: { root } })));
+  document.dispatchEvent(new CustomEvent("lightning:refreshed"));
   return true;
 };
-// A form inside a part marked data-stay posts in the background and the page refreshes in place, so a Track, a
-// One-off or a bulk rule keeps you in Edit plan where you were. Where the server sends you elsewhere, you go there.
-document.addEventListener("submit", (event) => {
+// A file the server sends back (an export) is saved, as a plain form post would have saved it.
+const saveDownload = async (response) => {
+  const disposition = response.headers.get("content-disposition") || "";
+  const name = (/filename\*=UTF-8''([^;]+)/i.exec(disposition)?.[1] && decodeURIComponent(/filename\*=UTF-8''([^;]+)/i.exec(disposition)[1]))
+    || /filename="?([^";]+)"?/i.exec(disposition)?.[1] || "download";
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(await response.blob());
+  link.download = name;
+  document.body.append(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 60000);
+};
+// A form inside a part marked data-stay posts in the background. When the server answers with this same page, it
+// refreshes in place, so a save keeps you where you were (Edit plan stays open, the row you edited stays in view).
+// When it sends you to another page, you go there; when it answers with a page of its own (an error on the form, an
+// import step), web.stay_shown_page keeps that page and the browser opens it as an ordinary page.
+// On window, so it runs after every listener on the document: a "Delete?" question or a check that stops the post
+// has had its say first (event.defaultPrevented).
+window.addEventListener("submit", (event) => {
   const form = event.target;
   // Attributes, not form.action and form.method: a button named "action" (Track, Not now) hides the form's own.
-  if (event.defaultPrevented || !form.closest("[data-refresh][data-stay]") || (form.getAttribute("method") || "get").toLowerCase() !== "post"
-      || form.hasAttribute("data-popup-return") || form.getAttribute("enctype") === "multipart/form-data") return;
+  const method = (event.submitter?.getAttribute("formmethod") || form.getAttribute("method") || "get").toLowerCase();
+  const part = form.closest("[data-refresh][data-stay]");
+  // A page that loads whole after a save anyway (see lightningRefreshInPlace) posts the ordinary way, as it always has.
+  if (event.defaultPrevented || !part || part.querySelector(RELOAD_ONLY) || listensOnPage(part) || method !== "post"
+      || form.hasAttribute("data-popup-return") || form.hasAttribute("target") || event.submitter?.hasAttribute("formtarget")
+      || (event.submitter?.getAttribute("formenctype") || form.getAttribute("enctype") || "") === "multipart/form-data") return;
   event.preventDefault();
+  window.lightningRememberPlace();
+  const action = event.submitter?.getAttribute("formaction") || form.getAttribute("action") || location.href;
   const body = new URLSearchParams(new FormData(form, event.submitter || undefined));
-  form.querySelectorAll("button").forEach((button) => { button.disabled = true; });
-  fetch(new URL(form.getAttribute("action") || location.href, location.href).href, { method: "POST", body, headers: { "X-Lightning-Stay": "1" } }).then(async (response) => {
+  const buttons = [...form.querySelectorAll("button"), ...document.querySelectorAll(`button[form="${CSS.escape(form.id || "-")}"]`)];
+  buttons.forEach((button) => { button.disabled = true; });
+  const release = () => buttons.forEach((button) => { if (button.isConnected) button.disabled = false; });
+  fetch(new URL(action, location.href).href, { method: "POST", body, headers: { "X-Lightning-Stay": "1" } }).then(async (response) => {
     const landed = new URL(response.url);
     if (!response.redirected) {
-      const doc = new DOMParser().parseFromString(await response.text(), "text/html");
-      if (!(await window.lightningRefreshInPlace(doc))) window.lightningReload();
+      if (/attachment/i.test(response.headers.get("content-disposition") || "")) { await saveDownload(response); release(); return; }
+      window.lightningReload();
       return;
     }
     if (landed.origin !== location.origin || landed.pathname !== location.pathname) { location.assign(landed.href); return; }
@@ -227,7 +286,10 @@ document.addEventListener("submit", (event) => {
     const next = new URL(location.href);
     ["msg", "error", "undo"].forEach((key) => next.searchParams.delete(key));
     landed.searchParams.forEach((value, key) => next.searchParams.set(key, value));
-    if (!(await window.lightningRefreshInPlace(next.href))) location.assign(landed.href);
+    // Sent back to the very address you are on: its answer is already the fresh page, so it is not asked for twice.
+    const source = next.search === landed.search && response.ok
+      ? new DOMParser().parseFromString(await response.text(), "text/html") : next.href;
+    if (!(await window.lightningRefreshInPlace(source))) location.assign(landed.href);
   }).catch(() => window.lightningReload());  // the save may have landed: show the page as it is now, never post twice
 });
 (() => {
@@ -826,12 +888,13 @@ const isoDate = (value) => {
 // calendar button. Plain [data-smart-date] boxes and leftover native date
 // inputs are upgraded here, so templates only need a text input.
 const DATE_ERROR = "Use yyyy-mm-dd, like 2026-01-31.";
-// Our calendar for every date field (App guideline · Fields): a month at a time, weeks from Monday,
+// Our calendar for every date field (App guideline · Fields): a month at a time, the shared week start,
 // today ringed, the chosen day in Nile. It writes yyyy-mm-dd into the text field, which stays typeable.
 const CALENDAR_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>';
 const CALENDAR_LOCALE = document.documentElement.lang || "en";
+const WEEK_START = Number(document.documentElement.dataset.weekStart);
 const MONTH_NAMES = Array.from({length: 12}, (_, month) => new Intl.DateTimeFormat(CALENDAR_LOCALE, {month: "long"}).format(new Date(2024, month, 1)));
-const WEEKDAY_NAMES = Array.from({length: 7}, (_, day) => new Intl.DateTimeFormat(CALENDAR_LOCALE, {weekday: "short"}).format(new Date(2024, 0, 1 + day)));
+const WEEKDAY_NAMES = Array.from({length: 7}, (_, day) => new Intl.DateTimeFormat(CALENDAR_LOCALE, {weekday: "short"}).format(new Date(2024, 0, 7 + WEEK_START + day)));
 const isoOf = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 const MONTH_SHORT = Array.from({length: 12}, (_, month) => new Intl.DateTimeFormat(CALENDAR_LOCALE, {month: "short"}).format(new Date(2024, month, 1)));
 let openCal = null;
@@ -880,7 +943,7 @@ const openCalendar = (text, button) => {
     if (level === "years") { drawYears(); return; }
     const year = view.getFullYear(), month = view.getMonth();
     const first = new Date(year, month, 1);
-    const lead = (first.getDay() + 6) % 7;  // Monday first
+    const lead = (first.getDay() - WEEK_START + 7) % 7;
     const cells = [];
     for (let i = 0; i < 42; i += 1) cells.push(new Date(year, month, 1 - lead + i));
     const rows = cells[35].getMonth() !== month ? 5 : 6;
@@ -3394,4 +3457,14 @@ document.querySelectorAll("[data-unrequires]").forEach((box) => {
   const apply = () => (select.setPickerRequired ? select.setPickerRequired(!box.checked) : (select.required = !box.checked));
   box.addEventListener("change", apply);
   if (box.checked) apply();
+});
+
+// A screen that waits for another device (the phone's two pairing digits, NF-4M) shows its news without a tap: it
+// reloads every few seconds while it is visible, and never while the person is typing in it.
+document.querySelectorAll("[data-refresh-seconds]").forEach((node) => {
+  const seconds = Math.max(2, Number(node.dataset.refreshSeconds) || 3);
+  window.setInterval(() => {
+    const typing = document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+    if (document.visibilityState === "visible" && !typing) window.location.reload();
+  }, seconds * 1000);
 });

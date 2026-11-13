@@ -63,5 +63,26 @@ def test_people_work_is_set_apart_and_the_same_area_is_never_run_twice():
     assert got[7]["state"] == "ready", "a whole folder such as lightning/ui is too broad to hold anything back"
     picked = [i["n"] for i in board.pick(board.derive(data), cap=3)]
     assert picked == [4], "one already runs, the most-unblocking goes first, #5 shares its area, #6 is not for launch"
-    assert "Start now" in board.tally(data, board.derive(data), 3)
+    text = board.tally(data, board.derive(data), 3)
+    assert "Start now" not in text and "Running" not in text and "Shipped" not in text
     assert 'href="https://github.com/LightningEg/Lightning/issues/4"' in board.page(data, board.derive(data))
+
+
+def test_every_open_issue_lands_in_ready_blocked_or_parked():
+    got, data = rows([issue(1, ["when:launch"]), issue(2, ["when:launch"], blocked_by=[1]),
+                      issue(3, ["when:launch", "can:owner"]), issue(4, ["when:launch"]),
+                      issue(5, ["when:after-launch"]), issue(6, ["when:someday"]), issue(7),
+                      issue(8, ["when:launch"], children=[9]), issue(9)], [pr(10, "Closes #4")])
+    kinds = {n: board.bucket(r) for n, r in got.items() if r["state"] != "group"}
+    assert kinds == {1: "ready", 2: "blocked", 3: "ready", 4: "ready", 5: "parked", 6: "parked", 7: "parked",
+                     9: "ready"}, "a step takes launch from its parent; an issue with no when: is parked"
+    text = board.tally(data, board.derive(data), 2)
+    assert "[taken: PR #10]" in text and "[owner]" in text
+    assert text.index("Ready (") < text.index("Blocked (") < text.index("Parked (")
+
+
+def test_a_status_label_set_by_the_owner_wins_over_the_worked_out_list():
+    got, data = rows([issue(1, ["when:launch", "status:parked"]), issue(2, ["when:after-launch", "status:ready"]),
+                      issue(3, ["when:launch", "status:blocked"]), issue(4, ["when:launch"])])
+    assert {n: board.bucket(r) for n, r in got.items()} == {1: "parked", 2: "ready", 3: "blocked", 4: "ready"}
+    assert [i["n"] for i in board.pick(board.derive(data), cap=4)] == [4], "a parked or blocked pick is never started"
