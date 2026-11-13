@@ -4,7 +4,7 @@ Runs from the staged folder (`staged\\Lightning.exe --finish-update --install <f
 so the install folder is free to rename. All the logic is platform-neutral; every operating-system call goes through the
 `Host` object, so tests drive it with a fake disk and fake processes, including a power cut between any two steps.
 
-Folders beside the install folder `<install>`: `.previous` (the old version, kept until the next update), `.incoming`
+Folders beside the install folder `<install>`: `.previous` (the old version, deleted once the new one starts), `.incoming`
 (the copy being checked), `.failed` (a new version that did not start). `update.json` in the updates folder says how far
 the swap got, so `repair()` leaves exactly one working folder after a crash. Nothing here touches profiles or borrowed
 copies, and nothing personal is logged.
@@ -115,12 +115,25 @@ def repair(host: Host, paths: Paths) -> str:
     if state.get("step") in ("swapped", "launched") and host.exists(paths.previous) and host.exists(paths.install):
         if host.exists(paths.ok_marker(str(state.get("to")))):
             _set_step(host, paths, "ok", str(state.get("from")), str(state.get("to")))
+            _drop_previous(host, paths)
             did = "accepted"
         else:
             _rollback(host, paths)
             _set_step(host, paths, "failed", str(state.get("from")), str(state.get("to")))
             did = "rolled back"
+    elif state.get("step") == "ok" and host.exists(paths.previous) and host.exists(paths.install):
+        _drop_previous(host, paths)  # an update that finished but could not delete the old folder then
+        did = "cleaned" if did == "nothing" else did
     return did
+
+
+def _drop_previous(host: Host, paths: Paths) -> None:
+    """The new version started: the old folder is no longer needed (owner, 2026-11-12). Antivirus or Explorer may hold
+    a file; then it stays until the next start, which tries again."""
+    try:
+        host.rmtree(paths.previous)
+    except OSError:
+        _log(host, paths, "the old version's folder could not be deleted yet; the next start tries again")
 
 
 def verify_copy(host: Host, folder: Path) -> bool:
@@ -188,7 +201,8 @@ def run(host: Host, paths: Paths, *, old_pid: int, old_version: str, new_version
             return "new app failed"
         host.sleep(0.5)
     _set_step(host, paths, "ok", old_version, new_version)
-    log("the new version started; .previous is kept until the next update")
+    _drop_previous(host, paths)
+    log("the new version started; the old version's folder is deleted")
     return "updated"
 
 

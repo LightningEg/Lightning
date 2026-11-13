@@ -36,7 +36,7 @@ def lent_through_the_screens(tmp_path, ports):
     create(phone, "Mohab")
     page = phone.get("/profiles/devices")
     phone.post("/profiles/devices/pair", data={"csrf": token(page.text), "phone_name": "My phone"})
-    code = re.search(r"([A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4})", phone.get("/profiles/devices").text).group(1)
+    code = re.search(r'aria-label="Pairing digits"[^>]*>(?:<strong[^>]*>)?(\d{2})<', phone.get("/profiles/devices").text).group(1)
     page = pc.get("/profiles/connect")
     pc.post("/profiles/connect", data={"csrf": token(page.text), "address": f"127.0.0.1:{phone_devices.server.port}",
                                        "code": code, "pc_name": "Office PC"})
@@ -103,7 +103,7 @@ def test_lost_move_confirmation_leaves_one_ledger(tmp_path, monkeypatch):
         pc_db = pc_app.session.paths.db_path
         page = phone.get("/profiles/receive")
         phone.post("/profiles/receive", data={"csrf": token(page.text), "phone_name": "My phone"})
-        code = re.search(r"([A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4})", phone.get("/profiles/receive").text).group(1)
+        code = re.search(r'aria-label="Pairing digits"[^>]*>(?:<strong[^>]*>)?(\d{2})<', phone.get("/profiles/receive").text).group(1)
         failed = pc.post("/profiles/move", data={"csrf": token(pc.get("/profiles").text), "code": code,
                                                  "address": f"127.0.0.1:{phone_devices.server.port}"})
         assert "stays on this PC" in failed.text and pc_db.exists()
@@ -276,17 +276,23 @@ def test_old_copies_from_hand_backs_do_not_pile_up(tmp_path):
 
 # ------------------------------------------------------------ S1, S2: other devices on the Wi-Fi
 def test_wrong_codes_from_another_device_do_not_close_the_owners_code(tmp_path):
+    from lightning.sync.domain import PasskeyCommit, PasskeyReveal
+    from lightning.sync.passkey import V2_MARKER
     phone = Phone(tmp_path)
     try:
         pending = phone.open_pairing()
-        for _ in range(3):
+        for _ in range(3):  # another device on the Wi-Fi guesses: each try fails at its first bit
+            with phone.desk._lock:
+                digits = phone.desk._begin(pending, V2_MARKER, "192.168.1.66")
+            answers = iter([PasskeyCommit(0, "0" * 64), PasskeyReveal(0, "0" * 64)])
             with pytest.raises(ProtocolError):
-                phone.desk._check_code(pending, "0" * 64, "pc", b"guess", "192.168.1.66")
+                phone.desk._rounds(pending, digits, b"guess", lambda message: None, lambda: next(answers), "192.168.1.66")
         with pytest.raises(ProtocolError) as blocked:
-            phone.desk._check_code(pending, "0" * 64, "pc", b"guess", "192.168.1.66")
-        assert "Three wrong codes" in str(blocked.value)
+            with phone.desk._lock:
+                phone.desk._begin(pending, V2_MARKER, "192.168.1.66")
+        assert "Three tries" in str(blocked.value)
         paired = pair(phone.endpoint, pending.code, load_or_create(tmp_path / "pc", "Office PC"))
-        assert paired.digits == pending.digits  # the owner's PC still pairs
+        assert paired.digits == pending.digits  # the owner's PC still pairs, with the digits shown now
     finally:
         phone.server.stop()
 

@@ -8,7 +8,7 @@ from test_devices_app import add_account, app_for
 from test_profile_app import PASSWORD, create, token
 
 
-def test_move_a_pc_profile_to_the_phone_then_borrow_it_back(tmp_path):
+def test_move_a_pc_profile_to_the_phone_then_borrow_it_back(tmp_path, monkeypatch):
     phone, phone_app, phone_cfg, phone_devices = app_for(tmp_path, "phone", 9881)
     pc, pc_app, pc_cfg, pc_devices = app_for(tmp_path, "pc", 9882)
     with phone, pc:
@@ -21,17 +21,19 @@ def test_move_a_pc_profile_to_the_phone_then_borrow_it_back(tmp_path):
         page = phone.get("/profiles/receive")
         phone.post("/profiles/receive", data={"csrf": token(page.text), "phone_name": "My phone"})
         page = phone.get("/profiles/receive").text
-        code = re.search(r"([A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4})", page).group(1)
-        address = f"127.0.0.1:{phone_devices.server.port}"
-
-        manage = pc.get("/profiles").text
-        moved = pc.post("/profiles/move", data={"csrf": token(manage), "address": address, "code": code,
-                                                "pc_name": "Office PC"})
+        code = re.search(r'aria-label="Pairing digits"[^>]*>(?:<strong[^>]*>)?(\d{2})<', page).group(1)
+        assert 'href="/profiles/move"' in pc.get("/profiles").text  # Move to your phone › Find your phone
+        from lightning.sync import nearby
+        monkeypatch.setattr(nearby, "NEARBY_PORT", phone_devices.nearby.port)
+        found = pc.get("/profiles/move").text
+        assert "The two digits on My phone" in found  # the PC found the phone waiting for a profile (NF-4M)
+        endpoint = re.search(r'name="endpoint" value="([^"]+)"', found).group(1)
+        moved = pc.post("/profiles/move", data={"csrf": token(found), "endpoint": endpoint, "phone_name": "My phone",
+                                                "code": code, "pc_name": "Office PC"})
         assert "now lives on My phone" in moved.text, moved.text[-1500:]
         assert not pc_db.exists() and pc_db.with_name(f"{pc_db.stem}.moved-to-phone.db").exists()
-        digits = re.search(r"shows (\d{3} \d{3})", moved.text).group(1)
         arrived = phone.get("/profiles/receive").text
-        assert "Mohab is here" in arrived and digits in arrived
+        assert "Mohab is here" in arrived and "Office PC" in arrived
 
         # The phone unlocks it with the same password, writable: it is home now.
         chooser = phone.get("/profiles").text
@@ -61,6 +63,6 @@ def test_a_failed_move_leaves_the_profile_on_the_pc(tmp_path):
         pc_db = pc_app.session.paths.db_path
         manage = pc.get("/profiles").text
         failed = pc.post("/profiles/move", data={"csrf": token(manage), "address": "127.0.0.1:9",
-                                                 "code": "ABCD-EFGH-JKMN", "pc_name": "Office PC"})
+                                                 "code": "12", "pc_name": "Office PC"})
         assert failed.status_code == 400 and "stays on this PC" in failed.text
         assert pc_db.exists() and not pc_db.with_name(f"{pc_db.stem}.moving.db").exists()
