@@ -140,6 +140,96 @@ window.lightningRememberPlace = () => {
   } catch (error) { /* private mode: the page simply starts at the top */ }
 };
 window.lightningReload = () => { window.lightningRememberPlace(); location.reload(); };
+// BV-12AF · Save in place (owner, 2026-11-12: no reload on save; stay where you are). A page marks the part that a save
+// changes with data-refresh="name"; this fetches the page again and swaps only those parts, the page title's status, the
+// Undo pills and the message, then runs the part's own scripts on the new nodes. Scroll, open sections, the field you
+// are in and what you typed there are kept. Returns false when the fresh page has no such part (the caller reloads).
+window.lightningRefreshInPlace = async (source = location.href) => {
+  let doc = source;
+  if (typeof source === "string") {
+    const response = await fetch(source, { headers: { "X-Lightning-Refresh": "1" } });
+    if (!response.ok) return false;
+    doc = new DOMParser().parseFromString(await response.text(), "text/html");
+  }
+  const parts = [...document.querySelectorAll("[data-refresh]")];
+  if (!parts.length || parts.some((part) => !doc.querySelector(`[data-refresh="${CSS.escape(part.dataset.refresh)}"]`))) return false;
+  const active = document.activeElement;
+  const FIELDS = "input:not([type=hidden]), select, textarea, button, a[href], summary";
+  const holder = parts.find((part) => part.contains(active));
+  const kept = holder && active.matches(FIELDS) ? {
+    part: holder.dataset.refresh, index: [...holder.querySelectorAll(FIELDS)].indexOf(active), label: active.getAttribute("aria-label") || "",
+    value: active.value, start: active.selectionStart, end: active.selectionEnd, typed: "defaultValue" in active && active.value !== active.defaultValue,
+  } : null;
+  const top = window.scrollY;
+  const open = new Map();
+  placeBoxes().forEach((box) => open.set(box.id || placeLabel(box), [...(open.get(box.id || placeLabel(box)) || []), box.open]));
+  const swap = (old, fresh) => { if (old && fresh) old.replaceWith(document.importNode(fresh, true)); };
+  swap(document.querySelector("main .page-title"), doc.querySelector("main .page-title"));
+  const oldHistory = document.querySelectorAll("main .history-form"), freshHistory = doc.querySelectorAll("main .history-form");
+  oldHistory.forEach((form, i) => swap(form, freshHistory[i]));
+  document.querySelectorAll("main > .flash:not(.device-line)").forEach((flash) => flash.remove());
+  const main = document.querySelector("main.main") || document.querySelector("main");
+  const anchor = main?.querySelector(":scope > .flash.device-line") || null;
+  doc.querySelectorAll("main > .flash:not(.device-line)").forEach((flash) => {
+    const node = document.importNode(flash, true);
+    if (anchor) anchor.after(node); else main?.querySelector("[data-refresh]")?.before(node);
+    initFlashMessages(node, true);
+  });
+  const nonce = document.querySelector("script[nonce]")?.nonce || "";
+  parts.forEach((part) => {
+    const node = document.importNode(doc.querySelector(`[data-refresh="${CSS.escape(part.dataset.refresh)}"]`), true);
+    part.replaceWith(node);
+    initOwnDataPickers(node);
+    initDateFields(node);
+    // Scripts brought in from another document never run by themselves; each is made again with this page's nonce.
+    node.querySelectorAll("script:not([src])").forEach((old) => {
+      const script = document.createElement("script");
+      script.nonce = nonce;
+      script.textContent = old.textContent;
+      old.replaceWith(script);
+    });
+  });
+  placeBoxes().forEach((box) => {
+    const queue = open.get(box.id || placeLabel(box));
+    if (queue && queue.length) box.open = queue.shift();
+  });
+  window.scrollTo({ top, behavior: "instant" });
+  if (kept) {
+    const fields = [...(document.querySelector(`[data-refresh="${CSS.escape(kept.part)}"]`)?.querySelectorAll(FIELDS) || [])];
+    const field = (kept.label && fields.find((f) => f.getAttribute("aria-label") === kept.label)) || fields[kept.index];
+    if (field) {
+      if (kept.typed) field.value = kept.value;
+      field.focus({ preventScroll: true });
+      try { field.setSelectionRange(kept.start, kept.end); } catch (error) { /* not a text field */ }
+    }
+  }
+  return true;
+};
+// A form inside a part marked data-stay posts in the background and the page refreshes in place, so a Track, a
+// One-off or a bulk rule keeps you in Edit plan where you were. Where the server sends you elsewhere, you go there.
+document.addEventListener("submit", (event) => {
+  const form = event.target;
+  // Attributes, not form.action and form.method: a button named "action" (Track, Not now) hides the form's own.
+  if (event.defaultPrevented || !form.closest("[data-refresh][data-stay]") || (form.getAttribute("method") || "get").toLowerCase() !== "post"
+      || form.hasAttribute("data-popup-return") || form.getAttribute("enctype") === "multipart/form-data") return;
+  event.preventDefault();
+  const body = new URLSearchParams(new FormData(form, event.submitter || undefined));
+  form.querySelectorAll("button").forEach((button) => { button.disabled = true; });
+  fetch(new URL(form.getAttribute("action") || location.href, location.href).href, { method: "POST", body, headers: { "X-Lightning-Stay": "1" } }).then(async (response) => {
+    const landed = new URL(response.url);
+    if (!response.redirected) {
+      const doc = new DOMParser().parseFromString(await response.text(), "text/html");
+      if (!(await window.lightningRefreshInPlace(doc))) window.lightningReload();
+      return;
+    }
+    if (landed.origin !== location.origin || landed.pathname !== location.pathname) { location.assign(landed.href); return; }
+    // The server's answer (its message, an undo token, a month) on the address you are on, which keeps Edit plan open.
+    const next = new URL(location.href);
+    ["msg", "error", "undo"].forEach((key) => next.searchParams.delete(key));
+    landed.searchParams.forEach((value, key) => next.searchParams.set(key, value));
+    if (!(await window.lightningRefreshInPlace(next.href))) location.assign(landed.href);
+  }).catch(() => window.lightningReload());  // the save may have landed: show the page as it is now, never post twice
+});
 (() => {
   let note = null;
   try { note = JSON.parse(sessionStorage.getItem(PLACE_KEY) || "null"); sessionStorage.removeItem(PLACE_KEY); } catch (error) { note = null; }
@@ -225,6 +315,60 @@ const rankPicker = async (query, choices, kind) => {
     // The original list stays usable if the local request fails.
     return choices.filter((row) => `${row.label} ${row.context || ""}`.toLocaleLowerCase().includes(query.toLocaleLowerCase())).map((row) => row.id);
   }
+};
+// The Add account form: choosing an institution sets the Type (its kind is decided in Python and sent as data) and
+// suggests the Name; a CD portfolio or gam'eya has no starting balance. In app.js, not inline, because a popup
+// inserts the form as HTML and never runs its inline scripts.
+const initAccountForm = (root = document) => {
+  const type = root.querySelector("#account_type");
+  if (!type || type.dataset.accountFormReady) return;
+  type.dataset.accountFormReady = "1";
+  const opening = root.querySelector("#opening-balance-section");
+  const openingAmount = root.querySelector("#opening_balance");
+  const syncBalance = () => {
+    if (!opening) return;
+    const isPortfolio = type.value === "DEPOSIT" || type.value === "GAMEYA";
+    if (isPortfolio && !opening.hidden && openingAmount && openingAmount.value !== "0") {
+      opening.dataset.previousValue = openingAmount.value;
+      openingAmount.value = "0";
+    } else if (!isPortfolio && opening.hidden && openingAmount && opening.dataset.previousValue) {
+      openingAmount.value = opening.dataset.previousValue;
+      delete opening.dataset.previousValue;
+    }
+    opening.hidden = isPortfolio;
+    opening.style.display = isPortfolio ? "none" : "";
+  };
+  type.addEventListener("change", syncBalance);
+  syncBalance();
+  const institution = root.querySelector("#institution");
+  const nameInput = root.querySelector("#name");
+  const currency = root.querySelector("#currency");
+  let hints = {};
+  try { hints = JSON.parse(type.dataset.institutionHints || "{}"); } catch (error) { hints = {}; }
+  const norm = (value) => (value || "").normalize("NFKC").toLowerCase().replace(/[^\p{L}\p{N}_&]+/gu, " ").trim().replace(/\s+/g, " ");
+  const hintFor = (value) => hints[value] || hints[norm(value)];
+  let lastInstitution = hintFor(institution ? institution.value : "")?.name || "";
+  let suggestedName = "";
+  const applyInstitution = () => {
+    const hint = hintFor(institution.value);
+    if (!hint) { lastInstitution = ""; return; }
+    if (hint.type && hint.name !== lastInstitution && type.value !== hint.type) {
+      type.value = hint.type;
+      type.dispatchEvent(new Event("change", {bubbles: true}));
+    }
+    lastInstitution = hint.name;
+    if (nameInput && (!nameInput.value.trim() || nameInput.value === suggestedName)) {
+      suggestedName = `${hint.short} \u00b7 ${currency ? currency.value : ""}`;
+      nameInput.value = suggestedName;
+    }
+  };
+  if (institution) {
+    institution.addEventListener("change", applyInstitution);
+    institution.addEventListener("input", applyInstitution);
+  }
+  if (currency) currency.addEventListener("change", () => {
+    if (nameInput && suggestedName && nameInput.value === suggestedName) applyInstitution();
+  });
 };
 let ownPickerId = 0;
 const initOwnDataPickers = (root = document) => {
@@ -324,7 +468,13 @@ const initOwnDataPickers = (root = document) => {
       button.addEventListener("click", () => choose(option));
       list.append(button);
     });
-    if (!matches.length) { close(); return; }
+    // data-add-href / data-add-label: the list's own way to add what is missing (a currency), never a sentence under it.
+    if (select.dataset.addHref) {
+      const add = document.createElement("a"); add.className = "counterparty-option picker-add"; add.setAttribute("role", "option");
+      add.href = select.dataset.addHref; add.textContent = t(select.dataset.addLabel || "+ Add");
+      list.append(add);
+    }
+    if (!matches.length && !select.dataset.addHref) { close(); return; }
     list.hidden = false; place(); input.setAttribute("aria-expanded", "true"); active = -1;
   };
   input.value = shown();
@@ -495,6 +645,7 @@ find("input[data-own-suggestions][list]").forEach((input) => {
   });
 };
 initOwnDataPickers();
+initAccountForm();
 
 // A small page jump replaces a sticky header while reading a long register. It stays out of the way: hidden
 // until the pointer nears the bottom-right corner (bottom-left in Arabic) or the page is being scrolled, and gone
@@ -584,7 +735,7 @@ window.askChoice = ({ title, message = "", choices }) => new Promise((resolve) =
   const dialog = document.createElement("dialog");
   dialog.className = "ask-dialog tone-info";
   dialog.setAttribute("aria-labelledby", "ask-title");
-  dialog.innerHTML = '<form method="dialog" class="ask-frame"><div class="ask-text"><h2 id="ask-title"></h2><p id="ask-message"></p></div><div class="ask-actions"></div></form>';
+  dialog.innerHTML = '<form method="dialog" class="ask-frame ask-frame-plain"><div class="ask-text"><h2 id="ask-title"></h2><p id="ask-message"></p></div><div class="ask-actions"></div></form>';
   dialog.querySelector("h2").textContent = title;
   dialog.querySelector("p").textContent = message;
   if (!message) dialog.querySelector("p").remove();
@@ -1092,7 +1243,8 @@ if (ledger) {
       if (asking) return;
       asking = true;
       const submitter = event.submitter;
-      const singleRowChanged = value("amount") !== String(original.amount ?? "").trim()
+      const num = (text) => { const n = Number(String(text ?? "").replace(/[^\d.\-]/g, "")); return Number.isFinite(n) ? n : String(text ?? "").trim(); };
+      const singleRowChanged = num(value("amount")) !== num(original.amount)
         || (editForm.elements.account_id && value("account_id") !== String(original.account_id ?? ""));
       window.askChoice({
         title: t("Change {count} selected rows?", {count: ids.length}),
@@ -1117,7 +1269,7 @@ if (ledger) {
         const notice = document.getElementById("bulk-edit-error") || document.createElement("div");
         notice.id = "bulk-edit-error"; notice.className = "flash error"; notice.setAttribute("role", "alert");
         notice.remove();
-        fetch(form.action, { method: "POST", body: new FormData(form),
+        fetch(new URL(form.getAttribute("action") || location.href, location.href).href, { method: "POST", body: new FormData(form),
           headers: { "Accept": "application/json", "X-Requested-With": "fetch" } }).then(async (response) => {
           // Session/journal middleware may redirect to its own explanation.
           if (response.redirected) { location.assign(response.url); return; }
@@ -1614,8 +1766,8 @@ const initTradeCatalogue = () => {
       positionHint.textContent = exceeds
         ? t("You have {owned} {unit}(s); you cannot sell {quantity}.", {owned: formatted(owned, selected.decimals), unit: selected.unit, quantity: formatted(Math.abs(qty), selected.decimals)})
         : t("You hold {quantity} {unit}(s) here.", {quantity: formatted(owned, selected.decimals), unit: selected.unit});
-    } else if (selected) {
-      positionHint.textContent = t("You hold {quantity} {unit}(s) here.", {quantity: formatted(Number(selected.holding || 0), selected.decimals), unit: selected.unit});
+    } else if (selected && selected.note) {
+      positionHint.textContent = "";
     }
     if (selected && selected.note) positionHint.textContent += ` ${t(selected.note)}`;
     // The live "You pay …" line (display only; the posted amounts are recomputed in Python).
@@ -1662,7 +1814,7 @@ const initTradeCatalogue = () => {
       button.append(name, ticker);
       const choose = () => {
         selected = item; selectedKey.value = item.key;
-        selectedLabel.value = `${item.name} · ${item.ticker}${item.exchange ? ` · ${item.exchange}` : ""}`;
+        selectedLabel.value = item.name;
         search.value = selectedLabel.value;
         results.hidden = true; search.setAttribute("aria-expanded", "false"); sync();
       };
@@ -1717,7 +1869,7 @@ const initTradeCatalogue = () => {
       results.hidden = true; search.setAttribute("aria-expanded", "false");
     }
   });
-  if (selected) { search.value = selectedLabel.value || `${selected.name} · ${selected.ticker}${selected.exchange ? ` · ${selected.exchange}` : ""}`; }
+  if (selected) { search.value = selectedLabel.value || selected.name; }
   sync();
 };
 initTradeCatalogue();
@@ -2151,7 +2303,13 @@ initCurrencySearch();
     if (goBack && history.state?.lightningPopup) history.back();
     else if (opener?.isConnected) opener.focus();
     window.scrollTo({ top: baseScroll, behavior: "instant" });
-    if (pageStale && !reopening) { pageStale = false; sessionStorage.setItem("lightning-popup-scroll", String(baseScroll)); window.lightningReload(); }
+    if (pageStale && !reopening) {
+      pageStale = false;
+      // BV-12AF: a page with a part marked data-refresh takes the popup's change in place; any other page reloads.
+      const reload = () => { sessionStorage.setItem("lightning-popup-scroll", String(baseScroll)); window.lightningReload(); };
+      if (document.querySelector("[data-refresh]")) window.lightningRefreshInPlace().then((done) => { if (!done) reload(); }, reload);
+      else reload();
+    }
     return true;
   };
   // A sheet or popup shows the form's own content. The page's chrome around it (the undo and redo pills, the
@@ -2184,19 +2342,7 @@ initCurrencySearch();
   };
   const initPopupFields = () => {
     initDateFields(content);
-    const type = content.querySelector("#account_type"), help = content.querySelector("#account-type-help");
-    if (type && help && !type.dataset.popupReady) {
-      type.dataset.popupReady = "1";
-      const update = () => {
-        help.textContent = type.value === "DEPOSIT"
-          ? "Certificate or time deposit: include the term, annual return, and maturity date in Notes."
-          : type.value === "GAMEYA" ? "A gam'eya holds one savings circle's cash. After you add it, enter its terms."
-          : type.value === "PHYSICAL_ASSET" ? "Add named items such as a ring after creating this account."
-          : type.value === "BROKERAGE" ? "Record brokerage cash here before buying investments."
-          : "";
-      };
-      type.addEventListener("change", update); update();
-    }
+    initAccountForm(content);
     content.querySelectorAll("[data-karat-reference]").forEach((select) => {
       if (select.dataset.popupKaratReady) return;
       select.dataset.popupKaratReady = "1";
@@ -2428,12 +2574,20 @@ initCurrencySearch();
         pageStale = false;  // this save reloads the page itself
         close(false, true);  // saved: nothing to discard
         history.replaceState(null, "", next.pathname + next.search + next.hash);
-        if (msg && !toast) sessionStorage.setItem("lightning-popup-success", msg);
-        if (goToResponse) location.href = next.href;
-        else {
+        const inPlace = !goToResponse && !toast && document.querySelector("[data-refresh]");
+        if (msg && !toast && !inPlace) sessionStorage.setItem("lightning-popup-success", msg);
+        const reload = () => {
+          if (msg && !toast) sessionStorage.setItem("lightning-popup-success", msg);
           sessionStorage.setItem("lightning-popup-scroll", String(baseScroll));
           window.lightningReload();
-        }
+        };
+        if (goToResponse) location.href = next.href;
+        else if (inPlace) {
+          // BV-12AF: the page behind takes the change in place, with the server's message and its Undo.
+          const here = new URL(location.href);
+          if (msg) here.searchParams.set("msg", msg);
+          window.lightningRefreshInPlace(here.href).then((done) => { if (!done) reload(); }, reload);
+        } else reload();
       }
     } catch (error) {
       if (status) status.textContent = t("Could not save. Check your connection and try again.");
@@ -2451,6 +2605,12 @@ initCurrencySearch();
     close(false, true);
     const base = new URL(baseUrl, location.href);
     if (base.pathname + base.search + base.hash !== location.pathname + location.search + location.hash) window.lightningReload();
+  });
+  // Opening a register row for editing reloads the page with ?edit=; keep the place instead of jumping to the top.
+  document.addEventListener("click", (event) => {
+    const link = event.target.closest?.("a[href*='edit=']");
+    if (!link || event.defaultPrevented || event.button || event.ctrlKey || event.metaKey || event.shiftKey) return;
+    try { if (new URL(link.href, location.href).searchParams.has("edit")) sessionStorage.setItem("lightning-popup-scroll", String(window.scrollY)); } catch (error) { /* keep the default */ }
   });
   const savedScroll = sessionStorage.getItem("lightning-popup-scroll");
   if (savedScroll !== null) {

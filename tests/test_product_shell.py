@@ -62,7 +62,7 @@ def test_analysis_navigation_selects_only_the_current_page(c):
     ):
         page = client.get(path)
         assert page.status_code == 200
-        active = re.findall(r'<a href="([^"]+)" class="active" aria-current="page">', page.text)
+        active = re.findall(r'<a href="([^"]+)" class="active"[^>]*aria-current="page">', page.text)
         assert active == [current]
 
 

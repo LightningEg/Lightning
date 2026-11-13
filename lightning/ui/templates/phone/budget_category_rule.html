@@ -5,6 +5,6 @@
 {% block content %}{% include "partials/budget_limit_spent.html" %}<form method="post" action="/budget/rule/{{ category.id }}" class="phone-form">
 <input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
 <label for="category-limit">{{ 'Amount or %'|tr(locale) }}</label><input id="category-limit" name="rule" value="{{ rule }}" inputmode="decimal" autocomplete="off">
-<p class="phone-note">{{ 'An empty value clears this category’s limit.'|tr(locale) }}</p>
 <button class="btn primary phone-save">{{ 'Save limit'|tr(locale) }}</button>
-</form>{% endblock %}
+</form>
+<form method="post" action="/budget/rule/{{ category.id }}"><input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="rule" value=""><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn phone-save">{{ 'Stop tracking'|tr(locale) }}</button></form>{% endblock %}

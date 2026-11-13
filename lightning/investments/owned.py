@@ -210,8 +210,8 @@ def per_share_total(amount: Decimal, units: Decimal) -> Decimal:
 
 
 def unit_price(total: Decimal, quantity: Decimal) -> Decimal:
-    """The unit price behind a total value."""
-    return total / quantity
+    """The unit price behind a total value, to the six places a price is kept (a total rarely divides evenly)."""
+    return (total / quantity).quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
 
 
 def exact_from_e6(value: int) -> Decimal:

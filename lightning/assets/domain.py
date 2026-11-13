@@ -108,6 +108,8 @@ INVESTMENT_KINDS: dict[str, InvestmentKind] = {
     "FUND.MONEY_MARKET": InvestmentKind("FND", "unit", 4, Exposure.FIXED_INCOME, Liquidity.DAYS),
     "FUND.FIXED_INCOME": InvestmentKind("FND", "unit", 4, Exposure.FIXED_INCOME, Liquidity.DAYS),
     "FUND.GOLD": InvestmentKind("FND", "unit", 4, Exposure.GOLD, Liquidity.DAYS),
+    # Units grow daily as interest, like a compounding account (OW-12AD): priced like a fund, held like cash.
+    "FUND.CLOUD": InvestmentKind("FND", "unit", 4, Exposure.FIXED_INCOME, Liquidity.DAYS),
     "FUND.OTHER": InvestmentKind("FND", "unit", 4, Exposure.OTHER, Liquidity.DAYS),
     "GOLD": InvestmentKind("GLD", "gram", 3, Exposure.GOLD, Liquidity.DAYS),
     # Silver is bought by the gram and priced by hand (NF-9C1); no price source feeds it yet.

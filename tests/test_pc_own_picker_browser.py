@@ -65,6 +65,9 @@ def test_certificate_and_budget_pickers_preserve_submitted_ids(c, setup):
                 assert page.locator('select[name=group_id]').input_value() == str(c.categories.get_by_code('EXP.PERSONAL').id)
                 page.locator('[name=broad_limit]').fill('5000')
                 page.get_by_role('button', name='Create plan').click()
+                # BV-12AF: Budget saves in place, so wait for the server's answer rather than a page load.
+                from playwright.sync_api import expect
+                expect(page.locator('main > .flash')).to_contain_text('Your monthly spending plan is ready')
                 assert c.budgets.has_plan('2026-09', schedule=c.schedules.view())
                 page.goto(host.origin + '/settings?section=budget')
                 groups = page.locator('.settings-compact fieldset.sc-group')

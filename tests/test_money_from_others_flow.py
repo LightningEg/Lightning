@@ -175,6 +175,21 @@ def test_someone_else_cannot_buy_investments_without_cash_in_the_funding_account
     assert c.money_from_others.cash_balance("Dad", brokerage.id, "2026-09-30") == 0
 
 
+def test_someone_else_can_buy_units_priced_at_one_with_all_their_cash(c, setup):
+    """A money-market fund at 1.00 a unit: the units and the cash cancel, which once made the buy look untagged."""
+    accounts, _ = setup
+    brokerage = accounts["thndr"]
+    c.transactions.record_transfer("2026-09-05", accounts["cib"].id, brokerage.id, "5000")
+    fund = c.assets.create_investment("Test money fund", "STOCK", "TMF")
+    c.money_from_others.record("2026-09-09", "Dad", brokerage.id, Decimal("1000"))
+    dad_id = c.counterparties.resolve("Dad")["id"]
+    with c.db.transaction():
+        trade = c.investments.buy_total("2026-09-10", brokerage.id, fund.id, "1000", "1000", owner_id=dad_id)
+        c.money_from_others.sync_investment(trade.id, trade.date, "Dad", brokerage.id, fund.id, Decimal("1000"))
+        c.money_from_others.sync_transaction(trade.id, trade.date, "Dad", brokerage.id, Decimal("-1000"))
+    assert c.money_from_others.cash_balance("Dad", brokerage.id, "2026-09-30") == 0
+
+
 def test_marking_part_of_a_dollar_line_for_someone_keeps_whole_cents_and_undo_works(c):
     """2G: the split used to store base amounts with six decimals, and every later undo was refused."""
     from decimal import Decimal as D

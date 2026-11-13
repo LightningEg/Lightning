@@ -57,7 +57,6 @@
       <select id="popup-owner" name="owner_id" data-own-picker><option value="">{{ 'You'|tr(locale) }}</option>
         {% for person in owners %}<option value="{{ person.id }}" {{ 'selected' if values.owner_id == person.id|string }}>{{ person.name }}</option>{% endfor %}
       </select>
-      <small class="muted">{{ "Leave blank if this money is yours. Add a person under Held for others first."|tr(locale) }}</small>
     </div>
     <div class="field"><label for="popup-notes">{{ 'Notes'|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label><input id="popup-notes" name="notes" value="{{ values.notes }}"></div>
     <div class="transaction-effect" data-transaction-effect role="status" aria-live="polite"></div>

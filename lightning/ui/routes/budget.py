@@ -490,7 +490,8 @@ async def inline_limit(request: Request, category_id: int):
                     f"/budget?month={month}", "Limit saved.")
             c.budgets.set_budget(category_id, month, str(form.get("amount", "")), schedule=c.schedules.view())
         current = _category_setting_ids(c, "budget_tracked_categories")
-        current.add(category_id)
+        # An empty limit stops tracking the category; a limit starts it.
+        (current.add if str(form.get("amount", "")).strip() else current.discard)(category_id)
         _save_category_setting(c, "budget_tracked_categories", current)
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Enter a valid monthly limit."
@@ -522,7 +523,8 @@ async def inline_rule(request: Request, category_id: int):
                 c.budgets.set_income_percentage(category_id, month, raw[:-1].strip())
             else:
                 c.budgets.set_budget(category_id, month, raw, schedule=c.schedules.view())
-        current = _category_setting_ids(c, "budget_tracked_categories"); current.add(category_id)
+        current = _category_setting_ids(c, "budget_tracked_categories")
+        (current.add if raw else current.discard)(category_id)  # an empty rule stops tracking
         _save_category_setting(c, "budget_tracked_categories", current)
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Enter an amount like 1,500 or a percentage like 12%."
