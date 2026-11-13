@@ -846,7 +846,8 @@ async def take_raise(request: Request):
 
 @router.get("/move")
 async def move_room_popup(request: Request):
-    """A category over plan two months running: move room to it from one that had room (Needs you)."""
+    """Move plan room to a category from one with room (Needs you, Budget's cover offer). The dialog says why from the
+    evidence itself, never from the link: over plan two months running, ahead of pace, or over plan this month (#626)."""
     c = container(request)
     query = request.query_params
     month = str(query.get("month", month_of(today())))
@@ -861,7 +862,20 @@ async def move_room_popup(request: Request):
     if to_plan is None or from_plan is None:
         return redirect(f"/budget?month={month}", "Both categories need a plan of their own this month.")
     return render(request, "budget_move.html", month=month, to=to, source=source, amount=amount,
-                  to_plan=to_plan, from_plan=from_plan)
+                  to_plan=to_plan, from_plan=from_plan, reason=_move_reason(c, month, to.id))
+
+
+def _move_reason(c, month: str, category_id: int) -> str:
+    """Why the category needs room, from the strongest evidence that holds now: 'twice', 'pace', 'over' or ''."""
+    schedule = c.schedules.view()
+    if any(row["category_id"] == category_id for row in c.budgets.over_twice(month, schedule=schedule)):
+        return "twice"
+    if any(row["category_id"] == category_id for row in c.budgets.running_out(month, today(), schedule=schedule)):
+        return "pace"
+    lines = (line for section in c.budgets.month_view(month, schedule=schedule).sections for line in section.lines)
+    if any(line.category_id == category_id and line.remaining is not None and line.remaining < 0 for line in lines):
+        return "over"
+    return ""
 
 
 @router.post("/move")

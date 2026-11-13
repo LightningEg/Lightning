@@ -5,7 +5,7 @@
 {% block content %}
 <form method="post" action="/budget/move" class="phone-form">
   <input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="to" value="{{ to.id }}"><input type="hidden" name="from" value="{{ source.id }}">
-  <p>{{ to.name }} was over its plan two months running; {{ source.name }} had room both months.</p>
+  {% if reason == "twice" %}<p>{{ to.name }} was over its plan two months running; {{ source.name }} had room both months.</p>{% elif reason == "pace" %}<p>At this pace {{ to.name }} passes its plan before the month ends; {{ source.name }} has room left.</p>{% elif reason == "over" %}<p>{{ to.name }} is over its plan this month; {{ source.name }} has room left.</p>{% endif %}
   <label for="move-amount">Amount to move ({{ base }})</label><input id="move-amount" name="amount" value="{{ amount|money(False, 0) }}" inputmode="decimal" class="money-input">
   <dl class="phone-facts">
     <div><dt>{{ to.name }}</dt><dd><bdi class="fig">{{ to_plan|money(False, 0) }} → {{ (to_plan + amount)|money(False, 0) }}</bdi></dd></div>
