@@ -32,20 +32,20 @@ With these the owner's file previews and imports: 1,739 records, 4 accounts.
 
 ## What is still hard (this item)
 
-## 7AS1 Errors name the sheet, row and column in plain words · S
+## 7AT1 Errors name the sheet, row and column in plain words · S
 "Workbook data violates a required type, unique key or financial constraint: NOT NULL constraint failed: x.y" is the
 raw database text. Say which sheet, row and column, and what to put there; list every problem at once, not one per upload.
 
-## 7AS2 The review page speaks the person's words · S
+## 7AT2 The review page speaks the person's words · S
 It lists 60 table names (`ledger_entries`, `bank_import_rows`); show what is coming in (accounts, entries, categories,
 budgets) with counts, and hide empty internal tables.
 
-## 7AS3 Fewer ways to get the workbook wrong · M
+## 7AT3 Fewer ways to get the workbook wrong · M
 The full workbook needs 63 sheets whose readable and mapping columns must agree, from an AI prompt. Check booleans
 (TRUE/FALSE), numbers saved as text and other Excel conversions the way serials are now; keep a sanitized AI-made
 workbook as a test fixture.
 
-## 7AS4 Starter or full workbook: one door · S
+## 7AT4 Starter or full workbook: one door · S
 The starter page and the full import look alike; a full workbook uploaded to the starter page fails with "no Entries
 sheet". Detect which one it is and send it to the right review.
 
