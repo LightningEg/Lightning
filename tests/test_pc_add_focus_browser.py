@@ -20,6 +20,8 @@ def test_add_starts_on_amount_and_saves_once(pc_page):
         el.value = option.value; el.dispatchEvent(new Event('change', {bubbles: true}));
     }""")
     page.locator("form[action='/accounts/1/transaction/new'] button[type=submit]").click()
+    # BV-12AG: the form posts in the background, then opens the page the server names; wait for it before moving on.
+    page.wait_for_url(lambda url: "/transaction/new" not in url)
     page.goto(origin + "/transactions")
     assert page.get_by_text("BF Test Merchant").count() == 1
 
