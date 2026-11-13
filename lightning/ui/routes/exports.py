@@ -198,7 +198,8 @@ async def preview_workbook_import(request: Request):
                       preview=[(name, len(rows)) for name, (_, rows) in tables.items()],
                       token=token, payload=base64.b64encode(data).decode('ascii'))
     except ValueError as exc:
-        return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT, error=str(exc), status_code=400)
+        return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT, error=str(exc),
+                      problems=getattr(exc, 'shown', []), status_code=400)
 
 
 # ---------------------------------------------------------------- the starter workbook (NF-7AC4)

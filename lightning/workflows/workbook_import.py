@@ -151,6 +151,43 @@ def _setting_allowed(key):
         ('budget_', 'investment_', 'emergency_', 'health_', 'financial_health_'))
 
 
+class WorkbookProblems(ValueError):
+    """Everything wrong with a workbook, found in one pass: each line names the sheet, row and column in plain words,
+    so a person (or the AI that filled the file) fixes them all before uploading again."""
+    SHOWN = 25
+
+    def __init__(self, problems):
+        self.problems = list(problems)
+        count = len(self.problems)
+        super().__init__('Nothing was imported. ' + (self.problems[0] if count == 1 else f'{count} things need fixing in the workbook:'))
+
+    @property
+    def shown(self):
+        extra = len(self.problems) - self.SHOWN
+        return self.problems[:self.SHOWN] + ([f'… and {extra} more.'] if extra > 0 else [])
+
+
+def _sheet_of(table):
+    return table[:31]
+
+
+def _plain_database_error(text):
+    """A database refusal in the words of the sheet it came from (the checks before it catch most; this is the net)."""
+    found = re.search(r'(NOT NULL|UNIQUE|CHECK|FOREIGN KEY) constraint failed:? ?([\w.]*)', text)
+    kind, where = (found.group(1), found.group(2)) if found else ('', '')
+    table, _, column = where.partition('.')
+    place = f'Sheet "{_sheet_of(table)}"' + (f', column "{column}"' if column else '') if table else 'The workbook'
+    if kind == 'NOT NULL':
+        return f'{place} cannot be empty: fill in every row.'
+    if kind == 'UNIQUE':
+        return f'{place} repeats a value that must be different in every row (an id or a reference).'
+    if kind == 'FOREIGN KEY':
+        return f'{place} points to a record that is not in the workbook.'
+    if kind == 'CHECK':
+        return f'{place} holds a value that is not allowed (check the template for the choices).'
+    return 'The workbook does not fit Lightning\'s records. ' + text
+
+
 def _from_excel_serial(value, dated):
     """Excel (or an AI tool) turns a typed date or time into a date cell, saved as days since 1899-12-30: put back
     the text Lightning keeps, a yyyy-mm-dd date or a local timestamp. Anything else is left for the checks below."""
@@ -185,7 +222,7 @@ def _convert(value, field, table):
                 raise ValueError()
             return int(number)
         except (InvalidOperation, ValueError):
-            raise ValueError(f'{table}.{name}: use a finite number with at most six decimal places.') from None
+            raise ValueError('use a number with at most six decimal places.') from None
     dated = name == 'date' or name.endswith('_date') or name in ('date_from', 'date_to', 'first_date')
     if (dated or name.endswith('_at')) and field['type'].upper() == 'TEXT':
         value = _from_excel_serial(value, dated)
@@ -194,7 +231,7 @@ def _convert(value, field, table):
             if date.fromisoformat(str(value)).isoformat() != value:
                 raise ValueError()
         except ValueError:
-            raise ValueError(f'{table}.{name}: use a real date in yyyy-mm-dd format.') from None
+            raise ValueError('use a real date written yyyy-mm-dd, for example 2026-03-31.') from None
     return value
 
 
@@ -226,8 +263,10 @@ def _load(conn, tables, schema):
     present_categories = {row[0] for row in conn.execute('SELECT code FROM categories')}
     if required_categories - present_categories:
         raise ValueError('Required system categories are missing. Keep the template system category records.')
-    if conn.execute('PRAGMA foreign_key_check').fetchone():
-        raise ValueError('The workbook contains a missing reference. Keep every referenced account, asset, category and transaction.')
+    broken = conn.execute('PRAGMA foreign_key_check').fetchall()
+    if broken:
+        raise WorkbookProblems([f'Sheet "{_sheet_of(row[0])}", the row with id {row[1]}: it points to a record that is not on sheet "{_sheet_of(row[2])}". '
+                                'Keep every account, asset, category and transaction that a row refers to.' for row in broken])
     for table in ('categories', 'asset_classes', 'accounts'):
         links = {r[0]: r[1] for r in conn.execute(f'SELECT id,parent_id FROM {table}')}
         for key in links:
@@ -329,18 +368,21 @@ def prepare_import(c, data):
     _unused(c)
     sheets, schema = read_workbook(data), _schema(c)
     mapping = {name[:31]: name for name in schema}
-    tables = {}
+    tables, problems = {}, []
     for sheet, rows in sheets.items():
         if sheet == 'Read me':
             continue
         if sheet not in mapping:
-            raise ValueError(f'Unsupported sheet: {sheet}. Use the complete Lightning template; no records were imported.')
+            problems.append(f'Sheet "{sheet}" is not one of Lightning\'s sheets. Use the complete template and keep its sheet names.')
+            continue
         name = mapping[sheet]
         if not rows:
-            raise ValueError(f'{sheet}: keep the column headings, even when the sheet is empty.')
+            problems.append(f'Sheet "{sheet}" has no heading row. Keep the column headings, even when the sheet is empty.')
+            continue
         headers = rows[0]
         if any(h is None or not isinstance(h, str) for h in headers) or len(set(headers)) != len(headers):
-            raise ValueError(f'{sheet}: headings must be nonempty and unique.')
+            problems.append(f'Sheet "{sheet}": every column heading must be filled in and different from the others.')
+            continue
         fields = {f['name'].removesuffix('_e6'): f for f in schema[name]}
         display = {key.removesuffix('_id').replace('_', ' ').title() for key in fields if key in readable_relations(c, name)}
         if name == 'ledger_entries':
@@ -348,25 +390,59 @@ def prepare_import(c, data):
                         'Total in currency', 'FX rate', 'Total in default currency', 'Category L1', 'Category L2'}
         if name == 'categories':
             display |= {'Category L1', 'Category L2', 'Category L3'}
-        if any(h not in fields and h not in display for h in headers):
-            raise ValueError(f'{sheet}: unsupported column. Use the template headings unchanged.')
+        unknown = [h for h in headers if h not in fields and h not in display]
+        if unknown:
+            problems.append(f'Sheet "{sheet}": column "{unknown[0]}" is not one of the template\'s columns'
+                            + (f' (and {len(unknown) - 1} more)' if len(unknown) > 1 else '') + '. Use the template headings unchanged.')
+            continue
         chosen = [h for h in headers if h in fields]
         missing = [f['name'] for f in schema[name] if (f['pk'] or (f['notnull'] and f['dflt_value'] is None)) and f['name'].removesuffix('_e6') not in chosen]
         if missing:
-            raise ValueError(f'{sheet}: required mapping columns are missing: {", ".join(missing)}.')
+            problems.append(f'Sheet "{sheet}" is missing the column{"s" if len(missing) > 1 else ""} {", ".join(chr(34) + m + chr(34) for m in missing)}. Add back from the template.')
+            continue
         records = []
+        key_columns = [h for h in chosen if fields[h]['pk'] and sum(f['pk'] > 0 for f in schema[name]) == 1]
+        seen_keys = {}
         for number, row in enumerate(rows[1:], 2):
             if len(row) > len(headers):
-                raise ValueError(f'{sheet} row {number}: more values than headings.')
+                problems.append(f'Sheet "{sheet}", row {number}: there are more values than column headings.')
+                continue
             row = row + [None] * (len(headers) - len(row))
-            record = tuple(_convert(row[headers.index(h)], fields[h], name) for h in chosen)
+            record, bad = [], False
+            for h in chosen:
+                field = fields[h]
+                try:
+                    value = _convert(row[headers.index(h)], field, name)
+                except ValueError as exc:
+                    problems.append(f'Sheet "{sheet}", row {number}, column "{h}": {exc}')
+                    bad = True
+                    value = None
+                else:
+                    if value is None and field['notnull'] and not field['pk']:
+                        problems.append(f'Sheet "{sheet}", row {number}, column "{h}": this cannot be empty. Fill it in.')
+                        bad = True
+                record.append(value)
+            if bad:
+                continue
+            record = tuple(record)
+            for h in key_columns:
+                value = record[chosen.index(h)]
+                if value is not None and (h, value) in seen_keys:
+                    problems.append(f'Sheet "{sheet}", row {number}, column "{h}": {value} is already used in row {seen_keys[(h, value)]}. Each row needs its own.')
+                    bad = True
+                elif value is not None:
+                    seen_keys[(h, value)] = number
             if name == 'settings' and not _setting_allowed(str(record[chosen.index('key')])):
-                raise ValueError('The workbook contains an unsupported runtime setting.')
-            records.append(record)
+                problems.append(f'Sheet "{sheet}", row {number}: the setting "{record[chosen.index("key")]}" is not one Lightning can import.')
+                bad = True
+            if not bad:
+                records.append(record)
         tables[name] = ([fields[h]['name'] for h in chosen], records)
+    if problems:
+        raise WorkbookProblems(problems)
     missing = set(schema) - set(tables)
     if missing:
-        raise ValueError('This is not a complete workbook. Missing sheets: ' + ', '.join(sorted(missing)) + '.')
+        raise WorkbookProblems([f'Sheet "{_sheet_of(name)}" is missing. Keep every sheet of the template, even the empty ones.' for name in sorted(missing)])
     _validate_context(c, sheets, tables)
     clone = c.db.driver.connect(':memory:', isolation_level=None)
     try:
@@ -380,7 +456,7 @@ def prepare_import(c, data):
         _load(clone, tables, schema)
         clone.execute('ROLLBACK')
     except c.db.driver.DatabaseError as exc:
-        raise ValueError('Workbook data violates a required type, unique key or financial constraint: ' + str(exc)) from None
+        raise ValueError(_plain_database_error(str(exc))) from None
     finally:
         clone.close()
     return tables
