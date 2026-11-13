@@ -140,6 +140,96 @@ window.lightningRememberPlace = () => {
   } catch (error) { /* private mode: the page simply starts at the top */ }
 };
 window.lightningReload = () => { window.lightningRememberPlace(); location.reload(); };
+// BV-12AF · Save in place (owner, 2026-11-12: no reload on save; stay where you are). A page marks the part that a save
+// changes with data-refresh="name"; this fetches the page again and swaps only those parts, the page title's status, the
+// Undo pills and the message, then runs the part's own scripts on the new nodes. Scroll, open sections, the field you
+// are in and what you typed there are kept. Returns false when the fresh page has no such part (the caller reloads).
+window.lightningRefreshInPlace = async (source = location.href) => {
+  let doc = source;
+  if (typeof source === "string") {
+    const response = await fetch(source, { headers: { "X-Lightning-Refresh": "1" } });
+    if (!response.ok) return false;
+    doc = new DOMParser().parseFromString(await response.text(), "text/html");
+  }
+  const parts = [...document.querySelectorAll("[data-refresh]")];
+  if (!parts.length || parts.some((part) => !doc.querySelector(`[data-refresh="${CSS.escape(part.dataset.refresh)}"]`))) return false;
+  const active = document.activeElement;
+  const FIELDS = "input:not([type=hidden]), select, textarea, button, a[href], summary";
+  const holder = parts.find((part) => part.contains(active));
+  const kept = holder && active.matches(FIELDS) ? {
+    part: holder.dataset.refresh, index: [...holder.querySelectorAll(FIELDS)].indexOf(active), label: active.getAttribute("aria-label") || "",
+    value: active.value, start: active.selectionStart, end: active.selectionEnd, typed: "defaultValue" in active && active.value !== active.defaultValue,
+  } : null;
+  const top = window.scrollY;
+  const open = new Map();
+  placeBoxes().forEach((box) => open.set(box.id || placeLabel(box), [...(open.get(box.id || placeLabel(box)) || []), box.open]));
+  const swap = (old, fresh) => { if (old && fresh) old.replaceWith(document.importNode(fresh, true)); };
+  swap(document.querySelector("main .page-title"), doc.querySelector("main .page-title"));
+  const oldHistory = document.querySelectorAll("main .history-form"), freshHistory = doc.querySelectorAll("main .history-form");
+  oldHistory.forEach((form, i) => swap(form, freshHistory[i]));
+  document.querySelectorAll("main > .flash:not(.device-line)").forEach((flash) => flash.remove());
+  const main = document.querySelector("main.main") || document.querySelector("main");
+  const anchor = main?.querySelector(":scope > .flash.device-line") || null;
+  doc.querySelectorAll("main > .flash:not(.device-line)").forEach((flash) => {
+    const node = document.importNode(flash, true);
+    if (anchor) anchor.after(node); else main?.querySelector("[data-refresh]")?.before(node);
+    initFlashMessages(node, true);
+  });
+  const nonce = document.querySelector("script[nonce]")?.nonce || "";
+  parts.forEach((part) => {
+    const node = document.importNode(doc.querySelector(`[data-refresh="${CSS.escape(part.dataset.refresh)}"]`), true);
+    part.replaceWith(node);
+    initOwnDataPickers(node);
+    initDateFields(node);
+    // Scripts brought in from another document never run by themselves; each is made again with this page's nonce.
+    node.querySelectorAll("script:not([src])").forEach((old) => {
+      const script = document.createElement("script");
+      script.nonce = nonce;
+      script.textContent = old.textContent;
+      old.replaceWith(script);
+    });
+  });
+  placeBoxes().forEach((box) => {
+    const queue = open.get(box.id || placeLabel(box));
+    if (queue && queue.length) box.open = queue.shift();
+  });
+  window.scrollTo({ top, behavior: "instant" });
+  if (kept) {
+    const fields = [...(document.querySelector(`[data-refresh="${CSS.escape(kept.part)}"]`)?.querySelectorAll(FIELDS) || [])];
+    const field = (kept.label && fields.find((f) => f.getAttribute("aria-label") === kept.label)) || fields[kept.index];
+    if (field) {
+      if (kept.typed) field.value = kept.value;
+      field.focus({ preventScroll: true });
+      try { field.setSelectionRange(kept.start, kept.end); } catch (error) { /* not a text field */ }
+    }
+  }
+  return true;
+};
+// A form inside a part marked data-stay posts in the background and the page refreshes in place, so a Track, a
+// One-off or a bulk rule keeps you in Edit plan where you were. Where the server sends you elsewhere, you go there.
+document.addEventListener("submit", (event) => {
+  const form = event.target;
+  // Attributes, not form.action and form.method: a button named "action" (Track, Not now) hides the form's own.
+  if (event.defaultPrevented || !form.closest("[data-refresh][data-stay]") || (form.getAttribute("method") || "get").toLowerCase() !== "post"
+      || form.hasAttribute("data-popup-return") || form.getAttribute("enctype") === "multipart/form-data") return;
+  event.preventDefault();
+  const body = new URLSearchParams(new FormData(form, event.submitter || undefined));
+  form.querySelectorAll("button").forEach((button) => { button.disabled = true; });
+  fetch(new URL(form.getAttribute("action") || location.href, location.href).href, { method: "POST", body, headers: { "X-Lightning-Stay": "1" } }).then(async (response) => {
+    const landed = new URL(response.url);
+    if (!response.redirected) {
+      const doc = new DOMParser().parseFromString(await response.text(), "text/html");
+      if (!(await window.lightningRefreshInPlace(doc))) window.lightningReload();
+      return;
+    }
+    if (landed.origin !== location.origin || landed.pathname !== location.pathname) { location.assign(landed.href); return; }
+    // The server's answer (its message, an undo token, a month) on the address you are on, which keeps Edit plan open.
+    const next = new URL(location.href);
+    ["msg", "error", "undo"].forEach((key) => next.searchParams.delete(key));
+    landed.searchParams.forEach((value, key) => next.searchParams.set(key, value));
+    if (!(await window.lightningRefreshInPlace(next.href))) location.assign(landed.href);
+  }).catch(() => window.lightningReload());  // the save may have landed: show the page as it is now, never post twice
+});
 (() => {
   let note = null;
   try { note = JSON.parse(sessionStorage.getItem(PLACE_KEY) || "null"); sessionStorage.removeItem(PLACE_KEY); } catch (error) { note = null; }
@@ -1179,7 +1269,7 @@ if (ledger) {
         const notice = document.getElementById("bulk-edit-error") || document.createElement("div");
         notice.id = "bulk-edit-error"; notice.className = "flash error"; notice.setAttribute("role", "alert");
         notice.remove();
-        fetch(form.action, { method: "POST", body: new FormData(form),
+        fetch(new URL(form.getAttribute("action") || location.href, location.href).href, { method: "POST", body: new FormData(form),
           headers: { "Accept": "application/json", "X-Requested-With": "fetch" } }).then(async (response) => {
           // Session/journal middleware may redirect to its own explanation.
           if (response.redirected) { location.assign(response.url); return; }
@@ -2213,7 +2303,13 @@ initCurrencySearch();
     if (goBack && history.state?.lightningPopup) history.back();
     else if (opener?.isConnected) opener.focus();
     window.scrollTo({ top: baseScroll, behavior: "instant" });
-    if (pageStale && !reopening) { pageStale = false; sessionStorage.setItem("lightning-popup-scroll", String(baseScroll)); window.lightningReload(); }
+    if (pageStale && !reopening) {
+      pageStale = false;
+      // BV-12AF: a page with a part marked data-refresh takes the popup's change in place; any other page reloads.
+      const reload = () => { sessionStorage.setItem("lightning-popup-scroll", String(baseScroll)); window.lightningReload(); };
+      if (document.querySelector("[data-refresh]")) window.lightningRefreshInPlace().then((done) => { if (!done) reload(); }, reload);
+      else reload();
+    }
     return true;
   };
   // A sheet or popup shows the form's own content. The page's chrome around it (the undo and redo pills, the
@@ -2478,12 +2574,20 @@ initCurrencySearch();
         pageStale = false;  // this save reloads the page itself
         close(false, true);  // saved: nothing to discard
         history.replaceState(null, "", next.pathname + next.search + next.hash);
-        if (msg && !toast) sessionStorage.setItem("lightning-popup-success", msg);
-        if (goToResponse) location.href = next.href;
-        else {
+        const inPlace = !goToResponse && !toast && document.querySelector("[data-refresh]");
+        if (msg && !toast && !inPlace) sessionStorage.setItem("lightning-popup-success", msg);
+        const reload = () => {
+          if (msg && !toast) sessionStorage.setItem("lightning-popup-success", msg);
           sessionStorage.setItem("lightning-popup-scroll", String(baseScroll));
           window.lightningReload();
-        }
+        };
+        if (goToResponse) location.href = next.href;
+        else if (inPlace) {
+          // BV-12AF: the page behind takes the change in place, with the server's message and its Undo.
+          const here = new URL(location.href);
+          if (msg) here.searchParams.set("msg", msg);
+          window.lightningRefreshInPlace(here.href).then((done) => { if (!done) reload(); }, reload);
+        } else reload();
       }
     } catch (error) {
       if (status) status.textContent = t("Could not save. Check your connection and try again.");
