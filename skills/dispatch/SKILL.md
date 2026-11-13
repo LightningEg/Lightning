@@ -13,6 +13,7 @@ The plan is the GitHub issues. One issue is one pull request of work. Any actor 
 - A **step** is a sub-issue, sized to one pull request. It takes `when:`, `can:` and `Area:` from its parent; a body line `Can: sonnet` or `Area: ...` overrides. Create steps **without labels**.
 - **Blocked by** is GitHub's own relationship between issues. The body line is for what is not an issue: `Blocked by: PR #535`, or words for something outside the repo.
 - **The three lists** (ready, blocked, parked) are worked out, but the owner can set one by hand with a label `status:ready|blocked|parked` (the owner console's Roadmap view on the website writes it, owner 2026-11-13); that label always wins. Running, held and stale are never labels.
+- **The owner's order** is one open issue titled `[PRIORITY] ...` whose body lists `#n` per line, first is first (the owner console's Roadmap view writes it by drag and drop, owner 2026-11-13). Ranked issues come first in every list and in `--next`; never add labels or edit it by hand unless the owner asks.
 - **Other state is never a label.** Running = an open pull request says `Closes #n`, or the issue has an assignee. Blocked = an open blocker. Held = a running issue has the same `Area:`. Stale = running with no activity for 48 hours.
 - Never add or change labels in bulk: every label event starts a workflow run, and a burst queues ahead of every pull request's checks.
 

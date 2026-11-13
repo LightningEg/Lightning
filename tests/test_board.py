@@ -86,3 +86,15 @@ def test_a_status_label_set_by_the_owner_wins_over_the_worked_out_list():
                       issue(3, ["when:launch", "status:blocked"]), issue(4, ["when:launch"])])
     assert {n: board.bucket(r) for n, r in got.items()} == {1: "parked", 2: "ready", 3: "blocked", 4: "ready"}
     assert [i["n"] for i in board.pick(board.derive(data), cap=4)] == [4], "a parked or blocked pick is never started"
+
+
+def test_the_owners_priority_issue_orders_every_list_and_is_not_itself_a_row():
+    prio = issue(9, title="[PRIORITY] Order", body="First is first.\n1. #3 the third\n2. #1\n3. #3 again\n4. #2")
+    got, data = rows([issue(1, ["when:launch"]), issue(2, ["when:launch"]), issue(3, ["when:after-launch"]),
+                      issue(4, ["when:launch"], blocking=5), prio])
+    assert 9 not in got, "the order issue never appears as work"
+    assert [r["n"] for r in board.derive(data)] == [3, 1, 2, 4], "ranked first in the owner's order, a repeat counts once, the rest follow"
+    assert got[3]["rank"] == 0 and got[4]["rank"] is None
+    text = board.tally(data, board.derive(data), 2)
+    assert text.index("#1 ") < text.index("#2 ") < text.index("#4 ")
+    assert [i["n"] for i in board.pick(board.derive(data), cap=2)] == [1, 2], "AIs start the owner's first ready issues"
