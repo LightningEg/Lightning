@@ -1,7 +1,7 @@
 {# A physical item on the phone (3AY17): one column of fields. #}
 {% extends "base.html" %}
 {% block title %}{{ ('Edit item' if item else 'Add physical item')|tr(locale) }}{% endblock %}
-{% block heading %}<h1>{{ ('Edit ' ~ values.name) if item else 'Add a physical item'|tr(locale) }}</h1><p class="phone-note">{{ "Track one named piece. Weight excludes stones and other non-gold parts."|tr(locale) }}</p>{% endblock %}
+{% block heading %}<h1>{{ ('Edit {name}'|tr(locale, name=values.name)) if item else 'Add a physical item'|tr(locale) }}</h1><p class="phone-note">{{ "Track one named piece. Weight excludes stones and other non-gold parts."|tr(locale) }}</p>{% endblock %}
 {% block content %}
 <form method="post" class="phone-form phone-fields" {% if item %}data-popup-autosave{% endif %}>
   {% if error %}<p class="flash error" role="alert">{{ error|tr(locale) }}</p>{% endif %}

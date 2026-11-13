@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import field, page_header with context %}
-{% block title %}{{ 'Edit investment' if asset else 'New investment' }}{% endblock %}
-{% block heading %}{{ page_header(('Edit ' ~ asset.label) if asset else 'New investment') }}{% endblock %}
+{% block title %}{{ 'Edit {name}'|tr(locale, name=asset.name) if asset else 'New investment'|tr(locale) }}{% endblock %}
+{% block heading %}{{ page_header('Edit {name}'|tr(locale, name=asset.name) if asset else 'New investment'|tr(locale)) }}{% endblock %}
 {% block content %}
 <form method="post" class="card" style="max-width:640px" autocomplete="off">
   {% if not asset %}

@@ -1529,6 +1529,7 @@ ARABIC_UI = {
     'Set a category…': 'حدّد فئة…',
     'Category for the selected rows': 'فئة الصفوف المختارة',
     'Edit transaction': 'تعديل المعاملة',
+    'Edit {name}': 'تعديل {name}',
     'New expense': 'مصروف جديد',
     'New income': 'دخل جديد',
     'New transfer': 'تحويل جديد',

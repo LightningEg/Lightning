@@ -1,7 +1,7 @@
 {# A recurring item or loan on the phone (3AY16): one column of fields, Matching in a sheet, Save full width. #}
 {% extends "base.html" %}
 {% from "phone/partials/sheet.html" import sheet with context %}
-{% block title %}{{ 'Plan this transaction' if promotion else ('Edit ' ~ item.name if item else ('Add loan' if is_loan else 'Add recurring item')) }}{% endblock %}
+{% block title %}{{ 'Plan this transaction' if promotion else ('Edit {name}'|tr(locale, name=item.name) if item else ('Add loan' if is_loan else 'Add recurring item')) }}{% endblock %}
 {% block heading %}<h1>{{ 'Plan this transaction' if promotion else (item.name if item else ('Add a loan' if is_loan else 'Add a recurring item')) }}</h1><p class="phone-note">{{ 'Start an ordinary monthly plan from this cash transaction. The transaction stays unchanged.' if promotion else '' }}</p>{% endblock %}
 {% block content %}
 {% macro err(name) %}{{ 'has-error' if error_field == name }}{% endmacro %}
