@@ -428,7 +428,7 @@ def prepare_import(c, data):
         chosen = [h for h in headers if h in fields]
         missing = [f['name'] for f in schema[name] if (f['pk'] or (f['notnull'] and f['dflt_value'] is None)) and f['name'].removesuffix('_e6') not in chosen]
         if missing:
-            problems.append(f'Sheet "{sheet}" is missing the column{"s" if len(missing) > 1 else ""} {", ".join(chr(34) + m + chr(34) for m in missing)}. Add back from the template.')
+            problems.append(f'Sheet "{sheet}" is missing: {", ".join(chr(34) + m + chr(34) for m in missing)}. Add the columns back from the template.')
             continue
         records = []
         key_columns = [h for h in chosen if fields[h]['pk'] and sum(f['pk'] > 0 for f in schema[name]) == 1]
@@ -509,6 +509,17 @@ REVIEW_GROUPS = (
     ('Gold, property and things you own', ('physical_items', 'other_asset_details', 'property_contracts')),
     ('Statement imports', ('bank_import_batches',)),
 )
+
+
+def workbook_kind(data):
+    """'full' for the complete workbook (one sheet per table), 'starter' for the short Accounts, Categories and Entries
+    one, '' for anything else: so one upload door can send each file to the review it belongs to (BT-7AS4)."""
+    names = {name.strip().casefold() for name in read_workbook(data)}
+    if 'ledger_entries' in names or 'transactions' in names:
+        return 'full'
+    if 'entries' in names:
+        return 'starter'
+    return ''
 
 
 def review_summary(tables):

@@ -400,3 +400,18 @@ def test_a_cell_of_spaces_is_a_blank_cell_not_a_number_error(c, tmp_path):  # BT
     with pytest.raises(WorkbookProblems) as caught:
         prepare_import(target, _edit(legacy, [('ledger_entries', 2, 'account_id', '   ')]))
     assert 'Sheet "ledger_entries", row 2, column "account_id": this cannot be empty' in caught.value.problems[0]
+
+
+def test_either_workbook_goes_to_its_own_review_from_either_page(c, tmp_path):  # BT-7AS4
+    from lightning.workflows import starter_workbook
+    from lightning.workflows.workbook_import import workbook_kind
+    _source(c)
+    full, _, _ = export_all(c, 'xlsx')
+    starter = starter_workbook.starter_workbook(c)
+    assert workbook_kind(full) == 'full' and workbook_kind(starter) == 'starter'
+    fresh = build(tmp_path / 'new.db')
+    client = TestClient(create_app(fresh))
+    wrong = client.post('/exports/starter', files={'workbook': ('full.xlsx', full)})  # a full workbook on the starter page
+    assert wrong.status_code == 200 and 'Coming in' in wrong.text and 'no Entries sheet' not in wrong.text
+    wrong = client.post('/exports/import', files={'workbook': ('starter.xlsx', starter)})  # a starter on the full page
+    assert wrong.status_code == 200 and 'Unsupported sheet' not in wrong.text and 'not one of Lightning' not in wrong.text
