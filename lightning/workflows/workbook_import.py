@@ -462,6 +462,35 @@ def prepare_import(c, data):
     return tables
 
 
+# What a person calls what is coming in, and the tables it is counted from (BT-7AS2). Tables not named here are
+# internal (links, histories, settings of other screens) and are never listed; empty groups are left out.
+REVIEW_GROUPS = (
+    ('Accounts', ('accounts',)),
+    ('Transactions', ('transactions',)),
+    ('Categories', ('categories',)),
+    ('People and businesses', ('counterparties',)),
+    ('Investments and cash assets', ('financial_assets',)),
+    ('Prices and exchange rates', ('price_history', 'fx_rates')),
+    ('Budgets', ('budgets',)),
+    ('Bills and plans', ('planned_items',)),
+    ('Rules', ('rules',)),
+    ('Certificates of deposit', ('cd_certificates',)),
+    ('Gam\'eyas', ('gameya_terms',)),
+    ('Gold, property and things you own', ('physical_items', 'other_asset_details', 'property_contracts')),
+    ('Statement imports', ('bank_import_batches',)),
+)
+
+
+def review_summary(tables):
+    """[(label, count)] for the review page: what is coming in, in a person's words, never table names."""
+    rows = []
+    for label, names in REVIEW_GROUPS:
+        count = sum(len(tables[name][1]) for name in names if name in tables)
+        if count:
+            rows.append((label, count))
+    return rows
+
+
 def confirm_import(c, data):
     tables = prepare_import(c, data)
     with c.db.transaction():

@@ -354,3 +354,18 @@ def test_the_preview_page_lists_every_problem(c, tmp_path):  # BT-7AS1
     page = client.post('/exports/import', files={'workbook': ('w.xlsx', bad)})
     assert page.status_code == 400
     assert 'import-problems' in page.text and 'row 2, column &#34;date&#34;' in page.text or 'row 2, column "date"' in page.text
+
+
+def test_the_review_lists_what_comes_in_not_table_names(c, tmp_path):  # BT-7AS2
+    from lightning.workflows.workbook_import import review_summary
+    _source(c)
+    data, _, _ = export_all(c, 'xlsx')
+    fresh = build(tmp_path / 'new.db')
+    rows = dict(review_summary(prepare_import(fresh, data)))
+    assert rows['Accounts'] == 1 and rows['Transactions'] == 1 and rows['Bills and plans'] == 1
+    assert 'Categories' in rows and all(' ' in label or label.isalpha() for label in rows)
+    assert not any('_' in label for label in rows) and len(rows) < 13
+    client = TestClient(create_app(fresh))
+    page = client.post('/exports/import', files={'workbook': ('w.xlsx', data)})
+    assert page.status_code == 200 and 'ledger_entries' not in page.text and 'bank_import_rows' not in page.text
+    assert 'Bills and plans' in page.text

@@ -166,7 +166,7 @@ async def preview_workbook_import(request: Request):
     import hashlib
     import secrets
     import time
-    from lightning.workflows.workbook_import import MAX_UPLOAD, SETUP_PROMPT, prepare_import, confirm_import
+    from lightning.workflows.workbook_import import MAX_UPLOAD, SETUP_PROMPT, prepare_import, confirm_import, review_summary
     c = container(request)
     try:
         form = await request.form(max_part_size=MAX_UPLOAD * 2)  # not money: bytes
@@ -195,7 +195,7 @@ async def preview_workbook_import(request: Request):
         token = secrets.token_urlsafe(32)
         pending[token] = (hashlib.sha256(data).hexdigest(), time.monotonic() + 900, id(c.db))  # not money: seconds
         return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT,
-                      preview=[(name, len(rows)) for name, (_, rows) in tables.items()],
+                      preview=review_summary(tables),
                       token=token, payload=base64.b64encode(data).decode('ascii'))
     except ValueError as exc:
         return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT, error=str(exc),
