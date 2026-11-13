@@ -249,6 +249,12 @@ def audit():
                 alias.fill('Audit example alias')
                 result["alias_enter_hint"] = first.locator('.alias-enter-hint').is_visible()
                 alias.press('Enter')
+                # BV-12AG: the save refreshes the page in place; wait for the saved alias, not for a page load.
+                try:
+                    page.wait_for_function("() => document.querySelector('[data-refresh]').innerHTML.includes('Audit example alias')"
+                                           " && !document.querySelector('.alias-add input[name=alias]')?.value", timeout=10000)
+                except Exception:
+                    pass
                 result["alias_saved"] = 'Audit example alias' in page.content()
                 # Exercise the audit itself with real browser geometry in both failing and passing states.
                 page.set_content("""<main class="main"><section class="card"><p>the same as<a href="#">Recurring</a>on Categories · Personal › Eating Out</p><fieldset style="border:1px solid black"><legend>Example</legend></fieldset>
