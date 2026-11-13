@@ -67,9 +67,11 @@ class MoneyFromOthersService:
         account = self.accounts.require_usable(account_id)
         # The posted ledger line may already carry this owner (investment buys
         # do). Read that balance once instead of subtracting the payment twice.
+        # Only the cash lines count: units at a price of 1 would cancel the cash and look untagged.
         tagged = self.db.scalar(
-            "SELECT COALESCE(SUM(le.quantity_e6),0) FROM ledger_entries le "
-            "JOIN counterparties p ON p.id=le.owner_id WHERE le.transaction_id=? "
+            "SELECT COUNT(*) FROM ledger_entries le "
+            "JOIN counterparties p ON p.id=le.owner_id "
+            "JOIN financial_assets f ON f.id=le.asset_id AND f.is_cash=1 WHERE le.transaction_id=? "
             "AND le.account_id=? AND lower(p.name)=lower(?)",
             (transaction_id, account_id, owner.strip())) or 0
         balance_after = self.cash_balance(owner, account_id, day)

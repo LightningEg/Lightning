@@ -66,6 +66,8 @@ def run(argv=None) -> int:
                 updates = for_this_app(args.after_update or "", args.update_failed or "")
                 if updates is not None:
                     updates.startup()
+                    if not args.smoke:
+                        updates.start_daily()  # checks once a day; never downloads on its own
                 host = Host(lambda credentials: profile_app(credentials, root, updates=updates)).start()
                 stage = "window"
                 try:

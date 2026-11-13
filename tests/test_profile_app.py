@@ -353,3 +353,36 @@ def test_settings_start_fresh_locks_this_profile_and_opens_new_profile_setup(tmp
         assert response.status_code == 303 and response.headers["location"].startswith("/profiles/new")
         assert app.session.container is None  # the old profile is locked, untouched
         assert "Home" in browser.get("/profiles").text
+
+
+def test_a_workbook_upload_passes_the_guard_instead_of_form_expired(tmp_path):
+    """/exports/starter and /exports/import take a file part; the guard once allowed none, so a real upload
+    through the running app answered "This form expired"."""
+    browser, app, cfg = start(tmp_path)
+    with browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        create(browser)
+        for path in ("/exports/starter", "/exports/import"):
+            session = token(browser.get(path).text, "__session")
+            response = browser.post(path, data={"__session": session},
+                                    files={"workbook": ("mine.xlsx", b"x" * 700_000)})
+            assert response.status_code == 400 and "This form expired" not in response.text, path
+            assert "valid Excel" in response.text, path  # it reached the page, which says the file is not a workbook
+
+
+def test_a_refusal_on_a_page_has_a_way_back_not_a_dead_end(tmp_path):
+    """The Windows window has no Back button: "This form expired" as bare text left the person stuck."""
+    browser, app, cfg = start(tmp_path)
+    with browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        create(browser)
+        nav = {"Sec-Fetch-Mode": "navigate", "Referer": cfg.origin + "/accounts/new"}
+        response = browser.post("/accounts/new", data={"__session": "stale", "name": "x"}, headers=nav)
+        assert response.status_code == 403 and response.headers["content-type"].startswith("text/html")
+        assert "This form expired" in response.text and "href='/accounts/new'>Go back</a>" in response.text
+        assert "href='/'>Home</a>" in response.text
+        outside = {"Sec-Fetch-Mode": "navigate", "Referer": "https://example.invalid/x"}
+        response = browser.post("/accounts/new", data={"__session": "stale"}, headers=outside)
+        assert "href='/'>Go back</a>" in response.text  # never a link off the app
+        fetched = browser.post("/accounts/new", data={"__session": "stale"}, headers={"X-Requested-With": "fetch"})
+        assert fetched.text == "This form expired. Reload the page and try again."  # scripts still read the text

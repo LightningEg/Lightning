@@ -205,3 +205,28 @@ def test_arabic_shows_no_english_in_any_state(ledger, tmp_path):
         if "{" not in reason:
             from lightning.ui.i18n import translate
             assert translate(reason, "ar") != reason, reason
+
+
+def test_it_checks_on_its_own_once_a_day_and_never_downloads(tmp_path):
+    now, calls = [1_000_000.0], []
+    ctl = controller(tmp_path, clock=lambda: now[0], check=lambda current: calls.append(1) or FOUND,
+                     download=lambda *a, **k: pytest.fail("downloaded on its own"))
+    ctl.daily_check()
+    assert calls == [1] and ctl.status()["state"] == "available"
+    ctl.daily_check()  # a found version waits for the person
+    now[0] += 23 * 3600
+    ctl._set(state="up_to_date")
+    ctl.daily_check()
+    assert calls == [1]  # not a day yet
+    now[0] += 3600
+    ctl.daily_check()
+    assert calls == [1, 1]
+
+
+def test_an_offline_daily_check_stays_quiet_and_is_tried_again(tmp_path):
+    calls = []
+    ctl = controller(tmp_path, check=lambda current: calls.append(1) or up.Failed("offline"))
+    ctl.daily_check()
+    assert ctl.status()["state"] == "idle" and ctl.due()
+    ctl.daily_check()
+    assert calls == [1, 1]

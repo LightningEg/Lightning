@@ -32,7 +32,7 @@
 <div class="cat-toolbar">
   <label class="cat-search"><input type="search" id="category-search" placeholder="Find a category" aria-label="Find a category"></label>
   <span id="category-result-count" class="muted small"></span>
-  <span class="cat-legend"><span class="cat-pill" aria-pressed="true">{{ 'Recurring'|tr(locale) }}</span>{{ "counts toward the income average and forecast ·"|tr(locale) }}<span class="cat-pill is-oneoff" aria-pressed="true">{{ 'One-off'|tr(locale) }}</span>{{ "stays in cash flow, out of the budget · changes save as you make them"|tr(locale) }}</span>
+  <button type="button" class="info-tip" data-tip="{{ 'Recurring counts toward the income average and forecast. One-off stays in cash flow, out of the budget. Changes save as you make them.'|tr(locale) }}" aria-label="{{ 'What do Recurring and One-off mean?'|tr(locale) }}">?</button>
   {% if archived %}<a class="btn small" href="/categories{{ '' if show_archived else '?archived=1' }}">{{ 'Hide archived' if show_archived else 'Archived (' ~ archived|length ~ ')' }}</a>{% endif %}
 </div>
 <form id="category-bulk-form" method="post" action="/categories/bulk-action" data-category-bulk><input type="hidden" name="__session" value="{{ session }}"></form>

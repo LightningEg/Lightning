@@ -120,10 +120,10 @@ def installed(fake):
     return {k: v for k, v in fake.tree(INSTALL).items() if k != "FILES.sha256"}
 
 
-def test_success_keeps_the_old_folder_and_launches_the_new_one():
+def test_success_deletes_the_old_folder_and_launches_the_new_one():
     fake = seed()
     assert swap(fake) == "updated"
-    assert installed(fake) == NEW and fake.tree(Path(f"{INSTALL}.previous")) == OLD
+    assert installed(fake) == NEW and not fake.exists(Path(f"{INSTALL}.previous"))
     assert not fake.exists(Path(f"{INSTALL}.incoming"))
     assert fake.launched == [(f"{INSTALL}/Lightning.exe", ("--after-update", "2.0.3"))]
     assert json.loads(fake.files[str(UPDATES / "update.json")])["step"] == "ok"
@@ -134,7 +134,16 @@ def test_an_older_previous_folder_is_replaced():
     fake = seed()
     fake.files[f"{INSTALL}.previous/stale.txt"] = b"from two updates ago"
     assert swap(fake) == "updated"
-    assert fake.tree(Path(f"{INSTALL}.previous")) == OLD
+    assert not fake.exists(Path(f"{INSTALL}.previous"))
+
+
+def test_an_old_folder_left_by_an_earlier_update_is_deleted_at_the_next_start():
+    fake = seed()
+    assert swap(fake) == "updated"
+    fake.files.update({f"{INSTALL}.previous/{name}": body for name, body in OLD.items()})  # left by a version that kept it
+    after = Fake(fake.files)
+    assert uh.repair(after, uh.Paths(INSTALL, STAGED, UPDATES)) == "cleaned"
+    assert installed(after) == NEW and not after.exists(Path(f"{INSTALL}.previous"))
 
 
 def test_the_old_app_never_exiting_changes_nothing_and_launches_nothing():
@@ -194,8 +203,10 @@ def test_a_new_version_that_wrote_its_ok_marker_before_the_cut_is_kept():
     assert swap(fake) == "updated"
     state = json.loads(fake.files[str(UPDATES / "update.json")])
     fake.files[str(UPDATES / "update.json")] = json.dumps({**state, "step": "launched"}).encode()  # cut before "ok" was written
-    assert uh.repair(Fake(fake.files), uh.Paths(INSTALL, STAGED, UPDATES)) == "accepted"
-    assert installed(fake) == NEW
+    fake.files.update({f"{INSTALL}.previous/{name}": body for name, body in OLD.items()})  # and before the old folder went
+    after = Fake(fake.files)
+    assert uh.repair(after, uh.Paths(INSTALL, STAGED, UPDATES)) == "accepted"
+    assert installed(after) == NEW and not after.exists(Path(f"{INSTALL}.previous"))
 
 
 def test_real_host_mark_ok_writes_the_marker(tmp_path):

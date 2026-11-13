@@ -1,7 +1,7 @@
 """Bounded, lossless onboarding of comprehensive Lightning workbooks into unused profiles."""
 from __future__ import annotations
 
-from datetime import date
+from datetime import date, datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from io import BytesIO
 import posixpath
@@ -85,12 +85,13 @@ def read_workbook(data):
                             inline = cell.find(NS + 'is')  # an emptied cell may keep the tag with no text
                             value = ''.join(inline.itertext()) if inline is not None else None
                         elif kind == 's':
-
                             try:
                                 value = strings[int(value)]
                             except (ValueError, IndexError):
                                 raise ValueError('Invalid shared-string reference.') from None
-                        elif kind in ('e', 'str'):
+                        elif kind == 'str':
+                            pass  # plain text written without the shared table (Open XML SDK); formulas were refused above
+                        elif kind == 'e':
                             raise ValueError(f'{name}: unsupported cell type; use plain values.')
                         if value is not None and len(str(value)) > 32767:
                             raise ValueError('A workbook cell contains too much text.')
@@ -150,9 +151,30 @@ def _setting_allowed(key):
         ('budget_', 'investment_', 'emergency_', 'health_', 'financial_health_'))
 
 
+def _from_excel_serial(value, dated):
+    """Excel (or an AI tool) turns a typed date or time into a date cell, saved as days since 1899-12-30: put back
+    the text Lightning keeps, a yyyy-mm-dd date or a local timestamp. Anything else is left for the checks below."""
+    text = str(value)
+    if not re.fullmatch(r'[1-9][0-9]{4}(\.[0-9]+)?', text) or not 20_000 <= Decimal(text) < 80_000:  # 1954 to 2119
+        return value
+    moment = datetime(1899, 12, 30) + timedelta(seconds=int((Decimal(text) * 86_400).to_integral_value()))  # not money: seconds
+    if dated:
+        return moment.date().isoformat()
+    return moment.astimezone().isoformat(timespec='seconds')
+
+
 def _convert(value, field, table):
     name = field['name']
     if value is None:
+        # Excel cannot keep an empty text: a blank cell in a required column with a default takes that default
+        # (notes '' and the like), so a workbook an AI or a person left blank is not refused.
+        default = field['dflt_value'] if field['notnull'] else None
+        if isinstance(default, str) and len(default) >= 2 and default[0] == default[-1] == "'":
+            return default[1:-1].replace("''", "'")
+        if isinstance(default, str) and re.fullmatch(r'-?[0-9]+', default):
+            return int(default)
+        if field['notnull'] and default is None and field['type'].upper() == 'TEXT':
+            return ''
         return None
     if name.endswith('_e6') or field['type'].upper() == 'INTEGER':
         try:
@@ -164,7 +186,10 @@ def _convert(value, field, table):
             return int(number)
         except (InvalidOperation, ValueError):
             raise ValueError(f'{table}.{name}: use a finite number with at most six decimal places.') from None
-    if value and (name == 'date' or name.endswith('_date') or name in ('date_from', 'date_to', 'first_date')):
+    dated = name == 'date' or name.endswith('_date') or name in ('date_from', 'date_to', 'first_date')
+    if (dated or name.endswith('_at')) and field['type'].upper() == 'TEXT':
+        value = _from_excel_serial(value, dated)
+    if value and dated:
         try:
             if date.fromisoformat(str(value)).isoformat() != value:
                 raise ValueError()
