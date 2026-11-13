@@ -1,7 +1,7 @@
 {% from "partials/icons.html" import icon_close with context %}
 {% from "partials/chevron.html" import chevron with context %}
 {# On the phone app the same pages render in the phone frame (guideline Part C): phone/base.html. #}{% if request.state.phone|default(false) %}{% extends "phone/base.html" %}{% endif %}{% if not request.state.phone|default(false) %}<!doctype html>
-<html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}"{% if privacy_on(request) %} class="privacy"{% endif %}>
+<html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}" data-week-start="{{ week_start }}"{% if privacy_on(request) %} class="privacy"{% endif %}>
 <head>
   {% include "partials/theme_head.html" %}
   <meta charset="utf-8">
