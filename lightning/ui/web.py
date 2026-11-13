@@ -42,7 +42,7 @@ from lightning.ui.i18n import BROWSER_UI, _COUNTED, counted, localize_html, loca
 
 UI_DIR = Path(__file__).parent
 templates = Jinja2Templates(directory=str(UI_DIR / "templates"))
-templates.env.globals["week_start"] = (WEEK_STARTS + 1) % 7  # JavaScript getDay(): Sunday is 0.
+templates.env.globals["week_start"] = (WEEK_STARTS + 1) % 7  # not money: JavaScript getDay() has Sunday as 0
 
 
 def _minus(text: str) -> str:
