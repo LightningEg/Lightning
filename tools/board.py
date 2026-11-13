@@ -8,7 +8,8 @@
 State is worked out, never typed: an issue is *running* when an open pull request says `Closes #n` or it has an
 assignee; *blocked* when a GitHub "blocked by" issue is open, or its `Blocked by:` line names an open pull request or
 something outside the repo; *held* when a running issue touches the same `Area:`; *for a person* when it is
-`can:owner` or `can:human`; otherwise *ready*. A sub-issue takes `when:`, `can:` and `Area:` from its parent unless its
+`can:owner` or `can:human`; otherwise *ready*. The owner's order is the open issue titled `[PRIORITY] ...` (a `#n` per line, first is first; the owner console writes
+it); ranked issues come first in every list and in `--next`, the rest follow. A sub-issue takes `when:`, `can:` and `Area:` from its parent unless its
 own body says `Can:` or `Area:`. Rules for taking an issue: skills/dispatch/SKILL.md. Needs the `gh` CLI.
 """
 from __future__ import annotations
@@ -85,10 +86,29 @@ def _overlap(a: set[str], b: set[str]) -> bool:
     return any(x == y or x.startswith(y + "/") or y.startswith(x + "/") for x in a for y in b)
 
 
+PRIORITY_TITLE = "[PRIORITY]"
+
+
+def priority(issues: list[dict]) -> tuple[list[int], int | None]:
+    """The owner's order (owner, 2026-11-13): the first `#n` of each line of the open issue titled `[PRIORITY] ...`,
+    first is first. One issue holds the whole order, so a reorder is one edit, never a burst of label events."""
+    for i in issues:
+        if i["title"].startswith(PRIORITY_TITLE):
+            seen: list[int] = []
+            for line in i["body"].splitlines():
+                m = re.search(r"#(\d+)", line)
+                if m and int(m.group(1)) not in seen:
+                    seen.append(int(m.group(1)))
+            return seen, i["n"]
+    return [], None
+
+
 def derive(data: dict) -> list[dict]:
     """One row per open issue with its worked-out state. Pure: no network."""
-    by_n = {i["n"]: dict(i) for i in data["issues"]}
-    parent = {k: i["n"] for i in data["issues"] for k in i["children"]}
+    order, holder = priority(data["issues"])
+    rank = {n: k for k, n in enumerate(order)}
+    by_n = {i["n"]: dict(i) for i in data["issues"] if i["n"] != holder}
+    parent = {k: i["n"] for i in data["issues"] if i["n"] != holder for k in i["children"]}
     open_prs = {p["n"]: p for p in data["prs"]}
     linked: dict[int, list[dict]] = {}
     for p in data["prs"]:
@@ -132,7 +152,10 @@ def derive(data: dict) -> list[dict]:
             clash = [b["n"] for b in busy if _overlap(i["areas"], b["areas"])]
             if clash:
                 i["state"], i["why"] = "held", [f"same area as #{c}" for c in clash]
-    return sorted(rows, key=lambda i: (ORDER.get(i["when"], 3), -i["blocking"], i["n"]))
+    for i in rows:
+        i["rank"] = rank.get(i["n"])
+    # The owner's order comes first (ranked issues, first is first); the rest keep the worked-out order after them.
+    return sorted(rows, key=lambda i: (i["rank"] is None, i["rank"] or 0, ORDER.get(i["when"], 3), -i["blocking"], i["n"]))
 
 
 def pick(rows: list[dict], cap: int) -> list[dict]:
