@@ -47,6 +47,8 @@ Read only the section your task needs (`grep -n '^## ' ai/ARCHITECTURE.md`, then
 
 Source launcher (OW-2AB, owner approved 2026-11-04): `python -m lightning --profiles` opens encrypted profiles. Bare `python -m lightning` and every `--db` argument stop with usage guidance before database or network work; existing legacy files are untouched. The legacy browser runner accepts only `--demo` or `--sample`: `--demo` opens the sample household (`lightning/demo.py`) in `data/demo.db` on port 8766, rebuilt on every start; `--sample` does the same with Mohab's 2026 on port 8767 and pins today to its last row (2026-10-02, `lightning/samples/__init__.py`) unless `LIGHTNING_TODAY` is set. `run.sh`/`run.bat` forward these explicit modes. Legacy import remains separate unfinished work under IT-2C; launching a plaintext file is not an import path.
 
+Application clock (IT-3BI4): `core/dates.now()` returns naive local application time; `today()` uses its date. `LIGHTNING_TODAY` changes only the date, preserving the clock time. `wall_now(tz)` always reads real device time for certificate validity, backup scheduling/names, network freshness and publication metadata; `now_iso()` keeps real local audit time with its UTC offset. Supplied SMS receipt timestamps stay unchanged, and the inbox cursor follows real receipts even in a pinned profile. Direct clock calls stay in `core/dates.py` and the six journal-owned files documented by `tests/test_application_clock.py`.
+
 ## Three layers: ledger, plan, report
 
 These describe what data *is*, not which package may import which.

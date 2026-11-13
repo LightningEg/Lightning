@@ -25,7 +25,7 @@ from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
-from lightning.core.dates import fmt_date, today
+from lightning.core.dates import fmt_date, today, wall_now
 from lightning.core.errors import NotFoundError
 
 MOHAB_2026 = Path(__file__).parent / "mohab_2026"
@@ -42,7 +42,7 @@ def pin_sample_today(environ=None) -> str:
     import os
     environ = os.environ if environ is None else environ
     if not environ.get("LIGHTNING_TODAY"):
-        environ["LIGHTNING_TODAY"] = fmt_date(min(date.today(), SAMPLE_TODAY))
+        environ["LIGHTNING_TODAY"] = fmt_date(min(wall_now().date(), SAMPLE_TODAY))
     return environ["LIGHTNING_TODAY"]
 
 

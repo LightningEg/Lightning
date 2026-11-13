@@ -7,9 +7,11 @@ back up live data and promote the candidate after the user's confirmation.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import timezone
 from pathlib import Path
 from uuid import uuid4
+
+from lightning.core.dates import wall_now
 
 from .connection import Database
 from .migrator import inspect_schema
@@ -45,7 +47,7 @@ def stage_database(source: Path, folder: Path, *, destination_key: bytes,
             raise ValueError("The selected file is not a recognized Lightning database")
         inspection = inspect_schema(db)
         folder.mkdir(parents=True, exist_ok=True)
-        day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        day = wall_now(timezone.utc).strftime("%Y-%m-%d")
         sequence = 1 + len(list(folder.glob(f"Import_{day}_*.partial")))
         target = folder / f"Import_{day}_{sequence:03d}_{uuid4().hex}.partial"
         export_snapshot(db.conn, target, key=destination_key, source_encrypted=source_key is not None)

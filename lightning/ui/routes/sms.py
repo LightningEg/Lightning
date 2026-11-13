@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import re
 from decimal import Decimal
-from datetime import datetime
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
+from lightning.core.dates import now as app_now
 from lightning.core.errors import LightningError
 from lightning.sms_imports import (MAX_TEXT, SALARY_ENDING, WALLET_PREFIX, _IGNORE as _IGNORE_RE, fingerprint, parse_sms,
                                     prefill, wallet_name)
@@ -94,7 +94,7 @@ async def paste(request: Request):
     messages = [m.strip() for m in re.split(r"\n\s*\n", text) if m.strip()][:MAX_PASTE]
     if not messages:
         return _page(request, c, error="Paste one or more bank messages, a blank line between each.")
-    now = datetime.now()
+    now = app_now()
     with settled_save(request, container(request)):
         result = c.sms_imports.read([("", m, now) for m in messages])
     found = sum(row["_status"] == "REVIEW" for batch in result["staged"].values()  # not money: counts
