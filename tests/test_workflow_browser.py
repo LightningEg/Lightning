@@ -1,5 +1,7 @@
 """Browser checks for the activity, planning, reimbursement, and review workflows."""
 
+import re
+
 import pytest
 
 pytest.importorskip("playwright.sync_api")
@@ -94,9 +96,11 @@ def test_workflow_pages_render_fit_and_keep_interactions_usable(c, setup, phone)
                                       response.url.endswith(f"/activity/{expense.id}/apply")) as result:
                 page.locator("#activity-review button.primary").click()
             assert result.value.status == 303
-            page.wait_for_load_state("networkidle")
+            # BV-12AG: the post goes in the background and then opens the page the server named; wait for that page.
+            from playwright.sync_api import expect
+            expect(page).to_have_url(re.compile(r"/transactions/\d+"))
+            expect(page.locator("main")).to_contain_text(transport.name)
             assert c.transactions.get(expense.id).lines[0].category_id == transport.id
-            assert transport.name in page.locator("body").inner_text()
 
             # Verify the owned-record picker remains usable and posts a real selected value.
             page.goto(origin + "/reimbursements", wait_until="networkidle")
@@ -115,8 +119,7 @@ def test_workflow_pages_render_fit_and_keep_interactions_usable(c, setup, phone)
                                           response.url.endswith("/payday/enable")) as result:
                     enable.click()
                 assert result.value.status == 303
-                page.wait_for_load_state("networkidle")
-                assert page.get_by_role("button", name="Pause cash funding").count() == 1
+                expect(page.get_by_role("button", name="Pause cash funding")).to_have_count(1)  # refreshed in place
 
             for error in page_errors:
                 pytest.fail(f"Browser JavaScript error: {error}")
