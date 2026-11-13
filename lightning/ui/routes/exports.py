@@ -160,13 +160,31 @@ async def import_workbook_template(request: Request):
     return Response(data, media_type=media, headers={'Content-Disposition': 'attachment; filename="lightning-onboarding-template.xlsx"', 'Cache-Control': 'no-store'})
 
 
-@router.post('/import')
-async def preview_workbook_import(request: Request):
+def _full_preview(request, c, data):
+    """The review of a complete workbook, with the token that confirms exactly these bytes."""
     import base64
     import hashlib
     import secrets
     import time
-    from lightning.workflows.workbook_import import MAX_UPLOAD, SETUP_PROMPT, prepare_import, confirm_import
+    from lightning.workflows.workbook_import import SETUP_PROMPT, prepare_import, review_summary
+    pending = getattr(request.app.state, 'workbook_import_tokens', {})
+    pending = {key: value for key, value in pending.items() if value[1] > time.monotonic()}
+    request.app.state.workbook_import_tokens = pending
+    tables = prepare_import(c, data)
+    if len(pending) >= 8:
+        pending.pop(next(iter(pending)))
+    token = secrets.token_urlsafe(32)
+    pending[token] = (hashlib.sha256(data).hexdigest(), time.monotonic() + 900, id(c.db))  # not money: seconds
+    return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT, preview=review_summary(tables),
+                  token=token, payload=base64.b64encode(data).decode('ascii'))
+
+
+@router.post('/import')
+async def preview_workbook_import(request: Request):
+    import base64
+    import hashlib
+    import time
+    from lightning.workflows.workbook_import import MAX_UPLOAD, SETUP_PROMPT, confirm_import, workbook_kind
     c = container(request)
     try:
         form = await request.form(max_part_size=MAX_UPLOAD * 2)  # not money: bytes
@@ -189,16 +207,12 @@ async def preview_workbook_import(request: Request):
         if upload is None or not hasattr(upload, 'read'):
             raise ValueError('Choose an Excel .xlsx workbook.')
         data = await upload.read(MAX_UPLOAD + 1)  # not money: bytes
-        tables = prepare_import(c, data)
-        if len(pending) >= 8:
-            pending.pop(next(iter(pending)))
-        token = secrets.token_urlsafe(32)
-        pending[token] = (hashlib.sha256(data).hexdigest(), time.monotonic() + 900, id(c.db))  # not money: seconds
-        return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT,
-                      preview=[(name, len(rows)) for name, (_, rows) in tables.items()],
-                      token=token, payload=base64.b64encode(data).decode('ascii'))
+        if workbook_kind(data) == 'starter':  # one door: the short workbook goes to its own review
+            return _starter_preview(request, c, data)
+        return _full_preview(request, c, data)
     except ValueError as exc:
-        return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT, error=str(exc), status_code=400)
+        return render(request, 'exports/import.html', setup_prompt=SETUP_PROMPT, error=str(exc),
+                      problems=getattr(exc, 'shown', []), status_code=400)
 
 
 # ---------------------------------------------------------------- the starter workbook (NF-7AC4)
@@ -235,6 +249,23 @@ async def starter_result(request: Request, token: str):
                     headers={'Content-Disposition': 'attachment; filename="lightning-starter-workbook-with-codes.xlsx"', 'Cache-Control': 'no-store'})
 
 
+def _starter_preview(request, c, data):
+    """The review of a starter workbook, with the token that confirms exactly these bytes."""
+    import base64
+    import hashlib
+    import secrets
+    import time
+    from lightning.workflows import starter_import
+    state = _starter_state(request)
+    preview = starter_import.prepare(c, data)
+    if len(state) >= 8:
+        state.pop(next(iter(state)))
+    token = secrets.token_urlsafe(32)
+    state[token] = {'sha': hashlib.sha256(data).hexdigest(), 'expires': time.monotonic() + 900, 'db': id(c.db)}  # not money: seconds
+    return render(request, 'exports/starter.html', preview=preview, token=token, shown=_STARTER_SHOWN,
+                  payload=base64.b64encode(data).decode('ascii'))
+
+
 @router.post('/starter')
 async def preview_starter_import(request: Request):
     import base64
@@ -244,7 +275,7 @@ async def preview_starter_import(request: Request):
     from lightning.core.errors import LightningError
     from lightning.workflows import starter_import
     from lightning.workflows.starter_result import result_for
-    from lightning.workflows.workbook_import import MAX_UPLOAD
+    from lightning.workflows.workbook_import import MAX_UPLOAD, workbook_kind
     c = container(request)
     try:
         form = await request.form(max_part_size=MAX_UPLOAD * 2)  # not money: bytes
@@ -265,12 +296,8 @@ async def preview_starter_import(request: Request):
         if upload is None or not hasattr(upload, 'read'):
             raise ValueError('Choose an Excel .xlsx workbook.')
         data = await upload.read(MAX_UPLOAD + 1)  # not money: bytes
-        preview = starter_import.prepare(c, data)
-        if len(state) >= 8:
-            state.pop(next(iter(state)))
-        token = secrets.token_urlsafe(32)
-        state[token] = {'sha': hashlib.sha256(data).hexdigest(), 'expires': time.monotonic() + 900, 'db': id(c.db)}  # not money: seconds
-        return render(request, 'exports/starter.html', preview=preview, token=token, shown=_STARTER_SHOWN,
-                      payload=base64.b64encode(data).decode('ascii'))
+        if workbook_kind(data) == 'full':  # one door: the complete workbook goes to its own review
+            return _full_preview(request, c, data)
+        return _starter_preview(request, c, data)
     except (ValueError, LightningError) as exc:
         return render(request, 'exports/starter.html', error=str(exc), status_code=400)
