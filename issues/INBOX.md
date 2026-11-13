@@ -9,6 +9,7 @@ Things seen, not yet planned. One line each: date, pillar, what and where (a pag
 - Lines older than 30 days that nobody picked are deleted in the next plan sweep.
 
 ## Lines
+- **Browser View Transition rejection (build, 2026-11-13):** `test_pc_period_browser.py::test_pc_period_track_submits_months_and_custom_ranges` reports "Transition was aborted because of invalid state. Page already revealed" on a clean `cef6b629` checkout as well as IT-3BI4; inspect transition promise handling without weakening the page-error assertion.
 - **C2 (from IV-3AM, 2026-11-12):** Cash planning's *What you owe* card stands alone in its row with one loan; pair it or make it a row (IV-12Q gave the unfinished Budget and Cash pages their pattern but left this page alone). Report: r19 C2.
 - **Rose on dark cards (from NF-10C3, 2026-11-12):** the app's rose `#C93D72` (`--rose`, `--neg`) reads about 3.8:1 on every dark theme card; give it a `--theme-rose` the way `--theme-positive` and `--theme-held` are made in `tools/build_themes.py`.
 - **Popup fields at 15px on the phone (Add sheet review, 2026-11-12, capture):** inside the phone's sheets (outside `.main`) Who, Date, Notes and the account select are 15px, not the 16px C05.1 asks for so the phone does not zoom; the `.main`-scoped field rule in phone.css never reaches them.

@@ -28,7 +28,6 @@ from cryptography.hazmat.primitives import hashes, serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 from cryptography.x509.oid import NameOID
 
-from lightning.core.dates import wall_now
 from lightning.security.device_credentials import DeviceCredentialError, Protector, native_protector, seal, unseal
 
 from .domain import _name
@@ -220,7 +219,7 @@ def load_or_create(folder: str | Path, name: str, *, protector: Protector | None
         raise DeviceCredentialError("An interrupted device identity needs explicit repair; its files were preserved")
     key = ec.generate_private_key(ec.SECP256R1())
     subject = x509.Name([x509.NameAttribute(NameOID.COMMON_NAME, "Lightning device")])
-    now = wall_now(dt.timezone.utc)
+    now = dt.datetime.now(dt.timezone.utc)
     certificate = (x509.CertificateBuilder().subject_name(subject).issuer_name(subject)
                    .public_key(key.public_key()).serial_number(x509.random_serial_number())
                    .not_valid_before(now - dt.timedelta(days=1)).not_valid_after(now + dt.timedelta(days=365 * 30))

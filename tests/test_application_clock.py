@@ -81,9 +81,10 @@ def test_sms_first_look_follows_real_receipts_or_an_explicit_replay_clock(c, mon
     assert source.after == int(expected.timestamp() * 1000)
 
 
-# These journal-owned files intentionally retain raw wall time. Their timestamps describe protocol
+# These sync/journal files intentionally retain raw wall time. Their timestamps describe protocol
 # events or real receipts, never a demo/business date; do not change the running journal work.
 JOURNAL_CLOCKS = {
+    'sync/identity.py',            # TLS validity uses real time; protocol imports exclude application modules.
     'sync/journal/local.py',       # Last successful synchronization.
     'sync/journal/store.py',       # Journal creation and seen-proposal receipts.
     'sync/journal/backups.py',     # Signed snapshot creation time.
