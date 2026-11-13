@@ -25,11 +25,6 @@ Per term, one PR: pick the plain word in the Glossary first (payee/who for count
 
 Each step is one pull request, one term at a time. The Glossary (`ai/GLOSSARY.md`, read only the term's line: `grep -n "<term>" ai/GLOSSARY.md`) is changed first in the same PR; then English keys, their Arabic in `lightning/ui/i18n.py`, templates and tests. Never rename a route, a database column or a code. Run `python -m pytest tests/test_arabic_no_english.py tests/test_mohab_year.py -q` and delete the step's heading in the same commit.
 
-## 3BH1 A test that keeps jargon off the screen · S · #425
-Files: new `tests/test_voice.py`.
-Do: render (with the sample household, English and Arabic; copy the set-up from `tests/test_arabic_no_english.py`) the main PC and phone pages listed in `tools/phone_check.py` `PAGES`, take the visible text, and assert it contains none of a list of words. Start the list with the words that are already gone (`Successfully`, `Please`, `Submit`, `Error:`, `Invalid`) so it passes today; each later step adds its own word.
-Done when: `python -m pytest tests/test_voice.py -q` passes and the list lives at the top of the file with a one-line reason per word.
-
 ## 3BH2 "Counterparty" becomes "Payee" (Arabic: الطرف التاني → الجهة) · M
 Needs 3BH1 merged first.
 Decided (owner, 2026-11-08): "Payee" for money out and in, "Who" as a column heading.
