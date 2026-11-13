@@ -21,14 +21,14 @@ by: Claude
 
 Acceptance: the salary case offers 18,000 from 25 Dec; an unchanged month shows "Your plan continues" with nothing to tick; a front-loaded shopper with that history gets no day-8 warning; the bill case still paces the flexible 2,900; next month opens read-only; PC and phone, English and Arabic; Mohab's year passes.
 
-## 12AL1 Income drops are offered from their date · M · opus
+## 12AL1 Income drops are offered from their date · M · opus · #641
 Rule 1 in `planning/health.py` beside `raise_offer` (shared shape, one route and popup), a dated basis in `income_average`. Done when: #626's 30,000 → 18,000 case offers the drop, Plan on it changes the basis from December only, Keep stops the offer at that amount, a one-month gap offers nothing.
 
-## 12AL2 Pacing on the flexible part, against your own curve · M · opus
+## 12AL2 Pacing on the flexible part, against your own curve · M · opus · #642
 Rule 3 in `BudgetService.running_out`; wording "may run out" with little history. Done when: #626's front-loaded case (with two earlier front-loaded months) gives no warning, the same spend without history says "may", the 100-bill case paces 2,900, and existing `tests/test_running_out.py` cases still hold or are updated with the reason.
 
-## 12AL3 The "what changed" card leads Budget · L · opus
+## 12AL3 The "what changed" card leads Budget · L · opus · #646
 Rule 2: `BudgetService.changes` with evidence versions and remembered dismissals; the card on PC Budget and phone Budget; Needs you shows the count only. Needs 12AL1 merged first. Done when: an unchanged month shows "Your plan continues"; each change type appears once with its evidence and goes on Dismiss until its evidence changes; A16 checked; PC and phone, English and Arabic.
 
-## 12AL4 Next month, read-only · M · opus
+## 12AL4 Next month, read-only · M · opus · #645
 Rule 4: Budget opens the next month as a preview with no Save and a line saying when it can be changed. Needs 12AL1 merged first. Done when: `/budget?month=<next>` renders the carried-forward plan, scheduled bills and the dated income with no form, and the current month is unchanged.
