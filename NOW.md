@@ -2,7 +2,7 @@
 
 ## Claimed
 
-Reserved codes: none
+Reserved codes: 7AV, 7AW, 7AX, 7AY, 7AZ (Claude, r37 items)
 
 | Who | Work | Files | Since |
 |---|---|---|---|
