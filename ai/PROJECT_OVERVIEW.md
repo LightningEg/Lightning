@@ -290,4 +290,6 @@ Report decisions delegated by the owner, 2026-11-04: early extra loan principal 
 
 Section 7 scenarios compare scheduled cash over 90 days with explicit income-delay, purchase and one-payment bill overrides. Variable spending and savings goals stay outside this comparison and are stated on screen. Bill alerts remain questions backed by source transactions; they never change money.
 Section 7 owner decisions (2026-11-04): NF-7C migration is excluded. NF-7G uses FIFO cash age with unknown opening dates and a read-only posting-date spending calendar.
+
+Cash planning owner decision (2026-11-14, r37): payday is the salary only; other planned income counts as money in and does not end Safe to spend's window (BT-7AZ).
 NF-7D now shares matching across search, scoped pickers and history. Windows/Linux native and frozen matcher probes passed in run 41922182521. Android packaged validation remains held by the owner’s unchanged selected-action policy; no release is published.
