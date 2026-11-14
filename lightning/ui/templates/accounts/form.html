@@ -20,7 +20,7 @@
       <label for="currency">{{ 'Currency'|tr(locale) }}</label>
       {% set chosen = account.currency if account else (values.currency or base) %}
       <select id="currency" name="currency" data-own-picker {% if not account %}data-add-href="/settings?section=currencies" data-add-label="+ Add a currency"{% endif %} {{ 'disabled' if account }} required>{% for currency in currencies %}<option value="{{ currency.code }}" {{ 'selected' if currency.code == chosen }}>{{ currency.code }} — {{ currency.name }}</option>{% endfor %}</select>
-      {% if account %}<div class="help">{{ "An account's currency cannot be changed after it is created."|tr(locale) }}</div>{% endif %}
+      {% if account %}<div class="help">{{ "An account’s currency cannot be changed after it is created."|tr(locale) }}</div>{% endif %}
       {% if error_field == 'currency' %}<small class="error">{{ error }}</small>{% endif %}
     </div>
     {{ field('name', 'Name', values, error_field, placeholder='e.g. CIB Current', attrs='required') }}

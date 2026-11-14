@@ -12,7 +12,7 @@
 {% set s = screen %}
 <div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/budget?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">{{ chevron(back=True) }}</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/budget?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">{{ chevron() }}</a>{% else %}<span class="phone-month-end" aria-hidden="true">&#160;</span>{% endif %}</span></div>
 {# 3AY9 (owner 2026-11-11): from the salary's day until this month's plan is saved, a strip at the top opens payday #}
-{% if s.payday %}<a class="phone-row phone-payday-strip" href="/payday"><span>{{ "Plan this month's {amt}"|tr(locale, amt=s.payday.amount|money) }}<small>{{ 'Salary arrived'|tr(locale) }} · {{ s.payday.date }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
+{% if s.payday %}<a class="phone-row phone-payday-strip" href="/payday"><span>{{ "Plan this month’s {amt}"|tr(locale, amt=s.payday.amount|money) }}<small>{{ 'Salary arrived'|tr(locale) }} · {{ s.payday.date }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
 {% if s.state == 'no_plan' %}
 <section class="phone-section" aria-labelledby="plan-heading">
   <header class="phone-section-head"><h2 id="plan-heading">{{ 'Make my plan'|tr(locale) }}</h2></header>

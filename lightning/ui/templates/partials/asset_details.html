@@ -35,7 +35,7 @@
 {% for row in prop.since.rows[:8] %}<tr><td>{{ row.date }}</td><td>{{ row.description }}</td><td class="num{{ ' is-negative' if row.amount < 0 }}">{{ row.amount|money(True, 0) }}</td></tr>{% endfor %}</tbody></table>{% endif %}
 </details>
 <details id="property-contract"><summary>{{ "Paying by instalments"|tr(locale) }}</summary>
-<p class="muted small">{{ "Bought off plan? Type the contract price as what you paid under purchase details, and what you have paid so far as the account's balance. Each instalment then moves from your bank into the property."|tr(locale) }}</p>
+<p class="muted small">{{ "Bought off plan? Type the contract price as what you paid under purchase details, and what you have paid so far as the account’s balance. Each instalment then moves from your bank into the property."|tr(locale) }}</p>
 {% set item = prop.contract.item if prop.contract else none %}{% set fund = (prop.cash_accounts|selectattr('id', 'equalto', item.account_id)|first) if item else (prop.cash_accounts|first) %}
 <form method="post" action="/accounts/{{ account.id }}/contract" class="{{ 'phone-form' if phone else 'row' }}" style="{{ '' if phone else 'align-items:end' }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
   <label class="field">{{ "Each instalment"|tr(locale) }} ({{ account.currency }})<input name="instalment" inputmode="decimal" required value="{{ item.amount|money(False, 2) if item else '' }}"></label>

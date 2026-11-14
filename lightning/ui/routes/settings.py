@@ -345,7 +345,7 @@ async def buy_theme(request: Request):
         return redirect("/settings")
     db = container(request).db
     if db.read_only:
-        return redirect("/settings", "This copy is read-only. Buy on the profile's home device.")
+        return redirect("/settings", "This copy is read-only. Buy on the profile’s home device.")
     ensure_profile_id(db)
     profile = profile_id()
     if not profile or not billing.buy(theme, profile):

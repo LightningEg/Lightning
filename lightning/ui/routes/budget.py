@@ -301,7 +301,7 @@ async def mark_budget_one_off(request: Request):
                 _save_category_setting(c, "budget_one_off_exclusions", excluded)
     except (ValueError, TypeError, LightningError) as exc:
         return redirect("/budget", exc.message if isinstance(exc, LightningError) else "Choose a valid category.")
-    return redirect(f"/budget?period=month&month={month}", "Category excluded from background estimates.")
+    return redirect(f"/budget?period=month&month={month}", f"{c.categories.get(category_id).name} is outside the budget now; it still counts in Cash flow. Put it back in Budget settings.")
 
 
 def _budget_return_to(raw: str | None) -> str:
