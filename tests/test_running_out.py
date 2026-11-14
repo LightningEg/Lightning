@@ -57,3 +57,20 @@ def test_snoozed_row_leaves_needs_you_and_without_a_donor_it_offers_only_raise(c
     assert item["action"] == "Raise" and "alt" not in item and f"limit-{food}" in item["href"]
     inbox.decide(item["review_id"], "snoozed", DAY, "2026-12-20")
     assert not [i for i in inbox.items(DAY) if "will run out" in i["label"]]
+
+
+def test_move_dialog_says_why_from_the_evidence_not_two_months(c, setup, monkeypatch):
+    # #626: a pace offer's Move room dialog said "over its plan two months running" with no such history.
+    from tests.screens import _ScreenClient, visible_text
+    from lightning.ui.web import create_app
+    food, transport = _plan(c, setup)
+    monkeypatch.setenv("LIGHTNING_TODAY", DAY.isoformat())
+    browser = _ScreenClient(create_app(c), "http://testserver")
+    href = f"/budget/move?month={MONTH}&to={food}&from={transport}&amount=1650"
+    text = visible_text(browser.get(href).text)
+    assert "two months running" not in text
+    assert "At this pace Food & Groceries passes its plan before the month ends; Transportation has room left." in text
+    c.transactions.record_outflow("2026-12-09", setup[0]["cib"].id, "2000", food)  # now over: 3,500 of 3,000
+    text = visible_text(browser.get(href).text)
+    assert "Food & Groceries is over its plan this month; Transportation has room left." in text
+    assert "two months running" not in text

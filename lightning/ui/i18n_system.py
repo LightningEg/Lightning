@@ -1006,6 +1006,8 @@ TEMPLATES = {
     "No scheduled bills or subscriptions have a spending category this month.": "مفيش فواتير أو اشتراكات مجدولة ليها فئة مصروف الشهر ده.",
     "Move plan to {name}": "انقل الخطة إلى {name}",
     "{a} was over its plan two months running; {b} had room both months.": "{a} عدّى خطته شهرين ورا بعض؛ و{b} كان عنده مساحة الشهرين.",
+    "At this pace {a} passes its plan before the month ends; {b} has room left.": "بالمعدل ده {a} هيعدّي خطته قبل آخر الشهر؛ و{b} لسه فيه مساحة.",
+    "{a} is over its plan this month; {b} has room left.": "{a} عدّى خطته الشهر ده؛ و{b} لسه فيه مساحة.",
     "Recurring expects {a} {cur} a month; your average is {b}": "المتكرر متوقع {a} {cur} في الشهر؛ ومتوسطك {b}",
     "What should the plan do with {a} {cur} more a month?": "الخطة تعمل إيه في {a} {cur} زيادة في الشهر؟",
     "{label} becomes {a} {cur}; your {b}% target stays": "{label} هيبقى {a} {cur}؛ وهدفك {b}% زي ما هو",
