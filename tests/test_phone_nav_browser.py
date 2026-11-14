@@ -26,7 +26,7 @@ def phone(c, monkeypatch):
     session = SimpleNamespace(container=c, paths=None, journal=None, borrowed=None, role=SessionRole.HOME,
                               token="test-phone-nav-session", csrf="test-phone-nav-csrf")
     app = create_app(c)
-    mount_phone(app)  # the phone app's own router: Home, Budget, Activity and Money (3AY10)
+    mount_phone(app)  # the phone app's own router: Home, Budget, Activity and Money (3AY10); Activity opens from Money (IV-11M1)
 
     @app.get("/profiles/health")
     async def health():
@@ -73,9 +73,14 @@ def test_tabs_links_and_the_month_stepper_swap_the_page_and_keep_working(phone):
     page.wait_for_function("(m) => document.querySelector('.phone-month-chip > span')?.textContent.trim() === m", arg=month_text(earlier))
     assert phone.same()
 
-    page.click(".phone-tabbar a[href='/activity']")
+    page.click(".phone-tabbar a[href='/plan']")   # IV-11M1: the Plan slot
+    page.wait_for_function("() => location.pathname === '/plan'")
+    assert phone.same() and page.locator(".phone-tab.is-chosen").inner_text().strip() == "Plan"
+    page.click(".phone-tabbar a[href='/money']")
+    page.wait_for_function("() => location.pathname === '/money' && !document.querySelector('main[aria-busy]')")
+    page.locator("main a[href='/activity']").first.click()   # Activity opens from Money, which stays chosen
     page.wait_for_function("() => location.pathname === '/activity'")
-    assert phone.same() and page.locator(".phone-tab.is-chosen").inner_text().strip() == "Activity"
+    assert phone.same() and page.locator(".phone-tab.is-chosen").inner_text().strip() == "Money"
     _go(page, "/activity?month=2026-09")  # a month with rows (the sample's data ends before today)
     assert page.locator(".phone-txn[data-txn]").count()
 
@@ -96,7 +101,7 @@ def test_tabs_links_and_the_month_stepper_swap_the_page_and_keep_working(phone):
     page.wait_for_function("() => location.pathname === '/money'")
     page.locator("main a[href='/plan/loans']").first.click()
     page.wait_for_function("() => location.pathname === '/plan/loans'")
-    assert phone.same() and page.locator(".phone-tab.is-chosen").inner_text().strip() == "Money"
+    assert phone.same() and page.locator(".phone-tab.is-chosen").inner_text().strip() == "Plan"   # Loans belong to the Plan slot (IV-11M1)
     assert phone.errors == []
 
 
@@ -147,7 +152,7 @@ def test_each_slot_keeps_its_own_stack_and_back_walks_the_slot_then_home(phone):
     page.click("a[href='/money/accounts']"); at("/money/accounts")
     page.click(".phone-tabbar a[href='/money']"); at("/money")          # the chosen slot: back to its top
     page.click("a[href='/money/accounts']"); at("/money/accounts")
-    page.click(".phone-tabbar a[href='/activity']"); at("/activity")    # another slot: Money's pages are dropped
+    page.click(".phone-tabbar a[href='/plan']"); at("/plan")            # another slot: Money's pages are dropped
     page.go_back(); at("/")                                              # Back: Home, not Money's accounts
     page.click(".phone-tabbar a[href='/money']"); at("/money")
     page.click("a[href='/money/accounts']"); at("/money/accounts")

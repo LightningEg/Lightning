@@ -35,6 +35,13 @@
 </div>
   {% set held = s.accounts|length + s.accounts_more %}<p class="phone-note">{{ ('1 account holds {amt}.' if held == 1 else '{n} accounts hold {amt}.')|tr(locale, n=held, amt=s.accounts_total|money) }}{% if s.held_for_others %} {{ 'Includes {amt} held for others.'|tr(locale, amt=s.held_for_others|money) }}{% endif %}</p>
 </section>
+<section class="phone-section" aria-labelledby="activity-heading">
+  <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span class="phone-head-text"><h2 id="activity-heading">{{ 'Activity'|tr(locale) }}</h2><small>{{ 'Everything that moved'|tr(locale) }}</small></span></header>
+  <div class="phone-rows">
+    <a class="phone-row" href="/activity"><span>{{ 'All transactions'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+    <a class="phone-row" href="/activity?tab=review"><span>{{ 'To review'|tr(locale) }}</span><b>{% if s.review_total %}<span class="neg">{{ s.review_total }}</span> {% endif %}{{ chevron() }}</b></a>
+  </div>
+</section>
 <section class="phone-section" aria-labelledby="coming-heading">
   <header class="phone-section-head"><h2 id="coming-heading">{{ 'Coming up'|tr(locale) }}</h2><a href="/money/bills">{% if s.late_count %}{{ ('1 late' if s.late_count == 1 else '{n} late')|tr(locale, n=s.late_count) }} · {% endif %}{{ 'All bills'|tr(locale) }}{{ chevron() }}</a></header>
   {% if s.strip %}<div class="phone-strip" role="grid" aria-label="{{ 'Next two weeks'|tr(locale) }}">{% for d in s.strip %}<a class="phone-strip-day{{ ' is-today' if d.today }}{{ ' is-payday' if d.payday }}" role="gridcell" href="/plan/upcoming?day={{ d.date }}"><small>{{ d.weekday|tr(locale) }}</small><i>{{ d.day }}</i><span class="phone-strip-marks">{% for e in d.entries %}<b class="pay-mark is-{{ e.state }}{{ ' is-in' if e.incoming }}" aria-hidden="true"></b>{% endfor %}</span></a>{% endfor %}</div>{% endif %}
