@@ -298,7 +298,9 @@ class ReevaluationService:
             manual = [tuple(row) for row in self.db.all(
                 "SELECT asset_id,date,quantity_e6,total_value_e6 FROM physical_item_valuations "
                 "WHERE date<=? ORDER BY asset_id,date,id", (day,))]
-        payload = json.dumps([reason, activity, prices, fx, forced, physical, manual],
+        # Revisit saved checkpoints when valuation rules change, even if their inputs did not.
+        # Identical journals are reused; old quote-driven certificate gains are replaced.
+        payload = json.dumps([reason, activity, prices, fx, forced, physical, manual, "certificate-principal-v1"],
                              separators=(",", ":"), default=str)
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 

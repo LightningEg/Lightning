@@ -119,6 +119,43 @@ def test_principal_dates_share_one_read_and_void_or_rollback_cannot_leave_stale_
         assert c.reporting.q.certificate_principal(asset_id, DAY) is None
 
 
+def test_existing_inflated_checkpoint_is_rebuilt_on_upgrade_and_then_stays_idempotent(c, certificate, monkeypatch):
+    import lightning.reevaluations as reevaluations
+    account, bank, asset_id, _ = certificate
+    monkeypatch.setenv('LIGHTNING_TODAY', '2026-10-02')
+    c.assets.repo.upsert_price(asset_id, '2026-09-30', D('2000'), 'EGP', 'MANUAL')
+    original_price, original_dumps = c.reporting.valuer._price, reevaluations.json.dumps
+
+    def legacy_payload(value, **kwargs):
+        # The old fingerprint contained these seven inputs, with no valuation-rule revision.
+        if isinstance(value, list) and value and value[0] == 'MONTH_END':
+            value = value[:7]
+        return original_dumps(value, **kwargs)
+
+    with monkeypatch.context() as legacy:
+        legacy.setattr(reevaluations.json, 'dumps', legacy_payload)
+        legacy.setattr(c.reporting.valuer, '_price', lambda asset, day:
+            (D('2000'), '2026-09-30', 'MANUAL') if asset.id == asset_id else original_price(asset, day))
+        assert c.reevaluations.process_date('2026-09-30', 'MONTH_END')
+    old = c.db.one('SELECT return_base_e6,journal_transaction_id FROM reevaluation_entries WHERE asset_id=?', (asset_id,))
+    assert old['return_base_e6'] == 1_000_000_000
+
+    c.reevaluations.process_due()
+    row = c.db.one('SELECT value_base_e6,return_base_e6,journal_transaction_id FROM reevaluation_entries WHERE asset_id=?',
+                   (asset_id,))
+    assert row['value_base_e6'] == 1_000_000_000 and row['return_base_e6'] == 0
+    assert c.transactions.get(old['journal_transaction_id']).is_void
+    assert c.transactions.get(row['journal_transaction_id']).lines[0].amount_base == 0
+    assert c.reporting.account_balance(bank.id, DAY) == 4000
+    assert c.investments.portfolio('2026-10-02', account.id).open[0].value == 1000
+    assert len(c.assets.price_history(asset_id)) == 1  # Preserve the original quote as history.
+    journal_count = c.db.scalar("SELECT COUNT(*) FROM transactions WHERE type='VAL'")
+    c.reevaluations.process_due()
+    assert c.db.scalar("SELECT COUNT(*) FROM transactions WHERE type='VAL'") == journal_count
+    assert c.db.scalar('SELECT journal_transaction_id FROM reevaluation_entries WHERE asset_id=?',
+                       (asset_id,)) == row['journal_transaction_id']
+
+
 def test_desktop_certificate_opens_its_actual_management_workflow(c, certificate, tmp_path):
     import re
     from playwright.sync_api import sync_playwright, expect
