@@ -283,7 +283,8 @@ class ScheduleView(Protocol):
         """Loan payments scheduled in the month, by spending category."""
 
     def bills(self, month: str) -> dict[int, dict]:
-        """Bills and subscriptions due in the month, by category: {"amount", "items"}."""
+        """Bills and subscriptions due in the month, by category: {"amount", "paid", "items"}; ``paid`` is the part
+        a recorded transaction already paid (read a missing "paid" as zero)."""
 
     def income(self) -> Decimal | None:
         """Income a month that Cash planning › Recurring expects; None without any."""

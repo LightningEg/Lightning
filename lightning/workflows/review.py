@@ -498,9 +498,14 @@ class ReviewInbox:
                               "glance": glance(row["name"], "Adjust", row["amount"], "over plan 2 months")})
         for row in c.budgets.running_out(month, on, schedule=c.schedules.view()):  # NF-12S
             raise_href = f"/budget?month={month}&open_group=all#limit-{row['category_id']}"
-            item = {"label": f"{row['name']} will run out around the {_ordinal(row['day'])}",
-                    "detail": f"At this pace it passes its {fmt(row['limit'], 0)} {cur} limit before the month ends. "
-                              f"It needs about {fmt(row['amount'], 0)} {cur} more.",
+            # NF-12AL2: "may" when the category has too little history for a curve of its own.
+            label = "may" if row["may"] else "will"
+            passes = (f"At this pace it passes the {fmt(row['limit'], 0)} {cur} left after bills before the month ends."
+                      if row["bills"] else
+                      f"At this pace it passes its {fmt(row['limit'], 0)} {cur} limit before the month ends.")
+            history = " It has too little history to read your usual pace." if row["may"] else ""
+            item = {"label": f"{row['name']} {label} run out around the {_ordinal(row['day'])}",
+                    "detail": f"{passes} It needs about {fmt(row['amount'], 0)} {cur} more.{history}",
                     "priority": 2, "source_version": f"running-out:{month}:{row['category_id']}"}
             if row["can_move"]:
                 item.update(href=f"/budget/move?month={month}&to={row['category_id']}&from={row['from_id']}"
@@ -508,7 +513,8 @@ class ReviewInbox:
                             alt={"label": "Raise", "href": raise_href})
             else:
                 item.update(href=raise_href, action="Raise")
-            item["glance"] = glance(row["name"], item["action"], row["amount"], "runs out around day {n}", n=row["day"])
+            item["glance"] = glance(row["name"], item["action"], row["amount"],
+                                   "may run out around day {n}" if row["may"] else "runs out around day {n}", n=row["day"])
             found.append(item)
         return found
 
