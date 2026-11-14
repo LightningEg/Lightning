@@ -4,8 +4,9 @@ Number-match offers commit the joining secret before the home supplies a fresh
 challenge. The signed reveal binds both contributions to the authentication
 number, preventing either peer from grinding a matching transcript offline.
 New offers ask the joining user to type two transcript digits before sending a password proof;
-admission also requires explicit home approval. Legacy offers still require a
-six-digit bootstrap code. Passwords and data keys never enter pairing messages.
+admission also requires explicit home approval. Older number-match offers keep
+six-digit confirmation, and legacy bootstrap-code offers remain supported.
+Passwords and data keys never enter pairing messages.
 """
 from __future__ import annotations
 
