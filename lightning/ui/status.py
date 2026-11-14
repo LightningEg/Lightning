@@ -63,8 +63,8 @@ def budget(e, has_plan: bool, period_key: str, spent: Decimal, planned: Decimal)
     if e.current and e.day:
         gap = e.pace_gap
         if gap <= ZERO:
-            return sentence("You are {amt} under your plan's pace.", amt=fmt(-gap, 0))
-        return sentence("You are {amt} over your plan's pace.", amt=fmt(gap, 0))
+            return sentence("You are {amt} under your plan’s pace.", amt=fmt(-gap, 0))
+        return sentence("You are {amt} over your plan’s pace.", amt=fmt(gap, 0))
     if e.current:
         return sentence("{amt} is left in the plan this month.", amt=fmt(e.left, 0))
     return sentence("You spent {amt} of the {x} planned.", amt=fmt(e.spent, 0), x=fmt(e.planned, 0))

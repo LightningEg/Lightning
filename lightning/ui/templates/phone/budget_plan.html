@@ -5,7 +5,7 @@
 {% block phone_back %}<a class="phone-back" href="/budget?month={{ plan.month }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Budget'|tr(locale) }}</span></a>{% endblock %}
 {% block heading %}<h1>{{ 'Your plan'|tr(locale) }}</h1><p class="phone-note">{{ plan.month }} · {{ 'Type a limit beside a category: an amount, or a % of income.'|tr(locale) }}</p>{% endblock %}
 {% block content %}
-<a class="phone-row" href="/budget/fill?month={{ plan.month }}"><span>{{ "Fill this month's budget"|tr(locale) }}<small>{{ 'From last month, your schedule or your average'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+<a class="phone-row" href="/budget/fill?month={{ plan.month }}"><span>{{ "Fill this month’s budget"|tr(locale) }}<small>{{ 'From last month, your schedule or your average'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
 {% if plan.first %}<section class="phone-section" aria-labelledby="first-heading">
   <header class="phone-section-head"><h2 id="first-heading">{{ "Set your first spending limits"|tr(locale) }}</h2></header>
   <p class="phone-note">{{ "Lightning proposes a limit for each category from what you spent; change any before saving."|tr(locale) }}</p>

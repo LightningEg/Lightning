@@ -287,7 +287,7 @@
             <p>{{ 'Only if no PC holds the ledger now, or you accept losing what was changed there since it borrowed it. Afterwards pair your PCs again.'|tr(locale) }}</p>
             <form method="post" action="/profiles/devices/keep-home" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
-              <label class="check-row"><input type="checkbox" name="confirm" value="yes"> {{ 'A PC\'s copy from before will not come back'|tr(locale) }}</label>
+              <label class="check-row"><input type="checkbox" name="confirm" value="yes"> {{ 'A PC’s copy from before will not come back'|tr(locale) }}</label>
               <div class="form-actions"><button class="button button-secondary" type="submit">{{ 'Keep this copy'|tr(locale) }}</button></div>
             </form>
           </section>
@@ -313,7 +313,7 @@
             <p>{{ 'The PC finds this phone on the same Wi-Fi; you type two digits. It can then borrow this ledger, edit it and hand it back. One device edits at a time.'|tr(locale) }}</p>
             <form method="post" action="/profiles/devices/pair" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
-              <div class="field"><label for="phone-name">{{ "This phone's name"|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off"></div>
+              <div class="field"><label for="phone-name">{{ "This phone’s name"|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off"></div>
               <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Pair a PC'|tr(locale) }}</button></div>
             </form>
             {% if not lent_to %}<p><a class="text-link" href="/profiles/journal/setup">{{ 'Edit from your devices'|tr(locale) }}</a></p>{% endif %}
@@ -335,7 +335,7 @@
             <p>{{ 'Only when the PC is lost or broken. The phone keeps editing from its own copy; what was changed on the PC since it borrowed the ledger does not come back.'|tr(locale) }}</p>
             <form method="post" action="/profiles/devices/take-back" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
-              <label class="check-row"><input type="checkbox" name="confirm" value="yes">{{ "The PC's changes since it borrowed the ledger will not come back"|tr(locale) }}</label>
+              <label class="check-row"><input type="checkbox" name="confirm" value="yes">{{ "The PC’s changes since it borrowed the ledger will not come back"|tr(locale) }}</label>
               <div class="form-actions"><button class="button button-secondary" type="submit">{{ 'Take back'|tr(locale) }}</button></div>
             </form>
           </section>
@@ -356,7 +356,7 @@
       {% elif mode == 'move' %}
         <section class="panel form-panel" aria-labelledby="move-find-heading">
           <h2 id="move-find-heading">{{ 'Move {name} to your phone'|tr(locale, name=active_name) }}</h2>
-          <p>{{ "The phone becomes this profile's home and this PC borrows it from there. On the phone, open Lightning and choose Bring a profile from your PC. It shows two digits; type them here."|tr(locale) }}</p>
+          <p>{{ "The phone becomes this profile’s home and this PC borrows it from there. On the phone, open Lightning and choose Bring a profile from your PC. It shows two digits; type them here."|tr(locale) }}</p>
           {% set find_route = 'move' %}
           {% include "partials/find_phone.html" %}
           <p><a class="text-link" href="/profiles">{{ 'Back'|tr(locale) }}</a></p>
@@ -373,7 +373,7 @@
         <section class="panel form-panel" aria-labelledby="borrowed-unlock-heading">
           <h2 id="borrowed-unlock-heading">{% if item.state.value in ['BORROWING', 'SEALED'] %}{{ 'On this PC'|tr(locale) }}{% elif item.state.value == 'RETURNING' %}{{ 'Going home to {name}'|tr(locale, name=item.home_name) }}{% elif item.state.value == 'NEEDS_REPAIR' %}{{ 'Taken back by {name}'|tr(locale, name=item.home_name) }}{% else %}{{ 'Borrow it from {name}'|tr(locale, name=item.home_name) }}{% endif %}</h2>
           {% if item.state.value not in ['BORROWING', 'SEALED', 'RETURNING', 'NEEDS_REPAIR'] %}<p>{{ 'Open Lightning on the phone, on the same Wi-Fi. While you work here, the phone only reads.'|tr(locale) }}</p>{% endif %}
-          {% if item.state.value == 'NEEDS_REPAIR' %}<p>{{ "Edits made here since then did not go to the phone. Borrow again to work on the phone's ledger; this copy stays on this PC as a backup."|tr(locale) }}</p>{% endif %}
+          {% if item.state.value == 'NEEDS_REPAIR' %}<p>{{ "Edits made here since then did not go to the phone. Borrow again to work on the phone’s ledger; this copy stays on this PC as a backup."|tr(locale) }}</p>{% endif %}
           <form method="post" action="/profiles/borrowed" class="form-stack">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <input type="hidden" name="id" value="{{ item.profile_id }}">
@@ -405,7 +405,7 @@
             <p>{{ "The profile keeps its password. Afterwards the PC borrows it from here, one device editing at a time."|tr(locale) }}</p>
             <form method="post" action="/profiles/receive" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
-              <div class="field"><label for="receive-name">{{ "This phone's name"|tr(locale) }}</label><input id="receive-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off"></div>
+              <div class="field"><label for="receive-name">{{ "This phone’s name"|tr(locale) }}</label><input id="receive-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off"></div>
               <div class="form-actions"><button class="button button-primary" type="submit">{{ "Show the digits"|tr(locale) }}</button></div>
             </form>
           {% endif %}
@@ -420,7 +420,7 @@
         {% if not journal_enabled %}<p><a class="button button-secondary" href="/profiles/journal/setup">{{ 'التعديل من أجهزتك' if locale == 'ar' else 'Edit from your devices' }}</a></p>{% endif %}
         {% if not on_phone and not journal_enabled %}<section class="panel form-panel" aria-labelledby="move-heading">
           <h2 id="move-heading">{{ "Move to your phone"|tr(locale) }}</h2>
-          <p>{{ "The phone becomes this profile's home and this PC borrows it from there. On the phone, open Lightning and choose Bring a profile from your PC."|tr(locale) }}</p>
+          <p>{{ "The phone becomes this profile’s home and this PC borrows it from there. On the phone, open Lightning and choose Bring a profile from your PC."|tr(locale) }}</p>
           <p><a class="button button-secondary" href="/profiles/move">{{ "Find your phone"|tr(locale) }}</a></p>
         </section>{% endif %}
         {% if new_recovery %}

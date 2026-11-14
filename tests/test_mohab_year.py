@@ -693,7 +693,7 @@ def _a_gameya(o: Mohab) -> None:
     o.notes["gameya_third"] = b.submit(button="Record instalment")       # 2027-09-05, his turn's month
     o.notes["gameya_payout"] = b.submit(button="Record payout")          # 20,000 on 2027-09-05
     o.ask("gameya_after", "What am I worth now, and what do I owe the circle?")
-    o.ask("gameya_circle", "Where do I stand in the gam'eya?", "Transactions", "Accounts", "Office gam'eya", "Open gam’eya")
+    o.ask("gameya_circle", "Where do I stand in the gam'eya?", "Transactions", "Accounts", "Office gam'eya", "Open gam'eya")
     o.ask("gameya_plan", "Do I see the instalments still to pay?", "Cash planning")
 
 
@@ -1129,7 +1129,7 @@ def test_needs_you_offers_the_raise_to_the_plan(mohab):
     assert offer.shows("Recurring expects 50,000 EGP a month; your average is 45,000",
                        "What should the plan do with 5,000 EGP more a month?",
                        "Most you can plan becomes 36,313 EGP; your 20% target stays",
-                       "Keep today's plan and raise your savings target to 28.0%")
+                       "Keep today’s plan and raise your savings target to 28.0%")
     # 20% of 45,000 is 9,000; with the 5,000 raise he keeps 14,000 of 50,000.
     assert mohab.notes["raise_saved"].shows("Savings target raised to 28.0%: the plan stays and saves the difference. "
                                             "Most you can plan this month is now 31,313; this month's plan fits.")
@@ -1436,7 +1436,7 @@ def test_a_year_of_spending_is_shown_month_by_month(mohab):
 
 
 def test_categories_say_which_way_money_moves_and_whether_it_repeats(mohab):
-    assert mohab.answers["categories"].shows("− Expense + Income ± Both Recurring One-off")
+    assert mohab.answers["categories"].shows("− Expense + Income ± Both Recurring Outside the budget")
 
 
 def test_categories_need_no_sign_key(mohab):

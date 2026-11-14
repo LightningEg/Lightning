@@ -36,14 +36,13 @@ def test_foreign_money_counts_foreign_investments(c, setup):
     assert "46,800" in page and "Cash 15,600 · investments 31,200" in page
 
 
-def test_holdings_table_leaves_foreign_price_details_on_the_holding_page(c, setup):
+def test_holdings_table_labels_foreign_unit_prices(c, setup):
     accounts, _ = setup
     _dollar_etf(c, accounts)
     page = TestClient(create_app(c)).get("/investments?period=custom&date_from=2026-09-01&date_to=2026-09-30").text
     row = page[page.index('class="holding-link" href="/investments/holding/'):].split('</tr>', 1)[0]
     assert '25,000' in row and '31,200' in row and '+6,200' in row
-    assert '<small' not in row and '50.00' not in row and '60.00' not in row
-    # Native price and average cost remain labeled on the linked holding page (next test).
+    assert '50 <small>USD</small>' in row and '60 <small>USD</small>' in row
 
 
 def test_holding_page_shows_what_was_paid_in_its_own_currency(c, setup):

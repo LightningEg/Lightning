@@ -138,7 +138,7 @@ def prepare(c, data: bytes) -> Preview:
         preview.accounts.append(item)
         try:
             if not item.name:
-                raise ValueError("Write the account's name.")
+                raise ValueError("Write the account’s name.")
             if item.name.casefold() in seen:
                 raise ValueError("This name is listed twice.")
             seen.add(item.name.casefold())
@@ -186,7 +186,7 @@ def prepare(c, data: bytes) -> Preview:
             if row["Money"].casefold() not in ("spending", "income"):
                 raise ValueError("Pick Spending or Income.")
             if not item.name:
-                raise ValueError("Write the category's name.")
+                raise ValueError("Write the category’s name.")
             item.parent_code = parent_code
             key = f"{row['Group'].casefold()} / {item.name.casefold()}"
             if key in new_categories:
@@ -223,7 +223,7 @@ def prepare(c, data: bytes) -> Preview:
             current = existing.get(item.account.casefold())
             currency = account.currency if account is not None and account.status == NEW else (current.currency if current else "")
             if item.currency and item.currency != currency:
-                raise ValueError("This entry's currency is not the account's. Entries in another currency are not imported here.")
+                raise ValueError("This entry’s currency is not the account’s. Entries in another currency are not imported here.")
             item.currency = currency
             check_places(item.amount, c.assets.cash_asset(currency).quantity_decimals, "amount")
             item.category_key, movement = _resolve_category(item.category, by_name, by_code, new_categories, parents)

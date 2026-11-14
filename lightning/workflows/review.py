@@ -548,7 +548,7 @@ class ReviewInbox:
                                     "A pending hold can make the bank's figure lag.",
                           "href": f"/accounts/{gap['account_id']}?date_from={day}&date_to={day}", "action": "Look at that day",
                           "priority": 2,
-                          "glance": glance(gap["name"], "Look", amount, "off the bank's balance since {sa}", sa=when),
+                          "glance": glance(gap["name"], "Look", amount, "off the bank’s balance since {sa}", sa=when),
                           "source_version": {"account": gap["account_id"], "date": day, "stated": str(gap["stated"])}})
         return found
 
