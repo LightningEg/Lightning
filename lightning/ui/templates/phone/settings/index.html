@@ -3,6 +3,7 @@
    (?section=budget, currencies, zakat, targets, financial-health) is its phone part; the rest is the shared page. #}
 {% extends "settings/index.html" %}
 {% block top_actions %}{% endblock %}
+{% block heading %}{% if section in ('', 'general') %}<h1 class="sr-only">{{ 'Settings'|tr(locale) }}</h1>{% else %}{{ super() }}{% endif %}{% endblock %}
 {# Sale factors and configured classes (section=valuations) keep the shared page; these two lists are the phone's. #}
 {% block factor_list %}
 <div class="phone-rows factor-phone-rows">{% for g in factor_groups %}{% for row in [g.root] + g.children %}
@@ -15,14 +16,20 @@
 {% block content %}
 {% if section in ('', 'general') %}
 {% set session = request.state.session_token|default('') %}
-<section class="card settings-list" aria-labelledby="theme-heading">
-  <h2 id="theme-heading">{{ 'Appearance'|tr(locale) }}</h2>
-  <div class="settings-row"><div><label for="app-theme">{{ 'Theme'|tr(locale) }}</label></div>
-    <div class="settings-control"><select id="app-theme" data-theme-select aria-describedby="theme-status"></select><span id="theme-status" class="settings-status" data-theme-status role="status"></span></div></div>
-  <div class="settings-row" data-theme-night hidden><div><label for="theme-night">{{ 'Night version'|tr(locale) }}</label></div>
-    <div class="settings-control"><select id="theme-night"><option value="day">{{ 'Day'|tr(locale) }}</option><option value="night">{{ 'Night'|tr(locale) }}</option><option value="follow">{{ 'Follow this phone'|tr(locale) }}</option></select></div></div>
-  <div class="settings-row"><div><label for="ui-locale">{{ 'Language'|tr(locale) }}</label></div>
-    <form method="post" action="/settings/locale" class="settings-control"><select id="ui-locale" name="locale" data-locale-auto><option value="en" {{ 'selected' if locale == 'en' }}>English</option><option value="ar" {{ 'selected' if locale == 'ar' }}>العربية</option></select><input type="hidden" name="__session" value="{{ session }}"></form></div>
+{# IV-11M8 (mockup v2.0): a profile card, then How it looks, Your data and Safety as list cards; Your setup and About keep what was here. #}
+{% macro chip(d) %}<span class="phone-txn-av is-flat" aria-hidden="true"><svg viewBox="0 0 24 24">{{ d|safe }}</svg></span>{% endmacro %}
+{% macro head(tile, title, sub, id, tint='') %}<header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24">{{ tile|safe }}</svg></span><span class="phone-head-text"><h2 id="{{ id }}">{{ title|tr(locale) }}</h2><small>{{ sub|tr(locale) }}</small></span></header>{% endmacro %}
+{% set name = profile_name or ('Your profile'|tr(locale)) %}
+<a class="phone-profile-card" href="/profiles"><span class="phone-profile-initial" aria-hidden="true">{{ name[:1]|upper }}</span><span class="phone-profile-text"><b>{{ name }}</b><small>{{ 'Encrypted on this phone · Lightning {version}'|tr(locale, version='v' ~ app_version) }}</small></span>{{ chevron() }}</a>
+
+<section class="phone-section" aria-labelledby="theme-heading">
+  {{ head('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>', 'How it looks', 'Theme, language, privacy', 'theme-heading') }}
+  <div class="phone-rows is-list">
+    <div class="phone-row has-chip">{{ chip('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2"/>') }}<span><label for="app-theme">{{ 'Theme'|tr(locale) }}</label></span><b class="phone-row-pick"><select id="app-theme" data-theme-select aria-describedby="theme-status"></select><span id="theme-status" class="settings-status" data-theme-status role="status"></span></b></div>
+    <div class="phone-row has-chip" data-theme-night hidden>{{ chip('<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>') }}<span><label for="theme-night">{{ 'Night version'|tr(locale) }}</label></span><b class="phone-row-pick"><select id="theme-night"><option value="day">{{ 'Day'|tr(locale) }}</option><option value="night">{{ 'Night'|tr(locale) }}</option><option value="follow">{{ 'Follow this phone'|tr(locale) }}</option></select></b></div>
+    <form method="post" action="/settings/locale" class="phone-row has-chip">{{ chip('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>') }}<span><label for="ui-locale">{{ 'Language'|tr(locale) }}</label></span><b class="phone-row-pick"><select id="ui-locale" name="locale" data-locale-auto><option value="en" {{ 'selected' if locale == 'en' }}>English</option><option value="ar" {{ 'selected' if locale == 'ar' }}>العربية</option></select></b><input type="hidden" name="__session" value="{{ session }}"></form>
+    <div class="phone-row has-chip">{{ chip('<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>') }}<span><label for="privacy-on">{{ 'Hide amounts when I open'|tr(locale) }}</label></span><b><label class="switch"><input id="privacy-on" type="checkbox" {{ 'checked' if privacy_on(request) }}><span class="sr-only">{{ 'Hide amounts when I open'|tr(locale) }}</span></label></b></div>
+  </div>
   {% set paid = store_themes() %}{% if paid %}
   {% if play_offers is not none %}{# the Play build (NF-11B3): Play's price and Buy; no website price or link anywhere #}
   {% if paid|rejectattr('owned')|list %}<p class="muted small" data-play-once>{{ 'Bought once on Google Play: every profile on this Google account wears it.'|tr(locale) }}</p>{% endif %}
@@ -46,58 +53,56 @@
     </form>
   </details>{% endif %}
 </section>
-<section class="card phone-card" aria-labelledby="this-phone-heading">
-  <h2 id="this-phone-heading" class="phone-card-title">{{ 'This phone'|tr(locale) }}</h2>
-  <div class="phone-rows">
-    <a class="phone-row" href="/profiles"><span>{{ 'Profile and lock'|tr(locale) }}<small>{{ 'Password, recovery key, lock'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
-    {% if request.state.fingerprint_row|default('') %}<a class="phone-row" href="/profiles/fingerprint"><span>{{ 'Unlock with fingerprint'|tr(locale) }}</span><b>{{ ('On' if request.state.fingerprint_row == 'on' else 'Off')|tr(locale) }}{{ chevron() }}</b></a>{% endif %}
-    <a class="phone-row" href="/profiles/devices"><span>{{ 'Devices'|tr(locale) }}<small>{{ 'Pair your phone or PC'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
-    <a class="phone-row" href="/sms"><span>{{ 'Bank SMS'|tr(locale) }}<small>{{ 'Read bank messages into transactions'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+
+<section class="phone-section is-green" aria-labelledby="backup-heading">
+  {{ head('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/>', 'Your data', 'Stays on this phone', 'backup-heading') }}
+  <div class="phone-rows is-list">
+    <a class="phone-row has-chip" href="/sms">{{ chip('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>') }}<span>{{ 'Bank messages'|tr(locale) }}<small>{{ 'Read bank messages into transactions'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+    <a class="phone-row has-chip" href="/import">{{ chip('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>') }}<span>{{ 'Bring in a statement'|tr(locale) }}<small>{{ 'CIB, NBE and other banks'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+    <a class="phone-row has-chip" href="/exports/all" data-popup-open>{{ chip('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/>') }}<span>{{ 'Export everything'|tr(locale) }}<small>{% if last_backup_day %}{{ 'Last backup {day}'|tr(locale, day=last_backup_day|day_label(locale)) }}{% else %}{{ 'No backup yet.'|tr(locale) }}{% endif %}</small></span><b>{{ chevron() }}</b></a>
+    <div class="phone-row has-chip">{{ chip('<path d="M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2"/>') }}<span>{{ 'Back up now'|tr(locale) }}<small>{{ 'One is made each time the app starts.'|tr(locale) }}{% if backups %} {{ '{n} kept on this phone.'|tr(locale, n=backups|length) }}{% endif %}</small></span>
+      <form method="post" action="/settings/backup"><button class="phone-pill is-strong">{{ 'Back up now'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ session }}"></form></div>
+    {% if backups %}<a class="phone-row has-chip" href="/settings/backup/latest">{{ chip('<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>') }}<span>{{ 'Save a copy'|tr(locale) }}</span><b>{{ chevron() }}</b></a>{% endif %}
+    {% set outside = request.state.outside_row|default(none) %}{% if outside %}<form method="post" action="/profiles/outside-copy" class="phone-row has-chip">{{ chip('<path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>') }}<span>{{ 'Keep a copy outside the app'|tr(locale) }}<small>{% if outside.problem %}{{ outside.problem|tr(locale) }}{% elif outside.last %}{{ 'Last copy: {day}, in {folder}.'|tr(locale, day=outside.last|day_label(locale), folder=outside.folder) }}{% elif outside.chosen %}{{ 'A copy goes to {folder} the next time you open Lightning.'|tr(locale, folder=outside.folder) }}{% else %}{{ 'A folder you choose keeps your newest copies, even if the app is removed.'|tr(locale) }}{% endif %}</small></span><input type="hidden" name="csrf" value="{{ request.state.csrf|default('') }}"><b class="phone-row-btns"><button class="phone-pill" name="action" value="choose">{{ ('Change folder' if outside.chosen else 'Choose a folder')|tr(locale) }}</button>{% if outside.chosen %}<button class="phone-pill" name="action" value="stop">{{ 'Stop'|tr(locale) }}</button>{% endif %}</b></form>{% endif %}
+    <a class="phone-row has-chip" href="/exports/import">{{ chip('<path d="M12 3v12M7 10l5 5 5-5M5 21h14"/>') }}<span>{{ 'Import'|tr(locale) }}<small>{{ 'A full copy, or records in from another profile.'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
   </div>
-  {% if request.state.recents_row|default('') %}<form method="post" action="/profiles/recents" class="settings-row"><div><label for="recents-hidden">{{ 'Hide in recent apps'|tr(locale) }}</label><small>{{ 'Your amounts do not show when you switch apps.'|tr(locale) }}</small></div>
-    <div class="settings-control"><input type="hidden" name="csrf" value="{{ request.state.csrf|default('') }}"><input type="hidden" name="on" value="0"><label class="switch"><input id="recents-hidden" type="checkbox" name="on" value="1" {{ 'checked' if request.state.recents_row == 'on' }} data-autosubmit><span class="sr-only">{{ 'Hide in recent apps'|tr(locale) }}</span></label><noscript><button class="btn small">{{ 'Save'|tr(locale) }}</button></noscript></div></form>{% endif %}
 </section>
-<section class="card settings-list" aria-labelledby="backup-heading">
-  <h2 id="backup-heading">{{ 'Backup'|tr(locale) }}</h2>
-  <div class="settings-row"><div><span class="settings-name">{{ 'Back up now'|tr(locale) }}</span><small>{{ 'One is made each time the app starts.'|tr(locale) }}{% if backups %} {{ '{n} kept on this phone.'|tr(locale, n=backups|length) }}{% endif %}</small></div>
-    <form method="post" action="/settings/backup" class="settings-control"><button class="btn primary small">{{ 'Back up now'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ session }}">{% if backups %}<a class="btn small" href="/settings/backup/latest">{{ 'Save a copy'|tr(locale) }}</a>{% endif %}</form></div>
-  {% set outside = request.state.outside_row|default(none) %}{% if outside %}<div class="settings-row"><div><span class="settings-name">{{ 'Keep a copy outside the app'|tr(locale) }}</span><small>{% if outside.problem %}{{ outside.problem|tr(locale) }}{% elif outside.last %}{{ 'Last copy: {day}, in {folder}.'|tr(locale, day=outside.last|day_label(locale), folder=outside.folder) }}{% elif outside.chosen %}{{ 'A copy goes to {folder} the next time you open Lightning.'|tr(locale, folder=outside.folder) }}{% else %}{{ 'A folder you choose keeps your newest copies, even if the app is removed.'|tr(locale) }}{% endif %}</small></div>
-    <form method="post" action="/profiles/outside-copy" class="settings-control"><input type="hidden" name="csrf" value="{{ request.state.csrf|default('') }}"><button class="btn small" name="action" value="choose">{{ ('Change folder' if outside.chosen else 'Choose a folder')|tr(locale) }}</button>{% if outside.chosen %}<button class="btn small" name="action" value="stop">{{ 'Stop'|tr(locale) }}</button>{% endif %}</form></div>{% endif %}
-  <div class="settings-row"><div><span class="settings-name">{{ 'Move your data'|tr(locale) }}</span><small>{{ 'A full copy, or records in from another profile.'|tr(locale) }}</small></div>
-    <div class="settings-control"><a class="btn small" href="/exports/all" data-popup-open>{{ 'Export'|tr(locale) }}</a><a class="btn small" href="/exports/import">{{ 'Import'|tr(locale) }}</a></div></div>
+
+<section class="phone-section is-rose" aria-labelledby="this-phone-heading">
+  {{ head('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>', 'Safety', 'Who can open Lightning', 'this-phone-heading') }}
+  <div class="phone-rows is-list">
+    <a class="phone-row has-chip" href="/profiles">{{ chip('<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>') }}<span>{{ 'Password and fingerprint'|tr(locale) }}<small>{{ 'Password, recovery key, lock'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+    {% if request.state.fingerprint_row|default('') %}<a class="phone-row has-chip" href="/profiles/fingerprint">{{ chip('<path d="M12 12a3 3 0 0 0-3 3c0 2-1 4-2 5M12 8a7 7 0 0 0-7 7M12 4a11 11 0 0 0-11 11M16 15c0 3-1 5-2 7M20 15a8 8 0 0 0-8-8"/>') }}<span>{{ 'Unlock with fingerprint'|tr(locale) }}</span><b>{{ ('On' if request.state.fingerprint_row == 'on' else 'Off')|tr(locale) }}{{ chevron() }}</b></a>{% endif %}
+    <a class="phone-row has-chip" href="/profiles">{{ chip('<circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6M15.5 7.5l3 3L22 7l-3-3"/>') }}<span>{{ 'Recovery key'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+    <a class="phone-row has-chip" href="/profiles/devices">{{ chip('<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>') }}<span>{{ 'Your PC'|tr(locale) }}<small>{{ 'Pair your phone or PC'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
+    {% if request.state.recents_row|default('') %}<form method="post" action="/profiles/recents" class="phone-row has-chip">{{ chip('<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><path d="M4 4l16 16"/>') }}<span><label for="recents-hidden">{{ 'Hide in recent apps'|tr(locale) }}</label><small>{{ 'Your amounts do not show when you switch apps.'|tr(locale) }}</small></span><input type="hidden" name="csrf" value="{{ request.state.csrf|default('') }}"><input type="hidden" name="on" value="0"><b><label class="switch"><input id="recents-hidden" type="checkbox" name="on" value="1" {{ 'checked' if request.state.recents_row == 'on' }} data-autosubmit><span class="sr-only">{{ 'Hide in recent apps'|tr(locale) }}</span></label><noscript><button class="btn small">{{ 'Save'|tr(locale) }}</button></noscript></b></form>{% endif %}
+  </div>
 </section>
-<section class="card phone-card" aria-labelledby="your-setup-heading">
-  <h2 id="your-setup-heading" class="phone-card-title">{{ 'Your setup'|tr(locale) }}</h2>
-  <div class="phone-rows">
+
+<section class="phone-section" aria-labelledby="your-setup-heading">
+  {{ head('<path d="M4 6h16M4 12h16M4 18h10"/>', 'Your setup', 'Categories, rules and checks', 'your-setup-heading') }}
+  <div class="phone-rows is-list">
     <a class="phone-row" href="/categories"><span>{{ 'Categories'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
     <a class="phone-row" href="/counterparties"><span>{{ 'Counterparties'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
     <a class="phone-row" href="/rules"><span>{{ 'Rules'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
     <a class="phone-row" href="/settings?section=currencies"><span>{{ 'Currencies'|tr(locale) }}</span><b dir="ltr">{{ base }}{{ chevron() }}</b></a>
     <a class="phone-row" href="/checks"><span>{{ 'Data checks'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+    <form method="post" action="/zakat/enabled" class="phone-row"><span><label for="zakat-on">{{ 'Show zakat'|tr(locale) }}</label></span><input type="hidden" name="__session" value="{{ session }}"><b><label class="switch"><input id="zakat-on" type="checkbox" name="on" value="1" {{ 'checked' if zakat_on }} data-autosubmit><span class="sr-only">{{ 'Show zakat'|tr(locale) }}</span></label><noscript><button class="btn small">{{ 'Save'|tr(locale) }}</button></noscript></b></form>
   </div>
-  <form method="post" action="/zakat/enabled" class="settings-row"><div><label for="zakat-on">{{ 'Show zakat'|tr(locale) }}</label></div>
-    <div class="settings-control"><input type="hidden" name="__session" value="{{ session }}"><label class="switch"><input id="zakat-on" type="checkbox" name="on" value="1" {{ 'checked' if zakat_on }} data-autosubmit><span class="sr-only">{{ 'Show zakat'|tr(locale) }}</span></label><noscript><button class="btn small">{{ 'Save'|tr(locale) }}</button></noscript></div></form>
 </section>
-<section class="card phone-card" aria-labelledby="privacy-heading">
-  <h2 id="privacy-heading" class="phone-card-title">{{ 'Privacy'|tr(locale) }}</h2>
-  <div class="phone-rows">
+
+<section class="phone-section" aria-labelledby="about-heading">
+  {{ head('<circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/>', 'About and licences', 'Privacy, version, your data', 'about-heading') }}
+  <div class="phone-rows is-list">
     <a class="phone-row" href="{{ outside_url('privacy', locale) }}#app" target="_blank" rel="noopener"><span>{{ 'Read the privacy notice'|tr(locale) }}<small>{{ 'No account and no analytics: your records stay on your devices.'|tr(locale) }}</small></span><b>↗</b></a>
+    <div class="phone-row"><span>{{ 'Lightning version'|tr(locale) }}</span><b dir="ltr">v{{ app_version }}</b></div>
+    <a class="phone-row" href="/settings/licences"><span>{{ 'Licences'|tr(locale) }}<small>{{ 'Lightning and the parts it is built from'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>
   </div>
-</section>
-<section class="card settings-list" aria-labelledby="about-heading">
-  <h2 id="about-heading">{{ 'About and licences'|tr(locale) }}</h2>
-  <div class="settings-row settings-facts"><div><span class="settings-name">{{ 'Lightning version'|tr(locale) }}</span></div><div class="settings-control" dir="ltr">v{{ app_version }}</div></div>
-  <div class="phone-rows"><a class="phone-row" href="/settings/licences"><span>{{ 'Licences'|tr(locale) }}<small>{{ 'Lightning and the parts it is built from'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a></div>
-</section>
-<section class="card settings-list" aria-labelledby="delete-heading">
-  <h2 id="delete-heading">{{ 'Delete your data'|tr(locale) }}</h2>
+  <h3 class="phone-sub-title" id="delete-heading">{{ 'Delete your data'|tr(locale) }}</h3>
   <p class="phone-note">{{ "Your profiles live only in Lightning's own storage on this phone. To delete them all, open Android's Settings › Apps › Lightning › Storage and clear it, or uninstall Lightning. Save a copy first if you may want them back."|tr(locale) }}</p>
 </section>
-<section class="card phone-card" aria-labelledby="pc-heading">
-  <h2 id="pc-heading" class="phone-card-title">{{ 'Best on your PC'|tr(locale) }}</h2>
-  <p class="phone-note">{{ 'Ask an AI, sale factors, target allocation, price files and each tab’s settings.'|tr(locale) }}</p>
-</section>
-<script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelectorAll('[data-autosubmit],[data-locale-auto]').forEach(control=>control.addEventListener('change',()=>control.form?.requestSubmit()));</script>
+<p class="phone-pc-note" id="pc-heading"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><span><b>{{ 'Best on your PC'|tr(locale) }}</b> {{ 'Ask an AI, sale factors, target allocation, price files and each tab’s settings.'|tr(locale) }}</span></p>
+<script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelectorAll('[data-autosubmit],[data-locale-auto]').forEach(control=>control.addEventListener('change',()=>control.form?.requestSubmit()));document.getElementById('privacy-on')?.addEventListener('change',()=>window.lightningPrivacy?.toggle());</script>
 {% elif section == 'budget' %}{% include 'phone/settings/budget_section.html' %}
 {% elif section == 'financial-health' %}{% include 'phone/settings/financial_health_section.html' %}
 {% elif section == 'zakat' %}{% include 'phone/settings/zakat_section.html' %}

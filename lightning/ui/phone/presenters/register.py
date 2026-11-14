@@ -48,7 +48,13 @@ def _phone_register(c, account_id, base_url, keep, kind, month, preset, from_que
         was_in, was_out = c.reporting.register_flows(account_id, start, end)
         if was_in or was_out:
             earlier = {"month": before, "out": -was_out, "in": was_in, "href": href({**ranged, "month": before})}
+    # IV-11M8: an account's hero always shows its In / Out; with no period chosen they are this month's.
+    hero_in, hero_out, hero_month = money_in, money_out, shown == "month"
+    if account_id is not None and shown == "all" and matched_flows is None:
+        hero_in, hero_out = c.reporting.register_flows(account_id, *parse_month(now))
+        hero_month = True
     return {
+        "hero_in": hero_in, "hero_out": -hero_out, "hero_month": hero_month, "hero_wells": tiles or hero_month,
         "earlier": earlier,
         "chips": [{"key": key, "label": label, "href": href({"kind": "" if key == "all" else key}),
                    "chosen": kind == ("" if key == "all" else key), "count": len(unsorted_ids) if key == "unsorted" else 0}
