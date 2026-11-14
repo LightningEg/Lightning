@@ -146,28 +146,29 @@ def test_pending_month_end_price_is_explicit_and_completes_after_manual_entry(c)
     assert c.reevaluations.pending_prices() == []
 
 
-def test_cd_month_end_prices_post_per_certificate_without_cash_or_unit_changes(c, setup):
+def test_legacy_cd_quotes_cannot_post_invented_month_end_returns(c, setup):
     accounts, _ = setup
     first = _certificate(c, accounts, "CIB first certificate", "10000")
     second = _certificate(c, accounts, "CIB second certificate", "20000")
-    c.assets.set_price(first.terms.asset_id, "2026-09-30", "11000")
-    c.assets.set_price(second.terms.asset_id, "2026-09-30", "18000")
+    # Old profiles may contain these quotes; principal must still be the valuation source (BT-12AQ).
+    c.assets.repo.upsert_price(first.terms.asset_id, "2026-09-30", Decimal("11000"), "EGP", "MANUAL")
+    c.assets.repo.upsert_price(second.terms.asset_id, "2026-09-30", Decimal("18000"), "EGP", "MANUAL")
     cash_before = c.reporting.account_balance(accounts["cd"].id, "2026-09-30")
 
     assert c.reevaluations.process_date("2026-09-30", "MONTH_END")
     details = c.db.all("SELECT asset_id,units_e6,return_base_e6,journal_transaction_id "
                        "FROM reevaluation_entries ORDER BY asset_id")
     assert [(row["asset_id"], row["units_e6"], row["return_base_e6"]) for row in details] == [
-        (first.terms.asset_id, 1_000_000, 1_000_000_000),
-        (second.terms.asset_id, 1_000_000, -2_000_000_000),
+        (first.terms.asset_id, 1_000_000, 0),
+        (second.terms.asset_id, 1_000_000, 0),
     ]
     assert len({row["journal_transaction_id"] for row in details}) == 1
     journal = c.transactions.get(details[0]["journal_transaction_id"])
     assert journal.type == DocType.VAL and journal.source == TxnSource.SYSTEM
     assert [(line.asset_id, line.quantity, line.amount_base,
              c.assets.get_asset(line.asset_id).is_cash) for line in journal.lines] == [
-        (first.terms.asset_id, Decimal(0), Decimal("1000.00"), False),
-        (second.terms.asset_id, Decimal(0), Decimal("-2000.00"), False),
+        (first.terms.asset_id, Decimal(0), Decimal("0.00"), False),
+        (second.terms.asset_id, Decimal(0), Decimal("0.00"), False),
     ]
     assert c.reporting.account_balance(accounts["cd"].id, "2026-09-30") == cash_before
     for asset_id in (first.terms.asset_id, second.terms.asset_id):

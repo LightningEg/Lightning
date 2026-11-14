@@ -359,6 +359,19 @@ class ReportQueries:
         )
         return dict(row) if row and row["qty"] else None
 
+    @request_cached
+    def asset_class_code(self, class_id: int) -> str | None:
+        return self.db.scalar("SELECT code FROM asset_classes WHERE id=?", (class_id,))
+
+    def certificate_principal(self, asset_id: int, as_of: str) -> dict | None:
+        """Principal paid or brought in at opening, in the certificate's native currency. Quotes and
+        redemption proceeds are never a new principal valuation."""
+        row = self.db.one(
+            f"SELECT SUM(le.amount_e6) AS amount, SUM(le.quantity_e6) AS qty, MAX(le.date) AS date"
+            f" FROM ledger_entries le {POSTED} WHERE le.asset_id=? AND le.date<=?"
+            " AND t.type IN ('BUY','OPN') AND le.quantity_e6>0", (asset_id, as_of))
+        return dict(row) if row and row["qty"] else None
+
     def investment_lines(self, as_of: str, account_id: int | None = None) -> list[dict]:
         """Every posted line of a non-cash asset (and dividend lines), oldest first — for positions."""
         where = "le.date <= ? AND (le.asset_id NOT IN (SELECT id FROM financial_assets WHERE is_cash = 1)" \
