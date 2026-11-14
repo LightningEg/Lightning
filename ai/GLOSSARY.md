@@ -188,12 +188,12 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Fall from its high** | How far a holding's month-end price sits below the highest month-end price before it, in percent. | Read directly from the ledger | `investments.journey.holding_history` |
 | **Average cost** | What you paid for each unit you still hold, fees included. | Cost ÷ Units | `investments.domain.Position.average_cost` |
 | **Growth** | Net gain or loss as a share of what the portfolio started the period with, plus money added. | Net gain or loss ÷ (Portfolio value at the start + Money added) | `investments.report.period_growth` |
-| **Average rate** | What each unit of a foreign currency you still hold cost you, in the profile currency: conversions count at the rate you got, money in at the day's rate, and money out takes units at this rate. | Read directly from the ledger | `reporting.fx_positions.Position.average_rate` |
-| **Unrealized FX gain** | Today's value of the foreign money you hold minus what it cost: the exchange-rate gain or loss not yet locked in. | Read directly from the ledger | `reporting.fx_positions.Position.unrealized` |
+| **Average rate** | What each unit of a foreign currency you still hold cost you, in the profile currency: conversions count at the rate you got, money in at the day’s rate, and money out takes units at this rate. | Read directly from the ledger | `reporting.fx_positions.Position.average_rate` |
+| **Unrealized FX gain** | Today’s value of the foreign money you hold minus what it cost: the exchange-rate gain or loss not yet locked in. | Read directly from the ledger | `reporting.fx_positions.Position.unrealized` |
 | **Realized FX gain** | For foreign money that left in the period (spent or converted), what it fetched minus what it cost at the average rate. | Read directly from the ledger | `reporting.fx_positions.Position.realized` |
 | **Spread paid** | What conversions in the period cost beyond the market rate of their day: the market value of what you sent minus the market value of what you received. Fees are separate. | Read directly from the ledger | `fx.spread_cost` |
-| **Price part** | The part of a foreign holding's unrealized gain that comes from its price in its own currency, at today's rate. | Read directly from the ledger | `investments.report.foreign_gain_split` |
-| **FX part** | The part of a foreign holding's unrealized gain that comes from the exchange rate. | Unrealized gain − Price part | `investments.report.foreign_gain_split` |
+| **Price part** | The part of a foreign holding’s unrealized gain that comes from its price in its own currency, at today’s rate. | Read directly from the ledger | `investments.report.foreign_gain_split` |
+| **FX part** | The part of a foreign holding’s unrealized gain that comes from the exchange rate. | Unrealized gain − Price part | `investments.report.foreign_gain_split` |
 
 ### From the plan — what-if
 
@@ -520,8 +520,8 @@ Asset class and exposure are separate. Account kinds describe the container: cas
 | Zakat due | الزكاة المستحقة |
 | Paid this zakat year | اللي دفعته السنة دي |
 | Shares and funds | الأسهم والصناديق |
-| Gold held as savings | الدهب المحتفظ بيه كمدخرات |
-| Gold you wear | الدهب اللي بتلبسه |
+| Gold held as savings | الذهب المحتفظ بيه كمدخرات |
+| Gold you wear | الذهب اللي بتلبسه |
 | Debts due now | ديون مستحقة دلوقتي |
 | Money in | فلوس داخلة |
 | Money out | فلوس خارجة |
@@ -564,8 +564,8 @@ Asset class and exposure are separate. Account kinds describe the container: cas
 | Spread paid | فرق السعر المدفوع |
 | Price part | جزء السعر |
 | FX part | جزء العملة |
-| Safe to spend | المتاح الآمن للصرف |
-| Day's net | صافي اليوم |
+| Safe to spend | المتاح للصرف |
+| Day’s net | صافي اليوم |
 | Investments moved | حركة الاستثمارات |
 | Bills inside the plan | الفواتير ضمن الخطة |
 | Budget until payday | الميزانية لحد الراتب |

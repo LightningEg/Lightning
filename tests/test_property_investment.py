@@ -148,7 +148,7 @@ def test_the_unpaid_part_is_not_a_debt_but_coming_instalments_are_in_the_forecas
 
 def test_an_instalment_cannot_be_paid_as_spending_from_cash_planning(c):
     bank, flat, item = _off_plan(c)
-    with pytest.raises(ValidationError, match="property's page"):
+    with pytest.raises(ValidationError, match="property’s page"):
         c.planning.record_payment(item, "2026-02-01", "2026-02-01", "100000", bank.id)
 
 

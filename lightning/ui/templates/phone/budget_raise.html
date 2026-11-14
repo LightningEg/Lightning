@@ -6,7 +6,7 @@
 <section class="phone-section" aria-labelledby="raise-q">
   <header class="phone-section-head"><h2 id="raise-q">What should the plan do with {{ offer.raise|money(False, 0) }} {{ base }} more a month?</h2></header>
   <div class="phone-rows">
-    {% for choice, title, line, button in [('plan', 'Plan with it', fig.spending_room.label ~ ' becomes ' ~ offer.room|money(False, 0) ~ ' ' ~ base ~ '; your ' ~ offer.rate|money(False, 0) ~ '% target stays', 'Plan with it'), ('save', 'Save the difference', "Keep today's plan and raise your savings target to " ~ offer.keep_rate ~ '%', 'Save it'), ('keep', 'Keep the average', 'The plan waits until the new income shows in completed months', 'Keep it')] %}
+    {% for choice, title, line, button in [('plan', 'Plan with it', fig.spending_room.label ~ ' becomes ' ~ offer.room|money(False, 0) ~ ' ' ~ base ~ '; your ' ~ offer.rate|money(False, 0) ~ '% target stays', 'Plan with it'), ('save', 'Save the difference', "Keep today’s plan and raise your savings target to " ~ offer.keep_rate ~ '%', 'Save it'), ('keep', 'Keep the average', 'The plan waits until the new income shows in completed months', 'Keep it')] %}
     <form method="post" action="/budget/raise" class="phone-row"><input type="hidden" name="month" value="{{ offer.month }}"><input type="hidden" name="choice" value="{{ choice }}">
       <span>{{ title|tr(locale) }}<small>{{ line|tr(locale) }}</small></span>
       <button class="btn small{{ ' primary' if loop.first }}">{{ button|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}

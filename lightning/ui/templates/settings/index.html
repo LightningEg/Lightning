@@ -11,7 +11,7 @@
   <h2 id="theme-heading">{{ 'Appearance and language'|tr(locale) }}</h2>
   <div class="settings-row"><div><label for="app-theme">{{ 'Theme'|tr(locale) }}</label><small>{{ 'Applies at once and saves with this profile.'|tr(locale) }}</small></div>
     <div class="settings-control"><select id="app-theme" data-theme-select aria-describedby="theme-status"></select><span id="theme-status" class="settings-status" data-theme-status role="status"></span></div></div>
-  <div class="settings-row" data-theme-night hidden><div><label for="theme-night">{{ 'Night version'|tr(locale) }}</label><small>{{ "Day, night, or follow this computer's light or dark setting."|tr(locale) }}</small></div>
+  <div class="settings-row" data-theme-night hidden><div><label for="theme-night">{{ 'Night version'|tr(locale) }}</label><small>{{ "Day, night, or follow this computer’s light or dark setting."|tr(locale) }}</small></div>
     <div class="settings-control"><select id="theme-night"><option value="day">{{ 'Day'|tr(locale) }}</option><option value="night">{{ 'Night'|tr(locale) }}</option><option value="follow">{{ 'Follow this computer'|tr(locale) }}</option></select></div></div>
   {% if section == 'general' %}<div class="settings-row"><div><label for="ui-locale">{{ 'Language'|tr(locale) }}</label></div>
     <form method="post" action="/settings/locale" class="settings-control"><select id="ui-locale" name="locale" data-locale-auto><option value="en" {{ 'selected' if locale == 'en' }}>{{ 'English'|tr(locale) }}</option><option value="ar" {{ 'selected' if locale == 'ar' }}>{{ 'العربية'|tr(locale) }}</option></select><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% endif %}
@@ -28,9 +28,9 @@
     {% if play_offers is none %}<ol class="theme-unlock-steps">
       <li>{{ 'Buy it on lightningeg.com.'|tr(locale) }} <a data-theme-prices data-marketplace="{{ marketplace }}" href="{{ marketplace }}?from=app#themes" target="_blank" rel="noopener">{{ 'See prices'|tr(locale) }}</a></li>
       <li>{{ 'On your account page, press Get app code.'|tr(locale) }}</li>
-      <li>{{ "Paste it here. Do this once: your profile's other devices unlock by themselves."|tr(locale) }}</li>
+      <li>{{ "Paste it here. Do this once: your profile’s other devices unlock by themselves."|tr(locale) }}</li>
     </ol>
-    <p class="muted small">{{ 'Your other profiles unlock free, each with its own code, up to 5.'|tr(locale) }}</p>{% else %}<p class="muted small">{{ "Have an unlock code? Paste it here. Your profile's other devices unlock by themselves."|tr(locale) }}</p>{% endif %}
+    <p class="muted small">{{ 'Your other profiles unlock free, each with its own code, up to 5.'|tr(locale) }}</p>{% else %}<p class="muted small">{{ "Have an unlock code? Paste it here. Your profile’s other devices unlock by themselves."|tr(locale) }}</p>{% endif %}
     {% set mine = paid|selectattr('owned')|map(attribute='name')|list %}{% if mine %}<p>{{ 'Yours on this profile:'|tr(locale) }} {% for n in mine %}<b>{{ n|tr(locale) }}</b>{% if not loop.last %} · {% endif %}{% endfor %}</p>{% endif %}
     <form method="post" action="/settings/theme/unlock" class="theme-unlock-form">
       <label for="unlock-code">{{ ('Code from your account page' if play_offers is none else 'Unlock code')|tr(locale) }}</label>
@@ -45,7 +45,7 @@
 {% set settings_section = 'valuations' if section in ('valuations', 'assets-valuations') else section %}
 
 
-{% if section in ('valuations','assets-valuations') %}<section id="assets-valuations" class="card data-panel"><div class="section-head"><div><h2>{{ 'Sale factors'|tr(locale) }}</h2><p class="muted small">{{ "The share of each class's value you would expect to get if you sold today. Used for {after_sale} and {sold_today}."|tr(locale, after_sale=fig.holdings_after_sale.label|lower, sold_today=fig.if_you_sold_today.label|lower) }}</p></div></div>{% block factor_list %}<table class="factor-table"><colgroup><col><col class="c-num"><col class="c-factor"><col class="c-num"></colgroup>
+{% if section in ('valuations','assets-valuations') %}<section id="assets-valuations" class="card data-panel"><div class="section-head"><div><h2>{{ 'Sale factors'|tr(locale) }}</h2><p class="muted small">{{ "The share of each class’s value you would expect to get if you sold today. Used for {after_sale} and {sold_today}."|tr(locale, after_sale=fig.holdings_after_sale.label|lower, sold_today=fig.if_you_sold_today.label|lower) }}</p></div></div>{% block factor_list %}<table class="factor-table"><colgroup><col><col class="c-num"><col class="c-factor"><col class="c-num"></colgroup>
 <thead><tr><th>{{ 'Class'|tr(locale) }}</th><th class="num">{{ 'Value you own'|tr(locale) }}</th><th>{{ 'Sale factor'|tr(locale) }}</th><th class="num">{{ 'After sale (estimate)'|tr(locale) }}</th></tr></thead>
 {% for g in factor_groups %}{% set r = g.root %}<tbody class="factor-group">
 <tr class="factor-head"><th data-label="{{ 'Class'|tr(locale) }}">{{ r.name }}</th><td class="num" data-label="{{ 'Value you own'|tr(locale) }}">{{ g.value|money }}</td>

@@ -41,7 +41,7 @@
   {% elif h.value is none %}
   <p class="muted">{{ "This holding has no price yet, so there is nothing to compare."|tr(locale) }}</p>
   {% else %}
-  <p class="muted">{{ "Your first typed rate is for {date}, after this holding's first cash flow. Type an earlier rate to compare."|tr(locale, date=rate_history[0][0].isoformat()) }}</p>
+  <p class="muted">{{ "Your first typed rate is for {date}, after this holding’s first cash flow. Type an earlier rate to compare."|tr(locale, date=rate_history[0][0].isoformat()) }}</p>
   {% endif %}
   <details{% if not rate_history %} open{% endif %}><summary>{{ "Risk-free rates you typed"|tr(locale) }}</summary>
     {% if rate_history %}<table class="plain-table"><thead><tr><th>{{ "From"|tr(locale) }}</th><th class="num">{{ "Yearly rate (%)"|tr(locale) }}</th><th></th></tr></thead><tbody>

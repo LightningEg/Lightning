@@ -84,7 +84,7 @@ def verify_manifest(raw: bytes, signature: str | bytes, keys: dict[str, bytes]) 
     try:
         Ed25519PublicKey.from_public_bytes(key).verify(base64.b64decode(signature, validate=True), LABEL + raw)
     except (InvalidSignature, ValueError):
-        raise UpdateError("The update's signature does not match, so it was not trusted.") from None
+        raise UpdateError("The update’s signature does not match, so it was not trusted.") from None
     version, name, sha, size = data["version"], data["zip"], data["sha256"], data["size"]
     version_tuple(version)
     if (data["format"] != 1 or name != f"Lightning-v{version}-Windows-x64.zip"
@@ -145,7 +145,7 @@ def check(*, get: Callable[[str], bytes] = http_get, current: str = DISPLAY_VERS
     except UpdateError as error:
         return Failed(str(error))
     except (ValueError, KeyError, TypeError):
-        return Failed("GitHub's answer was not in the expected form.")
+        return Failed("GitHub’s answer was not in the expected form.")
 
 
 def download(found: Available, folder: Path, *, stream: Callable[[str], Iterator[bytes]] = http_stream,
