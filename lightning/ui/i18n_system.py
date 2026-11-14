@@ -2439,6 +2439,25 @@ CLIENT = {
     "Amount per unit ({cur})": "المبلغ للوحدة ({cur})",
 }
 
+# IV-11M4 (mockup v2.0): the phone's Add sheet and a transaction's sheet.
+TEMPLATES.update({
+    "Paste a bank SMS": "الصق رسالة البنك",
+    "Log again": "سجّلها تاني",
+    "Amount keypad": "أرقام المبلغ",
+    "Delete last digit": "امسح آخر رقم",
+    "Save expense": "احفظ المصروف",
+    "Save income": "احفظ الدخل",
+    "Save transfer": "احفظ التحويل",
+    "Between your accounts": "بين حساباتك",
+    "{left} left after this": "فاضل {left} بعد دي",
+    "Over by {amt}": "زيادة {amt}",
+    "Balance after {amt}": "الرصيد بعدها {amt}",
+    "Add a note": "اكتب ملاحظة",
+    "Always file {who} under {category}?": "نحط {who} دايماً تحت {category}؟",
+    "Split it": "قسّمها",
+    "Delete this transaction": "امسح المعاملة دي",
+})
+
 INSIGHTS = {
     "{amt} more than {b}": "{amt} أكتر من {b}",
     "{amt} less than {b}": "{amt} أقل من {b}",

@@ -1,7 +1,9 @@
-{# A transaction's own sheet on a phone (guideline C09.7; 3AD2, 3AN3): look first, edit second. The arrow chip, the name,
-   the amount in whole EGP, the date and account, then Category with the plan left, and the note. Change category and
-   Split are at the foot; Edit opens the form. A row nobody has sorted leads with the usual categories as chips, and in the
-   To sort list one tap files it and opens the next one (J5 in three taps). Figures come from the route's services. #}
+{# A transaction's own sheet on a phone (guideline C09.7 v2.0; 3AD2, 3AN3, IV-11M4): look first, edit second. A hero tinted
+   by what the money did (rose out, green in, azure a move) holds the chip, the name, "Money out · Today" and the big
+   signed amount; then one card of rows (Category with the plan left, Account with its balance after, Date, Note), each
+   opening the field to change; the rule offer when the same filing was done by hand twice; Split it and Edit side by
+   side; Delete at the foot. A row nobody has sorted leads with the usual categories as chips, and in the To sort list one
+   tap files it and opens the next one (J5 in three taps). Every figure comes from the route's services. #}
 {% extends "base.html" %}
 {% from "phone/partials/txn.html" import arrow with context %}
 {% block title %}{{ who or label }}{% endblock %}
@@ -10,16 +12,17 @@
 {% block content %}
 {% set back_q = '?return_to=' ~ return_to|urlencode %}
 {% set sort_q = ('&' ~ sort_query) if sort_query else '' %}
+{% set edit_url = '/transactions/' ~ txn.id ~ '/edit-popup' ~ back_q %}
 {% set hidden_fields %}<input type="hidden" name="return_to" value="{{ return_to }}">{% for key, value in sort.items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}{% endset %}
 <section class="app-popup-content phone-txn-sheet">
-  <header class="phone-txn-head">
-    {{ arrow(kind) }}
+  <header class="phone-txn-hero is-{{ kind }}">
+    {{ arrow(kind, category_mark(category.id) if category and kind in ('in', 'out') else '') }}
     <div class="phone-txn-head-text">
       <h2 data-popup-title class="phone-sheet-title">{{ who if who else ('Transfer' if kind == 'move' else label)|tr(locale) }}</h2>
-      <p class="phone-note">{{ txn.date|day_label(locale) }} · {% if target %}{{ account.name }} → {{ target.name }}{% else %}{{ account.name }}{% endif %}</p>
+      <p class="phone-note">{{ ('Money out' if kind == 'out' else 'Money in' if kind == 'in' else 'Between your accounts')|tr(locale) }} · {{ txn.date|day_label(locale) }}{% if target %} · {{ account.name }} → {{ target.name }}{% endif %}</p>
     </div>
+    <p class="phone-txn-sheet-amount is-{{ kind }}"><bdi class="fig">{% if kind == 'move' %}{{ amount|amount_role('row') }}{% else %}{{ ((amount if kind == 'in' else -amount))|amount_role('row', True) }}{% endif %}</bdi> <small>{{ currency }}</small></p>
   </header>
-  <p class="phone-txn-sheet-amount{{ ' is-in' if kind == 'in' }}"><bdi class="fig">{% if kind == 'move' %}{{ amount|amount_role('row') }}{% else %}{{ ((amount if kind == 'in' else -amount))|amount_role('row', True) }}{% endif %}</bdi> <small>{{ currency }}</small></p>
   {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
 
   {% if chips %}
@@ -37,20 +40,36 @@
   </section>
   {% endif %}
 
-  {% if not chips or txn.notes %}
-  <dl class="phone-facts">
-    {% if not chips %}<div><dt>{{ 'Category'|tr(locale) }}</dt><dd>{% if kind == 'move' %}{{ 'Transfer'|tr(locale) }}{% elif category %}{{ category.name }}{% else %}{{ 'Split'|tr(locale) }}{% endif %}</dd></div>
-    {% if plan %}<div><dt>{{ 'Plan left'|tr(locale) }}</dt><dd>{% if plan.over %}<span class="is-over">{{ 'Over by {amt} · limit {limit}'|tr(locale, amt=(-plan.left)|amount_role('total'), limit=plan.limit|amount_role('total')) }}</span>{% else %}{{ '{left} left of {limit}'|tr(locale, left=plan.left|amount_role('total'), limit=plan.limit|amount_role('total')) }}{% endif %}</dd></div>{% endif %}{% endif %}
-    {% if txn.notes %}<div><dt>{{ 'Note'|tr(locale) }}</dt><dd dir="auto">{{ txn.notes }}</dd></div>{% endif %}
-  </dl>
-  {% endif %}
-
-  <div class="phone-sheet-actions">
-    {% if not chips %}<a class="btn" data-popup-open href="/transactions/{{ txn.id }}/sheet{{ back_q }}{{ sort_q }}&change=1">{{ 'Change category'|tr(locale) }}</a>{% endif %}
-    {% if split %}<a class="btn" href="/transactions/{{ txn.id }}">{{ 'Split'|tr(locale) }}</a>{% endif %}
-    {% if not unsorted %}<a class="btn" data-popup-open href="{{ repeat_url }}&amp;return_to={{ return_to|urlencode }}">{{ 'Repeat entry'|tr(locale) }}</a>{% endif %}
-    {% if skip %}<a class="btn" data-popup-open href="/transactions/{{ skip }}/sheet{{ back_q }}{{ sort_q }}">{{ 'Skip'|tr(locale) }}</a>{% endif %}
+  <div class="phone-txn-rows">
+    {% if not chips %}<a class="phone-txn-line" data-popup-open href="/transactions/{{ txn.id }}/sheet{{ back_q }}{{ sort_q }}&change=1">
+      <span class="phone-txn-line-body"><small>{{ 'Category'|tr(locale) }}</small><b>{% if kind == 'move' %}{{ 'Transfer'|tr(locale) }}{% elif category %}{{ category_path }}{% else %}{{ 'Split'|tr(locale) }}{% endif %}</b></span>
+      {% if plan %}<span class="phone-txn-line-side{{ ' is-over' if plan.over }}">{% if plan.over %}{{ 'Over by {amt}'|tr(locale, amt=(-plan.left)|amount_role('total')) }}{% else %}{{ '{left} left after this'|tr(locale, left=plan.left|amount_role('total')) }}{% endif %}</span>{% endif %}
+      <span class="phone-txn-line-go">{{ chevron() }}</span></a>{% endif %}
+    <a class="phone-txn-line" data-popup-open href="{{ edit_url }}">
+      <span class="phone-txn-line-body"><small>{{ 'Account'|tr(locale) }}</small><b>{% if target %}<bdi translate="no">{{ account.name }}</bdi> → <bdi translate="no">{{ target.name }}</bdi>{% else %}<bdi translate="no">{{ account.name }}</bdi>{% endif %}</b></span>
+      <span class="phone-txn-line-side">{{ 'Balance after {amt}'|tr(locale, amt=balance_after|amount_role('total')) }}</span>
+      <span class="phone-txn-line-go">{{ chevron() }}</span></a>
+    <a class="phone-txn-line" data-popup-open href="{{ edit_url }}">
+      <span class="phone-txn-line-body"><small>{{ 'Date'|tr(locale) }}</small><b>{{ txn.date|day_label(locale) }}</b></span>
+      <span class="phone-txn-line-go">{{ chevron() }}</span></a>
+    <a class="phone-txn-line" data-popup-open href="{{ edit_url }}">
+      <span class="phone-txn-line-body"><small>{{ 'Note'|tr(locale) }}</small><b dir="auto"{% if not txn.notes %} class="is-quiet"{% endif %}>{{ txn.notes if txn.notes else 'Add a note'|tr(locale) }}</b></span>
+      <span class="phone-txn-line-go">{{ chevron() }}</span></a>
   </div>
-  <a class="btn {{ 'primary ' if not chips }}phone-save" data-popup-open href="/transactions/{{ txn.id }}/edit-popup{{ back_q }}">{{ 'Edit'|tr(locale) }}</a>
+
+  {% if offer %}<div class="phone-txn-offer">
+    <p>{{ 'Always file {who} under {category}?'|tr(locale, who=offer.who, category=offer.category) }}</p>
+    <a class="phone-pill is-strong" href="{{ offer.url }}">{{ 'Yes'|tr(locale) }}</a>
+  </div>{% endif %}
+
+  <div class="phone-txn-pair">
+    {% if split %}<a class="btn" href="/transactions/{{ txn.id }}">{{ 'Split it'|tr(locale) }}</a>{% endif %}
+    <a class="btn primary" data-popup-open href="{{ edit_url }}">{{ 'Edit'|tr(locale) }}</a>
+  </div>
+  {% if not unsorted or skip %}<div class="phone-txn-quiet">
+    {% if not unsorted %}<a class="phone-quiet" data-popup-open href="{{ repeat_url }}&amp;return_to={{ return_to|urlencode }}">{{ 'Repeat entry'|tr(locale) }}</a>{% endif %}
+    {% if skip %}<a class="phone-quiet" data-popup-open href="/transactions/{{ skip }}/sheet{{ back_q }}{{ sort_q }}">{{ 'Skip'|tr(locale) }}</a>{% endif %}
+  </div>{% endif %}
+  <form method="post" action="/transactions/{{ txn.id }}/delete?back={{ return_to|urlencode }}" class="phone-txn-delete" data-confirm-delete><button class="phone-delete">{{ 'Delete this transaction'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 </section>
 {% endblock %}

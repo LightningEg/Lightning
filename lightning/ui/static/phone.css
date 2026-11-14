@@ -1533,3 +1533,106 @@ html.phone .phone-content .phone-row-pick select:not(#_) { height: auto; border-
 .phone-more-links .phone-quiet { min-height: 44px; display: inline-flex; align-items: center; }
 .phone-sheet-panel .choice-list .btn { height: auto; flex-direction: column; align-items: flex-start; white-space: normal; text-align: start; padding-block: 10px; }
 .phone-sheet-panel .choice-list .muted { white-space: normal; overflow-wrap: anywhere; }
+/* IV-11M4: Add and a transaction (mockup v2.0, screens 06 and 07). Tokens only; logical properties, so Arabic mirrors. */
+/* Add: the title with Paste a bank SMS on its right. */
+.phone-entry-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.phone-entry-head .phone-sheet-title { font: 700 20px/1.2 var(--display, inherit); letter-spacing: -.02em; color: var(--c-ink); }
+.phone-entry-head .phone-sms-paste:not(#_) { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; margin: 0; padding: 0 14px; border: 0; border-radius: 20px;
+  background: var(--v2-pill); color: var(--c-ink); font: 700 14px/1.2 var(--body, inherit); cursor: pointer; white-space: nowrap; }
+.phone-entry-head .phone-sms-paste[hidden]:not(#_) { display: none; }
+.phone-entry-head .phone-sms-paste::before { content: none; }
+.phone-entry-head .phone-sms-paste svg { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+/* Expense, Income, Transfer: the segmented track (a pale well, the chosen tab white with a soft shadow). */
+.phone-entry .phone-segment:not(#_) { gap: 4px; padding: 4px; border-radius: 16px; background: var(--v2-wash-flat); }
+.phone-entry .phone-segment span { min-height: 40px; border-radius: 12px; font-size: 14.5px; font-weight: 600; color: var(--c-muted); }
+.phone-entry .phone-segment input:checked + span { background: var(--v2-card); color: var(--c-ink); font-weight: 800; box-shadow: 0 2px 6px -2px rgba(10, 36, 66, .25); }
+/* Field labels in the sheet: 13/700, Ink-2. */
+.phone-entry.is-new .phone-form .field > label, .phone-entry.is-new .phone-form .field .phone-field-label { font-size: 13px; font-weight: 700; color: var(--c-ink-2); }
+/* Log again: three pale-green chips, the payee and what it was. */
+.phone-log-again { display: flex; gap: 8px; }
+.phone-log-chip { flex: 1; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 6px; height: 48px; padding: 0 10px; border-radius: 16px;
+  background: var(--v2-wash-good); color: var(--c-ink); font-size: 13.5px; font-weight: 700; text-decoration: none; }
+.phone-log-chip svg { flex: none; width: 17px; height: 17px; fill: none; stroke: var(--v2-good); stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.phone-log-chip span:not(.phone-log-amount) { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.phone-log-chip .phone-log-amount { flex: none; font-weight: 700; color: var(--c-ink-2); font-variant-numeric: tabular-nums; }
+/* The amount: large and centred, in its meaning's colour (rose money out, green money in), EGP after it. */
+.phone-entry.is-new .phone-amount > label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.phone-entry.is-new .phone-amount-box { justify-content: center; align-items: baseline; gap: 8px; color: var(--v2-bad); }
+.phone-entry.is-new:has([name="kind"][value="in"]:checked) .phone-amount-box { color: var(--v2-good); }
+.phone-entry.is-new:has([name="kind"][value="transfer"]:checked) .phone-amount-box { color: var(--c-ink); }
+html.phone .phone-entry.is-new .phone-amount-box input:not(#_):not(.x_):not(.y_) { field-sizing: content; width: auto; min-width: 1.2ch; max-width: 78%; height: auto !important; min-height: 0 !important;
+  padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; color: inherit; text-align: center;
+  font: 800 60px/1.1 var(--display, inherit) !important; letter-spacing: -.04em; font-variant-numeric: tabular-nums; caret-color: currentColor; }
+.phone-entry.is-new .phone-amount-box input::placeholder { color: inherit; opacity: .35; }
+html.phone .phone-entry.is-new .phone-amount-box input:is(:focus, :focus-visible):not(#_):not(.x_):not(.y_) { outline: none !important; border: 0 !important; box-shadow: none !important; background: none !important; }
+.phone-entry.is-new .phone-amount-sign { font: 800 60px/1.1 var(--display, inherit); letter-spacing: -.04em; }
+.phone-entry.is-new:has([name="kind"][value="out"]:checked):has([name="amount"]:not(:placeholder-shown)) .phone-amount-sign::before { content: "\2212"; }
+.phone-entry.is-new:has([name="kind"][value="in"]:checked):has([name="amount"]:not(:placeholder-shown)) .phone-amount-sign::before { content: "+"; }
+.phone-entry.is-new .phone-amount-unit { position: static; transform: none; font-size: 15px; font-weight: 700; color: var(--c-muted); }
+html[dir="rtl"] .phone-entry.is-new .phone-amount-box { direction: ltr; }  /* the figure reads sign, digits, EGP in either language */
+/* Account and date: two outline chips, side by side and centred. */
+.phone-when { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; }
+.phone-when > .field, .phone-when > .phone-note { margin: 0; }
+.phone-when > .field > label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.phone-form .phone-when .phone-account-chip select:not(#_) { min-height: 44px; border: 1px solid var(--v2-edge); background-color: var(--v2-card); font-size: 14.5px; }
+.phone-when .phone-entry-account { display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; border: 1px solid var(--v2-edge); border-radius: 22px;
+  background: var(--v2-card); color: var(--c-ink); font-size: 14.5px; font-weight: 700; }
+.phone-date-chip { position: relative; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border: 1px solid var(--v2-edge); border-radius: 22px;
+  background: var(--v2-card); color: var(--c-ink); font-size: 14.5px; font-weight: 700; }
+.phone-date-chip svg { flex: none; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.phone-form .phone-date-chip input:not(#_):not(.x_) { min-height: 0 !important; height: auto !important; padding: 0; border: 0; background: none; box-shadow: none; font: inherit; color: inherit; }
+.phone-form .phone-date-chip.is-enhanced :is(input, .iso-date-control):not(#_):not(.x_) { position: absolute; inset: 0; width: 100%; height: 100% !important; opacity: 0; cursor: pointer; }
+.phone-form .phone-date-chip.is-enhanced .date-picker-button:not(#_) { display: none; }
+/* Category chips: outline, the chosen one Ink; More last. */
+.phone-entry.is-new .phone-cat-chips .phone-chip { min-height: 44px; padding: 0 16px; border: 1px solid var(--v2-edge); border-radius: 22px; background: var(--v2-card);
+  color: var(--c-ink); font: 700 14.5px/1.2 var(--body, inherit); }
+.phone-entry.is-new .phone-cat-chips .phone-chip.is-chosen, .phone-entry.is-new .phone-cat-chips .phone-chip[aria-pressed="true"] { background: var(--c-ink); border-color: var(--c-ink); color: var(--v2-card); }
+/* The keypad: 3 by 4, white keys with an edge, Bricolage figures. */
+.phone-keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 8px; }
+.phone-keypad[hidden] { display: none; }
+html[dir="rtl"] .phone-keypad { direction: ltr; }  /* 1 2 3 left to right, as on every phone keypad */
+.phone-keypad button { display: flex; align-items: center; justify-content: center; height: 54px; padding: 0; border: 1px solid var(--v2-edge); border-radius: 16px;
+  background: var(--v2-card); color: var(--c-ink); font: 700 22px/1 var(--display, inherit); cursor: pointer; }
+.phone-keypad button:active { background: var(--v2-pill); }
+.phone-keypad svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+/* Save expense: full width, dark, 56 tall. */
+.phone-entry .phone-save-bar { border-top: 0; background: var(--v2-card); }
+.phone-entry .phone-save-bar .phone-save:not(#_) { min-height: 56px; border: 0; border-radius: 18px; background: var(--c-ink); color: var(--v2-card); font-size: 16px; font-weight: 700;
+  box-shadow: 0 14px 24px -16px rgba(10, 36, 66, .7); }
+
+/* A transaction: the tinted hero (rose money out, green money in, azure a move) with the chip, the name and the amount. */
+.phone-txn-hero { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 4px 12px; margin: -16px -16px 0; padding-block: 20px 22px;
+  padding-inline: 20px 60px; background: linear-gradient(180deg, var(--v2-wash-info) 0%, var(--v2-card) 100%); }
+.phone-txn-hero.is-out { background: linear-gradient(180deg, var(--v2-wash-bad) 0%, color-mix(in srgb, var(--v2-wash-bad) 45%, var(--v2-card)) 100%); }
+.phone-txn-hero.is-in { background: linear-gradient(180deg, var(--v2-wash-good) 0%, color-mix(in srgb, var(--v2-wash-good) 45%, var(--v2-card)) 100%); }
+.phone-txn-hero .phone-txn-av { width: 48px; height: 48px; background: var(--v2-card); box-shadow: var(--v2-tile-shadow); }
+.phone-txn-hero .phone-sheet-title { font: 700 19px/1.2 var(--display, inherit); letter-spacing: -.02em; overflow-wrap: anywhere; }
+.phone-txn-hero .phone-note { margin: 2px 0 0; font-size: 13px; color: var(--c-ink-2); }
+.phone-txn-hero .phone-txn-sheet-amount { grid-column: 1 / -1; margin: 12px 0 0; font: 800 44px/1.08 var(--display, inherit); letter-spacing: -.035em; color: var(--c-ink); }
+.phone-txn-hero .phone-txn-sheet-amount.is-out { color: var(--v2-bad); }
+.phone-txn-hero .phone-txn-sheet-amount.is-in { color: var(--v2-good); }
+.phone-txn-hero .phone-txn-sheet-amount small { margin-inline-start: 4px; font: 700 14px/1 var(--body, inherit); letter-spacing: 0; color: var(--c-muted); }
+/* The rows: one card, label over value, the figure that matters on the right, then ›. */
+.phone-txn-rows { margin: 16px 0 0; padding: 0 16px; border: 1px solid var(--v2-edge); border-radius: 22px; background: var(--v2-card); box-shadow: var(--v2-shadow); }
+.phone-txn-line { display: flex; align-items: center; gap: 10px; min-height: 64px; padding: 10px 0; border-top: 1px solid var(--v2-hair); color: var(--c-ink); text-decoration: none; }
+.phone-txn-line:first-child { border-top: 0; }
+.phone-txn-line-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.phone-txn-line-body small { font-size: 13px; font-weight: 600; color: var(--c-muted); }
+.phone-txn-line-body b { font-size: 15.5px; font-weight: 700; overflow-wrap: anywhere; }
+.phone-txn-line-body b.is-quiet { color: var(--c-ink-2); }
+.phone-txn-line-side { flex: none; max-width: 48%; font-size: 13px; font-weight: 600; color: var(--c-ink-2); text-align: end; font-variant-numeric: tabular-nums; }
+.phone-txn-line-side.is-over { color: var(--v2-bad); font-weight: 700; }
+.phone-txn-line-go { flex: none; display: inline-flex; color: var(--c-muted); }
+/* The rule offer: a pale azure well, the question and Yes. */
+.phone-txn-offer { display: flex; align-items: center; gap: 12px; margin: 16px 0 0; padding: 12px 14px; border-radius: 18px; background: var(--v2-wash-info); }
+.phone-txn-offer p { flex: 1; min-width: 0; margin: 0; font-size: 14px; color: var(--c-ink); }
+.phone-txn-offer .phone-pill { display: inline-flex; align-items: center; flex: none; text-decoration: none; }
+/* Split it and Edit side by side; Delete a soft rose full-width button at the foot. */
+.phone-txn-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 10px; margin: 16px 0 0; }
+.phone-txn-pair .btn:not(#_) { width: 100%; min-height: 52px; justify-content: center; border-radius: 18px; font-size: 15.5px; font-weight: 700; }
+.phone-txn-pair .btn:not(.primary):not(#_) { border: 1px solid var(--v2-edge); background: var(--v2-card); color: var(--c-ink); box-shadow: none; }
+.phone-txn-pair .btn.primary:not(#_) { border: 0; background: var(--c-ink); color: var(--v2-card); box-shadow: 0 14px 24px -16px rgba(10, 36, 66, .7); }
+.phone-txn-quiet { display: flex; justify-content: center; gap: 16px; margin: 8px 0 0; }
+.phone-txn-quiet .phone-quiet { min-height: 44px; display: inline-flex; align-items: center; font-weight: 700; text-decoration: none; }
+.phone-txn-delete { margin: 20px 0 0; }
+.phone-delete { width: 100%; min-height: 52px; border: 0; border-radius: 18px; background: var(--v2-wash-bad); color: var(--v2-bad); font: 700 15px/1.2 var(--body, inherit); cursor: pointer; }

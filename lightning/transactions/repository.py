@@ -336,6 +336,31 @@ class TransactionRepository:
             (since,),
         )
 
+    def recent_expense_entries(self, limit: int = 60) -> list:
+        """Money-out entries with a payee, newest first, one row per transaction: [{counterparty, account_id,
+        category_id, amount_e6, date, id}] (IV-11M4: the Add sheet's Log again chips)."""
+        return self.db.all(
+            "SELECT COALESCE(cp.name, t.counterparty) AS counterparty, le.account_id, le.category_id,"
+            " SUM(ABS(le.amount_e6)) AS amount_e6, t.date, t.id"
+            " FROM transactions t JOIN ledger_entries le ON le.transaction_id = t.id"
+            " JOIN categories cat ON cat.id = le.category_id AND cat.is_system = 0"  # never Unaccounted
+            " LEFT JOIN counterparties cp ON cp.id = t.counterparty_id"
+            " WHERE t.status = 'POSTED' AND t.type = 'OUT' AND t.counterparty != ''"
+            "  AND le.effect = 'OUTFLOW' AND le.category_id IS NOT NULL"
+            " GROUP BY t.id ORDER BY t.date DESC, t.id DESC LIMIT ?",
+            (limit,),
+        )
+
+    def cash_after(self, account_id: int, day: str, txn_id: int) -> int:
+        """The account's cash (millionths) just after one transaction: everything on earlier days plus that day's own
+        entries up to and including it, in the register's order (date, then id)."""
+        return int(self.db.scalar(
+            "SELECT COALESCE(SUM(le.quantity_e6), 0) FROM ledger_entries le"
+            " JOIN transactions t ON t.id = le.transaction_id AND t.status = 'POSTED'"
+            " WHERE le.account_id = ? AND le.asset_id IN (SELECT id FROM financial_assets WHERE is_cash = 1)"
+            "  AND (le.date < ? OR (le.date = ? AND t.id <= ?))",
+            (account_id, day, day, txn_id)) or 0)
+
     def recent_accounts(self, window: int) -> list:
         """Each counterparty's last ``window`` money in/out transactions with the account each used, newest first,
         under its saved name: [{counterparty, account_id, date, id}] (one row per transaction)."""
