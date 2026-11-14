@@ -61,4 +61,5 @@ def test_the_investments_table_shows_one_gain_without_secondary_fx_annotations(c
     row = table[table.index("Nasdaq 100 ETF"):]
     row = row[:row.index("</tr>")]
     assert "25,000" in row and "31,200" in row and "+6,200" in row
-    assert "<small" not in row and "Price part" not in row and "FX part" not in row
+    assert "50 <small>USD</small>" in row and "60 <small>USD</small>" in row
+    assert "Price part" not in row and "FX part" not in row

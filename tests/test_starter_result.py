@@ -26,7 +26,7 @@ def c(tmp_path):
 def imported(c):
     data = workbook([acct("Salary account", bal=5000), acct("Wallet", "Cash", bal=200)],
                     [(None, "Personal", "Pets", "Spending", None)],
-                    [entry("2026-01-05", "Salary account", "Food & Groceries", "Corner shop", -185.5),
+                    [entry("2026-01-05", "Salary account", "Food & groceries", "Corner shop", -185.5),
                      entry("2026-01-06", "Salary account", "Pets", "Vet", -420, note="Checkup"),
                      entry("2026-01-07", "Wallet", "Mystery", "Client", 900)])  # one row cannot be placed
     result = si.confirm(c, data)

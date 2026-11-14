@@ -124,8 +124,11 @@ def record(c, account, values: dict):
                                       "units")
             amount = to_decimal(total, "total")
             fee = to_decimal(values["fees"], "fees") if values["fees"] else ZERO
-            gross = amount - fee if values["fees_included"] != "0" else amount
-            units = (gross / price).quantize(Decimal("0.0001"))
+            # A cash total includes the buy fee but excludes the fee kept from a sale.
+            gross = amount
+            if values["fees_included"] != "0":
+                gross += fee if action == "sell" else -fee
+            units = (gross / price).quantize(Decimal(1).scaleb(-asset.quantity_decimals), rounding=ROUND_HALF_UP)
             if units <= ZERO:
                 raise ValidationError("The amount is too small for one unit at that price.", "total")
             if action == "sell":

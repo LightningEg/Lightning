@@ -41,7 +41,7 @@ def test_comprehensive_roundtrip_and_legacy_headers(c, tmp_path):
     ledger = next(t for t in tables if t[0] == 'ledger_entries')
     assert ledger[1][:11] == ['Transaction ID', 'Transaction reference', 'Account', 'Date', 'Counterparty',
                             'Currency', 'Total in currency', 'FX rate', 'Total in default currency', 'Category L1', 'Category L2']
-    assert any(row[2] == 'Example bank' and row[10] == 'Food & Groceries' for row in ledger[2])
+    assert any(row[2] == 'Example bank' and row[10] == 'Food & groceries' for row in ledger[2])
     target = build(tmp_path/'new.db', key=b'k' * 32)
     target.db.execute("INSERT INTO profile_identity(singleton,profile_id) VALUES(1,'00000000-0000-0000-0000-000000000001')")
     prepared = prepare_import(target, data)
@@ -120,7 +120,7 @@ def test_analysis_plain_arial_and_split_categories(c):
         assert all(xf.find('{*}alignment').get('horizontal')=='left' for xf in root.find('{*}cellXfs'))
     sheet=read_workbook(data)['Transactions']
     assert 'Quantity' not in sheet[0] and 'Unit price' not in sheet[0]
-    assert any(row[9:11]==['Personal','Food & Groceries'] for row in sheet[1:])
+    assert any(row[9:11]==['Personal','Food & groceries'] for row in sheet[1:])
 
 
 def test_settings_keeps_the_ai_text_off_the_page_and_groups_data_tools(c):

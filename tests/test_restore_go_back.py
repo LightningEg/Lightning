@@ -89,7 +89,10 @@ def test_a_changed_copy_from_before_is_refused_and_nothing_moves(tmp_path, monke
         live = _interrupted(browser, app, cfg, monkeypatch)
         restorer_files = sorted(path.name for path in live.parent.iterdir())
         pre = next(path for path in (live.parent / "backups").iterdir() if "_upgrade_" in path.name)
-        pre.write_bytes(pre.read_bytes()[:-1] + b"\x01")
+        original = pre.read_bytes()
+        # A constant replacement can equal the encrypted byte already there; always change it.
+        pre.write_bytes(original[:-1] + bytes([original[-1] ^ 1]))
+        assert pre.read_bytes() != original
         page = browser.get("/profiles/restore/repair", params={"db": str(live)})
         assert "Does not match the record" in page.text and 'action="/profiles/restore/repair"' not in page.text
         refused = browser.post("/profiles/restore/repair", data={"csrf": token(page.text), "db": str(live),

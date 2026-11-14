@@ -36,7 +36,7 @@ def _plan(c, **items):
 
 
 def _hero(html: str) -> str:
-    return re.search(r'(?s)<(section|a) class="phone-hero has-seam".*?</(section|a)>', html).group(0)
+    return re.search(r'(?s)<section class="phone-hero phone-plan-hero".*?</section>', html).group(0)
 
 
 def _due(html: str) -> str:
@@ -45,7 +45,7 @@ def _due(html: str) -> str:
 
 
 def _coming(html: str) -> str:
-    return re.search(r'(?s)<section class="phone-section phone-plan-coming".*?</section>', html).group(0)
+    return re.search(r'(?s)<section class="phone-section[^"]*phone-plan-coming".*?</section>', html).group(0)
 
 
 def _text(html: str) -> str:
@@ -64,49 +64,50 @@ def week(c, setup, monkeypatch):
     return _phone(c)
 
 
-def test_the_hero_is_safe_to_spend_and_coming_up_opens_on_due_before_payday(c, week):
+def test_the_hero_is_due_before_payday_and_before_payday_lists_its_bills(c, week):
+    """IV-11M6 (owner mockup v2.0, 2026-11-14): Coming up leads with Due before payday, its verdict, the next 30 days
+    in and out and a timeline; Safe to spend's home is Home's card (one figure, one home)."""
     html = week.get("/plan").text
     forecast = c.forecaster.forecast(DAY)
     due = -dict(forecast.safe_to_spend_parts)[label("payments_before_next_income")]
-    hero = _hero(html)  # IV-12P (owner, 2026-11-09): the same lead as the PC
-    assert "Safe to spend" in hero and f"{forecast.safe_to_spend:,.0f} <small>EGP</small>" in hero
+    hero = _hero(html)
+    assert "Due before payday" in hero and f"{due:,.0f} <small>EGP</small>" in hero and "Covered." in hero
+    assert "Coming in · 30 days" in hero and 'class="phone-timeline"' in hero
     line = _due(html)
     assert "Due before payday" in line and f"{due:,.0f} EGP" in line and line in _coming(html)
     assert "12,770" in line  # Landlord 12,000 + Streaming 120 + Internet's October 650
     text = _text(line)
     assert "3 payments until 25 Oct." in text and "All covered by free cash." in text
     assert "1 payment is already late." in text
-    # The hero sits above the worded tabs, which sit right under its sentence.
-    assert html.index('class="phone-hero has-seam"') < html.index('class="section-bar"') < html.index('class="phone-section phone-plan-coming"')
-    assert html.count('class="phone-hero ') == 1  # the sentence is shown once
+    # The hero sits above the worded tabs, which sit right above Before payday.
+    assert html.index('class="phone-hero phone-plan-hero"') < html.index('class="section-bar"') < html.index('class="phone-section is-rose phone-plan-coming"')
+    assert html.count('class="phone-hero ') == 1
 
 
 def test_coming_up_lists_late_first_then_what_is_due_and_ends_with_payday(c, week):
-    html = _coming(week.get("/plan").text)
-    names = re.findall(r'class="phone-row phone-plan-row[^"]*"[^>]*href="[^"]+"><span>([^<]+)<small>', html)
-    # Late Internet, then by date; payday ends the list; Gym (after payday) is the folded row below it.
+    page = week.get("/plan").text
+    pattern = r'class="phone-row phone-plan-row[^"]*"[^>]*href="[^"]+">(?:<span class="phone-txn-av[^>]*>.*?</span>)?<span>([^<]+)<small>'
+    names = re.findall(pattern, page, re.S)
+    # Late Internet, then by date; payday starts After payday, then Gym.
     assert names == ["Internet", "Landlord", "Streaming", "Internet", "ACME Egypt", "Gym"], names
+    html = _coming(page)
     assert "Late · 16 days" in html[html.index("Internet"):html.index("Landlord")]
-    assert html.count("plan-status-late") == 1 and "Payday" in html and "+45,000" in html
-    assert "−12,000" in html and "−120" in html and "in 4 days" in html and "2026-10-10" in html
-    assert "Gym" not in html.split("<details")[0]  # after payday: folded under the list
-    assert "<details" in html and "Gym" in html.split("<details")[1]
+    assert html.count("plan-status-late") == 1 and "12,000" in html and "120" in html and "in 4 days" in html and "2026-10-10" in html
+    after = page.split('id="after-section"')[1]
+    assert "Payday" in after and "+45,000" in after and "Gym" in after and "Gym" not in html
 
 
 def test_every_row_keeps_its_pay_sheet_link_with_the_name_first(c, week):
     html = week.get("/plan").text
     for name in ("Landlord", "Streaming", "Internet", "ACME Egypt", "Gym"):
-        assert re.search(r'href="/plan/items/\d+/pay\?[^"]+"[^>]*><span>' + name, html), name
+        assert re.search(r'href="/plan/items/\d+/pay\?[^"]+"[^>]*>(?:<span class="phone-txn-av.*?</span>)?<span>' + name, html, re.S), name
 
 
-def test_two_tiles_and_the_safe_to_spend_home_stay(c, week):
+def test_the_deeper_sections_stay_and_safe_to_spend_lives_on_home(c, week):
     html = week.get("/plan").text
-    tiles = re.search(r'(?s)<section class="phone-kpis".*?</section>', html).group(0)
-    assert tiles.count('class="phone-kpi ') == 2 and "Free cash" in tiles and "Reserves" in tiles and "After bills:" in tiles
-    assert html.index(tiles) > html.index('class="phone-section phone-plan-coming"')
-    for marker in ('id="plan-build"', 'id="plan-forecast"', 'id="plan-next"', "Each month ahead", "What is promised"):
+    for marker in ('id="plan-forecast"', 'id="plan-next"', "Each month ahead", "What is promised"):
         assert marker in html, marker
-    assert html.index('id="plan-build"') > html.index(tiles)
+    assert 'id="plan-build"' not in html and 'class="phone-kpis"' not in html   # IV-11M6: Home's card holds Safe to spend's working
 
 
 def test_short_free_cash_says_by_how_much(c, setup, monkeypatch):
@@ -116,7 +117,7 @@ def test_short_free_cash_says_by_how_much(c, setup, monkeypatch):
     html = _phone(c).get("/plan").text
     free = c.forecaster.forecast(DAY).free_cash
     assert f"Free cash is {90000 - free:,.0f} short of what is due." in _text(_due(html))
-    assert "−" in re.search(r"After bills: ([^<]+)<", html).group(0)  # the true minus, like every other figure
+    assert "Short." in _hero(html)   # IV-11M6: the hero's verdict
 
 
 def test_no_income_date_reads_the_next_three_months_and_nothing_planned_asks_for_bills(c, setup, monkeypatch):

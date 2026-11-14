@@ -4,15 +4,17 @@
 {% from "partials/charts.html" import rate %}
 {% from "phone/partials/sheet.html" import sheet with context %}
 {% block title %}Loans · Cash planning{% endblock %}
-{% block heading %}<h1>{{ 'Loans'|tr(locale) }}</h1>{% endblock %}
+{% block heading %}{% if lead %}<section class="phone-hero" aria-labelledby="lead-heading"><div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ lead.label }}</div>
+<div class="phone-lead">{{ lead.value|money }} <small>{{ base }}</small></div><p class="phone-hero-line">{% if lead.compare.figure %}<b>{{ lead.compare.figure }}</b> {% endif %}<span>{{ lead.compare.text }}</span></p></section>{% endif %}{% endblock %}
 {% block content %}
-{% if lead %}<section class="phone-hero has-seam" aria-labelledby="lead-heading"><div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ lead.label }}</div>
-<div class="phone-lead">{{ lead.value|money }} <small>{{ base }}</small></div><p class="phone-hero-line">{% if lead.compare.figure %}<b>{{ lead.compare.figure }}</b> {% endif %}<span>{{ lead.compare.text }}</span></p></section>{% endif %}
-{% if debt_tiles %}<div class="phone-rows" data-loan-ratios>{% for s in debt_tiles %}<a class="phone-row" href="{{ s.href }}"><span>{{ s.label }}{% if s.sub %}<small>{{ s.sub }}</small>{% endif %}</span><b>{{ rate(s.value) ~ '%' if s.value is not none else (s.empty or '—') }}</b></a>{% endfor %}</div>{% endif %}
-<section class="phone-section" aria-labelledby="loans-list">
-  <header class="phone-section-head"><h2 id="loans-list">{{ 'Your loans'|tr(locale) }}</h2></header>
+
+{% if debt_tiles %}<section class="phone-section" aria-label="{{ 'Debt ratios'|tr(locale) }}"><div class="phone-rows" data-loan-ratios>{% for s in debt_tiles %}<a class="phone-row" href="{{ s.href }}"><span>{{ s.label }}{% if s.sub %}<small>{{ s.sub }}</small>{% endif %}</span><b>{{ rate(s.value) ~ '%' if s.value is not none else (s.empty or '—') }}</b></a>{% endfor %}</div></section>{% endif %}
+<section class="phone-section is-rose" aria-labelledby="loans-list">
+  <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18M7 6h1v4M16.71 13.88l.7.71-2.82 2.82"/></svg></span><span class="phone-head-text"><h2 id="loans-list">{{ 'Loans'|tr(locale) }}</h2><small>{{ 'Paid down each month'|tr(locale) }}</small></span></header>
   {% if loans %}<div class="phone-rows">{% for l in loans %}{% set i = l.item %}{% set pr = l.progress %}
-    {% set row %}<span>{{ i.name }}<small>{{ '{paid} of {total} paid'|tr(locale, paid=pr.paid, total=pr.total) }}{% if pr.due %} · {{ pr.due|length }} {{ 'Due'|tr(locale) }}{% endif %}</small></span><b><bdi class="fig">{{ pr.still_to_pay|money(False, 0) }}</bdi></b>{% endset %}
+    {% set row %}<span class="phone-loan-row"><span class="phone-loan-top"><span class="phone-txn-av is-out" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9L18 10l-2.7-3.6A2 2 0 0 0 13.7 6H7.3a2 2 0 0 0-1.6.8L3 10.5V16c0 .6.4 1 1 1h2M7 17h8"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg></span><span class="phone-acct-text"><b>{{ i.name }}</b><small>{{ '{paid} of {total} paid'|tr(locale, paid=pr.paid, total=pr.total) }}{% if pr.due %} · {{ pr.due|length }} {{ 'Due'|tr(locale) }}{% endif %}</small></span><b class="phone-loan-left"><bdi class="fig">{{ pr.still_to_pay|money(False, 0) }}</bdi><small>{{ 'left'|tr(locale) }}</small></b></span>
+      <span class="phone-plan-bar is-loan" aria-hidden="true"><i style="width:{{ '%.1f'|format(l.meter.width) }}%"></i></span>
+      <span class="phone-loan-ends"><small>{{ '{pct}% paid'|tr(locale, pct=l.meter.width|round|int) }}</small><small>{% if pr.next %}{{ 'Next {amt} on {date}'|tr(locale, amt=pr.next.still_owed|money(False, 0), date=pr.next.due_date|day_label(locale)) }}{% else %}{{ 'Paid off'|tr(locale) }}{% endif %}</small></span></span>{% endset %}
     {% call sheet(i.name, row) %}
     <p class="phone-note" id="loan-{{ i.id }}">{{ l.schedule }}{% if l.account %} · {{ l.account }}{% endif %}{% if i.principal %} · {{ 'Borrowed {amt} {cur}'|tr(locale, amt=i.principal|money(places=0), cur=base) }}{% endif %}</p>
     <span class="phone-plan-bar" role="img" aria-label="{{ pr.paid_amount|money }} of {{ pr.total_amount|money }} paid"><i style="width:{{ '%.1f'|format(l.meter.width) }}%"></i></span>
@@ -32,7 +34,12 @@
     {% endcall %}{% endfor %}
   </div>
   {% else %}<p class="phone-note">{{ 'No loans yet. Add a car loan, a personal loan, or a phone bought in installments to see what you still owe and when it ends.'|tr(locale) }}</p>{% endif %}
-  <a class="btn primary phone-save" data-popup-open href="/plan/items/new?kind=LOAN">{{ 'Add loan'|tr(locale) }}</a>
-  <a class="btn phone-save" data-popup-open href="/plan/purchases/new">{{ 'Bought in instalments'|tr(locale) }}</a>
 </section>
+{% for g in circles %}<section class="phone-section is-green" aria-labelledby="gameya-{{ g.id }}">
+  <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/><circle cx="9" cy="7" r="4"/></svg></span><span class="phone-head-text"><h2 id="gameya-{{ g.id }}">{{ g.name }}</h2><small>{{ '{n} members'|tr(locale, n=g.members) }}</small></span><a class="phone-quiet" href="/accounts/{{ g.id }}">{{ 'Open'|tr(locale) }}{{ chevron() }}</a></header>
+  <p class="phone-gameya-turn"><span>{{ 'Your turn'|tr(locale) }}</span><b>{{ g.payout_date|month(locale) }} · <bdi class="fig">{{ g.payout|money(False, 0) }}</bdi></b></p>
+  <div class="phone-gameya-grid" role="img" aria-label="{{ '{paid} of {n} paid; your turn is {turn}'|tr(locale, paid=g.paid, n=g.members, turn=g.my_turn) }}">{% for k in range(1, g.members + 1) %}<i class="{{ 'is-mine' if k == g.my_turn else 'is-paid' if k <= g.paid else '' }}"></i>{% endfor %}</div>
+  <p class="phone-loan-ends"><small>{{ '{paid} of {n} paid · {amt} a month'|tr(locale, paid=g.paid, n=g.members, amt=g.installment|money(False, 0)) }}</small>{% if g.next_date %}<small>{{ 'Next {date}'|tr(locale, date=g.next_date|day_label(locale)) }}</small>{% endif %}</p>
+</section>{% endfor %}
+<div class="phone-two-actions"><a class="btn" data-popup-open href="/plan/purchases/new">{{ 'Bought in instalments'|tr(locale) }}</a><a class="btn primary" data-popup-open href="/plan/items/new?kind=LOAN">{{ 'Add loan'|tr(locale) }}</a></div>
 {% endblock %}

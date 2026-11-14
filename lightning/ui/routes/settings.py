@@ -7,7 +7,7 @@ from lightning.core.errors import LightningError, ValidationError
 from lightning.investments.domain import DEFAULT_SALE_FACTOR
 from lightning.planning.position import class_group_totals
 from lightning.core.money import ZERO
-from lightning.budgeting.domain import INCOME_FROM_RECURRING
+from lightning.budgeting.domain import INCOME_BASIS_FROM, INCOME_FROM_RECURRING, dated_basis
 from lightning.core.dates import today, wall_now
 
 from ..sections import SECTIONS
@@ -173,6 +173,7 @@ async def settings_page(request: Request):
                   emergency_basis=c.budgets.emergency_basis(),
                   manual_income=c.settings.get("budget_manual_monthly_income") or "",
                   income_from_recurring=c.settings.get(INCOME_FROM_RECURRING) == "1",
+                  income_basis=dated_basis(c.settings.get(INCOME_BASIS_FROM)),  # an income drop planned on (NF-12AL1)
                   current_month=month_of(today()), health_limits=health_limits,
                   health_fund=health_fund, zakat_settings=zakat_settings, zakat_on=zakat_on,
                   currencies=currency_registry.list(),
@@ -345,7 +346,7 @@ async def buy_theme(request: Request):
         return redirect("/settings")
     db = container(request).db
     if db.read_only:
-        return redirect("/settings", "This copy is read-only. Buy on the profile's home device.")
+        return redirect("/settings", "This copy is read-only. Buy on the profile’s home device.")
     ensure_profile_id(db)
     profile = profile_id()
     if not profile or not billing.buy(theme, profile):

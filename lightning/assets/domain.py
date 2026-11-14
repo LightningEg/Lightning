@@ -73,6 +73,7 @@ class FinancialAsset:
     mic: str | None = None         # ISO 10383 venue, e.g. XCAI (the Egyptian Exchange)
     country: str | None = None     # ISO 3166 alpha-2, e.g. EG
     market_key: str | None = None  # its instrument in the market file, e.g. EG:COMI
+    counts_as_cash: bool = False   # NF-7AU: the owner counts its owned value with Free cash (a fund sold in days)
 
     @property
     def label(self) -> str:

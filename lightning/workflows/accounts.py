@@ -76,7 +76,7 @@ class AccountWorkflows:
         if account_type == "GAMEYA" and current.account_type.value != "GAMEYA":
             if self.reporting.account_value(account_id, "9999-12-31") != ZERO or [
                     h for h in self.reporting.holdings("9999-12-31")[0] if h.account.id == account_id]:
-                raise ConflictError("Move this account's cash and holdings out before turning it into a gam'eya.",
+                raise ConflictError("Move this account’s cash and holdings out before turning it into a gam'eya.",
                                     "account_type")
         if current.account_type.value == "GAMEYA" and account_type != "GAMEYA":
             raise ConflictError("A gam'eya cannot change type. Deactivate it once it is finished.", "account_type")

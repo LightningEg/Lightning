@@ -23,6 +23,8 @@ def emergency_liquidity_context(position) -> dict:
     for asset_class in position.classes:
         for item in asset_class.items:
             value = item.value
+            if getattr(item, "counts_as_cash", False):
+                continue  # NF-7AU: already inside Free cash, never listed twice
             if item.locked_until:
                 locked.append({"label": item.asset, "value": value, "until": item.locked_until})
             elif item.class_code == MONEY_MARKET_CLASS:

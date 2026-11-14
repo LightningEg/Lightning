@@ -14,7 +14,7 @@
   <p class="phone-note">{{ 'Only if no PC holds the ledger now, or you accept losing what was changed there since it borrowed it. Afterwards pair your PCs again.'|tr(locale) }}</p>
   <form method="post" action="/profiles/devices/keep-home" class="phone-form">
     <input type="hidden" name="csrf" value="{{ csrf }}">
-    <label class="check-row"><input type="checkbox" name="confirm" value="yes"> {{ 'The PC\'s copy from before will not come back'|tr(locale) }}</label>
+    <label class="check-row"><input type="checkbox" name="confirm" value="yes"> {{ 'The PC’s copy from before will not come back'|tr(locale) }}</label>
     <button class="btn phone-save" type="submit">{{ 'Keep this copy'|tr(locale) }}</button>
   </form>
 </section>
@@ -40,7 +40,7 @@
   <p class="phone-note">{{ 'The PC finds this phone on the same Wi-Fi; you type two digits. It can then borrow this ledger, edit it and hand it back. One device edits at a time.'|tr(locale) }}</p>
   <form method="post" action="/profiles/devices/pair" class="phone-form">
     <input type="hidden" name="csrf" value="{{ csrf }}">
-    <div class="field"><label for="phone-name">{{ 'This phone\'s name'|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off" enterkeyhint="done"></div>
+    <div class="field"><label for="phone-name">{{ 'This phone’s name'|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off" enterkeyhint="done"></div>
     <button class="btn primary phone-save" type="submit">{{ 'Pair a PC'|tr(locale) }}</button>
   </form>
   {% if not lent_to %}<p class="phone-note"><a href="/profiles/journal/setup">{{ 'Edit from your devices'|tr(locale) }}</a></p>{% endif %}
@@ -60,7 +60,7 @@
   <p class="phone-note">{{ 'Only when the PC is lost or broken. The phone keeps editing from its own copy; what was changed on the PC since it borrowed the ledger does not come back.'|tr(locale) }}</p>
   <form method="post" action="/profiles/devices/take-back" class="phone-form">
     <input type="hidden" name="csrf" value="{{ csrf }}">
-    <label class="check-row"><input type="checkbox" name="confirm" value="yes"> {{ 'The PC\'s changes since it borrowed the ledger will not come back'|tr(locale) }}</label>
+    <label class="check-row"><input type="checkbox" name="confirm" value="yes"> {{ 'The PC’s changes since it borrowed the ledger will not come back'|tr(locale) }}</label>
     <button class="btn phone-save" type="submit">{{ 'Take back'|tr(locale) }}</button>
   </form>
 </section>

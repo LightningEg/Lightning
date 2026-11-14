@@ -75,7 +75,7 @@ class Unlocked:
 MESSAGES = {
     Outcome.CANCELLED: "",
     Outcome.LOCKOUT: "Too many fingerprint tries. Unlock with your password, or try the fingerprint later.",
-    Outcome.INVALIDATED: "Your phone's fingerprints changed, so fingerprint unlock was turned off. "
+    Outcome.INVALIDATED: "Your phone’s fingerprints changed, so fingerprint unlock was turned off. "
                          "Unlock with your password, then turn fingerprint on again.",
     Outcome.MISMATCH: "Fingerprint unlock no longer matches this profile, so it was turned off. "
                       "Unlock with your password, then turn fingerprint on again.",
@@ -84,7 +84,7 @@ MESSAGES = {
 ENROL_MESSAGES = {
     Outcome.CANCELLED: "Fingerprint unlock was not turned on.",
     Outcome.LOCKOUT: "Too many fingerprint tries. Try again later.",
-    Outcome.INVALIDATED: "Your phone's fingerprints changed. Try turning fingerprint on again.",
+    Outcome.INVALIDATED: "Your phone’s fingerprints changed. Try turning fingerprint on again.",
     Outcome.UNAVAILABLE: "Fingerprint unlock is not available on this phone now.",
     Outcome.MISMATCH: "Fingerprint unlock could not be checked. It was not turned on.",
 }

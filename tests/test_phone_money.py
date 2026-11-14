@@ -72,7 +72,7 @@ def test_the_bills_page_groups_the_one_bill_state_and_agrees_with_coming_up(moha
 
 
 def test_money_rows_carry_figures_and_settings_leave_for_the_gear(mohab):
-    """IV-11H: at most 12 rows under the hero, each with its figure or opening one place; the settings rows are on ⚙
+    """IV-11H: at most 14 rows (12, then Activity's two, IV-11M1) under the hero, each with its figure or opening one place; the settings rows are on ⚙
     (Settings), the analysis is one Reports and reviews row, and the Money tab no longer wears More's "···"."""
     import re
     app = create_app(mohab)
@@ -81,7 +81,7 @@ def test_money_rows_carry_figures_and_settings_leave_for_the_gear(mohab):
     page = client.get("/money").text
     body = page.split("</section>", 1)[1].split('<nav class="phone-tabbar"', 1)[0]   # below the hero
     rows = re.findall(r'<a class="phone-row"[^>]*href="([^"]+)"[^>]*>(.*?)</a>', body, re.S)
-    assert 0 < len(rows) <= 12
+    assert 0 < len(rows) <= 14   # IV-11M1: Activity's two rows (All transactions, To review) joined Money
     for href, inner in rows:
         assert href.startswith("/") and ("chevron" in inner or "fig" in inner), href
     for gone in ("/categories", "/counterparties", "/rules", "/profiles/devices", "/checks", "/money/report"):
@@ -140,7 +140,7 @@ def test_coming_up_includes_the_next_bill_before_payday_beyond_nine_days(c, setu
     app = create_app(c)
     mount_phone(app)
     client = TestClient(app)
-    for path in ("/money", "/money/bills"):
+    for path in ("/money/bills",):   # IV-11M7 (mockup v2.0): Money's Coming up rows moved to Plan; Money keeps one row to Bills
         page = client.get(path).text
         assert "Internet before payday" in page
         assert "Nothing is due soon." not in page

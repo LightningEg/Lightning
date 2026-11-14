@@ -1,0 +1,4 @@
+{% macro scope(n) -%}
+{%- if n == 1 -%}{{ 'and its 1 subcategory'|tr(locale) }}
+{%- elif n -%}{{ 'and its {n} subcategories'|tr(locale, n=n) }}{%- endif -%}
+{%- endmacro %}

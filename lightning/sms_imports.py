@@ -785,7 +785,7 @@ class SmsImportService:
         for row in sorted(rows, key=lambda r: r.when):
             notes = KIND_NOTES[row.kind] + (f" · {row.place}" if row.place and row.kind != "salary" else "")
             if row.paid:  # NF-7AK3: the bank's pound debit settles it later; until then the dated rate
-                notes += f" · {row.paid}, in pounds at the day's rate until the bank's debit"
+                notes += f" · {row.paid}, in pounds at the day’s rate until the bank’s debit"
             elif not row.sure:
                 notes = "Check this: read by the general rule · " + notes
             category, counterparty = "", row.place if row.kind in ("purchase", "transfer_in", "money_out", "money_in") else ""

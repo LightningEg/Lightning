@@ -70,18 +70,23 @@
 
 <header class="overview-section-head inv-head"><h2>{{ 'Holdings'|tr(locale) }}</h2><span>As of {{ period.end_text }}{% if lens.usd %} · {{ "at 1 USD = {rate} {base}, as of {date}"|tr(locale, rate=lens.rate|money(False, 2), base=base, date=lens.as_of) }}{% endif %}</span></header>
 <section class="card wide-card holdings-card"><div class="holdings-toolbar"><form action="/investments" method="get">{% for key, value in request.query_params.items() %}{% if key != 'view' %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}{% endfor %}<select name="view" class="holdings-group-picker" aria-label="{{ 'Group holdings'|tr(locale) }}" data-holdings-group data-submit-on-change>{% for key, text in views.items() %}<option value="{{ key }}" {{ 'selected' if key == view }}>{{ text|tr(locale) }}</option>{% endfor %}</select></form><div class="holdings-filters"><input id="holding-search" placeholder="Search holdings" data-filter-holdings aria-label="Search holdings"><select id="horizon-filter" data-filter-holdings aria-label="Horizon"><option value="">{{ 'All horizons'|tr(locale) }}</option><option>{{ 'Short'|tr(locale) }}</option><option>{{ 'Medium'|tr(locale) }}</option><option>{{ 'Long'|tr(locale) }}</option><option>{{ 'Unassigned'|tr(locale) }}</option></select></div></div>
-{% set cols = 5 %}{# Owner: one line per holding; details live on the holding page. #}
+{% set cols = 7 %}{# Owner: one line per holding; details live on the holding page. #}
 {% macro pct(value, tone_of=none) %}{% if value is not none %}<span class="{{ (tone_of if tone_of is not none else value)|tone }}">{{ value|signed_pct }}%</span>{% else %}—{% endif %}{% endmacro %}
-<div class="table-wrap"><table id="holdings-table" class="holdings-grouped holdings-wide"><thead><tr><th>{{ 'Investment'|tr(locale) }}</th><th class="num">{{ fig.cost.label }}</th><th class="num">{{ "Value"|tr(locale) }}</th><th class="num">{{ "Total gain"|tr(locale) }}</th><th class="num">{{ "Total return"|tr(locale) }}</th></tr></thead>
-{% set tot_cost = holding_groups|sum(attribute='cost') %}{% set tot_value = holding_groups|sum(attribute='value') %}{% set tot_gain = holding_groups|sum(attribute='gain') %}{% set tot_invested = holding_groups|sum(attribute='invested') %}<tbody class="holding-total"><tr><th>{{ "All holdings"|tr(locale) }}</th><td class="num">{{ tot_cost|money }}</td><td class="num">{{ tot_value|money }}</td><td class="num gain"><span class="{{ tot_gain|tone }}">{{ tot_gain|money(True) }}</span></td><td class="num">{{ pct(tot_gain / tot_invested * 100 if tot_invested else none) }}</td></tr></tbody>
-{% for g in holding_groups %}<tbody class="holding-group"><tr class="holding-class"><th>{{ g.name }}</th><td class="num">{{ g.cost|money }}</td><td class="num">{{ g.value|money }}</td><td class="num gain"><span class="{{ g.gain|tone }}">{{ g.gain|money(True) }}</span></td><td class="num">{{ pct(g.gain_pct) }}</td></tr>
+{# Price per unit: a foreign holding in its own currency, anything else in the profile currency. #}
+{% macro unit_price(value, currency) %}{% if value is not none %}{{ value|money(False, 2 if value < 10 else 0) }}{% if currency %} <small>{{ currency }}</small>{% endif %}{% else %}—{% endif %}{% endmacro %}
+<div class="table-wrap"><table id="holdings-table" class="holdings-grouped holdings-wide"><thead><tr><th>{{ 'Investment'|tr(locale) }}</th><th class="num" title="{{ fig.average_cost.label }}">{{ "Avg cost"|tr(locale) }}</th><th class="num">{{ "Price now"|tr(locale) }}</th><th class="num">{{ fig.cost.label }}</th><th class="num">{{ "Value"|tr(locale) }}</th><th class="num">{{ "Total gain"|tr(locale) }}</th><th class="num">{{ "Total return"|tr(locale) }}</th></tr></thead>
+{% set tot_cost = holding_groups|sum(attribute='cost') %}{% set tot_value = holding_groups|sum(attribute='value') %}{% set tot_gain = holding_groups|sum(attribute='gain') %}{% set tot_invested = holding_groups|sum(attribute='invested') %}<tbody class="holding-total"><tr><th>{{ "All holdings"|tr(locale) }}</th><td class="num"></td><td class="num"></td><td class="num">{{ tot_cost|money }}</td><td class="num">{{ tot_value|money }}</td><td class="num gain"><span class="{{ tot_gain|tone }}">{{ tot_gain|money(True) }}</span></td><td class="num">{{ pct(tot_gain / tot_invested * 100 if tot_invested else none) }}</td></tr></tbody>
+{% for g in holding_groups %}<tbody class="holding-group"><tr class="holding-class"><th>{{ g.name }}</th><td class="num"></td><td class="num"></td><td class="num">{{ g.cost|money }}</td><td class="num">{{ g.value|money }}</td><td class="num gain"><span class="{{ g.gain|tone }}">{{ g.gain|money(True) }}</span></td><td class="num">{{ pct(g.gain_pct) }}</td></tr>
 {% for r in g.rows %}{% if r.balance %}<tr data-search="{{ (r.name ~ ' ' ~ g.name)|lower }}" data-horizon="Unassigned">
   <td><a class="holding-link" href="/accounts/{{ r.account_id }}">{{ r.name }}</a></td>
+  <td class="num">—</td><td class="num">—</td>
   <td class="num">{{ r.cost|money }}</td>
   <td class="num"><b>{{ r.value|money }}</b></td>
   {% if r.priced %}<td class="num gain"><span class="{{ r.gain|tone }}">{{ r.gain|money(True) }}</span></td><td class="num">{{ pct(r.gain_pct) }}</td>{% else %}<td class="num gain">—</td><td class="num">—</td>{% endif %}
 </tr>{% else %}{% set h = r.h %}<tr data-search="{{ (h.asset_name ~ ' ' ~ h.asset_code ~ ' ' ~ g.name ~ ' ' ~ h.account_label)|lower }}" data-horizon="{{ r.horizon }}">
   <td><a class="holding-link" href="/investments/holding/{{ h.asset_id }}?account={{ h.account_id }}&date={{ period.end_text }}&start={{ period.start_text }}" title="{{ h.asset_name }}">{{ h.short_name }}</a></td>
+  <td class="num">{{ unit_price(r.average_cost_native if r.currency else r.average_cost, r.currency) }}</td>
+  <td class="num">{{ unit_price(r.price, r.currency) }}</td>
   <td class="num">{{ r.cost|money }}</td>
   <td class="num"><b>{{ r.value|money if r.value is not none else 'Unavailable' }}</b></td>
   <td class="num gain">{% if r.gain is not none %}<span class="{{ r.gain|tone }}">{{ r.gain|money(True) }}</span>{% else %}—{% endif %}</td>
@@ -98,7 +103,7 @@
   <div class="overview-split{{ ' is-single' if not flows.rows }}">
     <section><div class="overview-block-head"><div><h3>{{ "Income collected (dividends and interest)"|tr(locale) }}</h3><p>Year to date · {{ ytd_year }}-01-01 to today</p></div><a class="quiet-link" data-popup-open href="/investments/report-detail?kind=dividends&amp;from={{ ytd_year }}-01-01&amp;to={{ today }}">{{ "See them"|tr(locale) }}</a></div>
       {{ bars(ytd_dividends, 'in', 'No dividends collected this year yet.') }}</section>
-{% if flows.rows %}    <section><div class="overview-block-head"><div><h3>{{ "Money and value by class"|tr(locale) }}</h3><p>{{ period.start_text }} to {{ period.end_text }} · money in and out, and how each class's value moved</p></div></div>
+{% if flows.rows %}    <section><div class="overview-block-head"><div><h3>{{ "Money and value by class"|tr(locale) }}</h3><p>{{ period.start_text }} to {{ period.end_text }} · money in and out, and how each class’s value moved</p></div></div>
       {{ diverging(flows, 'Money in and out, and change in value by asset class') }}</section>{% endif %}
   </div>
 </section>

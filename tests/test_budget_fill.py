@@ -27,7 +27,7 @@ def test_last_month_copies_base_limit_without_spending_or_carryover(c, setup):
 
     assert row.amount == Decimal("4000")
     assert row.current_amount == Decimal("7000")
-    assert "Current limit" in row.conflict
+    assert "Your limit" in row.conflict
     assert not row.selected
     assert "From 2026-11" in row.note
 
@@ -44,7 +44,7 @@ def test_last_month_identifies_repeated_amounts_already_in_use(c, setup):
     assert not row.selected
 
 
-def test_average_source_uses_three_full_months_and_one_month_of_history(c, setup):
+def test_average_source_uses_three_full_months_and_counts_quiet_months(c, setup):
     accounts, _ = setup
     food = _food(c)
     for month, amount in (("2026-09", "3000"), ("2026-10", "4000"), ("2026-11", "5200")):
@@ -55,13 +55,13 @@ def test_average_source_uses_three_full_months_and_one_month_of_history(c, setup
 
     assert row.amount == Decimal("4100")  # 4,066.67 shown as a tidy figure
     assert row.source == "Your average" and row.current_amount == Decimal("1000")
-    assert row.selected and "3 months" in row.note
+    assert not row.selected and "3 months" in row.note  # NF-12AI: a limit you set is kept unless you tick the row
 
-    # Only one month of history: that month is the figure.
+    # NF-12AK1 (owner 2026-11-13): spending in one month of three the profile covers is 900 / 3, not 900 a month.
     other = c.categories.get_by_code("EXP.PERSONAL.TRANSPORT")
     c.transactions.record_outflow("2026-11-03", accounts["cib"].id, "900", other.id)
     row = next(row for row in _proposal(c, "average").rows if row.category_id == other.id)
-    assert row.amount == Decimal("900")
+    assert row.amount == Decimal("300")
 
 
 def test_average_source_skips_one_off_categories(c, setup):
@@ -171,7 +171,7 @@ def test_budget_fill_screen_reviews_and_posts_month_only_edits(c, setup):
     assert preview.status_code == 200
     assert "Already using last month's plan" not in preview.text
     assert 'value="4000.00"' in preview.text
-    assert "Current limit: 7,000.00 fixed" in preview.text
+    assert "Your limit: 7,000.00 fixed" in preview.text
 
     response = client.post("/budget/fill?month=2026-12", data={
         "source": "last_month", "selected": str(food.id), f"amount_{food.id}": "5200",

@@ -18,7 +18,7 @@ from lightning.database.connection import Database
 from lightning.database.settings import raw_setting
 from lightning.reporting.service import ReportingService
 
-from .domain import (EMERGENCY_BASES, INCOME_FROM_RECURRING, BudgetFillProposal, BudgetFillRow, BudgetLine, BudgetMonth,
+from .domain import (EMERGENCY_BASES, INCOME_BASIS_FROM, INCOME_FROM_RECURRING, dated_basis, BudgetFillProposal, BudgetFillRow, BudgetLine, BudgetMonth,
                      BudgetSection, EmergencyFund, IncomeAverage, ScheduleView, SpendingAverage)
 from .repository import BudgetRepository
 
@@ -26,6 +26,8 @@ SECTION_NAMES = {Scope.PERSONAL: "Personal", Scope.WORK: "Work"}
 
 
 OVER_PLAN_MARGIN = Decimal(50)  # a category a few pounds over its plan is not worth a move
+PACE_MARGIN = Decimal("0.10")  # NF-12AL2: warn only when spending is past the curve by more than this share of the limit
+PACE_HISTORY_MONTHS, PACE_HISTORY_NEEDED = 3, 2  # the curve is the category's own from 2 of the last 3 months
 
 
 MAX_BUDGET = 100_000_000  # EGP a month for one category; above it is a typo, not a plan
@@ -153,43 +155,96 @@ class BudgetService:
         return rows
 
     def running_out(self, month: str, on: date, *, schedule: ScheduleView) -> list[dict]:
-        """NF-12S: flexible categories whose pace passes their limit before the month ends. Spent so far / days gone x
-        days in month > the limit, after day 5, in the current month, for a category with a limit of its own that has
-        no scheduled bill, subscription or loan payment (those are paid on their day, not paced) and is not over yet.
-        Each row has the day the limit runs out and, when one exists, a category whose own limit would still have
-        that much left at its own pace to move from."""
+        """NF-12S, NF-12AL2 (owner rule 3, 2026-11-13): flexible categories whose pace passes their limit before the
+        month ends, after day 5, in the current month, for a category with a limit of its own that is not over yet.
+
+        Only the flexible part is paced: the limit less the category's bills and subscriptions this month (paid on
+        their day), and the spending less the bills already paid. Expected spending by today is that flexible limit
+        times the category's own share-by-day curve (``_spending_curve``); a row appears only when spending is past it
+        by more than ``PACE_MARGIN`` of the flexible limit. A category with a loan payment is not paced. Each row has
+        the day the flexible limit runs out at this pace, the amount it needs, ``may`` when the curve is a straight
+        line for want of history, and, when one exists, a category whose own flexible limit would still have that much
+        left at its own pace to move from."""
         first, last = parse_month(month)
         if not first <= on <= last or on.day <= 5:
             return []
         days_gone, days = on.day, last.day
-        scheduled = set(self.scheduled_payments(month, schedule=schedule)) | set(schedule.bills(month))
+        loans = {cid for cid, amount in schedule.loans(month).items() if amount}
+        bills = schedule.bills(month)
+        one_offs = self.one_off_ids()
         lines = [line for section in self.month_view(month, schedule=schedule).sections for line in section.lines]
-        pace = {}
+        paced: dict[int, dict] = {}
         for line in lines:
             if line.depth < 2 or line.direct is None or line.available is None or line.available <= ZERO:
                 continue
-            pace[line.category_id] = line.planned_actual / days_gone * days
+            ids = {line.category_id} | {c.id for c in self.categories.descendants(line.category_id)
+                                        if c.id not in one_offs}
+            if ids & loans:
+                continue
+            billed = sum((bills[i]["amount"] for i in ids if i in bills), ZERO)
+            paid = sum((bills[i].get("paid", ZERO) for i in ids if i in bills), ZERO)
+            limit = line.available - billed
+            if limit <= ZERO:
+                continue
+            spent = max(line.planned_actual - paid, ZERO)
+            share, own = self._spending_curve(ids, first, days)
+            expected = share[days_gone] if share[days_gone] > ZERO else Decimal(days_gone) / days
+            paced[line.category_id] = {"limit": limit, "spent": spent, "share": share, "own": own,
+                                       "now": share[days_gone], "projected": spent / expected, "expected": expected}
         rows = []
         for line in lines:
-            cid = line.category_id
-            if cid not in pace or cid in scheduled or line.planned_actual <= ZERO or line.remaining is None:
+            cid, pace = line.category_id, paced.get(line.category_id)
+            if pace is None or pace["spent"] <= ZERO or line.remaining is None or line.remaining < ZERO:
                 continue
-            if line.remaining < ZERO or pace[cid] <= line.available or line.average_months or line.income_percent is not None:
+            if line.average_months or line.income_percent is not None:
                 continue
-            short = Decimal(math.ceil((pace[cid] - line.available) / 50) * 50)
-            runs_out = min(days, max(on.day, math.ceil(line.available * days_gone / line.planned_actual)))
+            limit, spent = pace["limit"], pace["spent"]
+            if spent - limit * pace["now"] <= limit * PACE_MARGIN or pace["projected"] <= limit:
+                continue
+            short = Decimal(math.ceil((pace["projected"] - limit) / 50) * 50)
+            curve = pace["share"] if pace["now"] > ZERO else [Decimal(t) / days for t in range(days + 1)]
+            runs_out = next((t for t in range(days_gone, days + 1) if spent * curve[t] >= limit * pace["expected"]),
+                            days)
             related = lambda other: other.code.startswith(line.code + ".") or line.code.startswith(other.code + ".")
-            donors = [(other.available - pace[other.category_id], other) for other in lines
-                      if other.category_id in pace and other.category_id != cid and other.category_id not in scheduled
-                      and not related(other) and other.available - pace[other.category_id] >= short
-                      and other.direct >= short]
+            donors = [(paced[other.category_id]["limit"] - paced[other.category_id]["projected"], other)
+                      for other in lines if other.category_id in paced and other.category_id != cid
+                      and not related(other) and other.direct >= short
+                      and paced[other.category_id]["limit"] - paced[other.category_id]["projected"] >= short]
             donor = max(donors, key=lambda pair: pair[0])[1] if donors else None
-            rows.append({"category_id": cid, "name": line.name, "limit": line.available, "day": runs_out,
-                         "amount": short, "can_move": line.direct is not None and donor is not None,
+            rows.append({"category_id": cid, "name": line.name, "limit": limit, "bills": line.available - limit,
+                         "day": runs_out, "amount": short, "may": not pace["own"],
+                         "can_move": line.direct is not None and donor is not None,
                          "from_id": donor.category_id if donor else None,
                          "from_name": donor.name if donor else None})
         rows.sort(key=lambda r: (r["day"], r["name"].casefold()))
         return rows
+
+    def _spending_curve(self, ids: set[int], first: date, days: int) -> tuple[list[Decimal], bool]:
+        """NF-12AL2: the share of a month's spending done by each day (index 0..days, 0 then 1 at the end) for these
+        categories, averaged over the last ``PACE_HISTORY_MONTHS`` completed months before ``first`` that had
+        spending, when at least ``PACE_HISTORY_NEEDED`` did; else the straight line t / days. A shorter past month
+        counts as whole from its last day on. The flag says whether the curve is the category's own."""
+        months = []
+        end = first - timedelta(days=1)
+        for _ in range(PACE_HISTORY_MONTHS):
+            months.append((end.replace(day=1), end))
+            end = end.replace(day=1) - timedelta(days=1)
+        by_day = self.reporting.money_out_by_category_by_day(months[-1][0], months[0][1])
+        shares = []
+        for start, stop in months:
+            daily = [sum((by_day.get((start + timedelta(days=n)).isoformat(), {}).get(i, ZERO) for i in ids), ZERO)
+                     for n in range(stop.day)]
+            total = sum(daily, ZERO)
+            if total <= ZERO:
+                continue
+            running, cumulative = ZERO, [ZERO]
+            for amount in daily:
+                running += amount
+                cumulative.append(min(max(running / total, ZERO), Decimal(1)))
+            shares.append([cumulative[min(t, stop.day)] for t in range(days + 1)])
+        if len(shares) < PACE_HISTORY_NEEDED:
+            return [Decimal(t) / days for t in range(days + 1)], False
+        return [sum((share[t] for share in shares), ZERO) / len(shares) for t in range(days + 1)], True
 
     def move_room(self, month: str, to_id: int, from_id: int, amount: object, *, schedule: ScheduleView) -> None:
         """Move plan from one category to another from `month` on: both keep fixed amounts, the total is unchanged."""
@@ -306,8 +361,9 @@ class BudgetService:
         """Average monthly income: owned income in the chosen income categories, averaged over
         the last 3 (or 6) completed months before `month` that had any. A manual amount in
         Settings replaces the average. Before any completed month has income, the income set up in
-        Cash planning › Recurring stands in, so a new plan is checked from day one. The budget, reserves
-        and the cash forecast all use this."""
+        Cash planning › Recurring stands in, so a new plan is checked from day one. An income drop planned on
+        (HealthService.take_income_change) sets the basis from its month on; earlier months keep the average. The
+        budget, reserves and the cash forecast all use this."""
         chosen = self.recurring_income_ids()
         categories = self.categories.tree()
         by_id = {category.id: category for category in categories}
@@ -319,6 +375,9 @@ class BudgetService:
             scheduled = schedule.income()  # chosen after a raise: plan with what Recurring expects
             if scheduled is not None:
                 return IncomeAverage(scheduled, 0, lookback, "", "", False, scheduled=True)
+        dated = dated_basis(raw_setting(self.db, INCOME_BASIS_FROM))
+        if dated and month >= dated[0]:  # an income drop planned on from its month; earlier months keep the average
+            return IncomeAverage(dated[1], 0, lookback, "", "", False, since=dated[0])
         end = parse_month(month)[0] - timedelta(days=1)
         last_month = month_of(end)
         observed = []
@@ -396,6 +455,13 @@ class BudgetService:
 
     def has_plan(self, month: str, *, schedule: ScheduleView) -> bool:
         return bool(self.amounts_for(month, loans=False, schedule=schedule))
+
+    def plan_gap(self, month: str, view: BudgetMonth, *, schedule: ScheduleView):
+        """Left to plan: the income the plan stands on, everything the month plans, and what is still without a job
+        (None when there is no income to plan from)."""
+        income = self.income_average(month, schedule=schedule).amount
+        planned = view.budget
+        return income, planned, (income - planned if income is not None else None)
 
     @request_cached(deep=True)
     def month_view(self, month: str, *, schedule: ScheduleView) -> BudgetMonth:
@@ -534,8 +600,11 @@ class BudgetService:
     def fill_proposal(self, month: str, source: str, *, schedule: ScheduleView) -> BudgetFillProposal:
         """Build a read-only month-fill preview; all returned amounts are base limits in EGP."""
         first, _ = parse_month(month)
+        if source == "changes":
+            return self._fill_changes(month, schedule=schedule)
         if source not in {"last_month", "average", "schedule", "goal"}:
-            raise ValidationError("Choose Last month, Your average, Schedule, or Goal as the fill source.", "source")
+            raise ValidationError("Choose What changed, Last month, Your average, Schedule, or Goal as the fill source.",
+                                  "source")
         categories = [c for c in self.categories.tree(Movement.OUTFLOW)
                       if not c.is_root and c.family != CategoryFamily.INVESTMENT]
         by_id = {c.id: c for c in categories}
@@ -545,14 +614,16 @@ class BudgetService:
 
         if source == "last_month":
             previous = month_of(first - timedelta(days=1))
-            for category_id, (amount, _, period, percent) in self.amounts_for(previous, loans=False, schedule=schedule).items():
+            for category_id, (amount, only_then, period, percent) in self.amounts_for(previous, loans=False, schedule=schedule).items():
                 if category_id in by_id:
                     detail = (f"{period}-month average" if period else
-                              f"{fmt(percent)}% of income" if percent is not None else "fixed")
+                              f"{fmt(percent)}% of income" if percent is not None else
+                              "for that month only" if only_then else "fixed")  # NF-12AI: an exception says so
                     candidates[category_id] = (amount, f"From {previous} · {detail}")
         elif source == "average":
-            # NF-12R: what was really spent, averaged over the last three full months (a category with one month of
-            # history uses that month), as a tidy figure; one-off categories are not in plan-funded spending.
+            # NF-12R: what was really spent, averaged over the last three full months (NF-12AK1: over all three once the
+            # profile covers them, else over the months with spending), as a tidy figure; categories outside the budget
+            # are left out.
             one_offs = self.one_off_ids()
             for category_id, amount in self.first_plan_suggestions(month).items():
                 if category_id in by_id and category_id not in one_offs:
@@ -586,8 +657,8 @@ class BudgetService:
             if same:
                 conflict = ("Already using last month's plan" if source == "last_month"
                             else "Matches the current base limit.")
-            elif rule is not None:
-                conflict = f"Current limit: {current_rule}. Applying replaces it for {month} only."
+            elif rule is not None:  # NF-12AI: a limit you set is kept unless you tick the row
+                conflict = f"Your limit: {current_rule}. Tick to use this instead for {month} only."
             elif auto_loan:
                 conflict = (f"{fmt(auto_loan)} of scheduled payments are already planned automatically. "
                             "Applying this amount would replace that automatic line.")
@@ -599,8 +670,8 @@ class BudgetService:
                 current_amount=current_amount,
                 current_rule=current_rule,
                 conflict=conflict,
-                selectable=amount is not None,
-                selected=amount is not None and not auto_loan and (rule is None or (source == "average" and not same)),
+                selectable=amount is not None and not same,  # NF-12AI: an unchanged row has nothing to apply
+                selected=amount is not None and not auto_loan and rule is None,
                 already_using_last_month=source == "last_month" and same,
                 note=note,
             ))
@@ -633,6 +704,25 @@ class BudgetService:
                     if row.category_id in affected else row for row in rows]
         rows.sort(key=lambda row: (by_id[row.category_id].sort_order, row.category_name.casefold()))
         return BudgetFillProposal(month, source, tuple(rows))
+
+    def _fill_changes(self, month: str, *, schedule: ScheduleView) -> BudgetFillProposal:
+        """NF-12AI (#635): Fill's default view, only what would change this month. Bills scheduled above a limit you
+        set, and an average for a category with history: new where there is no limit (ticked), beside your limit where
+        it differs (unticked, so a limit you chose is kept). Each row keeps its source; the rest are counted unchanged."""
+        bills = {row.category_id: row for row in self.fill_proposal(month, "schedule", schedule=schedule).rows}
+        averages = {row.category_id: row for row in self.fill_proposal(month, "average", schedule=schedule).rows}
+        rows, unchanged = [], 0
+        for category_id in dict.fromkeys([*bills, *averages]):
+            bill, average = bills.get(category_id), averages.get(category_id)
+            if bill and bill.current_amount is not None and bill.amount is not None and bill.amount > bill.current_amount:
+                rows.append(replace(bill, selected=False, note=f"{bill.note} · above your limit"))
+            elif average and average.selectable:
+                rows.append(average)
+            else:
+                unchanged += 1
+        by_id = {c.id: c for c in self.categories.tree(Movement.OUTFLOW)}
+        rows.sort(key=lambda row: (by_id[row.category_id].sort_order, row.category_name.casefold()))
+        return BudgetFillProposal(month, "changes", tuple(rows), unchanged=unchanged)
 
     @staticmethod
     def _fill_rule_name(rule) -> str:
@@ -823,24 +913,92 @@ class BudgetService:
         if key in cache:
             return cache[key]
         tree = {category_id} | self._descendant_ids(category_id, children)
-        cache[key] = self._tree_average(tree, self._completed_months(month, months))[0]
+        cache[key] = self._tree_average(tree, self._completed_months(month, months),
+                                        full=self._full_window(month, months))[0]
         return cache[key]
 
     def _completed_months(self, month: str, months: int) -> list[dict[int, Decimal]]:
-        """Plan-funded spending by category in completed months, newest first."""
+        """The estimate basis by category in completed months, newest first (NF-12AK1)."""
         spending, cursor = [], parse_month(month)[0]
         for _ in range(months):
             start, end = parse_month((cursor - timedelta(days=1)).strftime("%Y-%m"))
-            spending.append(self.plan_funded_spending(start, end))
+            spending.append(self.estimate_spending(start, end))
             cursor = start
         return spending
 
+    def estimate_spending(self, start, end) -> dict[int, Decimal]:
+        """What estimates read for a period (NF-12AK1, owner 2026-11-13): plan-funded spending, with money back that is
+        linked to its expense (a reimbursement receipt) counted in the expense's month rather than the month it
+        arrived, and each category floored at zero, so a refund on its own never makes a negative month. Cash, Spent
+        and every report keep the real dates; only averages and the estimates built on them read this."""
+        first, last = str(start)[:10], str(end)[:10]
+        basis, moved = self.plan_funded_spending(start, end), set()
+        for shift in self._recovery_shifts():
+            if first <= shift["receipt_date"] <= last:  # it arrived here: undo its reduction here
+                basis[shift["category_id"]] = basis.get(shift["category_id"], ZERO) + shift["amount"]
+                moved.add(shift["category_id"])
+            if first <= shift["expense_date"] <= last:  # it belongs to the expense: count it here
+                basis[shift["category_id"]] = basis.get(shift["category_id"], ZERO) - shift["amount"]
+        # A month whose only line was money back that moved to its expense had no spending of its own.
+        return {cid: max(amount, ZERO) for cid, amount in basis.items() if amount or cid not in moved}
+
+    @request_cached(deep=True)
+    def _recovery_shifts(self) -> list[dict]:
+        """Linked money back that arrived in another month than its expense: per receipt and spending category, the
+        amount the receipt took off that category (never more than the amount linked) and both dates."""
+        rows = self.db.all(
+            "SELECT rr.id link_id,rr.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,"
+            "le.category_id,SUM(le.amount_base_e6) total_e6 "
+            "FROM reimbursement_receipts rr JOIN reimbursement_claims rc ON rc.id=rr.claim_id "
+            "JOIN transactions r ON r.id=rr.receipt_id JOIN transactions e ON e.id=rc.expense_id "
+            "JOIN ledger_entries le ON le.transaction_id=r.id "
+            "WHERE r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
+            "AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
+            "GROUP BY rr.id,le.category_id ORDER BY rr.id,le.category_id")
+        investment, shifts, left = self._investment_ids(), [], {}
+        for row in rows:
+            category = self.categories.get(int(row["category_id"]))
+            if category.movement != Movement.OUTFLOW or category.id in investment:
+                continue  # money back recorded as income never reduced spending, so there is nothing to move
+            reduced = from_e6(int(row["total_e6"] or 0))  # a receipt line is positive when it takes from spending
+            remaining = left.setdefault(row["link_id"], from_e6(int(row["linked_e6"])))
+            amount = min(reduced, remaining)
+            if amount <= ZERO:
+                continue
+            left[row["link_id"]] = remaining - amount
+            shifts.append({"category_id": category.id, "amount": amount,
+                           "receipt_date": row["receipt_date"], "expense_date": row["expense_date"]})
+        return shifts
+
+    @request_cached
+    def _history_start(self) -> str | None:
+        """The day the profile's first categorised money in or out was recorded: where its history begins."""
+        row = self.db.one("SELECT MIN(le.date) first FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id "
+                          "WHERE t.status='POSTED' AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') "
+                          "AND le.owner_id IS NULL")
+        return row["first"] if row and row["first"] else None
+
+    def _full_window(self, month: str, months: int) -> bool:
+        """True when the profile was already recording in the oldest of the `months` completed months before
+        `month`: every month in the window is a real month, so one without spending counts as nothing spent."""
+        first = self._history_start()
+        cursor = parse_month(month)[0]
+        for _ in range(months):
+            cursor = parse_month(month_of(cursor - timedelta(days=1)))[0]
+        return first is not None and first[:7] <= month_of(cursor)
+
     @staticmethod
-    def _tree_average(tree: set[int], spending: list[dict[int, Decimal]]) -> tuple[Decimal | None, int]:
-        """A category tree's average over the months that had spending in it, and how many months that was."""
+    def _tree_average(tree: set[int], spending: list[dict[int, Decimal]], *,
+                      full: bool = False) -> tuple[Decimal | None, int]:
+        """A category tree's average and how many months had spending in it. With a full window (owner 2026-11-13)
+        the average is over every month of it, so one 6,000 purchase in three months is 2,000; otherwise, while
+        the profile is newer than the window, it is over the months that had spending."""
         observed = [sum((amounts.get(cid, ZERO) for cid in tree), ZERO)
                     for amounts in spending if any(cid in amounts for cid in tree)]
-        return ((sum(observed, ZERO) / len(observed)).quantize(Decimal("0.01")) if observed else None), len(observed)
+        if not observed:
+            return None, 0
+        months = len(spending) if full else len(observed)
+        return (sum(observed, ZERO) / months).quantize(Decimal("0.01")), len(observed)
 
     def _outflow_children(self) -> tuple[dict[int, Category], dict[int, list[int]]]:
         categories = self.categories.tree(Movement.OUTFLOW)
@@ -858,19 +1016,21 @@ class BudgetService:
         return tracked | (self._id_list("budget_tracked_categories") or set())
 
     def category_averages(self, month: str, *, schedule: ScheduleView) -> dict[int, dict]:
-        """Each budget line's spending (its subcategories included) averaged over the three and the six
-        completed months before `month` that had spending in it, and how many months each saw."""
+        """Each budget line's estimate basis (its subcategories included) averaged over the three and the six
+        completed months before `month` (see _tree_average), how many of them had spending, and whether the profile
+        covers the whole window (full3, full6: the Budget page's label)."""
         view = self.month_view(month, schedule=schedule)
         _, children = self._outflow_children()
         six = self._completed_months(month, 6)
+        full3, full6 = self._full_window(month, 3), self._full_window(month, 6)
         averages = {}
         for section in view.sections:
             for line in section.lines:
                 tree = {line.category_id} | self._descendant_ids(line.category_id, children)
-                average3, observed3 = self._tree_average(tree, six[:3])
-                average6, observed6 = self._tree_average(tree, six)
-                averages[line.category_id] = {"average3": average3, "observed3": observed3,
-                                              "average6": average6, "observed6": observed6,
+                average3, observed3 = self._tree_average(tree, six[:3], full=full3)
+                average6, observed6 = self._tree_average(tree, six, full=full6)
+                averages[line.category_id] = {"average3": average3, "observed3": observed3, "full3": full3,
+                                              "average6": average6, "observed6": observed6, "full6": full6,
                                               "spent6": sum((amounts.get(cid, ZERO) for amounts in six for cid in tree), ZERO)}
         return averages
 
@@ -927,6 +1087,7 @@ class BudgetService:
         by_id, children = self._outflow_children()
         groups = {group.category_id for section in view.sections for group in section.groups}
         months = self._completed_months(month, 3)  # the three completed months before this one, newest first
+        full = self._full_window(month, 3)
         lines = []
         for section in view.sections:
             for line in section.lines:
@@ -938,7 +1099,7 @@ class BudgetService:
                     parent = by_id.get(parent.parent_id)
                 if not parent or parent.id not in groups:
                     continue
-                estimate, observed = self._tree_average({line.category_id}, months)
+                estimate, observed = self._tree_average({line.category_id}, months, full=full)
                 lines.append({"category_id": line.category_id, "name": line.name, "group_id": parent.id,
                               "estimate": estimate, "observed": observed, "low_confidence": observed <= 1})
         return lines

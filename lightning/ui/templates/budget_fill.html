@@ -1,12 +1,13 @@
 {% extends "base.html" %}
-{% block title %}{{ "Fill this month's budget"|tr(locale) }}{% endblock %}
-{% block heading %}<div class="page-title"><h1>{{ "Fill this month's budget"|tr(locale) }}</h1><p class="page-status">{{ 'Review base limits for {month}. Nothing is saved until you apply selected rows.'|tr(locale, month=month|month(locale)) }}</p></div>{% endblock %}
+{% block title %}{{ "Fill this month’s budget"|tr(locale) }}{% endblock %}
+{% block heading %}<div class="page-title"><h1>{{ "Fill this month’s budget"|tr(locale) }}</h1><p class="page-status">{{ 'Review base limits for {month}. Nothing is saved until you apply selected rows.'|tr(locale, month=month|month(locale)) }}</p></div>{% endblock %}
 {% block top_actions %}<a class="btn" href="/budget?month={{ month }}">{{ 'Budget'|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% if error %}<p class="notice" role="alert">{{ error|tr(locale) }}</p>{% endif %}
 <form method="get" action="/budget/fill" class="row">
   <input type="hidden" name="month" value="{{ month }}">
   <label>{{ "Fill from"|tr(locale) }}<select name="source">
+      <option value="changes" {{ 'selected' if source == 'changes' }}>{{ "What changed"|tr(locale) }}</option>
       <option value="last_month" {{ 'selected' if source == 'last_month' }}>{{ "Last month"|tr(locale) }}</option>
       <option value="average" {{ 'selected' if source == 'average' }}>{{ "Your average"|tr(locale) }}</option>
       <option value="schedule" {{ 'selected' if source == 'schedule' }}>{{ "Schedule"|tr(locale) }}</option>
@@ -28,7 +29,7 @@
         <a class="btn" href="/plan/reserves">{{ "Open Reserves"|tr(locale) }}</a>
       </section>
     {% else %}
-      <p class="muted">{{ "Proposals use base limits only. Spending and carryover are not copied. Selecting a row replaces that category's limit for {month} only."|tr(locale, month=month|month(locale)) }}</p>
+      <p class="muted">{{ "Proposals use base limits only. Spending and carryover are not copied. Selecting a row replaces that category’s limit for {month} only."|tr(locale, month=month|month(locale)) }}</p>
       <form method="post" action="/budget/fill?month={{ month }}">
         <input type="hidden" name="source" value="{{ source }}">
         <table class="setup-table"><thead><tr><th>{{ 'Category'|tr(locale) }}</th><th>{{ "Source"|tr(locale) }}</th><th class="num">{{ "Current base limit"|tr(locale) }}</th><th class="num">{{ "Proposed limit"|tr(locale) }}</th><th>{{ 'Review'|tr(locale) }}</th></tr></thead><tbody>
@@ -42,6 +43,7 @@
           </tr>
         {% endfor %}
         </tbody></table>
+        {% if proposal.unchanged %}<p class="muted small">{{ '{n} more categories keep their limits: nothing would change.'|tr(locale, n=proposal.unchanged) }}</p>{% endif %}
         <button class="btn primary" type="submit">{{ "Apply selected for this month only"|tr(locale) }}</button>
         <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
       </form>

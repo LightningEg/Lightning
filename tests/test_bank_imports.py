@@ -50,7 +50,7 @@ def test_suggested_mapping_uses_canonical_headers_and_bank_aliases(c, setup):
 def test_import_stages_posts_and_same_file_can_be_reviewed_again(c, setup):
     accounts, cats = setup
     data = ("\ufeffDate,Counterparty,Amount,Category,Notes,Reference\n"
-            "2026-09-20,Talabaat,-125,Food & Groceries,late meal,R-100\n").encode()
+            "2026-09-20,Talabaat,-125,Food & groceries,late meal,R-100\n").encode()
     batch_id, repeated = c.bank_imports.stage(accounts["cib"].id, "september.csv", data)
     assert not repeated
     batch, rows = c.bank_imports.preview(batch_id)
@@ -140,11 +140,11 @@ def test_ui_maps_two_amount_columns_and_previews_signed_amounts(c, setup):
 
 def test_reference_duplicate_is_flagged_and_not_posted(c, setup):
     accounts, cats = setup
-    first = b"Date,Counterparty,Amount,Category,Reference\n2026-09-20,Kiosk,-5,Food & Groceries,REF-X\n"
+    first = b"Date,Counterparty,Amount,Category,Reference\n2026-09-20,Kiosk,-5,Food & groceries,REF-X\n"
     first_id, _ = c.bank_imports.stage(accounts["cib"].id, "one.csv", first)
     _, first_rows = c.bank_imports.preview(first_id)
     c.bank_imports.confirm(first_id, {first_rows[0]["_import_row_id"]: {"category_id": cats["EXP.PERSONAL.FOOD"].id, "new_counterparty": "Kiosk"}})
-    second = b"Date,Counterparty,Amount,Category,Reference\n2026-09-21,Kiosk,-6,Food & Groceries,REF-X\n"
+    second = b"Date,Counterparty,Amount,Category,Reference\n2026-09-21,Kiosk,-6,Food & groceries,REF-X\n"
     second_id, _ = c.bank_imports.stage(accounts["cib"].id, "two.csv", second)
     _, rows = c.bank_imports.preview(second_id)
     assert rows[0]["_reference_duplicate"]
@@ -372,7 +372,7 @@ def test_foreign_statement_keeps_native_amounts_and_values_both_frames_at_dated_
     c.fx.save("USD", "2026-09-01", "50")
     c.fx.save("USD", "2026-09-30", "50")
     account = c.account_flows.open_account("Dollar bank", "BANK", "2026-09-01", "100", currency="USD")
-    batch, _ = c.bank_imports.stage(account.id, "usd.csv", b"Date,Counterparty,Amount,Category\n2026-09-20,Cafe,-10.50,Food & Groceries\n")
+    batch, _ = c.bank_imports.stage(account.id, "usd.csv", b"Date,Counterparty,Amount,Category\n2026-09-20,Cafe,-10.50,Food & groceries\n")
     _, rows = c.bank_imports.preview(batch)
     assert c.bank_imports.confirm(batch, {rows[0]["_import_row_id"]: {}})["posted"] == 1
     assert c.reporting.account_balance(account.id, "2026-09-30") == Decimal("89.50")

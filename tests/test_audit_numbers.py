@@ -273,3 +273,16 @@ def test_16_certificate_interest_paid_to_the_bank_is_not_an_unresolved_reconcili
     build_demo(c)
     page = TestClient(create_app(c)).get("/investments").text
     assert "Portfolio reconciliation differs" not in page
+
+
+def test_counted_as_cash_only_includes_owned_investment_units(c):
+    broker, dad, share = _shared_broker(c)
+    c.investments.buy('2026-09-11', broker.id, share.id, '7', '100')
+    c.investments.buy('2026-09-11', broker.id, share.id, '3', '100', owner_id=dad)
+    c.assets.set_price(share.id, '2026-09-12', '200')
+    before = c.position.at('2026-09-12', match_payments=False)
+    c.assets.set_counts_as_cash(share.id, True)
+    after = c.position.at('2026-09-12', match_payments=False)
+    assert after.counted_as_cash == D('1400')
+    assert after.free_cash - before.free_cash == D('1400')
+    assert after.net_worth == before.net_worth

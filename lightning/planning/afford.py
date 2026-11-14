@@ -35,6 +35,34 @@ def can_afford(amount: Decimal, safe_to_spend: Decimal, free_cash: Decimal, unti
                          f"No. You are {amount - free_cash:,.0f} short of free cash.")
 
 
+def after_payday(forecaster, amount: Decimal, on, account_id: int, day, end) -> Affordability | None:
+    """BV-7AW (r37 W7): a purchase dated after the next payday is outside Safe to spend's window, so it is answered by
+    the plan's Lowest point ahead with the purchase paid that day (the same measure as Compare scenarios). None when an
+    exchange rate is missing."""
+    import calendar
+    from .scenarios import compare_scenario
+    result = compare_scenario(forecaster, day, end, purchase=str(amount), purchase_date=on.isoformat(),
+                              account_id=str(account_id))
+    low = result.scenario_plan_low
+    if low is None:
+        return None
+    month = calendar.month_name[int(low[0][5:7])]
+    if low[1] >= ZERO:
+        return Affordability(amount, "yes", low[1], ZERO,
+                             f"Yes. Your lowest point ahead would be {low[1]:,.0f} in {month}.")
+    return Affordability(amount, "no", low[1], -low[1], f"No. You would be {-low[1]:,.0f} short in {month}.")
+
+
+def plan_purchase_url(amount: Decimal, on: str, account_id: int | None) -> str:
+    """BV-7AW (r37 L3): "Plan this purchase" opens the one-off item form, prefilled; nothing is saved until you save it."""
+    from urllib.parse import urlencode
+    values = {"kind": "BILL", "frequency": "ONCE", "name": "Purchase", "amount": f"{amount:f}", "start_date": on,
+              "back": "/plan"}
+    if account_id:
+        values["account_id"] = str(account_id)
+    return "/plan/items/new?" + urlencode(values)
+
+
 @dataclass(frozen=True)
 class AccountAnswer:
     """One account on one date: scheduled-only, never a guess about spending in between (NF-3AZ6)."""

@@ -46,7 +46,7 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 |---|---|---|
 | **Account** | Ledger | Where value is held (CIB, Cash wallet, THNDR brokerage). |
 | **Adjust balance** | Set an account to a balance you know on a date; the difference is recorded as one adjustment row. Was "Check against bank". CDs and physical items say **Update value** instead. | Read directly from the ledger | `reconciliation.ReconciliationService.adjust` |
-| **Payday** | The day of the month your salary usually arrives (1-31; 29-31 mean the last day of a shorter month). Lightning expects the salary then in the cash plan and forecast; it records nothing until the money arrives. Shown as "Salary arrives on day N of each month". | Read directly from the salary setup | `planning` salary setup |
+| **Payday** | The day of the month your salary usually arrives (1-31; 29-31 mean the last day of a shorter month). Lightning expects the salary then in the cash plan and forecast; it records nothing until the money arrives. Payday is the salary only (owner, 2026-11-14): other income before it is money in and never moves Safe to spend's window; with no salary set up, the largest regular income is payday. Shown as "Salary arrives on day N of each month". | Read directly from the salary setup | `planning` salary setup |
 | **Gam'eya** | Ledger | A rotating savings circle: one account per circle; every instalment and your payout is an internal transfer, never income or spending; balance = paid in − received (positive: Gam'eya paid in; negative: Gam'eya still to pay). |
 | **Paid in** | Ledger | A purchase made in another currency on a pound account (NF-7AK3): the entry keeps the currency and amount paid (USD 12.99) beside its pounds, which are the day's rate until the bank's pound debit arrives and then that debit. One expense, never two. Arabic: المدفوع بعملته. |
 | **Owed to you** | Ledger | Money you lent a person (NF-12G): one Owed to you account (`RECEIVABLE`) per person; lending and being paid back are internal transfers, forgiving is spending. Above zero it counts in What you own (under Other you own, never a holding or cash); below zero it is what you owe them, in What you owe. Arabic: ليك عند الناس. |
@@ -90,7 +90,8 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Financial health limit** | Report | Profile-owned minimum (passes at or above) or maximum (at or below) for a figure; unavailable figures get no judgement. |
 | **Budget** | Plan | Planned spending for a category and month; not a reserve or a transaction. |
 | **Monthly base budget** | Plan | A category's monthly plan before carryover: fixed EGP, a percentage of Average monthly income, or an observed-month average. Shown as **Base budget**. |
-| **Observed-month average** | Plan | 3m/6m spending divided by the months with qualifying activity; empty months are not zero. |
+| **Observed-month average** | Plan | 3m/6m average of the estimate basis (`BudgetService.estimate_spending`: linked money back counted in its expense's month, no month below zero). Once the profile covers the whole window every month counts, so a quiet month is zero; while it is newer, only months with spending count (owner 2026-11-13, NF-12AK1). |
+| **Outside the budget** | Plan | A category (its subcategories with it) left out of the budget, its averages and the forecast; its spending still counts in Cash flow and Spending (Settings › Budget, or Budget's Not tracked list). Was "One-off" until owner 2026-11-14. Arabic: بره الميزانية. Not a limit for this month only, which Budget tags **This month only**. |
 | **Budget carryover** | Plan | Optional unused room added to a later month's limit; sets aside no cash and does not reduce free cash. |
 | **Reserve** | Plan | Already-owned cash assigned to an emergency fund or goal; moves no money, does not change net worth. |
 | **Emergency fund** | Plan | The permanent reserve section. Coverage = emergency Reserves ÷ Average monthly income (or spending, per Settings › Budget), in months; aim six. |
@@ -112,6 +113,7 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Reimbursement claim** | Plan | An explicit amount expected back for an existing owned expense. Outstanding = the eligible claimed amount minus valid explicitly linked receipts; not cash before receipt. |
 | **Saved view** | Report | Named account/category/search/tag filters with live date presets or a custom range; reused by register, summary report and CSV export. |
 | **Weekly review** | Plan | A completion flow over existing Needs you decisions. Recording a review keeps unresolved items visible; optional reminders require an unlocked session. |
+| **Running out** | Plan | A Needs you row (`BudgetService.running_out`): a category's flexible part, its limit less this month's bills, passes its limit before the month ends at its own pace. Expected spending by today follows the category's share-by-day curve from two of the last three months; with less history a straight line, and the row says "may run out". Shown after day 5, only past that curve by more than 10% of the flexible limit. |
 | **Day's net** | Report | On a phone list, a day's money in less its money out, beside the day's header; transfers and value updates are left out. |
 | **Investments moved** | Report | One phone row for a day's value updates (revaluations): their count and their sum. The rows themselves stay in the ledger. |
 
@@ -151,6 +153,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Other you own** | Anything you own that is neither cash nor a holding. | What you own − Cash you own − Holdings value | `planning.position.Position.other_you_own` |
 | **Gam'eya still to pay** | What you owe a savings circle you took the pot from early: its balance while it is below zero. Net worth does not change when you take the pot. | Read directly from the ledger | `planning.position.Position.gameya_still_to_pay` |
 | **Kept apart** | Cash you own that is not ready to spend: cash in a brokerage, cash in another currency, or an account you set apart. It stays in what you own and in If you sold today. | Read directly from the ledger | `reporting.service.ReportingService.owned_cash_kept_apart` |
+| **Counted as cash** | Investments you marked to count with cash (Count in free cash on the investment), such as a fund you can sell in days at no loss. Their value joins Free cash; they stay in Holdings and Net worth, and If you sold today counts them once. A certificate in its lock-up never counts. | Read directly from the ledger | `planning.position.Position.counted_as_cash` |
 | **Portfolio value** | Holdings value under the name the Investments tab uses: everything you own that is not cash. Cash waiting in a brokerage account counts in Cash you own (owner decisions 2026-10-04). | Holdings value | `planning.position.Position.portfolio_value` |
 | **Valued by you** | The part of Portfolio value known only by its balance, with no cost or market price (a share of a flat with no purchase price; a property with one counts in Cost and Unrealized gain). The Investments Lead is Cost + Unrealized gain + Valued by you (BT-12AC). | Portfolio value − Cost − Unrealized gain | `planning.investment_figures.LeadParts` |
 | **Shares and funds** | Your stocks and funds at their latest value, counted in full for zakat. | Read directly from the ledger | `zakat.ZakatService.assess` |
@@ -173,8 +176,8 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Usual range** | The lowest, middle and highest money out of the twelve earlier months, using matching calendar days for a partial period. It needs three of them. | Read directly from the ledger | `reporting.spending._against_history` |
 | **Investing rate** | The share of what you kept (net flow) that you moved into investments. Money from earlier savings does not count, so it is never more than 100%. | Money added ÷ Net flow | `investments.report.investing_rate` |
 | **Kept as cash** | The part of what you kept (net flow) that you did not move into investments; the last band of the money flow chart. Money added beyond what you kept came from earlier savings, so it is never below zero. | Net flow − Money added | `reporting.service.CashFlow.kept_as_cash` |
-| **Average monthly income** | Income in your chosen income categories, averaged over the last 3 or 6 completed months that had any (Settings › Budget). Until a completed month has income, the income set up in Recurring stands in. The budget, reserves and the cash forecast all use it. | Read directly from the ledger | `budgeting.service.BudgetService.income_average` |
-| **Average monthly spending** | Money out in your budget categories, leaving out investments and one-off categories, averaged over the same 3 or 6 completed months as Average monthly income. The emergency fund can be counted in it (Settings › Budget). | Read directly from the ledger | `budgeting.service.BudgetService.spending_average` |
+| **Average monthly income** | Income in your chosen income categories, averaged over the last 3 or 6 completed months that had any (Settings › Budget). Until a completed month has income, the income set up in Recurring stands in. When scheduled pay falls and you plan on it, the lower pay counts from its month. The budget, reserves and the cash forecast all use it. | Read directly from the ledger | `budgeting.service.BudgetService.income_average` |
+| **Average monthly spending** | Money out in your budget categories, leaving out investments and categories outside the budget, averaged over the same 3 or 6 completed months as Average monthly income. The emergency fund can be counted in it (Settings › Budget). | Read directly from the ledger | `budgeting.service.BudgetService.spending_average` |
 | **Spent** | Money out in the category this month. | Read directly from the ledger | `budgeting.domain.BudgetLine.actual` |
 | **Cost** | What you paid for the units you still hold. | Read directly from the ledger | `investments.report.build_investment_report` |
 | **Unrealized gain** | Gain or loss on units you still hold. | Holdings value − Cost | `investments.report.build_investment_report` |
@@ -187,12 +190,12 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Fall from its high** | How far a holding's month-end price sits below the highest month-end price before it, in percent. | Read directly from the ledger | `investments.journey.holding_history` |
 | **Average cost** | What you paid for each unit you still hold, fees included. | Cost ÷ Units | `investments.domain.Position.average_cost` |
 | **Growth** | Net gain or loss as a share of what the portfolio started the period with, plus money added. | Net gain or loss ÷ (Portfolio value at the start + Money added) | `investments.report.period_growth` |
-| **Average rate** | What each unit of a foreign currency you still hold cost you, in the profile currency: conversions count at the rate you got, money in at the day's rate, and money out takes units at this rate. | Read directly from the ledger | `reporting.fx_positions.Position.average_rate` |
-| **Unrealized FX gain** | Today's value of the foreign money you hold minus what it cost: the exchange-rate gain or loss not yet locked in. | Read directly from the ledger | `reporting.fx_positions.Position.unrealized` |
+| **Average rate** | What each unit of a foreign currency you still hold cost you, in the profile currency: conversions count at the rate you got, money in at the day’s rate, and money out takes units at this rate. | Read directly from the ledger | `reporting.fx_positions.Position.average_rate` |
+| **Unrealized FX gain** | Today’s value of the foreign money you hold minus what it cost: the exchange-rate gain or loss not yet locked in. | Read directly from the ledger | `reporting.fx_positions.Position.unrealized` |
 | **Realized FX gain** | For foreign money that left in the period (spent or converted), what it fetched minus what it cost at the average rate. | Read directly from the ledger | `reporting.fx_positions.Position.realized` |
 | **Spread paid** | What conversions in the period cost beyond the market rate of their day: the market value of what you sent minus the market value of what you received. Fees are separate. | Read directly from the ledger | `fx.spread_cost` |
-| **Price part** | The part of a foreign holding's unrealized gain that comes from its price in its own currency, at today's rate. | Read directly from the ledger | `investments.report.foreign_gain_split` |
-| **FX part** | The part of a foreign holding's unrealized gain that comes from the exchange rate. | Unrealized gain − Price part | `investments.report.foreign_gain_split` |
+| **Price part** | The part of a foreign holding’s unrealized gain that comes from its price in its own currency, at today’s rate. | Read directly from the ledger | `investments.report.foreign_gain_split` |
+| **FX part** | The part of a foreign holding’s unrealized gain that comes from the exchange rate. | Unrealized gain − Price part | `investments.report.foreign_gain_split` |
 
 ### From the plan — what-if
 
@@ -216,8 +219,9 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Bills inside the plan** | This month's scheduled bills, due or upcoming, in a category that has a budget. They are part of that budget. | Read directly from the plan | `planning.forecast.CashForecaster.forecast` |
 | **Left to pay** | What the month's bills, subscriptions, loan payments and gam'eya instalments still ask, late ones included, in your profile currency (Upcoming). | Read directly from the plan | `planning.calendar.PaymentMonth.left_to_pay` |
 | **Already paid** | What of the month's bills, subscriptions, loan payments and gam'eya instalments is settled (Upcoming). | Read directly from the plan | `planning.calendar.PaymentMonth.already_paid` |
-| **Due before payday** | Scheduled bills, subscriptions and loan payments that are not due yet, up to your next income. | Read directly from the plan | `planning.forecast.CashForecaster._safe_to_spend` |
-| **Lowest point ahead** | The lowest month-end free cash in the cash forecast, everyday spending and savings included. Compare scenarios shows the same figure and moves it by what a scenario changes in scheduled cash (IV-12P). | Read directly from the plan | `planning.domain.CashForecast.lowest` |
+| **Due before payday** | Scheduled bills, subscriptions and loan payments that are not due yet, up to your next payday. | Read directly from the plan | `planning.forecast.CashForecaster._safe_to_spend` |
+| **Income before payday** | Scheduled income other than the salary that arrives before the next payday (BT-7AZ). | Read directly from the plan | `planning.forecast.CashForecaster._safe_to_spend` |
+| **Lowest point ahead** | The lowest month-end free cash in the cash forecast, everyday spending and savings included. Compare scenarios shows the same figure, day by day: each day is its month's closing moved by what the scenario changes in scheduled cash that day, so a late salary shows on its lowest day (IV-12P, BV-7AW). | Read directly from the plan | `planning.domain.CashForecast.lowest` |
 | **Saving for goals** | What dated reserve goals still need this month, spread over the months left. | Read directly from the plan | `planning.forecast.CashForecaster._goal_need` |
 | **Rest of savings target** | What the Savings target asks a month beyond Saving for goals and Emergency fund top-up (never below zero), so Safe to spend never counts what you mean to save (owner decision 2026-10-05). | Savings target − Saving for goals − Emergency fund top-up | `planning.forecast.CashForecaster.forecast` |
 
@@ -235,7 +239,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Debt to cash** | What you owe for each pound of cash you own: could your cash clear it today? | What you owe ÷ Cash you own | `planning.health.Ratio.percent` |
 | **Loan payments to income** | The share of your income that goes to loan payments, counting only loans with payments still to make. | Loan payments a month ÷ Average monthly income | `planning.health.Ratio.percent` |
 | **Fixed costs to income** | The share of your income already promised to bills, subscriptions and loan payments. | (Bills and subscriptions a month + Loan payments a month) ÷ Average monthly income | `planning.health.Ratio.percent` |
-| **Free cash** | Cash you can spend without touching reserves or leaving a bill unpaid. Cash kept apart (brokerage, other currencies) is left out. | Cash you own − Kept apart − Reserves − Bills due + Bill cash already set aside | `planning.position.Position.free_cash` |
+| **Free cash** | Cash you can spend without touching reserves or leaving a bill unpaid. Cash kept apart (brokerage, other currencies) is left out. | Cash you own − Kept apart + Counted as cash − Reserves − Bills due + Bill cash already set aside | `planning.position.Position.free_cash` |
 | **Holdings after sale (estimate)** | What your holdings, deposits included, might fetch if sold or cashed in today, after each class's sale factor. CDs before their earliest withdrawal count 0; early-redeemable CDs count their balance × the CD sale factor; matured CDs count their balance. | Σ Holdings value of each class × its sale factor | `planning.position.Position.holdings_after_sale` |
 | **If you sold today (estimate)** | Free cash plus what your holdings might fetch. | Free cash + Holdings after sale (estimate) | `planning.position.Position.if_you_sold_today` |
 | **Zakatable wealth** | What zakat is worked out on: what you hold, less the debts due now. | Cash you own + Deposits + Gam'eya paid in + Shares and funds + Gold held as savings + Gold you wear − Debts due now − Gam'eya instalments due now | `zakat.Assessment.zakatable_wealth` |
@@ -245,9 +249,9 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Other changes** | Everything else that moved net worth in the period: loan and circle payments (money out counts them, but they lower what you owe), dividends and interest outside money in, fees, exchange rates on foreign cash, and values you updated by hand (a flat, a car). | Change in net worth − Net flow − Market moves | `planning.position.net_worth_bridge` |
 | **Carryover** | Unused plan from last month, added to this month when carryover is on. | Left in plan last month | `budgeting.domain.BudgetLine.opening_carryover` |
 | **Planned** | What you plan to spend this month. The month's total also counts background estimates for untracked categories; one from a single month of spending is low confidence and shows a "!" that says why. | Base budget + Carryover | `budgeting.domain.BudgetLine.available` |
-| **Left in plan** | What is left of the plan; the Overview and Budget show the same month figure, and a negative one reads "Over plan". One-off categories are left out of Spent. | Planned − Spent | `budgeting.domain.BudgetLine.remaining` |
+| **Left in plan** | What is left of the plan; the Overview and Budget show the same month figure, and a negative one reads "Over plan". Categories outside the budget are left out of Spent. | Planned − Spent | `budgeting.domain.BudgetLine.remaining` |
 | **Left for everyday** | The plan's remaining money after unpaid planned bills and loans, floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance and the phone Home's lead (owner, 2026-11-09); Safe to spend leads Cash planning on both apps (IV-12P). | Read directly from the plan | `planning.domain.EverydayBudget.everyday_left` |
-| **Safe to spend** | Free cash after what is promised before your next income. An estimate. Budget until payday, Saving for goals, Emergency fund top-up and Rest of savings target count for every month until that income (only the days before it in the month it lands), so a long gap between pays is covered. | Free cash − Due before payday + Bill cash already set aside − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target | `planning.forecast.CashForecaster._safe_to_spend` |
+| **Safe to spend** | Free cash after what is promised before your next payday (the salary; other income before it counts as money in). An estimate. Budget until payday, Saving for goals, Emergency fund top-up and Rest of savings target count for every month until payday (only the days before it in the month it lands), so a long gap between pays is covered. | Free cash + Income before payday − Due before payday + Bill cash already set aside − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target | `planning.forecast.CashForecaster._safe_to_spend` |
 | **Budget until payday** | This month's left in plan less the scheduled bills it already covers, so a bill is never counted twice. | Left in plan − Bills inside the plan | `planning.domain.ForecastMonth.budget_spending` |
 | **Everyday spending** | This month's Spent less the plan's bills and loan payments already paid (or paid to that bill's payee in its category): what Budget's day rate is about. Budget compares it with the plan's straight-line pace and with last month by the same day. | Read directly from the plan | `planning.domain.EverydayBudget.everyday_spent` |
 
@@ -339,7 +343,7 @@ These names no longer appear on screens. Each is now called:
 | Level | Meaning |
 |---|---|
 | **L1 Activity family** | Personal, Work, Investment. |
-| **L2 Broad category** | The analysis bucket inside one family (Personal › Food & Groceries, Work › Salary, Investment › Dividends). |
+| **L2 Broad category** | The analysis bucket inside one family (Personal › Food & groceries, Work › Salary, Investment › Dividends). |
 | **L3 Detail** | Unused and empty; add only when a user chooses more detail. |
 
 Categories are not split into income and expense trees: pick the activity that explains the event whatever its sign (a refund keeps the original category). A Counterparty may suggest a category; the user can change it. Categories are picked from a list, never created by typing. A used category is archived, not deleted: readable on old transactions, not selectable for new ones. Sibling names are unique; one name may sit under different families.
@@ -519,8 +523,8 @@ Asset class and exposure are separate. **Risk level** (Low, Medium or High risk)
 | Zakat due | الزكاة المستحقة |
 | Paid this zakat year | اللي دفعته السنة دي |
 | Shares and funds | الأسهم والصناديق |
-| Gold held as savings | الدهب المحتفظ بيه كمدخرات |
-| Gold you wear | الدهب اللي بتلبسه |
+| Gold held as savings | الذهب المحتفظ بيه كمدخرات |
+| Gold you wear | الذهب اللي بتلبسه |
 | Debts due now | ديون مستحقة دلوقتي |
 | Money in | فلوس داخلة |
 | Money out | فلوس خارجة |
@@ -563,8 +567,8 @@ Asset class and exposure are separate. **Risk level** (Low, Medium or High risk)
 | Spread paid | فرق السعر المدفوع |
 | Price part | جزء السعر |
 | FX part | جزء العملة |
-| Safe to spend | المتاح الآمن للصرف |
-| Day's net | صافي اليوم |
+| Safe to spend | المتاح للصرف |
+| Day’s net | صافي اليوم |
 | Investments moved | حركة الاستثمارات |
 | Bills inside the plan | الفواتير ضمن الخطة |
 | Budget until payday | الميزانية لحد الراتب |

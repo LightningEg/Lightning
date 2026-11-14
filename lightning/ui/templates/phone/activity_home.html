@@ -1,11 +1,11 @@
-{# Activity (IV-3AY8, guideline C11.4): All (the month, one money line) and To review (one card at a time). #}
+{# Activity (IV-3AY8; v2.0 IV-11M7): All (search, chips, the month, In and Out wells, one card a day) and To review (one card at a time, its progress, Up next). #}
 {% extends "base.html" %}
 {% from "phone/partials/txn.html" import txn_list with context %}
 {% block title %}Activity{% endblock %}
 {% block heading %}<h1>{{ 'Activity'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
 {% set s = screen %}
-<div class="phone-chips" role="tablist">
+<div class="phone-chips phone-track" role="tablist">
   <a class="phone-chip{{ ' is-chosen' if s.tab == 'all' }}" role="tab" aria-selected="{{ 'true' if s.tab == 'all' else 'false' }}" href="/activity">{{ 'All'|tr(locale) }}</a>
   <a class="phone-chip{{ ' is-chosen' if s.tab == 'review' }}" role="tab" aria-selected="{{ 'true' if s.tab == 'review' else 'false' }}" href="/activity?tab=review"><span>{{ 'To review'|tr(locale) }}</span>{% if s.review_total %}<b>{{ s.review_total }}</b>{% endif %}</a>
 </div>
@@ -15,18 +15,17 @@
 <a class="btn phone-save" href="/import">{{ 'Import a statement'|tr(locale) }}</a>
 {% elif s.tab == 'all' %}
 {# 3AY8 (r25 › Activity): search is live on the register, payments first; Out, In and Transfers narrow the month #}
-<form class="phone-form" role="search" method="get" action="/transactions"><input type="hidden" name="month" value="{{ s.month }}"><input type="search" name="q" placeholder="{{ 'Search payments'|tr(locale) }}" aria-label="{{ 'Search payments'|tr(locale) }}" autocomplete="off"></form>
-<div class="phone-chips">{% for kind, label in (('out', 'Out'), ('in', 'In'), ('transfer', 'Transfers')) %}<a class="phone-chip" href="/transactions?month={{ s.month }}&amp;kind={{ kind }}">{{ label|tr(locale) }}</a>{% endfor %}</div>
-<div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/activity?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">{{ chevron(back=True) }}</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/activity?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">{{ chevron() }}</a>{% else %}<span class="phone-month-end" aria-hidden="true">&nbsp;</span>{% endif %}</span></div>
-<p class="phone-money-line"><span>{{ 'In'|tr(locale) }} <b class="pos"><bdi class="fig">{{ s.money_in|amount_role('total', True) }}</bdi></b> ·</span> <span>{{ 'Out'|tr(locale) }} <b><bdi class="fig">{{ (-s.money_out)|amount_role('total', True) }}</bdi></b></span></p>
-<div class="phone-flow-bars" aria-hidden="true"><i class="is-in" style="width: {{ s.in_share }}%"></i><i class="is-out" style="width: {{ s.out_share }}%"></i></div>
+<form class="phone-form phone-search-field" role="search" method="get" action="/transactions"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><input type="hidden" name="month" value="{{ s.month }}"><input type="search" name="q" placeholder="{{ 'Payee, category, amount or #tag'|tr(locale) }}" aria-label="{{ 'Search payments'|tr(locale) }}" autocomplete="off"></form>
+<div class="phone-chips phone-filter-chips"><a class="phone-chip is-chosen" href="/activity?month={{ s.month }}" aria-current="true">{{ 'All'|tr(locale) }}</a>{% for kind, label in (('out', 'Out'), ('in', 'In'), ('transfer', 'Transfers')) %}<a class="phone-chip" href="/transactions?month={{ s.month }}&amp;kind={{ kind }}">{{ label|tr(locale) }}</a>{% endfor %}</div>
+<div class="phone-chips phone-stepper"><span class="phone-chip phone-month-chip"><a href="/activity?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">{{ chevron(back=True) }}</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/activity?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">{{ chevron() }}</a>{% else %}<span class="phone-month-end" aria-hidden="true">&nbsp;</span>{% endif %}</span></div>
+<div class="phone-wells phone-flow-wells"><span class="phone-well"><span>{{ 'In'|tr(locale) }}</span><b class="pos"><bdi class="fig">{{ s.money_in|amount_role('total', True) }}</bdi></b></span><span class="phone-well is-bad"><span>{{ 'Out'|tr(locale) }}</span><b class="neg"><bdi class="fig">{{ (-s.money_out)|amount_role('total', True) }}</bdi></b></span></div>
 {% if s.rows %}{{ txn_list(s.rows, show_account=True, base_url='/activity', keep_qs='month=' ~ s.month, day_net=True) }}
 {% else %}<p class="phone-note">{{ 'Nothing recorded this month.'|tr(locale) }}</p>{% endif %}
 {% if s.more_rows %}<a class="phone-row" href="/transactions?month={{ s.month }}"><span>{{ 'See every row'|tr(locale) }}</span><b>{{ chevron() }}</b></a>{% endif %}
 {% elif s.card %}
 {% set card = s.card %}
-<section class="phone-section" aria-labelledby="card-heading">
-  <p class="phone-note" role="status">{{ '{n} of {total}'|tr(locale, n=s.index + 1, total=s.review_total) }}</p>
+<div class="phone-review-progress"><p role="status"><b>{{ '{n} of {total}'|tr(locale, n=s.index + 1, total=s.review_total) }}</b><span>{{ 'From your bank messages'|tr(locale) if card.kind == 'sms' else '' }}</span></p><span class="phone-progress" aria-hidden="true"><i style="width:{{ '%.1f'|format((s.index + 1) / s.review_total * 100) }}%"></i></span></div>
+<section class="phone-section phone-review-card is-rose" aria-labelledby="card-heading">
   <header class="phone-section-head"><h2 id="card-heading">{{ card.title|tr(locale) if card.kind in ('other', 'interest', 'sms') else card.title }}</h2>{% if card.amount is not none %}<b><bdi class="fig">{{ card.amount|money }}</bdi></b>{% endif %}</header>
   {% if card.day %}<p class="phone-note">{{ card.day }}</p>{% endif %}
   {% if card.detail %}<p class="review-card-detail">{{ card.detail|tr(locale) }}</p>{% endif %}
@@ -40,6 +39,10 @@
     {% elif s.review_total > 1 %}<a class="btn" href="/activity?tab=review&amp;i={{ s.index + 1 if s.index + 1 < s.review_total else 0 }}">{{ 'Skip'|tr(locale) }}</a>{% endif %}
   </div>
 </section>
+{% if s.up_next %}<section class="phone-section" aria-labelledby="next-heading">
+  <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span class="phone-head-text"><h2 id="next-heading">{{ 'Up next'|tr(locale) }}</h2><small>{{ ('1 more' if s.review_total - 1 == 1 else '{n} more')|tr(locale, n=s.review_total - 1) }}</small></span></header>
+  <div class="phone-rows">{% for n in s.up_next %}<a class="phone-row" href="/activity?tab=review&amp;i={{ (s.index + loop.index) % s.review_total }}"><span>{{ n.title|tr(locale) if n.kind in ('other', 'interest', 'sms') else n.title }}{% if n.day %}<small>{{ n.day }}</small>{% endif %}</span>{% if n.amount is not none %}<b><bdi class="fig">{{ n.amount|money }}</bdi></b>{% endif %}</a>{% endfor %}</div>
+</section>{% endif %}
 {% else %}
 <section class="phone-section"><h2>{{ 'All sorted'|tr(locale) }}</h2><p class="phone-note">{{ 'Nothing in Activity needs you.'|tr(locale) }}</p></section>
 {% endif %}

@@ -38,6 +38,8 @@
       let openOther = false;
       const sync = () => {
         const kind = kindNow();
+        const save = form.querySelector("[data-save-label]");  // IV-11M4: Save expense, Save income, Save transfer
+        if (save && save.dataset["label" + kind[0].toUpperCase() + kind.slice(1)]) save.textContent = save.dataset["label" + kind[0].toUpperCase() + kind.slice(1)];
         form.querySelectorAll("[data-account-word]").forEach((word) => { word.hidden = (word.dataset.accountWord === "to") !== (kind === "in"); });
         if (!chips || !select) return;
         chips.querySelectorAll("[data-chip-kind]").forEach((group) => { group.hidden = group.dataset.chipKind !== kind; });
@@ -72,6 +74,44 @@
         select.addEventListener("change", () => { select.setCustomValidity(""); sync(); });
       }
       form.querySelectorAll('[name="kind"]').forEach((radio) => radio.addEventListener("change", sync));
+
+      /* The keypad (IV-11M4): 1-9, the point, 0 and back type into the amount field. The field stays the plain input that
+         posts, so without this script (or with a keyboard) it works as before. */
+      const amount = form.querySelector('[name="amount"]');
+      const pad = sheet.querySelector("[data-keypad]");
+      if (pad && amount && !amount.readOnly) {
+        pad.hidden = false;
+        amount.setAttribute("inputmode", "none");  // the keypad is the keyboard; the field still takes typing
+        pad.addEventListener("click", (event) => {
+          const key = event.target.closest("[data-key]");
+          if (!key) return;
+          let text = amount.value;
+          if (key.dataset.key === "back") text = text.slice(0, -1);
+          else if (key.dataset.key === ".") { if (!text.includes(".")) text = (text || "0") + "."; }
+          else if (!(text.includes(".") && text.split(".")[1].length >= 2) && text.replace(/[^0-9]/g, "").length < 12) text += key.dataset.key;
+          amount.value = text === "0" && key.dataset.key === "0" ? "0" : text;
+          amount.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+      }
+
+      /* The date chip says Today or Yesterday; the date input lies over it so a tap still opens the picker. */
+      const chip = form.querySelector("[data-date-chip]");
+      const date = chip && chip.querySelector('input[name="date"]');  // app.js may have turned it into its own date field
+      const label = chip && chip.querySelector("[data-date-label]");
+      if (date && label) {
+        const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+        const paint = () => {
+          const now = new Date(), back = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+          const [y, m, d] = (date.value || iso(now)).split("-").map(Number);
+          label.textContent = date.value === iso(now) || !date.value ? t("Today") : date.value === iso(back) ? t("Yesterday")
+            : new Date(y, m - 1, d).toLocaleDateString(document.documentElement.lang || undefined, { day: "numeric", month: "short" });
+        };
+        label.hidden = false;
+        chip.classList.add("is-enhanced");
+        date.addEventListener("input", paint);
+        date.addEventListener("change", paint);
+        paint();
+      }
       // Save with no category: the field that says so must be on screen, or the browser blocks the form with nothing to read.
       form.addEventListener("invalid", (event) => {
         if (!event.target.closest("[data-category-field]") || !select) return;

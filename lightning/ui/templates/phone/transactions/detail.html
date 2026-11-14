@@ -26,7 +26,7 @@
     {% for effect in cash_effects %}<div><dt>Effect · {{ effect.owner }}</dt><dd>Cash in {{ effect.account }} {{ 'increases' if effect.quantity > 0 else 'decreases' }} by {{ effect.quantity|abs|money }} {{ effect.currency }}</dd></div>{% endfor %}
     {% if txn.counterparty %}<div><dt>{{ 'Counterparty'|tr(locale) }}</dt><dd>{% if touched.counterparty %}<a href="/counterparties/{{ touched.counterparty.id }}">{{ txn.counterparty }}</a>{% else %}{{ txn.counterparty }}{% endif %}</dd></div>{% endif %}
     {% for owner in touched.owners %}<div><dt>{{ 'Held for'|tr(locale) }}</dt><dd><a href="/counterparties/{{ owner.id }}">{{ owner.name }}</a></dd></div>{% endfor %}
-    {% if foreign %}<div><dt>{{ 'Paid in'|tr(locale) }}</dt><dd><bdi class="fig">{{ foreign.label }}</bdi> · {{ ("the bank's pound debit" if foreign.settled else "pounds at the day's rate until the bank's debit")|tr(locale) }}</dd></div>{% endif %}
+    {% if foreign %}<div><dt>{{ 'Paid in'|tr(locale) }}</dt><dd><bdi class="fig">{{ foreign.label }}</bdi> · {{ ("the bank’s pound debit" if foreign.settled else "pounds at the day’s rate until the bank’s debit")|tr(locale) }}</dd></div>{% endif %}
     {% if txn.notes %}<div><dt>{{ 'Notes'|tr(locale) }}</dt><dd>{{ txn.notes|tagged }}</dd></div>{% endif %}
     <div><dt>{{ 'Recorded'|tr(locale) }}</dt><dd><time datetime="{{ txn.created_at }}">{{ recorded_at }}</time>{% if txn.updated_at != txn.created_at %} · {{ 'Updated'|tr(locale) }} <time datetime="{{ txn.updated_at }}">{{ updated_at }}</time>{% endif %}</dd></div>
   </dl>

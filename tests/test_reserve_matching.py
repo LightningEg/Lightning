@@ -88,7 +88,7 @@ def test_editing_a_linked_expense_keeps_its_reserve_link_while_it_fits(c):
     expense = c.transactions.record_outflow("2026-09-10", account.id, "200", food.id)
     c.reserves.set_expense_link(reserve["id"], expense.id, "200")
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
-    row = dict(date="2026-09-10", amount="-190", category="Food & Groceries", counterparty="", notes="",
+    row = dict(date="2026-09-10", amount="-190", category="Food & groceries", counterparty="", notes="",
                revision=c.transactions.revision(expense.id))
     reply = client.post(f"/accounts/{account.id}/register/{expense.id}", data=row, follow_redirects=False)
     assert reply.status_code == 303
@@ -109,7 +109,7 @@ def test_editing_a_linked_expense_into_money_in_drops_the_link_and_says_so(c):
     expense = c.transactions.record_outflow("2026-09-10", account.id, "200", food.id)
     c.reserves.set_expense_link(reserve["id"], expense.id, "200")
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
-    row = dict(date="2026-09-10", amount="200", category="Food & Groceries", counterparty="", notes="",
+    row = dict(date="2026-09-10", amount="200", category="Food & groceries", counterparty="", notes="",
                revision=c.transactions.revision(expense.id))
     reply = client.post(f"/accounts/{account.id}/register/{expense.id}", data=row, follow_redirects=False)
     assert reply.status_code == 303 and "link was removed" in unquote_plus(reply.headers["location"])

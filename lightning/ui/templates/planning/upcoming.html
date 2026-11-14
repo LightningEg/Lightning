@@ -6,7 +6,7 @@
 {% from "partials/charts.html" import lead_card %}
 {% set keep = '&show=' ~ show if show != 'all' else '' %}
 {% if lead %}{% call lead_card(lead, base) %}<div class="compact-list">
-  {% for p in cal.paydays %}<a class="compact-row" href="/plan/upcoming?month={{ month }}&amp;day={{ p }}{{ keep }}"><span>{{ 'Payday'|tr(locale) }}</span><b>{{ p|day }}</b></a>{% endfor %}
+  {% if cal.next_payday %}<a class="compact-row" href="/plan/upcoming?month={{ cal.next_payday[:7] }}&amp;day={{ cal.next_payday }}{{ keep }}"><span>{{ 'Payday'|tr(locale) }}</span><b>{{ cal.next_payday|day }}</b></a>{% endif %}
   {% if cal.short_on %}<a class="compact-row is-short" href="/plan"><span>{{ 'Cash runs short'|tr(locale) }}<small>{{ 'short by {amt}'|tr(locale, amt=cal.short_by|money(False, 0)) }}</small></span><b>{{ cal.short_on|day }}</b></a>{% endif %}
   {% if cal.money_in %}<div class="compact-row"><span>{{ 'Coming in'|tr(locale) }}</span><b>{{ cal.money_in|money(False, 0) }}</b></div>{% endif %}
 </div>{% endcall %}{% endif %}

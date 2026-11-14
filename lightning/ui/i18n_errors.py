@@ -71,7 +71,7 @@ ERRORS_AR = {
     "{a} can only be recorded in a brokerage account.": "{a} ينفع يتسجل في حساب وساطة بس.",
     "{a} is priced in {b}; {c} has no {d} cash for it. Enter what you paid in {e} under Paid in another currency, or move {f} in first.": "{a} مسعّر بـ {b}؛ و{c} مفيهوش فلوس {d} له. اكتب اللي دفعته بـ {e} تحت \"مدفوع بعملة تانية\"، أو حوّل {f} الأول.",
     "{a} is priced in {b}; {c} is in {d}. Use a {e} account.": "{a} مسعّر بـ {b}؛ و{c} بـ {d}. استخدم حساب بـ {e}.",
-    "{a} only supplies a price. Record the gold you own as an item in a physical-asset account.": "{a} بيدّي سعر بس. سجّل الدهب اللي معاك كقطعة في حساب أصول مادية.",
+    "{a} only supplies a price. Record the gold you own as an item in a physical-asset account.": "{a} بيدّي سعر بس. سجّل الذهب اللي معاك كقطعة في حساب أصول مادية.",
     "{a} owes you {b}; a repayment of {c} is more than that.": "{a} عليه لك {b}؛ وسداد {c} أكتر من كده.",
     "{a} owes you {b}; you cannot forgive {c}.": "{a} عليه لك {b}؛ ومينفعش تسامح في {c}.",
     "Choose a person.": "اختار شخص.",

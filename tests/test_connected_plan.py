@@ -1,6 +1,7 @@
 """The parts of the plan talk to each other (owner request 2026-10-05): the savings target set in
 Financial health limits the budget, dated goals count in what a month must leave, and the budget,
 Needs you, Financial health and Reserves read one check (HealthService.plan_check)."""
+from dataclasses import replace
 import shutil
 from decimal import Decimal
 
@@ -127,8 +128,13 @@ def test_fill_this_month_stops_at_most_you_can_plan(c):
     c.budgets.set_budget(transport, "2026-11", "1000", only_this_month=True, schedule=c.schedules.view())
     proposal, left = c.health.fit_fill(c.budgets.fill_proposal(MONTH, "last_month", schedule=c.schedules.view()))
     rows = {row.category_id: row for row in proposal.rows}
-    assert not rows[food].selected and "Past Most you can plan: 8,000 of room left." in rows[food].conflict
-    assert rows[transport].selected and left == Decimal("7000.00")
+    # NF-12AI: 9,000 + 1,000 do not fit in 8,000, so both wait for the person's pick, whatever the rows' order.
+    shortfall = "Together the ticked rows pass Most you can plan by 2,000; 8,000 of room is left. Tick the ones you want."
+    assert not rows[food].selected and not rows[transport].selected and shortfall in rows[food].conflict
+    assert left == Decimal("8000.00")
+    raw = c.budgets.fill_proposal(MONTH, "last_month", schedule=c.schedules.view())
+    reverse, _ = c.health.fit_fill(replace(raw, rows=tuple(reversed(raw.rows))))
+    assert {r.category_id: r.selected for r in reverse.rows} == {r.category_id: r.selected for r in proposal.rows}
     page = visible_text(_ScreenClient(create_app(c), "http://testserver").get(f"/budget/fill?month={MONTH}").text)
     assert "Most you can plan 8,000 EGP, to leave 2,000 to save." in page
 
@@ -202,10 +208,10 @@ def test_needs_you_names_a_category_planned_below_its_bills(c):
                       start_date="2026-12-20", category_id=food)
     assert c.budgets.below_scheduled(MONTH, schedule=c.schedules.view()) == []  # no rule of its own: the bill plans the category
     c.budgets.set_budget(food, MONTH, "500", schedule=c.schedules.view())
-    assert c.budgets.below_scheduled(MONTH, schedule=c.schedules.view()) == [{"category_id": food, "name": "Food & Groceries", "planned": Decimal("500"),
+    assert c.budgets.below_scheduled(MONTH, schedule=c.schedules.view()) == [{"category_id": food, "name": "Food & groceries", "planned": Decimal("500"),
                                                  "scheduled": Decimal("900")}]
     inbox = {item["label"]: item for item in ReviewInbox(c).items(today())}
-    item = inbox["Food & Groceries is planned below its bills"]
+    item = inbox["Food & groceries is planned below its bills"]
     assert item["detail"] == "Planned 500 EGP; bills and loan payments scheduled this month come to 900."
     assert item["href"] == f"/budget?month={MONTH}&open_group=all#limit-{food}"   # where its limit is typed
     c.budgets.set_budget(food, MONTH, "900", schedule=c.schedules.view())
@@ -321,12 +327,12 @@ def test_over_plan_two_months_running_offers_to_move_room(c, setup):
     food, transport = _salaried(c, setup)
     [row] = c.budgets.over_twice(MONTH, schedule=c.schedules.view())
     assert (row["category_id"], row["amount"], row["from_id"]) == (food, Decimal("1000"), transport)
-    item = {i["label"]: i for i in ReviewInbox(c).items(today())}["Food & Groceries over plan two months running"]
+    item = {i["label"]: i for i in ReviewInbox(c).items(today())}["Food & groceries over plan two months running"]
     assert "Over its plan in October and November, by up to 1,000 EGP. Move 1,000 from Transportation" in item["detail"]
     browser = _ScreenClient(create_app(c), "http://testserver")
     dialog = visible_text(browser.get(item["href"]).text)
-    assert "Food & Groceries 5,000 → 6,000" in dialog
-    assert "Food & Groceries was over its plan two months running; Transportation had room both months." in dialog
+    assert "Food & groceries 5,000 → 6,000" in dialog
+    assert "Food & groceries was over its plan two months running; Transportation had room both months." in dialog
     browser.post("/budget/move", data={"month": MONTH, "to": food, "from": transport, "amount": "1000"})
     plans = c.budgets.amounts_for(MONTH, loans=False, schedule=c.schedules.view())
     assert (plans[food][0], plans[transport][0]) == (Decimal("6000"), Decimal("2000"))

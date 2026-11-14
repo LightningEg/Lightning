@@ -147,7 +147,7 @@ def test_serial_dates_do_not_bias_text_date_order_and_amount_stays_numeric(c, se
     assert profile_dates(['46631', '10/13/2026', '10/02/2026']).order == 'mdy'
     serial = (date(2026, 9, 20) - date(1899, 12, 30)).days
     batch, _ = c.bank_imports.stage(setup[0]['cib'].id, 'serial.csv',
-        f'Date,Amount,Counterparty,Category\n{serial},-100,Shop,Food & Groceries\n46631,-20,Future,Food & Groceries\n'.encode())
+        f'Date,Amount,Counterparty,Category\n{serial},-100,Shop,Food & groceries\n46631,-20,Future,Food & groceries\n'.encode())
     _, rows = c.bank_imports.preview(batch)
     assert rows[0]['Date'] == '2026-09-20' and rows[0]['Amount'] == '-100'
     assert rows[1]['Date'] == '2027-09-01'
@@ -163,8 +163,8 @@ def test_reupload_matches_only_active_rows_and_explicit_override_posts_once(c, s
     suffix = ',Reference' if reference else ''
     refs = [',A', ',B'] if reference else ['', '']
     data = (f'Date,Amount,Counterparty,Category{suffix}\n'
-            f'2026-09-20,-10,Shop,Food & Groceries{refs[0]}\n'
-            f'2026-09-21,-20,Other shop,Food & Groceries{refs[1]}\n').encode()
+            f'2026-09-20,-10,Shop,Food & groceries{refs[0]}\n'
+            f'2026-09-21,-20,Other shop,Food & groceries{refs[1]}\n').encode()
     first, _ = c.bank_imports.stage(bank.id, 'same.csv', data)
     _, rows = c.bank_imports.preview(first)
     assert c.bank_imports.confirm(first, {r['_import_row_id']: {} for r in rows})['posted'] == 2
@@ -203,7 +203,7 @@ def test_utf8_normalization_preserves_historical_hash_bytes():
 
 def test_duplicate_override_survives_http_validation_and_posts_once(c, setup):
     bank, category = setup[0]['cib'], setup[1]['EXP.PERSONAL.FOOD']
-    data = b'Date,Amount,Counterparty,Category\n2026-09-20,-10,Carrefour,Food & Groceries\n'
+    data = b'Date,Amount,Counterparty,Category\n2026-09-20,-10,Carrefour,Food & groceries\n'
     first, _ = c.bank_imports.stage(bank.id, 'same.csv', data)
     _, rows = c.bank_imports.preview(first)
     c.bank_imports.confirm(first, {rows[0]['_import_row_id']: {}})

@@ -85,4 +85,4 @@ def test_money_lists_every_balance_as_one_row_and_the_page_behind_more_adds_up(p
     assert re.search(r'<a class="phone-row" href="/accounts/\d+"><span>CIB Payroll</span><b>', html)
     assert not re.search(r'<input(?![^>]*type="hidden")', html.split('<main', 1)[1].split("</main>", 1)[0]) and "<td" not in html  # no field; an undo form's hidden inputs are not fields
     money = phone.get("/money").text
-    assert re.search(r'<a class="phone-row" href="/accounts/\d+"><span>CIB Payroll</span>', money)
+    assert re.search(r'<a class="phone-row phone-acct-row" href="/accounts/\d+">.*?<b>CIB Payroll</b>', money, re.S)   # IV-11M7 (mockup v2.0): a tile, then the name

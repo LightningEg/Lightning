@@ -16,6 +16,7 @@ from lightning.core.errors import ValidationError
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, month_of
 from lightning.core.money import ZERO, fmt
+from lightning.planning.domain import PlanKind
 from lightning.planning.salary_day import review_identity, salary_review
 from lightning.transactions.domain import TxnFilter
 from lightning.workflows.market_prices import missing_prices
@@ -24,6 +25,12 @@ from lightning.workflows.market_prices import missing_prices
 def _month_name(month: str) -> str:
     """yyyy-mm as "September 2026"."""
     return date.fromisoformat(month + "-01").strftime("%B %Y")
+
+
+def _day_name(day: str, on: date) -> str:
+    """yyyy-mm-dd as "25 Dec", with the year when it is not `on`'s (A06.1)."""
+    value = date.fromisoformat(day)
+    return f"{value.day} {value.strftime('%b')}" + ("" if value.year == on.year else f" {value.year}")
 
 
 def _ordinal(day: int) -> str:
@@ -173,6 +180,17 @@ class ReviewInbox:
                           "detail": f"Due {payment.due_date} · {fmt(payment.amount, 0)} {c.base_currency} · not paid yet.",
                           "href": f"/plan/items/{payment.item.id}/pay?due={payment.due_date}&back=%2F",
                           "popup": True, "action": "Mark paid", "priority": 1,
+                          "late_days": payment.days_late(on)})
+        for payment in c.planning.all_payments(on, on, (PlanKind.INCOME,)):
+            if not payment.outstanding or payment.days_late(on) < 2:
+                continue
+            item = payment.item
+            currency = c.accounts.get(item.account_id).currency if item.account_id else c.base_currency
+            items.append({"label": f"{item.name} has not arrived",
+                          "detail": f"Expected {payment.due_date} · {fmt(payment.amount)} {currency}. "
+                                    "Record it when it arrives.",
+                          "href": f"/plan/items/{item.id}/pay?due={payment.due_date}&back=%2F",
+                          "popup": True, "action": "Record", "priority": 1,
                           "late_days": payment.days_late(on)})
         # Money that moved before the payment was due (salary 12 days early): the forecast no longer counts it
         # twice, and one press links it (7K).
@@ -453,8 +471,14 @@ class ReviewInbox:
                                     f"leaves {fmt(goal['can'], 0)} for it. {pace} {way}",
                           "href": "/plan/reserves", "action": "See reserves", "priority": 2,
                           "glance": glance(goal["name"], "Set aside", goal["need"], "a month")})
-        offer = c.health.raise_offer(month)
-        if offer:
+        offer = c.health.income_change_offer(month)
+        if offer and offer["kind"] == "drop":  # NF-12AL1: scheduled pay falls from a date
+            found.append({"label": f"Your income falls to {fmt(offer['recurring'], 0)} from {_day_name(offer['from'], on)}",
+                          "detail": f"{fmt(offer['drop'], 0)} a month less than your average of "
+                                    f"{fmt(offer['average'], 0)}. Plan on it from then, or keep the average.",
+                          "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose", "priority": 2,
+                          "glance": glance("Your income", "Choose", offer["drop"], "less a month")})
+        elif offer:
             found.append({"label": "Your income went up",
                           "detail": f"Recurring expects {fmt(offer['recurring'], 0)} {cur} a month, {fmt(offer['raise'], 0)} "
                                     f"more than your average of {fmt(offer['average'], 0)}. Plan with it, or save the difference.",
@@ -486,9 +510,14 @@ class ReviewInbox:
                               "glance": glance(row["name"], "Adjust", row["amount"], "over plan 2 months")})
         for row in c.budgets.running_out(month, on, schedule=c.schedules.view()):  # NF-12S
             raise_href = f"/budget?month={month}&open_group=all#limit-{row['category_id']}"
-            item = {"label": f"{row['name']} will run out around the {_ordinal(row['day'])}",
-                    "detail": f"At this pace it passes its {fmt(row['limit'], 0)} {cur} limit before the month ends. "
-                              f"It needs about {fmt(row['amount'], 0)} {cur} more.",
+            # NF-12AL2: "may" when the category has too little history for a curve of its own.
+            label = "may" if row["may"] else "will"
+            passes = (f"At this pace it passes the {fmt(row['limit'], 0)} {cur} left after bills before the month ends."
+                      if row["bills"] else
+                      f"At this pace it passes its {fmt(row['limit'], 0)} {cur} limit before the month ends.")
+            history = " It has too little history to read your usual pace." if row["may"] else ""
+            item = {"label": f"{row['name']} {label} run out around the {_ordinal(row['day'])}",
+                    "detail": f"{passes} It needs about {fmt(row['amount'], 0)} {cur} more.{history}",
                     "priority": 2, "source_version": f"running-out:{month}:{row['category_id']}"}
             if row["can_move"]:
                 item.update(href=f"/budget/move?month={month}&to={row['category_id']}&from={row['from_id']}"
@@ -496,7 +525,8 @@ class ReviewInbox:
                             alt={"label": "Raise", "href": raise_href})
             else:
                 item.update(href=raise_href, action="Raise")
-            item["glance"] = glance(row["name"], item["action"], row["amount"], "runs out around day {n}", n=row["day"])
+            item["glance"] = glance(row["name"], item["action"], row["amount"],
+                                   "may run out around day {n}" if row["may"] else "runs out around day {n}", n=row["day"])
             found.append(item)
         return found
 
@@ -536,7 +566,7 @@ class ReviewInbox:
                                     "A pending hold can make the bank's figure lag.",
                           "href": f"/accounts/{gap['account_id']}?date_from={day}&date_to={day}", "action": "Look at that day",
                           "priority": 2,
-                          "glance": glance(gap["name"], "Look", amount, "off the bank's balance since {sa}", sa=when),
+                          "glance": glance(gap["name"], "Look", amount, "off the bank’s balance since {sa}", sa=when),
                           "source_version": {"account": gap["account_id"], "date": day, "stated": str(gap["stated"])}})
         return found
 

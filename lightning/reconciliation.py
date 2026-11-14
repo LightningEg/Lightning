@@ -52,8 +52,8 @@ class BalanceCheck:
     def filed_under(self) -> str:
         """The plain name of the category the adjustment lands in."""
         if self.is_cash:
-            return "Unaccounted Money Found" if self.difference > ZERO else "Unaccounted Spending"
-        return "Other Income" if self.difference > ZERO else "Other Personal spending"
+            return "Unaccounted money found" if self.difference > ZERO else "Unaccounted spending"
+        return "Other income" if self.difference > ZERO else "Other personal spending"
 
 
 class ReconciliationService:

@@ -136,8 +136,8 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
 
     if e.current and e.day:
         gap = e.pace_gap
-        pace_compare = (compare("under the plan's pace", fmt(-gap, 0), "good") if gap <= 0
-                        else compare("over the plan's pace", fmt(gap, 0), "bad"))
+        pace_compare = (compare("under the plan’s pace", fmt(-gap, 0), "good") if gap <= 0
+                        else compare("over the plan’s pace", fmt(gap, 0), "bad"))
         against = e.against_last_month_same_day
         tail = (line(f"{_signed(against)} against {previous} by day {e.day}") if against is not None
                 else line(f"Everyday plan {fmt(e.everyday_plan, 0)}"))
@@ -168,7 +168,9 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
     if check is not None and check.planned is not None and check.plan_saves is not None and check.planned_savings_rate is not None:
         rate, target = check.planned_savings_rate, check.target_percent
         scale = max(rate, target, Decimal(1)) * Decimal("1.4")  # not money: the meter's scale
-        if raise_offer:
+        if raise_offer and raise_offer.get("kind") == "drop":  # NF-12AL1: scheduled pay falls from a date
+            tail = line(f"Income down {fmt(raise_offer['drop'], 0)}", "Choose", f"/budget/raise?month={month}", popup=True)
+        elif raise_offer:
             tail = line(f"Income up {fmt(raise_offer['raise'], 0)}", "Raise the plan", f"/budget/raise?month={month}", popup=True)
         elif check.over_by:
             tail = line(f"Plan {fmt(check.over_by, 0)} less to keep {fmt(check.to_save, 0)} a month")
@@ -206,7 +208,7 @@ def budget_period(spent: Decimal, planned: Decimal, months: list[tuple[str, Deci
                   if ended else compare("of the plan left", f"{share_of_plan(max(left, ZERO), planned):.0f}%"),
                   tone="in" if left >= 0 else "over", key="left", chip_=chip(period_label),
                   visual=columns([value for _, value, _ in months], running=bool(months) and not months[-1][2]),
-                  line_=line("Each month's left in plan"),
+                  line_=line("Each month’s left in plan"),
                   href="#budget-meters")]
     return row(cards)
 
@@ -512,12 +514,12 @@ def scenario(result) -> tuple[dict | None, dict | None]:
     value = moved[1] if changed else low.closing
     if changed:
         diff = result.change
-        comparison = compare("on your plan's lowest point", _signed(diff),
+        comparison = compare("on your plan’s lowest point", _signed(diff),
                              "bad" if diff < 0 else "good" if diff > 0 else "plain")
     else:
         comparison = compare("with your plan as it is")
     lead = card(figure_label("lowest_point_ahead"), value, comparison, tone="over" if value < 0 else "hold",
-                chip_=chip(moved[0] if changed else low.month), key="scenario")
+                chip_=chip(moved[2] if changed else low.month), key="scenario")
     labels = [m for m, _, _ in result.months]
     series = [{"name": "Your plan", "tone": "reference", "dashed": True, "values": [b for _, b, _ in result.months],
                "mark_low": not changed}]

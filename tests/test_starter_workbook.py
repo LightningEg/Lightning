@@ -50,7 +50,7 @@ def test_dropdowns_are_ready_for_type_currency_group_money_and_the_entry_columns
     assert workbook["Lists"].sheet_state == "hidden"
     lists = {c.column_letter: [x.value for x in workbook["Lists"][c.column_letter] if x.value] for c in workbook["Lists"][1]}
     assert "Bank account" in lists["A"] and lists["B"][0] == "EGP" and lists["C"] == sw.MONEY and lists["D"] == sw.GROUPS
-    assert "Food & Groceries" in lists["E"] and "Salary" in lists["E"]
+    assert "Food & groceries" in lists["E"] and "Salary" in lists["E"]
     found = {}
     for name in ("Accounts", "Categories", "Entries"):
         for check in workbook[name].data_validations.dataValidation:

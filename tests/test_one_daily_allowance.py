@@ -42,9 +42,10 @@ def _phone(c):
 def test_home_gives_budgets_own_per_day_figure(sample):
     everyday = sample.forecaster.everyday("2026-10", date(2026, 10, 4))
     html = _phone(sample).get("/home").text
-    line = re.sub(r"<[^>]+>", "", re.search(r'<p class="phone-hero-line">(.*?)</p>', html, re.S).group(1))
+    lines = [re.sub(r"<[^>]+>", "", m) for m in re.findall(r'<p class="phone-hero-line">(.*?)</p>', html, re.S)]
+    line = next(l for l in lines if "a day" in l).strip().removeprefix("On pace.").removeprefix("Ahead of pace.").strip()   # IV-11M3: a verdict leads
     assert line.strip() == f"About {fmt(everyday.per_day, 0)} a day until payday on {said('2026-11-01')}.", line
-    root = _phone(sample).get("/").text.split('class="phone-hero-line"', 1)[1][:200]  # the phone's / is Home: the same figure
+    root = _phone(sample).get("/").text   # the phone's / is Home: the same figure
     assert re.findall(r"About ([\d,]+) a day", root) == [fmt(everyday.per_day, 0)], root
 
 
@@ -54,4 +55,4 @@ def test_phone_and_pc_budget_show_the_same_per_day_figure(sample):
     pc = TestClient(create_app(sample)).get("/budget?period=month&month=2026-10").text
     phone = _phone(sample).get("/budget?period=month&month=2026-10").text
     assert re.search(rf"about {figure} a day", pc), figure
-    assert re.search(rf"About {figure} a day\.", phone), figure  # flexible Budget's hero line (3AY9)
+    assert re.search(rf"About {figure} a day", phone), figure  # flexible Budget's hero line (3AY9; "for N days" follows, IV-11M5)

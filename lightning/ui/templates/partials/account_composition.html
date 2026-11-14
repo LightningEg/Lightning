@@ -1,7 +1,7 @@
 {# U4: what is in a brokerage account, as a bar rather than a table. Header already says the balance. #}
-{% if composition %}<section class="card account-composition" aria-label="{{ "What's in it"|tr(locale) }}">
-  <h2>{{ "What's in it"|tr(locale) }}</h2>
-  {% if composition.segments %}<div class="comp-bar" role="img" aria-label="{{ "What's in it"|tr(locale) }}">{% for seg in composition.segments %}<i class="tone-{{ seg.tone }}" style="width:{{ '%.2f'|format(seg.pct) }}%"></i>{% endfor %}</div>
+{% if composition %}<section class="card account-composition" aria-label="{{ "What’s in it"|tr(locale) }}">
+  <h2>{{ "What’s in it"|tr(locale) }}</h2>
+  {% if composition.segments %}<div class="comp-bar" role="img" aria-label="{{ "What’s in it"|tr(locale) }}">{% for seg in composition.segments %}<i class="tone-{{ seg.tone }}" style="width:{{ '%.2f'|format(seg.pct) }}%"></i>{% endfor %}</div>
   <ul class="comp-legend">{% for seg in composition.segments %}<li><span class="comp-dot tone-{{ seg.tone }}"></span><span class="comp-name">{{ seg.name|tr(locale) }}</span><b>{{ seg.amount|money(False, 0) }}</b><span class="muted small">{{ seg.share }}%</span></li>{% endfor %}</ul>{% endif %}
   {% if composition.held_bar %}{% set hb = composition.held_bar %}<div class="comp-bar thin" role="img" aria-label="{{ fig.what_you_own.label }} / {{ fig.held_for_others.label }}"><i class="comp-owned" style="width:{{ '%.2f'|format(hb.owned_pct) }}%"></i><i class="comp-held" style="width:{{ '%.2f'|format(hb.held_pct) }}%"></i></div>
   <ul class="comp-legend"><li><span class="comp-dot comp-owned"></span><span class="comp-name">{{ fig.what_you_own.label }}</span><b>{{ hb.owned|money(False, 0) }}</b></li><li><span class="comp-dot comp-held"></span><span class="comp-name">{{ fig.held_for_others.label }}</span><b>{{ hb.held|money(False, 0) }}</b></li></ul>{% endif %}

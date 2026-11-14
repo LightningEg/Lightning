@@ -1,16 +1,27 @@
-{# Income went up (3AY15): three choices, one row each, the row's button is its choice. #}
+{# The income offer (3AY15, NF-12AL1): a raise has three choices, a drop from its date two; one row each, the row's button is its choice. #}
 {% extends "base.html" %}
-{% block title %}Your income went up{% endblock %}
-{% block heading %}<h1>{{ "Your income went up"|tr(locale) }}</h1><p class="phone-note">Recurring expects {{ offer.recurring|money(False, 0) }} {{ base }} a month; your average is {{ offer.average|money(False, 0) }}</p>{% endblock %}
+{% block title %}{% if offer.kind == 'drop' %}Your income falls{% else %}Your income went up{% endif %}{% endblock %}
+{% block heading %}{% if offer.kind == 'drop' %}<h1>{{ 'Your income falls to {amt} from {day}'|tr(locale, amt=offer.recurring|money(False, 0), day=offer.from|day(locale)) }}</h1><p class="phone-note">{{ 'Your average is {amt}, {amt2} more a month'|tr(locale, amt=offer.average|money(False, 0), amt2=offer.drop|money(False, 0)) }}</p>{% else %}<h1>{{ "Your income went up"|tr(locale) }}</h1><p class="phone-note">Recurring expects {{ offer.recurring|money(False, 0) }} {{ base }} a month; your average is {{ offer.average|money(False, 0) }}</p>{% endif %}{% endblock %}
 {% block content %}
 <section class="phone-section" aria-labelledby="raise-q">
+  {% if offer.kind == 'drop' %}
+  {% set plan_line = ('{label} becomes {amt}; your plan is {amt2} over it'|tr(locale, label=fig.spending_room.label, amt=offer.room|money(False, 0), amt2=offer.over|money(False, 0))) if offer.over else ('{label} becomes {amt}; your plan still fits'|tr(locale, label=fig.spending_room.label, amt=offer.room|money(False, 0))) %}
+  <header class="phone-section-head"><h2 id="raise-q">{{ 'What should the plan count from {month}?'|tr(locale, month=offer.from_month|month(locale)) }}</h2></header>
+  <div class="phone-rows">
+    {% for choice, title, line, button in [('plan', 'Plan on it from then'|tr(locale), plan_line, 'Plan on it'), ('keep', 'Keep the average'|tr(locale), 'The plan waits until the lower income shows in completed months'|tr(locale), 'Keep it')] %}
+    <form method="post" action="/budget/raise" class="phone-row"><input type="hidden" name="month" value="{{ offer.month }}"><input type="hidden" name="choice" value="{{ choice }}">
+      <span>{{ title }}<small>{{ line }}</small></span>
+      <button class="btn small{{ ' primary' if loop.first }}">{{ button|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}
+  </div>
+  {% else %}
   <header class="phone-section-head"><h2 id="raise-q">What should the plan do with {{ offer.raise|money(False, 0) }} {{ base }} more a month?</h2></header>
   <div class="phone-rows">
-    {% for choice, title, line, button in [('plan', 'Plan with it', fig.spending_room.label ~ ' becomes ' ~ offer.room|money(False, 0) ~ ' ' ~ base ~ '; your ' ~ offer.rate|money(False, 0) ~ '% target stays', 'Plan with it'), ('save', 'Save the difference', "Keep today's plan and raise your savings target to " ~ offer.keep_rate ~ '%', 'Save it'), ('keep', 'Keep the average', 'The plan waits until the new income shows in completed months', 'Keep it')] %}
+    {% for choice, title, line, button in [('plan', 'Plan with it', fig.spending_room.label ~ ' becomes ' ~ offer.room|money(False, 0) ~ ' ' ~ base ~ '; your ' ~ offer.rate|money(False, 0) ~ '% target stays', 'Plan with it'), ('save', 'Save the difference', "Keep today’s plan and raise your savings target to " ~ offer.keep_rate ~ '%', 'Save it'), ('keep', 'Keep the average', 'The plan waits until the new income shows in completed months', 'Keep it')] %}
     <form method="post" action="/budget/raise" class="phone-row"><input type="hidden" name="month" value="{{ offer.month }}"><input type="hidden" name="choice" value="{{ choice }}">
       <span>{{ title|tr(locale) }}<small>{{ line|tr(locale) }}</small></span>
       <button class="btn small{{ ' primary' if loop.first }}">{{ button|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}
   </div>
+  {% endif %}
   <p class="phone-note">{{ "You can change this later in"|tr(locale) }} <a href="/settings?section=budget">{{ "Settings › Budget"|tr(locale) }}</a> {{ "and"|tr(locale) }} <a href="/settings?section=financial-health">{{ 'Financial health'|tr(locale) }}</a>.</p>
 </section>
 {% endblock %}
