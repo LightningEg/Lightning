@@ -5,9 +5,11 @@ from __future__ import annotations
 import os
 import re
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import timezone
 from pathlib import Path
 from uuid import uuid4
+
+from lightning.core.dates import wall_now
 
 from .connection import Database
 from .snapshot import snapshot
@@ -40,7 +42,7 @@ def list_backups(folder: str | Path, database: str | Path) -> list[BackupFile]:
 
 def _today() -> str:
     """The day in backup file names (UTC), so "one a day" and the names agree."""
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return wall_now(timezone.utc).strftime("%Y-%m-%d")
 
 
 def backed_up_today(folder: str | Path, database: str | Path) -> bool:

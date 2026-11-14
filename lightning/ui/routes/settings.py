@@ -8,7 +8,7 @@ from lightning.investments.domain import DEFAULT_SALE_FACTOR
 from lightning.planning.position import class_group_totals
 from lightning.core.money import ZERO
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
-from lightning.core.dates import today
+from lightning.core.dates import today, wall_now
 
 from ..sections import SECTIONS
 from .. import status as page_status
@@ -483,7 +483,6 @@ async def start_fresh(request: Request):
     """Browser mode: set the current database aside (after a backup) and open an empty one in its
     place. Nothing is deleted. The desktop app uses a new profile instead (Settings links there)."""
     import os
-    from datetime import datetime
     from pathlib import Path
     from lightning.bootstrap import build
 
@@ -498,7 +497,7 @@ async def start_fresh(request: Request):
     if str(current) == ":memory:":
         return redirect("/settings", "This database is not a file, so there is nothing to set aside.")
     saved = c.backup_now()
-    aside = current.with_name(f"{current.stem}_before-fresh_{datetime.now():%Y-%m-%d_%H%M%S}{current.suffix}")
+    aside = current.with_name(f"{current.stem}_before-fresh_{wall_now():%Y-%m-%d_%H%M%S}{current.suffix}")
     c.db.close()
     try:
         os.replace(current, aside)

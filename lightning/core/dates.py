@@ -6,7 +6,7 @@ import calendar
 import functools
 import os
 import re
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, tzinfo
 
 from .errors import ValidationError
 from .money import ascii_digits
@@ -60,16 +60,34 @@ def fmt_date(value: date) -> str:
 
 def today() -> date:
     """The current date. Tests can pin it with the LIGHTNING_TODAY environment variable (yyyy-mm-dd)."""
+    return now().date()
+
+
+def wall_now(tz: tzinfo | None = None) -> datetime:
+    """Real device time, unaffected by the profile's simulated date.
+
+    Use for certificate validity, backup scheduling, network freshness and publication metadata.
+    With no timezone it returns naive local time, matching datetime.now().
+    """
+    return datetime.now(tz)
+
+
+def now() -> datetime:
+    """Local application time; LIGHTNING_TODAY overrides only its date, keeping the clock time."""
+    current = wall_now()
     pinned = os.environ.get("LIGHTNING_TODAY")
-    return date.fromisoformat(pinned) if pinned else date.today()
+    if pinned:
+        day = date.fromisoformat(pinned)
+        current = current.replace(year=day.year, month=day.month, day=day.day)
+    return current
 
 
 def _local_now() -> datetime:
-    return datetime.now().astimezone()
+    return wall_now().astimezone()
 
 
 def now_iso() -> str:
-    """Local timestamp with UTC offset, e.g. 2026-09-25T16:00:00+03:00."""
+    """Real local audit timestamp with UTC offset; independent of LIGHTNING_TODAY."""
     return _local_now().isoformat(timespec="seconds")
 
 

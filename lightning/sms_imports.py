@@ -23,7 +23,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Protocol
 
-from lightning.core.dates import today
+from lightning.core.dates import now as app_now, today, wall_now
 from lightning.core.errors import ValidationError
 from lightning.foreign_amounts import pounds
 
@@ -141,7 +141,7 @@ def _clean(text: str) -> str:
 def parse_sms(text: str, *, sender: str = "", received: datetime | None = None) -> SmsTransaction | None:
     """One bank message as a proposed transaction, or None when it moves no money (a code, a declined payment,
     an offer). Patterns: CIB and NBE in Arabic (`tests/fixtures/bank_sms.json` holds a sample of each)."""
-    received = received or datetime.now()
+    received = received or app_now()
     body = (text or "").translate(_DIGITS).replace("،", ",")[:MAX_TEXT]  # spaces kept: they bound merchants
     flat = " ".join(body.split())
     if not flat or _IGNORE.search(flat):
@@ -271,7 +271,7 @@ def prefill(text: str) -> dict:
     date = ""
     if day:
         try:
-            date = _when(day.group(1), day.group(2), datetime.now())[:10]
+            date = _when(day.group(1), day.group(2), app_now())[:10]
         except ValueError:
             date = ""
     place = re.search(r"(?:عند|لدى|\bat)\s+(.+?)(?=\s+(?:يوم|في|on|بتاريخ|\d)|$)", flat)
@@ -525,12 +525,15 @@ class SmsImportService:
         """New messages from the phone: shared ones, and the inbox since the last read when allowed (from
         OVERLAP_MS before the cursor, which only moves forward). Messages from phone numbers are people, never
         read. Returns `read`'s counts, or None when there was nothing."""
-        now = now or datetime.now()
-        messages = [("Shared", text, now) for text in source.take_shared() if text and text.strip()]
+        received_now = now or app_now()
+        # The inbox cursor follows actual device receipts, even when the profile's business day is pinned.
+        # An explicitly supplied replay/test clock still controls both shared messages and the first look.
+        inbox_now = now or wall_now()
+        messages = [("Shared", text, received_now) for text in source.take_shared() if text and text.strip()]
         newest = None
         if source.permission() == "granted":
             stored = self.settings.get(LAST_READ_KEY)
-            after = int(stored) if stored.isdigit() else int((now - timedelta(days=FIRST_LOOK_DAYS)).timestamp() * 1000)
+            after = int(stored) if stored.isdigit() else int((inbox_now - timedelta(days=FIRST_LOOK_DAYS)).timestamp() * 1000)
             for sender, body, received_ms in source.since(max(0, after - OVERLAP_MS) if stored.isdigit() else after):
                 newest = max(newest or 0, int(received_ms))
                 if not PERSON.match((sender or "").replace(" ", "")):
@@ -796,7 +799,7 @@ class SmsImportService:
                 category = "Salary"
             writer.writerow([row.when[:10], format(row.signed, "f"), counterparty, category, notes, row.reference, row.text,
                              "sure" if row.sure else "check", row.paid])
-        batch_id, _ = self.bank_imports.stage(account_id, f"SMS {datetime.now():%Y-%m-%d %H:%M}",
+        batch_id, _ = self.bank_imports.stage(account_id, f"SMS {app_now():%Y-%m-%d %H:%M}",
                                               out.getvalue().encode("utf-8"))
         return batch_id
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import calendar
 import re
-from datetime import datetime, timedelta, timezone
+from datetime import timedelta, timezone
 
 from decimal import InvalidOperation
 from urllib.parse import urlencode
@@ -12,7 +12,7 @@ from fastapi import APIRouter, Request
 from lightning.budgeting.period import plan_used
 from lightning.planning.totals import share_of_free_cash
 from lightning.accounts.domain import AccountType
-from lightning.core.dates import fmt_date, month_of, parse_date, today
+from lightning.core.dates import fmt_date, month_of, parse_date, today, wall_now
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.figures import FIGURES, label
 from lightning.core.money import ZERO, fmt, to_decimal
@@ -180,7 +180,7 @@ async def dashboard(request: Request):
         attention=attention, attention_groups=attention_groups, attention_handled=inbox.handled, setup=setup,
         investment_report=investment_report, cash_flow=cash_flow,
     )
-    response.set_cookie(SEEN_COOKIE, datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    response.set_cookie(SEEN_COOKIE, wall_now(timezone.utc).isoformat(timespec="seconds"),
                         max_age=365 * 24 * 3600, httponly=True, samesite="lax")  # not money
     return response
 

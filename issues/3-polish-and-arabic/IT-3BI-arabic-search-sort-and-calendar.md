@@ -35,8 +35,3 @@ Done when: `tests/test_search_arabic.py` gains: a transaction with counterparty 
 Files: `lightning/planning/repository.py:35`, `lightning/reporting/service.py:420`, `lightning/ui/static/app.js:1712,1801`.
 Do: in Python, sort lists of names with `key=lambda n: fold_search_text(n)` after fetching (not in SQL); in JS, `a.localeCompare(b, document.documentElement.lang, {sensitivity: "base"})`.
 Done when: a test sorts ["إيمان", "احمد", "Zed", "ahmed"] the same way both places (folded order) and `grep -n "localeCompare(" lightning/ui/static/app.js` shows a locale argument on every call.
-
-## 3BI4 One clock · S · #407
-Files: `lightning/ui/routes/sms.py:92`, `lightning/sms_imports.py:125,408`, `lightning/desktop/window.py:82`, and the rest from `grep -rn "datetime.now()\|date.today()" lightning --include=*.py`.
-Do: use `lightning.core.dates.today()` for dates and add `now()` beside it (honouring `LIGHTNING_TODAY` for the date part) for timestamps; replace each call. Leave sync/journal timestamps that must be real wall-clock time, and say so in a comment.
-Done when: a new test greps `lightning/` and allows `datetime.now(`/`date.today(` only in `core/dates.py` and a short allowlist of journal files.

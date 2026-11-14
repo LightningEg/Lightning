@@ -8,10 +8,12 @@ from __future__ import annotations
 import os
 import shutil
 import threading
-from datetime import datetime, timezone
+from datetime import timezone
 from pathlib import Path
 from typing import Callable
 from uuid import uuid4
+
+from lightning.core.dates import wall_now
 
 Picker = Callable[[], "str | None"]
 
@@ -39,7 +41,7 @@ def copy_into_backups(chosen: str | Path, backups_dir: Path, database: Path) -> 
     if source.is_symlink() or not source.is_file() or source.stat().st_size == 0:
         raise ValueError("not a backup file")
     backups_dir.mkdir(parents=True, exist_ok=True)
-    day = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    day = wall_now(timezone.utc).strftime("%Y-%m-%d")
     target = backups_dir / f"{database.stem}_backup_{day}_999_{uuid4().hex[:8]}{PICKED_SUFFIX}"
     partial = target.with_name(f".{target.name}.partial")
     try:

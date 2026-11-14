@@ -9,6 +9,8 @@ import subprocess
 from datetime import date, timedelta
 from pathlib import Path
 
+from lightning.core.dates import today
+
 from lightning.workflows.reminder_schedule import KIND_TEXT, default_path, read
 
 TASK = "Lightning reminders"
@@ -53,7 +55,7 @@ def message(kinds: list[str]) -> str:
 def remind(path: Path | None = None, prefs: Path | None = None, notify=None, day: date | None = None) -> int:
     """The ``--remind`` run: notify once for today's items not yet shown; returns how many items it announced."""
     from lightning.desktop.window import _read_reminder_prefs, _reminder_prefs_path, _write_reminder_prefs
-    path, prefs, day = path or default_path(), prefs or _reminder_prefs_path(), day or date.today()
+    path, prefs, day = path or default_path(), prefs or _reminder_prefs_path(), day or today()
     data = read(path) if path else None
     if not data:
         return 0
