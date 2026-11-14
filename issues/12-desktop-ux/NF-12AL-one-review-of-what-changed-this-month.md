@@ -26,6 +26,3 @@ Rule 3 in `BudgetService.running_out`; wording "may run out" with little history
 
 ## 12AL3 The "what changed" card leads Budget · L · opus · #646
 Rule 2: `BudgetService.changes` with evidence versions and remembered dismissals; the card on PC Budget and phone Budget; Needs you shows the count only. Needs 12AL1 merged first. Done when: an unchanged month shows "Your plan continues"; each change type appears once with its evidence and goes on Dismiss until its evidence changes; A16 checked; PC and phone, English and Arabic.
-
-## 12AL4 Next month, read-only · M · opus · #645
-Rule 4: Budget opens the next month as a preview with no Save and a line saying when it can be changed. Needs 12AL1 merged first. Done when: `/budget?month=<next>` renders the carried-forward plan, scheduled bills and the dated income with no form, and the current month is unchanged.
