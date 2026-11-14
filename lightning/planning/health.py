@@ -12,7 +12,7 @@ from lightning.core.money import ZERO, check_places, fmt, to_decimal
 from lightning.core.memo import request_cached
 from lightning.database.settings import SettingsStore
 
-from lightning.budgeting.domain import INCOME_FROM_RECURRING
+from lightning.budgeting.domain import INCOME_BASIS_FROM, INCOME_FROM_RECURRING
 
 from .domain import PlanKind, per_year
 from .forecast import emergency_fund
@@ -175,9 +175,23 @@ ALERT_PREFIX = "financial_health_alert_"
 EMERGENCY_FUND_MONTHS = Decimal("6")
 RAISE_SHARE = Decimal("1.05")  # recurring income at least 5% above the average is a raise worth planning with
 RAISE_DECLINED = "income_raise_declined"         # the recurring amount whose offer was declined
+DROP_SHARE = Decimal("0.90")   # regular scheduled income at least 10% below the basis is a drop worth planning on (NF-12AL1)
+DROP_DECLINED = "income_drop_declined"           # the lower amount whose drop offer was kept away ("Keep the average")
+DROP_LOOK = 3                  # months searched for a drop's start: the averaged months before, and as many ahead
 
 NO_LIMIT_SUPPORTED = frozenset({"debt_to_cash", "debt_to_net_worth"})
 GOOD_LOCKED = frozenset({"emergency_fund"})  # its Good boundary is the six-month target on the Reserves page
+
+
+def _shift(month: str, months: int) -> str:
+    """The yyyy-mm `months` after `month` (before, when negative)."""
+    index = int(month[:4]) * 12 + int(month[5:7]) - 1 + months
+    return f"{index // 12}-{index % 12 + 1:02d}"
+
+
+def _month_label(month: str) -> str:
+    """"December 2026" for 2026-12."""
+    return date(int(month[:4]), int(month[5:7]), 1).strftime("%B %Y")
 
 
 def _gap(flow) -> str:
@@ -404,11 +418,59 @@ class HealthService:
         return {"month": month, "recurring": recurring, "average": average.amount, "raise": recurring - average.amount,
                 "room": recurring - max(recurring * rate / 100, check.needs), "rate": rate, "keep_rate": keep}
 
+    def drop_offer(self, month: str | None = None) -> dict | None:
+        """Regular scheduled income (monthly pay, not the lumps) that starts on a date and is at least 10% below
+        the budget basis (NF-12AL1, #626: a salary falling from 30,000 to 18,000 from 25 Dec): what planning on it
+        from that month would give, and how far today's plan is over it. The new pay must start within the
+        averaged months before `month` or the next ones, hold in its own month and the next, and still hold in
+        `month`; a month with no scheduled pay is a gap, never a drop. None when the basis is set by hand or
+        from Recurring, the drop is already planned on, or it was kept away at this amount."""
+        month = month or month_of(today())
+        average = self.budgets.income_average(month, schedule=self.schedules.view())
+        if average.manual or average.scheduled or average.since or not average.amount:
+            return None
+        levels = self.planning.regular_income_months(_shift(month, -DROP_LOOK), _shift(month, DROP_LOOK + 1))
+        floor = average.amount * DROP_SHARE
+        lower = {key for key, (level, _) in levels.items() if ZERO < level <= floor}
+        for key in sorted(levels):
+            level, starts = levels[key]
+            if not starts or key not in lower or _shift(key, 1) not in lower or (key < month and month not in lower):
+                continue
+            if self.settings.get(DROP_DECLINED) == format(level, "f"):
+                return None
+            check = self.plan_check(max(key, month))
+            rate = check.target_percent
+            room = level - max((level * rate / 100).quantize(Decimal("0.01")), check.needs)
+            return {"kind": "drop", "month": month, "from_month": key, "from": starts, "recurring": level,
+                    "average": average.amount, "drop": average.amount - level, "room": room, "rate": rate,
+                    "planned": check.planned, "over": max((check.planned or ZERO) - room, ZERO)}
+        return None
+
+    def income_change_offer(self, month: str | None = None) -> dict | None:
+        """Regular income that changed against the budget basis: a raise (`raise_offer`, kind "raise") or a drop
+        from its date (`drop_offer`, kind "drop"). One offer, one popup (/budget/raise), one Needs you row."""
+        raised = self.raise_offer(month)
+        return {"kind": "raise", **raised} if raised else self.drop_offer(month)
+
     def take_raise(self, choice: str, month: str | None = None) -> str:
-        """Act on the raise offer: plan with the recurring income, save the difference, or keep the average."""
-        offer = self.raise_offer(month)
+        """Act on the income offer. A raise: plan with the recurring income, save the difference, or keep the
+        average. A drop: plan on the lower pay from its month (a dated basis; earlier months keep the average),
+        or keep the average and stop offering this amount. "average" undoes a planned drop."""
+        if choice == "average" and self.settings.get(INCOME_BASIS_FROM):  # Settings › Budget: undo "Plan on it"
+            self.settings.set(INCOME_BASIS_FROM, "")
+            return "The plan counts your average income again."
+        offer = self.income_change_offer(month)
         if offer is None:
             raise ValidationError("There is no new income to plan with.", "choice")
+        if offer["kind"] == "drop":
+            if choice == "plan":
+                self.settings.set(INCOME_BASIS_FROM, f"{offer['from_month']}:{format(offer['recurring'], 'f')}")
+                return (f"The plan now counts {fmt(offer['recurring'], 0)} a month from "
+                        f"{_month_label(offer['from_month'])}; earlier months keep your average.")
+            if choice == "keep":
+                self.settings.set(DROP_DECLINED, format(offer["recurring"], "f"))
+                return "The plan keeps counting your average income."
+            raise ValidationError("Choose what to do with the lower income.", "choice")
         if choice == "plan":
             self.settings.set(INCOME_FROM_RECURRING, "1")
             return f"The plan now counts your recurring income, {fmt(offer['recurring'], 0)} a month."
