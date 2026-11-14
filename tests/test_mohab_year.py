@@ -1436,7 +1436,7 @@ def test_a_year_of_spending_is_shown_month_by_month(mohab):
 
 
 def test_categories_say_which_way_money_moves_and_whether_it_repeats(mohab):
-    assert mohab.answers["categories"].shows("− Expense + Income ± Both Recurring One-off")
+    assert mohab.answers["categories"].shows("− Expense + Income ± Both Recurring Outside the budget")
 
 
 def test_categories_need_no_sign_key(mohab):

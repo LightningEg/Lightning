@@ -1374,6 +1374,7 @@ ROUTES = {
     "Tracked categories updated.": "الفئات المتتابعة اتحدّثت.",
     "Preference saved.": "التفضيل اتحفظ.",
     "Category excluded from background estimates.": "الفئة اتشالت من التقديرات الخلفية.",
+    "{a} is outside the budget now; it still counts in Cash flow. Put it back in Budget settings.": "{a} بقت بره الميزانية؛ لسه محسوبة في التدفق النقدي. ترجّعها من إعدادات الميزانية.",
     "Budget settings updated.": "إعدادات الميزانية اتحدّثت.",
     "Carryover reset from this month.": "المبلغ المرحّل اتصفّر من الشهر ده.",
     "Limit saved.": "الحد اتحفظ.",

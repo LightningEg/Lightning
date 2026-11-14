@@ -18,7 +18,7 @@
   </select>
   {% set rec = cat and cat.id in recurring %}{% set off = cat and cat.id in one_offs %}
   <button type="button" class="cat-pill" data-toggle="recurring" data-for="{{ '' if cat and cat.code == 'EXP.SYSTEM.CUSTODY' else 'IN BOTH' }}" aria-pressed="{{ 'true' if rec else 'false' }}" title="Counted in the income average and the forecast">{{ 'Recurring'|tr(locale) }}</button><input type="hidden" name="recurring" value="{{ '1' if rec }}">
-  <button type="button" class="cat-pill is-oneoff" data-toggle="one_off" data-for="OUT BOTH" aria-pressed="{{ 'true' if off else 'false' }}" title="In cash flow, left out of the budget">{{ 'One-off'|tr(locale) }}</button><input type="hidden" name="one_off" value="{{ '1' if off }}">
+  <button type="button" class="cat-pill is-oneoff" data-toggle="one_off" data-for="OUT BOTH" aria-pressed="{{ 'true' if off else 'false' }}" title="{{ 'In Cash flow, left out of the budget'|tr(locale) }}">{{ 'Outside the budget'|tr(locale) }}</button><input type="hidden" name="one_off" value="{{ '1' if off }}">
   <span class="cat-actions">
     {% if add_parent %}<button class="btn small primary">{{ "Add"|tr(locale) }}</button><button type="button" class="btn small" data-cancel>{{ 'Cancel'|tr(locale) }}</button>
     {% else %}<small class="cat-state" role="status" aria-live="polite"></small>
@@ -32,7 +32,7 @@
 <div class="cat-toolbar">
   <label class="cat-search"><input type="search" id="category-search" placeholder="Find a category" aria-label="Find a category"></label>
   <span id="category-result-count" class="muted small"></span>
-  <button type="button" class="info-tip" data-tip="{{ 'Recurring counts toward the income average and forecast. One-off stays in cash flow, out of the budget. Changes save as you make them.'|tr(locale) }}" aria-label="{{ 'What do Recurring and One-off mean?'|tr(locale) }}">?</button>
+  <button type="button" class="info-tip" data-tip="{{ 'Recurring counts toward the income average and forecast. Outside the budget stays in Cash flow, out of the budget. Changes save as you make them.'|tr(locale) }}" aria-label="{{ 'What do Recurring and Outside the budget mean?'|tr(locale) }}">?</button>
   {% if archived %}<a class="btn small" href="/categories{{ '' if show_archived else '?archived=1' }}">{{ 'Hide archived' if show_archived else 'Archived (' ~ archived|length ~ ')' }}</a>{% endif %}
 </div>
 <form id="category-bulk-form" method="post" action="/categories/bulk-action" data-category-bulk><input type="hidden" name="__session" value="{{ session }}"></form>
