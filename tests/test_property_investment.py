@@ -44,7 +44,7 @@ def test_a_flat_is_real_estate_with_cost_value_and_gain_on_investments(c):
     _with_a_stock(c)
     page = _text(TestClient(create_app(c)).get("/investments").text)
     assert "Real estate 1,800,000 2,500,000 +700,000" in page
-    assert "Flat 1,800,000 2,500,000 +700,000 +38.9%" in page
+    assert "Flat — — 1,800,000 2,500,000 +700,000 +38.9%" in page
     assert "Other Investments" not in page
 
 
