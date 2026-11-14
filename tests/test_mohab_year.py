@@ -646,7 +646,7 @@ def _the_rest_of_lightning(o: Mohab) -> None:
     o.notes["view_report"] = b.click("Summary and export")
 
     b.open("/investments/targets")
-    for bucket, weight in (("Stocks", "50"), ("Gold", "30")):
+    for bucket, weight in (("High risk", "50"), ("Medium risk", "30")):  # by risk level, not class (NF-12AM)
         o.notes[f"target_{bucket}"] = b.submit({"bucket": bucket, "target_weight": weight}, action="/investments/targets")
 
     loans = b.go("Cash planning", "Loans")
@@ -1784,7 +1784,7 @@ def test_a_register_view_is_saved_and_summarised(mohab):
 
 
 def test_investing_targets_are_kept(mohab):
-    assert mohab.notes["target_Stocks"].shows("Target saved") and mohab.notes["target_Gold"].shows("Target saved")
+    assert mohab.notes["target_High risk"].shows("Target saved") and mohab.notes["target_Medium risk"].shows("Target saved")
 
 
 def test_paying_the_phone_early_shortens_it(mohab):

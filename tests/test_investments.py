@@ -584,15 +584,14 @@ def test_short_period_return_is_plain_in_portfolio_and_holding_screens(inv, monk
 
 def test_planner_warns_about_partial_targets_and_preserves_saved_weights(inv):
     c, _, _, _, _ = inv
-    cls = c.assets.get_class_by_code("STOCK")
-    c.investments.set_target_weight("Stocks", D("70"), cls.id)
+    c.investments.set_target_weight("High risk", D("70"))
     client = TestClient(create_app(c))
     response = client.get("/investments/planner?amount=1000")
     assert response.status_code == 200
     assert "Suggestions scale them to 100%" in response.text
     assert "Suggested allocation" in response.text
     assert "Target 100" in response.text
-    assert c.investments.target_weights() == {"Stocks": D("70")}
+    assert c.investments.target_weights() == {"High risk": D("70")}
 
 
 def test_phone_holdings_after_sale_use_the_sale_factors(inv, monkeypatch):
@@ -720,18 +719,14 @@ def test_planner_stack_keeps_four_named_parts_and_exact_neutral_remainder(values
     assert rows == before
 
 
-def test_planner_renders_five_suggestions_without_losing_detail(c):
-    codes = ("STOCK", "GOLD", "FUND.GOLD", "FUND.FIXED_INCOME", "FUND.MONEY_MARKET")
-    for name, code in zip(("Alpha", "Beta", "Gamma", "Delta", "Epsilon"), codes):
-        c.investments.set_target_weight(name, D("20"), c.assets.get_class_by_code(code).id)
+def test_planner_splits_new_money_by_risk_level(c):
+    """Owner, 2026-11-14: the planner suggests per risk level, the same three the targets are set on."""
+    for name, weight in (("Low risk", "50"), ("Medium risk", "30"), ("High risk", "20")):
+        c.investments.set_target_weight(name, D(weight))
     page = TestClient(create_app(c)).get("/investments/planner?amount=1000").text
-    stack = page.split('<div class="new-money-stack"', 1)[1].split('</div>', 1)[0]
-    assert stack.count('<span ') == 5 and 'tone-reference' in stack
-    assert 'Other · 200' in stack
-    legend = page.split('<div class="chart-legend">', 1)[1].split('</div>', 1)[0]
-    assert 'Other · 200 · 20%' in legend
     detail = page.split('<div class="planner-popup-rows">', 1)[1]
-    assert all(name in detail for name in ("Alpha", "Beta", "Gamma", "Delta", "Epsilon"))
+    assert [detail.index(f'data-planner-bucket="{name}"') for name in ("Low risk", "Medium risk", "High risk")] == \
+        sorted(detail.index(f'data-planner-bucket="{name}"') for name in ("Low risk", "Medium risk", "High risk"))
     assert 'name="amount"' in page and 'name="monthly_goal"' in page and 'name="mode"' in page
 
 
@@ -752,11 +747,10 @@ def test_phone_planner_groups_without_losing_recommendations(values):
     assert rows == before
 
 
-def test_phone_planner_keeps_remainder_details_and_controls(c):
-    codes = ('STOCK', 'GOLD', 'FUND.GOLD', 'FUND.FIXED_INCOME', 'FUND.MONEY_MARKET')
-    names = ('Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon')
-    for name, code in zip(names, codes):
-        c.investments.set_target_weight(name, D('20'), c.assets.get_class_by_code(code).id)
+def test_phone_planner_shows_every_risk_level_and_the_controls(c):
+    names = ('Low risk', 'Medium risk', 'High risk')
+    for name in names:
+        c.investments.set_target_weight(name, D('20'))
     app = create_app(c)
     async def phone_app(scope, receive, send):
         scope.setdefault('state', {})['phone'] = True
@@ -764,12 +758,7 @@ def test_phone_planner_keeps_remainder_details_and_controls(c):
     phone = TestClient(phone_app).get('/investments/planner?amount=1000').text
     desktop = TestClient(app).get('/investments/planner?amount=1000').text
     phone_rows = phone.split('planner-popup-rows">', 1)[1]   # 3AY16: the phone's own planner
-    assert 'class="phone-row-more planner-other"' in phone_rows
-    before, remainder = phone_rows.split('<details class="phone-row-more planner-other">', 1)
-    after = remainder.split('</details>', 1)[0]
-    assert sum(f'data-planner-bucket="{name}"' in before for name in names) == 4
-    assert sum(f'data-planner-bucket="{name}"' in after for name in names) == 1
-    assert re.search(r'Other</span><b>(<bdi class="fig">)?200', after)
+    assert all(f'data-planner-bucket="{name}"' in phone_rows for name in names)
+    assert 'planner-other' not in phone_rows  # three levels never need an Other row
     assert all(f'data-planner-bucket="{name}"' in desktop for name in names)
-    assert 'planner-other' not in desktop
     assert all(f'name="{field}"' in phone and f'name="{field}"' in desktop for field in ('amount', 'monthly_goal', 'mode'))

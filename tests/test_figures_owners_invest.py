@@ -41,10 +41,11 @@ class _Others:
 def test_owned_portfolio_leaves_out_what_you_hold_for_others():
     today = Portfolio("2026-02-01", [_position(owned_quantity=D(8), owned_cost_basis=D(80))])
     before = Portfolio("2026-01-31", [_position(value=D(120), owned_quantity=D(8), owned_cost_basis=D(80))])
-    own = owned.owned_portfolio(_Valuer(), _Others(), {}, today, before, "2026-02-01", "2026-01-31", D(5))
+    prefs = {1: {"risk_level": "High risk", "investment_horizon": None, "is_cash": False}}
+    own = owned.owned_portfolio(_Valuer(), _Others(), prefs, today, before, "2026-02-01", "2026-01-31", D(5))
     assert own.owned_value == D(120) and own.owned_cost == D(80) and own.owned_unrealized == D(40)
     assert own.starting_owned_value == D(90) and own.period_value_change == D(30)
-    assert own.own_units_by_holding == {"1:1": D(8)} and own.buckets == {"Stocks": D(120)}
+    assert own.own_units_by_holding == {"1:1": D(8)} and own.buckets == {"High risk": D(120)}
     assert own.period_distributions == D(5) and own.max_class_result == D(30)
 
 
@@ -60,7 +61,7 @@ def test_small_investment_figures():
     assert owned.per_share_total(D("0.333"), D(10)) == D("3.33")
     assert owned.unit_price(D(100), D(4)) == D(25) and owned.exact_from_e6(1_500_000) == D("1.5")
     values, total = owned.owned_by_bucket(Portfolio("d", [_position()]), {(1, 1): D(5)}, {})
-    assert values == {"Stocks": D(75)} and total == D(75)
+    assert values == {"Medium risk": D(75)} and total == D(75)  # no saved level read: Medium risk
     row = SimpleNamespace(value=D(9))
     assert owned.values_by_bucket([row, SimpleNamespace(value=None)], lambda r: "X") == {"X": D(9)}
     assert len(owned.dividends_since(Portfolio("d", [_position(owned_dividends=D(4))]), Portfolio("d"))) == 1

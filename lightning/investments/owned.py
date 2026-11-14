@@ -6,6 +6,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 
+from lightning.assets.risk import MEDIUM, default_risk
 from lightning.core.money import ZERO
 
 
@@ -115,7 +116,7 @@ def owned_portfolio(reporting, money_from_others, preferences: dict, p, prior, d
             continue
         yours = own_by_holding.get(key, h.value) if h.value is not None else None
         asset = preferences.get(h.asset_id)
-        bucket = (asset["allocation_bucket"] if asset else None) or h.asset_class.split(" › ")[-1]
+        bucket = risk_level(preferences, h.asset_id)
         horizon = (asset["investment_horizon"] if asset else None) or "Unassigned"
         if yours is not None:
             buckets[bucket] += yours
@@ -174,16 +175,24 @@ def suggested_total(rows: list[dict]) -> Decimal:
     return sum((r["suggested"] for r in rows), ZERO)
 
 
+def risk_level(preferences: dict, asset_id: int, account_class: str | None = None) -> str:
+    """A holding's risk level for target allocation, from ``AssetService.all_investment_preferences``. Cash kept
+    in a deposit or gam'eya takes the level of that account's class (``account_class``), not of cash."""
+    meta = preferences.get(asset_id)
+    if account_class and (meta is None or meta.get("is_cash")):
+        return default_risk(account_class)
+    return meta["risk_level"] if meta else MEDIUM
+
+
 def owned_by_bucket(portfolio, custody: dict, preferences: dict) -> tuple[dict, Decimal]:
-    """Your value per allocation class (units held for others left out) and their total, positive only."""
+    """Your value per risk level (units held for others left out) and their total, positive only."""
     values = defaultdict(lambda: ZERO); total = ZERO
     for position in portfolio.open:
         units = max(ZERO, position.quantity-custody.get((position.account_id, position.asset_id), ZERO))
         value = (position.value or ZERO)*units/position.quantity if position.quantity else ZERO
         if value <= ZERO:
             continue
-        meta = preferences.get(position.asset_id)
-        bucket = (meta["allocation_bucket"] if meta else None) or position.asset_class.split(" › ")[-1]
+        bucket = risk_level(preferences, position.asset_id)
         values[bucket] += value; total += value
     return values, total
 
@@ -202,6 +211,22 @@ def values_by_bucket(rows, bucket_of) -> dict:
             continue
         values[bucket_of(row)] += row.value
     return values
+
+
+def holdings_by_level(rows, preferences: dict) -> dict[str, list[dict]]:
+    """Owned holdings with a value, per risk level, one line per asset (its accounts added up; cash in a deposit
+    is named by its account and has no holding page), biggest first."""
+    levels: dict[str, dict[tuple, dict]] = {}
+    for row in rows:
+        if row.value is None or row.value <= ZERO:
+            continue
+        cash = bool((preferences.get(row.asset_id) or {}).get("is_cash"))
+        key = ("account", row.account_id) if cash else ("asset", row.asset_id)
+        item = levels.setdefault(risk_level(preferences, row.asset_id, row.class_code), {}).setdefault(
+            key, {"asset_id": None if cash else row.asset_id, "name": row.account if cash else row.asset, "value": ZERO})
+        item["value"] += row.value
+    return {level: sorted(items.values(), key=lambda m: (-m["value"], m["name"].casefold()))
+            for level, items in levels.items()}
 
 
 def per_share_total(amount: Decimal, units: Decimal) -> Decimal:

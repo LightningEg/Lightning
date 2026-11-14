@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse
 from starlette.concurrency import run_in_threadpool
 
 from lightning.accounts.domain import AccountType
+from lightning.assets.risk import RISK_LEVELS, RISK_TONES, default_risk
 from lightning.core.dates import fmt_date, parse_date, parse_month, today
 from lightning.core.errors import LightningError, NotFoundError, ValidationError
 from lightning.core.refs import DocType
@@ -59,8 +60,8 @@ async def investment_report_detail(request: Request):
 
 
 def _allocation_classes(c):
-    return sorted({c.assets.display_name(cls.id).split(" › ")[-1] for cls in c.assets.investment_classes()},
-                  key=str.casefold)
+    """What target allocation splits by: the three risk levels, lowest first (owner, 2026-11-14)."""
+    return list(RISK_LEVELS)
 
 KINDS = {
     "buy": ("Buy", "Units in, cash out — at cost, fees included."),
@@ -347,9 +348,9 @@ async def _render_planner(request: Request, raw_amount: str="10000"):
     by_current_mix = not planning_targets and total > ZERO  # no targets: split by what is held now
     suggestions = (suggest_by_current_mix(dict(values), amount) if by_current_mix
                    else suggest_contributions(dict(values),targets,amount,mode))
-    tones={cls.name:charts.class_tone(cls.code) for cls in c.assets.list_classes()}  # each class in its own colour
+    tones=RISK_TONES  # each risk level in its own colour
     rows=[]
-    for bucket in sorted(set(values)|set(targets),key=lambda b:(-values.get(b,ZERO),b.casefold())):
+    for bucket in [b for b in RISK_LEVELS if b in values or b in targets]:
         value=values.get(bucket,ZERO); suggested=suggestions.get(bucket,ZERO)
         shares=owned.planner_row(bucket, value, total, suggested, amount)
         rows.append({"bucket":bucket,"value":value,"weight":shares["weight"],
@@ -372,8 +373,7 @@ async def holding_detail(request: Request, asset_id: int):
     if h is None: raise NotFoundError("No holding found for that asset and account.")
     h=h.owned_only()
     asset=c.assets.get_asset(asset_id)
-    saved_bucket, saved_horizon = c.assets.investment_preferences(asset_id)
-    bucket=saved_bucket or h.asset_class.split(" › ")[-1]
+    bucket, saved_horizon = c.assets.investment_preferences(asset_id)
     horizon=saved_horizon or "Unassigned"
     before=c.investments.portfolio(fmt_date(parse_date(start).fromordinal(parse_date(start).toordinal()-1)))  # not money: dates
     previous=next((x for x in before.positions if x.asset_id==asset_id and x.account_id==h.account_id),None)
@@ -398,21 +398,23 @@ async def holding_detail(request: Request, asset_id: int):
                   display_return=h.display_return,
                   start=start,period_realized=h.realized_since(previous),
                   period_dividends=h.dividends_since(previous),
-                  allocation_classes=sorted({*_allocation_classes(c), bucket}, key=str.casefold),  # its own bucket is always a choice (5K)
+                  allocation_classes=_allocation_classes(c), default_risk=default_risk(c.assets.get_class(asset.asset_class_id).code),
                   show_popup=request.headers.get("X-Lightning-Popup")=="1")
 
 
 def target_plan(c) -> dict:
-    """Owned holdings by allocation class (a holding's own class unless reassigned) against targets."""
+    """Owned holdings by risk level (a holding's class's level unless moved) against targets, with the
+    holdings in each level, biggest first, so the user sees what counts where and can move one."""
     from lightning.investments.report import allocation_plan
     prefs = c.assets.all_investment_preferences()
     rows, _ = c.position.owned_holdings(today())
-
-    def bucket_of(row):
-        pref = prefs.get(row.asset_id)
-        return (pref["allocation_bucket"] if pref else None) or c.assets.get_class_by_code(row.class_code).name
-    values = owned.values_by_bucket(rows, bucket_of)
-    return allocation_plan(dict(values), c.investments.target_weights(), _allocation_classes(c))
+    values = owned.values_by_bucket(rows, lambda row: owned.risk_level(prefs, row.asset_id, row.class_code))
+    plan = allocation_plan(dict(values), c.investments.target_weights(), _allocation_classes(c))
+    members = owned.holdings_by_level(rows, prefs)
+    for r in plan["rows"]:
+        r["holdings"] = members.get(r["name"], [])
+        r["tone"] = RISK_TONES.get(r["name"], "other")
+    return plan
 
 
 @router.get("/targets")
@@ -426,7 +428,7 @@ async def targets_page(request: Request):
 async def save_target(request: Request):
     c=container(request); form=await request.form(); bucket=str(form.get("bucket","")).strip()
     try:
-        allowed = set(_allocation_classes(c)) | {r["name"] for r in target_plan(c)["rows"]}  # every class in the table
+        allowed = set(RISK_LEVELS)
         with settled_save(request, container(request)):
             if bucket in allowed and not str(form.get("target_weight", "")).strip():
                 c.investments.clear_target_weight(bucket)  # an empty field clears the target
@@ -437,11 +439,8 @@ async def save_target(request: Request):
                 room = max(ZERO, left)
                 raise LightningError(f"Targets can add up to 100% at most. The others take {others.normalize():f}%, so "
                                      f"{bucket} can be up to {room.normalize():f}%.")
-            if bucket not in allowed or value<ZERO or value>100: raise LightningError("Choose an available asset class and a target from 0 to 100.")
-            matches=[cls for cls in c.assets.list_classes() if cls.active and c.assets.display_name(cls.id).split(" › ")[-1] == bucket]
-            if len(matches)!=1: raise LightningError("This target label is ambiguous. Rename or resolve the asset classes first.")
-            cls_id=matches[0].id
-            c.investments.set_target_weight(bucket, value, cls_id)
+            if bucket not in allowed or value<ZERO or value>100: raise LightningError("Choose a risk level and a target from 0 to 100.")
+            c.investments.set_target_weight(bucket, value)
     except LightningError as exc:
         if request.headers.get("X-Requested-With") == "fetch":
             return Response(exc.message, status_code=400, media_type="text/plain")
@@ -454,14 +453,14 @@ async def save_target(request: Request):
 @router.post("/asset-plan/{asset_id:int}")
 async def save_asset_plan(request: Request,asset_id:int):
     c=container(request); form=await request.form(); asset=c.assets.get_asset(asset_id)
-    bucket=str(form.get("allocation_bucket","")).strip() or c.assets.display_name(asset.asset_class_id).split(" › ")[-1]
-    if bucket not in _allocation_classes(c): raise LightningError("Choose one of the available investment asset classes.","allocation_bucket")
+    bucket=str(form.get("allocation_bucket","")).strip() or default_risk(c.assets.get_class(asset.asset_class_id).code)
+    if bucket not in RISK_LEVELS: return redirect(f"/investments/holding/{asset_id}", "Choose Low risk, Medium risk or High risk.")
     horizon=str(form.get("investment_horizon","")).strip()
     if horizon not in ("Short","Medium","Long",""): raise LightningError("Choose Short, Medium, Long, or Unassigned.")
     with settled_save(request, container(request)):
         c.assets.set_investment_preferences(asset_id, bucket, horizon or None)
     back = str(form.get("return_to", "")).strip()
-    return redirect(back if back.startswith("/investments") else "/investments", "Horizon saved." if back else "Investment classification saved.")
+    return redirect(back if back.startswith("/investments") else "/investments", "Horizon saved." if back else "Risk level and horizon saved.")
 
 
 # -- trades -------------------------------------------------------------------

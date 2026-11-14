@@ -371,7 +371,7 @@ Categories are not split into income and expense trees: pick the activity that e
 
 ## Asset and account taxonomy (what vs where)
 
-Asset class and exposure are separate. Account kinds describe the container: cash wallet, bank, deposit, brokerage (cash plus holdings), physical-asset location, other asset account. Code patterns: account `INSTITUTION-TYPE-CURRENCY` (`THNDR-BRK-EGP`); asset `CLASS:SYMBOL` (`STK:COMI`, `GLD:21K`).
+Asset class and exposure are separate. **Risk level** (Low, Medium or High risk) is what target allocation and the investment planner split by (owner, 2026-11-14, NF-12AM): a holding starts in its class's level (`lightning/assets/risk.py` `DEFAULT_RISK`: stocks High; gold, silver, equity, gold and other funds, real estate and other investments Medium; fixed income, money market and Cloud funds, deposits and gam'eya Low) and can be moved on its own page; cash in a deposit account takes that account's class's level. Account kinds describe the container: cash wallet, bank, deposit, brokerage (cash plus holdings), physical-asset location, other asset account. Code patterns: account `INSTITUTION-TYPE-CURRENCY` (`THNDR-BRK-EGP`); asset `CLASS:SYMBOL` (`STK:COMI`, `GLD:21K`).
 
 ## Transaction and posting types
 

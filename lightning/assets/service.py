@@ -15,6 +15,7 @@ from lightning.core.memo import in_request, request_cached
 from lightning.core.money import ZERO, check_places, to_decimal
 from lightning.database.connection import Database
 
+from .risk import RISK_LEVELS, default_risk, risk_of
 from .domain import INVESTMENT_KINDS, AssetClass, Exposure, FinancialAsset, Liquidity, Price, PriceSource
 from .repository import AssetRepository
 
@@ -123,26 +124,29 @@ class AssetService:
             raise NotFoundError(f"Financial asset {code} not found.")
         return found
 
-    def investment_preferences(self, asset_id: int) -> tuple[str | None, str | None]:
-        """User-facing allocation bucket and horizon for an investment."""
-        row = self.db.one(
-            "SELECT allocation_bucket,investment_horizon FROM financial_assets WHERE id=?",
-            (asset_id,),
-        )
-        if row is None:
+    def investment_preferences(self, asset_id: int) -> tuple[str, str | None]:
+        """An investment's risk level (saved, else its class's) and horizon."""
+        prefs = self.all_investment_preferences().get(asset_id)
+        if prefs is None:
             raise NotFoundError("Financial asset not found.")
-        return row["allocation_bucket"], row["investment_horizon"]
+        return prefs["risk_level"], prefs["investment_horizon"]
 
     def all_investment_preferences(self) -> dict[int, dict[str, str | None]]:
-        """Saved allocation and horizon labels for investment views."""
-        return {row["id"]: {"allocation_bucket": row["allocation_bucket"],
-                            "investment_horizon": row["investment_horizon"]}
+        """Each asset's risk level for target allocation (saved, else its class's) and horizon."""
+        by_name = {row["name"]: row["code"] for row in self.db.all("SELECT name,code FROM asset_classes")}
+        return {row["id"]: {"risk_level": risk_of(row["code"], row["allocation_bucket"], by_name),
+                            "investment_horizon": row["investment_horizon"], "is_cash": bool(row["is_cash"])}
                 for row in self.db.all(
-                    "SELECT id,allocation_bucket,investment_horizon FROM financial_assets"
+                    "SELECT fa.id,fa.allocation_bucket,fa.investment_horizon,fa.is_cash,ac.code FROM financial_assets fa "
+                    "JOIN asset_classes ac ON ac.id=fa.asset_class_id"
                 )}
 
     def set_investment_preferences(self, asset_id: int, bucket: str, horizon: str | None) -> None:
-        self.get_asset(asset_id)
+        """Keep an investment's risk level (``bucket``: one of RISK_LEVELS) and horizon. Its class's own level
+        is kept as no choice, so the holding follows its class if the class changes."""
+        asset = self.get_asset(asset_id)
+        if bucket in RISK_LEVELS and bucket == default_risk(self.get_class(asset.asset_class_id).code):
+            bucket = None
         self.db.execute(
             "UPDATE financial_assets SET allocation_bucket=?,investment_horizon=? WHERE id=?",
             (bucket, horizon, asset_id),

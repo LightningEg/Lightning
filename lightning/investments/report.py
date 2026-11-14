@@ -497,12 +497,12 @@ def _adjust_alone(value: Decimal, total: Decimal, target: Decimal | None) -> Dec
 
 
 def allocation_plan(values: dict[str, Decimal], targets: dict[str, Decimal], classes: list[str]) -> dict:
-    """Target allocation: for each class its current share, the required share, the difference, and
+    """Target allocation: for each risk level (``classes``, in their own order) its current share, the required share, the difference, and
     the value to adjust: how much to buy (or sell, when negative) of that one class alone to reach its
     required share, with every other class left as it is. Buying grows the total too, so for a value v,
     total T and target t the amount is (t × T − v) ÷ (1 − t). ``values`` are owned holdings by class."""
     total = sum(values.values(), ZERO)
-    # Every class is listed, so a target can be set on one you hold nothing in yet. Heaviest first.
+    # Every level is listed, in its own order, so a target can be set on one you hold nothing in yet.
     names = list(classes) + sorted(set(values) - set(classes))
     rows = []
     for name in names:
@@ -512,7 +512,6 @@ def allocation_plan(values: dict[str, Decimal], targets: dict[str, Decimal], cla
         rows.append({"name": name, "value": value, "current": current, "target": target,
                      "difference": None if target is None else target - current,
                      "adjust": _adjust_alone(value, total, target)})
-    rows.sort(key=lambda r: (-r["value"], -(r["target"] or ZERO), r["name"].casefold()))
     required = sum(targets.values(), ZERO)
     return {"rows": rows, "total": total, "required": required, "complete": required == 100,
             "unset": [n for n in classes if n not in targets and not values.get(n)]}

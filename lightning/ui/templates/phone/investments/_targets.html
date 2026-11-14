@@ -1,26 +1,20 @@
-{# Target allocation on the phone (3AY16): one row per class with its current share, the required % field that saves in
+{# Target allocation on the phone (3AY16): one row per risk level, the holdings in it, with its current share, the required % field that saves in
    place, and how much to invest or take out. #}
 {% set class_help = {
-  "Stocks": "Shares in listed companies. Their value moves with each company and the market, and some pay dividends.",
-  "Equity Fund": "A fund that pools money into many stocks. More growth over the long run, with larger swings.",
-  "Fixed Income Fund": "A fund that holds bonds and other loans that pay regular interest. Steadier than stocks; moves with interest rates.",
-  "Money Market Fund": "A fund that holds short-term, high-quality debt such as treasury bills. Low risk and close to cash; you can usually sell any day.",
-  "Gold Fund": "A fund that follows the gold price, so you hold gold without storing the metal.",
-  "Gold": "Physical gold — bars, coins or jewelry — valued by weight and purity at today's gold price.",
-  "Other Fund": "A fund outside the main kinds, such as a mixed or real-estate fund.",
-  "Other Investments": "Anything that fits no other class, such as a private stake or a collectible.",
-  "Deposits": "Money placed with a bank for a fixed term at a set interest rate. Breaking it early usually costs a penalty.",
-  "CDs / Time Deposits": "Certificates and time deposits: money locked with a bank for a fixed term at a set rate.",
+  "Low risk": "Steady and close to cash: fixed income, money market and Cloud funds, certificates, deposits and gam'eya start here.",
+  "Medium risk": "Moves with markets but less than single stocks: gold, gold and equity funds, silver, real estate and other investments start here.",
+  "High risk": "Can rise or fall a lot: stocks start here.",
 } %}
 <div class="targets" id="targets" data-targets-src="/investments/targets?fragment=1">
   <div class="phone-rows">
   {% for r in plan.rows %}<div class="phone-row{{ ' is-empty' if not r.value and r.target is none }}">
-    <span>{{ r.name|tr(locale) }}<small>{{ 'Current %'|tr(locale) }} {{ '%.1f'|format(r.current) }}%{% if r.difference is not none %} · <span class="{{ r.difference|tone }}">{{ r.difference|signed_pct }}%</span>{% endif %}{% if r.adjust %} · <span class="{{ r.adjust|tone }}">{{ ('Invest ' if r.adjust > 0 else 'Take out ') }}{{ r.adjust|abs|money }}</span>{% endif %}</small>{% if class_help.get(r.name) %}<small>{{ class_help[r.name]|tr(locale) }}</small>{% endif %}</span>
+    <span>{{ r.name|tr(locale) }}<small>{{ 'Current %'|tr(locale) }} {{ '%.1f'|format(r.current) }}%{% if r.difference is not none %} · <span class="{{ r.difference|tone }}">{{ r.difference|signed_pct }}%</span>{% endif %}{% if r.adjust %} · <span class="{{ r.adjust|tone }}">{{ ('Invest ' if r.adjust > 0 else 'Take out ') }}{{ r.adjust|abs|money }}</span>{% endif %}</small>{% if class_help.get(r.name) %}<small>{{ class_help[r.name]|tr(locale) }}</small>{% endif %}{% set shown = r.holdings[:4] %}{% if shown %}<small>{% for m in shown %}{% if m.asset_id %}<a href="/investments/holding/{{ m.asset_id }}">{{ m.name }}</a>{% else %}{{ m.name }}{% endif %}{{ ', ' if not loop.last }}{% endfor %}{% if r.holdings|length > 4 %}{{ (' and {n} more')|tr(locale, n=r.holdings|length - 4) }}{% endif %}</small>{% endif %}</span>
     <form method="post" action="/investments/targets" data-target-save><input type="hidden" name="bucket" value="{{ r.name }}"><span class="row-field-unit"><input class="row-field" name="target_weight" inputmode="decimal" autocomplete="off" value="{{ r.target|units if r.target is not none else '' }}" placeholder="—" aria-label="{{ 'Required %'|tr(locale) }} · {{ r.name|tr(locale) }}" data-row-amount><i aria-hidden="true">%</i></span><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
-  </div>{% else %}<p class="phone-note">{{ "No investment classes yet."|tr(locale) }}</p>{% endfor %}
+  </div>{% else %}<p class="phone-note">{{ "No investments yet."|tr(locale) }}</p>{% endfor %}
   <div class="phone-row"><span><b>{{ "Total"|tr(locale) }}</b><small><bdi class="fig">{{ plan.total|money }} {{ base }}</bdi></small></span><b class="{{ '' if plan.complete else 'neg' }}">{{ plan.required|units }}%</b></div>
   </div>
-  {% if plan.required > 100 %}<p class="phone-note">Required shares add up to {{ plan.required|units }}%, more than 100%. Lower one of them; a new target can only use what is left.</p>{% elif not plan.complete %}<p class="phone-note">Required shares add up to {{ plan.required|units }}%; {{ (100 - plan.required)|units }}% is still free. Leave a class empty to clear its target.</p>{% endif %}
-  <p class="phone-note">{{ "Value to adjust is how much to buy (or sell) of that class alone to reach its share, with every other class left as it is."|tr(locale) }}</p>
+  {% if plan.required > 100 %}<p class="phone-note">Required shares add up to {{ plan.required|units }}%, more than 100%. Lower one of them; a new target can only use what is left.</p>{% elif not plan.complete %}<p class="phone-note">Required shares add up to {{ plan.required|units }}%; {{ (100 - plan.required)|units }}% is still free. Leave a level empty to clear its target.</p>{% endif %}
+  <p class="phone-note">{{ "Each holding starts in its class's level. To move one, open it and change its risk level."|tr(locale) }}</p>
+  <p class="phone-note">{{ "Value to adjust is how much to buy (or sell) of that level alone to reach its share, with every other level left as it is."|tr(locale) }}</p>
   <small class="save-state" role="status" aria-live="polite"></small>
 </div>

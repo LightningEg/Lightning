@@ -177,20 +177,21 @@ def test_targets_factors_and_the_investment_list(devices):
     broker, stock = setup(hd, pc)
     stocks = pc.c.assets.get_class_by_code("STOCK")
     cls = uid(pc, "asset_classes", stocks.id)
-    target = pc.command("investments.set_target", bucket="Stocks", weight="60", class_id=cls)
+    target = pc.command("investments.set_target", bucket="High risk", weight="60", class_id=None)
     factor = pc.command("investments.set_factor", asset_class_id=cls, factor="90")
     renamed = pc.command("assets.update_investment", asset_id=stock, name="Alpha Corporation", class_code=None, isin="",
                          notes="core", active=True, ticker=None, mic=None)
-    plan = pc.command("assets.set_preferences", asset_id=stock, bucket="Stocks", horizon="LONG")
+    plan = pc.command("assets.set_preferences", asset_id=stock, bucket="Medium risk", horizon="LONG")
     settle(hd, pc, target, factor, renamed, plan)
-    assert pc.c.investments.target_weights() == hd.c.investments.target_weights() == {"Stocks": Decimal("60")}
+    assert pc.c.investments.target_weights() == hd.c.investments.target_weights() == {"High risk": Decimal("60")}
+    assert hd.c.assets.investment_preferences(hd.c.assets.get_asset_by_code("STK:ALPH").id)[0] == "Medium risk"
     assert hd.c.investments.own_liquidation_factors() == {stocks.id: Decimal("90")}
     assert pc.c.assets.get_asset_by_code("STK:ALPH").notes == "core"
-    retarget = pc.command("investments.set_target", bucket="Stocks", weight="45.5", class_id=cls)
+    retarget = pc.command("investments.set_target", bucket="High risk", weight="45.5", class_id=None)
     cleared = hd.command("investments.set_factor", asset_class_id=cls, factor="")
     settle(hd, pc, retarget, cleared)
-    assert hd.c.investments.target_weights() == {"Stocks": Decimal("45.5")} and not pc.c.investments.own_liquidation_factors()
-    drop = pc.command("investments.clear_target", bucket="Stocks")
+    assert hd.c.investments.target_weights() == {"High risk": Decimal("45.5")} and not pc.c.investments.own_liquidation_factors()
+    drop = pc.command("investments.clear_target", bucket="High risk")
     settle(hd, pc, drop)
     assert not hd.c.investments.target_weights()
 
@@ -272,7 +273,7 @@ def test_dividend_price_target_and_pocket_forms_on_both_devices(devices):
     assert response.status_code == 303 and "Saved%201%20price" in response.headers["location"], response.headers["location"]
     response = replica.post("/investments/prices", data={"date": "2026-09-16", f"p_{stock_pc}": "12"})
     assert "msg=Saved+on+this+device" in response.headers["location"]
-    target = replica.post("/investments/targets", data={"bucket": "Stocks", "target_weight": "40"})
+    target = replica.post("/investments/targets", data={"bucket": "High risk", "target_weight": "40"})
     assert "msg=Saved+on+this+device" in target.headers["location"]
     pocket = replica.post(f"/accounts/{account(pc, 'Broker').id}/pockets", data={"currency": "USD"})
     assert "msg=Saved+on+this+device" in pocket.headers["location"]
@@ -280,7 +281,7 @@ def test_dividend_price_target_and_pocket_forms_on_both_devices(devices):
     assert cash(pc) == cash(hd) == 4000 + Decimal("150.00")  # 1.50 x 100 shares
     assert [p.date for p in hd.c.assets.price_history(stock_hd)] == [p.date for p in pc.c.assets.price_history(stock_pc)] == [
         "2026-09-16", "2026-09-15"]
-    assert hd.c.investments.target_weights() == {"Stocks": Decimal("40")}
+    assert hd.c.investments.target_weights() == {"High risk": Decimal("40")}
     same(hd, pc)
 
 

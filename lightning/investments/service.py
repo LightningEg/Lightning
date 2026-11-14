@@ -13,6 +13,7 @@ from dataclasses import replace
 from lightning.accounts.domain import INVESTMENT_ACCOUNT_TYPES, Account, AccountType
 from lightning.accounts.service import AccountService
 from lightning.assets.domain import EXPOSURE_LABELS, FinancialAsset
+from lightning.assets.risk import RISK_LEVELS
 from lightning.assets.service import AssetService
 from lightning.categories.service import CategoryService
 from lightning.core.dates import fmt_date, parse_date, today
@@ -120,10 +121,13 @@ class InvestmentService:
         )
 
     def target_weights(self) -> dict[str, Decimal]:
+        """The required share of each risk level, in percent. A class target an older device sends is kept
+        but not read: risk levels replaced classes (migration 0083)."""
         return {row["bucket"]: Decimal(str(row["target_weight"]))
-                for row in self.db.all("SELECT bucket,target_weight FROM investment_targets")}
+                for row in self.db.all("SELECT bucket,target_weight FROM investment_targets")
+                if row["bucket"] in RISK_LEVELS}
 
-    def set_target_weight(self, bucket: str, weight: Decimal, class_id: int) -> None:
+    def set_target_weight(self, bucket: str, weight: Decimal, class_id: int | None = None) -> None:
         self.db.execute(
             "INSERT INTO investment_targets(bucket,target_weight,updated_at,asset_class_id) VALUES(?,?,?,?) "
             "ON CONFLICT(bucket) DO UPDATE SET target_weight=excluded.target_weight,"

@@ -1,31 +1,25 @@
-{# Target allocation table: used by the popup, its full page and Settings. Saves in place. #}
+{# Target allocation by risk level: used by the popup, its full page and Settings. Saves in place. Each level
+   names the holdings in it; a holding moves to another level on its own page. #}
 {% set class_help = {
-  "Stocks": "Shares in listed companies. Their value moves with each company and the market, and some pay dividends.",
-  "Equity Fund": "A fund that pools money into many stocks. More growth over the long run, with larger swings.",
-  "Fixed Income Fund": "A fund that holds bonds and other loans that pay regular interest. Steadier than stocks; moves with interest rates.",
-  "Money Market Fund": "A fund that holds short-term, high-quality debt such as treasury bills. Low risk and close to cash; you can usually sell any day.",
-  "Gold Fund": "A fund that follows the gold price, so you hold gold without storing the metal.",
-  "Gold": "Physical gold — bars, coins or jewelry — valued by weight and purity at today's gold price.",
-  "Other Fund": "A fund outside the main kinds, such as a mixed or real-estate fund.",
-  "Other Investments": "Anything that fits no other class, such as a private stake or a collectible.",
-  "Deposits": "Money placed with a bank for a fixed term at a set interest rate. Breaking it early usually costs a penalty.",
-  "CDs / Time Deposits": "Certificates and time deposits: money locked with a bank for a fixed term at a set rate.",
+  "Low risk": "Steady and close to cash: fixed income, money market and Cloud funds, certificates, deposits and gam'eya start here.",
+  "Medium risk": "Moves with markets but less than single stocks: gold, gold and equity funds, silver, real estate and other investments start here.",
+  "High risk": "Can rise or fall a lot: stocks start here.",
 } %}
 <div class="targets" id="targets" data-targets-src="/investments/targets?fragment=1">
   <div class="table-wrap"><table class="targets-table">
-    <thead><tr><th>{{ 'Asset class'|tr(locale) }}</th><th class="num">{{ 'Current %'|tr(locale) }}</th><th class="num">{{ 'Required %'|tr(locale) }}</th><th class="num">{{ 'Difference'|tr(locale) }}</th><th class="num">{{ 'Value to adjust'|tr(locale) }} <button type="button" class="info-tip" aria-label="How is this worked out?" data-tip="How much to buy (or sell) of this class alone to reach its required share, with every other class left as it is.">?</button></th></tr></thead>
+    <thead><tr><th>{{ 'Risk level'|tr(locale) }}</th><th class="num">{{ 'Current %'|tr(locale) }}</th><th class="num">{{ 'Required %'|tr(locale) }}</th><th class="num">{{ 'Difference'|tr(locale) }}</th><th class="num">{{ 'Value to adjust'|tr(locale) }} <button type="button" class="info-tip" aria-label="How is this worked out?" data-tip="How much to buy (or sell) of this level alone to reach its required share, with every other level left as it is.">?</button></th></tr></thead>
     <tbody>
     {% for r in plan.rows %}<tr class="{{ 'is-empty' if not r.value and r.target is none }}">
-      <td><span class="target-name">{{ r.name }}{% if class_help.get(r.name) %}<button type="button" class="info-tip" data-tip="{{ class_help[r.name] }}" aria-label="What is {{ r.name }}?">?</button>{% endif %}</span></td>
+      <td><span class="target-name">{{ r.name|tr(locale) }}{% if class_help.get(r.name) %}<button type="button" class="info-tip" data-tip="{{ class_help[r.name]|tr(locale) }}" aria-label="{{ 'What is {name}?'|tr(locale, name=r.name|tr(locale)) }}">?</button>{% endif %}</span>{% set shown = r.holdings[:4] %}{% if shown %}<div class="muted small">{% for m in shown %}{% if m.asset_id %}<a href="/investments/holding/{{ m.asset_id }}">{{ m.name }}</a>{% else %}{{ m.name }}{% endif %}{{ ', ' if not loop.last }}{% endfor %}{% if r.holdings|length > 4 %}{{ (' and {n} more')|tr(locale, n=r.holdings|length - 4) }}{% endif %}</div>{% endif %}</td>
       <td class="num">{{ '%.1f'|format(r.current) }}%</td>
-      <td class="num"><form method="post" action="/investments/targets" data-target-save><input type="hidden" name="bucket" value="{{ r.name }}"><span class="row-field-unit"><input class="row-field" name="target_weight" inputmode="decimal" autocomplete="off" value="{{ r.target|units if r.target is not none else '' }}" placeholder="—" aria-label="Required % for {{ r.name }}"><i aria-hidden="true">%</i></span><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></td>
+      <td class="num"><form method="post" action="/investments/targets" data-target-save><input type="hidden" name="bucket" value="{{ r.name }}"><span class="row-field-unit"><input class="row-field" name="target_weight" inputmode="decimal" autocomplete="off" value="{{ r.target|units if r.target is not none else '' }}" placeholder="—" aria-label="{{ 'Required %'|tr(locale) }} · {{ r.name|tr(locale) }}"><i aria-hidden="true">%</i></span><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></td>
       <td class="num {{ r.difference|tone if r.difference is not none }}">{{ (r.difference)|signed_pct ~ '%' if r.difference is not none else '—' }}</td>
       <td class="num {{ r.adjust|tone if r.adjust is not none }}">{% if r.adjust is not none %}{{ ('Invest ' if r.adjust > 0 else ('Take out ' if r.adjust < 0 else '')) }}{{ r.adjust|abs|money }}{% else %}—{% endif %}</td>
-    </tr>{% else %}<tr><td colspan="5" class="empty">{{ "No investment classes yet."|tr(locale) }}</td></tr>{% endfor %}
+    </tr>{% else %}<tr><td colspan="5" class="empty">{{ "No investments yet."|tr(locale) }}</td></tr>{% endfor %}
     </tbody>
     <tfoot><tr><th>{{ "Total"|tr(locale) }}</th><th class="num">100%</th><th class="num {{ '' if plan.complete else 'neg' }}">{{ plan.required|units }}%</th><th colspan="2" class="num">{{ plan.total|money }} {{ base }}</th></tr></tfoot>
   </table></div>
-  {% if plan.required > 100 %}<p class="notice">Required shares add up to {{ plan.required|units }}%, more than 100%. Lower one of them; a new target can only use what is left.</p>{% elif not plan.complete %}<p class="muted small">Required shares add up to {{ plan.required|units }}%; {{ (100 - plan.required)|units }}% is still free. Leave a class empty to clear its target.</p>{% endif %}
-  <p class="muted small">{{ "Value to adjust is how much to buy (or sell) of that class alone to reach its share, with every other class left as it is."|tr(locale) }}</p>
+  {% if plan.required > 100 %}<p class="notice">Required shares add up to {{ plan.required|units }}%, more than 100%. Lower one of them; a new target can only use what is left.</p>{% elif not plan.complete %}<p class="muted small">Required shares add up to {{ plan.required|units }}%; {{ (100 - plan.required)|units }}% is still free. Leave a level empty to clear its target.</p>{% endif %}
+  <p class="muted small">{{ "Each holding starts in its class's level. To move one, open it and change its risk level."|tr(locale) }} {{ "Value to adjust is how much to buy (or sell) of that level alone to reach its share, with every other level left as it is."|tr(locale) }}</p>
   <small class="save-state" role="status" aria-live="polite"></small>
 </div>

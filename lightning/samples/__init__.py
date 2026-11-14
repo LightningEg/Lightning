@@ -275,10 +275,8 @@ def _features(c, accounts: dict[str, int], day: date) -> int:
                                      notes="Dollars from Banque Misr")
 
     # Investing: the mix he aims for, and 3,000 a month.
-    classes = {c.assets.display_name(cls.id).split(" › ")[-1]: cls.id for cls in c.assets.list_classes() if cls.active}
-    for bucket, weight in (("Stocks", 40), ("Money Market Fund", 30), ("Gold", 30)):
-        if bucket in classes:
-            c.investments.set_target_weight(bucket, Decimal(weight), classes[bucket])
+    for bucket, weight in (("High risk", 40), ("Low risk", 30), ("Medium risk", 30)):
+        c.investments.set_target_weight(bucket, Decimal(weight))
     c.settings.set("investment_monthly_goal", "3000")
 
     # A saved report he opens every Eid, and a Vodafone Cash statement he left half done.
