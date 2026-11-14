@@ -150,7 +150,8 @@ class Mohab:
     def track(self, name: str) -> Screen:
         """Cash planning › Recurring › 'Looks recurring' › Track, then Add on the filled-in form."""
         screen = self.b.go("Cash planning", "Recurring")
-        link = next(l for l in screen.links if l.text == "Track" and f"name={name.replace(' ', '%20')}&" in l.href)
+        link = next(l for l in screen.links if l.text in ("Track", "Make it a bill")  # the phone's offer card says Make it a bill (IV-11M6)
+                    and f"name={name.replace(' ', '%20')}&" in l.href)
         self.b.open(link.href)
         return self.b.submit({}, button="Add")
 
@@ -163,7 +164,9 @@ class Mohab:
     def _pay_link(self, screen: Screen, name: str) -> str:
         at = screen.html.find(name)
         assert at >= 0, f"{name} is not on {screen.path}"
-        found = re.search(r'href="(/plan/items/\d+/pay\?[^"]+)"', screen.html[at:])
+        start = screen.html.rfind("<a ", 0, at)   # the row's own link when the name sits inside it (a chip may come first)
+        found = (re.search(r'href="(/plan/items/\d+/pay\?[^"]+)"', screen.html[start:at]) if start >= 0 else None) \
+            or re.search(r'href="(/plan/items/\d+/pay\?[^"]+)"', screen.html[at:])
         assert found, f"No Mark paid for {name} on {screen.path}"
         return found.group(1).replace("&amp;", "&")
 

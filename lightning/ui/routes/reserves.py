@@ -99,7 +99,11 @@ def _context(request: Request, error: str = ""):
                                     "after": c.forecaster.forecast(today(), refill=amount).safe_to_spend}
             refill["manual_raw"] = raw
     bills = c.planning.items((PlanKind.BILL, PlanKind.SUBSCRIPTION))
-    return {"reserves": listed, "bills": bills, "completed_reserves": completed, "notes": notes, "emergency_meter": emergency_meter,
+    goals_set = sum((r["allocated"] for r in listed), ZERO)      # IV-11M6: the phone's Set aside hero
+    goals_target = sum((r["target"] for r in listed if r["target"]), ZERO)
+    return {"set_aside_total": set_aside + goals_set, "goals_set": goals_set,
+            "goals_pct": int(min(goals_set / goals_target, 1) * 100) if goals_target > ZERO else None,  # not money: the ring
+            "reserves": listed, "bills": bills, "completed_reserves": completed, "notes": notes, "emergency_meter": emergency_meter,
             "emergency_set_aside": set_aside, "emergency": emergency, "fund": fund, "refill": refill,
             "pos": position, "liquidity_context": liquidity_context, "error": error,
             "answer": page_status.reserves(fund.months, emergency is not None),
