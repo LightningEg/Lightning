@@ -6,7 +6,10 @@
    Transactions has its own slot in the tab bar, so it leaves the Accounts row and shows no row of its own. #}
 {% set phone = phone_mode() %}{% set tabs = (section.tabs|rejectattr('key', 'equalto', 'transactions')|list if phone else section.tabs) if section else [] %}
 {% set phone_off = phone and (request.url.path == '/' or (tab and tab.key == 'transactions') or (section and section.key == 'settings')) %}
-{% if section and not individual_account and not phone_off and (tabs|length > 1 or (tab.gear and phone)) %}<div class="section-bar">
+{% set plan_slot = phone and (request.url.path == '/plan' or request.url.path in ('/plan/upcoming', '/plan/recurring', '/plan/loans', '/plan/reserves')) %}
+{# IV-11M6 (owner, 2026-11-14): the phone's Plan slot has its own four tabs; Upcoming is Coming up's Calendar. #}
+{% if plan_slot %}{% set p = request.url.path %}<div class="section-bar"><nav class="plan-tabs-bar section-tabs" aria-label="{{ 'Plan'|tr(locale) }}">{% for href, label, on in (('/plan', 'Coming up', p in ('/plan', '/plan/upcoming')), ('/plan/recurring', 'Recurring', p == '/plan/recurring'), ('/plan/loans', 'Loans', p == '/plan/loans'), ('/plan/reserves', 'Reserves', p == '/plan/reserves')) %}<a class="plan-tab" href="{{ href }}"{% if on %} aria-current="page"{% endif %}><span>{{ label|tr(locale) }}</span></a>{% endfor %}</nav></div>
+{% elif section and not individual_account and not phone_off and (tabs|length > 1 or (tab.gear and phone)) %}<div class="section-bar">
   {% if tabs|length > 1 %}<nav class="plan-tabs-bar section-tabs" aria-label="{{ section.label|tr(locale) }}">{% for t in tabs %}<a class="plan-tab" title="{{ t.label|tr(locale) }}" href="{{ t.href }}"{% if t.key == tab.key %} aria-current="page"{% endif %}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ t.icon }}"/></svg><span class="tab-name">{{ t.label|tr(locale) }}</span></a>{% endfor %}</nav>{% endif %}
   {% if tab.gear and phone %}{{ gear_link(tab) }}{% endif %}
 </div>{% endif %}

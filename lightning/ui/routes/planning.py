@@ -280,7 +280,8 @@ async def recurring_page(request: Request):
                       due_count=totals.due_count, due_total=totals.due_total(c.planning, day)),
                   suggestions=c.planning.suggestions(day), dismissed=c.planning.dismissed_suggestions(),
                   subscriptions_per_year=subscriptions,
-                  monthly_out=monthly_out, monthly_in=monthly_in, labels=labels, as_of=fmt_date(day))
+                  monthly_out=monthly_out, monthly_in=monthly_in, labels=labels, as_of=fmt_date(day),
+                  loans_a_month=health.loans_a_month, every_month=monthly_out + health.loans_a_month)
 
 
 UPCOMING_GROUPS = {"bills": "Bills", "instalments": "Instalments", "gameya": "Gam'eya", "income": "Income"}
@@ -388,7 +389,13 @@ async def loans_page(request: Request):
                      line_=kpis.line(summary["title"] if summary else ""),  # "Paid off on …" or "2 loan payments due now"
                      needs=bool(summary and summary["tone"] == "attention")) if loans else None
     health = c.health
-    return render(request, "planning/loans.html", tabs=TABS, plan_tab="loans", loans=loans, lead=lead,
+    circles = []   # IV-11M6: each gam'eya with its turns, for the phone's turn grid (the PC page ignores it)
+    for account, terms in c.gameya.circles():
+        progress = c.gameya.progress(account.id)
+        circles.append({"id": account.id, "name": account.name, "organiser": terms.organiser, "members": terms.members,
+                        "paid": progress.paid, "my_turn": terms.my_turn, "payout": terms.payout, "installment": terms.installment,
+                        "payout_date": progress.payout_date, "next_date": progress.next_date})
+    return render(request, "planning/loans.html", tabs=TABS, plan_tab="loans", loans=loans, lead=lead, circles=circles,
                   answer=page_status.loans(still_to_pay, len(loans)),
                   debt_tiles=_debt_tiles(health.at(day), fmt_date(day)),
                   debt_kpis=kpis.debt(health.at(day), limits=health.limit_values(), band=health.band, as_of=fmt_date(day)),

@@ -144,7 +144,8 @@ def test_phone_recurring_suggestion_menu_can_dismiss_and_restore(c, setup, monke
                     assert page.locator('html').get_attribute('lang') == ('ar-EG' if language == 'ar' else 'en')
                     row = page.locator('.phone-suggest').filter(has_text='Monthly Gym')
                     assert row.count() == 1
-                    actions = row.locator('xpath=following-sibling::div[1]')
+                    # IV-11M6: the first suggestion is the dashed offer card, which holds its own actions
+                    actions = row if row.locator('a[href*="/plan/items/new?"]').count() else row.locator('xpath=following-sibling::div[1]')
                     assert '/plan/items/new?' in actions.locator('a').first.get_attribute('href')
                     actions.locator('summary').click()
                     dismiss = actions.locator('form[action$="/not-recurring"] button')

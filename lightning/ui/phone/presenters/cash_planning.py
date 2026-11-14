@@ -92,8 +92,18 @@ def _phone_cash(c, f, next_payments, late, position, day) -> dict:
               "sub": free_sub, "href": "/"},
              {"key": "reserves", "surface": "hold", "label": label("reserves"), "value": reserves, "kind": "money",
               "empty": "—", "sub": reserve_sub, "href": "/plan/reserves"}]
+    # IV-11M6 (mockup v2.0): the hero's verdict, what is kept after the bills, the next 30 days in and out, and a
+    # timeline from today to payday with a dot for each bill before it (positions are shares of those days).
+    window = [p for p in next_payments if p.status in (PaymentStatus.DUE, PaymentStatus.UPCOMING)]
+    coming_in = sum((base(p) for p in window if p.item.is_income), ZERO)
+    going_out = sum((base(p) for p in window if not p.item.is_income), ZERO)
+    span = max((parse_date(until) - day).days, 1) if until else 0  # not money: days to payday
+    timeline = [{"at": float(min(max((parse_date(r["date"]) - day).days, 0), span) / span * 100), "late": bool(r["late"])}  # not money
+                for r in now + ahead] if span else []
     return {"due": due, "lines": lines, "now": now, "ahead": ahead, "payday": payday, "rest": rest[:PHONE_ROWS_SHOWN],
-            "rest_more": max(len(rest) - PHONE_ROWS_SHOWN, 0), "tiles": tiles}  # not money
+            "rest_more": max(len(rest) - PHONE_ROWS_SHOWN, 0), "tiles": tiles,  # not money
+            "covered": f.free_cash >= due, "keep": f.free_cash_after(due), "until": until or "",
+            "coming_in": coming_in, "going_out": going_out, "timeline": timeline, "bill_count": len(now) + len(ahead)}
 
 
 def present(request, c, context: dict) -> dict:

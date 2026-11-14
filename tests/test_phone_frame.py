@@ -68,7 +68,7 @@ def test_the_pc_keeps_its_own_frame(tmp_path):
     assert 'class="shell"' in html and "phone-tabbar" not in html and "phone.css" not in html
 
 
-@pytest.mark.parametrize("path, marker", [("/budget?period=month", 'class="phone-row phone-budget-cat'), ("/plan", 'id="plan-build"'),
+@pytest.mark.parametrize("path, marker", [("/budget?period=month", 'class="phone-row phone-budget-cat'), ("/plan", 'id="plan-next"'),
                                           ("/investments", 'id="holdings-heading"')])
 def test_budget_cash_and_investments_have_phone_designs(phone, path, marker):
     html = phone.get(path).text
@@ -377,8 +377,8 @@ def test_the_safe_to_spend_card_opens_its_own_explanation():  # F11 (r24)
     from lightning.ui.routes.dashboard import _safe_tile
     tile = _safe_tile(SimpleNamespace(next_income_date="2026-12-01", safe_to_spend=Decimal("100"), free_cash=Decimal("400")))
     assert tile["href"] == "/plan#safe-section"
-    phone_plan = Path(__file__).resolve().parents[1] / "lightning/ui/templates/phone/planning/plan.html"
-    assert 'id="safe-section"' in phone_plan.read_text(encoding="utf-8")
+    phone_home = Path(__file__).resolve().parents[1] / "lightning/ui/templates/phone/home.html"
+    assert 'id="home-safe"' in phone_home.read_text(encoding="utf-8")   # IV-11M6: on the phone, Home's card opens it
 
 
 def test_cash_planning_lists_the_next_payments_before_the_secondary_cash_figures(c):  # F6 (r24)
