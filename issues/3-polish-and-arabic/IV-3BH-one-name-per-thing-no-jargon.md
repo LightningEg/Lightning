@@ -49,11 +49,6 @@ Files: `lightning/database/seed.py`, a new migration (skill `add-migration`: rea
 Do: change the 27 Title Case seed names ("Eating Out" → "Eating out", "Utilities & Bills" → "Utilities & bills", "Unaccounted Money Found" → "Unaccounted money found" …) for new profiles; the migration renames them in existing profiles **only where the user has not renamed them** (match the old exact name and the seed's code). Keep codes.
 Done when: the migration's test upgrades a profile made with the old seed and finds the new names, and a renamed category keeps its user name. `python -m pytest tests/test_migrations*.py tests/test_mohab_year.py -q`.
 
-## 3BH7 Headings never show a code · S · #428
-Files: `lightning/ui/templates/investments/asset_form.html:4`, `lightning/ui/templates/investments/form.html:4`.
-Do: "Edit FND:AZMM" → "Edit {name}" with the asset's display name; "Edit OUT-…" → "Edit transaction" with the date and payee as the subtitle. One `|tr` key each with a value, not `'Edit ' ~ …`.
-Done when: `grep -rn "'Edit ' ~" lightning/ui/templates` is empty.
-
 ## 3BH8 More words found by r35 · S
 Needs 3BH1 merged first.
 From [r35 F14](../12-desktop-ux/r35-ux-against-users-questions/report.md): "Completed payment occurrences" (Reserves) → "Payments made"; "Unreconciled events" and "Money at risk" (Weekly review) → "To match" and "Late or due"; "Cash ownership history" (Held for others) → "History"; "Funded spending left" and "Unfunded bills due" (payday) → plain sentences; "Other Investments" beside "Other" in one Investments legend (rename the class or the remainder); "Age of Money" → "Age of money". Arabic with each; add the retired words to the test's list.
