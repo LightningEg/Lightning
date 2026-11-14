@@ -17,7 +17,8 @@ from lightning.core.money import ZERO, fmt, from_e6, signed_pct, to_decimal
 from urllib.parse import urlencode
 
 from ..web import container, redirect, render, ui_locale, settled_save
-from ..i18n import translate
+from ..i18n import currency_label, translate
+from ..date_text import day_text
 from ...investments import benchmark as risk_free, events, owned, views as holding_views
 from ...assets.catalog import instruments
 from ..periods import parse_period
@@ -477,11 +478,48 @@ def _cash_accounts(c, keep: str = ""):
             if str(a.id) == keep or a.account_type in (AccountType.BANK, AccountType.CASH, AccountType.CASH_AT_HAND)]
 
 
+def _entry_currency(c, values, kind, locale):
+    locale = locale if locale in ("en", "ar") else "en"
+    currency = c.base_currency
+    try:
+        if _int(values.get("asset_id")):
+            currency = c.assets.get_asset(int(values["asset_id"])).currency
+        elif _int(values.get("account_id")):
+            currency = c.accounts.get(int(values["account_id"])).currency
+    except LightningError:
+        pass  # An invalid selection still renders its validation error.
+    display_currency = currency_label(currency, locale)
+    names = {"total": "Amount", "price": "Price per unit", "fees": "Fees", "total_cost": label("cost"),
+             "amount": "Amount paid back" if kind == "return_of_capital" else
+                       "Amount per unit" if values.get("dividend_basis") == "per_share" else "Amount"}
+    labels = {key: translate(name, locale) + f" ({display_currency})" for key, name in names.items()}
+    labels["fees_inside"] = translate("Fees (inside the amount)", locale) + f" ({display_currency})"
+    labels["fees_extra"] = translate("Fees (on top of the amount)", locale) + f" ({display_currency})"
+    exchange = ""
+    if currency != c.base_currency and kind != "bonus_or_split":
+        try:
+            day = fmt_date(parse_date(values.get("date") or fmt_date(today())))
+            rate = c.reporting.valuer.fx(currency, day)
+            exchange = (f"1 {display_currency} = {fmt(rate.rate, 6).rstrip('0').rstrip('.')} {currency_label(c.base_currency, locale)} · {day_text(rate.date, locale)}" if rate else
+                        translate("No exchange rate available", locale))
+        except LightningError:
+            exchange = ""
+    return {"currency": currency, "display_currency": display_currency, "egp_label": currency_label("EGP", locale),
+            "labels": labels, "exchange": exchange}
+
+
+@router.get("/entry-currency")
+async def entry_currency(request: Request):
+    return JSONResponse(_entry_currency(container(request), request.query_params,
+                                       request.query_params.get("kind", "buy"), container(request).settings.get("locale")))
+
+
 def _form(request: Request, kind: str, values: dict, txn=None, error: LightningError | None = None, status=200):
     c = container(request)
     return render(request, "investments/form.html", status_code=status, kind=kind, title=KINDS[kind][0],
                   spec=events.form_fields(kind) if kind in events.EVENTS else None,
                   hint=KINDS[kind][1], values=values, txn=txn,
+                  trade_currency=_entry_currency(c, values, kind, c.settings.get("locale")),
                   holding_accounts=c.investments.investment_accounts(), all_accounts=c.accounts.list(active_only=True),
                   assets=_tradable_assets(c, values.get("asset_id", "")),
                   cash_accounts=_cash_accounts(c, values.get("cash_account_id", "")),
