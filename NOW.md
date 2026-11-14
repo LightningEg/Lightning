@@ -6,6 +6,7 @@ Reserved codes: none
 
 | Who | Work | Files | Since |
 |---|---|---|---|
+| Claude | 11M phone v2.0: 11M1 foundation first (#658) | `lightning/ui/static/phone.css`, `lightning/ui/templates/phone/`, `lightning/ui/phone/` | 2026-11-14 |
 | Claude | O5 | `lightning/deposits/` | 2026-11-10 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
