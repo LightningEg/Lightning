@@ -675,6 +675,17 @@ class ReportingService:
                 totals[row["category_id"]] = totals.get(row["category_id"], ZERO) + money_out
         return totals
 
+    def money_out_by_category_by_day(self, date_from: date | str, date_to: date | str) -> dict[str, dict[int, Decimal]]:
+        """Money out per day (yyyy-mm-dd) and category, counted as money_out_by_category counts it: how a category's
+        spending falls across its months (NF-12AL2). Days with nothing are left out."""
+        out: dict[str, dict[int, Decimal]] = {}
+        for row in self.q.category_totals_by_date(self._day(date_from), self._day(date_to), 10):
+            money_in, money_out = flow_of(row["effect"], from_e6(row["total"]), self.categories.get(row["category_id"]))
+            if not money_in:
+                day = out.setdefault(row["key"], {})
+                day[row["category_id"]] = day.get(row["category_id"], ZERO) + money_out
+        return out
+
     def money_in_by_category(self, date_from: date | str, date_to: date | str) -> list[Group]:
         """Income by category, excluding custody and expense refunds."""
         start, end = self._day(date_from), self._day(date_to)

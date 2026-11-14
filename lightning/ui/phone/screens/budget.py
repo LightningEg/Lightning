@@ -50,7 +50,7 @@ class BudgetScreen:
     fixed_paid: Decimal
     fixed_count: int
     move: dict | None = None          # room to cover the largest overspend: {name, amount, href}
-    raise_offer: dict | None = None   # "your income went up": recurring pay is above the plan's average (a current month only)
+    raise_offer: dict | None = None   # recurring pay above the plan's average, or below it from a date (kind "drop"; a current month only)
     month_bar: dict | None = None     # IV-11D2: the everyday plan as one bar: spent, left, over (amounts add to the plan)
     spend: dict | None = None         # IV-11D5: where the month went: a donut of four categories then Other, and its rows
     working: object = None            # NF-12AB4: the hero's working, for its sheet
@@ -112,7 +112,7 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     return BudgetScreen(shown, prev, nxt, state, left, used,
                         e.spent_less_pace if state == "current" else None, e.per_day,
                         shown_needs, max(len(needs) - ATTENTION, 0), listed, planned, paid, count,  # not money
-                        move, c.health.raise_offer(shown) if state == "current" else None,
+                        move, c.health.income_change_offer(shown) if state == "current" else None,
                         month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, e.everyday_spent),
                         working=e.everyday_left_working,
                         payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None,

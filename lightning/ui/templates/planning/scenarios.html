@@ -20,11 +20,16 @@
 <button class="btn primary">{{ 'Compare'|tr(locale) }}</button></form></section>
 <section class="card" aria-labelledby="scn-result"><h2 id="scn-result">{{ 'What changes'|tr(locale) }}</h2>
 <div class="compact-list">
-{% for name, f in (('Baseline', comparison.baseline), ('Scenario', comparison.scenario)) %}<div class="compact-row"><span>{{ 'First shortfall'|tr(locale) }} <small class="muted">{{ name|tr(locale) }}{% if f.first_shortfall %} · {{ f.first_shortfall.date }}{% endif %}</small></span><b>{% if f.first_shortfall %}{{ f.first_shortfall.balance|money(False, 0) }}{% elif f.unvalued_currencies %}{{ 'Unavailable'|tr(locale) }}{% else %}{{ 'No shortfall'|tr(locale) }}{% endif %}</b></div>{% endfor %}
+{# BV-7AW: one measure with the lead and the headline: Cash planning's Lowest point ahead, day by day #}
+{% set moved = comparison.scenario_plan_low %}{% set below = comparison.first_below_zero %}
+{% if comparison.plan_low %}<div class="compact-row"><span>{{ fig.lowest_point_ahead.label }} <small class="muted">{{ 'Your plan'|tr(locale) }} · {{ comparison.plan_low.month }}</small></span><b>{{ comparison.plan_low.closing|money(False, 0) }}</b></div>{% endif %}
+{% if comparison.assumptions %}<div class="compact-row"><span>{{ fig.lowest_point_ahead.label }} <small class="muted">{{ 'With this change'|tr(locale) }}{% if moved %} · {{ moved[2] }}{% endif %}</small></span><b>{% if moved %}{{ moved[1]|money(False, 0) }}{% else %}{{ 'Unavailable'|tr(locale) }}{% endif %}</b></div>
+<div class="compact-row{{ ' is-short' if below }}"><span>{{ 'First day below zero'|tr(locale) }}{% if below %} <small class="muted">{{ below[0] }}</small>{% endif %}</span><b>{% if below %}{{ below[1]|money(False, 0) }}{% elif moved %}{{ 'Stays above zero'|tr(locale) }}{% else %}{{ 'Unavailable'|tr(locale) }}{% endif %}</b></div>{% endif %}
 </div>
+{% if plan_url %}<p><a class="btn small" data-popup-open href="{{ plan_url }}">{{ 'Plan this purchase'|tr(locale) }}</a> <small class="muted">{{ 'Nothing is saved until you save it.'|tr(locale) }}</small></p>{% endif %}
 {% if comparison.assumptions %}<ul class="scenario-assumption-list">{% for assumption in comparison.assumptions %}<li>{{ assumption }}</li>{% endfor %}</ul>{% else %}<p class="muted">{{ 'No changes selected.'|tr(locale) }}</p>{% endif %}
 {% set missing_rates = (comparison.baseline.unvalued_currencies + comparison.scenario.unvalued_currencies)|unique|list %}{% if missing_rates %}<p>{{ 'Missing rates'|tr(locale) }}: {{ missing_rates|join(', ') }} · <a href="/settings?section=currencies&amp;tab=rates">{{ 'Update the rate'|tr(locale) }}</a></p>{% endif %}
-<p class="muted small">{{ 'The lowest point ahead is Cash planning’s, month by month; the scenario moves each month by what it changes in your scheduled cash.'|tr(locale) }}</p></section>
+<p class="muted small">{{ 'The lowest point ahead is Cash planning’s; the change moves each day by what it does to your scheduled cash, so a late payment shows on the day it hurts.'|tr(locale) }}</p></section>
 </div>
 <details class="scenario-assumptions"><summary>{{ 'How this is worked out'|tr(locale) }}</summary><p>{{ day }} · {{ end }}</p><p>{{ 'Scheduled cash only: confirmed opening cash, outstanding payments and certificate events. Excludes variable spending and savings goals. Reserves stay in cash. No plans or transactions are saved.'|tr(locale) }}</p><p>{{ 'Overdue income has no assumed receipt date. A delayed occurrence replaces its original date; it is never counted twice. Rates stay fixed at today’s rates.'|tr(locale) }}</p><p>{{ 'Income with a possible recorded match is excluded pending review. Unambiguous recorded payments are not counted again.'|tr(locale) }}</p></details>
 {% endblock %}
