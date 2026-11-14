@@ -194,7 +194,7 @@ class GameyaService:
             raise ValidationError("Enter an amount above zero.", "amount")
         funding = self._cash_account(funding_account_id or terms.funding_account_id, "funding_account_id")
         if funding.currency != circle.currency:
-            raise ValidationError("Choose a funding account in the circle’s currency.", "funding_account_id")
+            raise ValidationError("Choose a funding account in the circle's currency.", "funding_account_id")
         with self.db.transaction():
             self._check_owned_cash(funding, day, value, "instalment")
             return self.transactions.record_transfer(
@@ -235,7 +235,7 @@ class GameyaService:
             raise ValidationError("Enter the amount you received.", "amount")
         target = self._cash_account(payout_account_id or terms.payout_account_id, "payout_account_id")
         if target.currency != circle.currency:
-            raise ValidationError("Choose a payout account in the circle’s currency.", "payout_account_id")
+            raise ValidationError("Choose a payout account in the circle's currency.", "payout_account_id")
         with self.db.transaction():
             return self.transactions.record_transfer(
                 fmt_date(day), circle.id, target.id, value, description=f"Gam'eya payout · {circle.name}")

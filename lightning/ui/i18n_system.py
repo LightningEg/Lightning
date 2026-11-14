@@ -332,6 +332,9 @@ SENTENCES = {
     "Record the payment on its actual date, not a future date.": "سجّل الدفع في يومه الفعلي، مش في تاريخ جاي.",
     "Pay more than zero and no more than the remaining loan; a fee cannot be negative.": "ادفع مبلغ أكبر من صفر وما يزيدش عن المتبقي من القرض؛ الرسوم ما ينفعش تكون سالبة.",
     "Pay no more than this instalment's remaining amount.": "ادفع مبلغ ما يزيدش عن المتبقي من القسط ده.",
+    # Existing service messages stay translatable alongside the page keys' typographic apostrophes.
+    "Choose a funding account in the circle's currency.": "لازم اختيار حساب دفع بعملة الجمعية.",
+    "Choose a payout account in the circle's currency.": "لازم اختيار حساب قبض بعملة الجمعية.",
     "Name the purchase.": "سمّي المشتريات.",
     "Check the amounts and dates.": "راجع المبالغ والتواريخ.",
     "Choose a paying account.": "لازم اختيار حساب الدفع.",
