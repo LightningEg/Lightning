@@ -12,27 +12,50 @@
   <link rel="stylesheet" href="/static/profiles{{ '.rtl' if locale == 'ar' else '' }}.css?v=6">
 </head>
 <body>
-  <main class="profile-page" id="profile-ready">
-    <header class="masthead">
+  {# IV-11M8 (mockup v2.0): on the phone, no profile yet is the Welcome screen; creating one is "1 of 2" and "2 of 2". #}
+  {% set welcome = on_phone and mode == 'choose' and not profiles and not borrowed and not backups and not legacy_found %}
+  {% set stepped = on_phone and mode in ['setup', 'recovery-key'] %}
+  <main class="profile-page{{ ' is-welcome' if welcome }}{{ ' is-step' if stepped }}" id="profile-ready">
+    {% if welcome %}
+    <section class="v2-welcome-top" aria-label="Lightning">
+      <form class="gate-language" method="post" action="/profiles/locale"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="return_to" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}"><button type="submit" name="locale" value="{{ 'en' if locale == 'ar' else 'ar' }}" aria-label="{{ 'Language'|tr(locale) }}: {{ 'English' if locale == 'ar' else 'العربية' }}">{{ 'English' if locale == 'ar' else 'العربية' }}</button></form>
+      <img class="v2-welcome-mark" src="/static/lightning-mark-flat.svg" alt="" width="62" height="86">
+      <p class="v2-welcome-word">lightning</p>
+    </section>
+    <section class="v2-welcome-body" aria-labelledby="page-title">
+      <h1 id="page-title">{{ 'Study your patterns.'|tr(locale) }} <span>{{ 'Control your future.'|tr(locale) }}</span></h1>
+      <p>{{ 'Log a payment in seconds. See what is safe to spend today, and the bills ahead before they land.'|tr(locale) }}</p>
+      <p class="v2-welcome-safe"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>{{ 'Everything stays on this phone.'|tr(locale) }}</p>
+      {% if error %}<div class="alert alert-error" role="alert" aria-live="assertive">{{ error|tr(locale) }}</div>{% endif %}
+      {% if notice %}<div class="alert alert-notice" role="status">{{ notice|tr(locale) }}</div>{% endif %}
+      <a class="button button-primary v2-big" href="/profiles/new">{{ 'Set up Lightning'|tr(locale) }}{{ chevron() }}</a>
+      <a class="v2-welcome-link" href="/profiles/receive"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>{{ 'Bring my profile from my PC'|tr(locale) }}</a>
+      <a class="v2-welcome-link is-quiet" href="/profiles/journal/join">{{ 'Find your phone or PC'|tr(locale) }}</a>
+    </section>
+    {% else %}
+    {% if stepped %}<header class="v2-steps">{% if mode == 'setup' %}<a class="v2-steps-back" href="/profiles" aria-label="{{ 'Back'|tr(locale) }}">{{ chevron(true) }}</a>{% else %}<span class="v2-steps-back" aria-hidden="true"></span>{% endif %}<span class="v2-steps-bar" role="img" aria-label="{{ ('1 of 2' if mode == 'setup' else '2 of 2')|tr(locale) }}"><i class="is-done"></i><i class="{{ 'is-done' if mode == 'recovery-key' }}"></i></span><span class="v2-steps-n">{{ ('1 of 2' if mode == 'setup' else '2 of 2')|tr(locale) }}</span></header>
+    {% else %}<header class="masthead">
       <a class="brand" href="/" aria-label="Lightning home">
         <img src="/static/lightning-mark.svg" alt="" width="18" height="25">
         <span>Lightning</span>
       </a>
       <form class="gate-language" method="post" action="/profiles/locale"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="return_to" value="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}">{% if on_phone %}<button type="submit" name="locale" value="{{ 'en' if locale == 'ar' else 'ar' }}" aria-label="{{ 'Language'|tr(locale) }}: {{ 'English' if locale == 'ar' else 'العربية' }}">{{ 'English' if locale == 'ar' else 'العربية' }}</button>{% else %}<label for="gate-locale">{{ 'Language'|tr(locale) }}</label><select id="gate-locale" name="locale" data-locale-auto><option value="en" {{ 'selected' if locale == 'en' }}>{{ 'English'|tr(locale) }}</option><option value="ar" {{ 'selected' if locale == 'ar' }}>{{ 'العربية'|tr(locale) }}</option></select>{% endif %}</form><span class="masthead-label">{{ 'Private profiles'|tr(locale) }}</span>
-    </header>
+    </header>{% endif %}
 
     <div class="content-wrap">
       <section class="intro" aria-labelledby="page-title">
-        <p class="eyebrow">Your data, on this {{ 'phone' if on_phone else 'computer' }}</p>
+        {% if not stepped %}<p class="eyebrow">Your data, on this {{ 'phone' if on_phone else 'computer' }}</p>{% endif %}
         {% if mode == 'choose' %}
           <h1 id="page-title">{{ 'Choose a profile'|tr(locale) }}</h1>
           <p>{{ 'Each profile keeps its financial data in a separate database.'|tr(locale) }}</p>
         {% elif mode == 'setup' %}
-          <h1 id="page-title">{{ 'Create a profile'|tr(locale) }}</h1>
-          <p>{{ 'Choose a name, a password and a security question. Together with a recovery key, they protect this profile.'|tr(locale) }}</p>
+          {% if on_phone %}<h1 id="page-title">{{ 'Make it yours.'|tr(locale) }}</h1>
+          <p>{{ 'A name and a password. Your profile is encrypted on this phone.'|tr(locale) }}</p>{% else %}<h1 id="page-title">{{ 'Create a profile'|tr(locale) }}</h1>
+          <p>{{ 'Choose a name, a password and a security question. Together with a recovery key, they protect this profile.'|tr(locale) }}</p>{% endif %}
         {% elif mode == 'recovery-key' %}
-          <h1 id="page-title">{{ 'Save your recovery key'|tr(locale) }}</h1>
-          <p>{{ 'If you forget your password, this key and your security answer set a new one.'|tr(locale) }}</p>
+          {% if on_phone %}<h1 id="page-title">{{ 'Keep your recovery key.'|tr(locale) }}</h1>
+          <p>{{ 'The only way back in if you forget your password.'|tr(locale) }}</p>{% else %}<h1 id="page-title">{{ 'Save your recovery key'|tr(locale) }}</h1>
+          <p>{{ 'If you forget your password, this key and your security answer set a new one.'|tr(locale) }}</p>{% endif %}
         {% elif mode == 'unlock' %}
           <h1 id="page-title">{{ 'Unlock your profile'|tr(locale) }}</h1>
           <p>{{ 'Enter the password for this profile to open its financial data.'|tr(locale) }}</p>
@@ -68,8 +91,8 @@
       {% if error %}<div class="alert alert-error" role="alert" aria-live="assertive">{{ error|tr(locale) }}</div>{% endif %}
       {% if error and selected and mode == 'unlock' %}<p><a class="text-link" href="/profiles/journal/setup?db={{ selected|urlencode }}">{{ 'استكمال إعداد التعديل من الأجهزة' if locale == 'ar' else 'Finish device editing setup' }}</a></p>{% endif %}
       {% if error and selected and mode in ['unlock', 'restore'] and 'restore' in error|lower %}<p><a class="text-link" href="/profiles/restore/resume?db={{ selected|urlencode }}">{{ 'Check interrupted restore →'|tr(locale) }}</a></p>{% endif %}
-      {% if notice %}<div class="alert alert-notice" role="status">{{ notice|tr(locale) }}</div>{% endif %}
-      {% if mode == 'devices' %}<p><a class="text-link" href="/profiles">{{ '← Back to profile settings'|tr(locale) }}</a></p>{% elif mode not in ['choose', 'manage', 'checking'] %}<p><a class="text-link" href="/profiles">{{ '← Back to profiles'|tr(locale) }}</a></p>{% endif %}
+      {% if notice and not stepped %}<div class="alert alert-notice" role="status">{{ notice|tr(locale) }}</div>{% endif %}
+      {% if mode == 'devices' %}<p><a class="text-link" href="/profiles">{{ '← Back to profile settings'|tr(locale) }}</a></p>{% elif mode not in ['choose', 'manage', 'checking'] and not stepped %}<p><a class="text-link" href="/profiles">{{ '← Back to profiles'|tr(locale) }}</a></p>{% endif %}
       {% if selected and not on_phone %}<p class="selected-database">{{ 'Selected database:'|tr(locale) }} <code>{{ selected }}</code></p>{% endif %}
 
       {% if mode == 'choose' %}
@@ -161,7 +184,7 @@
             <div class="field" data-own-password><label for="new-password">{{ 'Or type your own password'|tr(locale) }}</label><input id="new-password" name="password" type="password" autocomplete="new-password" data-strength="new-password-strength"><small id="new-password-strength" class="strength" aria-live="polite">{{ 'Any length works. Longer is safer: three or four unrelated words are hard to guess.'|tr(locale) }}</small></div>
             <div class="field" data-own-password><label for="confirm-password">{{ 'Confirm password'|tr(locale) }}</label><input id="confirm-password" name="confirm" type="password" autocomplete="new-password"></div>
             {% include "_security_question.html" %}
-            <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Create profile'|tr(locale) }}</button></div>
+            <div class="form-actions"><button class="button button-primary{{ ' v2-big' if on_phone }}" type="submit">{{ ('Continue' if on_phone else 'Create profile')|tr(locale) }}{% if on_phone %}{{ chevron() }}{% endif %}</button></div>
           </form>
         </section>
 
@@ -169,11 +192,13 @@
         <section class="panel form-panel" aria-labelledby="key-heading">
           <h2 id="key-heading">{{ 'Your recovery key'|tr(locale) }}</h2>
           <p class="key-warning">{{ 'Write it down and keep it away from this computer. It opens nothing on its own: it needs your security answer too. If you lose your password and either the key or the answer, your data cannot be recovered.'|tr(locale) }}</p>
-          <div class="recovery-value" aria-label="Recovery key">{{ recovery }}</div>
+          {% if on_phone %}<div class="recovery-card"><small>{{ 'Recovery key'|tr(locale) }}</small>{% endif %}<div class="recovery-value" id="recovery-text" aria-label="Recovery key">{{ recovery }}</div>{% if on_phone %}</div>{% endif %}
+          {% if on_phone %}<div class="v2-key-actions"><button type="button" class="button button-secondary" data-copy-key><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg>{{ 'Copy'|tr(locale) }}</button><button type="button" class="button button-secondary" data-save-key><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>{{ 'Save as a file'|tr(locale) }}</button></div>
+          <script nonce="{{ request.state.csp_nonce|default('') }}">(()=>{const text=()=>document.getElementById('recovery-text').textContent.trim();document.querySelector('[data-copy-key]').addEventListener('click',()=>{try{navigator.clipboard.writeText(text())}catch(e){}});document.querySelector('[data-save-key]').addEventListener('click',()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text()+'\n'],{type:'text/plain'}));a.download='lightning-recovery-key.txt';document.body.appendChild(a);a.click();a.remove()})})();</script>{% endif %}
           {% if chosen_password %}<p>{{ 'Your password:'|tr(locale) }} <strong class="suggestion-value">{{ chosen_password }}</strong>. {{ 'Write it down too.'|tr(locale) }}</p>{% endif %}
           <form method="post" action="/profiles/confirm" class="form-stack">
             <input type="hidden" name="csrf" value="{{ csrf }}">
-            <div class="form-actions"><button class="button button-primary" type="submit">{{ 'I saved it, create the profile'|tr(locale) }}</button></div>
+            <div class="form-actions"><button class="button button-primary{{ ' v2-big' if on_phone }}" type="submit">{{ 'I saved it, create the profile'|tr(locale) }}{% if on_phone %}{{ chevron() }}{% endif %}</button></div>
           </form>
           <form method="post" action="/profiles/cancel" class="cancel-form"><input type="hidden" name="csrf" value="{{ csrf }}"><button class="text-button" type="submit">{{ 'Cancel profile setup'|tr(locale) }}</button></form>
         </section>
@@ -465,6 +490,7 @@
       {% endif %}
       {% endif %}
     </div>
+    {% endif %}
 
     {% if not on_phone %}<footer class="site-footer">
       <p>{{ 'Documents may sync between your devices. Do not open the same database on two computers at once.'|tr(locale) }}</p>

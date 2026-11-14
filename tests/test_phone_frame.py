@@ -157,7 +157,7 @@ def test_a_profile_can_be_created_where_hard_links_are_refused(tmp_path, monkeyp
 def test_settings_on_the_phone_leads_to_pairing_sms_and_the_profile(phone):
     html = phone.get("/settings").text
     assert 'href="/profiles/devices"' in html and 'href="/sms"' in html and 'href="/profiles"' in html
-    assert '<table' not in html and 'settings-row' in html  # Settings itself is rows, not a stacked table
+    assert '<table' not in html and 'phone-row' in html  # Settings itself is rows, not a stacked table (IV-11M8, mockup v2.0: phone rows)
     assert "Pair a PC" in phone.get("/profiles/devices").text
 
 
@@ -441,8 +441,9 @@ def test_phone_settings_are_the_phones_rows_and_the_rest_is_best_on_a_pc(phone):
     """IV-11H (C11.3): Appearance, Language, This phone, Bank SMS, Backup, Privacy, About and licences, Delete your
     data; the PC's tools (sale factors, target allocation, price files) are one Best on your PC line, not sections."""
     html = phone.get("/settings").text
-    for words in ("Appearance", "Language", "This phone", "Bank SMS", "Back up now", "Read the privacy notice", "About and licences",
-                  "Delete your data", "Best on your PC"):
+    # IV-11M8 (mockup v2.0): a profile card, then How it looks, Your data and Safety cards
+    for words in ("How it looks", "Language", "Your data", "Safety", "Bank messages", "Back up now", "Read the privacy notice", "About and licences",
+                  "Delete your data", "Best on your PC", "Encrypted on this phone"):
         assert words in html, words
     assert 'href="https://lightningeg.com/privacy.html#app"' in html and 'href="/settings/licences"' in html
     for pc in ("Sale factors", "Ask an AI", "Settings in each tab", "another computer"):

@@ -27,6 +27,7 @@ PRESENTERS: dict[str, str] = {
     "financial_health.html": "health",
     "transactions/form_popup.html": "capture",
     "investments/index.html": "investments",
+    "settings/index.html": "settings",
 }
 
 _templates: set[str] | None = None
