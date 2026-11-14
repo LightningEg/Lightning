@@ -1,0 +1,9 @@
+{% from 'partials/budget_exclusion_scope.html' import scope with context %}
+{% if estimate_excluded %}
+<p class="{{ 'phone-note' if phone else 'muted small' }}"><a href="/budget?month={{ month }}#budget-exclusions">{{ 'Left out of budget estimates'|tr(locale) }} · {{ 'Put back'|tr(locale) }}</a></p>
+{% else %}
+<form method="post" action="/budget/one-off" class="{{ 'phone-form' if phone else 'stack' }}"><input type="hidden" name="category_id" value="{{ category.id }}"><input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+<button class="btn{{ ' phone-save' if phone else '' }}">{{ 'Leave out of budget estimates'|tr(locale) }}</button>
+{% if subcategories %}<p class="{{ 'phone-note' if phone else 'muted small' }}">{{ category.name|tr(locale) }} {{ scope(subcategories) }}</p>{% endif %}
+</form>
+{% endif %}

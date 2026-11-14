@@ -18,10 +18,11 @@
   <header class="phone-section-head"><h2 id="plan-g{{ loop.index }}">{{ group|tr(locale) }}</h2></header>
   <div class="phone-rows">{% for r in rows %}
     <form class="phone-row phone-limit" method="post" action="/budget/rule/{{ r.category_id }}" data-budget-rule id="limit-{{ r.category_id }}"><input type="hidden" name="month" value="{{ plan.month }}">
-      <span>{{ r.name|tr(locale) }}{% if r.spent %}<small>{{ 'Spent {amt}'|tr(locale, amt=r.spent|money) }}</small>{% endif %}</span>
+      <span><a data-popup-open href="/budget/category/{{ r.category_id }}/edit?month={{ plan.month }}">{{ r.name|tr(locale) }}</a>{% if r.month_only %}<small>{{ 'Limit for this month only'|tr(locale) }}</small>{% endif %}{% if r.spent %}<small>{{ 'Spent {amt}'|tr(locale, amt=r.spent|money) }}</small>{% endif %}</span>
       <input name="rule" value="{{ r.value }}" placeholder="{{ r.placeholder or ('Limit'|tr(locale)) }}" inputmode="text" autocomplete="off" aria-label="{{ 'Budget for {name}: an amount, or a percentage of average monthly income'|tr(locale, name=r.name) }}" enterkeyhint="done" data-row-amount><small class="save-state" role="status"></small>
       <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endfor %}</div>
 </section>{% else %}<p class="phone-note">{{ 'No everyday categories yet.'|tr(locale) }} <a href="/categories">{{ 'Categories'|tr(locale) }}</a></p>{% endfor %}{% endif %}
+<p class="phone-note"><a href="/budget?month={{ plan.month }}#budget-exclusions">{{ 'Left out of budget estimates'|tr(locale) }}</a></p>
 {# Each field saves as it is left or on Enter (C05: no Save button per row); without script, Enter posts the form. #}
 <script nonce="{{ request.state.csp_nonce|default('') }}">document.querySelectorAll('[data-budget-rule]').forEach(f=>{const input=f.elements.rule,state=f.querySelector('.save-state');let before=input.value,busy=false;const save=()=>{if(busy||input.value.trim()===before.trim())return;busy=true;state.textContent=window.lightningT('Saving…');fetch(f.action,{method:'POST',body:new URLSearchParams(new FormData(f)),headers:{'X-Requested-With':'fetch'}}).then(async r=>{if(!r.ok)throw Error(await r.text());before=input.value;state.textContent=window.lightningT('Saved')}).catch(e=>state.textContent=e.message||window.lightningT('Could not save.')).finally(()=>busy=false)};input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save()}});input.addEventListener('blur',save)});</script>
 {% endblock %}

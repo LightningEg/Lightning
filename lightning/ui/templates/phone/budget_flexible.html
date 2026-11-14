@@ -7,7 +7,7 @@
 {% from "partials/chevron.html" import chevron %}
 {% block title %}Budget{% endblock %}
 {% block heading %}<h1>{{ 'Budget'|tr(locale) }}</h1>{% endblock %}
-{% macro cat_row(r) %}<a class="phone-row phone-budget-cat is-{{ r.state }}" data-popup-open href="/budget/category/{{ r.category_id }}/sheet?month={{ screen.month }}"><span>{{ r.name }}<small>{{ '{spent} of {limit}'|tr(locale, spent=r.spent|money, limit=r.limit|money) }}</small><span class="phone-bar-track" aria-hidden="true"><i style="width: {{ r.share }}%"></i></span></span><b class="{{ 'neg' if r.left < 0 }}">{% if r.state == 'done' %}<span class="phone-done" aria-label="{{ 'Nothing left'|tr(locale) }}">—</span>{% else %}<bdi class="fig">{{ r.left|money }}</bdi>{% endif %}</b></a>{% endmacro %}
+{% macro cat_row(r) %}<a class="phone-row phone-budget-cat is-{{ r.state }}" data-popup-open href="/budget/category/{{ r.category_id }}/sheet?month={{ screen.month }}"><span>{{ r.name }}<small>{{ '{spent} of {limit}'|tr(locale, spent=r.spent|money, limit=r.limit|money) }}</small>{% if r.month_only %}<small>{{ 'Limit for this month only'|tr(locale) }}</small>{% endif %}<span class="phone-bar-track" aria-hidden="true"><i style="width: {{ r.share }}%"></i></span></span><b class="{{ 'neg' if r.left < 0 }}">{% if r.state == 'done' %}<span class="phone-done" aria-label="{{ 'Nothing left'|tr(locale) }}">—</span>{% else %}<bdi class="fig">{{ r.left|money }}</bdi>{% endif %}</b></a>{% endmacro %}
 {% block content %}
 {% set s = screen %}
 <div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/budget?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">{{ chevron(back=True) }}</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/budget?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">{{ chevron() }}</a>{% else %}<span class="phone-month-end" aria-hidden="true">&#160;</span>{% endif %}</span></div>
@@ -60,4 +60,5 @@
 {# 3AY9: This month in detail is the month's Spending page: the four biggest categories then Other, against the same days usually #}
 {% if s.state != 'no_plan' %}<a class="phone-row" href="/birdview/expenses?period=month&amp;month={{ s.month }}"><span>{{ 'This month in detail'|tr(locale) }}</span><b>{{ chevron() }}</b></a>{% endif %}
 {% endif %}
+{% include 'phone/partials/budget_exclusions.html' %}
 {% endblock %}

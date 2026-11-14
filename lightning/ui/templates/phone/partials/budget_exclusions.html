@@ -1,0 +1,11 @@
+{% if screen.exclusions %}
+{% from 'partials/budget_exclusion_scope.html' import scope with context %}
+<section class="phone-section" id="budget-exclusions" aria-labelledby="budget-exclusions-heading">
+  <header class="phone-section-head"><h2 id="budget-exclusions-heading">{{ 'Left out of budget estimates'|tr(locale) }}</h2></header>
+  <div class="phone-rows">{% for item in screen.exclusions %}
+    <div class="phone-row"><span>{{ item.name|tr(locale) }}{% if item.subcategories %}<small>{{ scope(item.subcategories) }}</small>{% endif %}</span>
+      <form method="post" action="/budget/one-off"><input type="hidden" name="category_id" value="{{ item.id }}"><input type="hidden" name="month" value="{{ screen.month }}"><input type="hidden" name="action" value="restore"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn small">{{ 'Put back'|tr(locale) }}</button></form>
+    </div>{% endfor %}</div>
+  <p class="phone-note">{{ 'These categories stay out of budget estimates until you put them back. Their spending still counts in Cash flow and Spending.'|tr(locale) }}</p>
+</section>
+{% endif %}
