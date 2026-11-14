@@ -541,6 +541,28 @@ html[dir=rtl]{--vivid:linear-gradient(225deg,#00995C 0%,#0B6DD6 100%)}
 html[dir=rtl] :is(em,i){font-style:normal}
 /* Charts do not mirror (A06.2): their labels anchor as drawn */
 html[dir=rtl] svg{direction:ltr}
+.hero2{border-radius:28px;padding:22px 20px;background:linear-gradient(135deg,color-mix(in srgb,var(--green) 14%,#fff),color-mix(in srgb,var(--azure) 14%,#fff));border:1px solid #fff;position:relative;overflow:hidden;max-width:360px;box-shadow:var(--shadow)}
+.hero2 .lm{position:absolute;top:10px;inset-inline-end:14px;width:60px;height:60px;opacity:.18;fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round}
+.hero2 .lm+.lm{top:30px;inset-inline-end:44px;opacity:.15;width:38px;height:38px}
+.hero2 .lb{font:700 14px/1.2 var(--body);color:var(--ink2)}
+.hero2 .fig{font:800 44px/1.05 var(--display);margin:8px 0 6px;color:var(--ink)}
+.hero2 .fig small{font:700 14px var(--body);margin-inline-start:6px;letter-spacing:0}
+.hero2 .st{font-size:14px;color:var(--ink2);margin:0}.hero2 .st b{color:var(--green-text)}
+.wells2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.wells2>div{background:rgba(255,255,255,.7);border-radius:16px;padding:10px 12px}
+.wells2 span{display:block;font-size:12.5px;color:var(--muted)}.wells2 b{font:700 18px var(--body)}
+.lc{background:var(--paper);border-radius:24px;border:1px solid #DDE9E6;box-shadow:0 14px 34px -24px rgba(10,36,66,.42);overflow:hidden;max-width:360px}
+.lc-h{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--t-rose)}.lc-h.azure{background:var(--t-azure)}.lc-h.green{background:var(--t-green)}
+.lc-t{width:38px;height:38px;border-radius:12px;background:#fff;display:grid;place-items:center;flex:none}
+.lc-h h4{font:700 17px/1.2 var(--display);margin:0}.lc-h small{display:block;font-size:12.5px;color:var(--muted)}.lc-h em{margin-inline-start:auto;font:700 13px var(--body);font-style:normal;color:var(--ink2)}
+.lc-day{padding:6px 14px 0;font-size:12.5px;color:var(--muted)}
+.lc-r{display:flex;align-items:center;gap:12px;height:64px;padding:0 14px;border-top:1px solid var(--line)}
+.lc-r i{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-style:normal;background:var(--t-rose);color:var(--rose-strong);flex:none}.lc-r i.in{background:var(--t-green);color:var(--green-text)}
+.lc-r div{min-width:0}.lc-r b{display:block;font:700 15.5px/1.2 var(--body)}.lc-r small{font-size:13px;color:var(--muted)}
+.lc-r .a{margin-inline-start:auto;font:700 15.5px var(--body)}.lc-r .a.out{color:var(--rose-strong)}.lc-r .a.in{color:var(--green-text)}
+.pf-nav.v2{padding-top:0;background:#fff}.pf-nav.v2>span{height:84px}.pf-nav.v2>span i{width:52px;height:30px}
+.pf-nav.v2>span.on i{background:#D7F0E3;color:var(--ink)}.pf-nav.v2>span.on{font-weight:800}
+.pf-nav.v2>span.add i{width:56px;height:56px;border-radius:50%;margin-top:-26px;border:5px solid #fff;box-sizing:content-box}
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Readex+Pro:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap">
 </head>
@@ -606,6 +628,7 @@ html[dir=rtl] svg{direction:ltr}
 
 <section class="g" id="c-rules" data-part="c">
   <div class="g-head"><div><h2><span class="secnum">C01</span>القواعد</h2><p>تطبيق الموبايل بيستخدم نفس شعار وألوان وخط وأرقام الجزء A؛ ولو القواعد اختلفت، الجزء C هو المعتمد على الموبايل. أي حاجة مش مذكورة هنا تتبع الجزء A.</p></div></div>
+  <p class="cap" style="margin:8px 0 14px"><b>الإصدار ٢٫٠ (قرار صاحب المشروع، ⁦‭٢٠٢٦-١١-١٤‬⁩): الكروت وكروت البطل وخانة «خطتك»؛ النموذج التجريبي في IV-11M.</b></p>
   <div class="rtiles">
     <div class="rt"><div class="vis"><span class="num" style="font-size:22px">٣٦٠ × ٨٠٠</span></div><b>صمّم على عرض ٣٦٠</b><span>عمود واحد. راجع كمان عرض ٣٢٠ وتأكد إن مفيش حاجة بتبوظ.</span></div>
     <div class="rt"><div class="vis" style="justify-content:flex-start"><span class="chip">الملخص</span><span class="chip">الإنفاق</span><span class="chip" style="opacity:.4">…</span></div><b>مفيش تمرير بالعرض</b><span>لا في التبويبات ولا الجداول ولا الرسوم. ومفيش كلمة تتقص.</span></div>
@@ -657,21 +680,22 @@ html[dir=rtl] svg{direction:ltr}
   <div class="g-head"><div><h2><span class="secnum">C03</span>التنقل</h2><p>القائمة الجانبية تتحول لشريط تبويبات تحت. يفضل مستويين: قسم وبعده تبويب.</p></div></div>
   <h3 class="sub"><span class="subnum">C03.1</span>شريط التبويبات: خمس خانات بكلماتها</h3>
   <div style="max-width:360px;border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)">
-    <div class="pf-nav words"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>الرئيسية</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>ميزانيتك</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>أضف</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>النشاط</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>فلوسك</span></div>
+    <div class="pf-nav words v2"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>الرئيسية</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>ميزانيتك</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>أضف</span><span><i><svg class="ic"><use href="#i-trend"/></svg></i>خطتك</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>فلوسك</span></div>
     <div class="pf-gest"></div>
   </div>
   <ul class="short">
-    <li><b>خمس خانات</b> (قرار صاحب المشروع، ⁦‭٢٠٢٦-١١-٠٦‬⁩): الرئيسية، ميزانيتك، أضف، النشاط، فلوسك. كل خانة بتجاوب سؤال. الرئيسية: «أنا تمام النهارده، وأعمل إيه بعدها؟» ميزانيتك: «فاضل كام، وعلى إيه؟» أضف: «سجّلها دلوقتي.» النشاط: «إيه اللي اتحرك، وإيه اللي محتاج ترتيب؟» فلوسك: «أنا معايا إيه، وعليّا إيه، وإيه اللي جاي؟» مفيش «أكتر»: تخطيط النقدية والاستثمارات وحساباتك وصحتك المالية والإعدادات بتوصلها من «فلوسك».</li>
-    <li><b>كل خانة:</b> أيقونة Lucide بحجم 24px واسمها تحتها 12px. الكلمة ما بتلفش ولا بتتقص: كل عمود عرضه على الأقل عرض كلمته. المختار: بلون الحبر وأتخن، وفوقه شريط قصير بلون النيل. الباقي: خافت.</li>
-    <li><b>«أضف»</b> في النص: قرص 48px بلون النيل مرفوع فوق الشريط، وكلمته تحته (C05.2).</li>
-    <li><b>الأيقونات بتقول المكان:</b> بيت للرئيسية، وقطاع دائري للميزانية، وعلامة زائد، وأسهم لفوق ولتحت للنشاط، ومحفظة لفلوسك. الدرع للاحتياطيات وصندوق الطوارئ، عمره ما يبقى لخانة.</li>
-    <li><b>«فلوسك»</b> بتفتح على صافي ثروتك، وبعدها اللي وراه، كل حاجة ومعاها رقمها الحي: أرصدة الحسابات نفسها (أربعة، وبعدين الباقي)، والجاي قريب، واللي عليك، والاستثمارات، والأهداف والاحتياطيات، والصحة المالية، والزكاة لو متفعّلة. الإعدادات ورا ⚙ في شريط التطبيق بتاع «فلوسك». الصفحة اللي بتوصلها من «فلوسك» يفضل «فلوسك» هو المختار.</li>
+    <li><b>خمس خانات</b> (قرار صاحب المشروع، ⁦‭٢٠٢٦-١١-١٤‬⁩): الرئيسية، ميزانيتك، أضف، خطتك، فلوسك. كل خانة بتجاوب سؤال. الرئيسية: «أنا تمام النهارده، وأعمل إيه بعدها؟» ميزانيتك: «فاضل كام، وعلى إيه؟» أضف: «سجّلها دلوقتي.» خطتك: «إيه اللي جاي، وهل متغطّي؟» فلوسك: «أنا معايا إيه، وعليّا إيه؟» مفيش «أكتر».</li>
+    <li><b>«خطتك»</b> فيها الجاي قريب، والمتكرر، والقروض، والاحتياطيات (تخطيط النقدية). <b>«النشاط» و«للمراجعة»</b> بيتفتحوا من «فلوسك» وشريط التطبيق بيقول «‹ فلوسك  النشاط»؛ و«فلوسك» يفضل هو المختار. الاستثمارات وحساباتك والصحة المالية والإعدادات بتوصلها برضه من «فلوسك».</li>
+    <li><b>كل خانة:</b> أيقونة خطوط بحجم 24px وكلمتها تحتها. الشريط ارتفاعه 84، أبيض، وفوقه خط رفيع. المختار: أيقونته جوّه كبسولة ميدو فاتحة 52 × 30 (#D7F0E3) وكلمته بلون الحبر 12/800. الباقي: خافت 12/600. الكلمة ما بتلفش ولا بتتقص.</li>
+    <li><b>«أضف»</b> في النص: قرص نيل 56px مرفوع فوق الشريط وحواليه حلقة بيضا 5px، وكلمته تحته (C05.2).</li>
+    <li><b>الأيقونات بتقول المكان:</b> بيت للرئيسية، وقطاع دائري للميزانية، وعلامة زائد، ورسم بياني بخطوط لخطتك، ومحفظة لفلوسك. الدرع للاحتياطيات وصندوق الطوارئ، عمره ما يبقى لخانة.</li>
+    <li><b>«فلوسك»</b> بتفتح على صافي ثروتك، وبعدها اللي وراه، كل حاجة ومعاها رقمها الحي: أرصدة الحسابات نفسها، والنشاط، وللمراجعة، واللي عليك، والاستثمارات، والصحة المالية، والزكاة لو متفعّلة. الإعدادات ورا ⚙ في شريط التطبيق بتاع «فلوسك». الصفحة اللي بتوصلها من «فلوسك» يفضل «فلوسك» هو المختار.</li>
   </ul>
 
   <h3 class="sub"><span class="subnum">C03.2</span>شريط التطبيق</h3>
   <div style="max-width:360px" class="pf"><div class="pf-bar named"><img class="pf-mark" alt="Lightning"><span class="pf-name">ميزانيتك</span><span class="pf-icon" title="بحث"><svg class="ic"><use href="#i-search"/></svg></span><span class="pf-icon" title="إخفاء المبالغ"><svg class="ic"><use href="#i-eye"/></svg></span><span class="pf-icon" title="إعدادات الميزانية"><svg class="ic"><use href="#i-gear"/></svg></span></div></div>
   <ul class="short">
-    <li><b>اليمين:</b> الرمز بحجم 28px، وبعده اسم الصفحة بحجم 17px (بيلف لسطرين قبل ما يتقص). في الصفحة الداخلية يظهر مكانهم ‹ واسم الصفحة اللي بيرجع لها، زي «‹ حساباتك».</li>
+    <li><b>اليمين:</b> شريط التطبيق ارتفاعه 64 على خلفية العلامة المتدرجة: الرمز بحجم 28px، وبعده اسم الصفحة بحجم 17px بخط Bricolage 700 (بيلف لسطرين قبل ما يتقص). في الصفحة الداخلية يظهر «‹ القسم» وبعده اسم الصفحة، زي «‹ فلوسك  النشاط».</li>
     <li><b>الشمال بالترتيب ده:</b> بحث وإخفاء المبالغ. أهداف 44px وأيقونات 22px. البحث يفتح بملء الشاشة ويدوّر على الفلوس الأول: المعاملات في أول النتايج، وبعدها الصفحات والإعدادات تحت عنوانها (قرار صاحب المشروع، ⁦‭٢٠٢٦-١١-٠٢‬⁩)؛ مفيش اختصار Ctrl K على الموبايل.</li>
     <li><b>ترس التبويب</b> (A10.4) تالت أيقونة، ويظهر بس في التبويب اللي ليه إعدادات، وبيفتحها. كل الإعدادات ورا ⚙ في «فلوسك».</li>
   </ul>
@@ -697,10 +721,11 @@ html[dir=rtl] svg{direction:ltr}
 
 <section class="g" id="c-header" data-part="c">
   <div class="g-head"><div><h2><span class="secnum">C04</span>رأس الصفحة</h2><p>تطبيق قاعدة A05 على الموبايل: اسم الصفحة في شريط التطبيق، وبعده الرقم الرئيسي (رقمه وجملة هادية واحدة)، وعدّاد الشهر، والتبويبات، و«محتاج تدخّلك». كل واحد في صف لوحده ومن غير عناصر جنبه.</p></div></div>
+  <ul class="short"><li><b>C04.1 كارت البطل</b> (٢٫٠): الصفحة بتفتح على كارت واحد بنفس شكله (C06.2): زوايا 28px، خلفية خضرا لأزرق هادية، حافة بيضا 1px، علامتين برق بخطوط في الركن العلوي بشفافية 15–20%؛ العنوان 14/700 معاه ›، الرقم 44px بالجنيه الكامل و EGP مرة واحدة، وجملة واحدة حكمها بالخط التخين بلون معناه («<b>ماشي على الوتيرة.</b>»)، وبعدها خانتين أو حلقة.</li></ul>
   <div class="grid2" style="max-width:760px;align-items:start">
     <div class="pf" style="padding:16px;gap:12px">
-      <div class="pf-lead"><p>المتبقي للصرف اليومي</p><div class="big num">٦٬٢٤٠<small>EGP</small></div><p class="st">إنت أقل من وتيرة خطتك بـ ٥٣٢.</p></div>
-      <div class="pf-sec"><h4>اللي تعمله</h4><span>شوف الكل ٥</span></div>
+      <div class="hero2"><svg class="lm" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><svg class="lm" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><div class="lb">المتبقي للصرف اليومي ›</div><div class="fig num">٦٬٢٤٠<small>EGP</small></div><p class="st"><b>ماشي على الوتيرة.</b> إنت أقل من وتيرة خطتك بـ ٥٣٢.</p><div class="wells2"><div><span>المصروف</span><b class="num">١٨٬٦٥١</b></div><div><span>المتبقي في الخطة</span><b class="num">٦٬٩٤٨</b></div></div></div>
+            <div class="pf-sec"><h4>اللي تعمله</h4><span>شوف الكل ٥</span></div>
           <div class="pf-card lead"><div class="pf-rows"><div><span>فودافون ٣٥٠ · بعد ٣ أيام</span><b>ادفع ›</b></div><div><span>١٢ معاملة جديدة محتاجة ترتيب</span><b>رتّب ›</b></div><div><span>وصل الراتب · ٤٥٬٠٠٠</span><b>خطّط ›</b></div></div></div>
           <div class="pf-sec"><h4>الأحدث</h4><span>شوف الكل</span></div>
           <div class="pf-list">
@@ -713,7 +738,7 @@ html[dir=rtl] svg{direction:ltr}
           <div class="pf-sec"><h4>الشهر ده</h4><span></span></div>
           <div class="pf-card lead"><div class="pf-rows"><div><span>صرفت ١٨٬٦٥١ · المتبقي في الخطة ٦٬٩٤٨</span><b>›</b></div></div></div>
         </div>
-        <div class="pf-nav words"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>الرئيسية</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>ميزانيتك</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>أضف</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>النشاط</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>فلوسك</span></div>
+        <div class="pf-nav words v2"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>الرئيسية</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>ميزانيتك</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>أضف</span><span><i><svg class="ic"><use href="#i-trend"/></svg></i>خطتك</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>فلوسك</span></div>
         <div class="pf-gest"></div>
       </div>
     </figure>
@@ -736,7 +761,7 @@ html[dir=rtl] svg{direction:ltr}
             <div class="pf-tx"><div class="pf-who"><i class="pf-av ar out">↓</i><div><b>Kiosk</b><small>بقالة</small></div></div><div class="a"><b>⁦−٢١٠⁩</b><small>⁦٧٬٤٧٥⁩</small></div></div>
           </div>
         </div>
-        <div class="pf-nav words"><span><i><svg class="ic"><use href="#i-home"/></svg></i>الرئيسية</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>ميزانيتك</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>أضف</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>النشاط</span><span class="on"><i><svg class="ic"><use href="#i-wallet"/></svg></i>فلوسك</span></div>
+        <div class="pf-nav words v2"><span><i><svg class="ic"><use href="#i-home"/></svg></i>الرئيسية</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>ميزانيتك</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>أضف</span><span><i><svg class="ic"><use href="#i-trend"/></svg></i>خطتك</span><span class="on"><i><svg class="ic"><use href="#i-wallet"/></svg></i>فلوسك</span></div>
         <div class="pf-gest"></div>
       </div>
     </figure>
@@ -746,6 +771,59 @@ html[dir=rtl] svg{direction:ltr}
     <li>«المتبقي في الخطة» في الرئيسية هو المخطط ناقص المنفق، زي الكمبيوتر. ميزانيتك بتبدأ برقم تاني اسمه «المتبقي للصرف اليومي»، بعد الفواتير والأقساط المخططة اللي لسه متدفعتش (قرار المالك، 2026-11-09).</li>
     <li><b>C11.3 فلوسك</b> (C03.1): صافي ثروتك كالرقم الرئيسي، وبعدها رصيد كل حساب مع السطر اللي بيطابقها بـ«اللي تملكه»، والجاي قريب من غير صفوف متأخرة، واللي عليك، والاستثمارات (الحيازات الأول)، والأهداف والاحتياطيات، والصحة المالية، والزكاة لو متفعّلة. الصف بيفتح صفحة أو لوحة، عمره ما يفتح صفحة كمبيوتر. الإعدادات ورا ⚙ في شريط التطبيق؛ وأي أداة للكمبيوتر بس بتقول «الأحسن على الكمبيوتر».</li>
     <li><b>C11.2:</b> الزر الثانوي الوحيد للحساب و⋯ يظهروا تحت الرقم. في حساب الوساطة، افتح «تسجيل معاملة استثمار» فوق القائمة للشراء والبيع والتوزيعات.</li>
+  </ul>
+</section>
+
+<section class="g" id="c-cards" data-part="c">
+  <div class="g-head"><div><h2><span class="secnum">C06</span>الكروت والأرقام</h2><p>الكروت الأربعة لسه ليها شغلها. كارت البطل هو أول حاجة في الصفحة.</p></div></div>
+  <h3 class="sub"><span class="subnum">C06.2</span>كارت البطل وزوج الخانتين والحلقة</h3>
+  <div class="grid2" style="max-width:760px">
+    <div class="hero2"><svg class="lm" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><svg class="lm" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><div class="lb">المتبقي للصرف اليومي ›</div><div class="fig num">٦٬٢٤٠<small>EGP</small></div><p class="st"><b>ماشي على الوتيرة.</b> إنت أقل من وتيرة خطتك بـ ٥٣٢.</p><div class="wells2"><div><span>المصروف</span><b class="num">١٨٬٦٥١</b></div><div><span>المتبقي في الخطة</span><b class="num">٦٬٩٤٨</b></div></div></div>
+    <ul class="short" style="margin:0">
+      <li><b>كارت البطل</b> (٢٫٠، قرار صاحب المشروع ⁦‭٢٠٢٦-١١-١٤‬⁩) هو أول حاجة في كل صفحة: زوايا 28px، حشو 22/20، خلفية خضرا لأزرق هادية، حافة بيضا 1px، علامتين برق بخطوط فوق بشفافية 15–20%؛ العنوان معاه › (14/700 حبر 2، بيفتح الشغل)؛ الرقم 44 (Bricolage 800) و EGP 14/700؛ جملة واحدة حكمها بالخط التخين بلون معناه؛ وبعدها خانتين أو حلقة. هو الكارت الوحيد اللي ليه خلفية متدرجة.</li>
+      <li><b>زوج الخانتين:</b> خانتين بيضا 70%، زوايا 16px، العنوان 12.5 خافت فوق الرقم 18/700 (المصروف والمتبقي في الخطة). عمرهم ما يبقوا أكتر من اتنين.</li>
+      <li><b>الحلقة:</b> بدل الخانتين، حلقة 84px على الجنب وفي نصها النسبة («٥٩٪ مصروف»).</li>
+      <li><b>الكارت المنقّط</b> بيعرض اللي لسه متظبطش («خليها فاتورة»). نفس الزوايا، حافة منقّطة، من غير ظل.</li>
+      <li>الصفوف اللي بتبني الرقم بتتحط في كارت قايمة تحته (C08.2)، عمرها جوّه كارت البطل. الكارت عمره ما يشيل كارت.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="g" id="c-lists" data-part="c">
+  <div class="g-head"><div><h2><span class="secnum">C08</span>القوايم والمعاملات</h2><p>القايمة بتتحط في كارت، والمعاملات بتتقسم بالأيام.</p></div></div>
+  <div class="grid2" style="max-width:780px;align-items:start">
+    <div class="lc"><div class="lc-h"><span class="lc-t"><svg class="ic"><use href="#i-updown"/></svg></span><div><h4>اللي تعمله</h4><small>٣ حاجات محتاجاك</small></div><em>الكل ٥ ›</em></div><div class="lc-r"><i class="out">↓</i><div><b>فودافون</b><small>بعد ٣ أيام</small></div><span class="a out">⁦−٣٥٠⁩</span></div><div class="lc-r"><i class="in">↑</i><div><b>الراتب</b><small>ACME Egypt</small></div><span class="a in">⁦+٤٥٬٠٠٠⁩</span></div></div>
+    <ul class="short" style="margin:0">
+      <li><b>C08.2 كارت القايمة والصف</b> (٢٫٠): كارت أبيض، زوايا 24px، حافة 1px وظل خفيف. صف العنوان ملوّن بمعناه (وردي: اللي تعمله والمصروفات؛ أزرق: الأحدث والنشاط؛ أخضر: الدخل والاحتياطيات والصحة) وفيه مربع أبيض 38px للأيقونة، والعنوان 17/700، وسطر فرعي 12.5 خافت، و«الكل ٥ ›». الصفوف ارتفاعها 64: دايرة 40px بلون المعنى، والاسم 15.5/700، والملاحظة 13 خافتة. الفلوس الخارجة بالوردي بعلامة −، والداخلة بالأخضر بعلامة +. الإجراء زر كبسولة: «ادفع» بالنيل، والباقي على خلفية فاتحة. الكارت عمره ما يشيل كارت. في المعاملات كل يوم كارت لوحده ومعاه صافي اليوم في عنوانه؛ وجوّه كارت القايمة اليوم سطر هادي.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="g" id="c-screens" data-part="c">
+  <div class="g-head"><div><h2><span class="secnum">C11</span>الشاشات</h2><p>٢٢ شاشة في نموذج ٢٫٠، كلها من C02 لـ C10.</p></div></div>
+  <ul class="short">
+    <li><b>01 الترحيب:</b> إيه هو Lightning، وبعدها «ابدأ»؛ من غير نموذج الأول.</li>
+    <li><b>02 ملفك:</b> اسم وكلمة سر، مفيش غيرهم.</li>
+    <li><b>03 مفتاح الاسترجاع:</b> المفتاح بيظهر مرة واحدة، و«احفظ» هو الإجراء الوحيد.</li>
+    <li><b>04 الرئيسية أول يوم:</b> خطوات أول يوم واحدة واحدة بدل الأرقام.</li>
+    <li><b>05 الرئيسية:</b> «المتاح الآمن للصرف» كبطل، وعدّاد القبض، واللي تعمله، والأحدث.</li>
+    <li><b>06 أضف:</b> ورقة الإدخال: المبلغ الأول وبعده كان إيه.</li>
+    <li><b>07 معاملة:</b> مبلغها وتصنيفها، و«عدّل» و«تراجع» في المتناول.</li>
+    <li><b>08 الرئيسية في دندرة:</b> نفس الرئيسية في ثيم مدفوع، بالتوكنز بس.</li>
+    <li><b>09 الميزانية · التصنيفات:</b> المتبقي للصرف اليومي، وبعده كل تصنيف بشريطه.</li>
+    <li><b>10 الميزانية · المصروفات:</b> الشهر راح فين، في كارت قايمة بالأيام.</li>
+    <li><b>11 الميزانية · تعديل الخطة:</b> تصنيف في كل صف ورقم الخطة بيتكتب في خانة ناعمة.</li>
+    <li><b>12 تصنيف واحد:</b> خطته واللي اتصرف ومعاملاته.</li>
+    <li><b>13 خطتك · الجاي قريب:</b> إيه اللي مستحق جاي، وهل متغطّي.</li>
+    <li><b>14 خطتك · المتكرر:</b> فواتير ودخل بيتكرر ومعاه الميعاد الجاي.</li>
+    <li><b>15 خطتك · القروض:</b> عليك كام ولمين وقسط إمتى.</li>
+    <li><b>16 خطتك · الاحتياطيات:</b> فلوس متحوشة وكل واحدة بتقدمها.</li>
+    <li><b>17 فلوسك:</b> صافي ثروتك كبطل، وبعده اللي وراه.</li>
+    <li><b>18 النشاط:</b> فلوس الشهر داخلة وخارجة، كارت لكل يوم.</li>
+    <li><b>19 للمراجعة:</b> كارت واحد في المرة، «٣ من ١٢»، و«تمام» هو الأساسي.</li>
+    <li><b>20 الاستثمارات:</b> قيمة المحفظة، والمقتنيات الأول.</li>
+    <li><b>21 حساب واحد:</b> الرصيد، وزره الثانوي الوحيد، وبعده قايمته.</li>
+    <li><b>22 الإعدادات:</b> صفوف متجمّعة ورا ⚙ في «فلوسك»؛ وأي أداة للكمبيوتر بس بتقول «الأحسن على الكمبيوتر».</li>
   </ul>
 </section>
 
