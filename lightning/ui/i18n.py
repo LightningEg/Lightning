@@ -18,6 +18,8 @@ from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TE
 
 ARABIC_UI = {
     'The total value is too small for this holding quantity.': 'القيمة الإجمالية صغيرة جدًا بالنسبة لعدد الوحدات دي.',
+    'Certificate value is set by its principal. Use the certificate workflow for terms or redemption.': 'قيمة الشهادة حسب أصل المبلغ. استخدم صفحة الشهادة لتعديل الشروط أو تسجيل الاسترداد.',
+    'View certificate': 'عرض الشهادة',
     'Quantities and total values cover all accounts, including units held for others. Use the currency shown beside each investment.': 'الكميات والقيم الإجمالية تشمل كل الحسابات، بما فيها الوحدات اللي محتفظ بيها لغيرك. استخدم العملة الموضحة جنب كل استثمار.',
     'Enter a total estimate': 'اكتب التقدير الإجمالي',
     'A total value must be greater than zero.': 'القيمة الإجمالية لازم تكون أكبر من صفر.',
@@ -3539,6 +3541,23 @@ ARABIC_UI = {
     'Move {amt} from {name}': 'انقل {amt} من {name}',
     'of income, target {x}': 'من الدخل، والهدف {x}',
     'Income up {amt}': 'الدخل زاد {amt}',
+    # NF-12AL1: regular pay that falls from a date, offered to the plan like a raise.
+    'Income down {amt}': 'الدخل قلّ {amt}',
+    'Your income falls': 'دخلك هيقلّ',
+    'Your income falls to {amt} from {day}': 'دخلك هيقلّ لـ {amt} من {day}',
+    'Your average is {amt}, {amt2} more a month': 'متوسطك {amt}، يعني {amt2} زيادة في الشهر',
+    'What should the plan count from {month}?': 'الخطة تحسب إيه من {month}؟',
+    'Plan on it from then': 'خطّط عليه من ساعتها',
+    'Plan on it': 'خطّط عليه',
+    '{label} becomes {amt}; your plan is {amt2} over it': '{label} يبقى {amt}؛ وخطتك فوقه بـ {amt2}',
+    '{label} becomes {amt}; your plan still fits': '{label} يبقى {amt}؛ وخطتك لسه مناسبة',
+    'The plan waits until the lower income shows in completed months': 'الخطة تستنى لحد ما الدخل الأقل يبان في شهور خلصت',
+    'Plan on it from then, or keep the average of {x}.': 'خطّط عليه من ساعتها، أو خليك على المتوسط {x}.',
+    '{amt} a month less than your average of {x}. Plan on it from then, or keep the average.': '{amt} في الشهر أقل من متوسطك {x}. خطّط عليه من ساعتها، أو خليك على المتوسط.',
+    'Your income falls to {amt} from {n} {mon}': 'دخلك هيقلّ لـ {amt} من {n} {mon}',  # Needs you: "25 Dec" from Python
+    'Planning on {amt} a month from {month}': 'الخطة على {amt} في الشهر من {month}',
+    'Count the average again': 'ارجع للمتوسط',
+    'less a month': 'أقل في الشهر',
     'Plan {amt} less to keep {x} a month': 'خطط {amt} أقل عشان تحوّش {x} في الشهر',
     '{amt} a month to save': '{amt} في الشهر للادخار',
     'of the {amt} plan': 'من خطة الـ{amt}',

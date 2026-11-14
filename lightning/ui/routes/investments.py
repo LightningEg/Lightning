@@ -773,13 +773,17 @@ async def prices(request: Request, error: str = ""):
         derived = (c.reporting.valuer.reference_price(asset.id, day)  # PR-2: a karat priced from another by purity
                    if valuation.price is None and getattr(asset.exposure, "value", asset.exposure) == "GOLD"
                    and asset.unit == "gram" else None)
+        is_certificate = c.assets.get_class(asset.asset_class_id).code == "DEPOSIT.CD"
+        certificate = c.deposits.certificate_for_asset(asset.id) if is_certificate else None
         rows.append({"asset": asset, "held": held.get(asset.id),
                      "current_value": investment_prices.total_at_price(valuation.price, held.get(asset.id)),
                      "price": valuation.price if derived is None else owned.exact_from_e6(derived["price_e6"]),
                      "price_date": valuation.price_date if derived is None else derived["date"],
                      "source": valuation.source if derived is None else derived["source"],
                      "is_item": asset.code.startswith("OTH:ITEM-"),
-                     "is_certificate": c.assets.get_class(asset.asset_class_id).code == "DEPOSIT.CD"})
+                     "is_certificate": is_certificate,
+                     "certificate_href": (f"/deposits/{certificate.terms.account_id}#certificate-{certificate.terms.id}"
+                                          if certificate else "/investments/certificate")})
     rows.sort(key=lambda r: (r["held"] is None, r["asset"].name))
     return render(request, "investments/prices.html", rows=rows, day=day, error=error,
                   pending=c.reevaluations.pending_prices(), market=_followed(c), fails=live_prices.failures(c))

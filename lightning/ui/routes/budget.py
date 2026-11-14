@@ -24,6 +24,7 @@ from ..web import container, redirect, render, settled_save
 from ..periods import parse_period
 from ..budget_rows import cover_from, last_payments, neighbours, pace_line
 from ..budget_exclusions import exclusion_context
+from ..date_text import day_text
 
 router = APIRouter(prefix="/budget")
 TRACK_SUGGESTION_PERCENT = Decimal(20)
@@ -155,7 +156,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     left_note = keynotes.per_day(month_left, days_left) if c.budgets.has_plan(month, schedule=c.schedules.view()) else ""
     # KPI cards (guideline 3.32 A08): every figure against something, two to four in the row. The figures come
     # from the forecaster's EverydayBudget, the same Budget until payday Cash planning shows.
-    raise_offer = c.health.raise_offer(month) if period.key == "month" else None
+    raise_offer = c.health.income_change_offer(month) if period.key == "month" else None  # a raise, or a drop from its date
     kpi_cards, pace, plan_bills, everyday = [], None, [], None
     if period.key == "month" and has_plan:
         everyday = c.forecaster.everyday(month, today())
@@ -192,9 +193,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                           "href": move["href"] if move else r["href"], "popup": True,  # Move room or the category sheet (3G6)
                           "action": f"Move {fmt(move['amount'], 0)} from {move['name']}" if move else "See it"})
         if raise_offer and not by_key.get("saves"):
-            needs.append({"label": "Your income went up",
-                          "detail": f"Recurring expects {fmt(raise_offer['raise'], 0)} more than your average.",
-                          "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose"})
+            needs.append(income_change_row(raise_offer, month))
     status = page_status.budget(everyday, has_plan, period.key, period_actual, period_budgeted)
     return render(request, "budget.html", budget_ai_prompt=budget_prompt(), notes=notes, meter_active=meter_active, meter_rest=meter_rest, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
                   lead=lead, pace_card=pace_card, needs=needs, status=status,
@@ -822,11 +821,22 @@ async def update_global_carryover(request: Request):
     return redirect(f"/budget?month={month}", "Carryover setting updated.")
 
 
+def income_change_row(offer: dict, month: str) -> dict:
+    """Budget's Needs you row for the income offer: a raise, or a drop from its date (NF-12AL1)."""
+    if offer["kind"] == "drop":
+        return {"label": f"Your income falls to {fmt(offer['recurring'], 0)} from {day_text(offer['from'])}",
+                "detail": f"Plan on it from then, or keep the average of {fmt(offer['average'], 0)}.",
+                "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose"}
+    return {"label": "Your income went up", "detail": f"Recurring expects {fmt(offer['raise'], 0)} more than your average.",
+            "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose"}
+
+
 @router.get("/raise")
 async def raise_offer(request: Request):
-    """Income above the average: plan with it, save the difference, or keep the average (Needs you)."""
+    """Income above the average (plan with it, save the difference, or keep the average) or below it from a date
+    (plan on it from then, or keep the average): one popup for both (Needs you, Budget)."""
     c = container(request)
-    offer = c.health.raise_offer(str(request.query_params.get("month", month_of(today()))))
+    offer = c.health.income_change_offer(str(request.query_params.get("month", month_of(today()))))
     if offer is None:
         return redirect("/budget", "Your plan already counts your income.")
     return render(request, "budget_raise.html", offer=offer)

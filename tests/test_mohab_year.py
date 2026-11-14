@@ -1403,6 +1403,7 @@ def test_certificate_keeps_its_purchase_value_without_month_end_price_prompts(mo
                        if asset.name == "NBE 3-year certificate · 22%")
     screen = mohab.b.go("Investments", "Prices")
     assert certificate.name in screen.text and f'name="p_{certificate.id}"' not in screen.html
+    assert f'name="value_{certificate.id}"' not in screen.html
     assert all(row["asset_id"] != certificate.id for row in mohab.c.reevaluations.pending_prices())
 
 

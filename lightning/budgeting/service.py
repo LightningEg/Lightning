@@ -18,7 +18,7 @@ from lightning.database.connection import Database
 from lightning.database.settings import raw_setting
 from lightning.reporting.service import ReportingService
 
-from .domain import (EMERGENCY_BASES, INCOME_FROM_RECURRING, BudgetFillProposal, BudgetFillRow, BudgetLine, BudgetMonth,
+from .domain import (EMERGENCY_BASES, INCOME_BASIS_FROM, INCOME_FROM_RECURRING, dated_basis, BudgetFillProposal, BudgetFillRow, BudgetLine, BudgetMonth,
                      BudgetSection, EmergencyFund, IncomeAverage, ScheduleView, SpendingAverage)
 from .repository import BudgetRepository
 
@@ -309,8 +309,9 @@ class BudgetService:
         """Average monthly income: owned income in the chosen income categories, averaged over
         the last 3 (or 6) completed months before `month` that had any. A manual amount in
         Settings replaces the average. Before any completed month has income, the income set up in
-        Cash planning › Recurring stands in, so a new plan is checked from day one. The budget, reserves
-        and the cash forecast all use this."""
+        Cash planning › Recurring stands in, so a new plan is checked from day one. An income drop planned on
+        (HealthService.take_income_change) sets the basis from its month on; earlier months keep the average. The
+        budget, reserves and the cash forecast all use this."""
         chosen = self.recurring_income_ids()
         categories = self.categories.tree()
         by_id = {category.id: category for category in categories}
@@ -322,6 +323,9 @@ class BudgetService:
             scheduled = schedule.income()  # chosen after a raise: plan with what Recurring expects
             if scheduled is not None:
                 return IncomeAverage(scheduled, 0, lookback, "", "", False, scheduled=True)
+        dated = dated_basis(raw_setting(self.db, INCOME_BASIS_FROM))
+        if dated and month >= dated[0]:  # an income drop planned on from its month; earlier months keep the average
+            return IncomeAverage(dated[1], 0, lookback, "", "", False, since=dated[0])
         end = parse_month(month)[0] - timedelta(days=1)
         last_month = month_of(end)
         observed = []

@@ -716,14 +716,53 @@ class PlanningService:
         """Recurring income a month: what Cash planning › Recurring expects to come in. None without any.
 
         ``regular_only`` leaves out the lumps (quarterly and yearly items, and anything in the Bonus
-        category): the pay that arrives every month, which is what a raise changes (7L1)."""
+        category): the pay that arrives every month, which is what a raise changes (7L1). An item whose last
+        payment is behind us is no longer expected (NF-12AL1: a salary that ended is not part of a raise)."""
         day = today()
-        items = self.items((PlanKind.INCOME,))
+        items = [i for i in self.items((PlanKind.INCOME,)) if not self._ended(i, day)]
         if regular_only:
             items = [i for i in items if i.frequency in (Frequency.MONTHLY, Frequency.WEEKLY) and not self._is_bonus(i)]
         monthly = ((item, per_year(item) / 12) for item in items)
         total = sum((self.amount_in_base(item, amount, day) for item, amount in monthly if amount), ZERO)
         return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if total > 0 else None
+
+    def regular_income_months(self, first: str, last: str) -> dict[str, tuple[Decimal, str | None]]:
+        """Regular scheduled income month by month, `first` to `last` (yyyy-mm): a month of each monthly or weekly
+        income item (not the Bonus category) with a payment due that month, and the earliest first payment due
+        that month of an item that begins in it (None when nothing begins). A month without any is 0: a gap."""
+        end = fmt_date(parse_month(last)[1])
+        items = [i for i in self.items((PlanKind.INCOME,))
+                 if i.frequency in (Frequency.MONTHLY, Frequency.WEEKLY) and not self._is_bonus(i)]
+        out: dict[str, tuple[Decimal, str | None]] = {}
+        index = int(first[:4]) * 12 + int(first[5:7]) - 1
+        while (key := f"{index // 12}-{index % 12 + 1:02d}") <= last:
+            out[key] = (ZERO, None)
+            index += 1
+        day = today()
+        for item in items:
+            a_month = self.amount_in_base(item, per_year(item) / 12, day)
+            paid_in: set[str] = set()
+            for number, _, due in scheduled_dates(item, end):
+                key = due[:7]
+                if key not in out:
+                    continue
+                level, starts = out[key]
+                if key not in paid_in:
+                    level += a_month
+                    paid_in.add(key)
+                if number == 1:
+                    starts = min(starts, due) if starts else due
+                out[key] = (level, starts)
+        return {key: (level.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP), starts)
+                for key, (level, starts) in out.items()}
+
+    @staticmethod
+    def _ended(item, day: date) -> bool:
+        """True when a bounded item (an end date or a payment count) has no payment left on or after `day`."""
+        if not item.end_date and item.payment_count is None:
+            return False
+        dates = scheduled_dates(item, "2999-12-31")
+        return not dates or dates[-1][2] < fmt_date(day)
 
     def _is_bonus(self, item) -> bool:
         if item.category_id is None:
