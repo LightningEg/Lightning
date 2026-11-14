@@ -198,6 +198,8 @@ def tally(data: dict, rows: list[dict], cap: int) -> str:
     def mark(i: dict) -> str:
         if i["prs"] or i["assignees"]:
             return "  [taken: " + ", ".join(f"PR #{p['n']}" for p in i["prs"]) + " ".join(i["assignees"]) + "]"
+        if i["state"] in ("blocked", "held"):  # the owner's status:ready label keeps it here; say why it can't start
+            return f"  [{i['state']}: " + "; ".join(i["why"])[:80] + "]"
         return f"  [{i['can']}]"
 
     out += ["", f"Ready ({len(got['ready'])}): start with the first free one"]
