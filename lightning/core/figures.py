@@ -177,7 +177,7 @@ _TABLE = [
      "(Settings › Budget). Until a completed month has income, the income set up in Recurring stands in. "
      "The budget, reserves and the cash forecast all use it."),
     ("average_monthly_spending", "Average monthly spending",
-     "Money out in your budget categories, leaving out investments and one-off categories, averaged over the same "
+     "Money out in your budget categories, leaving out investments and categories outside the budget, averaged over the same "
      "3 or 6 completed months as Average monthly income. The emergency fund can be counted in it (Settings › Budget)."),
     # ------------------------------------------------------------ budget (a month)
     ("base_budget", "Base budget", "The amount the budget rule gives: fixed, a share of income or an average."),
@@ -188,7 +188,7 @@ _TABLE = [
      "\"!\" that says why.", "Base budget + Carryover"),
     ("spent", "Spent", "Money out in the category this month."),
     ("left_in_plan", "Left in plan", "What is left of the plan; the Overview and Budget show the same month "
-     "figure, and a negative one reads \"Over plan\". One-off categories are left out of Spent.", "Planned − Spent"),
+     "figure, and a negative one reads \"Over plan\". Categories outside the budget are left out of Spent.", "Planned − Spent"),
     ("everyday_left", "Left for everyday", "The plan's remaining money after unpaid planned bills and loans, "
      "floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance and "
      "the phone Home's lead (owner, 2026-11-09); Safe to spend leads Cash planning on both apps (IV-12P)."),
