@@ -26,9 +26,9 @@ from test_mohab_year import Answer, Mohab, _live_the_year
 # The PC's link or button -> the phone's taps. A step starting with "/" opens that page; with "?" it is
 # typed into the page's search box; anything else is tapped on the page.
 DETOURS = {
-    "Add account": ("Money", "See all", "Add account"),           # the PC's sidebar +; the phone's Accounts ⋯
-    "Held for others": ("Money", "See all", "Held for others"),   # an Accounts tab; Transactions opens on this month
-    "Accounts": ("Money", "See all"),                              # Money's Accounts heading: See all (IV-11H)
+    "Add account": ("Money", "accounts", "Add account"),           # the PC's sidebar +; the phone's Accounts ⋯
+    "Held for others": ("Money", "accounts", "Held for others"),   # an Accounts tab; Transactions opens on this month
+    "Accounts": ("Money", "accounts"),                             # Money's Accounts card: All n accounts (IV-11H, IV-11M7)
     "Cash planning": ("Money", "Reports and reviews", "Cash planning"),  # the analysis is one row on Money (IV-11H)
     "Investments": ("Money", "Investments"),
     "Financial health": ("Money", "Financial health"),
@@ -110,7 +110,7 @@ class PhoneBrowser(screens.Browser):
                     if self.page is not None and self.page.path.split("?")[0] in ("/", "/home", "/money") and text not in MOVED:
                         self.detours[VIA_CASH_YOU_OWN] += 1   # Home names no account: Money's Accounts lists every balance
                         self._framed(super().click("Money"))
-                        self._framed(super().click("See all"))
+                        self._framed(super().click("accounts"))
                         return self._framed(super().click(text))
                     raise
         self.detours[text] += 1

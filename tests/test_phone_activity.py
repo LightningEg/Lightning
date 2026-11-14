@@ -24,7 +24,7 @@ def client(c, monkeypatch):
 def test_all_shows_the_month_with_one_money_line_and_the_review_count(client):
     http, _ = client
     page = http.get("/activity").text
-    assert "phone-money-line" in page and "phone-txn" in page and "To review" in page
+    assert "phone-flow-wells" in page and "phone-txn" in page and "To review" in page   # IV-11M7: In and Out wells
     earlier = http.get("/activity?month=2026-09").text
     assert "2026-09" in earlier and "phone-txn" in earlier
 
@@ -66,7 +66,7 @@ def test_activity_bars_are_proportional_to_in_and_out(client):
     assert top > 0 and max(s.in_share, s.out_share) == 100
     assert abs(s.in_share - round(s.money_in / top * 100)) <= 1 and abs(s.out_share - round(s.money_out / top * 100)) <= 1
     page = http.get("/activity").text
-    assert f'style="width: {s.in_share}%"' in page and f'style="width: {s.out_share}%"' in page
+    assert "phone-flow-wells" in page   # IV-11M7 (mockup v2.0): In and Out are two wells; the shares stay on the screen for other uses
 
 
 def test_a_transfer_reads_the_same_on_home_and_activity_and_typed_names_stay_in_arabic(client):
@@ -76,7 +76,7 @@ def test_a_transfer_reads_the_same_on_home_and_activity_and_typed_names_stay_in_
     names = {a.name for a in c.accounts.list()}
     for path in ("/", "/activity"):
         page = http.get(path).text
-        assert "<bdi translate=\"no\">" in page
+        assert path == "/" or "<bdi translate=\"no\">" in page   # IV-11M7 (mockup v2.0): Home's Latest names the category and the day, not the account
         assert not re.search(r"\bTo <", page)
     http.cookies.set("lightning_locale", "ar")
     ar = http.get("/activity", headers={"Accept-Language": "ar"}).text
@@ -93,4 +93,4 @@ def test_an_empty_ledger_offers_add_and_import_instead_of_zeros(tmp_path):
     mount_phone(app)
     page = TestClient(app).get("/activity").text
     assert "No transactions yet." in page and 'href="/add-transaction"' in page and 'href="/import"' in page
-    assert "phone-money-line" not in page
+    assert "phone-flow-wells" not in page

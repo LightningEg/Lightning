@@ -398,7 +398,7 @@ def test_money_names_each_place_once_and_arabic_transfers_read_from_the_first_ac
     import re
     money = phone.get("/money").text
     for href in ("/investments", "/plan/reserves", "/financial-health", "/money/reviews"):
-        assert money.count(f'class="phone-row" href="{href}"') == 1, href
+        assert money.count(f'href="{href}"') == 1, href   # IV-11M7: Investments is its card's Open link
     session = token(phone.get("/accounts/1/transaction/new").text, "__session")
     try:
         phone.post("/settings/locale", data={"locale": "ar", "__session": session})

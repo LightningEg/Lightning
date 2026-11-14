@@ -22,6 +22,7 @@ COMING_UP = 2   # IV-11H: twelve rows at most under the hero; the head opens eve
 BILLS_HORIZON_DAYS = 60   # BV-11L4: Coming up and Bills read the same window
 UPCOMING = (BillState.DUE_SOON, BillState.BEFORE_PAYDAY, BillState.LATER)
 TREND_MONTHS = 12
+INVEST_TYPES = ("DEPOSIT", "BROKERAGE", "PHYSICAL_ASSET", "OTHER_ASSET")
 # A04.1: what you own in a fixed order, four then Other; a fund joins its family (the bar has no room for shades).
 FAMILIES = (("cash", "Cash"), ("deposits", "Deposits"), ("gold", "Gold"), ("equity", "Stocks"), ("other", "Other"))
 FAMILY_OF_TONE = {"cash": "cash", "deposits": "deposits", "money-market": "deposits", "fixed-income": "deposits",
@@ -34,6 +35,9 @@ class AccountRow:
     id: int
     name: str
     balance: Decimal
+    kind: str = ""          # IV-11M7: the account's short kind ("Bank account", "Certificates")
+    institution: str = ""   # for its tile (logo or monogram)
+    type: str = ""          # AccountType value, for the tile's icon and which card it joins
 
 
 @dataclass(frozen=True)
@@ -60,6 +64,8 @@ class MoneyScreen:
     strip: tuple[dict, ...] = ()       # NF-7AR3: today and the next 13 days of payments, each day a way into Upcoming
     units: tuple[dict, ...] = ()       # 3AY10 (owner 2026-11-11): Net worth in US dollars and grams of 21K gold, dated
     review_total: int = 0              # IV-11M1: Activity is reached from Money; To review's count, Activity's own figure
+    month_count: int = 0               # IV-11M7: transactions this month so far (All transactions' note)
+    investments: tuple[AccountRow, ...] = ()   # IV-11M7: the investment accounts (certificates, brokers, gold), largest first
 
 
 def _goals(c) -> tuple[int, int]:
@@ -96,7 +102,8 @@ def _balances(c, day: date) -> list[AccountRow]:
             continue
         value = c.reporting.account_value(account.id, day)
         if value is not None:
-            rows.append(AccountRow(account.id, account.name, value))
+            rows.append(AccountRow(account.id, account.name, value, account.type_short, account.institution or account.name,
+                                   "CASH_AT_HAND" if account.cash_at_hand else account.account_type.value))
     rows.sort(key=lambda r: (-r.balance, r.name.casefold()))
     return rows
 
@@ -129,7 +136,9 @@ def build(c, day: date) -> MoneyScreen:
         goals_funded=funded, goals_count=goals, health_watch=_health_watch(c, day),
         trend=net_worth_trend(c, day), own_split=own_split(now), strip=_strip(c, day),
         units=tuple(c.position.in_other_units(now.net_worth, day, c.zakat.gold_price_24k(fmt_date(day)))),
-        review_total=_review_total(c, day))
+        review_total=_review_total(c, day),
+        month_count=c.reporting.register_page(None, day.replace(day=1), day, 1, 1)[1],
+        investments=tuple(r for r in rows if r.type in INVEST_TYPES)[:3])
 
 
 def _review_total(c, day: date) -> int:

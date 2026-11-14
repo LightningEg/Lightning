@@ -1380,3 +1380,36 @@ html.phone .phone-content .phone-row b.phone-pill .chevron { display: none; }
 .phone-first-hero .phone-lead { font-size: 36px; }
 html.phone .phone-content :is(.phone-hero, .phone-safe-card) .phone-hero-label { display: inline-flex; justify-content: flex-start; align-items: center; gap: 4px; text-decoration: none; }
 html.phone .phone-content :is(.phone-hero, .phone-safe-card) .phone-hero-label .chevron { width: 16px; height: 16px; }
+
+/* Activity and To review v2.0 (IV-11M7): a segmented track, a white search field, chips that wrap, a round-button
+   month stepper, In and Out wells, the review's progress and its card. */
+html.phone .phone-content .phone-track { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; padding: 4px; border-radius: 16px; background: var(--c-track); }
+html.phone .phone-content .phone-track .phone-chip { justify-content: center; min-height: 40px; border: 0; border-radius: 12px; background: none; color: var(--c-muted); font-weight: 600; box-shadow: none; }
+html.phone .phone-content .phone-track .phone-chip.is-chosen { background: var(--v2-card); color: var(--c-ink); font-weight: 700; box-shadow: 0 1px 3px rgba(10, 36, 66, .14); }
+html.phone .phone-content .phone-track .phone-chip b { margin-inline-start: 4px; background: none; color: inherit; }
+.phone-search-field { position: relative; margin: 16px 0 0; }
+.phone-search-field svg { position: absolute; inset-inline-start: 16px; top: 50%; width: 20px; height: 20px; margin-top: -10px; fill: none; stroke: var(--c-muted); stroke-width: 1.8; pointer-events: none; }
+html.phone .phone-search-field input[type="search"] { width: 100%; min-height: 52px; padding-inline-start: 48px; border: 1px solid var(--v2-edge); border-radius: 18px; background: var(--v2-card); font-size: 15.5px; }
+html.phone .phone-content .phone-filter-chips .phone-chip { min-height: 40px; padding: 0 16px; border: 1px solid var(--v2-edge); border-radius: 20px; background: var(--v2-card); color: var(--c-ink); font-weight: 700; }
+html.phone .phone-content .phone-filter-chips .phone-chip.is-chosen { background: var(--c-nile); border-color: var(--c-nile); color: #fff; }
+html.phone .phone-content .phone-stepper { justify-content: center; }
+html.phone .phone-content .phone-stepper .phone-month-chip { display: flex; width: 100%; justify-content: space-between; align-items: center; padding: 0; border: 0; background: none;
+  font: 700 16px/1.2 var(--display, inherit); color: var(--c-ink); }
+html.phone .phone-content .phone-stepper .phone-month-chip > a { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%;
+  background: var(--v2-card); border: 1px solid var(--v2-edge); box-shadow: var(--v2-tile-shadow); color: var(--c-ink); }
+.phone-flow-wells .phone-well > b { font-size: 20px; }
+.phone-flow-wells .phone-well > b.neg { color: var(--c-ink); }
+.phone-review-progress { margin: 16px 0 0; }
+.phone-review-progress p { display: flex; justify-content: space-between; margin: 0 0 8px; font-size: 13px; color: var(--c-ink-2); }
+.phone-progress { display: block; height: 6px; border-radius: 3px; background: var(--c-track); overflow: hidden; }
+.phone-progress i { display: block; height: 100%; border-radius: 3px; background: var(--v2-good); }
+html.phone .phone-content .phone-review-card { padding-bottom: 16px; }
+html.phone .phone-content .phone-review-card > .phone-section-head { flex-direction: column; align-items: center; justify-content: center; min-height: 0; padding: 24px 16px 18px; text-align: center; }
+html.phone .phone-content .phone-review-card > .phone-section-head h2 { font-size: 19px; }
+html.phone .phone-content .phone-review-card > .phone-section-head b { font: 800 34px/1.1 var(--display, inherit); color: var(--v2-bad); letter-spacing: -.03em; }
+.phone-review-card .review-card-detail { margin: 14px 0 0; padding: 12px 14px; border-radius: 14px; background: var(--v2-pill); font-size: 13.5px; }
+html.phone .phone-review-card .btn.primary.phone-save { width: 100%; min-height: 56px; margin: 16px 0 0; border-radius: 18px; font-size: 16px; }
+html.phone .phone-review-card .phone-segment .btn { min-height: 48px; border-radius: 16px; background: var(--v2-card); border: 1px solid var(--v2-edge); }
+html.phone .phone-content .phone-review-card:not(#_) { display: block; }
+html.phone .phone-content .phone-review-card > * { width: auto; max-width: 100%; }
+html.phone .phone-search-field input[type="search"]:not(#_) { padding-inline-start: 48px; background: var(--v2-card); border: 1px solid var(--v2-edge); border-radius: 18px; }
