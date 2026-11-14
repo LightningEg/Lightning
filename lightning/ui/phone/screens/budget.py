@@ -13,6 +13,7 @@ from lightning.core.dates import month_of, parse_month
 from lightning.planning.domain import plan_parts
 from lightning.planning.salary_day import payday_to_plan
 from lightning.ui.charts import ranked_donut
+from lightning.ui.budget_exclusions import exclusion_context
 
 ZERO = Decimal(0)
 ATTENTION = 4          # Needs attention shows at most this many, then "and N more"
@@ -29,6 +30,7 @@ class CategoryRow:
     share: float               # 0-100 for the bar
     attention: bool
     state: str = "ok"          # "over" | "ahead" (ahead of the month's pace) | "done" (spent to the plan, nothing left) | "ok"
+    month_only: bool = False
 
 
 @dataclass(frozen=True)
@@ -53,6 +55,7 @@ class BudgetScreen:
     spend: dict | None = None         # IV-11D5: where the month went: a donut of four categories then Other, and its rows
     working: object = None            # NF-12AB4: the hero's working, for its sheet
     payday: dict | None = None        # 3AY9: {amount, date} from the salary's day until this month's plan is saved
+    exclusions: tuple = ()
 
 
 def _shift(month: str, step: int) -> str:
@@ -70,7 +73,8 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     schedule = c.schedules.view()
     prev, nxt = _shift(shown, -1), "" if shown >= this else _shift(shown, 1)
     if not c.budgets.has_plan(shown, schedule=schedule):
-        return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0)
+        return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0,
+                            exclusions=exclusion_context(c)["estimate_exclusions"])
     e = c.forecaster.everyday(shown, day)
     state = "current" if e.current else ("past" if last < day else "future")
     left = e.everyday_left
@@ -93,7 +97,7 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
             ahead = gap > 0 and pace_pct is not None and spent / limit * 100 >= pace_pct + AHEAD_POINTS  # not money
             kind = "over" if gap < 0 else ("ahead" if ahead else ("done" if limit > 0 and gap == 0 else "ok"))
             rows.append(CategoryRow(line.category_id, line.name, limit, spent, gap, share,
-                                    state != "past" and kind in ("over", "ahead"), kind))
+                                    state != "past" and kind in ("over", "ahead"), kind, line.one_off))
     rows.sort(key=lambda r: (r.left, r.name.casefold()))
     needs = [r for r in rows if r.attention]
     shown_needs = tuple(needs[:ATTENTION])
@@ -106,7 +110,8 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
                         move, c.health.raise_offer(shown) if state == "current" else None,
                         month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, e.everyday_spent),
                         working=e.everyday_left_working,
-                        payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None)
+                        payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None,
+                        exclusions=exclusion_context(c)["estimate_exclusions"])
 
 
 def month_bar(plan: Decimal, spent: Decimal) -> dict | None:
@@ -157,6 +162,7 @@ class PlanRow:
     value: str          # what the field holds: "20%" or "1500.00", "" when the month has no limit of its own
     placeholder: str    # the limit it has from elsewhere (an average, a parent), else ""
     spent: Decimal
+    month_only: bool = False
 
 
 @dataclass(frozen=True)
@@ -191,7 +197,7 @@ def plan_list(c, month: str) -> PlanList:
             value = (f"{line.income_percent.normalize():f}%" if line.income_percent is not None
                      else _plain_amount(line.direct) if line.direct is not None and not line.average_months else "")
             holder = f"{line.budget:,.0f}" if line.budget is not None and not value else ""
-            rows.append(PlanRow(line.category_id, line.name, value, holder, line.actual))
+            rows.append(PlanRow(line.category_id, line.name, value, holder, line.actual, line.one_off))
         if rows:
             groups.append((current, tuple(rows)))
     return PlanList(shown, tuple(groups), tuple((g, tuple(rows)) for g, rows in first.items()))

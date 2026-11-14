@@ -17,6 +17,18 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'Leave out of budget estimates': 'استبعد من تقديرات الميزانية',
+    'Left out of budget estimates': 'المستبعد من تقديرات الميزانية',
+    'Put back': 'رجّعه',
+    'and its 1 subcategory': 'والتصنيف الفرعي اللي تحته',
+    'and its {n} subcategories': 'والتصنيفات الفرعية الـ{n} اللي تحته',
+    'These categories stay out of budget estimates until you put them back. Their spending still counts in Cash flow and Spending.': 'التصنيفات دي بتفضل برّه تقديرات الميزانية لحد ما ترجّعها. مصاريفها لسه بتتحسب في التدفق النقدي والإنفاق.',
+    '{amount} of excluded spending still counts in Cash flow and Spending.': '{amount} من المصروفات المستبعدة لسه بيتحسبوا في التدفق النقدي والإنفاق.',
+    'Limit for this month only': 'حد للشهر ده بس',
+    'New limits apply from this month onward.': 'الحدود الجديدة بتتطبق من الشهر ده وطالع.',
+    'Category left out of budget estimates.': 'التصنيف اتستبعد من تقديرات الميزانية.',
+    'Category put back in the budget.': 'الفئة رجعت للميزانية.',
+    'Choose a valid exclusion action.': 'اختيار إجراء صحيح للاستبعاد.',
     'Choose worksheets': 'اختيار أوراق العمل',
     'Choose a worksheet': 'اختيار ورقة العمل',
     'Choose a worksheet to import.': 'اختيار ورقة العمل المطلوب استيرادها.',
@@ -1458,6 +1470,7 @@ ARABIC_UI = {
     'One-off': 'مرة واحدة',
     'Outside the budget': 'بره الميزانية',
     'Categories outside the budget': 'فئات بره الميزانية',
+    'These categories stay outside the budget until you put them back. Their spending still counts in Cash flow and Spending.': 'الفئات دي بتفضل بره الميزانية لحد ما ترجعها. مصروفها لسه محسوب في التدفق النقدي والمصروفات.',
     'Leave outside the budget': 'سيبها بره الميزانية',
     'This month only': 'الشهر ده بس',
     'In Cash flow, left out of the budget': 'في التدفق النقدي، وبره الميزانية',
