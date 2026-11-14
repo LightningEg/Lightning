@@ -338,6 +338,20 @@ class DepositService:
             self.assets.update_investment(terms.asset_id, name, notes="Certificate of deposit; interest is forecast only.")
         return self.certificate(certificate_id)
 
+    def set_rate_change(self, certificate_id: int, effective_date, annual_rate):
+        """IV-12J4: a variable certificate's new rate from a date (after purchase, before maturity): periods starting
+        on or after it earn the new rate, earlier ones keep theirs; the purchase rate is not rewritten. Saving the
+        same date again replaces that change."""
+        terms = self.certificate(certificate_id).terms
+        day = parse_date(effective_date, "rate_from")
+        if not parse_date(terms.start_date) < day < parse_date(terms.maturity_date):
+            raise ValidationError("A new rate starts after the purchase date and before maturity.", "rate_from")
+        rate = to_decimal(annual_rate, "annual_rate")
+        if not ZERO <= rate <= Decimal("100"):
+            raise ValidationError("Annual rate must be between 0 and 100 percent.", "annual_rate")
+        with self.db.transaction():
+            self.repo.set_rate_change(certificate_id, fmt_date(day), rate)
+
     def redeem(self, certificate_id: int, date_value, proceeds, destination_account_id: int):
         """Record the actual whole-CD redemption amount supplied from the bank statement."""
         if self.transactions is None:
@@ -472,9 +486,9 @@ class DepositService:
                 for when, amount, kind in schedule.events(terms, self.rates(terms.id))
                 if day < when <= horizon and amount > ZERO]
 
-    def rates(self, certificate_id: int) -> list:
+    def rates(self, certificate_id: int) -> list[tuple[date, Decimal]]:
         """IV-12J4: dated rate changes of a variable certificate, oldest first (none for a fixed one)."""
-        return []
+        return [(parse_date(when), rate) for when, rate in self.repo.rate_changes(certificate_id)]
 
     def _portfolio(self, account_id: int):
         return self._typed_account(account_id, {AccountType.DEPOSIT}, "account_id")

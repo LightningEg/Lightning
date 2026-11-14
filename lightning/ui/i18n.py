@@ -3962,6 +3962,8 @@ ARABIC_UI = {
     'These two are no longer offered as possible duplicates.': 'الاتنين دول مبقوش معروضين كتكرار محتمل.',
     'These two are no longer offered.': 'الاتنين دول مبقوش معروضين.',
     # IV-12J: a certificate's own page and its portfolio list
+    'New rate from': 'العائد الجديد من',
+    'For a variable rate: payments from this date use the new rate; earlier ones keep theirs. Leave empty to correct the rate it was bought at.': 'للعائد المتغير: الدفعات من التاريخ ده بتاخد العائد الجديد، واللي قبله بيفضل زي ما هو. سيبه فاضي لو بتصحح العائد اللي اشتريتها بيه.',
     '{rate}% a year': '{rate}% في السنة',
     'Certificate of deposit': 'شهادة إيداع',
     'Change its terms': 'غيّر شروطها',

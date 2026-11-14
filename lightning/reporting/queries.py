@@ -330,9 +330,14 @@ class ReportQueries:
             "cd.compounding_frequency,a.currency FROM cd_certificates cd JOIN accounts a ON a.id=cd.account_id "
             "WHERE cd.interest_method='COMPOUND' OR cd.payout_frequency='AT_MATURITY'")}
 
+    @request_cached(deep=True)
     def certificate_rates(self, certificate_id: int) -> list:
         """IV-12J4: a variable certificate's dated rate changes, oldest first: [(date, annual rate)]."""
-        return []
+        from datetime import date
+        from decimal import Decimal
+        return [(date.fromisoformat(row["effective_date"]), Decimal(row["annual_rate"])) for row in self.db.all(
+            "SELECT effective_date,annual_rate FROM cd_rate_changes WHERE certificate_id=? ORDER BY effective_date",
+            (certificate_id,))]
 
     def physical_item(self, asset_id: int) -> dict | None:
         """The gold item behind an asset, if it is one."""

@@ -1772,6 +1772,7 @@ SERVICES = {
     "Maturity must be after the purchase date.": "الاستحقاق لازم يكون بعد تاريخ الشراء.",
     "Earliest withdrawal must be between the purchase and maturity dates.": "أقرب سحب لازم يكون بين تاريخ الشراء والاستحقاق.",
     "Enter a principal above zero.": "أصل المبلغ لازم يكون أكبر من صفر.",
+    "A new rate starts after the purchase date and before maturity.": "العائد الجديد بيبدأ بعد تاريخ الشراء وقبل الاستحقاق.",
     "Annual rate must be between 0 and 100 percent.": "المعدل السنوي لازم يكون بين 0 و100 في المية.",
     "Compound interest is paid at maturity only.": "الفايدة المركبة بتتدفع عند الاستحقاق بس.",
     "The portfolio, funding account and payout account must use the same currency.": "المحفظة وحساب التمويل وحساب الصرف لازم يبقوا بنفس العملة.",

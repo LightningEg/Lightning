@@ -12,7 +12,7 @@ TABLES = ("profile_identity", "accounts", "asset_classes", "financial_assets", "
           "counterparty_aliases", "institutions", "transactions", "ledger_entries", "foreign_amounts", "registered_currencies", "currency_suggestions",
           "fx_rates", "price_history", "budgets", "budget_carryover", "budget_carryover_resets", "cash_reserves",
           "reserve_allocation_history", "reserve_transaction_links", "planned_items", "planned_payments",
-          "loan_extra_payments", "installment_purchases", "cd_terms", "cd_certificates", "cd_redemptions",
+          "loan_extra_payments", "installment_purchases", "cd_terms", "cd_certificates", "cd_rate_changes", "cd_redemptions",
           "gameya_terms", "owed_to_you_accounts", "money_from_others", "investment_custody_events", "investment_dividend_assets",
           "investment_liquidation_factors", "investment_targets", "physical_items", "physical_item_valuations",
           "physical_item_trade_details", "other_asset_valuations", "other_asset_details", "property_contracts", "property_flows", "rules", "rule_conditions", "rule_actions",

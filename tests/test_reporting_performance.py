@@ -202,7 +202,8 @@ PAGE_READ_BUDGET = {
     # 3AC (2026-10-22): the budget's month view, plan summary, income average and cash flow are cached; Budget for
     # the month 92 reads, for all months 119 (was 334), Expense analysis 139.
     # 7T3 (2026-10-28): an account that plans pay from reads the dated forecast once for the day it goes below zero.
-    "/accounts/1": 151, "/transactions": 110, "/budget?period=month": 120,
+    # IV-12J3 (2026-11-14): one read of the certificates paid at maturity, whose value grows as they earn.
+    "/accounts/1": 152, "/transactions": 110, "/budget?period=month": 120,
     "/budget?period=all": 160, "/plan": 250, "/investments": 175, "/birdview/expenses?period=all": 180,
 }
 

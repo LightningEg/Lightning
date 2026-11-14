@@ -186,3 +186,64 @@ def test_growing_foreign_certificate_uses_the_dated_exchange_rate(c):
     portfolio = c.account_flows.open_account('Dollar certificates', 'DEPOSIT', '2026-09-01', '0', institution='CIB', currency='USD')
     certificate = _short_compound(c, {'cib': bank, 'cd': portfolio})
     assert _value(c, certificate.terms.asset_id, '2026-10-01') == Decimal('520200')
+
+
+def test_a_variable_rate_change_is_dated_not_a_rewrite_of_the_schedule(c, setup):
+    """IV-12J4: from 2027-01-01 the bank pays 15% instead of 20%; October to December keep 200 a month."""
+    accounts, _ = setup
+    certificate = _monthly(c, accounts)
+    cd = accounts["cd"].id
+    form = {"name": certificate.terms.name, "lockup_end_date": "2027-03-01", "maturity_date": "2029-09-01",
+            "annual_rate": "15", "interest_method": "SIMPLE", "payout_frequency": "MONTHLY",
+            "compounding_frequency": "MONTHLY", "destination_account_id": str(accounts["cib"].id), "term_years": "",
+            "rate_from": "2026-12-01"}
+
+    response = _client(c).post(f"/deposits/{cd}/certificates/{certificate.terms.id}/terms", data=form)
+
+    assert response.status_code == 303, response.text[:300]
+    after = c.deposits.certificate(certificate.terms.id)
+    assert after.terms.annual_rate == Decimal("20")                      # the purchase rate stays
+    assert c.deposits.rates(certificate.terms.id) == [(date(2026, 12, 1), Decimal("15"))]
+    paid = {when.isoformat(): amount for when, amount, kind in schedule.events(after.terms, c.deposits.rates(after.terms.id))
+            if kind == "INTEREST"}
+    assert paid["2026-12-01"] == Decimal("200")       # the period 1 Nov to 1 Dec began at 20%
+    assert paid["2027-01-01"] == Decimal("150")       # 12,000 x 15% / 12
+    future = [e for e in c.deposits.future_events("2026-12-31", "2027-02-28") if e.certificate_id == after.terms.id]
+    assert [e.amount for e in future] == [Decimal("150"), Decimal("150")]
+    page = _text(_client(c).get(f"/investments/holding/{after.terms.asset_id}").text)
+    assert "15% a year" in page and "variable" in page and "15% from 1 Dec" in page
+
+    form["rate_from"] = "2026-08-01"
+    refused = _client(c).post(f"/deposits/{cd}/certificates/{certificate.terms.id}/terms", data=form)
+    assert refused.status_code == 400 and "after the purchase date" in refused.text
+
+
+def test_a_dated_rate_moves_the_growing_value_of_a_compound_certificate(c, setup):
+    accounts, _ = setup
+    certificate = _short_compound(c, accounts)
+    c.deposits.set_rate_change(certificate.terms.id, "2026-11-01", "12")
+    # 200 in September, 204 in October at 24%; November at 12% on 10,404: 104.04.
+    assert _value(c, certificate.terms.asset_id, "2026-12-01") == Decimal("10508.04")
+
+
+def test_migration_0085_adds_the_rate_changes_table_to_an_older_profile(tmp_path, monkeypatch):
+    import shutil
+    from lightning.database import migrator
+    from lightning.database.connection import Database
+    old = tmp_path / "migrations_84"
+    old.mkdir()
+    for path in migrator.MIGRATIONS_DIR.glob("*.sql"):
+        if int(path.name[:4]) <= 84:
+            shutil.copy(path, old / path.name)
+    bundled = migrator.MIGRATIONS_DIR
+    monkeypatch.setattr(migrator, "MIGRATIONS_DIR", old)
+    db = Database(tmp_path / "old.db")
+    try:
+        migrator.migrate(db)
+        assert not db.has_table("cd_rate_changes")
+        monkeypatch.setattr(migrator, "MIGRATIONS_DIR", bundled)
+        assert migrator.migrate(db) == ["0085_cd_rate_changes (APPLIED)"]
+        assert db.has_table("cd_rate_changes") and db.scalar("SELECT COUNT(*) FROM cd_rate_changes") == 0
+        assert migrator.migrate(db) == []
+    finally:
+        db.close()

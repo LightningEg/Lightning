@@ -114,18 +114,22 @@ async def update_terms(request: Request, account_id: int, certificate_id: int):
         cert = c.deposits.certificate(certificate_id)
         if cert.terms.account_id != account_id:
             raise NotFoundError("Certificate not found in this portfolio.")
+        rate, rate_from = str(form.get("annual_rate", "")), str(form.get("rate_from", "")).strip()
         with settled_save(request, container(request)):
+            # IV-12J4: a rate with a "from" date is a dated change; the rate it was bought at stays.
             c.deposits.update_certificate(
                 certificate_id, name=str(form.get("name", "")).strip(),
                 lockup_end_date=str(form.get("lockup_end_date", "")),
                 maturity_date=str(form.get("maturity_date", "")),
-                annual_rate=str(form.get("annual_rate", "")),
+                annual_rate=str(cert.terms.annual_rate) if rate_from else rate,
                 interest_method=str(form.get("interest_method", "")),
                 payout_frequency=str(form.get("payout_frequency", "")),
                 compounding_frequency=str(form.get("compounding_frequency", "")),
                 destination_account_id=_int(str(form.get("destination_account_id", ""))),
                 term_years=str(form.get("term_years", "")),
             )
+            if rate_from:
+                c.deposits.set_rate_change(certificate_id, rate_from, rate)
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a valid payout account."
         return _page(request, account_id, error=message, status_code=400)
