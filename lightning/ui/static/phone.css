@@ -1439,3 +1439,15 @@ html.phone .phone-header:empty, html.phone .phone-header:not(:has(*)) { display:
 .category-bar-ends { display: flex; justify-content: space-between; margin: 8px 0 0; font-size: 12.5px; color: var(--c-ink-2); }
 .phone-cat-note { justify-content: flex-start; padding: 12px 16px; text-align: start; font-weight: 500; font-size: 14px; }
 .phone-cat-note svg { flex: none; color: var(--v2-good); }
+
+/* Plan v2.0 (IV-11M6): the timeline to payday under Coming up's hero. */
+.phone-timeline { position: relative; height: 14px; margin: 18px 6px 0; }
+.phone-timeline-line { position: absolute; inset-inline: 0; top: 6px; height: 2px; background: var(--v2-info); opacity: .5; }
+.phone-timeline i { position: absolute; top: 2px; width: 10px; height: 10px; margin-inline-start: -5px; border-radius: 50%; background: var(--v2-bad); box-shadow: 0 0 0 2px var(--v2-card); }
+.phone-timeline i.is-today { background: var(--c-ink); }
+.phone-timeline i.is-payday { width: 14px; height: 14px; top: 0; margin-inline-start: -7px; background: var(--v2-good); }
+.phone-timeline-ends { display: flex; justify-content: space-between; margin: 6px 0 0; font-size: 12.5px; color: var(--c-ink-2); }
+html.phone .phone-content .phone-plan-row > span:nth-child(2) { flex: 1; }
+html.phone .phone-content .phone-plan-row > b.fig { font: 700 16px/1.2 var(--display, inherit); }
+html.phone .phone-content .phone-recurring-row { justify-content: flex-start; gap: 12px; }
+html.phone .phone-content .phone-offer .phone-pill { flex: none; display: inline-flex; align-items: center; text-decoration: none; }

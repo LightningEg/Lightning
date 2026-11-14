@@ -280,7 +280,8 @@ async def recurring_page(request: Request):
                       due_count=totals.due_count, due_total=totals.due_total(c.planning, day)),
                   suggestions=c.planning.suggestions(day), dismissed=c.planning.dismissed_suggestions(),
                   subscriptions_per_year=subscriptions,
-                  monthly_out=monthly_out, monthly_in=monthly_in, labels=labels, as_of=fmt_date(day))
+                  monthly_out=monthly_out, monthly_in=monthly_in, labels=labels, as_of=fmt_date(day),
+                  loans_a_month=health.loans_a_month, every_month=monthly_out + health.loans_a_month)
 
 
 UPCOMING_GROUPS = {"bills": "Bills", "instalments": "Instalments", "gameya": "Gam'eya", "income": "Income"}
