@@ -198,7 +198,10 @@ def test_flash_behavior_covers_errors_popups_and_late_insertions():
 
     assert 'isError ? "alert" : "status"' in app_js
     assert 'isError ? "assertive" : "polite"' in app_js
-    assert "}, 5000));" in app_js
+    # Owner, 2026-11-14: every save message leaves after 5 seconds, Undo ones too, and has an X.
+    assert "const FLASH_SECONDS = 5000;" in app_js
+    assert 'flash.querySelector(".history-form")) return;' not in app_js
+    assert 'close.className = "flash-close"' in app_js
     assert "new MutationObserver" in app_js and "characterData: true" in app_js
     assert 'flashObserver.observe(popupFlashRoot,' in app_js
     assert 'flashObserver.observe(document.body' not in app_js
