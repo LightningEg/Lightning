@@ -140,7 +140,7 @@ def test_coming_up_includes_the_next_bill_before_payday_beyond_nine_days(c, setu
     app = create_app(c)
     mount_phone(app)
     client = TestClient(app)
-    for path in ("/money", "/money/bills"):
+    for path in ("/money/bills",):   # IV-11M7 (mockup v2.0): Money's Coming up rows moved to Plan; Money keeps one row to Bills
         page = client.get(path).text
         assert "Internet before payday" in page
         assert "Nothing is due soon." not in page

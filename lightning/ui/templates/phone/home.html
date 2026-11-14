@@ -80,7 +80,7 @@
 {% endif %}
 <section class="phone-section phone-latest" aria-labelledby="latest-heading">
   <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span class="phone-head-text"><h2 id="latest-heading">{{ 'Latest'|tr(locale) }}</h2><small>{{ 'Spent today {amt}'|tr(locale, amt=s.spent_today|money) }}</small></span><a class="phone-quiet" href="/transactions">{{ 'All'|tr(locale) }}{{ chevron() }}</a></header>
-  {% if s.latest %}{{ txn_list(s.latest, True, False, False, '', '/transactions', '', 5, False, day_in_note=True) }}{% else %}<p class="phone-note">{{ 'No transactions yet.'|tr(locale) }}</p>{% endif %}
+  {% if s.latest %}{{ txn_list(s.latest, True, False, False, '', '/transactions', '', 5, True, day_in_note=True) }}{% else %}<p class="phone-note">{{ 'No transactions yet.'|tr(locale) }}</p>{% endif %}
 </section>
 {% endif %}
 {% endblock %}

@@ -34,7 +34,7 @@ def test_the_net_worth_sheet_has_its_parts_then_dollars_and_gold_and_the_line_sh
     html = phone.get("/money").text
     sheet = html[html.index('class="phone-sheet-row'):]
     sheet = sheet[:sheet.index("</details>")]
-    assert html.count('class="phone-chart-trend"') == 1 and "phone-chart-trend" not in sheet
+    assert html.count('class="phone-chart-trend"') == 1 and "phone-chart-trend" in sheet   # IV-11M7 (mockup v2.0): the line lives in Net worth's sheet
     units = re.findall(r'<span>(In [^<]+)<small>', sheet)
     assert units == ["In US dollars", "In grams of 21K gold"]
 
