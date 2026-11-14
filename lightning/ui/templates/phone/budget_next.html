@@ -1,0 +1,28 @@
+{# NF-12AL4 (owner rule 4, 2026-11-13): next month as it will start, read only: no Save, no Fill. Changes wait until
+   the month begins. The PC shows the same service figures in budget_next.html. #}
+{% extends "base.html" %}
+{% from "partials/chevron.html" import chevron %}
+{% set p = preview %}
+{% block title %}Budget{% endblock %}
+{% block heading %}<h1>{{ 'Budget'|tr(locale) }}</h1>{% endblock %}
+{% block content %}
+<div class="phone-chips phone-stepper"><span class="phone-chip phone-month-chip"><a href="/budget" aria-label="{{ 'Earlier month'|tr(locale) }}">{{ chevron(back=True) }}</a><span>{{ p.month|month(locale) }}</span><span class="phone-month-end" aria-hidden="true">&#160;</span></span></div>
+<div class="phone-hero"><div class="phone-hero-top"><div><div class="phone-hero-label" role="heading" aria-level="2">{{ 'Income the plan counts'|tr(locale) }}</div>
+  <div class="phone-lead">{% if p.income is not none %}{{ p.income|money }} <small>{{ base }}</small>{% else %}—{% endif %}</div></div></div>
+  <p class="phone-hero-line">{% if p.income_since %}{{ 'Your scheduled pay from {month}'|tr(locale, month=p.income_since|month(locale)) }}{% elif p.income_manual %}{{ 'Set by hand in Settings'|tr(locale) }}{% elif p.income_scheduled %}{{ 'From your recurring income'|tr(locale) }}{% elif p.income_first %}{{ 'Average of {first} to {last}'|tr(locale, first=p.income_first|month(locale), last=p.income_last|month(locale)) }}{% endif %}</p>
+  <p class="phone-hero-line">{{ 'This is how {month} starts. You can change it from {day}.'|tr(locale, month=p.month|month(locale), day=p.starts|day(locale)) }}</p>
+  <div class="phone-wells"><span class="phone-well"><span>{{ 'Limits'|tr(locale) }}</span><b class="fig">{{ p.planned|money }}</b></span>{% if p.left is not none %}<span class="phone-well"><span>{{ 'Left after limits'|tr(locale) }}</span><b class="fig {{ p.left|tone }}">{{ p.left|money(True) }}</b></span>{% endif %}</div>
+</div>
+<section class="phone-section" aria-labelledby="next-scheduled-heading">
+  <header class="phone-section-head"><h2 id="next-scheduled-heading">{{ 'Scheduled in {month}'|tr(locale, month=p.month|month(locale)) }}</h2></header>
+  {% for row in p.bills %}<div class="phone-row"><span>{{ row.name }}<small>{{ row['items']|join(', ') }}</small></span><b class="fig">{{ row.amount|money }}</b></div>{% endfor %}
+  {% for row in p.loans %}<div class="phone-row"><span>{{ row.name }}<small>{{ 'Loan payments'|tr(locale) }}</small></span><b class="fig">{{ row.amount|money }}</b></div>{% endfor %}
+  {% if not p.bills and not p.loans %}<p class="muted">{{ 'Nothing is scheduled in this month.'|tr(locale) }}</p>{% endif %}
+</section>
+<section class="phone-section" aria-labelledby="next-limits-heading">
+  <header class="phone-section-head"><h2 id="next-limits-heading">{{ 'Limits that carry into {month}'|tr(locale, month=p.month|month(locale)) }}</h2></header>
+  {% for group in p.groups %}{% for line in group.lines %}<div class="phone-row"><span>{{ line.name }}<small>{{ group.name }}</small></span><b class="fig">{{ line.planned|money }}</b></div>{% endfor %}
+  {% else %}<p class="muted">{{ 'No limits carry into this month yet.'|tr(locale) }}</p>{% endfor %}
+  <p class="muted small">{{ 'Carryover from this month is added once it ends.'|tr(locale) }}</p>
+</section>
+{% endblock %}
