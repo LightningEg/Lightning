@@ -1,9 +1,9 @@
 {# Add or edit an investment on the phone (3AY16): search the list first, then one column of fields. #}
 {% extends "base.html" %}
 {% from "partials/macros.html" import field with context %}
-{% block title %}{{ ('Edit investment' if asset else 'New investment')|tr(locale) }}{% endblock %}
+{% block title %}{{ 'Edit {name}'|tr(locale, name=asset.name) if asset else 'New investment'|tr(locale) }}{% endblock %}
 {% block phone_back %}<a class="phone-back" href="/investments/assets"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Investments'|tr(locale) }}</span></a>{% endblock %}
-{% block heading %}<h1>{{ ('Edit ' ~ asset.label) if asset else 'New investment'|tr(locale) }}</h1>{% endblock %}
+{% block heading %}<h1>{{ 'Edit {name}'|tr(locale, name=asset.name) if asset else 'New investment'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
 <form method="post" class="phone-form phone-fields" autocomplete="off">
   {% if not asset %}

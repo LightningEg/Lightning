@@ -348,7 +348,7 @@ Categories are not split into income and expense trees: pick the activity that e
 
 | Term | Rule |
 |---|---|
-| **Name** | Human label on screens; account codes never show under it. Counterparty names are unique, other taxonomy names may repeat under different parents. |
+| **Name** | Human label on screens; account codes never show under it. Edit headings use the name without its code; transaction edits say "Edit transaction" with the date and payee below. Counterparty names are unique, other taxonomy names may repeat under different parents. |
 | **Code** | Stable machine identifier for links, imports and technical search; not shown in ordinary UI. |
 | **ID** | Internal database key; never shown. |
 | **Ticker / symbol** | Public exchange symbol; not Lightning's code or ID. Optional ISIN also matches sources. |

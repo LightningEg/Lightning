@@ -1,8 +1,8 @@
 {# A trade or holding on the phone (3AY16): the kind as chips, then one column of fields, Record full width. #}
 {% extends "base.html" %}
 {% from "partials/macros.html" import field, date_field with context %}
-{% block title %}{{ title|tr(locale) }}{% endblock %}
-{% block heading %}<h1>{{ ('Edit ' ~ txn.ref) if txn else title|tr(locale) }}</h1>{% if hint %}<p class="phone-note">{{ hint|tr(locale) }}</p>{% endif %}{% endblock %}
+{% block title %}{{ ('Edit transaction' if txn else title)|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ ('Edit transaction' if txn else title)|tr(locale) }}</h1>{% if txn %}<p class="phone-note">{{ txn.date }}{% if txn.counterparty %} · {{ txn.counterparty }}{% endif %}</p>{% elif hint %}<p class="phone-note">{{ hint|tr(locale) }}</p>{% endif %}{% endblock %}
 {% block content %}
 {% if not txn %}
 <div class="phone-cat-chips">
