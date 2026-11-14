@@ -21,8 +21,8 @@ class ScenarioResult:
     scenario_low: object
     assumptions: tuple[str, ...]
     plan_low: object = None       # IV-12P: Cash planning's Lowest point ahead (a ForecastMonth), as the plan shows it
-    scenario_plan_low: object = None  # the same months moved by what the scenario changes: (month, closing)
-    months: tuple = ()            # IV-12Q2: every month as (month, plan closing, scenario closing or None), for the chart
+    scenario_plan_low: object = None  # the same, with the change, on its lowest day: (month, value, date)
+    months: tuple = ()            # every month as (month, plan closing, scenario's lowest day in it or None)
 
     @property
     def change(self):
@@ -31,6 +31,13 @@ class ScenarioResult:
             return None
         return self.scenario_plan_low[1] - self.plan_low.closing
 
+    @property
+    def first_below_zero(self):
+        """BV-7AW: the first day the plan, with the change, goes below zero: (date, value), or None."""
+        return next(((on, value) for _, _, _, days in self._days for on, value in days if value is not None and value < 0), None)
+
+    _days: tuple = ()  # (month, plan closing, lowest, ((date, value), ...)) for each month, in order
+
 
 def _balance_on(projection, on: str):
     """Day-end combined scheduled cash on ``on``: the last point on or before it (None when FX is missing)."""
@@ -38,32 +45,49 @@ def _balance_on(projection, on: str):
     return known[-1].balance if known else None
 
 
-def plan_months(forecast, baseline, projected, end):
-    """IV-12Q2: each month of the cash forecast as (month, plan closing, scenario closing), the scenario closing moved
-    by the scenario's change in scheduled cash at the month's end (None when an exchange rate is missing)."""
+def plan_days(forecast, baseline, projected, day, end):
+    """BV-7AW (r37 W3, M2): one measure for the whole page. Each day of a month is that month's planned closing (Cash
+    planning's month end) moved by what the scenario changes in scheduled cash on that day, so a salary 20 days late
+    inside one month shows as the dip it is, not only at month ends. Days after ``end`` keep the change at ``end``.
+    Returns (month, plan closing, lowest (date, value) or None, ((date, value), ...)) per month; a value is None when
+    an exchange rate is missing."""
     from lightning.core.dates import parse_month
+    points = sorted({row.date for row in baseline.balances} | {row.date for row in projected.balances})
+    start, stop = day.isoformat(), end.isoformat()
     rows = []
     for month in forecast.months:
-        _, last = parse_month(month.month)
-        on = min(last, end).isoformat()
-        before, after = _balance_on(baseline, on), _balance_on(projected, on)
-        moved = None if before is None or after is None else month.closing + after - before
-        rows.append((month.month, month.closing, moved))
+        first, last = parse_month(month.month)
+        lo, hi = max(first.isoformat(), start), min(last.isoformat(), stop)
+        dates = sorted({d for d in points if lo <= d <= hi} | {min(last.isoformat(), stop) if lo <= hi else stop})
+        days = []
+        for on in dates:
+            before, after = _balance_on(baseline, on), _balance_on(projected, on)
+            days.append((on, None if before is None or after is None else month.closing + after - before))
+        known = [row for row in days if row[1] is not None]
+        lowest = min(known, key=lambda row: row[1]) if len(known) == len(days) and known else None
+        rows.append((month.month, month.closing, lowest, tuple(days)))
     return tuple(rows)
 
 
-def plan_lowest(forecast, baseline, projected, end):
-    """IV-12P: the plan's Lowest point ahead, with and without the scenario. Each month of the cash forecast keeps its
-    closing and moves by the scenario's change in scheduled cash at that month's end (at ``end`` for months after it,
-    where a purchase stays spent and a delayed income has arrived). Returns (baseline month, (month, closing)) or
-    (None, None) without a forecast or when an exchange rate is missing."""
+def plan_months(forecast, baseline, projected, end, day=None):
+    """Each month of the cash forecast as (month, plan closing, the scenario's lowest day in it or None)."""
+    from lightning.core.dates import today
+    days = plan_days(forecast, baseline, projected, day or today(), end)
+    return tuple((month, closing, low[1] if low else None) for month, closing, low, _ in days)
+
+
+def plan_lowest(forecast, baseline, projected, end, day=None):
+    """IV-12P, BV-7AW: the plan's Lowest point ahead, and the same with the scenario on its lowest day. Returns
+    (baseline month, (month, value, date)) or (None, None) without a forecast, (low, None) when a rate is missing."""
+    from lightning.core.dates import today
     low = forecast.lowest
     if low is None:
         return None, None
-    moved = [(month, closing) for month, _, closing in plan_months(forecast, baseline, projected, end)]
-    if any(closing is None for _, closing in moved):
+    rows = plan_days(forecast, baseline, projected, day or today(), end)
+    if any(lowest is None for _, _, lowest, _ in rows):
         return low, None
-    return low, min(moved, key=lambda row: row[1])
+    month, _, (on, value), _ = min(rows, key=lambda row: row[2][1])
+    return low, (month, value, on)
 
 
 def occurrence_key(payment):
@@ -115,6 +139,8 @@ def compare_scenario(forecaster, day, end, *, income='', delay='', purchase='', 
     baseline = dated_cash_forecast(forecaster.reporting, payments, events, day, end)
     projected = dated_cash_forecast(forecaster.reporting, changed, changed_events, day, end)
     forecast = forecaster.forecast(day, match_payments=False)
-    plan_low, scenario_plan_low = plan_lowest(forecast, baseline, projected, end)
+    plan_low, scenario_plan_low = plan_lowest(forecast, baseline, projected, end, day)
+    days = plan_days(forecast, baseline, projected, day, end)
+    months = tuple((month, closing, low[1] if low else None) for month, closing, low, _ in days)
     return ScenarioResult(baseline, projected, lowest_scheduled_balance(baseline), lowest_scheduled_balance(projected),
-                          tuple(assumptions), plan_low, scenario_plan_low, plan_months(forecast, baseline, projected, end))
+                          tuple(assumptions), plan_low, scenario_plan_low, months, days)

@@ -1,7 +1,20 @@
 {% extends "base.html" %}
-{% block title %}Your income went up{% endblock %}
-{% block heading %}<div><h1>{{ "Your income went up"|tr(locale) }}</h1><p class="muted small page-subtitle">Recurring expects {{ offer.recurring|money(False, 0) }} {{ base }} a month; your average is {{ offer.average|money(False, 0) }}</p></div>{% endblock %}
+{# The income offer (one popup, NF-12AL1): a raise has three choices; a drop from its date has two. #}
+{% block title %}{% if offer.kind == 'drop' %}Your income falls{% else %}Your income went up{% endif %}{% endblock %}
+{% block heading %}{% if offer.kind == 'drop' %}<div><h1>{{ 'Your income falls to {amt} from {day}'|tr(locale, amt=offer.recurring|money(False, 0), day=offer.from|day(locale)) }}</h1><p class="muted small page-subtitle">{{ 'Your average is {amt}, {amt2} more a month'|tr(locale, amt=offer.average|money(False, 0), amt2=offer.drop|money(False, 0)) }}</p></div>{% else %}<div><h1>{{ "Your income went up"|tr(locale) }}</h1><p class="muted small page-subtitle">Recurring expects {{ offer.recurring|money(False, 0) }} {{ base }} a month; your average is {{ offer.average|money(False, 0) }}</p></div>{% endif %}{% endblock %}
 {% block content %}
+{% if offer.kind == 'drop' %}
+<section class="card stack">
+  <h2>{{ 'What should the plan count from {month}?'|tr(locale, month=offer.from_month|month(locale)) }}</h2>
+  <div class="compact-list">
+    <form method="post" action="/budget/raise" class="compact-row"><input type="hidden" name="month" value="{{ offer.month }}"><input type="hidden" name="choice" value="plan">
+      <span><b>{{ "Plan on it from then"|tr(locale) }}</b><small class="muted">{% if offer.over %}{{ '{label} becomes {amt}; your plan is {amt2} over it'|tr(locale, label=fig.spending_room.label, amt=offer.room|money(False, 0), amt2=offer.over|money(False, 0)) }}{% else %}{{ '{label} becomes {amt}; your plan still fits'|tr(locale, label=fig.spending_room.label, amt=offer.room|money(False, 0)) }}{% endif %}</small></span>
+      <button class="btn small primary">{{ "Plan on it"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+    <form method="post" action="/budget/raise" class="compact-row"><input type="hidden" name="month" value="{{ offer.month }}"><input type="hidden" name="choice" value="keep">
+      <span><b>{{ "Keep the average"|tr(locale) }}</b><small class="muted">{{ "The plan waits until the lower income shows in completed months"|tr(locale) }}</small></span>
+      <button class="btn small">{{ "Keep it"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+  </div>
+{% else %}
 <section class="card stack">
   <h2>What should the plan do with {{ offer.raise|money(False, 0) }} {{ base }} more a month?</h2>
   <div class="compact-list">
@@ -15,6 +28,7 @@
       <span><b>{{ "Keep the average"|tr(locale) }}</b><small class="muted">{{ "The plan waits until the new income shows in completed months"|tr(locale) }}</small></span>
       <button class="btn small">{{ "Keep it"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
   </div>
+{% endif %}
   <p class="muted small">{{ "You can change this later in"|tr(locale) }}<a href="/settings?section=budget">{{ "Settings › Budget"|tr(locale) }}</a>{{ "and"|tr(locale) }}<a href="/settings?section=financial-health">{{ 'Financial health'|tr(locale) }}</a>.</p>
 </section>
 {% endblock %}

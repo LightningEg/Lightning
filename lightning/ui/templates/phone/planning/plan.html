@@ -51,6 +51,19 @@
 <a class="btn primary phone-save" href="/accounts/new" data-popup-open>{{ 'Add an account'|tr(locale) }}</a>
 {% endif %}
 
+{# BV-7AW (r37 M1): Can I afford this? on the phone: a price and a date; the same answer as the PC #}
+{% if has_accounts %}<section class="phone-section" aria-labelledby="afford-h">
+  <header class="phone-section-head"><h2 id="afford-h">{{ 'Can I afford this?'|tr(locale) }}</h2></header>
+  <form method="get" action="/plan" class="phone-form">
+    <label>{{ 'Price'|tr(locale) }}<input name="afford" inputmode="decimal" class="money-input" value="{{ afford_amount }}"></label>
+    <label>{{ 'Date'|tr(locale) }}<input name="afford_date" type="date" min="{{ as_of }}" value="{{ afford_date }}"></label>
+    <button class="btn primary phone-save">{{ 'Check'|tr(locale) }}</button>
+  </form>
+  {% if afford %}<p class="phone-note" role="status">{{ afford.headline|tr(locale) }}</p>
+  {% if afford_plan_url %}<a class="phone-row" href="{{ afford_plan_url }}"><span>{{ 'Plan this purchase'|tr(locale) }}<small>{{ 'Nothing is saved until you save it.'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
+  {% elif afford_error %}<div class="flash error" role="alert">{{ afford_error|tr(locale) }}</div>{% endif %}
+</section>{% endif %}
+
 {% set dated = f.dated %}
 {% if dated and (dated.first_shortfall or dated.account_shortfalls or dated.unassigned_payments or dated.unvalued_currencies) %}
 <section id="plan-dated-cash" class="phone-section" aria-labelledby="dated-cash-heading">

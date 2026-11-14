@@ -1291,7 +1291,7 @@ def test_what_is_left_to_pay_this_month_and_on_which_days(mohab):
     assert route(mohab, "upcoming") == ["/", "/plan", "/plan/upcoming"]
     assert upcoming.figure("Left to pay in October") == D("1130")    # WE Internet 650 + North Cairo Electricity 480
     assert upcoming.shows("1,130 left to pay in October, on 2 days.", "14,500 paid of 15,630 due in October",
-                          "Payday 1 Oct", "20 Oct WE Internet Bills · To pay 650")
+                          "Payday 1 Nov", "20 Oct WE Internet Bills · To pay 650")
 
 
 def test_the_emergency_fund_in_months(mohab):
@@ -1403,6 +1403,7 @@ def test_certificate_keeps_its_purchase_value_without_month_end_price_prompts(mo
                        if asset.name == "NBE 3-year certificate · 22%")
     screen = mohab.b.go("Investments", "Prices")
     assert certificate.name in screen.text and f'name="p_{certificate.id}"' not in screen.html
+    assert f'name="value_{certificate.id}"' not in screen.html
     assert all(row["asset_id"] != certificate.id for row in mohab.c.reevaluations.pending_prices())
 
 
@@ -1488,6 +1489,9 @@ def test_a_fund_can_be_valued_by_its_total(mohab):
     mohab.b.open(screen.path)
     saved = mohab.b.submit({"date": "2027-09-30", field: "20000"}, button="Save prices")
     assert saved.shows("Saved 1 price")
+    asset_id = int(field.removeprefix("value_"))
+    values = [p.value for p in mohab.c.investments.portfolio("2027-09-30").open if p.asset_id == asset_id]
+    assert abs(sum(values) - D("20000")) < D("0.01")
 
 
 def test_other_investments_are_in_the_investment_analysis(mohab):

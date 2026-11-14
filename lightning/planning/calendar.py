@@ -14,6 +14,7 @@ from lightning.core.dates import fmt_date, parse_month
 from lightning.core.money import ZERO
 from lightning.fx import rate_for
 
+from .bill_state import next_income_date
 from .domain import Payment, PaymentStatus, PlanKind
 
 GROUPS = ("bills", "instalments", "gameya", "income")  # the page's filter chips, in this order
@@ -45,10 +46,11 @@ class PaymentMonth:
     already_paid: Decimal      # Already paid: what of them is settled
     last_month_total: Decimal  # last month's outgoing payments, paid or not (the comparison)
     money_in: Decimal          # income and payouts dated in the month
-    paydays: tuple[str, ...]   # dates of scheduled income in the month
+    paydays: tuple[str, ...]   # the month's paydays: the salary's dates only (BT-7AZ)
     short_on: str | None = None          # the first day scheduled cash goes below zero, when it falls in the month
     short_by: Decimal | None = None
     groups: tuple[str, ...] = field(default=())  # the groups that have at least one entry this month
+    next_payday: str | None = None  # the next payday from today, whatever month is shown (BT-7AZ)
 
     @property
     def month_total(self) -> Decimal:
@@ -141,7 +143,8 @@ def month_calendar(planning, gameya, month: str, day: date, forecaster=None) -> 
     left = sum((e.left for e in outgoing), ZERO)
     paid = sum((e.amount - e.left for e in outgoing), ZERO)
     money_in = sum((e.amount for e in entries if e.incoming and e.state != "skipped"), ZERO)
-    paydays = tuple(sorted({e.date for e in entries if e.group == "income"}))
+    payday_ids = planning.payday_item_ids()
+    paydays = tuple(sorted({e.date for e in entries if e.group == "income" and e.item_id in payday_ids}))
     previous = fmt_date(first - timedelta(days=1))[:7]
     short_on = short_by = None
     if forecaster is not None and last >= day:
@@ -151,7 +154,7 @@ def month_calendar(planning, gameya, month: str, day: date, forecaster=None) -> 
             short_on, short_by = shortfall.date, -shortfall.balance
     groups = tuple(g for g in GROUPS if any(e.group == g for e in entries))
     return PaymentMonth(month, fmt_date(day), tuple(entries), left, paid, _out_total(planning, previous, day),
-                        money_in, paydays, short_on, short_by, groups)
+                        money_in, paydays, short_on, short_by, groups, next_income_date(planning, day))
 
 
 @dataclass(frozen=True)

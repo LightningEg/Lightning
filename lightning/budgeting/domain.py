@@ -175,9 +175,12 @@ class IncomeAverage:
     last_month: str
     manual: bool = False
     scheduled: bool = False    # no completed month had income yet: Recurring income stands in
+    since: str = ""            # yyyy-mm: a dated basis chosen for an income drop (INCOME_BASIS_FROM) applies from it
 
     @property
     def window(self) -> str:
+        if self.since:
+            return f"your scheduled income from {self.since}"
         if self.scheduled:
             return "from your recurring income"
         return f"{self.first_month} to {self.last_month}" if self.first_month else ""
@@ -202,6 +205,18 @@ EMERGENCY_BASES = {"income": "average_monthly_income", "spending": "average_mont
 
 
 INCOME_FROM_RECURRING = "budget_income_from_recurring"  # setting: "1" plans with Recurring income, not the average
+INCOME_BASIS_FROM = "budget_income_basis_from"  # setting "yyyy-mm:amount": an income drop planned on from that month (NF-12AL1)
+
+
+def dated_basis(raw: str | None) -> tuple[str, Decimal] | None:
+    """The stored dated basis as (month, amount); None when unset or unreadable."""
+    month, _, amount = str(raw or "").partition(":")
+    if len(month) != 7 or not amount:
+        return None
+    try:
+        return month, Decimal(amount)
+    except ArithmeticError:
+        return None
 EMERGENCY_TOP_UP_MONTHS = 24  # owner request 2026-10-05: reach six months within two years
 
 
@@ -298,7 +313,8 @@ class ScheduleView(Protocol):
         """Loan payments scheduled in the month, by spending category."""
 
     def bills(self, month: str) -> dict[int, dict]:
-        """Bills and subscriptions due in the month, by category: {"amount", "items"}."""
+        """Bills and subscriptions due in the month, by category: {"amount", "paid", "items"}; ``paid`` is the part
+        a recorded transaction already paid (read a missing "paid" as zero)."""
 
     def income(self) -> Decimal | None:
         """Income a month that Cash planning › Recurring expects; None without any."""
