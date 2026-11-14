@@ -486,6 +486,9 @@ Search is read-only retrieval; choosing a result is the user's action.
 
 **Shared matcher (NF-7D, 2026-11-04):** `core/matching.py` folds query and candidates identically (NFKD, Arabic/Persian digits, marks and invisible format characters removed, Arabic spelling variants, punctuation and Latin accents/case). Display and stored identity never change. RapidFuzz 3.14.3 scores typo candidates after exact (1), prefix (.95), word prefix (.9) and substring (.8); confirmed exact aliases rank at .98. Typo cutoffs out of 100: Account/Person/Investment 78, Counterparty 68, Category 70, Reserve/Page/Action/Text 72. Three-character queries need 84; shorter queries, numeric/date/ref terms and codes have no typo matching. Equal ranks sort by folded label, then original order. There is no cross-script transliteration.
 
+**Name ordering (IT-3BI2).** Planned items keep kind groups and sort names with the shared search fold; held-money reports use the same fold for owners and account/investment names. Browser category and payee pickers compare names in the page language with base sensitivity. Only comparison keys change; stored and displayed names stay intact.
+
+
 | Rule | Example and acceptance |
 |---|---|
 | Common misspelling | `Talbt` suggests Talabat; only selecting it changes the form. |
