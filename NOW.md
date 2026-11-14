@@ -2,7 +2,7 @@
 
 ## Claimed
 
-Reserved codes: none
+Reserved codes: r37 (Claude, cash planning workflow audit)
 
 | Who | Work | Files | Since |
 |---|---|---|---|
