@@ -69,8 +69,8 @@ def test_move_dialog_says_why_from_the_evidence_not_two_months(c, setup, monkeyp
     href = f"/budget/move?month={MONTH}&to={food}&from={transport}&amount=1650"
     text = visible_text(browser.get(href).text)
     assert "two months running" not in text
-    assert "At this pace Food & Groceries passes its plan before the month ends; Transportation has room left." in text
+    assert "At this pace Food & groceries passes its plan before the month ends; Transportation has room left." in text
     c.transactions.record_outflow("2026-12-09", setup[0]["cib"].id, "2000", food)  # now over: 3,500 of 3,000
     text = visible_text(browser.get(href).text)
-    assert "Food & Groceries is over its plan this month; Transportation has room left." in text
+    assert "Food & groceries is over its plan this month; Transportation has room left." in text
     assert "two months running" not in text
