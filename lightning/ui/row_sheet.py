@@ -68,6 +68,13 @@ def sheet_context(request: Request, c, txn) -> dict:
     plan = None
     if kind == "out" and category is not None and not unsorted:
         plan = c.budgets.plan_left(category.id, txn.date[:7], schedule=c.schedules.view())
+    balance_after = c.transactions.cash_after(account.id, txn.date, txn.id)  # IV-11M4: the account just after this row
+    offer = None  # IV-11M4: the rule offer: the same filing done by hand twice, a rule to propose (Yes opens it)
+    if kind == "out" and category is not None and not unsorted and txn.counterparty:
+        found = c.rules.suggestion(txn.counterparty, category.id)
+        if found:
+            offer = {"who": txn.counterparty, "category": found["category"], "url": "/rules/offer?" + urlencode(
+                {"counterparty": txn.counterparty, "category_id": category.id, "return_to": f"/transactions/{txn.id}/sheet"})}
     chips, other = [], []
     if unsorted or request.query_params.get("change"):
         movement = "out" if kind == "out" else "in"
@@ -89,7 +96,8 @@ def sheet_context(request: Request, c, txn) -> dict:
     skip = next_in_queue(queue, txn.id) if queue else None
     return dict(txn=txn, kind=kind, account=account, target=target, repeat_url=repeat_url, amount=amount, currency=account.currency,
                 category=category, unsorted=unsorted, plan=plan, chips=chips, other=other, sort=args, hide_global_error=True,
-                sort_query=urlencode(args), skip=skip, split=txn.type.value == "OUT" and len(cash) == 1 and not unsorted,
+                sort_query=urlencode(args), skip=skip, balance_after=balance_after, offer=offer,
+                category_path=c.categories.display_name(category.id) if category is not None else "", split=txn.type.value == "OUT" and len(cash) == 1 and not unsorted,
                 return_to=return_to(request.query_params.get("return_to")), who=txn.counterparty or txn.description or "", label=DOC_LABELS.get(txn.type, "Transaction"))
 
 

@@ -86,6 +86,29 @@ def test_the_account_add_opens_on_is_the_one_used_most(month):
     assert c.transactions.usual_account([]) is None
 
 
+def test_log_again_is_the_last_three_payees_paid_with_what_each_was(month):
+    """IV-11M4 (mockup v2.0): Log again repeats the last three payees paid, newest first, never an unsorted row."""
+    c, accounts, cats = month
+    got = c.transactions.recent_expenses()
+    assert [(p["name"], p["amount"]) for p in got] == [("Seoudi", D("250")), ("Carrefour", D("300")), ("Figma", D("300"))]
+    assert got[2]["account_id"] == accounts["wallet"].id and got[0]["category_id"] == cats["EXP.PERSONAL.FOOD"].id
+    sheet = _phone(c).get(f"/accounts/{accounts['cib'].id}/transaction/new").text
+    assert "Log again" in sheet and "amount=250" in unescape(sheet) and "counterparty=Seoudi" in unescape(sheet)
+
+
+def test_balance_after_is_the_account_just_after_that_row(month):
+    """IV-11M4: a transaction's sheet shows the account's balance just after the row, from the ledger."""
+    c, accounts, _ = month
+    cib = accounts["cib"].id
+    first = int(c.db.scalar("SELECT id FROM transactions WHERE counterparty = 'Carrefour' ORDER BY id"))
+    assert c.transactions.cash_after(cib, "2026-09-03", first) == c.reporting.account_balance(cib, "2026-09-03")
+    seoudi = _txn_id(c, "Seoudi")
+    assert c.transactions.cash_after(cib, "2026-09-12", seoudi) == c.reporting.account_balance(cib, "2026-09-12")
+    sheet = _phone(c).get(f"/transactions/{seoudi}/sheet").text
+    after = c.reporting.account_balance(cib, "2026-09-12")
+    assert f"Balance after {after:,.0f}" in unescape(re.sub(r"<[^>]+>", "", sheet))
+
+
 # ---- the Add sheet ----------------------------------------------------------------------------------------------------
 
 def test_the_add_sheet_is_amount_first_with_chips_and_no_card(month):
@@ -98,7 +121,8 @@ def test_the_add_sheet_is_amount_first_with_chips_and_no_card(month):
     assert 'data-account-chip' in sheet and 'data-sms-paste' in sheet and 'type="date"' in sheet
     out_group = re.search(r'data-chip-kind="out"[^>]*>(.*?)</span>', sheet, re.S).group(1)
     chips = re.findall(r'data-category="(\d+)"[^>]*>([^<]+)<', out_group)
-    assert [int(i) for i, _ in chips] == c.transactions.usual_capture_categories("out")           # the service's order
+    # IV-11M4 (mockup v2.0): five usual categories, then More
+    assert [int(i) for i, _ in chips] == c.transactions.usual_capture_categories("out", 5)        # the service's order
     assert unescape(chips[0][1]) == "Food & Groceries"                                                       # the usual first
     assert "data-chip-other" in sheet and 'name="category_id"' in sheet                          # the field itself stays
     assert "decreases by" not in sheet and "balance owned by" not in sheet
@@ -112,14 +136,15 @@ def test_the_add_sheet_is_decluttered_amount_before_usual_and_shortcuts_are_quie
     top = sheet.split('class="phone-entry-top"')[1].split("</div>\n    </div>")[0]
     assert "phone-segment" in top and "phone-sms-paste" not in top and "phone-pay-bill" not in top  # nothing beside the segment
     assert sheet.index('id="popup-amount"') < sheet.index("data-account-chip")
-    if "data-usual-entries" in sheet:
-        assert sheet.index('id="popup-amount"') < sheet.index("data-usual-entries")
-        assert "popup-usual-label" in sheet and 'phone-usual-row' in sheet
+    if "data-usual-entries" in sheet:  # IV-11M4 (mockup v2.0): Log again sits above the amount, as quick repeats
+        assert sheet.index("data-usual-entries") < sheet.index('id="popup-amount"')
+        assert "popup-usual-label" in sheet and 'phone-log-again' in sheet
     bar = sheet.split('class="phone-save-bar"')[1]
     assert bar.count('class="btn primary phone-save"') == 1 and "btn phone-save-again" not in sheet
     assert 'name="again" value="1" class="phone-quiet phone-save-again"' in bar and "data-sms-paste" not in bar
-    assert sheet.index("data-sms-paste") < sheet.index('class="phone-save-bar"')  # shortcuts end the form, above the bar
-    assert 'class="phone-quiet phone-sms-paste"' in sheet and 'class="phone-chip phone-sms-paste"' not in sheet
+    # IV-11M4 (mockup v2.0): Paste a bank SMS is a pill beside the sheet's title, not a shortcut at the foot
+    head = sheet.split('class="phone-entry-head"')[1].split("</div>")[0]
+    assert 'class="phone-pill phone-sms-paste"' in head and "Paste a bank SMS" in head
     assert "Who you paid or who paid you" not in sheet.split('id="popup-counterparty"')[1].split(">")[0]
 
 
@@ -185,9 +210,10 @@ def test_a_row_opens_its_sheet_first_and_the_sheet_looks_before_it_edits(month):
     assert ">−250</bdi>" in sheet and "−250.00" not in sheet                         # whole EGP, no .00
     assert "Seoudi" in body and "Food & Groceries" in unescape(body)
     left = D("5000") - D("1200") - D("300") - D("250")
-    assert f"{left:,.0f} left of 5,000" in body                                          # Plan left, from BudgetService
-    assert "Change category" in body and "Split" in body and "/edit-popup" in sheet  # the foot; Edit opens the form
-    assert "<form" not in sheet.split("phone-sheet-actions")[0].split("phone-txn-sheet\">")[1]       # nothing to type yet
+    # IV-11M4 (mockup v2.0): the Category row says what is left after this one; it opens Change category
+    assert f"{left:,.0f} left after this" in body                                        # Plan left, from BudgetService
+    assert "&change=1" in unescape(sheet) and "Split it" in body and "/edit-popup" in sheet  # Edit opens the form
+    assert "<form" not in sheet.split("phone-txn-pair")[0].split("phone-txn-sheet\">")[1]       # nothing to type yet
     assert c.budgets.plan_left(cats["EXP.PERSONAL.FOOD"].id, "2026-09", schedule=c.schedules.view())["left"] == left
 
 
