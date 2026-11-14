@@ -3391,6 +3391,8 @@ ARABIC_UI = {
     'Reserve links exceed this expense. Resolve those links before merging.': 'روابط المبالغ المحجوزة أكتر من المصروف ده. عالج الروابط دي قبل الدمج.',
     '{name} was paid at a different amount': 'اتدفعت {name} بمبلغ مختلف',
     '{name} arrived early': '{name} وصل بدري',
+    '{name} has not arrived': '{name} لسه ما وصلش',
+    'Expected {date} · {amount} {currency}. Record it when it arrives.': 'المتوقع {date} · {amount} {currency}. سجّله لما يوصل.',
     '{name} was paid early': 'اتدفعت {name} بدري',
     '{amount} {currency} on {date}, for the payment due {due}. Link it so the plan does not count it again.': '{amount} {currency} يوم {date}، للدفعة المستحقة {due}. اربطها عشان الخطة ما تحسبهاش مرتين.',
     'Link': 'اربطها',
