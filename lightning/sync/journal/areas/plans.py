@@ -93,6 +93,9 @@ COMMANDS = {
     "budgets.set_recurring_income": Command("budgets.set_recurring_income", dict(
         category_id=ref("categories"), recurring=FLAG), target=CATEGORY),
     "budgets.set_emergency_basis": Command("budgets.set_emergency_basis", dict(basis=choice("spending", "income"))),
+    # NF-12AK2: one expense left out of estimates; its row is keyed by the transaction.
+    "budgets.set_left_out": Command("budgets.set_left_out", dict(transaction_id=ref("transactions"), left_out=FLAG),
+                                    target=("transactions", "transaction_id")),
     "budgets.restore_rows": Command("budgets.restore_rows", dict(category_ids=listof(ref("categories")), rows=BUDGET_ROW)),
     "funding.apply": Command("funding.apply", dict(
         fingerprint=TEXT, amounts=items(category=ref("categories"), amount=TEXT),

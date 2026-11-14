@@ -10,7 +10,7 @@ import json
 
 from lightning.categories.domain import Category, CategoryFamily, Movement, Scope
 from lightning.categories.service import CategoryService
-from lightning.core.dates import month_of, parse_month
+from lightning.core.dates import month_of, now_iso, parse_month
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, check_places, fmt, from_e6, to_decimal
@@ -354,6 +354,47 @@ class BudgetService:
         ids = self.one_off_ids(with_children=False)
         ids = ids | {category_id} if one_off else ids - {category_id}
         self._save_id_list("budget_one_off_exclusions", ids)
+
+    # ------------------------------------------------------------- one transaction left out of estimates (NF-12AK2)
+    @request_cached
+    def left_out_ids(self) -> frozenset[int]:
+        """Expenses the person chose to leave out of estimates (owner 2026-11-13). Optional, never automatic; Cash
+        flow and Spent still count them. This service is the only writer of ``budget_estimate_exclusions``."""
+        return frozenset(int(row["transaction_id"]) for row in
+                         self.db.all("SELECT transaction_id FROM budget_estimate_exclusions"))
+
+    def is_left_out(self, transaction_id: int) -> bool:
+        return int(transaction_id) in self.left_out_ids()
+
+    def can_leave_out(self, transaction_id: int) -> bool:
+        """A posted expense with the user's own spending in an expense category: the only kind estimates can skip."""
+        rows = self.db.all(
+            "SELECT DISTINCT le.category_id FROM transactions t JOIN ledger_entries le ON le.transaction_id=t.id "
+            "JOIN categories c ON c.id=le.category_id "
+            "WHERE t.id=? AND t.type='OUT' AND t.status='POSTED' AND le.owner_id IS NULL "
+            "AND le.effect IN ('INFLOW','OUTFLOW') AND c.movement='OUTFLOW'", (int(transaction_id),))
+        investment = self._investment_ids()
+        return any(int(row["category_id"]) not in investment for row in rows)
+
+    def set_left_out(self, transaction_id: int, left_out: bool) -> bool:
+        """Leave one expense out of estimates, or count it again. Returns whether anything changed."""
+        transaction_id = int(transaction_id)
+        if not self.db.scalar("SELECT 1 FROM transactions WHERE id=?", (transaction_id,)):
+            raise NotFoundError("That transaction no longer exists.")
+        current = bool(self.db.scalar("SELECT 1 FROM budget_estimate_exclusions WHERE transaction_id=?",
+                                      (transaction_id,)))
+        if bool(left_out) == current:
+            return False
+        with self.db.transaction(undo_label="Leave out of estimates" if left_out else "Count in estimates"):
+            if left_out:
+                if not self.can_leave_out(transaction_id):
+                    raise ValidationError("Only an expense can be left out of estimates.")
+                stamp = now_iso()
+                self.db.execute("INSERT INTO budget_estimate_exclusions(transaction_id,created_at,updated_at) "
+                                "VALUES(?,?,?)", (transaction_id, stamp, stamp))
+            else:
+                self.db.execute("DELETE FROM budget_estimate_exclusions WHERE transaction_id=?", (transaction_id,))
+        return True
 
     def budgeting_income(self, month: str, *, schedule: ScheduleView) -> Decimal | None:
         """Average monthly income for a month's budget (see income_average)."""
@@ -933,11 +974,27 @@ class BudgetService:
         """What estimates read for a period (NF-12AK1, owner 2026-11-13): plan-funded spending, with money back that is
         linked to its expense (a reimbursement receipt, or a refund that names its purchase: NF-12AK3) counted in the
         expense's month rather than the month it arrived, and each category floored at zero, so a refund on its own
-        never makes a negative month. Cash, Spent and every report keep the real dates; only averages and the
-        estimates built on them read this."""
+        never makes a negative month. An expense the person left out (NF-12AK2) is skipped here, with every refund and
+        claim receipt linked to it. Cash, Spent and every report keep the real dates; only averages and the estimates
+        built on them read this."""
         first, last = str(start)[:10], str(end)[:10]
         basis, moved = self.plan_funded_spending(start, end), set()
+        taken: dict[int, Decimal] = {}
+        for line in self._left_out_lines():  # NF-12AK2: an expense left out, with the money back linked to it
+            if first <= line["date"] <= last:
+                taken[line["category_id"]] = taken.get(line["category_id"], ZERO) + line["amount"]
+        if taken:
+            gross = self.owned_spending(start, end)
+            for cid, amount in taken.items():
+                # Funding from a reserve or a loan already took part of the month out of the basis; a left-out
+                # purchase it paid for is not taken out twice.
+                funded = max(gross.get(cid, ZERO) - basis.get(cid, ZERO), ZERO)
+                basis[cid] = basis.get(cid, ZERO) - amount + min(funded, max(amount, ZERO))
+                moved.add(cid)
+        left_out = self.left_out_ids()
         for shift in self._recovery_shifts():
+            if shift["expense_id"] in left_out:  # left out above with its expense, in the month it arrived
+                continue
             if first <= shift["receipt_date"] <= last:  # it arrived here: undo its reduction here
                 basis[shift["category_id"]] = basis.get(shift["category_id"], ZERO) + shift["amount"]
                 moved.add(shift["category_id"])
@@ -952,7 +1009,7 @@ class BudgetService:
         amount the receipt took off that category (never more than the amount linked) and both dates. Money back is a
         claim's receipt or a refund that names its purchase (NF-12AK3); money that is both counts once, as a receipt."""
         rows = [*self.db.all(
-            "SELECT rr.id link_id,rr.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,"
+            "SELECT rr.id link_id,rr.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
             "le.category_id,SUM(le.amount_base_e6) total_e6 "
             "FROM reimbursement_receipts rr JOIN reimbursement_claims rc ON rc.id=rr.claim_id "
             "JOIN transactions r ON r.id=rr.receipt_id JOIN transactions e ON e.id=rc.expense_id "
@@ -960,7 +1017,7 @@ class BudgetService:
             "WHERE r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
             "AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
             "GROUP BY rr.id,le.category_id ORDER BY rr.id,le.category_id"), *self.db.all(
-            "SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,"
+            "SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
             "le.category_id,SUM(le.amount_base_e6) total_e6 "
             "FROM refund_links rl JOIN transactions r ON r.id=rl.refund_id JOIN transactions e ON e.id=rl.expense_id "
             "JOIN ledger_entries le ON le.transaction_id=r.id "
@@ -980,9 +1037,55 @@ class BudgetService:
             if amount <= ZERO:
                 continue
             left[row["link_id"]] = remaining - amount
-            shifts.append({"category_id": category.id, "amount": amount,
+            shifts.append({"category_id": category.id, "amount": amount, "expense_id": int(row["expense_id"]),
                            "receipt_date": row["receipt_date"], "expense_date": row["expense_date"]})
         return shifts
+
+    @request_cached(deep=True)
+    def _left_out_lines(self) -> list[dict]:
+        """What leaving expenses out takes from the estimate basis (NF-12AK2): per day and spending category, each
+        left-out expense's own spending (positive) and the money back linked to it (negative, never more than the
+        amount linked), so an expense and its refunds and claim receipts leave the basis together."""
+        if not self.left_out_ids():
+            return []
+        owned = ("le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
+                 "AND le.category_id NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY')")
+        expenses = self.db.all(
+            "SELECT NULL link_id,0 linked_e6,le.date,le.category_id,SUM(le.amount_base_e6) total_e6 "
+            "FROM budget_estimate_exclusions x JOIN transactions t ON t.id=x.transaction_id "
+            "JOIN ledger_entries le ON le.transaction_id=t.id "
+            f"WHERE t.status='POSTED' AND {owned} GROUP BY t.id,le.category_id,le.date")
+        back = self.db.all(  # money back: a claim's receipts, and refunds that name the purchase (NF-12AK3), once
+            "SELECT 'claim:'||rr.id link_id,rr.amount_e6 linked_e6,le.date,le.category_id,"
+            "SUM(le.amount_base_e6) total_e6 FROM budget_estimate_exclusions x "
+            "JOIN transactions e ON e.id=x.transaction_id JOIN reimbursement_claims rc ON rc.expense_id=e.id "
+            "JOIN reimbursement_receipts rr ON rr.claim_id=rc.id JOIN transactions r ON r.id=rr.receipt_id "
+            "JOIN ledger_entries le ON le.transaction_id=r.id "
+            f"WHERE e.status='POSTED' AND r.status='POSTED' AND {owned} "
+            "GROUP BY rr.id,le.category_id,le.date "
+            "UNION ALL SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,le.date,le.category_id,"
+            "SUM(le.amount_base_e6) total_e6 FROM budget_estimate_exclusions x "
+            "JOIN transactions e ON e.id=x.transaction_id JOIN refund_links rl ON rl.expense_id=e.id "
+            "JOIN transactions r ON r.id=rl.refund_id JOIN ledger_entries le ON le.transaction_id=r.id "
+            f"WHERE e.status='POSTED' AND r.status='POSTED' AND {owned} "
+            "AND NOT EXISTS (SELECT 1 FROM reimbursement_receipts y WHERE y.receipt_id=rl.refund_id) "
+            "GROUP BY rl.id,le.category_id,le.date ORDER BY 1,4,3")
+        investment, lines, left = self._investment_ids(), [], {}
+        for row in [*expenses, *back]:
+            category = self.categories.get(int(row["category_id"]))
+            if category.movement != Movement.OUTFLOW or category.id in investment:
+                continue  # never part of the basis: income, or investment money
+            amount = -from_e6(int(row["total_e6"] or 0))  # money out is a negative line, money back positive
+            if row["link_id"] is not None:  # money back takes off at most what is linked to the expense
+                remaining = left.setdefault(row["link_id"], from_e6(int(row["linked_e6"])))
+                back_amount = min(-amount, remaining)
+                if back_amount <= ZERO:
+                    continue
+                left[row["link_id"]] = remaining - back_amount
+                amount = -back_amount
+            if amount:
+                lines.append({"date": row["date"], "category_id": category.id, "amount": amount})
+        return lines
 
     @request_cached
     def _history_start(self) -> str | None:
