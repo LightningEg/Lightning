@@ -6,6 +6,7 @@ Reserved codes: none
 
 | Who | Work | Files | Since |
 |---|---|---|---|
+| Codex | Owner-requested NF-4N (#615): finish journal two-digit pairing and the short fallback. Read: issues/4-edit-journal-and-devices/NF-4N-pairing-two-digits.md | pairing protocol/driver, pairing screens and focused tests | 2026-11-14 |
 | Claude | O5 | `lightning/deposits/` | 2026-11-10 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 
