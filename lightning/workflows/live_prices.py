@@ -232,6 +232,8 @@ def plan(c, on: date, now: datetime | None = None) -> Plan:
     gold: dict[int, list[str]] = {}  # gold price references and gold held by the gram -> month-ends to price
     for asset_id, month_ends in sorted(held.items()):
         asset = c.assets.get_asset(asset_id)
+        if c.assets.get_class(asset.asset_class_id).code == "DEPOSIT.CD":
+            continue
         if asset.code.startswith("OTH:ITEM-"):
             item = c.reporting.q.physical_item(asset_id)
             if item and item.get("reference_asset_id"):

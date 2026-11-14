@@ -45,16 +45,19 @@ class BillRow:
 
 
 def next_income_date(planning, day: date) -> str | None:
-    """The date of the next scheduled income after ``day``, as the forecast reads it (None when none is planned)."""
+    """The next payday after ``day``, as the forecast reads it: the salary only (BT-7AZ); None when none is planned."""
     early = {(e["item"].id, e["payment"].due_date) for e in planning.early_payments(day)}
+    payday_ids = planning.payday_item_ids()
     upcoming = [p for p in planning.all_payments(day + timedelta(days=62), day, (PlanKind.INCOME,))
-                if p.outstanding and p.due_date > fmt_date(day) and (p.item.id, p.due_date) not in early]
+                if p.outstanding and p.due_date > fmt_date(day) and (p.item.id, p.due_date) not in early
+                and p.item.id in payday_ids]
     return upcoming[0].due_date if upcoming else None
 
 
 def last_income_date(planning, day: date) -> str | None:
-    """The date of the latest scheduled income already received on or before ``day``."""
-    received = [p.due_date for item in planning.items((PlanKind.INCOME,))
+    """The latest payday (the salary only, BT-7AZ) already received on or before ``day``."""
+    payday_ids = planning.payday_item_ids()
+    received = [p.due_date for item in planning.items((PlanKind.INCOME,)) if item.id in payday_ids
                 for p in planning.payments(item, fmt_date(day), day) if p.status == PaymentStatus.PAID]
     return max(received) if received else None
 

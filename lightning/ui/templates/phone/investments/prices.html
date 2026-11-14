@@ -36,10 +36,11 @@
   </div>
 </section>
 <form method="post" class="phone-form phone-section" autocomplete="off">
+  <p class="phone-note">{{ 'Quantities and total values cover all accounts, including units held for others. Use the currency shown beside each investment.'|tr(locale) }}</p>
   <label for="date">{{ 'As of'|tr(locale) }}</label><input type="text" id="date" name="date" value="{{ day }}" placeholder="yyyy-mm-dd" inputmode="numeric" autocomplete="off" data-smart-date required>
   {% if rows %}<div class="phone-rows">{% for r in rows %}
     <div class="phone-row" id="asset-{{ r.asset.id }}"><span><a href="/investments/assets/{{ r.asset.id }}/edit">{{ r.asset.name }}</a><small>{% if r.held %}<span>{{ r.held.quantity|units_of(r.asset.unit) }}</span> · {% endif %}{% if r.price is not none %}<bdi class="fig">{{ r.price|units }}{% if r.asset.currency != base %} {{ r.asset.currency }}{% endif %}</bdi> · {{ r.price_date }}{% else %}{{ 'none'|tr(locale) }}{% endif %}</small></span>
-      {% if not r.is_certificate %}<input type="text" name="p_{{ r.asset.id }}" inputmode="decimal" placeholder="{{ r.price|money(False, 4) if r.price is not none else '' }}" aria-label="{{ 'New price per unit'|tr(locale) }} · {{ r.asset.name }}" data-row-amount>{% else %}<b class="muted">{{ 'Set at purchase'|tr(locale) }}</b>{% endif %}</div>{% endfor %}
+      {% if r.is_item and r.held %}<span>{% if r.current_value is not none %}<b data-current-value>{{ r.current_value|money(False, 2 if r.asset.currency != base else 0) }} {{ r.asset.currency }}</b>{% endif %}<input type="text" name="value_{{ r.asset.id }}" inputmode="decimal" aria-label="{{ 'Total value'|tr(locale) }} · {{ r.asset.name }}" data-row-amount></span>{% elif not r.is_certificate and not r.is_item %}<input type="text" name="p_{{ r.asset.id }}" inputmode="decimal" placeholder="{{ r.price|money(False, 4) if r.price is not none else '' }}" aria-label="{{ 'New price per unit'|tr(locale) }} · {{ r.asset.name }}" data-row-amount>{% else %}<b class="muted">{{ 'Set at purchase'|tr(locale) }}</b>{% endif %}</div>{% endfor %}
   </div>{% else %}<p class="phone-note">{{ 'No investments yet.'|tr(locale) }} <a href="/investments/assets/new">{{ 'Add one'|tr(locale) }}</a>.</p>{% endif %}
   <button class="btn primary phone-save">{{ 'Save prices'|tr(locale) }}</button>
 <input type="hidden" name="__session" value="{{ session }}"></form>

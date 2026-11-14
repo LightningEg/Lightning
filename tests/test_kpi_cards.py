@@ -143,7 +143,7 @@ def test_neighbouring_figures_no_longer_disagree_or_read_wrong(mohab, monkeypatc
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-19")
     c, client = mohab
     scen = _page(client, "/plan/scenarios")                                    # (b) whole EGP and a note, (c) no "None None"
-    assert "None None" not in scen and "No shortfall" in scen and "Cash planning’s, month by month" in scen
+    assert "None None" not in scen and "Your plan" in scen and "Cash planning’s; the change moves each day" in scen
     low = c.forecaster.forecast(date(2026, 10, 19)).lowest              # IV-12P: the plan's own Lowest point ahead
     from lightning.ui.date_text import month_text
     # IV-12Q2: the plan's own Lowest point ahead is the page's Lead, its month in the chip

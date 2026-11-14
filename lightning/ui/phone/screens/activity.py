@@ -31,11 +31,18 @@ class ActivityScreen:
     in_share: int = 0   # bar lengths (0-100) on one scale: the larger of In and Out is 100 (11D3)
     out_share: int = 0
     ledger_empty: bool = False   # IV-11A2: nothing was ever recorded: say so once, with Add and Import
+    up_next: tuple = ()          # IV-11M7: the next three cards after this one (To review's Up next)
 
 
 def review_items(c, day: date) -> list[dict]:
     """The inbox's activity-group items, most urgent first: what sorting means on the phone."""
     return [i for i in ReviewInbox(c).items(day) if group_of(i) == "activity"]
+
+
+def _after(items: list, card) -> list:
+    """The next three cards after this one, wrapping round (a list of cards, not money)."""
+    at = items.index(card)
+    return (items[at + 1:] + items[:at])[:3]  # not money
 
 
 def _shift(month: str, step: int) -> str:
@@ -71,4 +78,5 @@ def build(c, day: date, tab: str = "all", month: str = "", index: int = 0) -> Ac
                           next_month="" if shown >= this else _shift(shown, 1), rows=rows,
                           money_in=money_in, money_out=money_out, in_share=in_share, out_share=out_share, review_total=len(items), card=card,
                           index=items.index(card) if card else 0, more_rows=more,
-                          ledger_empty=c.reporting.first_activity_date() is None)
+                          ledger_empty=c.reporting.first_activity_date() is None,
+                          up_next=tuple(_after(items, card)) if card else ())

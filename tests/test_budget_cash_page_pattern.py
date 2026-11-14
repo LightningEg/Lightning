@@ -6,6 +6,8 @@ with the lowest month marked; inputs is one row per account or currency with one
 on a source that has rows; an empty source or carryover says what to do next."""
 from __future__ import annotations
 
+import re
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -98,3 +100,54 @@ def test_budget_settings_offers_spending_categories_only_and_keeps_hidden_choice
     c.settings.set("budget_one_off_exclusions", f"[{zakat}]")
     page = http.get("/settings?section=budget").text
     assert f'<input type="hidden" name="exclusion_category" value="{zakat}">' in page   # saving keeps it
+
+
+def test_breakdown_links_and_menu(client):
+    c, http = client
+    c.health.set_limit('savings_rate', '90')
+    page = http.get('/plan').text
+    expected = {'Budget until payday': '/budget', 'Saving for goals': '/plan/reserves',
+                'Emergency fund top-up': '/plan/reserves',
+                'Rest of savings target': '/settings?section=financial-health#health-limit-savings_rate'}
+    for name, href in expected.items():
+        assert re.search(r'<a class="chart-fall-row[^>]*href="' + re.escape(href) + r'"[^>]*><span class="chart-fall-label">' + name, page), name
+        assert http.get(href).status_code == 200
+    target = http.get(expected['Rest of savings target']).text
+    assert 'id="health-limit-savings_rate"' in target
+    menu = page.split('class="action-menu"', 1)[1].split('</details>', 1)[0]
+    assert 'href="/plan/reserves"' in menu and 'href="/payday"' in menu
+    assert locate('/payday')[0].key == 'plan'
+    assert locate('/payday/apply')[1].key == 'plan'
+    assert 'href="/plan"' in http.get('/payday').text
+
+
+@pytest.mark.parametrize('phone', [False, True])
+@pytest.mark.parametrize('action', ['record', 'link', 'skip', 'reopen', 'invalid'])
+@pytest.mark.parametrize('salary', [False, True])
+def test_income_receipt_offers_optional_payday(c, setup, monkeypatch, phone, action, salary):
+    monkeypatch.setenv('LIGHTNING_TODAY', '2026-10-01')
+    accounts, cats = setup
+    account = accounts['cib'].id
+    category = cats['EXP.WORK.SALARY' if salary else 'EXP.INVEST.INTEREST'].id
+    item = c.planning.create(kind='INCOME', name='Pay <script>alert(1)</script>', amount='30000',
+                             frequency='MONTHLY', start_date='2026-10-01', account_id=account, category_id=category)
+    app = create_app(c)
+    async def wrapped(scope, receive, send):
+        if scope['type'] == 'http':
+            scope.setdefault('state', {})['phone'] = phone
+        await app(scope, receive, send)
+    http = TestClient(wrapped)
+    form = {'due': '2026-10-01', 'back': '/plan/recurring', 'outcome': action,
+            'date_paid': '2026-10-01', 'amount': '30000', 'account_id': str(account)}
+    if action == 'link':
+        txn = c.transactions.record_inflow('2026-10-01', account, '30000', category)
+        form['transaction_id'] = str(txn.id)
+    response = http.post(f'/plan/items/{item}/pay', data=form, follow_redirects=False)
+    assert response.status_code == 303
+    assert response.headers['location'].startswith('/payday?') == (salary and action in ('record', 'link'))
+    page = http.get(response.headers['location']).text
+    if salary and action in ('record', 'link'):
+        assert '<h1>Fund your payday plan</h1>' in page
+        assert 'marked paid.' in page and 'href="/plan"' in page
+        assert '<script>alert(1)</script>' not in page
+        assert not c.funding.enabled

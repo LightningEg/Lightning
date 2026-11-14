@@ -359,6 +359,26 @@ class ReportQueries:
         )
         return dict(row) if row and row["qty"] else None
 
+    @request_cached
+    def certificate_class_id(self) -> int | None:
+        return self.db.scalar("SELECT id FROM asset_classes WHERE code='DEPOSIT.CD'")
+
+    @request_cached(deep=True)
+    def _certificate_principals_of(self, asset_id: int) -> list[dict]:
+        """Read principal entries once per asset, even when a page values several dates."""
+        return [dict(row) for row in self.db.all(
+            f"SELECT le.amount_e6 AS amount, le.quantity_e6 AS qty, le.date FROM ledger_entries le {POSTED}"
+            " WHERE le.asset_id=? AND t.type IN ('BUY','OPN') AND le.quantity_e6>0", (asset_id,))]
+
+    def certificate_principal(self, asset_id: int, as_of: str) -> dict | None:
+        """Principal paid or brought in at opening, in the certificate's native currency. Quotes and
+        redemption proceeds are never a new principal valuation."""
+        rows = [row for row in self._certificate_principals_of(asset_id) if row["date"] <= as_of]
+        if not rows:
+            return None
+        return {"amount": sum(row["amount"] for row in rows), "qty": sum(row["qty"] for row in rows),
+                "date": max(row["date"] for row in rows)}
+
     def investment_lines(self, as_of: str, account_id: int | None = None) -> list[dict]:
         """Every posted line of a non-cash asset (and dividend lines), oldest first — for positions."""
         where = "le.date <= ? AND (le.asset_id NOT IN (SELECT id FROM financial_assets WHERE is_cash = 1)" \

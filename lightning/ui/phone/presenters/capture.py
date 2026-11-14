@@ -10,6 +10,12 @@ def _entry_accounts(c) -> list:
     return [a for a in c.accounts.list(active_only=True) if a.account_type.value not in ("PHYSICAL_ASSET", "OTHER_ASSET")]
 
 
+def _plain(amount) -> str:
+    """An amount as typed into the field: 95, not 95.00 (the figure is the service's; this only trims the zeros)."""
+    text = f"{amount:f}"
+    return text.rstrip("0").rstrip(".") if "." in text else text
+
+
 def _capture_context(c, account) -> dict:
     """What the phone's Add sheet shows besides the fields (3AN3): the accounts its From chip can change to, and the
     usual categories for money out and money in as chips, most used first (computed from this person's history in
@@ -26,10 +32,13 @@ def _capture_context(c, account) -> dict:
     spend_ids = {a.id for a in spend}
     return {"entry_accounts": [{"id": a.id, "name": a.name} for a in spend],
             "usual_payees": [p for p in c.transactions.usual_payees() if p["account_id"] in spend_ids][:3],
+            # IV-11M4 Log again: the last three payees paid, with what that payment was (a tap fills it in)
+            "log_again": [p | {"amount_text": _plain(p["amount"])} for p in c.transactions.recent_expenses()
+                          if p["account_id"] in spend_ids],
             "usual_accounts": {name: a_id for name, a_id in c.transactions.usual_accounts().items() if a_id in spend_ids},
             "bills_due": len(bill_state.unpaid_bills(c.planning, today(), bill_state.SOON_DAYS)),
-            "chips_out": named(c.transactions.usual_capture_categories("out", hour=hour)),
-            "chips_in": named(c.transactions.usual_capture_categories("in", hour=hour))}
+            "chips_out": named(c.transactions.usual_capture_categories("out", 5, hour=hour)),
+            "chips_in": named(c.transactions.usual_capture_categories("in", 5, hour=hour))}
 
 
 def present(request, c, context: dict) -> dict:

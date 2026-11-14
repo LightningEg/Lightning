@@ -311,7 +311,9 @@ class CashForecaster:
                                       deposit_cash, emergency, rest, circle_in, circle_out, reserved_bills))
             opening = closing
 
-        next_income = next((p for p in upcoming if p.item.is_income), None)
+        # Payday is the salary only (BT-7AZ): other income before it is money in inside the window.
+        payday_ids = self.planning.payday_item_ids()
+        next_income = next((p for p in upcoming if p.item.is_income and p.item.id in payday_ids), None)
         if next_income:
             next_date, next_estimated = next_income.due_date, False
         elif average:
@@ -321,7 +323,9 @@ class CashForecaster:
         before = [p for p in upcoming if not p.item.is_income and (next_date is None or p.due_date < next_date)]
         instalments = -sum((e.amount for e in circle_events if e.kind == "INSTALLMENT"
                             and (next_date is None or e.date < next_date)), ZERO)
-        safe, parts, before_total = self._safe_to_spend(free, before, next_date, day, rows, instalments)
+        income_before = sum((self.planning.amount_in_base(p, p.still_owed, day) for p in upcoming
+                             if p.item.is_income and next_date is not None and p.due_date < next_date), ZERO)
+        safe, parts, before_total = self._safe_to_spend(free, before, next_date, day, rows, instalments, income_before)
         return CashForecast(fmt_date(day), free, average, average_months, next_date, next_estimated,
                             safe, parts, rows, [p for p in upcoming if p.due_date <= next_date] if next_date else upcoming[:10],
                             before, dated_cash_forecast(self.reporting, *self.scheduled_inputs(day, horizon_end), day, horizon_end),
@@ -415,9 +419,9 @@ class CashForecaster:
         return payments, list(events) + _due_circle_events(self.deposits, day)
 
     def _safe_to_spend(self, free: Decimal, before: list[Payment], until: str | None, day: date,
-                       rows: list[ForecastMonth], instalments: Decimal = ZERO
+                       rows: list[ForecastMonth], instalments: Decimal = ZERO, income_before: Decimal = ZERO
                        ) -> tuple[Decimal, list[tuple[str, Decimal]], Decimal]:
-        """Free cash less what is already promised before the next income.
+        """Free cash, plus income other than the salary that lands first, less what is already promised before payday.
 
         Budget, goal and savings needs count for every month until the next income, not just this one: between
         jobs, next month's spending still comes out of today's cash. The month the income lands in
@@ -446,8 +450,8 @@ class CashForecaster:
         emergency, rest = emergency.quantize(Decimal("0.01")), rest.quantize(Decimal("0.01"))
         bills_part = (label("payments_before_next_income"), -bills)
         circle_part = ("Gam'eya instalments before next income", -instalments)
-        parts = [(label("free_cash"), free), bills_part, ("Bill cash already set aside", saved_for_bills), circle_part,
+        parts = [(label("free_cash"), free), (label("income_before_payday"), income_before), bills_part, ("Bill cash already set aside", saved_for_bills), circle_part,
                  (label("left_in_plan_after_bills"), -spending), (label("saving_for_goals"), -goals),
                  (label("emergency_top_up"), -emergency), (label("savings_target_rest"), -rest)]
-        return (free - bills + saved_for_bills - instalments - spending - goals - emergency - rest,
+        return (free + income_before - bills + saved_for_bills - instalments - spending - goals - emergency - rest,
                 [(name, value) for name, value in parts if value or name == label("free_cash")], bills)

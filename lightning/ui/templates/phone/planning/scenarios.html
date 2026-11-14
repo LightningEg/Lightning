@@ -18,15 +18,15 @@
 <button class="btn primary phone-save">{{ 'Compare'|tr(locale) }}</button></form>
 <section class="phone-section" aria-labelledby="scn-result">
   <header class="phone-section-head"><h2 id="scn-result">{{ 'Comparison'|tr(locale) }}</h2></header>
-  {% macro low_text(low) %}{% if low %}<bdi class="fig">{{ low.balance|money(False, 0) }}</bdi> · {{ low.date }}{% else %}{{ 'Unavailable'|tr(locale) }}{% endif %}{% endmacro %}
-  {% macro short_text(f) %}{% if f.first_shortfall %}<bdi class="fig">{{ f.first_shortfall.balance|money(False, 0) }}</bdi> · {{ f.first_shortfall.date }}{% elif f.unvalued_currencies %}{{ 'Unavailable'|tr(locale) }}{% else %}{{ 'No shortfall'|tr(locale) }}{% endif %}{% endmacro %}
+  {# BV-7AW: the same measure as the hero: Cash planning's Lowest point ahead, day by day #}
+  {% set moved = comparison.scenario_plan_low %}{% set below = comparison.first_below_zero %}
   <dl class="phone-facts">
-    <div><dt>{{ fig.lowest_scheduled_cash.label }} · {{ 'Baseline'|tr(locale) }}</dt><dd>{{ low_text(comparison.baseline_low) }}</dd></div>
-    <div><dt>{{ fig.lowest_scheduled_cash.label }} · {{ 'Scenario'|tr(locale) }}</dt><dd>{{ low_text(comparison.scenario_low) }}</dd></div>
-    <div><dt>{{ 'First shortfall'|tr(locale) }} · {{ 'Baseline'|tr(locale) }}</dt><dd>{{ short_text(comparison.baseline) }}</dd></div>
-    <div><dt>{{ 'First shortfall'|tr(locale) }} · {{ 'Scenario'|tr(locale) }}</dt><dd>{{ short_text(comparison.scenario) }}</dd></div>
+    {% if comparison.plan_low %}<div><dt>{{ fig.lowest_point_ahead.label }} · {{ 'Your plan'|tr(locale) }}</dt><dd><bdi class="fig">{{ comparison.plan_low.closing|money(False, 0) }}</bdi> · {{ comparison.plan_low.month }}</dd></div>{% endif %}
+    {% if comparison.assumptions %}<div><dt>{{ fig.lowest_point_ahead.label }} · {{ 'With this change'|tr(locale) }}</dt><dd>{% if moved %}<bdi class="fig">{{ moved[1]|money(False, 0) }}</bdi> · {{ moved[2] }}{% else %}{{ 'Unavailable'|tr(locale) }}{% endif %}</dd></div>
+    <div><dt>{{ 'First day below zero'|tr(locale) }}</dt><dd>{% if below %}<bdi class="fig">{{ below[1]|money(False, 0) }}</bdi> · {{ below[0] }}{% elif moved %}{{ 'Stays above zero'|tr(locale) }}{% else %}{{ 'Unavailable'|tr(locale) }}{% endif %}</dd></div>{% endif %}
   </dl>
-  <p class="phone-note">{{ 'Scheduled bills, income and certificates only. Cash planning’s lowest point ahead also counts your usual everyday spending, so it is lower.'|tr(locale) }}</p>
+  <p class="phone-note">{{ 'The lowest point ahead is Cash planning’s; the change moves each day by what it does to your scheduled cash, so a late payment shows on the day it hurts.'|tr(locale) }}</p>
+  {% if plan_url %}<a class="phone-row" href="{{ plan_url }}"><span>{{ 'Plan this purchase'|tr(locale) }}<small>{{ 'Nothing is saved until you save it.'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
   {% set missing_rates = (comparison.baseline.unvalued_currencies + comparison.scenario.unvalued_currencies)|unique|list %}{% if missing_rates %}<a class="phone-row" href="/settings?section=currencies&amp;tab=rates"><span>{{ 'Missing rates'|tr(locale) }}<small>{{ missing_rates|join(', ') }}</small></span><b>{{ 'Update the rate'|tr(locale) }}</b></a>{% endif %}
   {% if comparison.assumptions %}<div class="phone-rows">{% for assumption in comparison.assumptions %}<div class="phone-row"><span>{{ assumption }}</span></div>{% endfor %}</div>{% else %}<p class="phone-note">{{ 'No changes selected.'|tr(locale) }}</p>{% endif %}
 </section>
