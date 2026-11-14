@@ -161,14 +161,10 @@ async def plan_page(request: Request):
         needs = [{"label": f"{len(late)} payments are late", "detail": names, "href": "/plan/catch-up",
                   "action": "Catch up"}]
     status = page_status.cash_plan(forecast.safe_to_spend, forecast.next_income_date, has_income)
-    afford, afford_error = None, ""
+    afford, afford_error, afford_plan_url = None, "", ""
     raw_afford = request.query_params.get("afford", "").replace(",", "").strip()
     if raw_afford:
-        from lightning.planning.afford import can_afford
-        try:
-            afford = can_afford(Decimal(raw_afford), forecast.safe_to_spend, forecast.free_cash, forecast.next_income_date)
-        except (ArithmeticError, ValueError):
-            afford_error = "Type an amount above zero."
+        afford, afford_error, afford_plan_url = _afford_answer(c, request, raw_afford, forecast, day)
     afford_account = _afford_account_answer(c, request, afford, day)
     has_accounts = bool(c.accounts.list())
     has_items = bool(c.planning.items())
@@ -180,7 +176,7 @@ async def plan_page(request: Request):
                   afford_date=str(request.query_params.get("afford_date", "")),
                   afford_account_id=str(request.query_params.get("afford_account", "")), tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,
                   lead=lead, needs=needs, status=status, afford=afford, afford_error=afford_error,
-                  afford_amount=raw_afford,
+                  afford_amount=raw_afford, afford_plan_url=afford_plan_url,
                   gameya_owed=position.gameya_still_to_pay,
                   notes=[], plan=plan, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
                   next_payments=next_payments, late_days=late_days, circle_rows=circle_rows,
@@ -690,6 +686,33 @@ async def delete_item(request: Request, item_id: int):
 
 
 # --------------------------------------------------------------- payments
+def _afford_answer(c, request, raw: str, forecast, day):
+    """Can I afford this? (BV-7AW, r37 W7) The date always counts: a past one is refused; up to the next payday the
+    answer is Safe to spend's; after it, the plan's Lowest point ahead with the purchase paid that day. Returns
+    (answer, error, Plan this purchase link)."""
+    from lightning.planning.afford import after_payday, can_afford, plan_purchase_url
+    try:
+        amount = Decimal(raw)
+        afford = can_afford(amount, forecast.safe_to_spend, forecast.free_cash, forecast.next_income_date)
+    except (ArithmeticError, ValueError):
+        return None, "Type an amount above zero.", ""
+    raw_date = str(request.query_params.get("afford_date", "")).strip()
+    try:
+        on = parse_date(raw_date) if raw_date else day
+    except (ValueError, LightningError):
+        return None, "Type a date like 2026-12-10.", ""
+    if on < day:
+        return None, "Pick today or a later date.", ""
+    raw_account = str(request.query_params.get("afford_account", ""))
+    accounts = [a for a in _paying_accounts(c) if a.currency == c.base_currency]
+    account = next((a for a in accounts if raw_account.isdigit() and a.id == int(raw_account)), None)
+    payer = account or (accounts[0] if accounts else None)
+    if payer is not None and forecast.next_income_date and fmt_date(on) > forecast.next_income_date:
+        later = after_payday(c.forecaster, amount, on, payer.id, day, max(on, day + timedelta(days=90)))  # not money
+        afford = later or afford
+    return afford, "", plan_purchase_url(amount, fmt_date(on), account.id if account else None)
+
+
 def _afford_account_answer(c, request, afford, day):
     """Can I afford this? on a chosen account and date: that account's day-end balance on that date, scheduled-only,
     beside the plan answer, with the assumptions and a link to record it only if the person confirms."""
@@ -893,10 +916,17 @@ async def scenario_page(request: Request):
     payments, _ = c.forecaster.scheduled_inputs(day, end)
     from .. import kpis, status
     lead, chart = kpis.scenario(comparison)
+    moved = comparison.scenario_plan_low
     page_status = status.scenario(bool(comparison.assumptions), comparison.plan_low.closing if comparison.plan_low else None,
-                                  comparison.change)
+                                  comparison.change, moved[1] if moved else None,
+                                  calendar.month_name[int(moved[0][5:7])] if moved else "")
+    plan_url = ""
+    if comparison.assumptions and values["purchase"] and not error:
+        from lightning.planning.afford import plan_purchase_url
+        plan_url = plan_purchase_url(Decimal(values["purchase"].replace(",", "")), values["purchase_date"],
+                                     int(values["account_id"]))
     return render(request, "planning/scenarios.html", comparison=comparison, values=values, error=error, what=what,
-                  lead=lead, chart=chart, status=page_status,
+                  lead=lead, chart=chart, status=page_status, plan_url=plan_url,
                   day=str(day), end=str(end), payments=payments, occurrence_key=occurrence_key,
                   accounts=_paying_accounts(c))
 

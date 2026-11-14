@@ -28,9 +28,9 @@
     {% if aa.balance_on is none %}<p><b>{{ aa.account }}:</b> {{ 'Nothing is recorded in this account yet, so its balance on {date} is unknown.'|tr(locale, date=aa.on) }}</p>
     {% else %}<p class="{{ 'is-yes' if aa.enough else 'is-no' }}"><b>{{ aa.account }} · {{ aa.on }}:</b> {{ 'about {a} {c} before, {b} {c} after paying'|tr(locale, a=aa.balance_on|money(places=0), b=aa.after|money(places=0), c=base) }}{% if aa.enough %} · {{ 'enough' |tr(locale) }}{% else %} · {{ 'not enough from {date}'|tr(locale, date=aa.short_on) }}{% endif %}</p>
     <small class="muted">{{ 'Basis: posted cash plus bills, income and certificate events already scheduled for this account. It assumes no other spending, transfers or budget use before then.'|tr(locale) }}</small>{% endif %}
-    <p><a class="btn small" href="{{ afford_account.record_url }}">{{ 'Record this purchase'|tr(locale) }}</a> <small class="muted">{{ 'Nothing is recorded until you save it.'|tr(locale) }}</small></p></div>
+    <p><a class="btn small" href="{{ afford_account.record_url }}">{{ 'Record this purchase'|tr(locale) }}</a> {% if afford_plan_url %}<a class="btn small" data-popup-open href="{{ afford_plan_url }}">{{ 'Plan this purchase'|tr(locale) }}</a> {% endif %}<small class="muted">{{ 'Nothing is recorded until you save it.'|tr(locale) }}</small></p></div>
   {% endif %}
-  {% if afford and not afford_account %}<p class="afford-answer is-{{ afford.verdict }}" role="status">{{ afford.headline|tr(locale) }}</p>{% elif afford_error %}<p class="afford-answer is-no" role="status">{{ afford_error|tr(locale) }}</p>{% endif %}
+  {% if afford and not afford_account %}<p class="afford-answer is-{{ afford.verdict }}" role="status">{{ afford.headline|tr(locale) }}{% if afford_plan_url %} <a class="btn small" data-popup-open href="{{ afford_plan_url }}">{{ 'Plan this purchase'|tr(locale) }}</a>{% endif %}</p>{% elif afford_error %}<p class="afford-answer is-no" role="status">{{ afford_error|tr(locale) }}</p>{% endif %}
 </form></section>
 {% else %}{{ stat_tiles(stats, base, 'Your cash') }}{% endif %}
 

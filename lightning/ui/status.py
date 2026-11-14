@@ -214,12 +214,16 @@ def forecast_inputs(subjects: int) -> dict:
     return sentence("{n} accounts or currencies behind the forecast need a look.", n=subjects)
 
 
-def scenario(changed: bool, plan_low: Decimal | None, diff: Decimal | None) -> dict:
-    """What would this change do to my lowest point ahead? (IV-12Q2)"""
+def scenario(changed: bool, plan_low: Decimal | None, diff: Decimal | None,
+             low: Decimal | None = None, month: str = "") -> dict:
+    """What would this change do to my lowest point ahead? (IV-12Q2) ``low`` and ``month`` are the lowest point with
+    the change and the month it falls in: below zero, the headline says how short you would be (BV-7AW)."""
     if plan_low is None:
         return sentence("Add your recurring payments to compare scenarios.")
     if not changed or diff is None:
         return sentence("Your lowest point ahead is {amt}. Pick a change to compare.", amt=fmt(plan_low, 0))
+    if low is not None and low < ZERO and month:
+        return sentence("You would be {amt} short in {when}.", amt=fmt(-low, 0), when=month)
     if diff < ZERO:
         return sentence("This change lowers your lowest point ahead by {amt}.", amt=fmt(-diff, 0))
     if diff > ZERO:

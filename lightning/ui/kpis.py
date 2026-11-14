@@ -517,7 +517,7 @@ def scenario(result) -> tuple[dict | None, dict | None]:
     else:
         comparison = compare("with your plan as it is")
     lead = card(figure_label("lowest_point_ahead"), value, comparison, tone="over" if value < 0 else "hold",
-                chip_=chip(moved[0] if changed else low.month), key="scenario")
+                chip_=chip(moved[2] if changed else low.month), key="scenario")
     labels = [m for m, _, _ in result.months]
     series = [{"name": "Your plan", "tone": "reference", "dashed": True, "values": [b for _, b, _ in result.months],
                "mark_low": not changed}]
