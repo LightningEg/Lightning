@@ -1,16 +1,22 @@
 {% from "partials/icons.html" import icon_more with context %}
 {% extends "base.html" %}
 {% from "planning/_macros.html" import payment_row %}
+{# IV-7AX: keep the waterfall's existing layout, with keyboard-accessible links for its deductions. #}
+{% macro linked_breakdown(w) %}
+{% if w %}<div class="chart chart-waterfall" role="group" aria-label="{{ 'How safe to spend is worked out'|tr(locale) }}">
+  {% for r in w.rows %}{% set href = breakdown_links.get(r.label) %}{% set tag = 'a' if href else 'div' %}<{{ tag }} class="chart-fall-row is-{{ r.kind }}"{% if href %} href="{{ href }}"{% endif %}><span class="chart-fall-label">{{ r.label|tr(locale) }}</span><span class="chart-fall-track" aria-hidden="true"><i style="margin-left:{{ '%.2f'|format(r.left) }}%;width:{{ '%.2f'|format([r.width, 0.6]|max) }}%"></i></span><b class="chart-fall-value">{{ r.display_value|default(r.value)|money(r.kind in ('down','up')) }}</b></{{ tag }}>{% endfor %}
+</div>{% endif %}
+{% endmacro %}
 {% block title %}Cash planning{% endblock %}
 {% block heading %}{% from "partials/macros.html" import page_title %}{{ page_title('Cash planning'|tr(locale), status, as_of ~ ' to ' ~ (forecast.next_income_date or window_end), 'until payday' if forecast.next_income_date else 'the next 3 months') }}{% endblock %}
 
-{# 3AM3: the two links are page actions, in the header's More actions (A05), not two rows above the Lead #}
-{% block top_actions %}<details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">{{ icon_more() }}</summary><div><a href="/plan/scenarios">{{ 'Compare scenarios'|tr(locale) }}</a><a href="/plan/inputs">{{ 'Forecast inputs'|tr(locale) }}</a></div></details>{% endblock %}
+{# 3AM3: page actions stay in the header’s More actions (A05), above the Lead #}
+{% block top_actions %}<details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">{{ icon_more() }}</summary><div><a href="/plan/scenarios">{{ 'Compare scenarios'|tr(locale) }}</a><a href="/plan/inputs">{{ 'Forecast inputs'|tr(locale) }}</a><a href="/plan/reserves">{{ 'Reserves'|tr(locale) }}</a><a href="/payday">{{ 'Fund your payday plan'|tr(locale) }}</a></div></details>{% endblock %}
 {% block content %}
-{% from "partials/charts.html" import stat_tiles, kpi_row, trend, waterfall, bars, lead_card %}{% from "partials/macros.html" import needs_rows %}
+{% from "partials/charts.html" import stat_tiles, kpi_row, trend, bars, lead_card %}{% from "partials/macros.html" import needs_rows %}
 {% set f = forecast %}{% set p = plan %}
 {% if lead %}{% call lead_card(lead, base) %}<div class="lead-side-head" id="plan-build"><div><h3>{{ 'How safe to spend is worked out'|tr(locale) }}</h3><p>{{ "From free cash to safe to spend"|tr(locale) }}</p></div></div>
-    {{ waterfall(p.build) }}
+    {{ linked_breakdown(p.build) }}
     {# Feedback ticket 102: when only what is left in the budget pushes safe to spend below zero, the way out is the budget. #}
     {% set budget_part = f.safe_to_spend_parts|selectattr(0, 'equalto', fig.left_in_plan_after_bills.label)|map(attribute=1)|first|default(0) %}
     {% if f.safe_to_spend < 0 and budget_part < 0 and f.safe_to_spend - budget_part >= 0 %}<p class="notice">{{ "What is still planned to spend in your budget is more than your cash allows."|tr(locale) }} <a class="btn small" href="/budget">{{ 'Adjust your budget'|tr(locale) }}</a></p>
@@ -37,12 +43,12 @@
 {% if not lead %}<header class="overview-section-head inv-head" id="plan-build"><h2>{{ 'How is safe to spend worked out?'|tr(locale) }}</h2><span>Today to {{ f.next_income_date or 'three months from now' }}</span></header>
 <section class="card wide-card"><div class="overview-split">
   <section><div class="overview-block-head"><div><h3>{{ "From free cash to safe to spend"|tr(locale) }}</h3></div></div>
-    {{ waterfall(p.build) }}
+    {{ linked_breakdown(p.build) }}
     {# Feedback ticket 102: when only what is left in the budget pushes safe to spend below zero, the way out is the budget. #}
     {% set budget_part = f.safe_to_spend_parts|selectattr(0, 'equalto', fig.left_in_plan_after_bills.label)|map(attribute=1)|first|default(0) %}
     {% if f.safe_to_spend < 0 and budget_part < 0 and f.safe_to_spend - budget_part >= 0 %}<p class="notice">{{ "What is still planned to spend in your budget is more than your cash allows."|tr(locale) }} <a class="btn small" href="/budget">{{ 'Adjust your budget'|tr(locale) }}</a></p>
     {% elif f.safe_to_spend < 0 %}<p class="notice">{{ "Promised payments are larger than your free cash."|tr(locale) }}</p>{% endif %}
-    <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><tbody>{% for name, value in p.safe_display_parts %}<tr><td>{{ name }}</td><td class="num">{{ value|money(not loop.first) }}</td></tr>{% endfor %}<tr><th>{{ fig.safe_to_spend.label }}</th><th class="num">{{ f.safe_to_spend|money }}</th></tr></tbody></table></details></section>
+    <details class="chart-table"><summary>{{ 'Show the numbers'|tr(locale) }}</summary><table><tbody>{% for name, value in p.safe_display_parts %}<tr><td>{% if breakdown_links.get(name) %}<a href="{{ breakdown_links[name] }}">{{ name|tr(locale) }}</a>{% else %}{{ name }}{% endif %}</td><td class="num">{{ value|money(not loop.first) }}</td></tr>{% endfor %}<tr><th>{{ fig.safe_to_spend.label }}</th><th class="num">{{ f.safe_to_spend|money }}</th></tr></tbody></table></details></section>
 {% else %}<section class="card wide-card"><div class="overview-split is-single">
 {% endif %}  <section id="plan-next"><div class="overview-block-head"><div><h3>{{ "The next 30 days"|tr(locale) }}</h3><p>{{ as_of }} to {{ window_end }} · {{ 'money in above the line, payments below'|tr(locale) }}</p></div><a class="quiet-link" href="/plan/recurring">{{ 'Recurring'|tr(locale) }}</a></div>
     {% if p.marks and not lead %}<div class="timeline{{ ' has-in' if p.marks|selectattr('income')|list }}" role="img" aria-label="Payments in the next 30 days">

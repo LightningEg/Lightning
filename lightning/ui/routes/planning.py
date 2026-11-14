@@ -134,6 +134,11 @@ async def plan_page(request: Request):
     late_days = {(p.item.id, p.due_date): p.days_late(day) for p in next_payments if p.days_late(day)}
     circle_rows = _circle_rows(c, day, window_end)
     plan = visuals.cash_plan(c, forecast, day)
+    # IV-7AX: each deduction leads to the page that controls it; values stay with the forecast.
+    breakdown_links = {label("left_in_plan_after_bills"): "/budget",
+                       label("saving_for_goals"): "/plan/reserves",
+                       label("emergency_top_up"): "/plan/reserves",
+                       label("savings_target_rest"): "/settings?section=financial-health#health-limit-savings_rate"}
     # Honest numbers (A01): with no income planned there is nothing to forecast from.
     has_income = bool(c.planning.items((PlanKind.INCOME,)))
     stats = _plan_stats(forecast, plan, day, has_income)
@@ -178,7 +183,7 @@ async def plan_page(request: Request):
                   lead=lead, needs=needs, status=status, afford=afford, afford_error=afford_error,
                   afford_amount=raw_afford, afford_plan_url=afford_plan_url,
                   gameya_owed=position.gameya_still_to_pay,
-                  notes=[], plan=plan, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
+                  notes=[], plan=plan, breakdown_links=breakdown_links, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
                   next_payments=next_payments, late_days=late_days, circle_rows=circle_rows,
                   upcoming=[p for p in next_payments if p not in late],  # IV-12Z2: the PC lists late bills in Needs you only
                   as_of=fmt_date(day), window_end=fmt_date(window_end),
@@ -815,6 +820,11 @@ async def settle_payment(request: Request, item_id: int):
                 raise LightningError("Choose how this payment was settled.")
     except LightningError as exc:
         return redirect(f"/plan/items/{item_id}/pay?" + urlencode({"due": due, "back": back}), exc.message)
+    if item.is_income and action in ("record", "link") and item.category_id:
+        category = c.categories.get(item.category_id)
+        if category.code == "EXP.WORK.SALARY" or category.code.startswith("EXP.WORK.SALARY."):
+            # Offer the optional step once the salary is posted; opening it assigns no cash.
+            return redirect("/payday", message)
     return redirect(back, message)
 
 
