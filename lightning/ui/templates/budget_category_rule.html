@@ -5,9 +5,13 @@
 <section class="card form-card"><h2 id="app-popup-title">{{ category.name }}</h2>
 <p class="muted">{{ 'Change the monthly limit for this category only.'|tr(locale) }} {{ month|month(locale) }}</p>
 {% include "partials/budget_limit_spent.html" %}
+{% if line and line.one_off %}<p class="muted small">{{ 'Limit for this month only'|tr(locale) }}</p>{% endif %}
 <form method="post" action="/budget/rule/{{ category.id }}" class="stack">
 <input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
 <div class="field"><label for="category-limit">{{ 'Amount or %'|tr(locale) }}</label><input id="category-limit" name="rule" value="{{ rule }}" inputmode="decimal" autocomplete="off"></div>
+<p class="muted small">{{ 'New limits apply from this month onward.'|tr(locale) }}</p>
 <button class="btn primary">{{ 'Save limit'|tr(locale) }}</button>
 </form>
-<form method="post" action="/budget/rule/{{ category.id }}"><input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="rule" value=""><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn">{{ 'Stop tracking'|tr(locale) }}</button></form></section>{% endblock %}
+<form method="post" action="/budget/rule/{{ category.id }}"><input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="rule" value=""><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn">{{ 'Stop tracking'|tr(locale) }}</button></form>
+{% include 'partials/budget_exclusion_action.html' %}
+</section>{% endblock %}
