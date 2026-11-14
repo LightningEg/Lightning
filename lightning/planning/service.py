@@ -785,7 +785,8 @@ class PlanningService:
 
     @request_cached(deep=True)  # rows hold lists of item names
     def budget_fill_schedule(self, month: str) -> dict[int, dict]:
-        """Bill and subscription amounts due in a month, grouped by spending category.
+        """Bill and subscription amounts due in a month, grouped by spending category: {"amount", "paid", "items"},
+        ``paid`` being the part a recorded transaction already paid.
 
         Loans are deliberately left to ``loan_payments_by_category``; budget rules already add
         those automatically when a category has no explicit rule.
@@ -800,11 +801,13 @@ class PlanningService:
             for payment in self.payments(item, last):
                 if payment.due_date < fmt_date(first) or payment.status == PaymentStatus.SKIPPED:
                     continue
-                row = out.setdefault(item.category_id, {"amount": ZERO, "items": []})
+                row = out.setdefault(item.category_id, {"amount": ZERO, "paid": ZERO, "items": []})
                 value = self.amount_in_base(payment, payment.amount, payment.due_date)
                 reserve = (funded.get((item.id, payment.transaction_id), ZERO) if payment.transaction_id
                            else cover.get((item.id, payment.due_date), ZERO))
                 row["amount"] += max(value - reserve, ZERO)
+                if payment.transaction_id:  # already in the month's spending (NF-12AL2 paces the rest)
+                    row["paid"] += max(value - reserve, ZERO)
                 row["items"].append(item.name)
         return out
 
