@@ -6,7 +6,6 @@ import json
 import sys
 import threading
 import types
-from datetime import date
 
 import pytest
 
@@ -14,6 +13,12 @@ from lightning.desktop import window as desktop_window
 
 ORIGIN = "http://127.0.0.1:8765"
 ALLOWED = ("http", "127.0.0.1", 8765)
+TODAY = "2027-01-02"
+
+
+@pytest.fixture(autouse=True)
+def application_day(monkeypatch):
+    monkeypatch.setenv("LIGHTNING_TODAY", TODAY)
 
 
 def test_prefs_missing_corrupt_or_wrong_shape_read_as_empty(tmp_path):
@@ -70,7 +75,7 @@ def test_one_balloon_for_the_first_valid_item(monkeypatch, tmp_path):
     second = dict(GOOD, id="bill:8")
     calls, seen = _run({"enabled": True, "items": [GOOD, second]}, monkeypatch, tmp_path)
     assert len(calls) == 1
-    assert seen == {"bill:7": date.today().isoformat()}
+    assert seen == {"bill:7": TODAY}
 
 
 def test_none_when_disabled(monkeypatch, tmp_path):
@@ -97,12 +102,12 @@ def test_bad_item_does_not_hide_the_next_good_one(monkeypatch, tmp_path):
 
 
 def test_an_item_seen_today_is_not_shown_again(monkeypatch, tmp_path):
-    desktop_window._write_reminder_prefs(tmp_path / "prefs.json", {"bill:7": date.today().isoformat()})
+    desktop_window._write_reminder_prefs(tmp_path / "prefs.json", {"bill:7": TODAY})
     calls, _seen = _run({"enabled": True, "items": [GOOD]}, monkeypatch, tmp_path)
     assert calls == []
 
 
 def test_an_item_seen_yesterday_is_shown(monkeypatch, tmp_path):
-    desktop_window._write_reminder_prefs(tmp_path / "prefs.json", {"bill:7": "2000-01-01"})
+    desktop_window._write_reminder_prefs(tmp_path / "prefs.json", {"bill:7": "2027-01-01"})
     calls, seen = _run({"enabled": True, "items": [GOOD]}, monkeypatch, tmp_path)
-    assert len(calls) == 1 and seen == {"bill:7": date.today().isoformat()}
+    assert len(calls) == 1 and seen == {"bill:7": TODAY}

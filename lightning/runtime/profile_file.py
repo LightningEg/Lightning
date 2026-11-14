@@ -15,8 +15,10 @@ import shutil
 import stat
 import zipfile
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import timezone
 from pathlib import Path
+
+from lightning.core.dates import wall_now
 
 from lightning.database.connection import Database
 from lightning.database.migrator import inspect_schema
@@ -51,7 +53,7 @@ class OpenedProfile:
 
 
 def _today() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return wall_now(timezone.utc).strftime("%Y-%m-%d")
 
 
 def _fsync_directory(folder: Path) -> None:

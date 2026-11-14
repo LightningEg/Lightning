@@ -49,10 +49,6 @@ Files: `lightning/ui/i18n.py`, templates.
 Do: "Gam’eya" → "Gam'eya" in the 2 places (`grep -rn "Gam’eya" lightning`); Arabic دهب → ذهب (glossary spelling: check `ai/GLOSSARY.md`), انت → إنت; Free cash's Arabic is the glossary's النقدية المتاحة everywhere, and brand-voice's «المتاح للصرف» is for Safe to spend only (check `grep -n "المتاح" guideline/brand-voice.md`). Curly apostrophes in visible English strings: `’` in place of `'` inside words, in templates and `ARABIC_UI` keys **and** their callers together (a key change must change every `|tr` that uses it).
 Done when: `grep -rc "دهب\|\bانت\b" lightning/ui/i18n.py` is 0 and `python -m pytest tests/test_arabic_no_english.py -q` passes.
 
-## 3BH7 Headings never show a code · S · #428
-Files: `lightning/ui/templates/investments/asset_form.html:4`, `lightning/ui/templates/investments/form.html:4`.
-Do: "Edit FND:AZMM" → "Edit {name}" with the asset's display name; "Edit OUT-…" → "Edit transaction" with the date and payee as the subtitle. One `|tr` key each with a value, not `'Edit ' ~ …`.
-Done when: `grep -rn "'Edit ' ~" lightning/ui/templates` is empty.
 
 ## 3BH8 More words found by r35 · S
 Needs 3BH1 merged first.

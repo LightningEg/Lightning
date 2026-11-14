@@ -42,7 +42,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime, time as clock, timedelta, timezone
 from decimal import Decimal
 
-from lightning.core.dates import fmt_date
+from lightning.core.dates import fmt_date, wall_now
 from lightning.core.plural import counted
 from lightning.fx import rate_for, save_rate
 from lightning.market.http import APP_AGENT, Polite
@@ -214,7 +214,7 @@ def due_month_ends(on: date, first: date, now: datetime) -> list[str]:
 
 def plan(c, on: date, now: datetime | None = None) -> Plan:
     """What to fetch: every held investment a source can name, with the month-ends it lacks a price for."""
-    now = now or datetime.now(timezone.utc)
+    now = now or wall_now(timezone.utc)
     result = Plan(fmt_date(on))
     first = c.reporting.first_activity_date()
     held: dict[int, list[str]] = {}
@@ -299,7 +299,7 @@ def _range(oldest: date, on: date) -> str:
 def gather(work: Plan, session=None, now: datetime | None = None, budget: float = 20.0) -> tuple[dict, list[str]]:
     """Fetch, touching no database: the closes found per asset id, and the sources that failed. Latest closes
     come from whole boards; history only for investments missing a month-end. Stops when `budget` runs out."""
-    now = now or datetime.now(timezone.utc)
+    now = now or wall_now(timezone.utc)
     session = session or Polite(min_interval=0.3, retries=2, timeout=10.0, user_agent=APP_AGENT)
     deadline = time.monotonic() + budget
     found: dict[int, dict[str, Decimal]] = {}
@@ -586,7 +586,7 @@ def apply_finished(c) -> str:
 def probe(session=None) -> list[tuple[str, bool, str]]:
     """Ask each source once, as Update prices would, and say what came back: (source, works, what)."""
     session = session or Polite(min_interval=0.3, retries=1, timeout=10.0, user_agent=APP_AGENT)
-    day = fmt_date(final_day("egx", datetime.now(timezone.utc)))
+    day = fmt_date(final_day("egx", wall_now(timezone.utc)))
     def count(n: int, one: str, many: str) -> str:
         return f"{n} {one if n == 1 else many}"
     checks = (
@@ -594,7 +594,7 @@ def probe(session=None) -> list[tuple[str, bool, str]]:
         ("Yahoo Finance", lambda: count(len(yahoo.fetch_history(session, "EG:COMI", "1mo")), "day", "days")
          + " of CIB's history"),
         ("Mubasher", lambda: count(len(mubasher.fetch(session).quotes), "Egyptian fund", "Egyptian funds")),
-        ("Banque Misr", lambda: count(len(banque_misr.fetch(session, fmt_date(date.today())).quotes),
+        ("Banque Misr", lambda: count(len(banque_misr.fetch(session, fmt_date(wall_now().date())).quotes),
                                                 "exchange rate", "exchange rates")),
     )
     results = []

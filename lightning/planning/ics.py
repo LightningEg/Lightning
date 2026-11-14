@@ -7,9 +7,9 @@ UID, so saving the file again updates the person's calendar instead of doubling 
 """
 from __future__ import annotations
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import date, timedelta, timezone
 
-from lightning.core.dates import fmt_date, month_of, parse_month
+from lightning.core.dates import fmt_date, month_of, parse_month, wall_now
 from lightning.core.money import fmt
 
 from .calendar import CalendarEntry, month_calendar
@@ -58,7 +58,7 @@ def payments_ics(planning, gameya, day: date, months: int = MONTHS) -> str:
     """Every payment from `day` through the end of the `months`th month that is still open, and the month's late
     payments (money still to pay; income that has not come is not put on a past day)."""
     currency = planning.transactions.base_currency
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    stamp = wall_now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Lightning//Upcoming payments//EN", "CALSCALE:GREGORIAN",
              "METHOD:PUBLISH", "X-WR-CALNAME:Lightning payments"]
     month = month_of(day)

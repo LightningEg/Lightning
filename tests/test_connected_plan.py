@@ -324,7 +324,9 @@ def test_over_plan_two_months_running_offers_to_move_room(c, setup):
     item = {i["label"]: i for i in ReviewInbox(c).items(today())}["Food & groceries over plan two months running"]
     assert "Over its plan in October and November, by up to 1,000 EGP. Move 1,000 from Transportation" in item["detail"]
     browser = _ScreenClient(create_app(c), "http://testserver")
-    assert "Food & groceries 5,000 → 6,000" in visible_text(browser.get(item["href"]).text)
+    dialog = visible_text(browser.get(item["href"]).text)
+    assert "Food & groceries 5,000 → 6,000" in dialog
+    assert "Food & groceries was over its plan two months running; Transportation had room both months." in dialog
     browser.post("/budget/move", data={"month": MONTH, "to": food, "from": transport, "amount": "1000"})
     plans = c.budgets.amounts_for(MONTH, loans=False, schedule=c.schedules.view())
     assert (plans[food][0], plans[transport][0]) == (Decimal("6000"), Decimal("2000"))

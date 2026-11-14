@@ -8,11 +8,11 @@ import os
 import re
 import threading
 import time
-from datetime import date
 from pathlib import Path
 from urllib.parse import urljoin, urlsplit
 
 from lightning import DISPLAY_VERSION
+from lightning.core.dates import today as clock_today
 from lightning.ui.entitlements import MARKETPLACE_HOST, OUTSIDE_PATHS
 
 _PYWEBVIEW_VERSION = "6.2.1"
@@ -80,7 +80,7 @@ def _native_reminder_loop(window, origin: str, allowed_origin: tuple[str, str, i
                         closed.wait(0.15)
                     data = json.loads(payload) if payload else {}
                     if data.get("enabled") is True and isinstance(data.get("items"), list):
-                        today = date.today().isoformat()
+                        today = clock_today().isoformat()
                         seen = {key: value for key, value in seen.items() if value == today}
                         for item in data["items"]:
                             if not isinstance(item, dict):

@@ -11,6 +11,8 @@ from datetime import date, datetime, timezone
 from pathlib import Path, PureWindowsPath
 from typing import Callable, Mapping
 
+from lightning.core.dates import wall_now
+
 _PROFILE_STEM = re.compile(
     r"(?P<name>.+)_(?P<day>\d{4}-\d{2}-\d{2})_(?P<sequence>\d{3,})_(?P<identity>[0-9a-fA-F]{8})\Z"
 )
@@ -310,7 +312,7 @@ def create_profile(
     )
     safe_name = _sanitize_profile_name(name)
     if created_at is None:
-        day = datetime.now(timezone.utc).date()
+        day = wall_now(timezone.utc).date()
     elif isinstance(created_at, datetime):
         moment = created_at.replace(tzinfo=timezone.utc) if created_at.tzinfo is None else created_at
         day = moment.astimezone(timezone.utc).date()
