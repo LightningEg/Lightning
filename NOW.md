@@ -2,7 +2,7 @@
 
 ## Claimed
 
-Reserved codes: none
+Reserved codes: r37 (Codex, investment workflow audit, 2026-11-14)
 
 | Who | Work | Files | Since |
 |---|---|---|---|
