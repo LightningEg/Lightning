@@ -56,6 +56,21 @@ class PlanningService:
     def _currency_of(self, account_id: int | None) -> str:
         return self.accounts.get(account_id).currency if account_id else self.transactions.base_currency
 
+    def flows(self, payments, day: date | str) -> tuple[Decimal, Decimal]:
+        """(money coming in, money going out) of these payments, in profile currency at the rate known on ``day``,
+        each at what is still owed; a payment with no rate yet counts as scheduled."""
+        coming = going = Decimal(0)
+        for p in payments:
+            try:
+                value = self.amount_in_base(p, p.still_owed, day)
+            except ValidationError:
+                value = p.still_owed
+            if p.item.is_income:
+                coming += value
+            else:
+                going += value
+        return coming, going
+
     def amount_in_base(self, payment_or_item: Payment | PlannedItem, amount: Decimal,
                        day: date | str) -> Decimal:
         """Value a native scheduled amount in profile currency at the rate known on ``day``."""
@@ -85,6 +100,29 @@ class PlanningService:
     def items(self, kinds: tuple[PlanKind, ...] | None = None, active_only: bool = True) -> list[PlannedItem]:
         items = self.repo.items(active_only)
         return [i for i in items if kinds is None or i.kind in kinds]
+
+    def payday_item_ids(self) -> set[int]:
+        """The income items whose dates are payday (BT-7AZ, owner 2026-11-14: payday is the salary only).
+
+        The items set up as the salary (category Salary or one under it); with none, the largest regular income
+        by what it brings in a year; with no regular income, every income item, so a one-off still ends the window."""
+        incomes = self.items((PlanKind.INCOME,))
+        if not incomes:
+            return set()
+        ids = [i.category_id for i in incomes if i.category_id is not None]
+        salary_cats = set()
+        if ids:
+            marks = ",".join("?" * len(set(ids)))
+            salary_cats = {r["id"] for r in self.db.all(
+                f"SELECT id FROM categories WHERE id IN ({marks}) "
+                "AND (code='EXP.WORK.SALARY' OR code LIKE 'EXP.WORK.SALARY.%')", tuple(set(ids)))}
+        salary = {i.id for i in incomes if i.category_id in salary_cats}
+        if salary:
+            return salary
+        regular = [i for i in incomes if per_year(i) > ZERO]
+        if regular:
+            return {max(regular, key=lambda i: (per_year(i), -i.id)).id}
+        return {i.id for i in incomes}
 
     def get(self, item_id: int) -> PlannedItem:
         item = self.repo.item(item_id)
@@ -678,14 +716,53 @@ class PlanningService:
         """Recurring income a month: what Cash planning › Recurring expects to come in. None without any.
 
         ``regular_only`` leaves out the lumps (quarterly and yearly items, and anything in the Bonus
-        category): the pay that arrives every month, which is what a raise changes (7L1)."""
+        category): the pay that arrives every month, which is what a raise changes (7L1). An item whose last
+        payment is behind us is no longer expected (NF-12AL1: a salary that ended is not part of a raise)."""
         day = today()
-        items = self.items((PlanKind.INCOME,))
+        items = [i for i in self.items((PlanKind.INCOME,)) if not self._ended(i, day)]
         if regular_only:
             items = [i for i in items if i.frequency in (Frequency.MONTHLY, Frequency.WEEKLY) and not self._is_bonus(i)]
         monthly = ((item, per_year(item) / 12) for item in items)
         total = sum((self.amount_in_base(item, amount, day) for item, amount in monthly if amount), ZERO)
         return total.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP) if total > 0 else None
+
+    def regular_income_months(self, first: str, last: str) -> dict[str, tuple[Decimal, str | None]]:
+        """Regular scheduled income month by month, `first` to `last` (yyyy-mm): a month of each monthly or weekly
+        income item (not the Bonus category) with a payment due that month, and the earliest first payment due
+        that month of an item that begins in it (None when nothing begins). A month without any is 0: a gap."""
+        end = fmt_date(parse_month(last)[1])
+        items = [i for i in self.items((PlanKind.INCOME,))
+                 if i.frequency in (Frequency.MONTHLY, Frequency.WEEKLY) and not self._is_bonus(i)]
+        out: dict[str, tuple[Decimal, str | None]] = {}
+        index = int(first[:4]) * 12 + int(first[5:7]) - 1
+        while (key := f"{index // 12}-{index % 12 + 1:02d}") <= last:
+            out[key] = (ZERO, None)
+            index += 1
+        day = today()
+        for item in items:
+            a_month = self.amount_in_base(item, per_year(item) / 12, day)
+            paid_in: set[str] = set()
+            for number, _, due in scheduled_dates(item, end):
+                key = due[:7]
+                if key not in out:
+                    continue
+                level, starts = out[key]
+                if key not in paid_in:
+                    level += a_month
+                    paid_in.add(key)
+                if number == 1:
+                    starts = min(starts, due) if starts else due
+                out[key] = (level, starts)
+        return {key: (level.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP), starts)
+                for key, (level, starts) in out.items()}
+
+    @staticmethod
+    def _ended(item, day: date) -> bool:
+        """True when a bounded item (an end date or a payment count) has no payment left on or after `day`."""
+        if not item.end_date and item.payment_count is None:
+            return False
+        dates = scheduled_dates(item, "2999-12-31")
+        return not dates or dates[-1][2] < fmt_date(day)
 
     def _is_bonus(self, item) -> bool:
         if item.category_id is None:
@@ -708,7 +785,8 @@ class PlanningService:
 
     @request_cached(deep=True)  # rows hold lists of item names
     def budget_fill_schedule(self, month: str) -> dict[int, dict]:
-        """Bill and subscription amounts due in a month, grouped by spending category.
+        """Bill and subscription amounts due in a month, grouped by spending category: {"amount", "paid", "items"},
+        ``paid`` being the part a recorded transaction already paid.
 
         Loans are deliberately left to ``loan_payments_by_category``; budget rules already add
         those automatically when a category has no explicit rule.
@@ -723,11 +801,13 @@ class PlanningService:
             for payment in self.payments(item, last):
                 if payment.due_date < fmt_date(first) or payment.status == PaymentStatus.SKIPPED:
                     continue
-                row = out.setdefault(item.category_id, {"amount": ZERO, "items": []})
+                row = out.setdefault(item.category_id, {"amount": ZERO, "paid": ZERO, "items": []})
                 value = self.amount_in_base(payment, payment.amount, payment.due_date)
                 reserve = (funded.get((item.id, payment.transaction_id), ZERO) if payment.transaction_id
                            else cover.get((item.id, payment.due_date), ZERO))
                 row["amount"] += max(value - reserve, ZERO)
+                if payment.transaction_id:  # already in the month's spending (NF-12AL2 paces the rest)
+                    row["paid"] += max(value - reserve, ZERO)
                 row["items"].append(item.name)
         return out
 

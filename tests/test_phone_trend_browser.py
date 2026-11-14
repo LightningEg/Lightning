@@ -34,6 +34,8 @@ def test_the_latest_trend_point_sits_in_its_months_column(c, monkeypatch, locale
                 ):
                     page.goto(host.origin + path)
                     page.wait_for_function("document.fonts.status === 'loaded'")
+                    if path == "/money":   # IV-11M7 (mockup v2.0): Money's line lives in Net worth's sheet
+                        page.locator("details.phone-sheet-row > summary").first.click()
                     figure = page.locator(chart).first
                     point = figure.locator(dot).last.bounding_box()
                     newest = figure.locator(labels).last.bounding_box()

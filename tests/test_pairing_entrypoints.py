@@ -52,7 +52,8 @@ def test_locked_picker_leads_to_nearby_pairing(device, locale):
     page = client.get('/profiles')
     links = Links(page.text).links
     if phone:
-        assert ('/profiles/journal/join', 'button button-primary', ()) in links
+        # IV-11M8 (mockup v2.0): the empty phone's Welcome leads with Set up Lightning; pairing is its quiet third link
+        assert ('/profiles/journal/join', 'v2-welcome-link is-quiet', ()) in links
     else:
         assert ('/profiles/connect', 'button button-primary', ()) in links
         assert ('/profiles/journal/join', 'text-link', ()) in links

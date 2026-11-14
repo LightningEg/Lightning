@@ -43,7 +43,7 @@ def test_every_page_renders_in_the_phone_frame(phone, path):
     assert "viewport-fit=cover" in html and "/static/phone-bundle.css" in html
     assert "/static/phone-fields.js" in html  # a tapped field opens empty, its old text back if left empty
     names = re.findall(r'class="phone-tab-name">([^<]+)<', html)
-    assert names == ["Home", "Budget", "Add", "Activity", "Money"]  # IV-3AY10: Home, Budget, Add, Activity, Money
+    assert names == ["Home", "Budget", "Add", "Plan", "Money"]  # IV-11M1 (owner, 2026-11-14): Plan replaces Activity
 
 
 def test_the_chosen_section_and_the_period_words(phone):
@@ -52,8 +52,10 @@ def test_the_chosen_section_and_the_period_words(phone):
     assert re.search(r'class="phone-tab is-chosen" href="/" aria-current="page"', phone.get("/").text)  # Home, IV-3AY10
     moved = phone.get("/?period=month", follow_redirects=False)  # 3AY10: the older Overview is gone
     assert moved.status_code in (302, 303) and moved.headers["location"] == "/money/report?period=month"
-    assert re.search(r'class="phone-tab is-chosen" href="/money"', phone.get("/plan").text)  # Cash planning lives under Money
-    assert re.search(r'class="phone-tab is-chosen" href="/activity"', phone.get("/transactions").text)  # redirected to Activity
+    assert re.search(r'class="phone-tab is-chosen" href="/plan"', phone.get("/plan").text)  # IV-11M1: Cash planning is the Plan slot
+    assert re.search(r'class="phone-tab is-chosen" href="/plan"', phone.get("/plan/loans").text)
+    activity = phone.get("/transactions").text  # redirected to Activity, reached from Money
+    assert re.search(r'class="phone-tab is-chosen" href="/money"', activity) and 'class="phone-back" href="/money"' in activity
 
 
 def test_the_pc_keeps_its_own_frame(tmp_path):
@@ -66,7 +68,7 @@ def test_the_pc_keeps_its_own_frame(tmp_path):
     assert 'class="shell"' in html and "phone-tabbar" not in html and "phone.css" not in html
 
 
-@pytest.mark.parametrize("path, marker", [("/budget?period=month", 'class="phone-row phone-budget-cat'), ("/plan", 'id="plan-build"'),
+@pytest.mark.parametrize("path, marker", [("/budget?period=month", 'class="phone-row phone-budget-cat'), ("/plan", 'id="plan-next"'),
                                           ("/investments", 'id="holdings-heading"')])
 def test_budget_cash_and_investments_have_phone_designs(phone, path, marker):
     html = phone.get(path).text
@@ -155,7 +157,7 @@ def test_a_profile_can_be_created_where_hard_links_are_refused(tmp_path, monkeyp
 def test_settings_on_the_phone_leads_to_pairing_sms_and_the_profile(phone):
     html = phone.get("/settings").text
     assert 'href="/profiles/devices"' in html and 'href="/sms"' in html and 'href="/profiles"' in html
-    assert '<table' not in html and 'settings-row' in html  # Settings itself is rows, not a stacked table
+    assert '<table' not in html and 'phone-row' in html  # Settings itself is rows, not a stacked table (IV-11M8, mockup v2.0: phone rows)
     assert "Pair a PC" in phone.get("/profiles/devices").text
 
 
@@ -167,10 +169,10 @@ def test_one_navigation_the_app_bar_title_is_plain_text_and_every_old_menu_page_
         html = phone.get(path).text
         assert "phone-page-menu" not in html and "phone-page-grid" not in html and "⌄" not in html, path
     assert 'class="phone-appbar-title"' in phone.get("/").text
-    tabs = ("/", "/budget", "/activity", "/money")
+    tabs = ("/", "/budget", "/plan", "/money")   # IV-11M1: the Plan slot
     reviews = phone.get("/money/reviews").text
     for href in ("/investments", "/money/accounts", "/money/bills", "/settings", "/financial-health", "/plan/reserves",
-                 "/money/reviews"):
+                 "/money/reviews", "/activity", "/activity?tab=review"):
         assert f'href="{href}"' in money, href  # Money reaches every page More used to reach
     for href in ("/money/report", "/plan", "/birdview/expenses", "/review"):
         assert f'href="{href}"' in reviews, href  # the analysis, behind Money's one Reports and reviews row (IV-11H)
@@ -375,8 +377,8 @@ def test_the_safe_to_spend_card_opens_its_own_explanation():  # F11 (r24)
     from lightning.ui.routes.dashboard import _safe_tile
     tile = _safe_tile(SimpleNamespace(next_income_date="2026-12-01", safe_to_spend=Decimal("100"), free_cash=Decimal("400")))
     assert tile["href"] == "/plan#safe-section"
-    phone_plan = Path(__file__).resolve().parents[1] / "lightning/ui/templates/phone/planning/plan.html"
-    assert 'id="safe-section"' in phone_plan.read_text(encoding="utf-8")
+    phone_home = Path(__file__).resolve().parents[1] / "lightning/ui/templates/phone/home.html"
+    assert 'id="home-safe"' in phone_home.read_text(encoding="utf-8")   # IV-11M6: on the phone, Home's card opens it
 
 
 def test_cash_planning_lists_the_next_payments_before_the_secondary_cash_figures(c):  # F6 (r24)
@@ -396,7 +398,7 @@ def test_money_names_each_place_once_and_arabic_transfers_read_from_the_first_ac
     import re
     money = phone.get("/money").text
     for href in ("/investments", "/plan/reserves", "/financial-health", "/money/reviews"):
-        assert money.count(f'class="phone-row" href="{href}"') == 1, href
+        assert money.count(f'href="{href}"') == 1, href   # IV-11M7: Investments is its card's Open link
     session = token(phone.get("/accounts/1/transaction/new").text, "__session")
     try:
         phone.post("/settings/locale", data={"locale": "ar", "__session": session})
@@ -439,8 +441,9 @@ def test_phone_settings_are_the_phones_rows_and_the_rest_is_best_on_a_pc(phone):
     """IV-11H (C11.3): Appearance, Language, This phone, Bank SMS, Backup, Privacy, About and licences, Delete your
     data; the PC's tools (sale factors, target allocation, price files) are one Best on your PC line, not sections."""
     html = phone.get("/settings").text
-    for words in ("Appearance", "Language", "This phone", "Bank SMS", "Back up now", "Read the privacy notice", "About and licences",
-                  "Delete your data", "Best on your PC"):
+    # IV-11M8 (mockup v2.0): a profile card, then How it looks, Your data and Safety cards
+    for words in ("How it looks", "Language", "Your data", "Safety", "Bank messages", "Back up now", "Read the privacy notice", "About and licences",
+                  "Delete your data", "Best on your PC", "Encrypted on this phone"):
         assert words in html, words
     assert 'href="https://lightningeg.com/privacy.html#app"' in html and 'href="/settings/licences"' in html
     for pc in ("Sale factors", "Ask an AI", "Settings in each tab", "another computer"):

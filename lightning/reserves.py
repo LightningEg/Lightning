@@ -28,6 +28,12 @@ class CashReserveService:
     def _id(value, field: str) -> int:
         return parse_row_id(value, field)
 
+    @staticmethod
+    def totals(rows, emergency_set_aside: Decimal) -> tuple[Decimal, Decimal, Decimal]:
+        """(what the listed goals hold, what they aim for, everything set aside with the emergency fund): the phone's Set aside."""
+        held = sum((r["allocated"] for r in rows), Decimal(0))
+        return held, sum((r["target"] for r in rows if r["target"]), Decimal(0)), held + emergency_set_aside
+
     @request_cached(deep=True)
     def list_active(self):
         return [self._row(row) for row in self.db.all(

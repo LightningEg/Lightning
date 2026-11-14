@@ -32,9 +32,8 @@ def test_each_hero_opens_its_working(c, monkeypatch):
             browser = p.chromium.launch(executable_path=executable)
             page = browser.new_context(viewport={"width": 360, "height": 800}, is_mobile=True, has_touch=True).new_page()
             page.goto(host.origin + "/home")
-            assert page.locator('.phone-home-hero a.phone-home-lead[href="/budget/flexible"] .phone-lead').is_visible()
-            assert page.locator('a#home-safe[href="/plan"]').is_visible()
-            for path, rows, home in (("/money", "Cash you own", "/"), ("/budget", "Bills to pay", "/budget")):
+            assert page.locator('.phone-safe-card #home-safe .phone-lead').is_visible()   # IV-11M3 (mockup v2.0): Safe to spend's card
+            for path, rows, home in (("/home", "Free cash", "/plan"), ("/money", "Cash you own", "/"), ("/budget", "Bills to pay", "/budget")):
                 page.goto(host.origin + path)
                 hero = page.locator("details.phone-sheet-row:has(.phone-lead) > summary").first
                 panel = page.locator("details.phone-sheet-row:has(.phone-lead) .phone-sheet-panel").first

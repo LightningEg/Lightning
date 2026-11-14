@@ -26,9 +26,12 @@ from test_mohab_year import Answer, Mohab, _live_the_year
 # The PC's link or button -> the phone's taps. A step starting with "/" opens that page; with "?" it is
 # typed into the page's search box; anything else is tapped on the page.
 DETOURS = {
-    "Add account": ("Money", "See all", "Add account"),           # the PC's sidebar +; the phone's Accounts ⋯
-    "Held for others": ("Money", "See all", "Held for others"),   # an Accounts tab; Transactions opens on this month
-    "Accounts": ("Money", "See all"),                              # Money's Accounts heading: See all (IV-11H)
+    "Add account": ("Money", "accounts", "Add account"),           # the PC's sidebar +; the phone's Accounts ⋯
+    "Held for others": ("Money", "accounts", "Held for others"),   # an Accounts tab; Transactions opens on this month
+    "Change the plan": ("Edit plan",),
+    "Upcoming": ("Calendar",),
+    "Limits": ("Money", "Financial health"),                       # Reserves joined the Plan slot; Financial health stays on Money (IV-11M6)                                     # Plan › Coming up's Before payday card: Calendar (IV-11M6)                             # Budget's track: Categories, Spending, Edit plan (IV-11M5)
+    "Accounts": ("Money", "accounts"),                             # Money's Accounts card: All n accounts (IV-11H, IV-11M7)
     "Cash planning": ("Money", "Reports and reviews", "Cash planning"),  # the analysis is one row on Money (IV-11H)
     "Investments": ("Money", "Investments"),
     "Financial health": ("Money", "Financial health"),
@@ -110,7 +113,7 @@ class PhoneBrowser(screens.Browser):
                     if self.page is not None and self.page.path.split("?")[0] in ("/", "/home", "/money") and text not in MOVED:
                         self.detours[VIA_CASH_YOU_OWN] += 1   # Home names no account: Money's Accounts lists every balance
                         self._framed(super().click("Money"))
-                        self._framed(super().click("See all"))
+                        self._framed(super().click("accounts"))
                         return self._framed(super().click(text))
                     raise
         self.detours[text] += 1
@@ -263,4 +266,4 @@ def test_needs_you_and_get_set_up_say_what_a_tap_does(mohab):
     home = mohab.b.client.get("/").text
     assert 'id="home-hero"' in home
     if 'id="todo-heading"' in home:
-        assert re.search(r"<b>(Pay|Plan|Catch up|Sort|Review|Open) <svg class=\"chevron\"", home)
+        assert re.search(r'<b class="phone-pill[^"]*">(Pay|Plan|Catch up|Sort|Review|Open) <svg class="chevron"', home)

@@ -103,7 +103,8 @@ def test_home_leads_with_left_for_everyday_and_cash_planning_with_safe_to_spend(
     plan = _tokens(phone.get("/plan").text)
     pc_plan = _tokens(_client(c, False).get("/plan").text)
     first = lambda tokens: next(t for t in tokens if t in LABELS)                     # noqa: E731
-    assert first(plan) == first(pc_plan) == "Safe to spend"
+    assert first(pc_plan) == "Safe to spend"
+    assert first(plan) == "Due before payday"   # IV-11M6 (mockup v2.0): the phone's Coming up leads with it; Safe to spend is Home's card
 
 
 def test_a_scenario_purchase_moves_the_plans_lowest_point_by_its_amount(c, monkeypatch):

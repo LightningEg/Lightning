@@ -530,6 +530,28 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
 .pickdoc{margin-top:16px;padding:14px 16px;border-radius:16px;background:var(--track);font-size:14px;color:var(--ink2);max-width:62ch}
 .pickdoc b{color:var(--ink)}
 .pickdoc a{color:var(--ink);font-weight:800}
+.hero2{border-radius:28px;padding:22px 20px;background:linear-gradient(135deg,color-mix(in srgb,var(--green) 14%,#fff),color-mix(in srgb,var(--azure) 14%,#fff));border:1px solid #fff;position:relative;overflow:hidden;max-width:360px;box-shadow:var(--shadow)}
+.hero2 .lm{position:absolute;top:10px;inset-inline-end:14px;width:60px;height:60px;opacity:.18;fill:none;stroke:var(--ink);stroke-width:1.5;stroke-linejoin:round}
+.hero2 .lm+.lm{top:30px;inset-inline-end:44px;opacity:.15;width:38px;height:38px}
+.hero2 .lb{font:700 14px/1.2 var(--body);color:var(--ink2)}
+.hero2 .fig{font:800 44px/1.05 var(--display);margin:8px 0 6px;color:var(--ink)}
+.hero2 .fig small{font:700 14px var(--body);margin-inline-start:6px;letter-spacing:0}
+.hero2 .st{font-size:14px;color:var(--ink2);margin:0}.hero2 .st b{color:var(--green-text)}
+.wells2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.wells2>div{background:rgba(255,255,255,.7);border-radius:16px;padding:10px 12px}
+.wells2 span{display:block;font-size:12.5px;color:var(--muted)}.wells2 b{font:700 18px var(--body)}
+.lc{background:var(--paper);border-radius:24px;border:1px solid #DDE9E6;box-shadow:0 14px 34px -24px rgba(10,36,66,.42);overflow:hidden;max-width:360px}
+.lc-h{display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--t-rose)}.lc-h.azure{background:var(--t-azure)}.lc-h.green{background:var(--t-green)}
+.lc-t{width:38px;height:38px;border-radius:12px;background:#fff;display:grid;place-items:center;flex:none}
+.lc-h h4{font:700 17px/1.2 var(--display);margin:0}.lc-h small{display:block;font-size:12.5px;color:var(--muted)}.lc-h em{margin-inline-start:auto;font:700 13px var(--body);font-style:normal;color:var(--ink2)}
+.lc-day{padding:6px 14px 0;font-size:12.5px;color:var(--muted)}
+.lc-r{display:flex;align-items:center;gap:12px;height:64px;padding:0 14px;border-top:1px solid var(--line)}
+.lc-r i{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-style:normal;background:var(--t-rose);color:var(--rose-strong);flex:none}.lc-r i.in{background:var(--t-green);color:var(--green-text)}
+.lc-r div{min-width:0}.lc-r b{display:block;font:700 15.5px/1.2 var(--body)}.lc-r small{font-size:13px;color:var(--muted)}
+.lc-r .a{margin-inline-start:auto;font:700 15.5px var(--body)}.lc-r .a.out{color:var(--rose-strong)}.lc-r .a.in{color:var(--green-text)}
+.pf-nav.v2{padding-top:0;background:#fff}.pf-nav.v2>span{height:84px}.pf-nav.v2>span i{width:52px;height:30px}
+.pf-nav.v2>span.on i{background:#D7F0E3;color:var(--ink)}.pf-nav.v2>span.on{font-weight:800}
+.pf-nav.v2>span.add i{width:56px;height:56px;border-radius:50%;margin-top:-26px;border:5px solid #fff;box-sizing:content-box}
 </style>
 </head>
 <!-- AI AGENTS: this is ONE of FOUR guideline documents, all in this folder: app.html (Part A, the app on a PC, A01-A16), website.html (Part B, Normal: lightningeg.com except For Geeks, B01-B12), phone.html (Part C, the app on a phone, C01-C12), coders.html (Part D, Coders: the For Geeks pages, D01-D12). This file is phone.html. For anything about another surface, open that file; do not guess. Do not read a file whole (about 95,000 tokens in all): run `python tools/guideline.py` in the app repo to list sections and `python tools/guideline.py C05` to print one. -->
@@ -595,6 +617,7 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
 
 <section class="g" id="c-rules" data-part="c">
   <div class="g-head"><div><h2><span class="secnum">C01</span>Rules</h2><p>The app on a phone. Same logo, colours, type and numbers as Part A; where they differ on a phone, Part C wins. Anything not named here follows Part A.</p></div></div>
+  <p class="cap" style="margin:8px 0 14px"><b>v2.0 (owner, 2026-11-14): cards, hero cards and the Plan slot; mockup in IV-11M.</b></p>
   <div class="rtiles">
     <div class="rt"><div class="vis"><span class="num" style="font-size:22px">360 × 800</span></div><b>Design at 360</b><span>One column. Check it at 320; nothing breaks.</span></div>
     <div class="rt"><div class="vis" style="justify-content:flex-start"><span class="chip">Summary</span><span class="chip">Spending</span><span class="chip" style="opacity:.4">H…</span></div><b>Nothing scrolls sideways</b><span>Not tabs, not tables, not charts. Never a cut word.</span></div>
@@ -646,21 +669,22 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
   <div class="g-head"><div><h2><span class="secnum">C03</span>Navigation</h2><p>The sidebar becomes a tab bar at the bottom. Two levels still: a section, then a tab.</p></div></div>
   <h3 class="sub"><span class="subnum">C03.1</span>Tab bar: five slots with their words</h3>
   <div style="max-width:360px;border-radius:20px;overflow:hidden;border:1px solid var(--line);box-shadow:var(--shadow)">
-    <div class="pf-nav words"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>Home</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>Activity</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>Money</span></div>
+    <div class="pf-nav words v2"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>Home</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-trend"/></svg></i>Plan</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>Money</span></div>
     <div class="pf-gest"></div>
   </div>
   <ul class="short">
-    <li><b>Five slots</b> (owner, 2026-11-06): Home, Budget, Add, Activity, Money. Each answers one question. Home: “Am I OK today, and what do I do next?” Budget: “How much is left, and on what?” Add: “Record it now.” Activity: “What moved, and what needs sorting?” Money: “What do I have, what do I owe, what is coming?” There is no More: Cash planning, Investments, Accounts, Financial health and Settings are reached from Money.</li>
-    <li><b>Each slot:</b> a 24px Lucide icon with its name under it, 12px. A word never wraps or cuts: each column is at least its word's width. Chosen: Ink, bolder, with a short Nile bar on top. Others: Muted.</li>
-    <li><b>Add</b> sits in the middle: a 48px Nile disc raised above the bar, its word under it (C05.2).</li>
-    <li><b>Icons say the place:</b> house for Home, pie for Budget, plus, up-and-down arrows for Activity, wallet for Money. The shield belongs to Reserves and the emergency fund, never to a slot.</li>
-    <li><b>Money</b> opens on Net worth, then lists what is behind it, each with its live figure: the accounts' balances themselves (four, then more), Coming up, What you owe, Investments, Goals and reserves, Financial health, Zakat when it is on. Settings sit behind ⚙ in Money's app bar. A page reached from Money keeps Money chosen.</li>
+    <li><b>Five slots</b> (owner, 2026-11-14): Home, Budget, Add, Plan, Money. Each answers one question. Home: “Am I OK today, and what do I do next?” Budget: “How much is left, and on what?” Add: “Record it now.” Plan: “What is coming, and is it covered?” Money: “What do I have, and what do I owe?” There is no More.</li>
+    <li><b>Plan</b> holds Coming up, Recurring, Loans and Reserves (cash planning). <b>Activity and To review</b> open from Money, with the app bar “‹ Money  Activity”; Money stays chosen there. Investments, Accounts, Financial health and Settings are also reached from Money.</li>
+    <li><b>Each slot:</b> a 24px line icon with its word under it. The bar is 84 tall, white, with a hairline on top. Chosen: its icon sits in a 52 × 30 pale Meadow pill (#D7F0E3) and its word is Ink 12/800. Others: Muted 12/600. A word never wraps or cuts.</li>
+    <li><b>Add</b> sits in the middle: a 56px Nile disc raised above the bar with a 5px white ring, its word under it (C05.2).</li>
+    <li><b>Icons say the place:</b> house for Home, pie for Budget, plus for Add, line chart for Plan, wallet for Money. The shield belongs to Reserves and the emergency fund, never to a slot.</li>
+    <li><b>Money</b> opens on Net worth, then lists what is behind it, each with its live figure: the accounts' balances themselves (four, then more), Activity, To review, What you owe, Investments, Financial health, Zakat when it is on. Settings sit behind ⚙ in Money's app bar. A page reached from Money keeps Money chosen.</li>
   </ul>
 
   <h3 class="sub"><span class="subnum">C03.2</span>App bar</h3>
   <div style="max-width:360px" class="pf"><div class="pf-bar named"><img class="pf-mark" alt="Lightning"><span class="pf-name">Budget</span><span class="pf-icon" title="Search"><svg class="ic"><use href="#i-search"/></svg></span><span class="pf-icon" title="Hide amounts"><svg class="ic"><use href="#i-eye"/></svg></span><span class="pf-icon" title="Budget settings"><svg class="ic"><use href="#i-gear"/></svg></span></div></div>
   <ul class="short">
-    <li><b>Left:</b> the mark, 28px, then the page's name at 17px (it wraps to two lines before it is cut). On an inner page, ‹ and the page it returns to (“‹ Accounts”) in their place.</li>
+    <li><b>Left:</b> the app bar is 64 tall on the brand wash: the mark, 28px, then the page's name at 17px, Bricolage 700 (it wraps to two lines before it is cut). On an inner page, “‹ Section” then the page's name (“‹ Money  Activity”).</li>
     <li><b>Right, in this order:</b> Search, Hide amounts. 44px targets, 22px icons. Search opens full screen and looks for money first: transactions lead its results, then pages and settings under their own heading (owner, 2026-11-02); no “Ctrl K” on a phone.</li>
     <li><b>The tab's gear</b> (A10.4) comes third, only on a tab that has settings, and opens them. All settings are behind ⚙ on Money.</li>
   </ul>
@@ -688,13 +712,13 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
   <div class="g-head"><div><h2><span class="secnum">C04</span>Page header</h2><p>A05 on a phone: the page's name in the app bar, then the hero (its figure and one calm sentence), the month stepper, the tabs and Needs you. One row each, nothing beside them.</p></div></div>
   <div class="grid2" style="max-width:760px;align-items:start">
     <div class="pf" style="padding:16px;gap:12px">
-      <div class="pf-lead"><p>Left for everyday</p><div class="big num">6,240<small>EGP</small></div><p class="st">You are 532 under your plan's pace.</p></div>
-      <div class="pf-stepper"><i>‹</i><b>2026-10</b><i>›</i></div>
+      <div class="hero2"><svg class="lm" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><svg class="lm" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><div class="lb">Left for everyday ›</div><div class="fig num">6,240<small>EGP</small></div><p class="st"><b>On pace.</b> You are 532 under your plan's pace.</p><div class="wells2"><div><span>Spent</span><b class="num">18,651</b></div><div><span>Left in plan</span><b class="num">6,948</b></div></div></div>
+            <div class="pf-stepper"><i>‹</i><b>2026-10</b><i>›</i></div>
       <div class="pf-words"><span class="on">Plan</span><span>Recurring</span><span>Loans</span><span>Reserves</span></div>
       <div class="pf-needcard"><div><b>9 items need you</b><small>4 to sort out · 3 bills · 2 prices</small></div><em>9</em><u>Open</u></div>
     </div>
     <ol style="margin:0;padding-left:20px;color:var(--ink2)">
-      <li style="margin:6px 0"><b style="color:var(--ink)">C04.1 The hero.</b> The page's name sits in the app bar (C03.2), so the page opens on its one figure: the label 13px, the figure 40px in whole EGP with EGP once, one calm sentence 14px Ink 2 (it is the page's status sentence, A05), then the seam (A02.3). On Home the payday meter (C06.1) takes the seam's place (owner, 2026-11-09). Each slot's figure: Home, Safe to spend; Budget, Left for everyday (the service’s allowance after unpaid planned bills and loans) with a ring of the plan spent; Activity, the month's money in and out; Money, Net worth. A page inside Money keeps its own figure: Due before payday, Portfolio value, In your accounts. A page with no figure keeps its status sentence and dates.</li>
+      <li style="margin:6px 0"><b style="color:var(--ink)">C04.1 The hero card</b> (v2.0). The page's name sits in the app bar (C03.2), so the page opens on its one hero card (C06.2): 28px corners, 22/20 padding, a soft green-to-azure wash, a white 1px edge, two outline lightning marks in the top-right corner at 15–20% opacity; the label 14/700 Ink 2 with ›, the figure 44px in whole EGP with EGP once, one sentence whose verdict is bold in its meaning's colour (“<b>On pace.</b>”), then either two wells or a ring on the right. On Home the payday meter (C06.1) follows it (owner, 2026-11-09). Each slot's figure: Home, Safe to spend; Budget, Left for everyday (the service’s allowance after unpaid planned bills and loans) with a ring of the plan spent; Plan, Due before payday; Money, Net worth. A page inside Money keeps its own figure: Activity, the month's money in and out; Investments, Portfolio value; an account, its balance.</li>
       <li style="margin:6px 0"><b style="color:var(--ink)">C04.2 Period,</b> only on Budget and Activity, which look back: one compact month stepper ‹ 2026-10 ›. Home and Money are always today and have no stepper. Tapping the month opens Choose period, a sheet: This month, Last month, Year to date, All time, Custom range (two month pickers). Never a sideways row of chips, never “Monthly”.</li>
       <li style="margin:6px 0"><b style="color:var(--ink)">C04.3 Tabs</b> (C03.3).</li>
       <li style="margin:6px 0"><b style="color:var(--ink)">C04.4 To do and To review.</b> Home's To do (A09) is at most three rows, picked in this order: a late or due-today bill, payday, catch-up, to sort, the weekly check, prices, then the rest. Each row is one sentence with one action on the right (“Vodafone 350 · in 3 days   Pay ›”; a bill due within three days is named by payee, amount and days), and the action does the job in a sheet or a flow. “See all” opens every action, grouped by place. With nothing waiting the section is gone. Activity's To review is the queue of rows to confirm, one card at a time with a progress line (“3 of 12”): Looks right is the Primary, Change and Skip sit beside it, and the queue ends on “All sorted”. “Not now” moves an item down for a week.</li>
@@ -746,16 +770,18 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
     <li><b>How it adds up</b> (owner, 2026-11-10): a page's hero is the way into its working. A tap opens a sheet from the bottom with the rows that add up to the figure, what changed it, and one link to its home page, labelled “How it adds up” as on the PC (A08.1).</li>
   </ul>
 
-  <h3 class="sub"><span class="subnum">C06.2</span>Lead and support, stacked</h3>
+  <h3 class="sub"><span class="subnum">C06.2</span>Hero card, the two-well pair and the ring</h3>
   <div class="grid2" style="max-width:760px">
-    <div class="pf-card lead"><h4>Net worth</h4><p class="sub">Excludes money held for others</p><div class="big num">156,084<small>EGP</small></div><div class="pf-rows"><div><span>What you own</span><b>261,024</b></div><div><span>What you owe</span><b>−104,940</b></div></div></div>
+    <div class="hero2"><svg class="lm" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><svg class="lm" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><div class="lb">Left for everyday ›</div><div class="fig num">6,240<small>EGP</small></div><p class="st"><b>On pace.</b> You are 532 under your plan's pace.</p><div class="wells2"><div><span>Spent</span><b class="num">18,651</b></div><div><span>Left in plan</span><b class="num">6,948</b></div></div></div>
     <ul class="short" style="margin:0">
-      <li>Lead first, its working under it: the rows that build the figure, in the same card or the support card under it. Never side by side. On the page (C11.1) the Lead needs no card and no watermark.</li>
-      <li>16 inside, 20px corners, 12 between. The figure 40px, 34 when long.</li>
-      <li>Rows 48 tall. A row with › opens its parts in a sheet, never a fold inside a fold (owner, 2026-10-29).</li>
+      <li><b>The hero card</b> (v2.0, owner 2026-11-14) is each page's Lead: 28px corners, 22/20 padding, a soft green-to-azure wash, a white 1px edge, two outline lightning marks top-right at 15–20%; the label with › (14/700 Ink 2, it opens the working, C06.1); the figure at 44 (Bricolage 800) with EGP 14/700; one sentence whose verdict is bold in its meaning's colour; then two wells or a ring. It is the only card with a wash.</li>
+      <li><b>Two-well pair:</b> two white 70% wells, 16px corners, the label 12.5 Muted over the figure 18/700 (Spent and Left in plan; Money in and Money out). Never more than two.</li>
+      <li><b>Ring:</b> instead of the wells, an 84px ring on the right with the share in its middle (“59% spent”).</li>
+      <li><b>A dashed card</b> offers what is not set up yet (“Make it a bill”, Fixed bills from Plan). Same corners, dashed edge, no shadow.</li>
+      <li>Rows that build the figure sit in a list card under it (C08.2), never inside the hero. A card never holds a card (owner, 2026-10-29). A row with › opens its parts in a sheet.</li>
       <li>“Show the numbers” opens a sheet of rows, never a table in the card.</li>
-        <li><b>C06.3 Headline figures on a page with comparisons</b> (Expense analysis): the first figure large on the page, no card; its comparisons under it as rows (down in spending is green, up is rose); every other figure one 48-tall row with its note under it. No icon, no coloured edge, no tile for each.</li>
-  </ul>
+      <li><b>C06.3 Headline figures on a page with comparisons</b> (Expense analysis): the first figure in a hero card; its comparisons under it as rows (down in spending is green, up is rose); every other figure one 48-tall row with its note under it. No icon, no coloured edge, no tile for each.</li>
+    </ul>
   </div>
 </section>
 
@@ -864,7 +890,8 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
     </div>
     <ul class="short" style="margin:0">
       <li><b>C08.1 Day headers:</b> Today, Yesterday, then the date (A06.1), once, Muted, 12.5px, above that day's rows, with the day's net on the right (money in less money out; transfers and value updates move nothing in or out) on the Transactions tab and an account's list. Not repeated on each row. The period's Money in and Money out are one line, not a day header (C08.3).</li>
-      <li><b>C08.2 Row:</b> flat on the page, a hairline between rows, never a card around the list. A 40px round chip says what the money did, by its colour's meaning (A03): money in on soft green, money out on soft rose, ⇄ between your accounts on Track, ↗ investments (buy, sell, value) on soft azure; never a letter. In money in and out the chip holds the category's mark (owner, 2026-11-09): one line icon per built-in category, 24px, stroke 1.75, drawn in the chip's colour, so the colour still says in or out; a category you made keeps the arrow, ↑ in and ↓ out. Then the counterparty and its category, the amount on the right. 64 tall. In: green with +. Out: ink with −. Transfers: no sign (A11). A day's value updates are one row, “Investments moved”, with their count. The balance after the row shows only on an account's own list, Muted under the amount; never on Overview or the all-accounts list. The Overview names no account (category only); the all-accounts list adds it after the category.</li>
+      <li><b>C08.2 List card and row</b> (v2.0): a list sits in a card: white, 24px corners, a 1px edge, a soft shadow. Its header row is tinted by meaning (rose: To do, spending; azure: Latest, Activity; green: income, reserves, health) and holds a 38px white icon tile, the title 17/700, a 12.5 Muted subtitle and “All 5 ›” on the right. Rows are 64 tall with a hairline inset 68px: a 40px round chip by meaning (A03: money in soft green, out soft rose, ⇄ between your accounts and ↗ investments soft azure; in money in and out the chip holds the category's line icon, 24px, stroke 1.75; a category you made keeps ↑ or ↓), the name 15.5/700, the note 13 Muted, the amount on the right. Money out is Rose with −, money in is Green with +, transfers are ink without a sign. An action is a pill: Pay on Nile, the others on a pale well. A card never holds a card. On Transactions each day is its own card with the day's net in its header (C08.1); inside a list card the day is a quiet line.</li>
+      <li style="list-style:none;margin:10px 0"><div class="lc"><div class="lc-h"><span class="lc-t"><svg class="ic"><use href="#i-updown"/></svg></span><div><h4>To do</h4><small>3 things need you</small></div><em>All 5 ›</em></div><div class="lc-r"><i class="out">↓</i><div><b>Vodafone</b><small>Due in 3 days</small></div><span class="a out">−350</span></div><div class="lc-r"><i class="in">↑</i><div><b>Salary</b><small>ACME Egypt</small></div><span class="a in">+45,000</span></div></div></li>
       <li><b>C08.3 Filters:</b> search full width (payee, category or amount; it takes a #tag too), then one row of chips that wraps, never scrolls: All, In, Out, Transfers, To sort with its count. Then the month stepper (C04.2) with Select and ⋯ beside it; then Money in and Money out for what is shown as one quiet line (“In +46,833 · Out 0”), not two tiles (owner, 2026-10-29); Views and value updates on one quiet line. A date is never typed: pickers only.</li>
       <li><b>C08.4 Adding:</b> the tab bar's Add (C05.2) opens the entry sheet. No “New” row at the top of the list.</li>
       <li><b>C08.5 Selecting:</b> press and hold a row, or the Select chip after the month. Chosen rows turn soft green with a Meadow edge; a bar replaces the tab bar with the count, the category to give them, Change category and Delete. Done ends it.</li>
@@ -921,7 +948,7 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
 </section>
 
 <section class="g" id="c-screens" data-part="c">
-  <div class="g-head"><div><h2><span class="secnum">C11</span>Screens</h2><p>Three screens built only from C02 to C10.</p></div></div>
+  <div class="g-head"><div><h2><span class="secnum">C11</span>Screens</h2><p>The 22 screens of the v2.0 mockup, built only from C02 to C10. Three are drawn here.</p></div></div>
   <div class="cmock">
     <figure><figcaption>C11.1 Home</figcaption>
       <div class="pf">
@@ -942,7 +969,7 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
           <div class="pf-sec"><h4>This month</h4><span></span></div>
           <div class="pf-card lead"><div class="pf-rows"><div><span>Spent 18,651 · Left in plan 6,948</span><b>›</b></div></div></div>
         </div>
-        <div class="pf-nav words"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>Home</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>Activity</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>Money</span></div>
+        <div class="pf-nav words v2"><span class="on"><i><svg class="ic"><use href="#i-home"/></svg></i>Home</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-trend"/></svg></i>Plan</span><span><i><svg class="ic"><use href="#i-wallet"/></svg></i>Money</span></div>
         <div class="pf-gest"></div>
       </div>
     </figure>
@@ -965,12 +992,13 @@ nav.side .grp{margin:14px 10px 6px;font:800 12px/1 var(--body);color:var(--muted
             <div class="pf-tx"><div class="pf-who"><i class="pf-av ar out">↓</i><div><b>Kiosk</b><small>Groceries</small></div></div><div class="a"><b>−210</b><small>7,475</small></div></div>
           </div>
         </div>
-        <div class="pf-nav words"><span><i><svg class="ic"><use href="#i-home"/></svg></i>Home</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-updown"/></svg></i>Activity</span><span class="on"><i><svg class="ic"><use href="#i-wallet"/></svg></i>Money</span></div>
+        <div class="pf-nav words v2"><span><i><svg class="ic"><use href="#i-home"/></svg></i>Home</span><span><i><svg class="ic"><use href="#i-pie"/></svg></i>Budget</span><span class="add"><i><svg class="ic"><use href="#i-plus"/></svg></i>Add</span><span><i><svg class="ic"><use href="#i-trend"/></svg></i>Plan</span><span class="on"><i><svg class="ic"><use href="#i-wallet"/></svg></i>Money</span></div>
         <div class="pf-gest"></div>
       </div>
     </figure>
   </div>
   <ul class="short">
+    <li><b>The 22 screens of the v2.0 mockup</b> (owner, 2026-11-14), each led by what it answers:</li><li><b>01 Welcome:</b> what Lightning is, then Start; no form first.</li><li><b>02 Your profile:</b> a name and a passphrase, nothing else.</li><li><b>03 Recovery key:</b> the key, shown once, with Save as the one action.</li><li><b>04 Home first day:</b> the first-day steps, one at a time, in place of the figures.</li><li><b>05 Home:</b> Safe to spend as the hero, the payday meter, To do, Latest (C11.1).</li><li><b>06 Add:</b> the entry sheet: amount first, then what it was.</li><li><b>07 A transaction:</b> its amount and category, with Edit and Undo in reach.</li><li><b>08 Home in Dendera:</b> the same Home in a paid theme, recoloured through tokens only.</li><li><b>09 Budget · Categories:</b> Left for everyday, then each category with its bar.</li><li><b>10 Budget · Spending:</b> where the month went, as a list card by day.</li><li><b>11 Budget · Edit plan:</b> one category per row, the plan figure typed in a well.</li><li><b>12 One category:</b> its plan, what is spent, and its transactions.</li><li><b>13 Plan · Coming up:</b> what is due next, and whether it is covered.</li><li><b>14 Plan · Recurring:</b> bills and income that repeat, with the next date.</li><li><b>15 Plan · Loans:</b> what you owe, who to, and the next instalment.</li><li><b>16 Plan · Reserves:</b> money set aside, each with its progress.</li><li><b>17 Money:</b> Net worth as the hero, then what is behind it (C11.3).</li><li><b>18 Activity:</b> the month's money in and out, one card per day.</li><li><b>19 To review:</b> one card at a time, “3 of 12”, Looks right as the Primary.</li><li><b>20 Investments:</b> Portfolio value, holdings first.</li><li><b>21 One account:</b> the balance, its one Secondary, then its list (C11.2).</li><li><b>22 Settings:</b> grouped rows behind ⚙ on Money; a PC-only tool says “Best on your PC”.</li>
     <li><b>C11.1 is Home: “Am I OK today, and what do I do next?” in one glance</b> (owner, 2026-11-06). It is always today: no month stepper and no Net worth. In order: Safe to spend as the hero, with about how much a day until payday (tapping it opens its working: free cash, minus bills before payday, minus reserves; below zero it turns rose, “You are 1,200 over until payday”, with See why); under it, in the seam's place, the payday meter: everyday money spent against the pace by today, rose when ahead (owner, 2026-11-09; the line a day is Budget's own figure); To do, at most three rows (C04.4); Latest, the five newest transactions across every account with “See all”; then This month, one row with two figures that opens Budget. Its Left in plan is the whole plan (Planned − Spent), as on the PC; Budget’s hero has its own name, Left for everyday (owner, 2026-11-09). At most 1.2 screens long, at most 8 figures, the first Latest row above 600 px. Analysis is never first: it is a tap away, or on the PC. States change the screen, not just its numbers (C13).</li>
     <li><b>C11.3 Money</b> (C03.1): Net worth as the hero, then each account's balance with the line that reconciles them with what you own, Coming up with no late rows, What you owe, Investments (holdings first), Goals and reserves, Financial health, Zakat when it is on. A row opens a page or a sheet, never a PC page. Settings sit behind ⚙ in the app bar; a tool only the PC has says “Best on your PC”.</li>
     <li><b>C11.2:</b> the account's one Secondary and ⋯ sit under its figure. On a brokerage, “Record an investment transaction” folds above the list for buy, sell and dividend.</li>

@@ -150,7 +150,8 @@ class Mohab:
     def track(self, name: str) -> Screen:
         """Cash planning › Recurring › 'Looks recurring' › Track, then Add on the filled-in form."""
         screen = self.b.go("Cash planning", "Recurring")
-        link = next(l for l in screen.links if l.text == "Track" and f"name={name.replace(' ', '%20')}&" in l.href)
+        link = next(l for l in screen.links if l.text in ("Track", "Make it a bill")  # the phone's offer card says Make it a bill (IV-11M6)
+                    and f"name={name.replace(' ', '%20')}&" in l.href)
         self.b.open(link.href)
         return self.b.submit({}, button="Add")
 
@@ -163,7 +164,9 @@ class Mohab:
     def _pay_link(self, screen: Screen, name: str) -> str:
         at = screen.html.find(name)
         assert at >= 0, f"{name} is not on {screen.path}"
-        found = re.search(r'href="(/plan/items/\d+/pay\?[^"]+)"', screen.html[at:])
+        start = screen.html.rfind("<a ", 0, at)   # the row's own link when the name sits inside it (a chip may come first)
+        found = (re.search(r'href="(/plan/items/\d+/pay\?[^"]+)"', screen.html[start:at]) if start >= 0 else None) \
+            or re.search(r'href="(/plan/items/\d+/pay\?[^"]+)"', screen.html[at:])
         assert found, f"No Mark paid for {name} on {screen.path}"
         return found.group(1).replace("&amp;", "&")
 
@@ -1288,7 +1291,7 @@ def test_what_is_left_to_pay_this_month_and_on_which_days(mohab):
     assert route(mohab, "upcoming") == ["/", "/plan", "/plan/upcoming"]
     assert upcoming.figure("Left to pay in October") == D("1130")    # WE Internet 650 + North Cairo Electricity 480
     assert upcoming.shows("1,130 left to pay in October, on 2 days.", "14,500 paid of 15,630 due in October",
-                          "Payday 1 Oct", "20 Oct WE Internet Bills · To pay 650")
+                          "Payday 1 Nov", "20 Oct WE Internet Bills · To pay 650")
 
 
 def test_the_emergency_fund_in_months(mohab):
@@ -1400,6 +1403,7 @@ def test_certificate_keeps_its_purchase_value_without_month_end_price_prompts(mo
                        if asset.name == "NBE 3-year certificate · 22%")
     screen = mohab.b.go("Investments", "Prices")
     assert certificate.name in screen.text and f'name="p_{certificate.id}"' not in screen.html
+    assert f'name="value_{certificate.id}"' not in screen.html
     assert all(row["asset_id"] != certificate.id for row in mohab.c.reevaluations.pending_prices())
 
 
@@ -1485,6 +1489,9 @@ def test_a_fund_can_be_valued_by_its_total(mohab):
     mohab.b.open(screen.path)
     saved = mohab.b.submit({"date": "2027-09-30", field: "20000"}, button="Save prices")
     assert saved.shows("Saved 1 price")
+    asset_id = int(field.removeprefix("value_"))
+    values = [p.value for p in mohab.c.investments.portfolio("2027-09-30").open if p.asset_id == asset_id]
+    assert abs(sum(values) - D("20000")) < D("0.01")
 
 
 def test_other_investments_are_in_the_investment_analysis(mohab):
