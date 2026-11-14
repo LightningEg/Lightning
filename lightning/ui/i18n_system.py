@@ -2197,6 +2197,7 @@ DEVICES = {
     "Three wrong codes from this PC. Open the code screen on the phone again for a new code.": "3 أكواد غلط من الكمبيوتر ده. افتح شاشة الكود على الموبايل تاني عشان تاخد كود جديد.",
     "That code is not the one on the phone.": "الكود ده مش اللي على الموبايل.",
     "Type the two digits shown on the phone.": "اكتب الرقمين اللي ظاهرين على الموبايل.",
+    "Finish with the last part of the phone address.": "كمّل بآخر جزء من عنوان الموبايل.",
     "Choose a phone the search found, or type the phone's address.": "اختار موبايل من اللي لقيناهم، أو اكتب عنوان الموبايل.",
     "Those digits are not the ones on the phone. The phone now shows new digits: type those.": "الرقمين دول مش اللي على الموبايل. الموبايل بيعرض دلوقتي رقمين جداد: اكتبهم.",
     "Update Lightning on this PC to the phone's version, then pair again.": "حدّث Lightning على الكمبيوتر ده لنفس نسخة الموبايل، وبعدين اربط تاني.",

@@ -23,10 +23,12 @@ def home_candidate(hs):
     return unpack(hs.advertise("0"*64, 47513))["body"] | dict(endpoint="https://127.0.0.1:47513/pairing/exchange")
 
 
-def nearby(devices, wires=None):
+def nearby(devices, wires=None, *, method=None):
     home, pc = devices
     hs = setup(devices)
     hs.begin(PASSWORD)
+    if method is not None:
+        hs.desk.begin(hs.keys(), PASSWORD, method=method)
     candidate = home_candidate(hs)
     async def search(identity):
         return [candidate]
@@ -52,7 +54,7 @@ def admitted(home, device):
 
 
 def other_digits(digits):
-    return "000000" if digits != "000000" else "000001"
+    return "0" * len(digits) if int(digits) else "0" * (len(digits) - 1) + "1"
 
 
 def test_fake_home_receives_nothing_derived_from_the_password_when_the_user_stops_at_the_digits(tmp_path):
@@ -107,7 +109,7 @@ def test_mismatched_digits_never_send_the_password_proof_on_a_compatible_replica
     async def run():
         hs, make, ps = await started(devices, wires)
         assert len(wires) == 2
-        with pytest.raises(JournalError, match="same six"):
+        with pytest.raises(JournalError, match="same two"):
             ps.compare(other_digits(ps.screen()["pending"]))
         with pytest.raises(JournalError, match="Compare"):
             await ps.prove(PASSWORD)
@@ -249,8 +251,9 @@ def test_devices_screen_walks_code_then_digits_then_password_then_waits(devices)
             identifier = page.split('name="candidate" value="')[1].split('"')[0]
             page = await post("join", candidate=identifier, code=hs.screen()["code"])
             digits = hs.screen()["digits"]
-            assert "Select the number shown on the other device." in page and digits in page and 'name="password"' not in page
-            assert page.count('name="digits" value=') == 3
+            assert "Type the two digits shown on the home." in page and 'name="password"' not in page
+            assert 'id="pair-digits" name="digits"' in page and 'maxlength="2"' in page
+            assert 'name="digits" value=' not in page  # never supply the correct number on the joining screen
             page = await post("compare", digits=digits)
             assert 'name="password"' in page and "/devices/prove" in page
             page = await post("prove", password=PASSWORD)

@@ -11,6 +11,7 @@ from fastapi.templating import Jinja2Templates
 from lightning.runtime.journal_enrollment import NewJournalReplica
 from lightning.runtime.paths import create_profile
 from lightning.sync.journal.codec import JournalError, digest, unpack
+from lightning.sync.journal.pairing import is_number_match
 from lightning.ui.journal_enrollment_i18n import error_text, strings
 
 _BASE = "/profiles/journal/join"
@@ -89,7 +90,7 @@ def journal_enrollment_router(session) -> APIRouter:
             notice = strings(locale).get(notice_key, notice)
         found = []
         if enrollment is not None:
-            found = [dict(id=identifier, name=candidate["name"], number_match=unpack(candidate["offer"].encode())["body"].get("method") == "number-match")
+            found = [dict(id=identifier, name=candidate["name"], number_match=is_number_match(unpack(candidate["offer"].encode())["body"]))
                      for identifier, candidate in enrollment.candidates.items()]
         context = dict(request=request, locale=locale, texts=strings(locale), csrf=session.csrf,
                        error=error_text(error, locale) if error else "", notice=notice,

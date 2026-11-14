@@ -19,7 +19,7 @@
 <details{% if error and not phones %} open{% endif %}><summary class="text-link">{{ 'Type the phone address instead'|tr(locale) }}</summary>
   <form method="post" action="/profiles/{{ find_route }}" class="form-stack">
     <input type="hidden" name="csrf" value="{{ csrf }}">
-    <div class="field"><label for="phone-address">{{ 'Phone address'|tr(locale) }}</label><input id="phone-address" name="address" type="text" required value="{{ address|default('') }}" placeholder="192.168.1.20:47513" autocomplete="off" spellcheck="false" dir="ltr"></div>
+    <div class="field"><label for="phone-address">{{ 'Phone address'|tr(locale) }}</label><input id="phone-address" name="address" type="text" required value="{{ address|default('') }}" placeholder="192.168.1.20:47513" autocomplete="off" spellcheck="false" dir="ltr">{% if address|default('') and address.endswith('.') %}<small>{{ 'Finish with the last part of the phone address.'|tr(locale) }}</small>{% endif %}</div>
     <div class="field"><label for="pair-code">{{ 'The two digits on the phone'|tr(locale) }}</label><input id="pair-code" name="code" type="text" inputmode="numeric" maxlength="3" required autocomplete="one-time-code" dir="ltr"></div>
     <div class="field"><label for="pc-name">{{ "This PC’s name"|tr(locale) }}</label><input id="pc-name" name="pc_name" type="text" required maxlength="60" value="{{ pc_name|default('') }}" autocomplete="off"></div>
     <div class="form-actions"><button class="button button-secondary" type="submit">{{ 'Connect'|tr(locale) }}</button></div>

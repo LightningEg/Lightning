@@ -9,11 +9,12 @@
   {% else %}
     {% for name in pairing.members %}<p>{{ name }} · Paired</p>{% else %}<p>No other devices paired yet.</p>{% endfor %}
     {% if home %}
+      {% if pairing.exhausted %}<p role="alert">{{ 'This pairing offer is closed. Open pairing again.' }}</p>{% endif %}
       {% if pairing.code %}
         <h3>Pair a device</h3><p>On your other device, select this device from Nearby devices.</p>
         {% if not pairing.number_match %}<p class="num"><strong>{{ pairing.code }}</strong></p>{% endif %}
         {% if pairing.request_name %}
-          <p>{{ pairing.request_name }} wants to connect. Check that both screens show:</p>
+          <p>{{ pairing.request_name }}</p><p>{{ ('Type these two digits on your other device, then approve here.' if pairing.digits|length == 2 else 'Select this number on your other device, then approve here.') }}</p>
           <p class="stat-value" dir="ltr">{{ pairing.digits }}</p>
           {% if pairing.confirmed %}<p class="muted">Waiting for {{ pairing.request_name }} to confirm and enter its profile password.</p>
           {% else %}<form method="post" action="/devices/confirm"><input type="hidden" name="__session" value="{{ session }}"><input type="hidden" name="digits" value="{{ pairing.digits }}"><input type="hidden" name="request" value="{{ pairing.request_id }}"><button class="btn primary">The numbers match</button></form>{% endif %}
@@ -25,8 +26,8 @@
     {% elif pairing.pending and pairing.stage in ['handshake','proving','cancelling'] %}<p>Pairing was interrupted. Resume to check its saved state.</p><form method="post" action="/devices/resume"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Resume pairing</button></form>
 <form method="post" action="/devices/cancel"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Cancel this pairing</button></form>
 {% elif pairing.pending and pairing.stage == 'compare' %}
-      {% if pairing.failed %}<p role="alert">The number did not match. Stop pairing on the home, then cancel here and start again.</p>{% else %}<p>Select the number shown on the other device.</p>
-      <form method="post" action="/devices/compare"><input type="hidden" name="__session" value="{{ session }}">{% for choice in pairing.choices %}<button class="btn" name="digits" value="{{ choice }}" dir="ltr">{{ choice }}</button>{% endfor %}</form>{% endif %}
+      {% if pairing.failed %}<p role="alert">The number did not match. Stop pairing on the home, then cancel here and start again.</p>{% else %}<p>{{ ('Type the two digits shown on the home.' if pairing.typed_digits else 'Select the number shown on the other device.') }}</p>
+      <form method="post" action="/devices/compare"><input type="hidden" name="__session" value="{{ session }}">{% if pairing.typed_digits %}<div class="field"><label for="pair-digits">{{ 'The two digits on the home' }}</label><input id="pair-digits" name="digits" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="2" pattern="[0-9٠-٩۰-۹]{2}" dir="ltr" required autofocus></div><button class="btn primary">{{ 'Continue' }}</button>{% else %}{% for choice in pairing.choices %}<button class="btn" name="digits" value="{{ choice }}" dir="ltr">{{ choice }}</button>{% endfor %}{% endif %}</form>{% endif %}
       <form method="post" action="/devices/cancel"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">No, start over</button></form>
     {% elif pairing.pending and pairing.stage == 'password' %}
       <form method="post" action="/devices/prove"><input type="hidden" name="__session" value="{{ session }}"><p>The numbers match. Enter your profile password to finish.</p>
