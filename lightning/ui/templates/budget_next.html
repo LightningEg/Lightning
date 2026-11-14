@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "partials/macros.html" import page_title %}
+{# NF-12AL4 (owner rule 4, 2026-11-13): next month as it will start, read only. Changes wait until it begins. #}
+{% set p = preview %}
+{% block title %}{{ 'Budget'|tr(locale) }}{% endblock %}
+{% block heading %}{{ page_title('Budget'|tr(locale), 'This is how {month} starts. You can change it from {day}.'|tr(locale, month=p.month|month(locale), day=p.starts|day(locale)), p.month|month(locale)) }}{% endblock %}
+{% block top_actions %}<a class="btn small" href="/budget">{{ 'This month'|tr(locale) }}</a>{% endblock %}
+{% block content %}
+<div class="grid g2 budget-next">
+<section class="card" aria-labelledby="next-income-h"><h2 id="next-income-h">{{ 'Income the plan counts'|tr(locale) }}</h2>
+{% if p.income is not none %}<p class="metric-value"><span class="num">{{ p.income|money(places=0) }}</span> <small>{{ base }}</small></p>
+<p class="muted small">{% if p.income_since %}{{ 'Your scheduled pay from {month}'|tr(locale, month=p.income_since|month(locale)) }}{% elif p.income_manual %}{{ 'Set by hand in Settings'|tr(locale) }}{% elif p.income_scheduled %}{{ 'From your recurring income'|tr(locale) }}{% elif p.income_first %}{{ 'Average of {first} to {last}'|tr(locale, first=p.income_first|month(locale), last=p.income_last|month(locale)) }}{% endif %}</p>{% else %}<p class="muted">{{ 'No income to count yet.'|tr(locale) }}</p>{% endif %}
+<div class="compact-list">
+<div class="compact-row"><span>{{ 'Limits'|tr(locale) }}</span><b>{{ p.planned|money(places=0) }}</b></div>
+{% if p.left is not none %}<div class="compact-row"><span>{{ 'Left after limits'|tr(locale) }}</span><b class="{{ p.left|tone }}">{{ p.left|money(True, places=0) }}</b></div>{% endif %}
+</div></section>
+<section class="card" aria-labelledby="next-scheduled-h"><h2 id="next-scheduled-h">{{ 'Scheduled in {month}'|tr(locale, month=p.month|month(locale)) }}</h2>
+<div class="compact-list">{% for row in p.bills %}<div class="compact-row"><span>{{ row.name }} <small class="muted">{{ row['items']|join(', ') }}</small></span><b>{{ row.amount|money(places=0) }}</b></div>{% endfor %}
+{% for row in p.loans %}<div class="compact-row"><span>{{ row.name }} <small class="muted">{{ 'Loan payments'|tr(locale) }}</small></span><b>{{ row.amount|money(places=0) }}</b></div>{% endfor %}
+{% if not p.bills and not p.loans %}<p class="muted">{{ 'Nothing is scheduled in this month.'|tr(locale) }}</p>{% endif %}</div>
+{% if p.bills or p.loans %}<p class="muted small">{{ 'Bills and subscriptions'|tr(locale) }} {{ p.bills_total|money(places=0) }} {{ base }}{% if p.loans %} · {{ 'Loan payments'|tr(locale) }} {{ p.loans_total|money(places=0) }} {{ base }}{% endif %}</p>{% endif %}</section>
+</div>
+<section class="card wide-card" aria-labelledby="next-limits-h"><h2 id="next-limits-h">{{ 'Limits that carry into {month}'|tr(locale, month=p.month|month(locale)) }}</h2>
+{% for group in p.groups %}<h3>{{ group.name }} <small class="muted">{{ group.planned|money(places=0) }} {{ base }}</small></h3>
+<div class="compact-list">{% for line in group.lines %}<div class="compact-row"><span>{{ line.name }}{% if line.from_loans %} <small class="muted">{{ 'Loan payments'|tr(locale) }}</small>{% elif line.from_bills %} <small class="muted">{{ 'Includes bills'|tr(locale) }}</small>{% endif %}</span><b>{{ line.planned|money(places=0) }}</b></div>{% endfor %}</div>
+{% else %}<p class="muted">{{ 'No limits carry into this month yet.'|tr(locale) }}</p>{% endfor %}
+<p class="muted small">{{ 'Carryover from this month is added once it ends.'|tr(locale) }}</p></section>
+{% endblock %}

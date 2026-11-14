@@ -37,7 +37,7 @@ class CategoryRow:
 class BudgetScreen:
     month: str
     prev_month: str
-    next_month: str            # "" for the current month
+    next_month: str            # "" after this month; this month leads to the read-only next month (NF-12AL4)
     state: str                 # "no_plan" | "past" | "current" | "future"
     left: Decimal | None       # everyday money left in the plan; None with no plan
     used_pct: int | None
@@ -76,7 +76,7 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
         first, last = parse_month(this)
     shown = month_of(first)
     schedule = c.schedules.view()
-    prev, nxt = _shift(shown, -1), "" if shown >= this else _shift(shown, 1)
+    prev, nxt = _shift(shown, -1), "" if shown > this else _shift(shown, 1)  # this month leads to next (NF-12AL4)
     if not c.budgets.has_plan(shown, schedule=schedule):
         return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0,
                             exclusions=exclusion_context(c)["estimate_exclusions"])
