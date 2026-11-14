@@ -22,7 +22,7 @@
 {# Direct entry still needs a way back on a phone with no browser navigation. #}
 {% set path = request.url.path %}{% set parts = path.split('/') %}
 {% if not back and path == '/settings' %}{% set back = here.tab.href if request.query_params.get('section') and here.tab and here.tab.href != '/settings' else '/money' %}
-{% elif not back and path in ('/rules', '/categories', '/counterparties', '/checks') %}{% set back = '/money' %}
+{% elif not back and path in ('/rules', '/categories', '/counterparties', '/checks', '/activity', '/financial-health', '/investments') %}{% set back = '/money' %}
 {% elif not back and path == '/investments/planner' %}{% set back = '/investments' %}
 {% elif not back and parts|length >= 4 and parts[1] == 'accounts' and parts[2].isdigit() and parts[3] == 'import' %}{% set back = '/accounts/' ~ parts[2] %}{% endif %}
 <body data-base-currency="{{ base }}" class="phone-body">
@@ -30,8 +30,8 @@
   {# Slim top bar (phone overhaul 2026-10-22, C03.2): the mark and the page's name, then Search and Hide amounts;
      the tab's gear only where the tab has settings. On an inner page, ‹ and the page it returns to. A page sets phone_back.
      One way to move: the tab bar, More and ‹; the title is plain text (3AN2). #}
-  {% block phone_back %}{% if back %}<a class="phone-back" href="{{ back }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ ('Budget' if back.startswith('/budget') else 'Money' if back == '/money' else 'Investments' if back == '/investments' else 'Accounts' if back.startswith('/accounts') else here.section.label if here.section else 'Back')|tr(locale) }}</span></a>
-  {% else %}<span class="phone-mark"><img src="/static/lightning-mark.svg" alt="" width="20" height="28"></span><span class="phone-appbar-title">{% block phone_title %}{% set parts = (self.title()|trim).split(' · ') %}{{ (parts[-1] if parts|length > 1 and parts[-1] in ('Overview', 'Budget', 'Cash planning', 'Investments', 'Accounts', 'Settings') else parts|join(' · '))|tr(locale) }}{% endblock %}</span>{% endif %}{% endblock %}
+  {% block phone_back %}{% if back %}<a class="phone-back" href="{{ back }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg>{% set back_label = ('Budget' if back.startswith('/budget') else 'Money' if back == '/money' else 'Plan' if back == '/plan' else 'Investments' if back == '/investments' else 'Accounts' if back.startswith('/accounts') else here.section.label if here.section else 'Back')|tr(locale) %}<span>{{ back_label }}</span></a>
+  {% else %}<span class="phone-mark"><img src="/static/lightning-mark.svg" alt="" width="20" height="28"></span>{% endif %}{% set title_text %}{% block phone_title %}{% set parts = (self.title()|trim).split(' · ') %}{{ ('Plan' if parts[-1] == 'Cash planning' and not back else parts[-1] if parts|length > 1 and parts[-1] in ('Overview', 'Budget', 'Cash planning', 'Investments', 'Accounts', 'Settings') else parts|join(' · '))|tr(locale) }}{% endblock %}{% endset %}{% if not back or (title_text|trim) != (back_label|default('')) %}<span class="phone-appbar-title">{{ title_text }}</span>{% else %}<span class="phone-appbar-title"></span>{% endif %}{% endblock %}
   <nav class="phone-appbar-icons" aria-label="{{ 'Tools'|tr(locale) }}">
     <a class="phone-icon" href="/search" aria-label="{{ 'Search'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></a>
     {% set hidden = privacy_on(request) %}<button type="button" class="phone-icon" data-privacy-toggle aria-pressed="{{ 'true' if hidden else 'false' }}" aria-label="{{ ('Show amounts' if hidden else 'Hide amounts')|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path class="side-privacy-off" d="M4 4l16 16"/></svg></button>
@@ -51,15 +51,15 @@
   {% block content %}{% endblock %}
 </main>
 <nav class="phone-tabbar" aria-label="{{ 'Sections'|tr(locale) }}">
-  {# Phone overhaul (owner, 2026-10-22): five slots with their words, Add in the middle. Transactions is a slot;
-     Cash planning, Investments, Accounts, Financial health and Settings live on More with their figures. #}
+  {# Phone v2.0 (owner, 2026-11-14, IV-11M): Home, Budget, Add, Plan, Money. Plan is Cash planning; Activity, To review,
+     Investments, Accounts, Financial health and Settings are reached from Money, which stays chosen there. #}
   {% set skey = here.section.key if here.section else '' %}
-  {% set chosen = 'add' if request.url.path == '/accounts/add-transaction' or request.url.path.endswith('/transaction/new') else 'money' if request.url.path == '/review' or request.url.path.startswith('/money/') else 'budget' if back and back.startswith('/budget') else 'activity' if request.url.path.startswith('/activity') or (here.tab and here.tab.key == 'transactions') else 'home' if request.url.path in ('/', '/home') or skey == 'overview' else 'budget' if skey == 'budget' else 'money' if skey or request.url.path in ('/money', '/more', '/review') else '' %}
+  {% set chosen = 'add' if request.url.path == '/accounts/add-transaction' or request.url.path.endswith('/transaction/new') else 'money' if request.url.path == '/review' or request.url.path.startswith('/money/') else 'budget' if back and back.startswith('/budget') else 'money' if request.url.path.startswith('/activity') or (here.tab and here.tab.key == 'transactions') else 'plan' if request.url.path == '/plan' or request.url.path.startswith('/plan/') or skey == 'plan' else 'home' if request.url.path in ('/', '/home') or skey == 'overview' else 'budget' if skey == 'budget' else 'money' if skey or request.url.path in ('/money', '/more', '/review') else '' %}
   {% macro slot(chosen, key, label, href, path) %}<a class="phone-tab{{ ' is-chosen' if chosen == key }}" href="{{ href }}"{% if chosen == key %} aria-current="page"{% endif %}><span class="phone-tab-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="{{ path }}"/></svg></span><span class="phone-tab-name">{{ label|tr(locale) }}</span></a>{% endmacro %}
   {{ slot(chosen, 'home', 'Home', '/', 'm3 10 9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1zM9 21v-7h6v7') }}
   {{ slot(chosen, 'budget', 'Budget', '/budget', 'M12 3a9 9 0 1 0 9 9h-9zM15 3.5A9 9 0 0 1 20.5 9H15z') }}
   {% block phone_add %}{% from "phone/partials/add.html" import add_slot with context %}{{ add_slot(off=request.state.read_only|default(false), chosen=chosen == 'add') }}{% endblock %}
-  {{ slot(chosen, 'activity', 'Activity', '/activity', 'M7 4v16M3 8l4-4 4 4M17 20V4M13 16l4 4 4-4') }}
+  {{ slot(chosen, 'plan', 'Plan', '/plan', 'M3 3v16a2 2 0 0 0 2 2h16M19 9l-5 5-4-4-3 3') }}
   {{ slot(chosen, 'money', 'Money', '/money', 'M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v1M4 7v10a2 2 0 0 0 2 2h14V9H6a2 2 0 0 1-2-2M16 14h.01') }}
 </nav>
 <dialog id="app-popup" class="app-popup phone-sheet" aria-modal="true" aria-labelledby="app-popup-title">

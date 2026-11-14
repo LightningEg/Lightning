@@ -59,6 +59,7 @@ class MoneyScreen:
     own_split: tuple[dict, ...] = ()   # what you own by asset class family: {key, label, value, share}, A04 order
     strip: tuple[dict, ...] = ()       # NF-7AR3: today and the next 13 days of payments, each day a way into Upcoming
     units: tuple[dict, ...] = ()       # 3AY10 (owner 2026-11-11): Net worth in US dollars and grams of 21K gold, dated
+    review_total: int = 0              # IV-11M1: Activity is reached from Money; To review's count, Activity's own figure
 
 
 def _goals(c) -> tuple[int, int]:
@@ -127,7 +128,18 @@ def build(c, day: date) -> MoneyScreen:
         holdings_value=now.holdings_value, has_accounts=bool(c.accounts.list()), zakat=c.zakat.enabled(),
         goals_funded=funded, goals_count=goals, health_watch=_health_watch(c, day),
         trend=net_worth_trend(c, day), own_split=own_split(now), strip=_strip(c, day),
-        units=tuple(c.position.in_other_units(now.net_worth, day, c.zakat.gold_price_24k(fmt_date(day)))))
+        units=tuple(c.position.in_other_units(now.net_worth, day, c.zakat.gold_price_24k(fmt_date(day)))),
+        review_total=_review_total(c, day))
+
+
+def _review_total(c, day: date) -> int:
+    """To review's count, as Activity counts it (one card per decision)."""
+    from lightning.ui.phone.screens.activity import review_items
+    from lightning.ui.phone.screens.review_cards import review_cards
+    try:
+        return len(review_cards(c, day, review_items(c, day)))  # not money
+    except ValueError:  # history the inbox cannot read yet (free cash unknown): Money still opens, without the count
+        return 0
 
 
 @dataclass(frozen=True)

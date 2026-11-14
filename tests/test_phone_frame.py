@@ -43,7 +43,7 @@ def test_every_page_renders_in_the_phone_frame(phone, path):
     assert "viewport-fit=cover" in html and "/static/phone-bundle.css" in html
     assert "/static/phone-fields.js" in html  # a tapped field opens empty, its old text back if left empty
     names = re.findall(r'class="phone-tab-name">([^<]+)<', html)
-    assert names == ["Home", "Budget", "Add", "Activity", "Money"]  # IV-3AY10: Home, Budget, Add, Activity, Money
+    assert names == ["Home", "Budget", "Add", "Plan", "Money"]  # IV-11M1 (owner, 2026-11-14): Plan replaces Activity
 
 
 def test_the_chosen_section_and_the_period_words(phone):
@@ -52,8 +52,10 @@ def test_the_chosen_section_and_the_period_words(phone):
     assert re.search(r'class="phone-tab is-chosen" href="/" aria-current="page"', phone.get("/").text)  # Home, IV-3AY10
     moved = phone.get("/?period=month", follow_redirects=False)  # 3AY10: the older Overview is gone
     assert moved.status_code in (302, 303) and moved.headers["location"] == "/money/report?period=month"
-    assert re.search(r'class="phone-tab is-chosen" href="/money"', phone.get("/plan").text)  # Cash planning lives under Money
-    assert re.search(r'class="phone-tab is-chosen" href="/activity"', phone.get("/transactions").text)  # redirected to Activity
+    assert re.search(r'class="phone-tab is-chosen" href="/plan"', phone.get("/plan").text)  # IV-11M1: Cash planning is the Plan slot
+    assert re.search(r'class="phone-tab is-chosen" href="/plan"', phone.get("/plan/loans").text)
+    activity = phone.get("/transactions").text  # redirected to Activity, reached from Money
+    assert re.search(r'class="phone-tab is-chosen" href="/money"', activity) and 'class="phone-back" href="/money"' in activity
 
 
 def test_the_pc_keeps_its_own_frame(tmp_path):
@@ -167,10 +169,10 @@ def test_one_navigation_the_app_bar_title_is_plain_text_and_every_old_menu_page_
         html = phone.get(path).text
         assert "phone-page-menu" not in html and "phone-page-grid" not in html and "⌄" not in html, path
     assert 'class="phone-appbar-title"' in phone.get("/").text
-    tabs = ("/", "/budget", "/activity", "/money")
+    tabs = ("/", "/budget", "/plan", "/money")   # IV-11M1: the Plan slot
     reviews = phone.get("/money/reviews").text
     for href in ("/investments", "/money/accounts", "/money/bills", "/settings", "/financial-health", "/plan/reserves",
-                 "/money/reviews"):
+                 "/money/reviews", "/activity", "/activity?tab=review"):
         assert f'href="{href}"' in money, href  # Money reaches every page More used to reach
     for href in ("/money/report", "/plan", "/birdview/expenses", "/review"):
         assert f'href="{href}"' in reviews, href  # the analysis, behind Money's one Reports and reviews row (IV-11H)

@@ -1881,6 +1881,7 @@ SERVICES = {
     "This year": "السنة دي",
     "Nothing is due.": "مفيش حاجة مستحقة.",
     "To review": "للمراجعة",
+    "Everything that moved": "كل حركة فلوسك",
     "Earlier month": "الشهر اللي قبله",
     "Later month": "الشهر اللي بعده",
     "See every row": "شوف كل الحركات",

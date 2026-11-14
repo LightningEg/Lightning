@@ -1,4 +1,4 @@
-{# The phone's transaction list (guideline C08, phone overhaul 2026-10-22): flat on the page, a quiet day header with
+{# The phone's transaction list (guideline C08 v2.0, IV-11M1): one card a day (a quiet line inside a list card), the day header with
    the day's net (day_net), an arrow chip that says what the money did, the name and category left, one amount right.
    ↑ money in (Meadow), ↓ money out (Soft rose), ⇄ between your accounts (Neutral), ↗ investments (Azure): A03.
    A day's value updates are one "Investments moved" row. The balance after a row shows only on an account's own
@@ -13,7 +13,7 @@
 {% for r in rows if not (show_account and r.type == 'TRF' and r.amount > 0) %}
   {% if not limit or ns.shown < limit %}
   {% set ns.shown = ns.shown + 1 %}
-  {% if r.date != ns.day %}{% if not loop.first and ns.day %}</div>{% endif %}<div class="phone-day" role="heading" aria-level="3"><span>{{ r.date|day_label(locale) }}</span>{% if r.date in nets %}<span class="phone-day-net">{{ nets[r.date]|amount_role('total', True) }}</span>{% endif %}</div><div class="phone-day-rows">{% set ns.day = r.date %}{% endif %}
+  {% if r.date != ns.day %}{% if not loop.first and ns.day %}</div></section>{% endif %}<section class="phone-daycard"><div class="phone-day" role="heading" aria-level="3"><span>{{ r.date|day_label(locale) }}</span>{% if r.date in nets %}<span class="phone-day-net">{{ nets[r.date]|amount_role('total', True) }}</span>{% endif %}</div><div class="phone-day-rows">{% set ns.day = r.date %}{% endif %}
   {% if r.type == 'VALS' %}
   <a class="phone-txn" href="/investments">
     {{ arrow('invest') }}
@@ -37,5 +37,5 @@
   {% endif %}
   {% endif %}
 {% endfor %}
-{% if ns.day %}</div>{% endif %}
+{% if ns.day %}</div></section>{% endif %}
 {% endmacro %}
