@@ -11,6 +11,8 @@ from decimal import Decimal
 from lightning.core.money import ZERO
 from lightning.market.iso import venue_name
 
+from .lots import allocate_value, cagr, roi
+
 VIEWS = ("class", "account", "currency", "market", "security")
 VIEW_LABELS = {"class": "By class", "account": "By account", "currency": "By currency", "market": "By market",
                "security": "By security"}
@@ -160,14 +162,21 @@ def purchase_returns(h, day: str):
     (NF-5D). Percent figures are worked out here, never in the template."""
     def pct(rate):
         return None if rate is None else rate * 100
-    mine = [lot for lot in h.lots if lot.owner_id is None]
+    mine = [lot for lot in h.lots if lot.owner_id is None and lot.quantity > ZERO]
+    values = [None] * len(mine)
+    if mine and h.value is not None and h.quantity > ZERO:
+        # Costs and the headline value are in profile currency; h.price is a native quote.
+        # Use the same owned share as Position.owned_only, with the last lot taking the remainder.
+        owned_value = h.value * (sum((lot.quantity for lot in mine), ZERO) / h.quantity)
+        values = allocate_value(owned_value, [lot.quantity for lot in mine])
     held = [{"opened": lot.opened, "units": lot.quantity, "cost": lot.cost,
-             "value": None if h.price is None else lot.quantity * h.price,
-             "gain": None if h.price is None else lot.quantity * h.price - lot.cost,
-             "roi": None if h.price is None else pct(lot.roi(h.price)),
+             "value": value,
+             "gain": None if value is None else value - lot.cost,
+             "roi": None if value is None else pct(roi(value - lot.cost, lot.cost)),
              # A yearly rate on weeks is a guess dressed as a fact: it shows only once held a full year (r30 N2).
-             "cagr": None if h.price is None or _days_between(lot.opened, day) < 365 else pct(lot.cagr(h.price, day))}
-            for lot in mine if lot.quantity]
+             "cagr": None if value is None or _days_between(lot.opened, day) < 365 else
+                     pct(cagr(value, lot.cost, _days_between(lot.opened, day)))}
+            for lot, value in zip(mine, values)]
     sold = [{"opened": d.lot_opened, "sold": d.sold, "units": d.quantity, "cost": d.cost, "proceeds": d.proceeds,
              "gain": d.gain, "roi": pct(d.roi), "cagr": pct(d.cagr) if d.days_held >= 365 else None}
             for d in h.disposals if d.owner_id is None and d.quantity]

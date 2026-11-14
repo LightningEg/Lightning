@@ -160,7 +160,7 @@ def build_lots(lines: Iterable[LotLine], method: str = "average", owner_id: int 
     return book
 
 
-def _shares(total: Decimal, weights: list[Decimal]) -> list[Decimal]:
+def allocate_value(total: Decimal, weights: list[Decimal]) -> list[Decimal]:
     """Split ``total`` in proportion to ``weights`` to six decimals; the last share takes the remainder."""
     whole = sum(weights, ZERO)
     parts: list[Decimal] = []
@@ -176,7 +176,7 @@ def _fifo(lines: Iterable[LotLine], owner_id: int | None) -> LotBook:
         quantity, amount = line.quantity, line.amount
         if line.type == "SPL":  # every open lot gets its share of the new units; no cost moves
             if book.lots:
-                for lot, share in zip(book.lots, _shares(quantity, [lot.quantity for lot in book.lots])):
+                for lot, share in zip(book.lots, allocate_value(quantity, [lot.quantity for lot in book.lots])):
                     lot.quantity += share
             else:
                 book.lots.append(Lot(line.date, quantity, ZERO, owner_id))
@@ -187,7 +187,7 @@ def _fifo(lines: Iterable[LotLine], owner_id: int | None) -> LotBook:
             if line.effect == "INTERNAL" and amount < 0 and book.lots:  # a return of capital
                 removed, _ = cost_returned(book.cost, -amount)
                 # Each lot's cost falls in proportion to its cost, so none goes below zero.
-                for lot, share in zip(book.lots, _shares(removed, [lot.cost for lot in book.lots])):
+                for lot, share in zip(book.lots, allocate_value(removed, [lot.cost for lot in book.lots])):
                     lot.cost -= share
                 book.disposals.append(Disposal(book.lots[0].opened, line.date, ZERO, removed, -amount, owner_id))
             elif line.effect == "INTERNAL" and amount < 0:
@@ -207,7 +207,7 @@ def _fifo(lines: Iterable[LotLine], owner_id: int | None) -> LotBook:
             if need:  # more sold than held: the shortfall is a piece with no cost
                 taken.append((Lot(line.date, ZERO, ZERO, owner_id), need, ZERO))
             if line.type == "SEL":
-                proceeds = _shares(-amount, [units for _, units, _ in taken])
+                proceeds = allocate_value(-amount, [units for _, units, _ in taken])
                 for (lot, units, cost), got in zip(taken, proceeds):
                     book.disposals.append(Disposal(lot.opened, line.date, units, cost, got, owner_id))
             book.lots = [lot for lot in book.lots if lot.quantity != ZERO]

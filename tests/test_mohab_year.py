@@ -722,6 +722,8 @@ def _a_dollar_account_and_a_nasdaq_etf(o: Mohab) -> None:
                                       "date": "2027-09-30", "units": "10", "total": "2,200", "fees": "5"},
                                      action="investment-entry")
     o.ask("usd_investments", "Is my Nasdaq ETF in my investments?", "Investments")
+    o.ask("usd_purchase_return", "Does each purchase agree with my holding in pounds?",
+          "Investments", "Invesco NASDAQ 100 ETF")
 
 
 def _exercise_cash_ownership(o: Mohab) -> None:
@@ -1859,3 +1861,14 @@ def test_mohab_asks_search_three_questions(mohab):
     assert 'class="search-answer"' in pc and "Open in Transactions" in pc
     nothing = client.get("/search", params={"q": "qqqqzz"}).text
     assert 'class="search-answer"' not in nothing
+
+
+def test_his_dollar_purchase_returns_are_in_pounds(mohab):
+    """BT-12AN: the fee is a small loss, not a fictitious 98% loss from comparing dollars with pounds."""
+    screen = mohab.answers["usd_purchase_return"].screen
+    assert route(mohab, "usd_purchase_return")[-1].startswith("/investments/holding/")
+    table = screen.html.split('Each purchase', 1)[1].split('<tbody>', 1)[1].split('</tbody>', 1)[0]
+    cells = [re.sub('<[^>]+>', '', td).strip() for td in re.findall(r'<td[^>]*>(.*?)</td>', table, re.S)]
+    assert money(cells[2]) == D('108900')
+    assert money(cells[3]) == D('108653')
+    assert money(cells[4]) == D('-0.2')
