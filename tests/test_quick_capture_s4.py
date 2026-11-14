@@ -80,7 +80,7 @@ def test_pc_asks_once_about_a_forgotten_minus(month):
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
     page = client.get(f"/accounts/{accounts['cib'].id}").text
     session = re.search(r'name="__session" value="([^"]*)"', page).group(1)
-    data = {"__session": session, "date": "2026-09-20", "counterparty": "Carrefour", "category": "Food & Groceries",
+    data = {"__session": session, "date": "2026-09-20", "counterparty": "Carrefour", "category": "Food & groceries",
             "amount": "200", "notes": ""}
     before = len(c.transactions.search_ids("Carrefour"))
     asked = client.post(f"/accounts/{accounts['cib'].id}/register", data=data)

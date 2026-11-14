@@ -250,7 +250,7 @@ def test_a_refund_and_a_typed_budget_limit_work_on_the_phone(mohab):
 def test_several_rows_get_one_category_together(mohab):
     rows = mohab.notes["bulk_rows"]
     assert rows >= 12   # one Talabat order a month, chosen with Select
-    assert mohab.notes["bulk_done"].shows(f"Food & Groceries is now the category of {rows} rows.")
+    assert mohab.notes["bulk_done"].shows(f"Food & groceries is now the category of {rows} rows.")
 
 
 def test_a_tag_gathers_its_rows_with_their_totals(mohab):

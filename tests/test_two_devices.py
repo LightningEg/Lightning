@@ -113,7 +113,7 @@ class Device:
         return self.hand.account(name, "Cash", "1000", when="2026-10-01")
 
     def spend(self, account: str, when: str, party: str, amount: str) -> screens.Screen:
-        return self.hand.enter(account, when, party, "Food & Groceries", f"-{amount}")
+        return self.hand.enter(account, when, party, "Food & groceries", f"-{amount}")
 
     def fix_amount(self, account: str, party: str, amount: str) -> screens.Screen:
         """A spending's new amount: the phone's sheet keeps Out; the PC's register row is signed."""
@@ -287,7 +287,7 @@ def test_3b_a_save_on_a_lent_phone_says_who_has_the_ledger_and_where_to_go(mohab
     assert not any(l.attrs.get("aria-label") == "Add transaction" for l in phone.b.go("Accounts").links)
     phone.b.open(add)
     refused = phone.b.submit({"kind": "out", "date": "2026-10-04", "counterparty": "Cafe", "amount": "40",
-                              "category_id": screens.Choose("Food & Groceries")}, button="Save", expect=403)
+                              "category_id": screens.Choose("Food & groceries")}, button="Save", expect=403)
     assert 'class="phone-appbar"' in refused.html            # a phone page, not bare text
     assert refused.shows("Nothing was saved", "Office PC has the ledger now", "Hand it back on that PC")
     assert phone.b.click("Devices").shows("Office PC", "Has the ledger")
@@ -362,7 +362,7 @@ def test_5_the_phone_takes_the_ledger_back_from_a_pc_out_of_reach(mohab):
     assert kept.shows("The phone took the ledger back. This copy is kept here, read only.")
     # He reads his lunch in the kept copy, which saves nothing...
     assert "Office lunch" in pc.register("Wallet")
-    refused = pc.b.submit({"date": "2026-10-07", "counterparty": "Taxi", "category": "Food & Groceries",
+    refused = pc.b.submit({"date": "2026-10-07", "counterparty": "Taxi", "category": "Food & groceries",
                            "amount": "-30"}, button="Add", page=pc.b.go("Wallet"), expect=403)
     assert refused.shows("Nothing was saved", "Read only on this PC") and refused.link("Profiles & lock")
     # ...closes it and borrows the phone's ledger again, then types the lunch there.

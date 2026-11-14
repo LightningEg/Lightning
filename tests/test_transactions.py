@@ -218,7 +218,7 @@ class TestSearch:
         assert ids(c, search="50%")[1] == 1 and ids(c, search="%")[1] == 1 and ids(c, search="_")[1] == 1
 
     def test_search_by_category_name_and_notes(self, data, c):
-        assert ids(c, search="groceries")[1] == 2  # "Food & Groceries" category name
+        assert ids(c, search="groceries")[1] == 2  # "Food & groceries" category name
         assert ids(c, search="personal food")[1] == 2
 
 
@@ -249,7 +249,7 @@ class TestRegister:
     def test_typed_category_and_account_lookup(self, setup, c):
         accounts, _ = setup
         find = c.categories.find_by_text
-        assert find("Personal › Food & Groceries").code == "EXP.PERSONAL.FOOD"
+        assert find("Personal › Food & groceries").code == "EXP.PERSONAL.FOOD"
         assert find("food & groceries").code == "EXP.PERSONAL.FOOD"
         assert find("EXP.WORK.SOFTWARE").code == "EXP.WORK.SOFTWARE"
         assert find("groceries").code == "EXP.PERSONAL.FOOD"  # unique partial match
