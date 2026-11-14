@@ -90,7 +90,7 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Financial health limit** | Report | Profile-owned minimum (passes at or above) or maximum (at or below) for a figure; unavailable figures get no judgement. |
 | **Budget** | Plan | Planned spending for a category and month; not a reserve or a transaction. |
 | **Monthly base budget** | Plan | A category's monthly plan before carryover: fixed EGP, a percentage of Average monthly income, or an observed-month average. Shown as **Base budget**. |
-| **Observed-month average** | Plan | 3m/6m spending divided by the months with qualifying activity; empty months are not zero. |
+| **Observed-month average** | Plan | 3m/6m average of the estimate basis (`BudgetService.estimate_spending`: linked money back counted in its expense's month, no month below zero). Once the profile covers the whole window every month counts, so a quiet month is zero; while it is newer, only months with spending count (owner 2026-11-13, NF-12AK1). |
 | **Budget carryover** | Plan | Optional unused room added to a later month's limit; sets aside no cash and does not reduce free cash. |
 | **Reserve** | Plan | Already-owned cash assigned to an emergency fund or goal; moves no money, does not change net worth. |
 | **Emergency fund** | Plan | The permanent reserve section. Coverage = emergency Reserves ÷ Average monthly income (or spending, per Settings › Budget), in months; aim six. |

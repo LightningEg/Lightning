@@ -138,7 +138,8 @@ def test_observed_month_average_and_percentage_income_basis(b):
     c.transactions.record_outflow("2026-03-03", wallet, "3000", food)
     c.transactions.record_outflow("2026-06-03", wallet, "9000", food)
     c.budgets.set_budget(food, "2026-09", "", average_months=6, schedule=c.schedules.view())
-    assert line(c.budgets.month_view("2026-09", schedule=c.schedules.view()), "EXP.PERSONAL.FOOD").budget == Decimal("6000")
+    # NF-12AK1 (owner 2026-11-13): the profile records from March, so all six months count: 12,000 / 6.
+    assert line(c.budgets.month_view("2026-09", schedule=c.schedules.view()), "EXP.PERSONAL.FOOD").budget == Decimal("2000")
     transport = ids["EXP.PERSONAL.TRANSPORT"]
     c.budgets.set_budget(transport, "2026-09", "", average_months=6, schedule=c.schedules.view())
     assert line(c.budgets.month_view("2026-09", schedule=c.schedules.view()), "EXP.PERSONAL.TRANSPORT").budget is None

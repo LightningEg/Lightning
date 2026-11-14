@@ -44,7 +44,7 @@ def test_last_month_identifies_repeated_amounts_already_in_use(c, setup):
     assert not row.selected
 
 
-def test_average_source_uses_three_full_months_and_one_month_of_history(c, setup):
+def test_average_source_uses_three_full_months_and_counts_quiet_months(c, setup):
     accounts, _ = setup
     food = _food(c)
     for month, amount in (("2026-09", "3000"), ("2026-10", "4000"), ("2026-11", "5200")):
@@ -57,11 +57,11 @@ def test_average_source_uses_three_full_months_and_one_month_of_history(c, setup
     assert row.source == "Your average" and row.current_amount == Decimal("1000")
     assert row.selected and "3 months" in row.note
 
-    # Only one month of history: that month is the figure.
+    # NF-12AK1 (owner 2026-11-13): spending in one month of three the profile covers is 900 / 3, not 900 a month.
     other = c.categories.get_by_code("EXP.PERSONAL.TRANSPORT")
     c.transactions.record_outflow("2026-11-03", accounts["cib"].id, "900", other.id)
     row = next(row for row in _proposal(c, "average").rows if row.category_id == other.id)
-    assert row.amount == Decimal("900")
+    assert row.amount == Decimal("300")
 
 
 def test_average_source_skips_one_off_categories(c, setup):
