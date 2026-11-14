@@ -28,3 +28,4 @@ Things seen, not yet planned. One line each: date, pillar, what and where (a pag
 - **Planning form polish (feel, 2026-11-14, r37 P6-P8):** radio circles show above the Type pills in the add popup; ".00" and raw "−60000 EGP" amounts (A16); the "Scheduled cash checks" card's wording; *In and out › Show the numbers* is clipped at 1366 px.
 - **Loan as its payments (own, 2026-11-14, r37 M5):** a loan of 80,000 repaid as 36 x 3,000 lowers net worth by 108,000 when added; for the owner's eye.
 - **Bill changes once (plan, 2026-11-14, r37 M3):** the scenario moves one occurrence; a rent rise that stays cannot be tried.
+- **Mohab gets a compound certificate (own, 2026-11-14, IV-12J3 follow-up, owner pick):** his year has only a monthly-payout certificate, so the growing value of a certificate paid at maturity is proven in `tests/test_certificate_holding.py`, not on him; add a small compound one to his year and re-check his figures.

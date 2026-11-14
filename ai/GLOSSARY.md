@@ -146,7 +146,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Bank and wallet cash** | Your cash in bank accounts and wallets. | Read directly from the ledger | `planning.position.Position.bank_and_wallet_cash` |
 | **Brokerage cash** | Your uninvested cash inside brokerage accounts. | Read directly from the ledger | `reporting.service.ReportingService.owned_brokerage_cash` |
 | **Cash you own** | Your cash in banks, wallets and brokerage accounts. | Bank and wallet cash + Brokerage cash | `planning.position.Position.cash_you_own` |
-| **Deposits** | Your certificates and time deposits, at their balance. They are part of Holdings value. | Read directly from the ledger | `planning.position.Position.deposits` |
+| **Deposits** | Your certificates and time deposits, at their balance; a certificate paid at maturity also counts the interest it has earned so far, an estimate. They are part of Holdings value. | Read directly from the ledger | `planning.position.Position.deposits` |
 | **Gam'eya paid in** | What you have paid into your savings circles and not yet taken out: a circle's balance while it owes you. It is part of Holdings value, a circle cannot be sold early (100%). | Read directly from the ledger | `planning.position.Position.gameya_paid_in` |
 | **Holdings value** | Everything you own that is not cash, at its latest value: certificates and deposits, Gam'eya paid in, stocks, funds, gold and other assets. Assets that are not cash sit under one roof (owner decision 2026-10-04). | Read directly from the ledger | `planning.position.Position.holdings_value` |
 | **Other you own** | Anything you own that is neither cash nor a holding. | What you own − Cash you own − Holdings value | `planning.position.Position.other_you_own` |

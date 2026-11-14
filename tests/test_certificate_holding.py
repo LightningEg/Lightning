@@ -10,7 +10,7 @@ from decimal import Decimal
 import pytest
 from fastapi.testclient import TestClient
 
-from lightning.deposits import schedule
+from lightning.core import certificate_schedule as schedule
 from lightning.ui.web import create_app
 
 STOCK_WORDS = re.compile(r"\b(price|units?|average cost|unrealized|buy more)\b", re.I)
@@ -112,3 +112,64 @@ def test_the_certificates_page_leads_with_the_list_and_opens_the_buy_form_from_a
     assert "<table" not in rows and holding in rows   # rows, never a table cut at the phone's edge
     assert all(words in _text(rows) for words in ("CIB 3-year certificate", "20%", "Next payment", "1 Jan 2027",
                                                     "Maturity", "1 Sep 2029", "Locked"))
+
+
+def _short_compound(c, accounts):
+    """10,000 at 24% compounded monthly for three months: 200, then 204, then 208.08 of interest."""
+    return _monthly(c, accounts, name="CIB 3-month compound", principal="10000", annual_rate="24",
+                    interest_method="COMPOUND", payout_frequency="AT_MATURITY", compounding_frequency="MONTHLY",
+                    lockup_end_date="2026-09-01", maturity_date="2026-12-01")
+
+
+def _value(c, asset_id, day):
+    return next(h.value for h in c.investments.portfolio(day).open if h.asset_id == asset_id)
+
+
+def test_a_certificate_paid_at_maturity_gains_value_as_it_earns(c, setup):
+    accounts, _ = setup
+    certificate = _short_compound(c, accounts)
+    asset = certificate.terms.asset_id
+
+    values = [_value(c, asset, day) for day in ("2026-09-01", "2026-10-01", "2026-10-16", "2026-11-01", "2026-12-01")]
+
+    assert values == [Decimal("10000"), Decimal("10200"), Decimal("10298.71"), Decimal("10404"), Decimal("10612.08")]
+    assert _value(c, asset, "2026-12-31") == Decimal("10612.08")      # matured, not yet redeemed: no more growth
+    worth = [c.reporting.net_worth(day).total for day in ("2026-09-01", "2026-10-01", "2026-11-01")]
+    assert worth[1] - worth[0] == Decimal("200") and worth[2] - worth[1] == Decimal("204")
+    info = c.deposits.holding(certificate, date(2026, 10, 16), Decimal("0"), Decimal("95"))
+    assert info["value"] == values[2] and info["earned"] == Decimal("298.71")   # 204 over 15 of 31 days
+    page = _text(_client(c).get(f"/investments/holding/{asset}").text)
+    assert "Worth today" in page and "estimate" in page and "10,612" in page
+
+
+def test_the_redemption_settles_the_estimate_and_the_period_report_reconciles(c, setup):
+    from lightning.investments.report import investment_period
+    accounts, _ = setup
+    certificate = _short_compound(c, accounts)
+    c.deposits.redeem(certificate.terms.id, "2026-12-01", "10612.08", accounts["cib"].id)
+
+    report = investment_period(c.db, c.accounts, c.assets, c.reporting, "2026-10-01", "2026-12-31")
+    worth_change = c.reporting.net_worth("2026-12-31").total - c.reporting.net_worth("2026-09-30").total
+
+    assert report["realized"] == Decimal("612.08")                   # the bank paid what the terms said
+    # The estimate held the day before the period (29 of September's 30 days of 200) is settled by the redemption.
+    assert report["unrealized_change"] == Decimal("-193.33")
+    assert report["result"] == Decimal("418.75") == worth_change     # interest earned in the period, nothing more
+    assert all(h.asset_id != certificate.terms.asset_id for h in c.investments.portfolio("2026-12-31").open)
+
+
+def test_a_certificate_that_pays_as_it_goes_stays_at_its_principal(c, setup):
+    accounts, _ = setup
+    certificate = _monthly(c, accounts)
+    assert _value(c, certificate.terms.asset_id, "2026-12-15") == Decimal("12000")
+
+
+def test_simple_interest_paid_at_maturity_accrues_evenly_to_the_maturity_amount(c, setup):
+    accounts, _ = setup
+    certificate = _monthly(c, accounts, payout_frequency="AT_MATURITY", principal="36500", annual_rate="10",
+                           lockup_end_date="2026-09-01", maturity_date="2027-09-01")
+    terms = certificate.terms
+    total = sum(amount for _, amount, kind in schedule.events(terms) if kind == "INTEREST")
+    assert total == Decimal("3650")
+    assert schedule.accrued(terms, date(2027, 9, 1)) == total
+    assert schedule.accrued(terms, date(2026, 9, 11)) == Decimal("100.00")   # 10 of 365 days

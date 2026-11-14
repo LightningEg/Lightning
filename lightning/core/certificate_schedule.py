@@ -18,12 +18,12 @@ from decimal import Decimal, ROUND_HALF_UP
 
 from lightning.core.money import ZERO
 
-from .domain import CompoundingFrequency, InterestMethod, PayoutFrequency
 
 _MICRO = Decimal("0.000001")
-PAYOUT_MONTHS = {PayoutFrequency.MONTHLY: 1, PayoutFrequency.QUARTERLY: 3, PayoutFrequency.YEARLY: 12}
-COMPOUND_MONTHS = {CompoundingFrequency.MONTHLY: 1, CompoundingFrequency.QUARTERLY: 3,
-                   CompoundingFrequency.YEARLY: 12}
+# Keyed by the stored values; the enums in lightning/deposits/domain.py are StrEnums of the same text. This module
+# sits in core so reporting (valuation) and deposits (forecast) share it without reporting importing deposits.
+PAYOUT_MONTHS = {"MONTHLY": 1, "QUARTERLY": 3, "YEARLY": 12}
+COMPOUND_MONTHS = {"MONTHLY": 1, "QUARTERLY": 3, "YEARLY": 12}
 
 
 @dataclass(frozen=True)
@@ -68,14 +68,14 @@ def rate_on(terms, rates, day: date) -> Decimal:
 
 def pays_at_maturity(terms) -> bool:
     """Interest that stays with the bank until maturity, so the certificate's value grows as it is earned."""
-    return terms.interest_method == InterestMethod.COMPOUND or terms.payout_frequency == PayoutFrequency.AT_MATURITY
+    return terms.interest_method == "COMPOUND" or terms.payout_frequency == "AT_MATURITY"
 
 
 def periods(terms, rates=()) -> list[Period]:
     start, maturity = date.fromisoformat(terms.start_date), date.fromisoformat(terms.maturity_date)
     principal = terms.principal
-    compound = terms.interest_method == InterestMethod.COMPOUND
-    if not compound and terms.payout_frequency == PayoutFrequency.AT_MATURITY:
+    compound = terms.interest_method == "COMPOUND"
+    if not compound and terms.payout_frequency == "AT_MATURITY":
         rate = rate_on(terms, rates, start)
         return [Period(start, maturity, rate, period_interest(principal, rate / 100, start, maturity,
                                                               whole_months(start, maturity)))]
@@ -105,7 +105,7 @@ def events(terms, rates=()) -> list[tuple[date, Decimal, str]]:
     def q(amount: Decimal) -> Decimal:
         return amount.quantize(_MICRO, rounding=ROUND_HALF_UP)
 
-    if terms.interest_method == InterestMethod.COMPOUND:
+    if terms.interest_method == "COMPOUND":
         return [(maturity, q(terms.principal + sum((p.interest for p in found), ZERO)), "MATURITY")]
     return [*((p.end, q(p.interest), "INTEREST") for p in found), (maturity, q(terms.principal), "PRINCIPAL")]
 

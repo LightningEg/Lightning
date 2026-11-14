@@ -13,6 +13,7 @@ from decimal import Decimal
 
 from lightning.assets.domain import FinancialAsset
 from lightning.core.money import ONE, from_e6
+from lightning.core import certificate_schedule
 from lightning.fx import MISSING_DAYS, Rate, rate_for
 
 from .price_sources import SOURCE_RANK, source_rank  # noqa: F401  (SOURCE_RANK is the written order, re-exported here)
@@ -27,6 +28,16 @@ class Valuation:
     reason: str = ""
     source: str = ""  # MANUAL (a price you typed) · TRADE (last buy/sell) · COST (what you paid) · CASH
     fx_as_of: str | None = None  # the day of the exchange rate used, when it is older than a week and more
+
+
+class _GrowingTerms:
+    """The part of a certificate's terms its schedule reads, from a ``growing_certificates`` row."""
+
+    def __init__(self, row: dict):
+        self.start_date, self.maturity_date = row["start_date"], row["maturity_date"]
+        self.principal, self.annual_rate = from_e6(row["principal_e6"]), Decimal(row["annual_rate"])
+        self.interest_method, self.payout_frequency = row["interest_method"], row["payout_frequency"]
+        self.compounding_frequency = row["compounding_frequency"]
 
 
 class Valuer:
@@ -89,6 +100,9 @@ class Valuer:
                     return Valuation((quantity * unit_cost).quantize(Decimal("0.000001")), unit_cost,
                                      cost_date, "", "COST")
                 return Valuation(None, None, None, f"No gold reference or recorded cost for {asset.name}")
+            growing = self._certificate(asset, day)
+            if growing is not None:
+                return Valuation((quantity * growing).quantize(Decimal("0.000001")), growing, day, "", "ACCRUED")
             found = self._gold_price(asset, day) or self._price(asset, day)
             if found is None:
                 return Valuation(None, None, None, f"No price for {asset.label} on or before {day}")
@@ -98,6 +112,18 @@ class Valuer:
             return Valuation(None, price, price_date, f"No {asset.currency}/{self.base} rate within {MISSING_DAYS} days before {day}")
         return Valuation((quantity * price * rate.rate).quantize(Decimal("0.000001")), price, price_date, "", source,
                          rate.as_of)
+
+    def _certificate(self, asset: FinancialAsset, day: str) -> Decimal | None:
+        """IV-12J3: a certificate paid at maturity is worth its principal plus the interest earned to ``day`` (an
+        estimate from its terms, source ACCRUED); the redemption then records what the bank actually paid."""
+        if not asset.code.startswith("CD:"):
+            return None
+        row = self.q.growing_certificates().get(asset.id)
+        if row is None:
+            return None
+        terms = _GrowingTerms(row)
+        when = min(date.fromisoformat(day), date.fromisoformat(terms.maturity_date))
+        return terms.principal + certificate_schedule.accrued(terms, when, self.q.certificate_rates(row["id"]))
 
     def reference_price(self, reference_id: int, day: str) -> dict | None:
         """A gold reference's price per gram on ``day``. PR-2 (3H2): a karat with no price of its own is worked out

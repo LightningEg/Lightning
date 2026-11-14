@@ -14,7 +14,7 @@ from lightning.transactions.service import TransactionService
 
 from .domain import (CertificateTerms, CompoundingFrequency, DepositEvent, DepositTerms, InterestMethod,
                      PayoutFrequency)
-from . import schedule
+from lightning.core import certificate_schedule as schedule
 from .repository import DepositRepository
 
 _MICRO = Decimal("0.000001")
@@ -465,7 +465,7 @@ class DepositService:
         return sorted(events, key=lambda event: (event.date, event.deposit_account_id, event.kind))
 
     def _certificate_events(self, terms: CertificateTerms, day: date, horizon: date) -> list[DepositEvent]:
-        """The bank's payments after ``day`` up to ``horizon``, from lightning/deposits/schedule.py."""
+        """The bank's payments after ``day`` up to ``horizon``, from lightning/core/certificate_schedule.py."""
         if min(date.fromisoformat(terms.maturity_date), horizon) <= day:
             return []
         return [DepositEvent(fmt_date(when), terms.destination_account_id, amount, kind, terms.account_id, terms.id)
