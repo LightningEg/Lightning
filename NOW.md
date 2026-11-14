@@ -2,7 +2,7 @@
 
 ## Claimed
 
-Reserved codes: r37 (Codex, investment workflow audit, 2026-11-14)
+Reserved codes: r37, 12AM, 12AN, 12AO, 12AP, 12AQ (Codex, investment audit, 2026-11-14)
 
 | Who | Work | Files | Since |
 |---|---|---|---|
