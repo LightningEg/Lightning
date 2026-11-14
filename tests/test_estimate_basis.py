@@ -66,4 +66,4 @@ def test_budget_names_the_window(c, setup):
     food, _ = _ids(c)
     c.transactions.record_outflow("2026-09-02", accounts["cib"].id, "6000", food)
     text = visible_text(_ScreenClient(create_app(c), "http://testserver").get("/budget?month=2026-12&open_group=all").text)
-    assert "Food & Groceries 0 spent Track One-off 2,000 1 of 3 months had spending" in text
+    assert "Food & Groceries 0 spent Track Leave outside the budget 2,000 1 of 3 months had spending" in text

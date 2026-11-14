@@ -58,7 +58,7 @@
   <h2 id="depends-title">{{ 'What depends on this account'|tr(locale) }}</h2>
   {% if d.shortfall %}{{ link_row('/plan#plan-dated-cash', 'Goes below zero on {date}'|tr(locale, date=d.shortfall.date), 'Scheduled payments leave it short'|tr(locale), d.shortfall.balance|money(True, 0) ~ ' ' ~ d.shortfall.currency, 'neg') }}{% endif %}
   {% for item in d.plans %}{{ link_row(item.href, item.name, item.kind_label|tr(locale), item.amount|money(False, 0)) }}{% endfor %}
-  {% for circle in d.circles %}{{ link_row('/gameya/' ~ circle.id, circle.name, ('Gam’eya paid from here'|tr(locale) if circle.funding_account_id == d.account.id else 'Gam’eya payout comes here'|tr(locale)), (circle.installment if circle.funding_account_id == d.account.id else circle.payout)|money(False, 0)) }}{% endfor %}
+  {% for circle in d.circles %}{{ link_row('/gameya/' ~ circle.id, circle.name, ('Gam\'eya paid from here'|tr(locale) if circle.funding_account_id == d.account.id else 'Gam\'eya payout comes here'|tr(locale)), (circle.installment if circle.funding_account_id == d.account.id else circle.payout)|money(False, 0)) }}{% endfor %}
   {% for cert in d.certificates %}{{ link_row('/deposits/' ~ cert.account_id, cert.name, 'Certificate interest comes here · matures {date}'|tr(locale, date=cert.maturity_date), cert.principal|money(False, 0)) }}{% endfor %}
   {% for reserve in d.reserves %}{{ link_row('/reserves/' ~ reserve.id ~ '/payments', reserve.name, 'Reserve held here'|tr(locale), reserve.effective_allocated|money(False, 0)) }}{% endfor %}
 </section>{% endif %}

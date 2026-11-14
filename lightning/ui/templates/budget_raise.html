@@ -9,7 +9,7 @@
       <span><b>{{ "Plan with it"|tr(locale) }}</b><small class="muted">{{ fig.spending_room.label }} becomes {{ offer.room|money(False, 0) }} {{ base }}; your {{ offer.rate|money(False, 0) }}% target stays</small></span>
       <button class="btn small primary">{{ "Plan with it"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
     <form method="post" action="/budget/raise" class="compact-row"><input type="hidden" name="month" value="{{ offer.month }}"><input type="hidden" name="choice" value="save">
-      <span><b>{{ "Save the difference"|tr(locale) }}</b><small class="muted">Keep today's plan and raise your savings target to {{ offer.keep_rate }}%</small></span>
+      <span><b>{{ "Save the difference"|tr(locale) }}</b><small class="muted">Keep today’s plan and raise your savings target to {{ offer.keep_rate }}%</small></span>
       <button class="btn small">{{ "Save it"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
     <form method="post" action="/budget/raise" class="compact-row"><input type="hidden" name="month" value="{{ offer.month }}"><input type="hidden" name="choice" value="keep">
       <span><b>{{ "Keep the average"|tr(locale) }}</b><small class="muted">{{ "The plan waits until the new income shows in completed months"|tr(locale) }}</small></span>

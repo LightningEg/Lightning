@@ -1,6 +1,6 @@
 ---
 title: Polish and Arabic
-done: 3BH1, 3BC, 3BC1, 3BC2, 3BC3, 3BC4, 3AU3, 3AU4, NF-3AU, 3BG, 3AQ, 3AR, 3G, 3Q, 3S, 3T, 3AD, 3AJ, 3B, 3J, 3AP, 3AL, 3AG, 3W, 3U, 3D, 3E, 3A, 3C, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AF, 3AE, 3I, 3AH, 3AK, 3AO, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BJ, 3BB, 3BE, 3AU2, 3BD, 3BD1, 3BD2, 3BD3, 3BD4, 3BD5, 3BF, 3BF1, 3BF2, 3BF3, 3BF4, 3BF5, 3BF6, 3BF7
+done: 3BH5, 3BH1, 3BC, 3BC1, 3BC2, 3BC3, 3BC4, 3AU3, 3AU4, NF-3AU, 3BG, 3AQ, 3AR, 3G, 3Q, 3S, 3T, 3AD, 3AJ, 3B, 3J, 3AP, 3AL, 3AG, 3W, 3U, 3D, 3E, 3A, 3C, 3L, 3M, 3N, 3O, 3P, 3R, 3V, 3X, 3Y, 3Z, 3AA, 3AB, 3AC, 3AF, 3AE, 3I, 3AH, 3AK, 3AO, 3AS, 3AT, 3AV, 3AW, 3AX, 3BA, 3BJ, 3BB, 3BE, 3AU2, 3BD, 3BD1, 3BD2, 3BD3, 3BD4, 3BD5, 3BF, 3BF1, 3BF2, 3BF3, 3BF4, 3BF5, 3BF6, 3BF7
 ---
 
 **Goal.** Every screen reads right in English and Arabic, on PC and phone, and says only what helps.

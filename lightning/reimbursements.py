@@ -366,7 +366,7 @@ class ReimbursementService:
                     raise ConflictError("This receipt is already linked to a reimbursement claim.", "receipt_id")
                 summary = self._claim_summary(claim)
                 if value_e6 > to_e6(summary["outstanding"]):
-                    raise ValidationError("Receipt amount cannot exceed the claim's current outstanding amount.", "amount")
+                    raise ValidationError("Receipt amount cannot exceed the claim’s current outstanding amount.", "amount")
                 if value_e6 > int(receipt["amount_e6"]):
                     raise ValidationError("Receipt amount cannot exceed the posted owned inflow.", "amount")
                 now = now_iso()

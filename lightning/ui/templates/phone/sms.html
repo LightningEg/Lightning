@@ -21,7 +21,7 @@
 {% if permission == 'not_granted' %}
 <section class="phone-section" aria-labelledby="allow-heading">
   <header class="phone-section-head"><h2 id="allow-heading">{{ "Read bank SMS by itself"|tr(locale) }}</h2></header>
-  <p class="phone-note">{{ "Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction. It reads messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages stay on this phone: nothing is sent anywhere. A payment Lightning is sure about saves itself, marked and undoable; the rest wait for your check."|tr(locale) }}</p>
+  <p class="phone-note">{{ "Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction. It reads messages from senders with a name or a short code, like CIB or NBE, never from people’s numbers. The messages stay on this phone: nothing is sent anywhere. A payment Lightning is sure about saves itself, marked and undoable; the rest wait for your check."|tr(locale) }}</p>
   <form method="post" action="/sms/allow" class="phone-form"><button class="btn phone-save" type="submit">{{ "Allow reading SMS"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
 </section>
 {% endif %}
