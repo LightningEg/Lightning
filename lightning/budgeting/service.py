@@ -534,8 +534,11 @@ class BudgetService:
     def fill_proposal(self, month: str, source: str, *, schedule: ScheduleView) -> BudgetFillProposal:
         """Build a read-only month-fill preview; all returned amounts are base limits in EGP."""
         first, _ = parse_month(month)
+        if source == "changes":
+            return self._fill_changes(month, schedule=schedule)
         if source not in {"last_month", "average", "schedule", "goal"}:
-            raise ValidationError("Choose Last month, Your average, Schedule, or Goal as the fill source.", "source")
+            raise ValidationError("Choose What changed, Last month, Your average, Schedule, or Goal as the fill source.",
+                                  "source")
         categories = [c for c in self.categories.tree(Movement.OUTFLOW)
                       if not c.is_root and c.family != CategoryFamily.INVESTMENT]
         by_id = {c.id: c for c in categories}
@@ -545,14 +548,16 @@ class BudgetService:
 
         if source == "last_month":
             previous = month_of(first - timedelta(days=1))
-            for category_id, (amount, _, period, percent) in self.amounts_for(previous, loans=False, schedule=schedule).items():
+            for category_id, (amount, only_then, period, percent) in self.amounts_for(previous, loans=False, schedule=schedule).items():
                 if category_id in by_id:
                     detail = (f"{period}-month average" if period else
-                              f"{fmt(percent)}% of income" if percent is not None else "fixed")
+                              f"{fmt(percent)}% of income" if percent is not None else
+                              "for that month only" if only_then else "fixed")  # NF-12AI: an exception says so
                     candidates[category_id] = (amount, f"From {previous} · {detail}")
         elif source == "average":
             # NF-12R: what was really spent, averaged over the last three full months (NF-12AK1: over all three once the
-            # profile covers them, else over the months with spending), as a tidy figure; one-off categories are left out.
+            # profile covers them, else over the months with spending), as a tidy figure; categories outside the budget
+            # are left out.
             one_offs = self.one_off_ids()
             for category_id, amount in self.first_plan_suggestions(month).items():
                 if category_id in by_id and category_id not in one_offs:
@@ -586,8 +591,8 @@ class BudgetService:
             if same:
                 conflict = ("Already using last month's plan" if source == "last_month"
                             else "Matches the current base limit.")
-            elif rule is not None:
-                conflict = f"Current limit: {current_rule}. Applying replaces it for {month} only."
+            elif rule is not None:  # NF-12AI: a limit you set is kept unless you tick the row
+                conflict = f"Your limit: {current_rule}. Tick to use this instead for {month} only."
             elif auto_loan:
                 conflict = (f"{fmt(auto_loan)} of scheduled payments are already planned automatically. "
                             "Applying this amount would replace that automatic line.")
@@ -599,8 +604,8 @@ class BudgetService:
                 current_amount=current_amount,
                 current_rule=current_rule,
                 conflict=conflict,
-                selectable=amount is not None,
-                selected=amount is not None and not auto_loan and (rule is None or (source == "average" and not same)),
+                selectable=amount is not None and not same,  # NF-12AI: an unchanged row has nothing to apply
+                selected=amount is not None and not auto_loan and rule is None,
                 already_using_last_month=source == "last_month" and same,
                 note=note,
             ))
@@ -633,6 +638,25 @@ class BudgetService:
                     if row.category_id in affected else row for row in rows]
         rows.sort(key=lambda row: (by_id[row.category_id].sort_order, row.category_name.casefold()))
         return BudgetFillProposal(month, source, tuple(rows))
+
+    def _fill_changes(self, month: str, *, schedule: ScheduleView) -> BudgetFillProposal:
+        """NF-12AI (#635): Fill's default view, only what would change this month. Bills scheduled above a limit you
+        set, and an average for a category with history: new where there is no limit (ticked), beside your limit where
+        it differs (unticked, so a limit you chose is kept). Each row keeps its source; the rest are counted unchanged."""
+        bills = {row.category_id: row for row in self.fill_proposal(month, "schedule", schedule=schedule).rows}
+        averages = {row.category_id: row for row in self.fill_proposal(month, "average", schedule=schedule).rows}
+        rows, unchanged = [], 0
+        for category_id in dict.fromkeys([*bills, *averages]):
+            bill, average = bills.get(category_id), averages.get(category_id)
+            if bill and bill.current_amount is not None and bill.amount is not None and bill.amount > bill.current_amount:
+                rows.append(replace(bill, selected=False, note=f"{bill.note} · above your limit"))
+            elif average and average.selectable:
+                rows.append(average)
+            else:
+                unchanged += 1
+        by_id = {c.id: c for c in self.categories.tree(Movement.OUTFLOW)}
+        rows.sort(key=lambda row: (by_id[row.category_id].sort_order, row.category_name.casefold()))
+        return BudgetFillProposal(month, "changes", tuple(rows), unchanged=unchanged)
 
     @staticmethod
     def _fill_rule_name(rule) -> str:

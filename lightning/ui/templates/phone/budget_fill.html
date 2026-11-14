@@ -8,6 +8,7 @@
 <form method="get" action="/budget/fill" class="phone-form">
   <input type="hidden" name="month" value="{{ month }}">
   <label for="fill-source">{{ "Fill from"|tr(locale) }}</label><select id="fill-source" name="source">
+      <option value="changes" {{ 'selected' if source == 'changes' }}>{{ "What changed"|tr(locale) }}</option>
       <option value="last_month" {{ 'selected' if source == 'last_month' }}>{{ "Last month"|tr(locale) }}</option>
       <option value="average" {{ 'selected' if source == 'average' }}>{{ "Your average"|tr(locale) }}</option>
       <option value="schedule" {{ 'selected' if source == 'schedule' }}>{{ "Schedule"|tr(locale) }}</option>
@@ -34,7 +35,7 @@
             <input class="money-input" name="amount_{{ row.category_id }}" type="number" min="0" step="0.01" inputmode="decimal" value="{{ values.get(row.category_id, row.amount|string) if values is defined else row.amount }}" aria-label="Proposed monthly limit for {{ row.category_name }}" data-row-amount>
             {% else %}<span>{{ row.category_name }}<small><span>{{ row.note }}</span>{% for part in row.conflict|sentences %} · <span>{{ part }}</span>{% endfor %}</small></span><b>—</b>{% endif %}</div>{% endfor %}
         </div>
-        <button class="btn primary phone-save" type="submit">{{ "Apply selected for this month only"|tr(locale) }}</button>
+        {% if proposal.unchanged %}<p class="phone-note">{{ '{n} more categories keep their limits: nothing would change.'|tr(locale, n=proposal.unchanged) }}</p>{% endif %}<button class="btn primary phone-save" type="submit">{{ "Apply selected for this month only"|tr(locale) }}</button>
         <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
       </form>
     {% endif %}
