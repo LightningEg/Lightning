@@ -9,7 +9,7 @@ COMMANDS = {
     # and dismissing an unread bank message.
     "health.set_limit": Command("health.set_limit", dict(key=TEXT, raw=TEXT, no_limit=FLAG, alert_raw=optional(TEXT))),
     "health.restore_limit": Command("health.restore_limit", dict(key=TEXT)),
-    "health.take_raise": Command("health.take_raise", dict(choice=choice("plan", "save", "keep"), month=optional(MONTH))),
+    "health.take_raise": Command("health.take_raise", dict(choice=choice("plan", "save", "keep", "average"), month=optional(MONTH))),
     "zakat.set_enabled": Command("zakat.set_enabled", dict(on=FLAG)),
     "sms_imports.dismiss": Command("sms_imports.dismiss", dict(message_id=TEXT)),
 }

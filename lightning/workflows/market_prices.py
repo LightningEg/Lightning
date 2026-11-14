@@ -230,6 +230,8 @@ class MarketPrices:
         instruments = market.instruments()
         for asset_id, month_ends in sorted(held.items()):
             asset = self.assets.get_asset(asset_id)
+            if self.assets.get_class(asset.asset_class_id).code == "DEPOSIT.CD":
+                continue
             if asset.is_cash or asset.code.startswith(("OTH:ITEM-", "REF:")):
                 continue
             key = self.match(asset, market)
