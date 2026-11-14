@@ -1,5 +1,7 @@
 """A settled salary offers a review, without assigning cash or recording a transaction."""
-from datetime import date
+from datetime import date, timedelta
+
+import pytest
 
 from fastapi.testclient import TestClient
 
@@ -113,3 +115,109 @@ def test_old_proposal_is_refused_if_a_different_salary_is_settled(c, setup, monk
     with pytest.raises(ValidationError, match='changed'):
         c.funding.apply(old['token'], {}, {})
     assert _salary_item(c)['review_state'] == 'active'
+
+
+def _missing_income(c, on):
+    return [item for item in ReviewInbox(c).items(on) if item['label'].endswith(' has not arrived')]
+
+
+def test_missing_salary_waits_two_days_and_recording_the_receipt_clears_it(c, setup, monkeypatch):
+    due = date(2026, 12, 31)
+    on = due + timedelta(days=2)
+    monkeypatch.setenv('LIGHTNING_TODAY', on.isoformat())
+    account, salary = setup[0]['cib'].id, setup[1]['EXP.WORK.SALARY'].id
+    item_id = c.planning.create(kind='INCOME', name='Salary', amount='2000', frequency='ONCE',
+                               start_date=due.isoformat(), account_id=account, category_id=salary)
+    before = tuple(c.db.scalar(f'SELECT count(*) FROM {table}')
+                   for table in ('transactions', 'planned_payments', 'cash_funding'))
+    assert _missing_income(c, due) == []
+    assert _missing_income(c, due + timedelta(days=1)) == []
+    row, = _missing_income(c, on)
+    assert row['label'] == 'Salary has not arrived'
+    assert row['detail'] == 'Expected 2026-12-31 · 2,000.00 EGP. Record it when it arrives.'
+    assert row['priority'] == 1 and row['popup'] and row['action'] == 'Record'
+    assert row['late_days'] == 2
+    client = TestClient(create_app(c))
+    assert client.get(row['href']).status_code == 200
+    assert tuple(c.db.scalar(f'SELECT count(*) FROM {table}')
+                 for table in ('transactions', 'planned_payments', 'cash_funding')) == before
+    response = client.post(f'/plan/items/{item_id}/pay', data={
+        'due': due.isoformat(), 'outcome': 'record', 'date_paid': on.isoformat(),
+        'amount': '2000', 'account_id': str(account), 'back': '/'}, follow_redirects=False)
+    assert response.status_code == 303
+    assert c.db.scalar('SELECT count(*) FROM transactions') == before[0] + 1
+    assert _missing_income(c, on) == []
+
+
+def test_missing_income_reminder_is_opt_in_stable_and_does_not_post_money(c, setup, monkeypatch):
+    from lightning.workflows.reminders import ReminderService
+
+    monkeypatch.setenv('LIGHTNING_TODAY', '2027-01-02')
+    account, salary = setup[0]['cib'].id, setup[1]['EXP.WORK.SALARY'].id
+    item_id = c.planning.create(kind='INCOME', name='Salary', amount='2000', frequency='ONCE',
+                               start_date='2026-12-31', account_id=account, category_id=salary)
+    service = ReminderService(c)
+    before = c.db.scalar('SELECT count(*) FROM transactions')
+    assert service.due() == []
+    c.settings.set('reminders_enabled', '1')
+    notices = [item for item in service.due() if item['label'] == 'Salary has not arrived']
+    assert len(notices) == 1 and notices[0]['href'].startswith(f'/plan/items/{item_id}/pay?due=2026-12-31')
+    assert notices == [item for item in service.due() if item['label'] == 'Salary has not arrived']
+    assert c.db.scalar('SELECT count(*) FROM transactions') == before
+    c.db.read_only = True
+    try:
+        assert service.due() == []
+    finally:
+        c.db.read_only = False
+    c.planning.skip(item_id, '2026-12-31')
+    assert _missing_income(c, date(2027, 1, 2)) == []
+    assert not any(item['label'] == 'Salary has not arrived' for item in service.due())
+    c.planning.reopen(item_id, '2026-12-31')
+    assert len(_missing_income(c, date(2027, 1, 2))) == 1
+    c.planning.remove(item_id)
+    assert _missing_income(c, date(2027, 1, 2)) == []
+
+
+@pytest.mark.parametrize('currency', ['EGP', 'USD'])
+def test_missing_income_uses_its_account_currency_or_the_profile_default(c, currency, monkeypatch):
+    from lightning.database.currencies import CurrencyRegistry
+
+    monkeypatch.setenv('LIGHTNING_TODAY', '2027-01-02')
+    account_id = None
+    if currency == 'USD':
+        CurrencyRegistry(c.db).register('USD')
+        c.fx.save('USD', '2026-12-31', '50')
+        account_id = c.account_flows.open_account('Dollars', 'BANK', '2026-12-31', '0', currency='USD').id
+    c.planning.create(kind='INCOME', name='Income', amount='125.50', frequency='ONCE',
+                      start_date='2026-12-31', account_id=account_id)
+    row, = _missing_income(c, date(2027, 1, 2))
+    assert row['detail'] == f'Expected 2026-12-31 · 125.50 {currency}. Record it when it arrives.'
+
+
+@pytest.mark.parametrize('phone', [False, True])
+def test_missing_income_row_and_notification_are_translated_on_both_surfaces(c, setup, monkeypatch, phone):
+    monkeypatch.setenv('LIGHTNING_TODAY', '2027-01-02')
+    monkeypatch.setenv('LIGHTNING_REMINDER_SCHEDULE', str(c.data_dir / 'test-reminder-schedule.json'))
+    account, salary = setup[0]['cib'].id, setup[1]['EXP.WORK.SALARY'].id
+    c.planning.create(kind='INCOME', name='المرتب', amount='2000', frequency='ONCE',
+                      start_date='2026-12-31', account_id=account, category_id=salary)
+    c.settings.set('reminders_enabled', '1')
+    app = create_app(c)
+    if phone:
+        inner = app
+
+        async def phone_app(scope, receive, send):
+            if scope['type'] == 'http':
+                scope.setdefault('state', {})['phone'] = True
+            await inner(scope, receive, send)
+        app = phone_app
+    client = TestClient(app)
+    en = client.get('/needs-you/payments')
+    assert en.status_code == 200 and 'المرتب has not arrived' in en.text
+    c.settings.set('locale', 'ar')
+    ar = client.get('/needs-you/payments')
+    assert ar.status_code == 200 and 'المرتب لسه ما وصلش' in ar.text
+    assert 'سجّله لما يوصل.' in ar.text and 'has not arrived' not in ar.text
+    notice, = [item for item in client.get('/reminders/due.json').json()['items']
+               if item['label'] == 'المرتب لسه ما وصلش']
+    assert 'سجّله لما يوصل.' in notice['detail'] and 'Expected' not in notice['detail']
