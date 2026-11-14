@@ -18,6 +18,8 @@ from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TE
 
 ARABIC_UI = {
     'The total value is too small for this holding quantity.': 'القيمة الإجمالية صغيرة جدًا بالنسبة لعدد الوحدات دي.',
+    'Certificate value is set by its principal. Use the certificate workflow for terms or redemption.': 'قيمة الشهادة حسب أصل المبلغ. استخدم صفحة الشهادة لتعديل الشروط أو تسجيل الاسترداد.',
+    'View certificate': 'عرض الشهادة',
     'Quantities and total values cover all accounts, including units held for others. Use the currency shown beside each investment.': 'الكميات والقيم الإجمالية تشمل كل الحسابات، بما فيها الوحدات اللي محتفظ بيها لغيرك. استخدم العملة الموضحة جنب كل استثمار.',
     'Enter a total estimate': 'اكتب التقدير الإجمالي',
     'A total value must be greater than zero.': 'القيمة الإجمالية لازم تكون أكبر من صفر.',

@@ -298,7 +298,9 @@ class ReevaluationService:
             manual = [tuple(row) for row in self.db.all(
                 "SELECT asset_id,date,quantity_e6,total_value_e6 FROM physical_item_valuations "
                 "WHERE date<=? ORDER BY asset_id,date,id", (day,))]
-        payload = json.dumps([reason, activity, prices, fx, forced, physical, manual],
+        # Revisit saved checkpoints when valuation rules change, even if their inputs did not.
+        # Identical journals are reused; old quote-driven certificate gains are replaced.
+        payload = json.dumps([reason, activity, prices, fx, forced, physical, manual, "certificate-principal-v1"],
                              separators=(",", ":"), default=str)
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
@@ -313,13 +315,14 @@ class ReevaluationService:
             return valuation.price, valuation.source
         asset = self.reporting.assets.get_asset(asset_id)
         found = self.reporting.valuer._price(asset, day)
-        if not found or found[2] == "COST":
+        if not found:
             return None
         price, price_date, source = found
         if self.reporting.assets.get_class(asset.asset_class_id).code == "DEPOSIT.CD":
-            # A CD has no market quote. Its purchase price remains its principal value until
-            # the user enters a new valuation, so it does not need a new price each month.
+            # A CD keeps its recorded principal until redemption; it needs no monthly market quote.
             return price, source
+        if source == "COST":
+            return None
         if (parse_date(day) - parse_date(price_date)).days > 10:
             return None
         return price, source

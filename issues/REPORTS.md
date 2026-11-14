@@ -24,8 +24,8 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r25 | [The phone, redesigned: a phone-first architecture, tab by tab](11-phone-ux/r25-phone-ux-architecture/report.md) | 2026-11-06 | research | none |
 | r26 | [Audit 14: using Lightning as a user, on the PC and the phone](12-desktop-ux/r26-user-test-pc-and-phone/report.md) | 2026-11-06 | audit | 12G |
 | r27 | [User journeys and visual unity](12-desktop-ux/r27-journeys-and-visual-unity/report.md) | 2026-11-08 | audit | none |
-| r28 | [International polish: the small things that make Lightning feel finished](3-polish-and-arabic/r28-international-polish/report.md) | 2026-11-08 | audit | 3BH, 3BI, 3BK |
-| r29 | [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](11-phone-ux/r29-google-play-readiness/report.md) | 2026-11-09 | audit | 3BK |
+| r28 | [International polish: the small things that make Lightning feel finished](3-polish-and-arabic/r28-international-polish/report.md) | 2026-11-08 | audit | 3BH, 3BI |
+| r29 | [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](11-phone-ux/r29-google-play-readiness/report.md) | 2026-11-09 | audit | none |
 | r30 | [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](12-desktop-ux/r30-investments-beyond-stocks/report.md) | 2026-11-09 | audit | 12J, 6D |
 | r31 | [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](7-planning-import-and-search/r31-logging-entries/report.md) | 2026-11-09 | audit | none |
 | r32 | [Audit 18: Budget and Cash planning, every tab and sub-page](12-desktop-ux/r32-budget-and-cash-planning/report.md) | 2026-11-09 | audit | none |
