@@ -2,7 +2,7 @@
 Month / YTD / All links and the holdings as one flat list, shaped from the page's own figures (3AY11)."""
 from __future__ import annotations
 
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 from urllib.parse import urlencode
 
@@ -58,6 +58,37 @@ def _phone_hero_line(result, growth, period, current: bool, locale: str) -> dict
     return page_status.sentence(_SENTENCES[(result > ZERO, pct is not None)], **values)
 
 
+def _phone_verdict(result, growth, period, current: bool, locale: str) -> dict | None:
+    """The bold verdict of the hero sentence (IV-11M8): "+7,956 this month (+1.9%)." in its meaning's colour, or None
+    when nothing moved or a price is missing (the page's own sentence says why instead)."""
+    if result is None or result == ZERO:
+        return None
+    pct = _signed_percent(growth)
+    sign = "+" if result > ZERO else "\u2212"
+    text = f"{sign}{fmt(abs(result), 0)} {_when_phrase(period, current, locale)}" + (f" ({pct})" if pct else "") + "."
+    return {"text": text, "tone": "good" if result > ZERO else "bad"}
+
+
+SIX_MONTHS = 6
+
+
+def _six_months(c, divisor: Decimal) -> dict:
+    """Portfolio value at the end of each of the last six months (today for this one): the mockup's Six months line."""
+    now = today()
+    keys, days = [], []
+    for back in range(SIX_MONTHS - 1, -1, -1):
+        index = now.year * 12 + now.month - 1 - back
+        year, month = divmod(index, 12)
+        month += 1
+        last = date(year + (month == 12), month % 12 + 1, 1) - timedelta(days=1)  # not money: the month's last day
+        keys.append(f"{year}-{month:02d}")
+        days.append(min(last, now))
+    values = [c.position.portfolio_value_in(day, divisor) for day in days]
+    series = [{"name": label("portfolio_value"), "tone": "hold", "area": True, "values": values}]
+    line = charts.trend(keys, series)
+    return {**line, "first": values[0], "last": values[-1]}
+
+
 def _phone_value_line(c, period, divisor: Decimal) -> tuple[Decimal, dict]:
     """Portfolio value on the period's last day, and the line of it from the first day to the last: seven dates
     spread evenly (five or three on a very short period), so the chart can name its first, middle and last."""
@@ -78,7 +109,9 @@ def _phone_parts(c, request: Request, period, extras: dict, current: bool) -> di
     rows = [r for g in extras["holding_groups"] for r in g["rows"]]
     rows.sort(key=lambda r: (r["value"] is None, -(r["value"] or ZERO), (r["h"].asset_name if r["h"] else r["name"]).casefold()))
     expanded = request.query_params.get("holdings") == "all" and len(rows) > PHONE_HOLDINGS_SHOWN
-    return {"value": value, "chart": chart, "expanded": expanded,
+    return {"value": value, "chart": chart, "expanded": expanded, "count": len(rows), "six": _six_months(c, extras["lens"]["divisor"]),
+            "verdict": _phone_verdict(extras["hero_result"], extras["growth"], period, current,
+                                      "ar" if c.settings.get("locale") == "ar" else "en"),
             "line": _phone_hero_line(extras["hero_result"], extras["growth"], period, current,
                                      "ar" if c.settings.get("locale") == "ar" else "en"),
             "rows": rows if expanded else rows[:PHONE_HOLDINGS_SHOWN],
