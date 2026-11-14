@@ -1,27 +1,33 @@
-{# A category's sheet on the phone (3AY15): spent of limit, pace, the last payments, then Cover it, Edit limit and
-   See transactions. Figures come from the route (shared with the PC sheet). #}
+{# One category on the phone (3AY15; v2.0 IV-11M5): its hero (left or over, the bar with the plan's end and today's pace),
+   Raise the plan (or Edit limit) and Move money, the usual-month note, then this month's payments in a card.
+   Figures come from the route (shared with the PC sheet). #}
 {% extends "base.html" %}
 {% block title %}{{ category.name }}{% endblock %}
 {% block heading %}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/budget?month={{ month }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Budget'|tr(locale) }}</span></a><span class="phone-appbar-title">{{ category.name|tr(locale) }}</span>{% endblock %}
 {% block content %}
-<section class="app-popup-content category-sheet phone-txn-sheet">
-  <h2 data-popup-title id="app-popup-title" class="phone-sheet-title">{{ category.name|tr(locale) }}</h2>
-  <p class="phone-note">{% if group %}{{ group }} · {% endif %}{{ month }}</p>
-  {% if r %}
-  <p class="category-sheet-figure{{ ' is-over' if r.over }}"><b><bdi class="fig">{{ spent|money(False, 0) }}</bdi></b> <small>{{ 'of'|tr(locale) }} <bdi class="fig">{{ planned|money(False, 0) }}</bdi> {{ base }}</small></p>
-  <span class="category-sheet-bar{{ ' is-over' if r.over }}" role="img" aria-label="{{ spent|money(False, 0) }} {{ 'of'|tr(locale) }} {{ planned|money(False, 0) }}"><i style="width:{{ '%.1f'|format(r.width) }}%"></i>{% if r.pace is not none %}<s style="inset-inline-start:{{ '%.1f'|format(r.pace) }}%"></s>{% endif %}</span>
-  <p class="category-sheet-left">{% if r.over %}<b class="neg"><bdi class="fig">{{ r.amount|money(False, 0) }}</bdi></b> {{ 'over plan'|tr(locale) }}{% else %}<b><bdi class="fig">{{ r.amount|money(False, 0) }}</bdi></b> {{ 'left'|tr(locale) }}{% endif %}</p>
-  {% if r.line %}<p class="phone-note">{{ r.line.text|tr(locale, **r.line['values']) }}</p>{% endif %}
-  {% else %}
-  <p class="category-sheet-figure"><b><bdi class="fig">{{ spent|money(False, 0) }}</bdi></b> <small>{{ base }}</small></p>
-  <p class="phone-note">{{ 'No limit for this category this month.'|tr(locale) }}</p>
-  {% endif %}
-  {% if rows %}<h3 class="category-sheet-sub">{{ 'Last payments'|tr(locale) }}</h3>
-  <div class="phone-rows">{% for t in rows %}<a class="phone-row" href="/transactions/{{ t.id }}/sheet"><span>{{ t.counterparty or t.description or t.type_label }}<small>{{ t.date }}</small></span><b>{{ t.amount|amount_role('row', True) }}</b></a>{% endfor %}</div>
-  {% elif earlier %}<p class="phone-note"><a href="{{ see_last }}">{{ 'Last month'|tr(locale) }} {{ last_month }}</a> · <bdi class="fig">{{ earlier|money(False, 0) }}</bdi> {{ base }}</p>
-  {% else %}<p class="phone-note">{{ 'Nothing spent here yet this month.'|tr(locale) }}</p>{% endif %}
-  {% if r and r.cover %}<a class="btn primary phone-save" data-popup-open href="{{ r.cover }}">{{ 'Cover it'|tr(locale) }}</a>{% endif %}
-  {% if editable %}<a class="btn phone-save" data-popup-open href="/budget/category/{{ category.id }}/edit?month={{ month }}">{{ ('Edit limit' if r else 'Set a limit')|tr(locale) }}</a>{% endif %}
-  <div class="phone-rows"><a class="phone-row" href="{{ see_all }}"><span>{{ 'See transactions'|tr(locale) }}</span><b>{{ chevron() }}</b></a></div>
-</section>
+{% from "phone/partials/txn.html" import arrow with context %}
+<div class="app-popup-content category-sheet category-page">
+  <h2 data-popup-title id="app-popup-title" class="sr-only">{{ category.name|tr(locale) }}</h2>
+  <section class="phone-hero" aria-labelledby="cat-lead">
+    <div id="cat-lead" class="phone-hero-label" role="heading" aria-level="2">{{ category.name|tr(locale) }} · {{ month|month(locale) }}</div>
+    {% if r %}
+    <div class="phone-lead{{ ' is-negative' if r.over }}"><bdi class="fig">{{ r.amount|money(False, 0) }}</bdi> <small>{{ base }} {{ ('over'|tr(locale)) if r.over else ('left'|tr(locale)) }}</small></div>
+    <p class="phone-hero-line">{{ 'You spent {spent} of the {plan} you planned.'|tr(locale, spent=spent|money(False, 0), plan=planned|money(False, 0)) }}</p>
+    <span class="category-sheet-bar{{ ' is-over' if r.over }}" role="img" aria-label="{{ spent|money(False, 0) }} {{ 'of'|tr(locale) }} {{ planned|money(False, 0) }}"><i style="width:{{ '%.1f'|format(r.width) }}%"></i>{% if r.pace is not none %}<s style="inset-inline-start:{{ '%.1f'|format(r.pace) }}%"></s>{% endif %}</span>
+    <p class="category-bar-ends"><span>{{ 'Spent'|tr(locale) }}</span><span>{{ 'Plan {amt}'|tr(locale, amt=planned|money(False, 0)) }}</span></p>
+    {% else %}
+    <div class="phone-lead"><bdi class="fig">{{ spent|money(False, 0) }}</bdi> <small>{{ base }}</small></div>
+    <p class="phone-hero-line">{{ 'No limit for this category this month.'|tr(locale) }}</p>
+    {% endif %}
+  </section>
+  {% if editable or (r and r.cover) %}<div class="phone-two-actions">{% if editable %}<a class="btn" data-popup-open href="/budget/category/{{ category.id }}/edit?month={{ month }}">{{ ('Raise the plan' if r and r.over else 'Edit limit' if r else 'Set a limit')|tr(locale) }}</a>{% endif %}{% if r and r.cover %}<a class="btn primary" data-popup-open href="{{ r.cover }}">{{ 'Move money'|tr(locale) }}</a>{% endif %}</div>{% endif %}
+  {% if r and r.line %}<p class="phone-wide-soft phone-cat-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 7 13.5 15.5 8.5 10.5 2 17M16 7h6v6"/></svg><span>{{ r.line.text|tr(locale, **r.line['values']) }}</span></p>{% endif %}
+  <section class="phone-section is-rose" aria-labelledby="cat-month">
+    <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span class="phone-head-text"><h2 id="cat-month">{{ 'This month'|tr(locale) }}</h2><small>{{ ('1 payment' if rows|length == 1 else '{n} payments')|tr(locale, n=rows|length) }}</small></span><a class="phone-quiet" href="{{ see_all }}">{{ 'All'|tr(locale) }}{{ chevron() }}</a></header>
+    {% if rows %}<div class="phone-rows">{% for t in rows %}<a class="phone-txn" href="/transactions/{{ t.id }}/sheet">{{ arrow('out' if t.amount < 0 else 'in', category_mark(category.id)) }}<span class="phone-txn-who"><b>{{ t.counterparty or t.description or t.type_label }}</b><small>{{ t.date|day_label(locale) }}</small></span><span class="phone-txn-amount"><b class="{{ 'pos' if t.amount > 0 }}"><bdi class="fig">{{ t.amount|amount_role('row', True) }}</bdi></b></span></a>{% endfor %}</div>
+    {% elif earlier %}<p class="phone-note"><a href="{{ see_last }}">{{ 'Last month'|tr(locale) }} {{ last_month }}</a> · <bdi class="fig">{{ earlier|money(False, 0) }}</bdi> {{ base }}</p>
+    {% else %}<p class="phone-note">{{ 'Nothing spent here yet this month.'|tr(locale) }}</p>{% endif %}
+  </section>
+</div>
 {% endblock %}
