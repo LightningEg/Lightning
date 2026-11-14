@@ -44,11 +44,6 @@ Files: `lightning/ui/sections.py` (section and tab names), `lightning/ui/templat
 Do: the section is "Cash planning" everywhere (tab and heading too, not "Plan"/"Planning"); "Back to the dashboard" → "Back to Overview" (phone: "Back to Home"); "The journey" → "How it went"; "Could not save; retry with Enter or blur." → "Not saved. Press Enter to try again."; "YTD" → "This year". Add "dashboard" and "journey" to the test's list.
 Done when: `tests/test_voice.py` passes with both listed, and `grep -rn "'Plan'\|\"Planning\"" lightning/ui/sections.py` shows only the section's single name.
 
-## 3BH5 One spelling per word · S · #426
-Files: `lightning/ui/i18n.py`, templates.
-Do: "Gam’eya" → "Gam'eya" in the 2 places (`grep -rn "Gam’eya" lightning`); Arabic دهب → ذهب (glossary spelling: check `ai/GLOSSARY.md`), انت → إنت; Free cash's Arabic is the glossary's النقدية المتاحة everywhere, and brand-voice's «المتاح للصرف» is for Safe to spend only (check `grep -n "المتاح" guideline/brand-voice.md`). Curly apostrophes in visible English strings: `’` in place of `'` inside words, in templates and `ARABIC_UI` keys **and** their callers together (a key change must change every `|tr` that uses it).
-Done when: `grep -rc "دهب\|\bانت\b" lightning/ui/i18n.py` is 0 and `python -m pytest tests/test_arabic_no_english.py -q` passes.
-
 ## 3BH6 Built-in categories in sentence case · M · opus · #427
 Files: `lightning/database/seed.py`, a new migration (skill `add-migration`: read `skills/add-migration/SKILL.md` first), `lightning/ui/i18n.py` (Arabic keys for the new names).
 Do: change the 27 Title Case seed names ("Eating Out" → "Eating out", "Utilities & Bills" → "Utilities & bills", "Unaccounted Money Found" → "Unaccounted money found" …) for new profiles; the migration renames them in existing profiles **only where the user has not renamed them** (match the old exact name and the seed's code). Keep codes.

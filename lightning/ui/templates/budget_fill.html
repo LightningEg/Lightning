@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ "Fill this month's budget"|tr(locale) }}{% endblock %}
-{% block heading %}<div class="page-title"><h1>{{ "Fill this month's budget"|tr(locale) }}</h1><p class="page-status">{{ 'Review base limits for {month}. Nothing is saved until you apply selected rows.'|tr(locale, month=month|month(locale)) }}</p></div>{% endblock %}
+{% block title %}{{ "Fill this month’s budget"|tr(locale) }}{% endblock %}
+{% block heading %}<div class="page-title"><h1>{{ "Fill this month’s budget"|tr(locale) }}</h1><p class="page-status">{{ 'Review base limits for {month}. Nothing is saved until you apply selected rows.'|tr(locale, month=month|month(locale)) }}</p></div>{% endblock %}
 {% block top_actions %}<a class="btn" href="/budget?month={{ month }}">{{ 'Budget'|tr(locale) }}</a>{% endblock %}
 {% block content %}
 {% if error %}<p class="notice" role="alert">{{ error|tr(locale) }}</p>{% endif %}
@@ -28,7 +28,7 @@
         <a class="btn" href="/plan/reserves">{{ "Open Reserves"|tr(locale) }}</a>
       </section>
     {% else %}
-      <p class="muted">{{ "Proposals use base limits only. Spending and carryover are not copied. Selecting a row replaces that category's limit for {month} only."|tr(locale, month=month|month(locale)) }}</p>
+      <p class="muted">{{ "Proposals use base limits only. Spending and carryover are not copied. Selecting a row replaces that category’s limit for {month} only."|tr(locale, month=month|month(locale)) }}</p>
       <form method="post" action="/budget/fill?month={{ month }}">
         <input type="hidden" name="source" value="{{ source }}">
         <table class="setup-table"><thead><tr><th>{{ 'Category'|tr(locale) }}</th><th>{{ "Source"|tr(locale) }}</th><th class="num">{{ "Current base limit"|tr(locale) }}</th><th class="num">{{ "Proposed limit"|tr(locale) }}</th><th>{{ 'Review'|tr(locale) }}</th></tr></thead><tbody>
