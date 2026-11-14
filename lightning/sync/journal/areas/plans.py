@@ -6,7 +6,7 @@ preview is refused. Automatic plan matching runs only through home automation.
 from .spec import AMOUNT, DATE, FLAG, INT, LONG, MONTH, TEXT, Command, choice, items, listof, optional, ref
 
 TABLES = ("planned_items", "planned_payments", "loan_extra_payments", "installment_purchases", "budgets",
-          "budget_carryover", "budget_carryover_resets", "cash_funding")
+          "budget_carryover", "budget_carryover_resets", "cash_funding", "budget_estimate_exclusions")
 
 PLAN = dict(kind=choice("BILL", "SUBSCRIPTION", "INCOME", "LOAN"), name=TEXT, amount=AMOUNT,
             frequency=choice("ONCE", "WEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"), interval_count=INT, start_date=DATE,
