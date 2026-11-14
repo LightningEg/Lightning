@@ -263,4 +263,4 @@ def test_needs_you_and_get_set_up_say_what_a_tap_does(mohab):
     home = mohab.b.client.get("/").text
     assert 'id="home-hero"' in home
     if 'id="todo-heading"' in home:
-        assert re.search(r"<b>(Pay|Plan|Catch up|Sort|Review|Open) <svg class=\"chevron\"", home)
+        assert re.search(r'<b class="phone-pill[^"]*">(Pay|Plan|Catch up|Sort|Review|Open) <svg class="chevron"', home)

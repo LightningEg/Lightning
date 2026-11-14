@@ -6,14 +6,14 @@
 {% macro arrow(kind, mark='') -%}
 <span class="phone-txn-av is-{{ kind }}{{ ' has-mark' if mark }}" aria-hidden="true"><svg viewBox="0 0 24 24">{% if mark %}<path d="{{ mark }}"/>{% elif kind == 'in' %}<path d="M12 19V5M6 11l6-6 6 6"/>{% elif kind == 'out' %}<path d="M12 5v14M6 13l6 6 6-6"/>{% elif kind == 'move' %}<path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/>{% elif kind == 'invest' %}<path d="M4 17l6-6 4 4 6-7M14 8h6v6"/>{% else %}<path d="M6 10h12M6 14h12"/>{% endif %}</svg></span>
 {%- endmacro %}
-{% macro txn_list(rows, show_account=False, show_balance=False, selecting=False, picked='', base_url='', keep_qs='', limit=0, with_account=True, reserve_suggestions={}, day_net=False, sort_qs='') %}
+{% macro txn_list(rows, show_account=False, show_balance=False, selecting=False, picked='', base_url='', keep_qs='', limit=0, with_account=True, reserve_suggestions={}, day_net=False, sort_qs='', day_in_note=False) %}
 {% set rows = rows|group_value_updates %}
 {% set nets = day_nets(rows, show_account) if day_net else {} %}
 {% set ns = namespace(day='', shown=0) %}
 {% for r in rows if not (show_account and r.type == 'TRF' and r.amount > 0) %}
   {% if not limit or ns.shown < limit %}
   {% set ns.shown = ns.shown + 1 %}
-  {% if r.date != ns.day %}{% if not loop.first and ns.day %}</div></section>{% endif %}<section class="phone-daycard"><div class="phone-day" role="heading" aria-level="3"><span>{{ r.date|day_label(locale) }}</span>{% if r.date in nets %}<span class="phone-day-net">{{ nets[r.date]|amount_role('total', True) }}</span>{% endif %}</div><div class="phone-day-rows">{% set ns.day = r.date %}{% endif %}
+  {% if day_in_note %}{% if loop.first %}<div class="phone-day-rows">{% endif %}{% set ns.day = r.date %}{% elif r.date != ns.day %}{% if not loop.first and ns.day %}</div></section>{% endif %}<section class="phone-daycard"><div class="phone-day" role="heading" aria-level="3"><span>{{ r.date|day_label(locale) }}</span>{% if r.date in nets %}<span class="phone-day-net">{{ nets[r.date]|amount_role('total', True) }}</span>{% endif %}</div><div class="phone-day-rows">{% set ns.day = r.date %}{% endif %}
   {% if r.type == 'VALS' %}
   <a class="phone-txn" href="/investments">
     {{ arrow('invest') }}
@@ -29,7 +29,7 @@
   {% else %}<a class="phone-txn" href="{{ ('/transactions/' ~ r.txn_id ~ '/sheet?return_to=' ~ (base_url ~ ('?' ~ keep_qs if keep_qs else ''))|urlencode ~ ('&' ~ sort_qs if sort_qs else '')) if editable else '/transactions/' ~ r.txn_id }}" data-txn="{{ r.txn_id }}"{% if editable %} data-popup-open{% endif %}{% if r.type in ('IN', 'OUT') %} data-cat{% endif %}>{% endif %}
     {{ arrow(kind, category_mark(r.category_id) if kind in ('in', 'out') else '') }}{# IV-11D6: the category's mark, in the in/out colour #}
     {# Each account name is isolated, so on an Arabic line the pair reads right to left and the flipped arrow points from the first account to the second (r29). #}
-    <span class="phone-txn-who"><b>{% if r.type == 'TRF' and show_account and with_account %}<bdi translate="no">{{ r.account_label }}</bdi> → <bdi translate="no">{{ r.other_account_label }}</bdi>{% elif r.type == 'TRF' %}{{ ('From' if r.amount > 0 and not show_account else 'To')|tr(locale) }} <bdi translate="no">{{ r.other_account_label }}</bdi>{% else %}{{ who }}{% endif %}</b><small>{{ cat if cat != who else '' }}{% if show_account and with_account and r.type != 'TRF' %}{% if cat != who %}<span> · </span>{% endif %}<bdi translate="no">{{ r.account_label }}</bdi>{% endif %}</small></span>
+    <span class="phone-txn-who"><b>{% if r.type == 'TRF' and show_account and with_account %}<bdi translate="no">{{ r.account_label }}</bdi> → <bdi translate="no">{{ r.other_account_label }}</bdi>{% elif r.type == 'TRF' %}{{ ('From' if r.amount > 0 and not show_account else 'To')|tr(locale) }} <bdi translate="no">{{ r.other_account_label }}</bdi>{% else %}{{ who }}{% endif %}</b><small>{{ cat if cat != who else '' }}{% if show_account and with_account and r.type != 'TRF' %}{% if cat != who %}<span> · </span>{% endif %}<bdi translate="no">{{ r.account_label }}</bdi>{% endif %}{% if day_in_note %}<span> · </span>{{ r.date|day_label(locale) }}{% endif %}</small></span>
     {# On the all-accounts list a buy, a sell and a move between your own accounts move nothing in or out: no sign (an account's own statement keeps it), so the row, Money in and out and the day's net agree (C08.2, 3AN8). #}
     <span class="phone-txn-amount">{% if show_account and kind in ('move', 'invest') %}<b><bdi class="fig">{{ (r.amount|abs)|amount_role('row') }}</bdi></b>{% else %}<b class="{{ 'pos' if r.amount > 0 else '' }}"><bdi class="fig">{{ r.amount|amount_role('row', True) }}</bdi></b>{% endif %}{% if show_balance and r.balance is not none %}<small>{{ r.balance|amount_role('total') }}</small>{% endif %}</span>
   {% if selecting %}</label>{% else %}</a>{% endif %}
@@ -37,5 +37,5 @@
   {% endif %}
   {% endif %}
 {% endfor %}
-{% if ns.day %}</div></section>{% endif %}
+{% if ns.day %}</div>{% if not day_in_note %}</section>{% endif %}{% endif %}
 {% endmacro %}

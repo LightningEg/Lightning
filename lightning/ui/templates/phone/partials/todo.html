@@ -1,12 +1,14 @@
 {# To do's rows (IV-11E, C11.1), drawn by Home (three) and /todo (all, IV-3AY14): name, figure, when, one verb. #}
 {% macro todo_rows(rows) %}
   {% for r in rows %}
-    <a class="phone-row{{ ' is-late' if r.kind == 'bill' and r.late }}"{% if r.popup %} data-popup-open{% endif %} href="{{ r.href }}">
+    <a class="phone-row phone-todo-row{{ ' is-late' if r.kind == 'bill' and r.late }}"{% if r.popup %} data-popup-open{% endif %} href="{{ r.href }}">
+      {# v2.0 (IV-11M3): a chip by meaning, the words, the verb as a pill (Pay on Nile). #}
+      <span class="phone-txn-av is-{{ 'out' if r.kind in ('bill', 'budget', 'overspent') else 'flat' }}" aria-hidden="true"><svg viewBox="0 0 24 24">{% if r.kind == 'bill' %}<path d="M4 2v20l3-2 3 2 3-2 3 2 3-2V2l-3 2-3-2-3 2-3-2-3 2zM8 8h8M8 12h8M8 16h5"/>{% elif r.kind in ('sort', 'sms', 'match', 'review') %}<path d="m3 17 2 2 4-4M3 7l2 2 4-4M13 6h8M13 12h8M13 18h8"/>{% elif r.kind == 'payday' %}<path d="M12 19V5M6 11l6-6 6 6"/>{% else %}<path d="M12 8v4M12 16h.01M22 12a10 10 0 1 1-20 0 10 10 0 0 1 20 0"/>{% endif %}</svg></span>
       {# IV-11E, C11.1: the name, its figure, when or how many, then one verb: "Vodafone 350 · in 3 days  Pay ›". #}
       <span>{% if r.kind == 'bill' %}{% if r.late %}{{ ('{name} {amt} · 1 day late' if r.late == 1 else '{name} {amt} · {n} days late')|tr(locale, name=r.subject, amt=r.amount|money, n=r.late) }}{% elif r.days == 0 %}{{ '{name} {amt} · today'|tr(locale, name=r.subject, amt=r.amount|money) }}{% elif r.days == 1 %}{{ '{name} {amt} · tomorrow'|tr(locale, name=r.subject, amt=r.amount|money) }}{% else %}{{ '{name} {amt} · in {n} days'|tr(locale, name=r.subject, amt=r.amount|money, n=r.days) }}{% endif %}
       {%- elif r.kind == 'catch_up' %}{% if r.days is not none and r.days >= 3 %}{{ '{n} days not recorded'|tr(locale, n=r.days) }}{% else %}{{ ('1 bill long overdue' if r.count == 1 else '{n} bills long overdue')|tr(locale, n=r.count) }}{% endif %}
       {%- else %}{{ r.subject|tr(locale) }}{% if r.amount is not none %} {{ r.amount|money }}{% endif %}{% if r.when %} · {{ r.when|tr(locale, n=r.count, sa=r.since) }}{% endif %}{% endif %}</span>
-      <b>{{ r.action|tr(locale) }} {{ chevron() }}</b>
+      <b class="phone-pill{{ ' is-strong' if r.kind == 'bill' }}">{{ r.action|tr(locale) }} {{ chevron() }}</b>
     </a>
   {% endfor %}
 {% endmacro %}
