@@ -1416,6 +1416,7 @@ ROUTES = {
     "Updated carryover for {n} budget line.": "اتحدّث المبلغ المرحّل لبند ميزانية.",
     "Carryover setting updated.": "إعداد المبلغ المرحّل اتحدّث.",
     "Moved plan from {a} to {b} from {month} on.": "الخطة اتنقلت من {a} إلى {b} من {month} وطالع.",
+    "Moved plan from {a} to {b} for {month} only.": "الخطة اتنقلت من {a} إلى {b} لشهر {month} بس.",
     "Average monthly income must use three or six completed months.": "متوسط الدخل الشهري لازم يستخدم 3 أو 6 شهور كاملة.",
     "Manual monthly income cannot be negative.": "الدخل الشهري اليدوي مينفعش يكون سالب.",
     "This category has no active budget in that month.": "الفئة دي ملهاش ميزانية شغّالة في الشهر ده.",
