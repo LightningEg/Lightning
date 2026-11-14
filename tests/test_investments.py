@@ -458,7 +458,7 @@ def test_a_fund_can_be_bought_by_amount_and_a_new_name_needs_no_extra_step(c, se
     assert response.status_code in (200, 303)
     assert c.investments.holding(thndr.id, fund.id, "2026-09-30") == D("25")  # 3,000 ÷ the latest price 120
     saved = client.post(f"/accounts/{accounts['cib'].id}/register", data={
-        "date": "2026-09-25", "counterparty": "Zzq Bakery", "category": "Food & Groceries", "amount": "-40"})
+        "date": "2026-09-25", "counterparty": "Zzq Bakery", "category": "Food & groceries", "amount": "-40"})
     assert saved.status_code == 200 and c.counterparties.resolve("Zzq Bakery") is not None
 
 

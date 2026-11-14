@@ -74,7 +74,7 @@ def test_plan_to_invest_shows_only_for_todays_position(c, setup):
 
 
 def test_the_system_group_says_what_it_holds(c, setup, monkeypatch):
-    """Ticket 93: "System Categories" no longer reads "Personal" under its name; it names its active categories."""
+    """Ticket 93: "System categories" no longer reads "Personal" under its name; it names its active categories."""
     import re
     accounts, _ = setup
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-10")
@@ -83,7 +83,7 @@ def test_the_system_group_says_what_it_holds(c, setup, monkeypatch):
     page = TestClient(create_app(c)).get("/budget?period=month&month=2026-10").text
     # Audit 12 (B4): the PC row is named by what it holds, so the internal group name never shows there.
     assert "<b>Loan payments</b></span>" in page
-    assert not re.search(r"<b>System Categories</b>", page)
+    assert not re.search(r"<b>System categories</b>", page)
 
 
 def test_the_investing_rate_is_the_share_of_what_you_kept(c, setup):

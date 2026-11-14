@@ -44,10 +44,6 @@ Files: `lightning/ui/sections.py` (section and tab names), `lightning/ui/templat
 Do: the section is "Cash planning" everywhere (tab and heading too, not "Plan"/"Planning"); "Back to the dashboard" → "Back to Overview" (phone: "Back to Home"); "The journey" → "How it went"; "Could not save; retry with Enter or blur." → "Not saved. Press Enter to try again."; "YTD" → "This year". Add "dashboard" and "journey" to the test's list.
 Done when: `tests/test_voice.py` passes with both listed, and `grep -rn "'Plan'\|\"Planning\"" lightning/ui/sections.py` shows only the section's single name.
 
-## 3BH6 Built-in categories in sentence case · M · opus · #427
-Files: `lightning/database/seed.py`, a new migration (skill `add-migration`: read `skills/add-migration/SKILL.md` first), `lightning/ui/i18n.py` (Arabic keys for the new names).
-Do: change the 27 Title Case seed names ("Eating Out" → "Eating out", "Utilities & Bills" → "Utilities & bills", "Unaccounted Money Found" → "Unaccounted money found" …) for new profiles; the migration renames them in existing profiles **only where the user has not renamed them** (match the old exact name and the seed's code). Keep codes.
-Done when: the migration's test upgrades a profile made with the old seed and finds the new names, and a renamed category keeps its user name. `python -m pytest tests/test_migrations*.py tests/test_mohab_year.py -q`.
 
 ## 3BH8 More words found by r35 · S
 Needs 3BH1 merged first.

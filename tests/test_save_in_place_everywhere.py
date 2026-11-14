@@ -131,6 +131,7 @@ def test_a_save_on_an_ordinary_page_stays_and_its_message_shows(app_page):
     page, _cdp, host, errors = app_page
     page.goto(host.origin + "/budget/fill")
     page.evaluate("() => { window.__stayed = 1; }")
+    page.locator('form[action^="/budget/fill"] input[name="selected"]').first.check()
     page.locator("[data-refresh] form[method=post] button").first.click()  # sends you to Budget: an ordinary load
     expect(page.locator("main > .flash").first).to_contain_text("Applied")
     assert urlsplit(page.url).path == "/budget"

@@ -33,7 +33,7 @@ def test_a_dollar_bill_and_a_part_paid_instalment_give_one_due_before_payday(c, 
     loan = c.planning.create(kind="LOAN", name="Phone instalments", amount="2,000", frequency="MONTHLY",
                              interval_count="1", start_date="2026-10-20", payment_count="6", principal="12,000",
                              account_id=str(names["CIB Payroll"]),
-                             category_id=category("System Categories › Loan payments"))
+                             category_id=category("System categories › Loan payments"))
     c.planning.record_payment(loan, "2026-10-20", "2026-10-02", "1000", names["CIB Payroll"])
 
     day = date(2026, 10, 2)

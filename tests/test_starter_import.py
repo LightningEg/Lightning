@@ -52,7 +52,7 @@ def txn_count(c):
 def test_a_clean_file_is_previewed_then_created_with_codes(c):
     data = workbook([acct("Salary account", bal=5000), acct("Wallet", "Cash", bal=200)],
                     [(None, "Personal", "Pets", "Spending", None), (None, "Work", "Side projects", "Income", None)],
-                    [entry("2026-01-05", "Salary account", "Food & Groceries", "Corner shop", -185.5),
+                    [entry("2026-01-05", "Salary account", "Food & groceries", "Corner shop", -185.5),
                      entry("2026-01-06", "Salary account", "Pets", "Vet", -420, note="Checkup"),
                      entry("2026-01-07", "Wallet", "Side projects", "Client", 900)])
     before = txn_count(c)
@@ -80,7 +80,7 @@ def test_names_that_exist_are_used_not_duplicated(c):
     si.confirm(c, first)
     again = workbook([acct("salary ACCOUNT"), acct("Wallet", "Cash")],
                      [(None, "Personal", "Pets", "Spending", None)],
-                     [entry("2026-01-05", "Salary account", "Food & Groceries", "Shop", -50)])
+                     [entry("2026-01-05", "Salary account", "Food & groceries", "Shop", -50)])
     preview = si.prepare(c, again)
     assert [r.status for r in preview.accounts] == [si.EXISTS, si.NEW] and preview.accounts[0].code
     accounts_before = len(c.accounts.list())
@@ -89,17 +89,17 @@ def test_names_that_exist_are_used_not_duplicated(c):
 
 
 @pytest.mark.parametrize("entries, message", [
-    ([entry("2026-01-05", "Nowhere", "Food & Groceries", "x", -5)], "account is not on the Accounts sheet"),
-    ([entry("2026-02-31", "Salary account", "Food & Groceries", "x", -5)], "date"),
-    ([entry("2026-01-05", "Salary account", "Food & Groceries", "x", "abc")], "number"),
-    ([entry("2026-01-05", "Salary account", "Food & Groceries", "x", 0)], "cannot be zero"),
-    ([entry("2026-01-05", "Salary account", "Food & Groceries", "x", -5.1234567)], "decimal"),
+    ([entry("2026-01-05", "Nowhere", "Food & groceries", "x", -5)], "account is not on the Accounts sheet"),
+    ([entry("2026-02-31", "Salary account", "Food & groceries", "x", -5)], "date"),
+    ([entry("2026-01-05", "Salary account", "Food & groceries", "x", "abc")], "number"),
+    ([entry("2026-01-05", "Salary account", "Food & groceries", "x", 0)], "cannot be zero"),
+    ([entry("2026-01-05", "Salary account", "Food & groceries", "x", -5.1234567)], "decimal"),
     ([entry("2026-01-05", "Salary account", "Mystery", "x", -5)], "category is not on the Categories sheet"),
     ([entry("2026-01-05", "Salary account", "Transportation", "x", -5)], "more than one group"),
     ([entry("2026-01-05", "Salary account", "Salary", "x", -5)], "income category"),
     ([entry("2026-01-05", "Salary account", "Adjustment", "x", -5)], "System categories"),
-    ([entry("2026-01-05", "Salary account", "Food & Groceries", "x", -5, cur="USD")], "currency is not the account"),
-    ([entry("2026-01-05", "Salary account", "Food & Groceries", "x", -5, ref="NOPE-1")], "not in this profile"),
+    ([entry("2026-01-05", "Salary account", "Food & groceries", "x", -5, cur="USD")], "currency is not the account"),
+    ([entry("2026-01-05", "Salary account", "Food & groceries", "x", -5, ref="NOPE-1")], "not in this profile"),
 ])
 def test_rows_that_cannot_be_placed_are_listed_with_a_reason_and_never_guessed(c, entries, message):
     data = workbook([acct("Salary account")], [], entries)
@@ -131,7 +131,7 @@ def test_bad_account_rows(c, account, message):
 
 
 def test_an_entry_on_a_bad_account_row_waits_for_that_row_to_be_fixed(c):
-    data = workbook([acct("A", bal=-5)], [], [entry("2026-01-05", "A", "Food & Groceries", "x", -5)])
+    data = workbook([acct("A", bal=-5)], [], [entry("2026-01-05", "A", "Food & groceries", "x", -5)])
     [bad] = si.prepare(c, data).entries
     assert bad.status == si.ERROR and "account row has a problem" in bad.error
 
@@ -147,8 +147,8 @@ def test_bad_category_rows(c):
 
 def test_a_repeated_upload_posts_nothing_twice(c):
     data = workbook([acct("Salary account")], [],
-                    [entry("2026-01-05", "Salary account", "Food & Groceries", "Shop", -50),
-                     entry("2026-01-05", "Salary account", "Food & Groceries", "Shop", -50)])  # two real coffees
+                    [entry("2026-01-05", "Salary account", "Food & groceries", "Shop", -50),
+                     entry("2026-01-05", "Salary account", "Food & groceries", "Shop", -50)])  # two real coffees
     first = si.confirm(c, data)
     assert [r.status for r in first.entries] == [si.NEW, si.NEW]
     count = txn_count(c)
@@ -156,12 +156,12 @@ def test_a_repeated_upload_posts_nothing_twice(c):
     assert [r.status for r in again.entries] == [si.DUPLICATE, si.DUPLICATE] and again.entries[0].ref
     si.confirm(c, data)
     assert txn_count(c) == count
-    third = workbook([acct("Salary account")], [], [entry("2026-01-05", "Salary account", "Food & Groceries", "Shop", -50)] * 3)
+    third = workbook([acct("Salary account")], [], [entry("2026-01-05", "Salary account", "Food & groceries", "Shop", -50)] * 3)
     assert [r.status for r in si.prepare(c, third).entries] == [si.DUPLICATE, si.DUPLICATE, si.NEW]
 
 
 def test_an_entry_with_its_reference_is_known_not_new(c):
-    first = si.confirm(c, workbook([acct("Salary account")], [], [entry("2026-01-05", "Salary account", "Food & Groceries", "Shop", -50)]))
+    first = si.confirm(c, workbook([acct("Salary account")], [], [entry("2026-01-05", "Salary account", "Food & groceries", "Shop", -50)]))
     ref = first.entries[0].ref
     row = entry(None, None, None, None, None, ref=ref)
     [known] = si.prepare(c, workbook([], [], [row])).entries
@@ -203,7 +203,7 @@ def test_the_template_itself_imports_nothing(c):
 
 
 def test_each_existing_entry_answers_one_duplicate_row_with_its_own_reference(c):
-    rows = [entry("2026-01-05", "Salary account", "Food & Groceries", "Shop", -50)] * 2
+    rows = [entry("2026-01-05", "Salary account", "Food & groceries", "Shop", -50)] * 2
     made = si.confirm(c, workbook([acct("Salary account")], [], rows))
     again = si.prepare(c, workbook([acct("Salary account")], [], rows))
     assert sorted(r.ref for r in again.entries) == sorted(r.ref for r in made.entries) and len({r.ref for r in again.entries}) == 2
