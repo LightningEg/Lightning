@@ -414,6 +414,25 @@ class TransactionService:
                  "account_id": int(newest[name]["account_id"]), "category_id": int(newest[name]["category_id"])}
                 for name in order[:limit]]
 
+    def recent_expenses(self, limit: int = 3) -> list[dict]:
+        """The last ``limit`` distinct payees paid (money out), newest first, each with what that last payment was:
+        [{name, kind, account_id, category_id, amount}] for the Add sheet's Log again chips (IV-11M4). Computed here,
+        never in the template."""
+        seen: dict[str, dict] = {}
+        for row in self.repo.recent_expense_entries():  # newest first
+            key = row["counterparty"].casefold()
+            if key in seen:
+                continue
+            seen[key] = {"name": row["counterparty"], "kind": "out", "account_id": int(row["account_id"]),
+                         "category_id": int(row["category_id"]), "amount": from_e6(int(row["amount_e6"]))}
+            if len(seen) == limit:
+                break
+        return list(seen.values())
+
+    def cash_after(self, account_id: int, day: str, txn_id: int) -> Decimal:
+        """The account's balance just after one transaction (a transaction's sheet: Balance after)."""
+        return from_e6(self.repo.cash_after(account_id, day, txn_id))
+
     def usual_accounts(self) -> dict[str, int]:
         """{counterparty name: the account it is usually paid from or into}, by the habit rule of `usual_categories`
         (IV-7AL): the Add sheet selects it when the payee is chosen."""
