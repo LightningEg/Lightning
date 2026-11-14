@@ -1,0 +1,32 @@
+USD FORM LABELS Buy · Lightning Lightning Search Ctrl K Overview Spending Budget Cash planning Safety Investments Transactions Settings Accounts 1,510,000 EGP Accounts · Balances in EGP In your accounts 1,510,000 Cash & bank AB Audit bank 1,000,000 Investments AB Audit broker 10,000 AD Audit dollar broker 500,000 Buy Units in, cash out — at cost, fees included. Holdings Planner Prices Currencies Buy Sell Dividend Return of capital Bonus or split Holding I already own Account Choose… Audit broker Audit dollar broker Investment Choose… 18K gold price reference Audit US stock + New investment Date yyyy-mm-dd ▦ Today Yesterday Units Amount (EGP) Including fees, unless you tick Fees are extra. Price per unit (EGP) Calculated automatically from the trade value and fee choice. Fees are extra (not in the amount) Fees (EGP) Cash account The same account (its broker cash) Audit bank Where the money came from. For gold at home, choose the wallet or bank account. Held for You You, or the person these units belong to. Notes Record buy Cancel ↑ ↓ to move · Enter to open · Esc to close Show
+USD BUY 303 USD cash after amount labelled EGP=100 9900.00
+USD LOT RETURNS ([{'opened': '2026-11-02', 'units': Decimal('10.00'), 'cost': Decimal('5000.00'), 'value': Decimal('100.0000'), 'gain': Decimal('-4900.0000'), 'roi': Decimal('-98.00'), 'cagr': None}], [])
+USD holding cost EGP 5000.00 expected if EGP label followed 100
+SELL BY NET AMOUNT [('-9.00', '-100.00'), ('100.00', '100.00')] expected units -11, cash +100 for 10/unit and fee 10
+CD action buy account selectable False
+CD POST buy 400 <div aria-atomic="true" aria-live="assertive" class="flash error" role="alert">Audit CD is a certificates of deposit (cd portfolio). Investments are held in a brokerage, physical-asset or other account.</div>
+CD action sell account selectable False
+CD POST sell 400 <div aria-atomic="true" aria-live="assertive" class="flash error" role="alert">Audit CD is a certificates of deposit (cd portfolio). Investments are held in a brokerage, physical-asset or other account.</div>
+CD action dividend account selectable True
+CD POST dividend 400 <div aria-atomic="true" aria-live="assertive" class="flash error" role="alert">Dividends can only be recorded in a brokerage account.</div>
+MULTI-BROKER TOTAL PRICE [(2, '91.00', '910.000000'), (5, '50.00', '500.000000')] entered 1500 303 [(2, '91.00', '2730.000000'), (5, '50.00', '1500.000000')]
+GOLD GENERAL PRICE 50000.000000 entered 60000 303 after 50000.000000
+CD TOTAL PRICE 303 valuer 2000.000000 portfolio [('2000.000000', '1000.00')]
+VALIDATION quantity '' 400 new transactions 0
+VALIDATION quantity '0' 400 new transactions 0
+VALIDATION quantity '-1' 400 new transactions 0
+VALIDATION quantity 'abc' 400 new transactions 0
+VALIDATION quantity '1.1234567' 400 new transactions 0
+VALIDATION total '0' 400 new transactions 0
+VALIDATION total '-10' 400 new transactions 0
+VALIDATION total 'abc' 400 new transactions 0
+VALIDATION total '10.001' 400 new transactions 0
+VALIDATION total '999999999999999999999999' 400 new transactions 0
+VALIDATION quantity '999999999999999999999999' 400 new transactions 0
+VALIDATION account_id 1 400 new transactions 0
+VALIDATION date 'wrong' 400 new transactions 0
+VALIDATION date '2027-01-01' 400 new transactions 0
+VALIDATION account_id '999999' 400 new transactions 0
+VALIDATION asset_id '999999' 400 new transactions 0
+DUPLICATE [303, 303] new transactions 1
+UNBALANCED INTERNAL TRANSACTIONS 0

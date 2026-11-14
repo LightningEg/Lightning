@@ -1,0 +1,29 @@
+..........F.......                                                       [100%]
+=================================== FAILURES ===================================
+_____________ test_the_app_and_website_guidelines_are_all_mirrored _____________
+
+    def test_the_app_and_website_guidelines_are_all_mirrored():
+        """AGENTS.md section 1: change both copies together. Checked when the website repo sits beside this one."""
+        beside = [ROOT.parent / name / "guideline" for name in ("Lightning_website", "lightning_website")]
+        website = next((path for path in beside if path.is_dir()), None)
+        if website is None:
+            pytest.skip("the website repository is not checked out next to this one")
+        tool = _docs_check_tool()
+>       assert not tool.mirrors(ROOT, website.parent)
+E       AssertionError: assert not ['guideline/app-ar.html: differs between repositories', 'guideline/app.html: differs between repositories', 'guideline...s', 'guideline/phone-ar.html: differs between repositories', 'guideline/phone.html: differs between repositories', ...]
+E        +  where ['guideline/app-ar.html: differs between repositories', 'guideline/app.html: differs between repositories', 'guideline...s', 'guideline/phone-ar.html: differs between repositories', 'guideline/phone.html: differs between repositories', ...] = <function mirrors at 0x7fd6e9d06fc0>(PosixPath('/workspace/Lightning'), PosixPath('/workspace/Lightning_website'))
+E        +    where <function mirrors at 0x7fd6e9d06fc0> = <module 'docs_check' from '/workspace/Lightning/tools/docs_check.py'>.mirrors
+E        +    and   PosixPath('/workspace/Lightning_website') = PosixPath('/workspace/Lightning_website/guideline').parent
+
+tests/test_docs_structure.py:133: AssertionError
+=============================== warnings summary ===============================
+../../opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages/anyio/pytest_plugin.py:14
+  /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages/anyio/pytest_plugin.py:14: PytestRemovedIn10Warning: _pytest.python.CallSpec2 has been renamed to CallSpec.
+  The CallSpec2 alias will be removed in pytest 10.
+  Update imports to use CallSpec instead.
+  See https://docs.pytest.org/en/stable/deprecations.html#callspec2-renamed
+    from _pytest.python import CallSpec2
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_docs_structure.py::test_the_app_and_website_guidelines_are_all_mirrored

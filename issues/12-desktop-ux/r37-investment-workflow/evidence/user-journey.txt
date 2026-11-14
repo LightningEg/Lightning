@@ -1,0 +1,4 @@
+prefills 4 11
+saved http://127.0.0.1:8766/investments/holding/11?account=4&date=2026-11-14&start=2026-11-01 ['Saved BUY-2026-11-14-002.\n\n\n\n  \n  \n  \n  \n  \n  \n  Undo\n\n\n']
+CD buy prefilled account
+CD available accounts ['Choose…', 'Gold at home', 'THNDR']

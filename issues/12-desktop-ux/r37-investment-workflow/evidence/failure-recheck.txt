@@ -1,0 +1,34 @@
+.............F.                                                          [100%]
+=================================== FAILURES ===================================
+____________ test_notices_follow_what_pyinstaller_actually_bundled _____________
+
+tmp_path = PosixPath('/tmp/pytest-of-agent/pytest-3/test_notices_follow_what_pyins0')
+
+    def test_notices_follow_what_pyinstaller_actually_bundled(tmp_path):
+        """A package PyInstaller pulls in without the app declaring it still gets its licence listed."""
+        package_app = _packager()
+        (tmp_path / "PYZ-00.toc").write_text(repr(("PYZ-00.pyz", [
+            ("jinja2", "jinja2/__init__.py", "PYMODULE"), ("jinja2.ext", "jinja2/ext.py", "PYMODULE"),
+            ("no_such_module", "x.py", "PYMODULE"), ("json", "json/__init__.py", "PYMODULE")])), encoding="utf-8")
+        (tmp_path / "COLLECT-00.toc").write_text(repr(([
+            ("Lightning.exe", "build/Lightning.exe", "EXECUTABLE"),
+            ("cryptography\\hazmat\\bindings\\_rust.pyd", "_rust.pyd", "EXTENSION")],)), encoding="utf-8")
+        names = {name.lower() for name in package_app.bundled_distribution_names(tmp_path)}
+>       assert {"jinja2", "cryptography"} <= names and "no_such_module" not in names
+E       AssertionError: assert ({'cryptography', 'jinja2'} <= {'cryptography'}
+E
+E         Extra items in the left set:
+E         'jinja2')
+
+tests/test_profile_packaging.py:331: AssertionError
+=============================== warnings summary ===============================
+../../opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages/anyio/pytest_plugin.py:14
+  /opt/codex/runtimes/codex-primary-runtime/dependencies/python/lib/python3.12/site-packages/anyio/pytest_plugin.py:14: PytestRemovedIn10Warning: _pytest.python.CallSpec2 has been renamed to CallSpec.
+  The CallSpec2 alias will be removed in pytest 10.
+  Update imports to use CallSpec instead.
+  See https://docs.pytest.org/en/stable/deprecations.html#callspec2-renamed
+    from _pytest.python import CallSpec2
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED tests/test_profile_packaging.py::test_notices_follow_what_pyinstaller_actually_bundled

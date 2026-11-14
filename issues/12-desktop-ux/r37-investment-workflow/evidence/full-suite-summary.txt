@@ -1,0 +1,23 @@
+Command: python -m pytest -q -n 4 --dist loadfile
+Exit status: 1
+Progress marker counts: {'.': 4396, 'F': 3, 'E': 13, 's': 11, 'x': 0}
+
+=========================== short test summary info ============================
+FAILED tests/test_profile_packaging.py::test_notices_follow_what_pyinstaller_actually_bundled
+FAILED tests/test_docs_structure.py::test_the_app_and_website_guidelines_are_all_mirrored
+FAILED tests/test_docs_structure.py::test_report_codes_are_sequential_unique_and_in_their_folder_names
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[none-en-/]
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[none-en-/transactions]
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[none-en-/profiles/new]
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[none-ar-/]
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[none-ar-/transactions]
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[none-ar-/profiles/new]
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[active-en-/]
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[active-en-/transactions]
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[active-en-/profiles/new]
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[active-ar-/]
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[active-ar-/transactions]
+ERROR tests/test_focus_browser.py::test_tab_stops_have_visible_focus[active-ar-/profiles/new]
+ERROR tests/test_import_account_defaults_browser.py::test_larger_register_page_can_select_and_edit_one_hundred_entries[390]
+
+Causes: 5-second browser setup/navigation timeouts (13 errors); Jinja2 absent from packaging-distribution discovery; old sibling website guidelines differ; report-code assertion ran while r37 was reserved but before its folder was created. Serial recheck completed: all 13 browser cases and the final report-code test passed; packaging-distribution discovery still failed. See failure-recheck.txt.

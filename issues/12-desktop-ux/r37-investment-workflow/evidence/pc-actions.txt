@@ -1,0 +1,5 @@
+initial instrument 11
+after switching Sell
+gold dividend error ['Dividends can only be recorded in a brokerage account.']
+holdings table y {'x': 321, 'y': 1214.140625, 'width': 986, 'height': 496.640625}
+1366 overflow False

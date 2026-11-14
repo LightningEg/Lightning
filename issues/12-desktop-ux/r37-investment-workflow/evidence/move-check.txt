@@ -1,0 +1,8 @@
+Date 2026-11-14 actual browser transaction BUY-2026-11-14-002; copied database only
+net_worth before 250762.360000 after 250748.860000 delta -13.500000
+broker_cash before 400.00 after 300.00 delta -100.00
+units before 150.00 after 151.00 delta 1.00
+holding_value before 12975.000000 after 13061.500000 delta 86.500000
+cost before 12150.00 after 12250.00 delta 100.00
+unrealized before 825.000000 after 811.500000 delta -13.500000
+period_result before 7505.830000 after 7492.330000 delta -13.500000

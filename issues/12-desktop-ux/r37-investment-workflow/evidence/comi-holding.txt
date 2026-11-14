@@ -1,0 +1,148 @@
+Lightning
+Search
+Ctrl K
+Overview
+Spending
+Budget
+Cash planning
+Safety
+Investments
+Transactions
+Settings
+Accounts · Balances in EGP
+In your accounts
+260,762
+Cash & bank
+CIB Payroll
+82,925
+Cash wallet
+10,385
+Vodafone Cash
+3,150
+Deposits
+NBE CDs
+100,000
+Investments
+THNDR
+21,108
+Gold at home
+57,195
+Gam'eya
+Office gam'eya
+−14,000
+You owe the circle
+Commercial International Bank (COMI)
+THNDR · Stocks · COMI on EGX · 150 share · as of today
+Holdings
+Planner
+Prices
+Currencies
+Buy more
+More actions
+Current value
+2 months held
+12,975EGP
+Price 87 · Today
+Unrealized gain
++6.8%
++825EGP
+Cost 12,150 · Average cost 81
+Total return
++825EGP
+Price change, sales and payouts since you bought it
+Return
++6.8%
+Held 34 days
+Against the risk-free rate
+
+The same money on the same dates, if it had earned a T-bill or certificate rate you type.
+
+Type the yearly rate of a T-bill or certificate to compare this holding with it.
+
+Risk-free rates you typed
+From
+Yearly rate (%)
+Save rate
+Is it making money?
+Month ends · Oct – Nov 2026
+Price against what you paid
+
+Month-end price · the dashed line is your average cost
+
+Price
+Average cost 81
+100
+50
+0
+87
+10
+2026
+11
+Show the numbers
+Month-end price against average cost
+Where the return came from
+
+From what you paid to value plus what it paid you
+
+What you paid
+12,150
+Price change
++825
+Gain from sales
+0
+Dividends and interest
+0
+Value plus what it paid you
+12,975
+
+Month-to-month moves appear after three month-ends. So far: +2.7% in November 2026.
+
+The journey
+What you put in and what it is worth
+Value against cost
+
+Month-end value and what you paid for the units you held
+
+Value
+Cost
+20,000
+10,000
+0
+12,975
+12,150
+10
+2026
+11
+Show the numbers
+Value against cost
+Trades and payouts
+Date	What	Units	Price	Amount	Held
+11 Oct	Bought	+150	81	12,150	150
+Each purchase
+What each one has made, and how fast per year
+Still held
+Bought	Units	Cost	Value	Return	Per year
+11 Oct	150	12,150	12,975	+6.8	—
+Planning
+Your own classification
+
+Horizon is your intended holding period: Short up to 1 year, Medium over 1 through 5 years, Long over 5 years. Edits save when you change them.
+
+Allocation bucket
+Cloud
+Equity Fund
+Fixed Income Fund
+Gold
+Gold Fund
+Money Market Fund
+Other Fund
+Other Investments
+Silver
+Stocks
+Horizon
+Unassigned
+Short
+Medium
+Long
+
+Exposure Equity · Gain from sales in the period 0 · Dividends and interest in the period 0
