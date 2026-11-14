@@ -340,7 +340,8 @@ def test_lazy_input_and_next_month(c, setup, monkeypatch):
     assert to_decimal("١٢٬٥٠٠٫٥") == Decimal("12500.5") and to_decimal("۶۰۰") == Decimal("600")
     assert parse_date("٥/١٠") == date(2026, 10, 5)
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
-    ahead = client.get("/budget?month=2026-11", follow_redirects=False)
+    assert client.get("/budget?month=2026-11").status_code == 200  # NF-12AL4: next month opens read only
+    ahead = client.get("/budget?month=2026-12", follow_redirects=False)
     assert ahead.status_code == 303 and "has%20not%20started" in ahead.headers["location"]
     item_id = c.planning.create(kind="BILL", name="Gym", amount="600", frequency="MONTHLY", start_date="2026-10-05")
     form = client.get(f"/plan/items/{item_id}/edit").text
