@@ -1488,6 +1488,9 @@ def test_a_fund_can_be_valued_by_its_total(mohab):
     mohab.b.open(screen.path)
     saved = mohab.b.submit({"date": "2027-09-30", field: "20000"}, button="Save prices")
     assert saved.shows("Saved 1 price")
+    asset_id = int(field.removeprefix("value_"))
+    values = [p.value for p in mohab.c.investments.portfolio("2027-09-30").open if p.asset_id == asset_id]
+    assert abs(sum(values) - D("20000")) < D("0.01")
 
 
 def test_other_investments_are_in_the_investment_analysis(mohab):

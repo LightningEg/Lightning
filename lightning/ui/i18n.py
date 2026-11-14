@@ -17,6 +17,11 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'The total value is too small for this holding quantity.': 'القيمة الإجمالية صغيرة جدًا بالنسبة لعدد الوحدات دي.',
+    'Quantities and total values cover all accounts, including units held for others. Use the currency shown beside each investment.': 'الكميات والقيم الإجمالية تشمل كل الحسابات، بما فيها الوحدات اللي محتفظ بيها لغيرك. استخدم العملة الموضحة جنب كل استثمار.',
+    'Enter a total estimate': 'اكتب التقدير الإجمالي',
+    'A total value must be greater than zero.': 'القيمة الإجمالية لازم تكون أكبر من صفر.',
+    "Use the item's total valuation instead of a unit price.": 'استخدم التقييم الإجمالي للقطعة بدل سعر الوحدة.',
     'Leave out of budget estimates': 'استبعد من تقديرات الميزانية',
     'Left out of budget estimates': 'المستبعد من تقديرات الميزانية',
     'Put back': 'رجّعه',

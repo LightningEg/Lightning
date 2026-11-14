@@ -341,6 +341,8 @@ class AssetService:
         asset = self.get_asset(asset_id)
         if asset.is_cash:
             raise ValidationError("Currencies do not need a price.")
+        if asset.code.startswith("OTH:ITEM-"):
+            raise ValidationError("Use the item's total valuation instead of a unit price.", "price")
         day = parse_date(date)
         if day > today():
             raise ValidationError("Prices cannot be dated in the future.", "date")
