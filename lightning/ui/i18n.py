@@ -1666,6 +1666,8 @@ ARABIC_UI = {
     'All horizons': 'كل الآفاق',
     'Horizon': 'الأفق الزمني',
     'XIRR': 'العائد السنوي الداخلي',
+    'Avg cost': 'متوسط التكلفة',
+    'Price now': 'السعر الآن',
     'System-generated': 'مُنشأ تلقائيًا',
     'deleted': 'محذوف',
     'Refund': 'استرداد',
