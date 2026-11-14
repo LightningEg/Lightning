@@ -30,9 +30,6 @@ Reproductions: the scripts in #626.
 
 Acceptance: the #626 cases above give 1,000 (laptop left out), 2,000 labelled, 0 not −6,000, "1,200 expected back", and reserve 200 restored with the month at 0; Cash flow and the ledger are byte-for-byte unchanged in every case; Mohab's year still passes; PC and phone, English and Arabic.
 
-## 12AK2 Leave one transaction out of estimates · L · opus · #643
-Migration for `budget_estimate_exclusions` (skill `add-migration`: journal, export, undo); the basis skips it and its linked returns; a switch on the PC and phone transaction edit and on add under More. Needs 12AK1 merged first. Done when: the laptop case averages 1,000 with the purchase still in Cash flow and Spent, the switch round-trips with undo, an older profile upgrades.
-
 ## 12AK3 A refund names its purchase · L · opus · #644
 Migration for `refund_links`; *This refunds…* on a refund's edit (type and pick a purchase in the same category, last 6 months) and *Record a refund* on a purchase prefilled with the link; capacity checks as reimbursement links; rule 2 reads it. Needs 12AK1 merged first. Done when: a linked 6,000 refund in November counts in September for estimates, unlinking restores it, over-linking is refused.
 
