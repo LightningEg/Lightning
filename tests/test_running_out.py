@@ -74,3 +74,15 @@ def test_move_dialog_says_why_from_the_evidence_not_two_months(c, setup, monkeyp
     text = visible_text(browser.get(href).text)
     assert "Food & groceries is over its plan this month; Transportation has room left." in text
     assert "two months running" not in text
+
+
+def test_money_out_by_day_matches_the_month_total(c, setup):
+    # NF-12AL2: the share-by-day curve reads spending by day, counted the way the month total counts it.
+    accounts, _ = setup
+    food, _ = _ids(c)
+    for day, amount in (("2026-11-02", "800"), ("2026-11-02", "200"), ("2026-11-20", "500")):
+        c.transactions.record_outflow(day, accounts["cib"].id, amount, food)
+    by_day = c.reporting.money_out_by_category_by_day("2026-11-01", "2026-11-30")
+    assert by_day["2026-11-02"][food] == Decimal("1000") and by_day["2026-11-20"][food] == Decimal("500")
+    total = c.reporting.money_out_by_category("2026-11-01", "2026-11-30")[food]
+    assert sum(day.get(food, 0) for day in by_day.values()) == total
