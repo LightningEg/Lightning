@@ -33,6 +33,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r34 | [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](12-desktop-ux/r34-accounts-and-transactions/report.md) | 2026-11-10 | audit | none |
 | r35 | [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](12-desktop-ux/r35-ux-against-users-questions/report.md) | 2026-11-09 | audit | 12AB, 3BH |
 | r36 | [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](11-phone-ux/r36-figures-one-owner/report.md) | 2026-11-09 | audit | none |
+| r37 | [Audit 20: the cash planning and forecasting workflow, used as a user](7-planning-import-and-search/r37-cash-planning-workflow/report.md) | 2026-11-14 | audit | 7AV, 7AW, 7AX, 7AY, 7AZ |
 
 
 ## Create and maintain a report
