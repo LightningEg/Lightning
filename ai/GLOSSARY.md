@@ -113,6 +113,7 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Reimbursement claim** | Plan | An explicit amount expected back for an existing owned expense. Outstanding = the eligible claimed amount minus valid explicitly linked receipts; not cash before receipt. |
 | **Saved view** | Report | Named account/category/search/tag filters with live date presets or a custom range; reused by register, summary report and CSV export. |
 | **Weekly review** | Plan | A completion flow over existing Needs you decisions. Recording a review keeps unresolved items visible; optional reminders require an unlocked session. |
+| **Running out** | Plan | A Needs you row (`BudgetService.running_out`): a category's flexible part, its limit less this month's bills, passes its limit before the month ends at its own pace. Expected spending by today follows the category's share-by-day curve from two of the last three months; with less history a straight line, and the row says "may run out". Shown after day 5, only past that curve by more than 10% of the flexible limit. |
 | **Day's net** | Report | On a phone list, a day's money in less its money out, beside the day's header; transfers and value updates are left out. |
 | **Investments moved** | Report | One phone row for a day's value updates (revaluations): their count and their sum. The rows themselves stay in the ledger. |
 

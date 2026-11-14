@@ -4049,7 +4049,7 @@ def _translate_text(value: str) -> str:
         return _DATE_WORDS[month.group(1)] + (month.group(2) or "")
     if value in WEEKDAYS:
         return WEEKDAYS[value]
-    if value.endswith(".") and not value.endswith(".."):
+    if value.endswith(".") and not value.endswith("..") and len(_SENTENCES.split(value)) == 1:  # several: each below
         head = _translate_text(value[:-1])  # a name or list closing a sentence: "Transportation."
         if head != value[:-1]:
             return head + "."
