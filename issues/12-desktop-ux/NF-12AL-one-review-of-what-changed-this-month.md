@@ -21,9 +21,6 @@ by: Claude
 
 Acceptance: the salary case offers 18,000 from 25 Dec; an unchanged month shows "Your plan continues" with nothing to tick; a front-loaded shopper with that history gets no day-8 warning; the bill case still paces the flexible 2,900; next month opens read-only; PC and phone, English and Arabic; Mohab's year passes.
 
-## 12AL1 Income drops are offered from their date · M · opus · #641
-Rule 1 in `planning/health.py` beside `raise_offer` (shared shape, one route and popup), a dated basis in `income_average`. Done when: #626's 30,000 → 18,000 case offers the drop, Plan on it changes the basis from December only, Keep stops the offer at that amount, a one-month gap offers nothing.
-
 ## 12AL2 Pacing on the flexible part, against your own curve · M · opus · #642
 Rule 3 in `BudgetService.running_out`; wording "may run out" with little history. Done when: #626's front-loaded case (with two earlier front-loaded months) gives no warning, the same spend without history says "may", the 100-bill case paces 2,900, and existing `tests/test_running_out.py` cases still hold or are updated with the reason.
 
