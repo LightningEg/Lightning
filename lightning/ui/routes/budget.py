@@ -81,6 +81,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     averages = {cid: row["average3"] for cid, row in category_averages.items()}
     averages6 = {cid: row["average6"] for cid, row in category_averages.items()}
     average_observations = {cid: row["observed3"] for cid, row in category_averages.items()}
+    average_full = {cid: row["full3"] for cid, row in category_averages.items()}
     income_basis = c.budgets.budgeting_income(month, schedule=c.schedules.view())
     # A default, not a setting (owner, 2026-10-06): suggest tracking a category that averages a fifth of income.
     tracking_suggestions = [{**row, "reason": f"{row['share']:.1f}% of average monthly income"}
@@ -202,7 +203,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                   prev_month=prev_month, next_month=next_month, values=values or {}, error=error,
                   has_plan=has_plan, suggestions=suggestions_view, suggestion_groups=suggestion_groups,
                   tracked=tracked, averages=averages,
-                  averages6=averages6, average_observations=average_observations,
+                  averages6=averages6, average_observations=average_observations, average_full=average_full,
                   tracking_suggestions=tracking_suggestions,
                   carryover=c.settings.get("budget_carryover_global") == "1",
                   overall_ceiling=c.settings.get("budget_overall_ceiling"), this_month=month_of(today()),
