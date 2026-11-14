@@ -72,7 +72,7 @@ def test_a_new_item_keeps_its_date_until_you_choose_and_a_paid_date_stays_paid(c
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
     form = client.get("/plan/items/new?kind=INCOME").text
     assert 'value="none" checked' in form and "On a weekend" in form and ">Day before<" in form
-    assert "Salary" in form and "Food &amp; Groceries" not in form and "System Categories" in form
+    assert "Salary" in form and "Food &amp; groceries" not in form and "System categories" in form
     assert "Internal transfers" in form and "Capital allocation" in form and "Adjustment" in form
     food = cats["EXP.PERSONAL.FOOD"]
     item_id = c.planning.create(kind="BILL", name="Box", amount="400", frequency="MONTHLY", start_date="2026-10-02",

@@ -380,7 +380,7 @@ def test_visuals_and_breakdowns_add_up(demo):
     assert sum(v for _, v in c.reporting.spending_by_counterparty(first, last)) == out  # who you paid
     assert sum(v for _, v in c.reporting.spending_by_account(first, last)) == out  # paid from
     usual = {r["label"].split(" › ")[-1]: r for r in c.reporting.spending_vs_usual(first, last)}
-    food = usual["Food & Groceries"]
+    food = usual["Food & groceries"]
     assert food["usual"] == (D("4568.50") + D("4762.80")) / 2 and food["change"] == D("5.50")
     assert c.reporting.largest_payments(first, last, 1)[0]["counterparty"] == "Landlord"
 
@@ -400,7 +400,7 @@ def test_expense_analysis_compares_big_categories_with_their_usual_month(c, setu
     c.transactions.record_outflow("2026-12-07", cib, "20", fees)  # under 1%: folded away
     a = visuals.expense_analysis(c, date(2026, 12, 1), date(2026, 12, 31))
     names = [r["name"] for r in a["rows"]]
-    assert names == ["Housing & Rent", "Food & Groceries", "Other"] and a["small"] == D("20")  # under 1% folds into Other
+    assert names == ["Housing & rent", "Food & groceries", "Other"] and a["small"] == D("20")  # under 1% folds into Other
     housing_row = a["rows"][0]
     assert housing_row["usual"] == D("31000") / 3 and housing_row["above"]  # 15,000 beats its 10–11k range
     assert (housing_row["low"], housing_row["high"]) == (D("10000"), D("11000"))

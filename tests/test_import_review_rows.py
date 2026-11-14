@@ -293,13 +293,13 @@ def test_same_named_categories_are_never_guessed_between(c, setup):
 
 def _questions_file(c, cib, cats):
     """NF-7AB1: 3 rows Lightning can place, 1 unknown name, 1 already imported."""
-    seen = "Date,Counterparty,Amount,Category,Reference\n2026-09-09,Bakery,-5,Food & Groceries,REF9\n"
+    seen = "Date,Counterparty,Amount,Category,Reference\n2026-09-09,Bakery,-5,Food & groceries,REF9\n"
     earlier, rows = _stage(c, cib, seen, "earlier.csv")
     _post(c, cib, earlier, {f"category_{rows[0]['_import_row_id']}": str(cats["EXP.PERSONAL.FOOD"].id)})
     data = ("Date,Counterparty,Amount,Category,Reference\n"
-            "2026-09-10,Carrefour,-10,Food & Groceries,R1\n2026-09-11,Metro,-20,Food & Groceries,R2\n"
-            "2026-09-12,Seoudi,-30,Food & Groceries,R3\n2026-09-13,Somebody new,-40,,R4\n"
-            "2026-09-09,Bakery,-5,Food & Groceries,REF9\n")
+            "2026-09-10,Carrefour,-10,Food & groceries,R1\n2026-09-11,Metro,-20,Food & groceries,R2\n"
+            "2026-09-12,Seoudi,-30,Food & groceries,R3\n2026-09-13,Somebody new,-40,,R4\n"
+            "2026-09-09,Bakery,-5,Food & groceries,REF9\n")
     return _stage(c, cib, data)
 
 
@@ -393,8 +393,8 @@ def test_the_result_offers_undo_and_keeps_the_balance_check(c, setup):
     """NF-7AB6: Undo on the result removes what the file created; the statement's balance check stays visible."""
     accounts, cats = setup
     cib = accounts["cib"].id
-    data = ("Date,Counterparty,Amount,Category,Balance\n2026-09-10,Carrefour,-10,Food & Groceries,990\n"
-            "2026-09-11,Metro,-20,Food & Groceries,900\n")
+    data = ("Date,Counterparty,Amount,Category,Balance\n2026-09-10,Carrefour,-10,Food & groceries,990\n"
+            "2026-09-11,Metro,-20,Food & groceries,900\n")
     batch, rows = _stage(c, cib, data)
     before = c.reporting.account_balance(cib)
     client = TestClient(create_app(c), base_url="http://127.0.0.1")

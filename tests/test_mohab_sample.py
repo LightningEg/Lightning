@@ -55,7 +55,7 @@ def test_a_phone_on_the_rule_is_shopping_and_the_bill_is_not(sample):
         """SELECT le.quantity_e6, cat.name category FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id
            JOIN counterparties cp ON cp.id=t.counterparty_id LEFT JOIN categories cat ON cat.id=le.category_id
            WHERE cp.name='Vodafone' AND le.account_id IS NOT NULL AND t.status='POSTED'""")}
-    assert rows[D(12000)] == "Shopping" and rows[D(350)] == "Utilities & Bills"
+    assert rows[D(12000)] == "Shopping" and rows[D(350)] == "Utilities & bills"
 
 
 def test_a_laptop_is_owed_like_a_loan_next_to_the_car(sample):

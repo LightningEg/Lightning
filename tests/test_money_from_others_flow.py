@@ -75,8 +75,8 @@ def test_import_uses_transfer_note_suggestion_and_posts_custody_rows_chronologic
     batch_id, _ = c.bank_imports.stage(
         source.id, "reverse-order.csv",
         b"Date,Counterparty,Category,Notes,Amount\n"
-        b"2026-09-15,Dad,Personal > Money Held for Others,Transfer to thundr,-10000\n"
-        b"2026-09-10,Dad,Personal > Money Held for Others,Received from Dad,9900\n",
+        b"2026-09-15,Dad,Personal > Money held for others,Transfer to thundr,-10000\n"
+        b"2026-09-10,Dad,Personal > Money held for others,Received from Dad,9900\n",
     )
     _, rows = c.bank_imports.preview(batch_id)
     transfer_row = next(row for row in rows if row["Amount"] == "-10000")
@@ -107,7 +107,7 @@ def test_import_posts_valid_rows_and_keeps_only_failed_rows_in_review(c):
         bank.id, "partial.csv",
         b"Date,Amount,Counterparty,Category,Notes\n"
         b"2026-09-10,-20,Shop,,Groceries\n"
-        b"2026-09-11,-500,Dad,Personal > Money Held for Others,Return\n",
+        b"2026-09-11,-500,Dad,Personal > Money held for others,Return\n",
     )
     _, rows = c.bank_imports.preview(batch_id)
     failed = next(row for row in rows if row["Counterparty"] == "Dad")

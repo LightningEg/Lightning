@@ -106,7 +106,7 @@ def test_long_review_is_paged_and_unseen_rows_still_post(c, setup):
     cib = setup[0]["cib"].id
     SHOPS = ["Seoudi", "Uber", "Netflix", "Carrefour", "Vodafone", "Pharmacy", "Kiosk"]
     lines = ["Date,Amount,Counterparty,Category"] + [
-        f"2026-10-{1 + i % 28:02d},-{10 + i}.00,{SHOPS[i % 7]},Food & Groceries" for i in range(400)]
+        f"2026-10-{1 + i % 28:02d},-{10 + i}.00,{SHOPS[i % 7]},Food & groceries" for i in range(400)]
     client = TestClient(create_app(c), base_url="http://127.0.0.1")
     r = client.post(f"/accounts/{cib}/import", files={"file": ("long.csv", "\n".join(lines).encode(), "text/csv")},
                     follow_redirects=False)
