@@ -27,6 +27,12 @@ def _month_name(month: str) -> str:
     return date.fromisoformat(month + "-01").strftime("%B %Y")
 
 
+def _day_name(day: str, on: date) -> str:
+    """yyyy-mm-dd as "25 Dec", with the year when it is not `on`'s (A06.1)."""
+    value = date.fromisoformat(day)
+    return f"{value.day} {value.strftime('%b')}" + ("" if value.year == on.year else f" {value.year}")
+
+
 def _ordinal(day: int) -> str:
     return f"{day}{'th' if 11 <= day % 100 <= 13 else {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 10, 'th')}"
 
@@ -465,8 +471,14 @@ class ReviewInbox:
                                     f"leaves {fmt(goal['can'], 0)} for it. {pace} {way}",
                           "href": "/plan/reserves", "action": "See reserves", "priority": 2,
                           "glance": glance(goal["name"], "Set aside", goal["need"], "a month")})
-        offer = c.health.raise_offer(month)
-        if offer:
+        offer = c.health.income_change_offer(month)
+        if offer and offer["kind"] == "drop":  # NF-12AL1: scheduled pay falls from a date
+            found.append({"label": f"Your income falls to {fmt(offer['recurring'], 0)} from {_day_name(offer['from'], on)}",
+                          "detail": f"{fmt(offer['drop'], 0)} a month less than your average of "
+                                    f"{fmt(offer['average'], 0)}. Plan on it from then, or keep the average.",
+                          "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose", "priority": 2,
+                          "glance": glance("Your income", "Choose", offer["drop"], "less a month")})
+        elif offer:
             found.append({"label": "Your income went up",
                           "detail": f"Recurring expects {fmt(offer['recurring'], 0)} {cur} a month, {fmt(offer['raise'], 0)} "
                                     f"more than your average of {fmt(offer['average'], 0)}. Plan with it, or save the difference.",
