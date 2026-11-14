@@ -272,6 +272,7 @@ class BudgetFillProposal:
     month: str
     source: str
     rows: tuple[BudgetFillRow, ...]
+    unchanged: int = 0  # NF-12AI: categories the What changed view left out because nothing would change
 
 
 class ScheduleView(Protocol):

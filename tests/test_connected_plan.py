@@ -1,6 +1,7 @@
 """The parts of the plan talk to each other (owner request 2026-10-05): the savings target set in
 Financial health limits the budget, dated goals count in what a month must leave, and the budget,
 Needs you, Financial health and Reserves read one check (HealthService.plan_check)."""
+from dataclasses import replace
 import shutil
 from decimal import Decimal
 
@@ -127,8 +128,13 @@ def test_fill_this_month_stops_at_most_you_can_plan(c):
     c.budgets.set_budget(transport, "2026-11", "1000", only_this_month=True, schedule=c.schedules.view())
     proposal, left = c.health.fit_fill(c.budgets.fill_proposal(MONTH, "last_month", schedule=c.schedules.view()))
     rows = {row.category_id: row for row in proposal.rows}
-    assert not rows[food].selected and "Past Most you can plan: 8,000 of room left." in rows[food].conflict
-    assert rows[transport].selected and left == Decimal("7000.00")
+    # NF-12AI: 9,000 + 1,000 do not fit in 8,000, so both wait for the person's pick, whatever the rows' order.
+    shortfall = "Together the ticked rows pass Most you can plan by 2,000; 8,000 of room is left. Tick the ones you want."
+    assert not rows[food].selected and not rows[transport].selected and shortfall in rows[food].conflict
+    assert left == Decimal("8000.00")
+    raw = c.budgets.fill_proposal(MONTH, "last_month", schedule=c.schedules.view())
+    reverse, _ = c.health.fit_fill(replace(raw, rows=tuple(reversed(raw.rows))))
+    assert {r.category_id: r.selected for r in reverse.rows} == {r.category_id: r.selected for r in proposal.rows}
     page = visible_text(_ScreenClient(create_app(c), "http://testserver").get(f"/budget/fill?month={MONTH}").text)
     assert "Most you can plan 8,000 EGP, to leave 2,000 to save." in page
 

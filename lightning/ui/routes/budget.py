@@ -663,7 +663,7 @@ async def budget_page(request: Request):
     return _page(request, month)
 
 
-FILL_SOURCES = ("last_month", "average", "schedule")
+FILL_SOURCES = ("changes", "last_month", "average", "schedule")
 
 
 @router.get("/fill")
@@ -675,28 +675,18 @@ async def budget_fill_page(request: Request):
         return redirect("/budget", "That month is invalid. Use YYYY-MM, for example 2026-09.")
     if month > month_of(today()):
         return redirect("/budget", f"{month} has not started yet. Choose a current or past month to fill.")
-    source = request.query_params.get("source")
-    tried = []
+    # NF-12AI (#635): opened without a source (Fill this month, Give it a job), the page shows What changed: only
+    # rows that would change something; an unchanged month says the plan continues. The other sources stay a pick.
+    source = request.query_params.get("source") or FILL_SOURCES[0]
     try:
-        if source:
-            proposal = c.budgets.fill_proposal(month, source, schedule=c.schedules.view())
-        else:
-            # IV-12Q3: opened without a source (Fill this month, Give it a job), the page opens on the first source
-            # that has something to offer, never on an empty "last month".
-            for source in FILL_SOURCES:
-                proposal = c.budgets.fill_proposal(month, source, schedule=c.schedules.view())
-                if any(row.selectable for row in proposal.rows):
-                    break
-                tried.append(source)
-            else:
-                source, proposal = FILL_SOURCES[0], c.budgets.fill_proposal(month, FILL_SOURCES[0], schedule=c.schedules.view())
+        proposal = c.budgets.fill_proposal(month, source, schedule=c.schedules.view())
     except LightningError as exc:
-        return render(request, "budget_fill.html", month=month, source="last_month", proposal=None,
+        return render(request, "budget_fill.html", month=month, source=FILL_SOURCES[0], proposal=None,
                       error=exc.message, status_code=400)
     proposal, room_left = c.health.fit_fill(proposal)
     return render(request, "budget_fill.html", month=month, source=source, proposal=proposal, error="",
                   check=c.health.plan_check(month), room_left=room_left, other_sources=[
-                      key for key in FILL_SOURCES if key != source and key not in tried])
+                      key for key in FILL_SOURCES if key != source])
 
 
 @router.post("/fill")

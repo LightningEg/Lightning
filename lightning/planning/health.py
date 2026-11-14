@@ -433,22 +433,29 @@ class HealthService:
                 "short": (flow.inflows * limit / 100 - flow.net).quantize(Decimal("0.01"))}
 
     def fit_fill(self, proposal):
-        """Fill this month stops at Most you can plan: rows stay ticked only while they fit in the room the
-        plan has left; the rest are unticked with the reason, and you may still tick them yourself.
+        """Fill this month stops at Most you can plan: the ticked rows stay ticked when they all fit in the room the
+        plan has left; otherwise every row that adds to the plan starts unticked with the shortfall, whatever the
+        rows' order (NF-12AI), and you tick the ones you want.
         Returns the proposal and the room left after the ticked rows (None without income)."""
         check = self.plan_check(proposal.month)
         if check.spending_room is None:
             return proposal, None
         left = check.spending_room - (check.planned or ZERO)
+        change = {id(row): row.amount - (row.current_amount or ZERO)
+                  for row in proposal.rows if row.selected and row.amount is not None}
         rows = []
+        if sum(change.values(), ZERO) <= left:  # everything ticked fits
+            return proposal, left - sum(change.values(), ZERO)
+        # NF-12AI: when the ticked rows do not all fit, which ones to keep is the person's choice, never the rows'
+        # order: every row that adds to the plan starts unticked with the shortfall, and rows that lower it stay.
+        short = sum(change.values(), ZERO) - left
         for row in proposal.rows:
-            if row.selected and row.amount is not None:
-                change = row.amount - (row.current_amount or ZERO)
-                if change > left:
-                    reason = f"Past Most you can plan: {fmt(max(left, ZERO), 0)} of room left."
-                    row = replace(row, selected=False, conflict=" ".join(x for x in (row.conflict, reason) if x))
-                else:
-                    left -= change
+            if id(row) in change and change[id(row)] > ZERO:
+                reason = (f"Together the ticked rows pass Most you can plan by {fmt(short, 0)}; "
+                          f"{fmt(max(left, ZERO), 0)} of room is left. Tick the ones you want.")
+                row = replace(row, selected=False, conflict=" ".join(x for x in (row.conflict, reason) if x))
+            elif id(row) in change:
+                left -= change[id(row)]
             rows.append(row)
         return replace(proposal, rows=tuple(rows)), left
 
