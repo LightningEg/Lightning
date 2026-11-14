@@ -1,5 +1,7 @@
-"""Home (IV-3AY6, IV-11E, guideline C11.1): "Am I OK today, and what do I do next?". Always today: the Safe to spend
-hero with its working and about how much a day, To do (three rows: name, figure, when, one verb), Latest five, This month. The state (first run, catch-up, payday,
+"""Home (guideline C11 v2.0, IV-11M3): "Am I OK today, and what do I do next?". Always today: a greeting, In your accounts
+(the cash in your bank and wallet accounts, each with its share), the Safe to spend card (its working in a sheet, a ring of
+everyday money spent, Left in budget and Bills before payday), four quick actions, To do (three rows: name, figure, when,
+one verb), Latest five. The first day shows the three steps to the number instead. The state (first run, catch-up, payday,
 overspent, calm; C13) decides what leads. Services calculate; this module only picks and orders."""
 from __future__ import annotations
 
@@ -7,7 +9,8 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
 
-from lightning.core.dates import month_of, parse_date
+from lightning.core.dates import month_of, now, parse_date
+from lightning.accounts.domain import AccountType
 from lightning.ui.phone.screens.budget import month_bar
 from lightning.planning import bill_state
 from lightning.planning.domain import PlanKind
@@ -67,7 +70,45 @@ class HomeScreen:
     month: str
     catch_up: bill_state.CatchUp
     month_bar: dict | None = None      # IV-11D2: the plan as one bar (spent, left, over); None without a plan
-    everyday_left: Decimal | None = None  # IV-12P: the hero, Left for everyday (owner, 2026-11-09); None with no plan
+    everyday_left: Decimal | None = None  # IV-12P: Left for everyday (owner, 2026-11-09); None with no plan
+    accounts: tuple = ()               # IV-11M3: In your accounts, the bank and cash accounts (dicts: id, name, kind, institution, balance, share)
+    accounts_total: Decimal = Decimal(0)
+    accounts_count: int = 0
+    bills_before_payday: Decimal = Decimal(0)   # the forecaster's Due before payday (what Safe to spend takes off)
+    spent_today: Decimal = Decimal(0)
+    greeting: str = "Good evening"
+    name: str = ""
+    steps: tuple = ()                  # first day: (key, done) for the salary account, the payday, the first payment
+
+
+CASH_KINDS = (AccountType.BANK, AccountType.CASH)
+ACCOUNTS_SHOWN = 4
+
+
+def _greeting(hour: int) -> str:
+    return "Good morning" if 4 <= hour < 12 else "Good afternoon" if hour < 17 else "Good evening"
+
+
+def _cash_accounts(c, day: date) -> tuple[tuple, Decimal, int]:
+    """In your accounts: active bank and cash accounts with a positive balance, largest first, four then Other."""
+    rows, base = [], c.reporting.base_currency
+    for a in c.accounts.list(active_only=True):
+        if a.parent_id or a.account_type not in CASH_KINDS or a.currency != base:
+            continue
+        value = c.reporting.account_value(a.id, day)
+        if value is not None and value > 0:
+            rows.append({"id": a.id, "name": a.name, "kind": a.type_short, "institution": a.institution or a.name,
+                         "type": "CASH_AT_HAND" if a.cash_at_hand else a.account_type.value, "balance": value})
+    rows.sort(key=lambda r: (-r["balance"], r["name"].casefold()))
+    total = c.reporting.balances_total([r["balance"] for r in rows]) if rows else Decimal(0)
+    count = len(rows)
+    if len(rows) > ACCOUNTS_SHOWN:
+        rest = rows[ACCOUNTS_SHOWN - 1:]
+        rows = rows[:ACCOUNTS_SHOWN - 1] + [{"id": 0, "name": "Other", "kind": "{n} accounts", "count": len(rest), "institution": "",
+                                              "type": "", "balance": c.reporting.balances_total([r["balance"] for r in rest])}]
+    for r in rows:
+        r["share"] = float(r["balance"] / total * 100) if total > 0 else 0.0  # not money: a bar's length
+    return tuple(rows), total, count
 
 
 def _first_run(c) -> bool:
@@ -106,6 +147,8 @@ def build(c, day: date) -> HomeScreen:
     else:
         state = "calm"
     first_run = state == "first_run"
+    accounts, accounts_total, accounts_count = _cash_accounts(c, day)
+    steps = (("account", bool(c.accounts.list())), ("payday", bool(c.planning.items((PlanKind.INCOME,)))), ("payment", bool(total)))
     return HomeScreen(state=state, safe=None if first_run else safe, until=until, per_day=per_day,
                       per_day_days=everyday.days_left if everyday else 0,
                       per_day_to_payday=bool(until) and until <= next_month.isoformat(),
@@ -115,4 +158,8 @@ def build(c, day: date) -> HomeScreen:
                       spent=c.reporting.cash_flow(day.replace(day=1), day).outflows,
                       left_in_plan=plan["left"] if plan else None, month=month, catch_up=away,
                       month_bar=month_bar(plan["planned"], plan["spent"]) if plan else None,
-                      everyday_left=everyday.everyday_left if everyday and everyday.current else None)
+                      everyday_left=everyday.everyday_left if everyday and everyday.current else None,
+                      accounts=accounts, accounts_total=accounts_total, accounts_count=accounts_count,
+                      bills_before_payday=forecast.payments_before_income_total,
+                      spent_today=c.reporting.cash_flow(day, day).outflows,
+                      greeting=_greeting(now().hour), name=c.settings.get("display_name") or "", steps=steps)
