@@ -1,8 +1,8 @@
 {# Fill this month's budget on the phone (3AY15): choose a source, then one row per category with its proposed limit. #}
 {% extends "base.html" %}
-{% block title %}{{ "Fill this month's budget"|tr(locale) }}{% endblock %}
+{% block title %}{{ "Fill this month’s budget"|tr(locale) }}{% endblock %}
 {% block phone_back %}<a class="phone-back" href="/budget?month={{ month }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Budget'|tr(locale) }}</span></a>{% endblock %}
-{% block heading %}<h1>{{ "Fill this month's budget"|tr(locale) }}</h1><p class="phone-note">{{ 'Review base limits for {month}. Nothing is saved until you apply selected rows.'|tr(locale, month=month|month(locale)) }}</p>{% endblock %}
+{% block heading %}<h1>{{ "Fill this month’s budget"|tr(locale) }}</h1><p class="phone-note">{{ 'Review base limits for {month}. Nothing is saved until you apply selected rows.'|tr(locale, month=month|month(locale)) }}</p>{% endblock %}
 {% block content %}
 {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
 <form method="get" action="/budget/fill" class="phone-form">
@@ -26,7 +26,7 @@
         <a class="btn phone-save" href="/plan/reserves">{{ "Open Reserves"|tr(locale) }}</a>
       </section>
     {% else %}
-      <p class="phone-note">{{ "Proposals use base limits only. Spending and carryover are not copied. Selecting a row replaces that category's limit for {month} only."|tr(locale, month=month|month(locale)) }}</p>
+      <p class="phone-note">{{ "Proposals use base limits only. Spending and carryover are not copied. Selecting a row replaces that category’s limit for {month} only."|tr(locale, month=month|month(locale)) }}</p>
       <form method="post" action="/budget/fill?month={{ month }}" class="phone-form">
         <input type="hidden" name="source" value="{{ source }}">
         <div class="phone-rows">{% for row in proposal.rows %}

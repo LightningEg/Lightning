@@ -76,7 +76,7 @@
       rate.textContent = window.lightningT("Rate: 1 {a} = {rate} {b}", { a: answer.base, rate: answer.rate, b: answer.quote });
       if (answer.reference) {
         spread.textContent = window.lightningT(answer.direction === "above"
-          ? "{pct}% above the day's rate of {reference} ({date})" : "{pct}% below the day's rate of {reference} ({date})",
+          ? "{pct}% above the day’s rate of {reference} ({date})" : "{pct}% below the day’s rate of {reference} ({date})",
           { pct: answer.percent, reference: answer.reference, date: answer.reference_date });
       }
     } catch (error) { /* the quote is a convenience; saving works without it */ }

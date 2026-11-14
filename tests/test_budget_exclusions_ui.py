@@ -45,7 +45,7 @@ def test_scope_and_put_back_round_trip_preserve_cash_flow_and_spending(c, setup,
     before_spending = c.budgets.owned_spending(date(2026, 11, 1), date(2026, 11, 30))
     page = client.get(f"/budget/category/{parent.id}/edit?month=2026-11")
     assert tr("and its {n} subcategories", locale, n=2) in Screen(page).text
-    assert tr("Leave out of budget estimates", locale) in Screen(page).text
+    assert tr("Leave outside the budget", locale) in Screen(page).text
     form = exclusion_form(page, parent.id, "exclude")
     assert client.post(form.action, data=form.fields).status_code == 200
     # Keep an unrelated saved preference, including across the parent restore.
@@ -57,7 +57,7 @@ def test_scope_and_put_back_round_trip_preserve_cash_flow_and_spending(c, setup,
     page = client.get("/budget?month=2026-12")
     text = Screen(page).text
     assert tr("and its {n} subcategories", locale, n=2) in text
-    assert tr("These categories stay out of budget estimates until you put them back. Their spending still counts in Cash flow and Spending.", locale) in text
+    assert tr("These categories stay outside the budget until you put them back. Their spending still counts in Cash flow and Spending.", locale) in text
     form = exclusion_form(page, parent.id, "restore")
     assert tr("Put back", locale) in form.text
     client.post(form.action, data=form.fields)

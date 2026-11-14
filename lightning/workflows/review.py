@@ -16,6 +16,7 @@ from lightning.core.errors import ValidationError
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, month_of
 from lightning.core.money import ZERO, fmt
+from lightning.planning.domain import PlanKind
 from lightning.planning.salary_day import review_identity, salary_review
 from lightning.transactions.domain import TxnFilter
 from lightning.workflows.market_prices import missing_prices
@@ -173,6 +174,17 @@ class ReviewInbox:
                           "detail": f"Due {payment.due_date} · {fmt(payment.amount, 0)} {c.base_currency} · not paid yet.",
                           "href": f"/plan/items/{payment.item.id}/pay?due={payment.due_date}&back=%2F",
                           "popup": True, "action": "Mark paid", "priority": 1,
+                          "late_days": payment.days_late(on)})
+        for payment in c.planning.all_payments(on, on, (PlanKind.INCOME,)):
+            if not payment.outstanding or payment.days_late(on) < 2:
+                continue
+            item = payment.item
+            currency = c.accounts.get(item.account_id).currency if item.account_id else c.base_currency
+            items.append({"label": f"{item.name} has not arrived",
+                          "detail": f"Expected {payment.due_date} · {fmt(payment.amount)} {currency}. "
+                                    "Record it when it arrives.",
+                          "href": f"/plan/items/{item.id}/pay?due={payment.due_date}&back=%2F",
+                          "popup": True, "action": "Record", "priority": 1,
                           "late_days": payment.days_late(on)})
         # Money that moved before the payment was due (salary 12 days early): the forecast no longer counts it
         # twice, and one press links it (7K).
@@ -536,7 +548,7 @@ class ReviewInbox:
                                     "A pending hold can make the bank's figure lag.",
                           "href": f"/accounts/{gap['account_id']}?date_from={day}&date_to={day}", "action": "Look at that day",
                           "priority": 2,
-                          "glance": glance(gap["name"], "Look", amount, "off the bank's balance since {sa}", sa=when),
+                          "glance": glance(gap["name"], "Look", amount, "off the bank’s balance since {sa}", sa=when),
                           "source_version": {"account": gap["account_id"], "date": day, "stated": str(gap["stated"])}})
         return found
 

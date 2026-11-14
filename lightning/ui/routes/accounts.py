@@ -342,7 +342,7 @@ async def create_account(request: Request):
         return render(request, "accounts/form.html", status_code=400, **_form_context(request, values, error=exc))
     _remember_institution(c, values["institution"])
     if account.account_type.value == "GAMEYA":  # its terms are the next step (lightning/ui/routes/gameya.py)
-        return redirect(f"/gameya/{account.id}", f"Account {account.label} is ready. Enter the circle's terms.")
+        return redirect(f"/gameya/{account.id}", f"Account {account.label} is ready. Enter the circle’s terms.")
     return redirect(f"/accounts/{account.id}?welcome=1", f"Account {account.label} is ready.")
 
 
