@@ -37,7 +37,7 @@ class CategoryRow:
 class BudgetScreen:
     month: str
     prev_month: str
-    next_month: str            # "" for the current month
+    next_month: str            # "" after this month; this month leads to the read-only next month (NF-12AL4)
     state: str                 # "no_plan" | "past" | "current" | "future"
     left: Decimal | None       # everyday money left in the plan; None with no plan
     used_pct: int | None
@@ -50,7 +50,7 @@ class BudgetScreen:
     fixed_paid: Decimal
     fixed_count: int
     move: dict | None = None          # room to cover the largest overspend: {name, amount, href}
-    raise_offer: dict | None = None   # "your income went up": recurring pay is above the plan's average (a current month only)
+    raise_offer: dict | None = None   # recurring pay above the plan's average, or below it from a date (kind "drop"; a current month only)
     month_bar: dict | None = None     # IV-11D2: the everyday plan as one bar: spent, left, over (amounts add to the plan)
     spend: dict | None = None         # IV-11D5: where the month went: a donut of four categories then Other, and its rows
     working: object = None            # NF-12AB4: the hero's working, for its sheet
@@ -76,7 +76,7 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
         first, last = parse_month(this)
     shown = month_of(first)
     schedule = c.schedules.view()
-    prev, nxt = _shift(shown, -1), "" if shown >= this else _shift(shown, 1)
+    prev, nxt = _shift(shown, -1), "" if shown > this else _shift(shown, 1)  # this month leads to next (NF-12AL4)
     if not c.budgets.has_plan(shown, schedule=schedule):
         return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0,
                             exclusions=exclusion_context(c)["estimate_exclusions"])
@@ -112,7 +112,7 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     return BudgetScreen(shown, prev, nxt, state, left, used,
                         e.spent_less_pace if state == "current" else None, e.per_day,
                         shown_needs, max(len(needs) - ATTENTION, 0), listed, planned, paid, count,  # not money
-                        move, c.health.raise_offer(shown) if state == "current" else None,
+                        move, c.health.income_change_offer(shown) if state == "current" else None,
                         month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, e.everyday_spent),
                         working=e.everyday_left_working,
                         payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None,

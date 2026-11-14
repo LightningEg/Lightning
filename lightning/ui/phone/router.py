@@ -91,8 +91,14 @@ def phone_router() -> APIRouter:
         asked = request.query_params
         if asked.get("open_group") or asked.get("make"):
             return redirect("/budget/plan?" + urlencode({"month": asked.get("month", "")} if asked.get("month") else {}))
+        from lightning.core.dates import month_of
+        from lightning.ui.budget_rows import neighbours
+        c = container(request)
+        if asked.get("month") == neighbours(month_of(today()))[1]:  # NF-12AL4: next month, read only
+            return render_phone(request, "phone/budget_next.html",
+                                preview=c.budgets.preview(asked["month"], schedule=c.schedules.view()))
         return render_phone(request, "phone/budget_flexible.html",
-                            screen=screen.build(container(request), today(), request.query_params.get("month", "")))
+                            screen=screen.build(c, today(), request.query_params.get("month", "")))
 
     @router.get("/budget/plan")
     async def budget_plan(request: Request):

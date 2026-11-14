@@ -17,6 +17,13 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'The total value is too small for this holding quantity.': 'القيمة الإجمالية صغيرة جدًا بالنسبة لعدد الوحدات دي.',
+    'Certificate value is set by its principal. Use the certificate workflow for terms or redemption.': 'قيمة الشهادة حسب أصل المبلغ. استخدم صفحة الشهادة لتعديل الشروط أو تسجيل الاسترداد.',
+    'View certificate': 'عرض الشهادة',
+    'Quantities and total values cover all accounts, including units held for others. Use the currency shown beside each investment.': 'الكميات والقيم الإجمالية تشمل كل الحسابات، بما فيها الوحدات اللي محتفظ بيها لغيرك. استخدم العملة الموضحة جنب كل استثمار.',
+    'Enter a total estimate': 'اكتب التقدير الإجمالي',
+    'A total value must be greater than zero.': 'القيمة الإجمالية لازم تكون أكبر من صفر.',
+    "Use the item's total valuation instead of a unit price.": 'استخدم التقييم الإجمالي للقطعة بدل سعر الوحدة.',
     'Leave out of budget estimates': 'استبعد من تقديرات الميزانية',
     'Left out of budget estimates': 'المستبعد من تقديرات الميزانية',
     'Put back': 'رجّعه',
@@ -1429,6 +1436,7 @@ ARABIC_UI = {
     'Bills inside the plan': 'الفواتير ضمن الخطة',
     'Budget until payday': 'الميزانية لحد الراتب',
     'Due before payday': 'المستحق قبل القبض',
+    'Income before payday': 'دخل قبل القبض',
     'Saving for goals': 'الادخار للأهداف',
     'Rest of savings target': 'باقي هدف الادخار',
     'Create plan': 'اعمل الخطة',
@@ -2059,6 +2067,18 @@ ARABIC_UI = {
     'Budget carryover': 'ترحيل الميزانية',
     'Carryover into {month}': 'الترحيل إلى {month}',
     'Plan in {month}': 'الخطة في {month}',
+    'This is how {month} starts. You can change it from {day}.': 'كده هيبدأ {month}. تقدر تغيّره من {day}.',
+    'Income the plan counts': 'الدخل اللي الخطة بتحسبه',
+    'No income to count yet.': 'لسه مفيش دخل يتحسب.',
+    'Left after limits': 'الباقي بعد الحدود',
+    'Scheduled in {month}': 'المجدول في {month}',
+    'Nothing is scheduled in this month.': 'مفيش حاجة مجدولة في الشهر ده.',
+    'Limits that carry into {month}': 'الحدود اللي بتترحّل لـ {month}',
+    'No limits carry into this month yet.': 'لسه مفيش حدود بتترحّل للشهر ده.',
+    'Includes bills': 'فيها فواتير',
+    'Your scheduled pay from {month}': 'مرتبك المجدول من {month}',
+    'Average of {first} to {last}': 'المتوسط من {first} لـ {last}',
+    'Carryover from this month is added once it ends.': 'ترحيل الشهر ده بيتضاف لما يخلص.',
     'Spent in {month}': 'المصروف في {month}',
     'Carried over': 'اللي اترحّل',
     'base': 'أساسي',
@@ -2080,6 +2100,14 @@ ARABIC_UI = {
     'Your lowest point ahead is {amt}. Pick a change to compare.': 'أقل نقطة قدامك {amt}. اختار تغيير للمقارنة.',
     'This change lowers your lowest point ahead by {amt}.': 'التغيير ده بينزّل أقل نقطة قدامك بمقدار {amt}.',
     'This change raises your lowest point ahead by {amt}.': 'التغيير ده بيرفع أقل نقطة قدامك بمقدار {amt}.',
+    'First day below zero': 'أول يوم تحت الصفر',
+    'Stays above zero': 'بيفضل فوق الصفر',
+    'The lowest point ahead is Cash planning’s; the change moves each day by what it does to your scheduled cash, so a late payment shows on the day it hurts.': 'أقل نقطة قدامك هي بتاعة تخطيط النقدية؛ والتغيير بيحرّك كل يوم بقد ما بيغيّر في نقديتك المجدولة، فالدفعة المتأخرة بتبان في اليوم اللي بتوجع فيه.',
+    'Plan this purchase': 'خطّط للشراء ده',
+    'Nothing is saved until you save it.': 'مفيش حاجة بتتحفظ لحد ما تحفظها.',
+    'Pick today or a later date.': 'اختار النهارده أو يوم بعده.',
+    'Type a date like 2026-12-10.': 'اكتب تاريخ زي 2026-12-10.',
+    'You would be {amt} short in {when}.': 'هتبقى ناقصك {amt} في {when}.',
     'This change leaves your lowest point ahead where it is.': 'التغيير ده بيسيب أقل نقطة قدامك زي ما هي.',
     'Nothing behind the forecast is old or missing.': 'مفيش حاجة ورا التوقع قديمة أو ناقصة.',
     'One account or currency behind the forecast needs a look.': 'حساب أو عملة واحدة ورا التوقع محتاجة نظرة.',
@@ -3519,6 +3547,23 @@ ARABIC_UI = {
     'Move {amt} from {name}': 'انقل {amt} من {name}',
     'of income, target {x}': 'من الدخل، والهدف {x}',
     'Income up {amt}': 'الدخل زاد {amt}',
+    # NF-12AL1: regular pay that falls from a date, offered to the plan like a raise.
+    'Income down {amt}': 'الدخل قلّ {amt}',
+    'Your income falls': 'دخلك هيقلّ',
+    'Your income falls to {amt} from {day}': 'دخلك هيقلّ لـ {amt} من {day}',
+    'Your average is {amt}, {amt2} more a month': 'متوسطك {amt}، يعني {amt2} زيادة في الشهر',
+    'What should the plan count from {month}?': 'الخطة تحسب إيه من {month}؟',
+    'Plan on it from then': 'خطّط عليه من ساعتها',
+    'Plan on it': 'خطّط عليه',
+    '{label} becomes {amt}; your plan is {amt2} over it': '{label} يبقى {amt}؛ وخطتك فوقه بـ {amt2}',
+    '{label} becomes {amt}; your plan still fits': '{label} يبقى {amt}؛ وخطتك لسه مناسبة',
+    'The plan waits until the lower income shows in completed months': 'الخطة تستنى لحد ما الدخل الأقل يبان في شهور خلصت',
+    'Plan on it from then, or keep the average of {x}.': 'خطّط عليه من ساعتها، أو خليك على المتوسط {x}.',
+    '{amt} a month less than your average of {x}. Plan on it from then, or keep the average.': '{amt} في الشهر أقل من متوسطك {x}. خطّط عليه من ساعتها، أو خليك على المتوسط.',
+    'Your income falls to {amt} from {n} {mon}': 'دخلك هيقلّ لـ {amt} من {n} {mon}',  # Needs you: "25 Dec" from Python
+    'Planning on {amt} a month from {month}': 'الخطة على {amt} في الشهر من {month}',
+    'Count the average again': 'ارجع للمتوسط',
+    'less a month': 'أقل في الشهر',
     'Plan {amt} less to keep {x} a month': 'خطط {amt} أقل عشان تحوّش {x} في الشهر',
     '{amt} a month to save': '{amt} في الشهر للادخار',
     'of the {amt} plan': 'من خطة الـ{amt}',
@@ -4038,7 +4083,7 @@ def _translate_text(value: str) -> str:
         return _DATE_WORDS[month.group(1)] + (month.group(2) or "")
     if value in WEEKDAYS:
         return WEEKDAYS[value]
-    if value.endswith(".") and not value.endswith(".."):
+    if value.endswith(".") and not value.endswith("..") and len(_SENTENCES.split(value)) == 1:  # several: each below
         head = _translate_text(value[:-1])  # a name or list closing a sentence: "Transportation."
         if head != value[:-1]:
             return head + "."
