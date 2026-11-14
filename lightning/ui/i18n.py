@@ -1623,6 +1623,8 @@ ARABIC_UI = {
     'Held for (if not you)': 'مملوك لـ (لو مش أنت)',
     'Fees (on top of the amount)': 'الرسوم (تُضاف للمبلغ)',
     'Fees (inside the amount)': 'الرسوم (ضمن المبلغ)',
+    'Amount paid back': 'المبلغ المُعاد من رأس المال',
+    'No exchange rate available': 'لا يتوفر سعر صرف',
     'Amount per unit': 'المبلغ لكل وحدة',
     'Amount received': 'المبلغ المستلم',
     'Amount paid': 'المبلغ المدفوع',
