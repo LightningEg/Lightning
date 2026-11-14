@@ -80,6 +80,9 @@ COMMANDS = {
         asset_id=ref("financial_assets"), name=TEXT, class_code=optional(TEXT), isin=TEXT, notes=LONG, active=FLAG,
         ticker=optional(TEXT), mic=optional(TEXT)), target=ASSET),
     "assets.link_fund": Command("assets.link_fund", dict(asset_id=ref("financial_assets"), page=TEXT), target=ASSET),
+    # NF-7AU: count an investment's value with Free cash, or not.
+    "assets.set_counts_as_cash": Command("assets.set_counts_as_cash", dict(asset_id=ref("financial_assets"), counts=FLAG),
+                                         target=ASSET),
     "assets.set_preferences": Command("assets.set_investment_preferences", dict(
         asset_id=ref("financial_assets"), bucket=TEXT, horizon=optional(TEXT)), target=ASSET),
     "assets.set_price": Command("assets.set_price", dict(asset_id=ref("financial_assets"), date=DATE, price=RATE)),

@@ -257,7 +257,7 @@ def audit():
                     pass
                 result["alias_saved"] = 'Audit example alias' in page.content()
                 # Exercise the audit itself with real browser geometry in both failing and passing states.
-                page.set_content("""<main class="main"><section class="card"><p>the same as<a href="#">Recurring</a>on Categories · Personal › Eating Out</p><fieldset style="border:1px solid black"><legend>Example</legend></fieldset>
+                page.set_content("""<main class="main"><section class="card"><p>the same as<a href="#">Recurring</a>on Categories · Personal › Eating out</p><fieldset style="border:1px solid black"><legend>Example</legend></fieldset>
                     <div class="chart-plot" style="position:relative;width:200px;height:100px">
                     <span class="chart-end" style="position:absolute;left:30px;top:10px">100</span>
                     <span class="chart-end" style="position:absolute;left:30px;top:10px">200</span></div></section></main>""")
@@ -412,4 +412,4 @@ def test_no_category_breadcrumbs_in_rendered_text(audit):
 
 def test_the_text_detectors_find_what_they_look_for(audit):
     joined, crumbs = audit["text_detectors"]
-    assert joined == ["asRecurringon"] and crumbs and crumbs[0].startswith("Personal › Eating Out")
+    assert joined == ["asRecurringon"] and crumbs and crumbs[0].startswith("Personal › Eating out")

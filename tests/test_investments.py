@@ -340,9 +340,9 @@ class TestInvestmentPages:
         rows = re.findall(r"<tr\b[^>]*>.*?</tr>", table, re.S)
 
         assert [re.sub(r"<[^>]+>", "", h) for h in re.findall(r"<th\b[^>]*>(.*?)</th>", table.split("</thead>", 1)[0])] == [
-            "Investment", "Cost", "Value", "Total gain", "Total return"]  # five columns (3.33, A11)
-        assert len(headers) == 5 and rows
-        assert all(len(re.findall(r"<(?:th|td)\b", row)) == 5 for row in rows)
+            "Investment", "Avg cost", "Price now", "Cost", "Value", "Total gain", "Total return"]  # A11 exception, owner 2026-11-14
+        assert len(headers) == 7 and rows
+        assert all(len(re.findall(r"<(?:th|td)\b", row)) == 7 for row in rows)
         assert "Holding details" not in table and 'class="small muted"' not in table
         row = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", rows[-1]))
         assert "Commercial International Bank" in table and "950 1,000" in row and "+5.3%" in row
@@ -458,7 +458,7 @@ def test_a_fund_can_be_bought_by_amount_and_a_new_name_needs_no_extra_step(c, se
     assert response.status_code in (200, 303)
     assert c.investments.holding(thndr.id, fund.id, "2026-09-30") == D("25")  # 3,000 ÷ the latest price 120
     saved = client.post(f"/accounts/{accounts['cib'].id}/register", data={
-        "date": "2026-09-25", "counterparty": "Zzq Bakery", "category": "Food & Groceries", "amount": "-40"})
+        "date": "2026-09-25", "counterparty": "Zzq Bakery", "category": "Food & groceries", "amount": "-40"})
     assert saved.status_code == 200 and c.counterparties.resolve("Zzq Bakery") is not None
 
 

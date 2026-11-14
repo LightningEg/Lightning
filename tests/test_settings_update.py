@@ -154,7 +154,7 @@ def test_without_an_updater_the_block_shows_the_version_and_the_download_page(le
     ("ready", {"version": "2.0.4"}, "Your profiles stay as they are.", "Restart to update"),
     ("refused_lend", {"names": ["Mona"], "version": "2.0.4"}, "Hand Mona back to your phone first, then update.", "Restart to update"),
     ("refused_move", {"names": ["Home"], "version": "2.0.4"}, "Finish moving the home of Home first", "Restart to update"),
-    ("refused_folder", {}, "Lightning can&#39;t update itself in this folder. Download the new version instead.", "Download page"),
+    ("refused_folder", {}, "Lightning can’t update itself in this folder. Download the new version instead.", "Download page"),
     ("failed", {"reason": "The update file is damaged."}, "The update file is damaged.", "Download it yourself"),
 ])
 def test_every_state_reads_plainly_with_the_right_button(ledger, tmp_path, state, extra, shows, button):
@@ -183,7 +183,7 @@ def test_the_buttons_drive_the_controller_and_never_the_network_on_load(ledger, 
 def test_the_one_time_notices(ledger, tmp_path):
     ctl = controller(tmp_path, update_failed="2.0.4")
     _, response = page(ledger, ctl)
-    assert "The update to 2.0.4 didn&#39;t start, so you&#39;re back on 2.0.3." in response.text and "/current-status.html" in response.text
+    assert "The update to 2.0.4 didn’t start, so you’re back on 2.0.3." in response.text and "/current-status.html" in response.text
     ctl = controller(tmp_path, after_update="2.0.3", current="2.0.4")
     _, response = page(ledger, ctl)
     assert "Updated to 2.0.4." in block(response.text)

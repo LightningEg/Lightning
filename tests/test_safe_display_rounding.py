@@ -56,6 +56,7 @@ def test_phone_safe_to_spend_bars_use_the_reconciled_display(c, setup, monkeypat
     from dataclasses import replace
     from fastapi.testclient import TestClient
     from lightning.ui.web import create_app
+    c.planning.create(kind='INCOME', name='Salary', amount='45000', frequency='MONTHLY', start_date='2026-10-25')   # Home leaves its first-day steps
     original = c.forecaster.forecast()
     parts = [('Free cash', D('312504.51')), ('Budget until payday', D('-1283.51')),
              ('Emergency fund top-up', D('-11520.51')), ('Rest of savings target', D('-2012.51'))]
@@ -63,6 +64,8 @@ def test_phone_safe_to_spend_bars_use_the_reconciled_display(c, setup, monkeypat
                 safe_to_spend=sum((value for _, value in parts), D(0)))
     monkeypatch.setattr(c.forecaster, 'forecast', lambda *args, **kwargs: f)
     inner = create_app(c)
+    from lightning.ui.phone.router import mount_phone
+    mount_phone(inner)
 
     async def phone(scope, receive, send):
         if scope['type'] == 'http':
@@ -70,12 +73,12 @@ def test_phone_safe_to_spend_bars_use_the_reconciled_display(c, setup, monkeypat
         await inner(scope, receive, send)
 
     with TestClient(phone) as client:
-        response = client.get('/plan')
+        response = client.get('/home')   # IV-11M3 (mockup v2.0): Safe to spend's working is Home's card sheet
     assert response.status_code == 200
-    section = response.text.split('id="plan-build"', 1)[1].split('</article>', 1)[0]
-    rows = re.findall(r'<span class="phone-bar-name">([^<]+)</span>'
-                      r'<b class="phone-bar-value">([^<]+)</b>', section)
+    section = response.text.split('phone-working', 1)[1].split('</div>\n', 1)[0]
+    rows = re.findall(r'<div class="phone-row"><span>([^<]+)</span><b><bdi class="fig">([^<]+)</bdi></b>', section)
     values = [int(value.replace(',', '').replace('−', '-')) for _, value in rows]
-    assert [name for name, _ in rows] == [name for name, _ in parts] + ['Safe to spend']
-    assert values[0] == 312505 and values[-1] == 297688 and sum(values[:-1]) == values[-1]
+    headline = int(re.search(r'data-fig="safe_to_spend">([\d,]+)', response.text).group(1).replace(',', ''))   # the card's own figure
+    assert [name for name, _ in rows] == [name for name, _ in parts]
+    assert values[0] == 312505 and headline == 297688 and sum(values) == headline   # the shown rows add up to the shown figure
     assert f.free_cash == D('312504.51') and f.safe_to_spend == D('297687.98')

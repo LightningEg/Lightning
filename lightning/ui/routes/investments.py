@@ -17,7 +17,8 @@ from lightning.core.money import ZERO, fmt, from_e6, signed_pct, to_decimal
 from urllib.parse import urlencode
 
 from ..web import container, redirect, render, ui_locale, settled_save
-from ..i18n import translate
+from ..i18n import currency_label, translate
+from ..date_text import day_text
 from ...investments import benchmark as risk_free, events, owned, views as holding_views
 from ...assets.catalog import instruments
 from ..periods import parse_period
@@ -30,7 +31,7 @@ from lightning.core.figures import label
 from lightning.core.plural import counted
 from lightning.market.packs import chosen, read_zip
 from lightning.market.update import DEFAULT_URL, update_packs
-from lightning.workflows import live_prices
+from lightning.workflows import live_prices, investment_prices
 from lightning.workflows.market_prices import (fill_followed, followed_packs, forget, held_packs, local_folder,
                                               pack_files, pack_rows)
 
@@ -477,11 +478,48 @@ def _cash_accounts(c, keep: str = ""):
             if str(a.id) == keep or a.account_type in (AccountType.BANK, AccountType.CASH, AccountType.CASH_AT_HAND)]
 
 
+def _entry_currency(c, values, kind, locale):
+    locale = locale if locale in ("en", "ar") else "en"
+    currency = c.base_currency
+    try:
+        if _int(values.get("asset_id")):
+            currency = c.assets.get_asset(int(values["asset_id"])).currency
+        elif _int(values.get("account_id")):
+            currency = c.accounts.get(int(values["account_id"])).currency
+    except LightningError:
+        pass  # An invalid selection still renders its validation error.
+    display_currency = currency_label(currency, locale)
+    names = {"total": "Amount", "price": "Price per unit", "fees": "Fees", "total_cost": label("cost"),
+             "amount": "Amount paid back" if kind == "return_of_capital" else
+                       "Amount per unit" if values.get("dividend_basis") == "per_share" else "Amount"}
+    labels = {key: translate(name, locale) + f" ({display_currency})" for key, name in names.items()}
+    labels["fees_inside"] = translate("Fees (inside the amount)", locale) + f" ({display_currency})"
+    labels["fees_extra"] = translate("Fees (on top of the amount)", locale) + f" ({display_currency})"
+    exchange = ""
+    if currency != c.base_currency and kind != "bonus_or_split":
+        try:
+            day = fmt_date(parse_date(values.get("date") or fmt_date(today())))
+            rate = c.reporting.valuer.fx(currency, day)
+            exchange = (f"1 {display_currency} = {fmt(rate.rate, 6).rstrip('0').rstrip('.')} {currency_label(c.base_currency, locale)} · {day_text(rate.date, locale)}" if rate else
+                        translate("No exchange rate available", locale))
+        except LightningError:
+            exchange = ""
+    return {"currency": currency, "display_currency": display_currency, "egp_label": currency_label("EGP", locale),
+            "labels": labels, "exchange": exchange}
+
+
+@router.get("/entry-currency")
+async def entry_currency(request: Request):
+    return JSONResponse(_entry_currency(container(request), request.query_params,
+                                       request.query_params.get("kind", "buy"), container(request).settings.get("locale")))
+
+
 def _form(request: Request, kind: str, values: dict, txn=None, error: LightningError | None = None, status=200):
     c = container(request)
     return render(request, "investments/form.html", status_code=status, kind=kind, title=KINDS[kind][0],
                   spec=events.form_fields(kind) if kind in events.EVENTS else None,
                   hint=KINDS[kind][1], values=values, txn=txn,
+                  trade_currency=_entry_currency(c, values, kind, c.settings.get("locale")),
                   holding_accounts=c.investments.investment_accounts(), all_accounts=c.accounts.list(active_only=True),
                   assets=_tradable_assets(c, values.get("asset_id", "")),
                   cash_accounts=_cash_accounts(c, values.get("cash_account_id", "")),
@@ -681,6 +719,7 @@ async def edit_asset(request: Request, asset_id: int):
         raise NotFoundError("That is a currency, not an investment.")
     values = {"name": asset.name, "class_code": c.assets.get_class(asset.asset_class_id).code, "symbol": asset.ticker,
               "isin": asset.isin or "", "mic": asset.mic or "", "notes": asset.notes, "active": "1" if asset.active else "",
+              "counts_as_cash": "1" if asset.counts_as_cash else "",
               "fund_page": (asset.market_key or "").removeprefix("EG:FUND:") if (asset.market_key or "").startswith("EG:FUND:") else ""}
     return _asset_form(request, values, asset=asset)
 
@@ -691,7 +730,7 @@ async def update_asset(request: Request, asset_id: int):
     asset = c.assets.get_asset(asset_id)
     form = await request.form()
     values = {k: str(form.get(k, "")) for k in ("name", "class_code", "symbol", "isin", "mic", "notes", "active",
-                                                "fund_page")}
+                                                "fund_page", "counts_as_cash")}
     try:
         with settled_save(request, container(request)):
             if "fund_page" in form:
@@ -699,6 +738,8 @@ async def update_asset(request: Request, asset_id: int):
             asset = c.assets.update_investment(asset_id, values["name"], values["class_code"], values["isin"],
                                                values["notes"], active=bool(values["active"]), ticker=values["symbol"],
                                                mic=values["mic"])
+            if "cash_switch" in form:  # NF-7AU: only a form that showed the switch sets it
+                asset = c.assets.set_counts_as_cash(asset_id, bool(values["counts_as_cash"]))
     except LightningError as exc:
         return _asset_form(request, values, asset=asset, error=exc, status=400)
     return redirect("/investments/assets", f"Saved {asset.name}.")
@@ -725,18 +766,24 @@ async def prices(request: Request, error: str = ""):
     except LightningError as exc:
         day, error = fmt_date(today()), exc.message
     portfolio = c.investments.portfolio(day)
-    held = {p.asset_id: p for p in portfolio.open}
+    held = investment_prices.holding_totals(portfolio)
     rows = []
     for asset in c.assets.investments(active_only=True):
         valuation = c.reporting.value_of(asset.id, 1, day)
         derived = (c.reporting.valuer.reference_price(asset.id, day)  # PR-2: a karat priced from another by purity
                    if valuation.price is None and getattr(asset.exposure, "value", asset.exposure) == "GOLD"
                    and asset.unit == "gram" else None)
+        is_certificate = c.assets.get_class(asset.asset_class_id).code == "DEPOSIT.CD"
+        certificate = c.deposits.certificate_for_asset(asset.id) if is_certificate else None
         rows.append({"asset": asset, "held": held.get(asset.id),
+                     "current_value": investment_prices.total_at_price(valuation.price, held.get(asset.id)),
                      "price": valuation.price if derived is None else owned.exact_from_e6(derived["price_e6"]),
                      "price_date": valuation.price_date if derived is None else derived["date"],
                      "source": valuation.source if derived is None else derived["source"],
-                     "is_certificate": c.assets.get_class(asset.asset_class_id).code == "DEPOSIT.CD"})
+                     "is_item": asset.code.startswith("OTH:ITEM-"),
+                     "is_certificate": is_certificate,
+                     "certificate_href": (f"/deposits/{certificate.terms.account_id}#certificate-{certificate.terms.id}"
+                                          if certificate else "/investments/certificate")})
     rows.sort(key=lambda r: (r["held"] is None, r["asset"].name))
     return render(request, "investments/prices.html", rows=rows, day=day, error=error,
                   pending=c.reevaluations.pending_prices(), market=_followed(c), fails=live_prices.failures(c))
@@ -940,20 +987,10 @@ async def save_prices(request: Request):
     day = fmt_date(parse_date(str(form.get("date", "")) or fmt_date(today())))
     values = {int(k[2:]): str(v) for k, v in form.items() if k.startswith("p_") and k[2:].isdigit() and str(v).strip()}
     try:
-        portfolio = c.investments.portfolio(day)
-        held = {position.asset_id: position for position in portfolio.open}
-        for key, raw in form.items():
-            if not key.startswith("value_") or not key[6:].isdigit() or not str(raw).strip():
-                continue
-            asset_id = int(key[6:])
-            position = held.get(asset_id)
-            if not position or position.quantity <= ZERO:
-                raise LightningError("A total value needs a positive holding quantity.", "value")
-            if asset_id in values:
-                raise LightningError("Enter either a unit price or total value for each investment, not both.", "price")
-            values[asset_id] = owned.unit_price(to_decimal(str(raw), "value"), position.quantity)
+        totals = {int(k[6:]): str(v) for k, v in form.items()
+                  if k.startswith("value_") and k[6:].isdigit() and str(v).strip()}
         with settled_save(request, container(request)):
-            count = c.assets.set_prices(day, values)
+            count = investment_prices.save_inputs(c, day, values, totals)
             for key, raw in form.items():
                 if not key.startswith("rp_") or not str(raw).strip():
                     continue
@@ -964,7 +1001,8 @@ async def save_prices(request: Request):
             c.reevaluations.process_due()
     except LightningError as exc:
         return redirect(f"/investments/prices?date={day}", exc.message)
-    return redirect("/investments", f"Saved {counted(count, 'price input', 'price inputs')}; reevaluation catch-up completed." if count
+    result_url = f"/investments/prices?date={day}"
+    return redirect(result_url, f"Saved {counted(count, 'price input', 'price inputs')}; reevaluation catch-up completed." if count
                     else "No prices entered.")
 
 

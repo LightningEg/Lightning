@@ -289,7 +289,7 @@ def _exchange(url: str, body: dict, profile: str, refusals: dict[int, str], refu
     except InvalidCosmeticLicense as exc:
         if str(exc).startswith("Update Lightning: unsupported"):  # signed, but names an item this app does not carry
             raise UnlockError("Update Lightning to wear this theme.") from exc
-        raise UnlockError("The store's answer did not verify. Update Lightning and try again.") from exc
+        raise UnlockError("The store’s answer did not verify. Update Lightning and try again.") from exc
     names = [n for n in names if n in supported]
     if not names:
         raise UnlockError("Update Lightning to wear this theme.")

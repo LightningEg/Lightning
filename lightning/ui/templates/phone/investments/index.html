@@ -8,9 +8,18 @@
 {% from "partials/charts.html" import donut, trend %}
 {% from "partials/macros.html" import period_control with context %}
 {% block title %}Investments{% endblock %}
-{# The hero sits in the header so the section's tabs follow it (C03.3), as on Cash planning. #}
+{# IV-11M8 (mockup v2.0): the hero holds Portfolio value, the verdict and the allocation bar with its legend; the tab strip is gone
+   (Prices from Holdings, the planner is best on a PC). #}
+{% block section_tabs %}{% endblock %}
 {% block heading %}<h1>{{ 'Investments'|tr(locale) }}</h1>{% if accounts and invest_phone and (owned_rows or period_activity) %}{% set ph = invest_phone %}
-{{ hero(fig.portfolio_value.label, ph.value, ph.line.text|tr(locale, **ph.line['values']), note=("As of {date}"|tr(locale, date=period.end_text)) if period.end_text != today else '', unit=lens.code) }}{% endif %}{% endblock %}
+<section class="phone-hero has-seam" aria-labelledby="lead-heading">
+  <div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig.portfolio_value.label }}{% if period.end_text != today %} <span>{{ "As of {date}"|tr(locale, date=period.end_text) }}</span>{% endif %}</div>
+  <div class="phone-lead">{{ ph.value|money }} <small>{{ lens.code }}</small></div>
+  {% if ph.verdict %}<p class="phone-hero-line"><b class="is-{{ ph.verdict.tone }}">{{ ph.verdict.text }}</b> {{ "Prices as of {date}."|tr(locale, date=period.end_text) }}</p>
+  {% else %}<p class="phone-hero-line">{{ ph.line.text|tr(locale, **ph.line['values'])|keep_dates }}</p>{% endif %}
+  {% if investment_donut.segments %}<div class="phone-alloc"><div class="phone-alloc-bar" role="img" aria-label="{{ 'By asset class'|tr(locale) }}">{% for s in investment_donut.segments %}<i class="tone-{{ s.tone }}" style="flex-grow:{{ '%.2f'|format(s.share) }}"></i>{% endfor %}</div>
+    <ul class="phone-alloc-legend">{% for s in investment_donut.segments %}<li><i class="tone-{{ s.tone }}" aria-hidden="true"></i>{{ s.label }} {{ '%.0f'|format(s.share) }}%</li>{% endfor %}</ul></div>{% endif %}
+</section>{% endif %}{% endblock %}
 {% macro phone_bars(rows, caption) %}<div class="phone-bars" role="list" aria-label="{{ caption }}">{% for r in rows if not r.header %}
   {% set tag = 'a' if r.href else 'div' %}<{{ tag }} class="phone-bar-row" role="listitem"{% if r.href %} href="{{ r.href }}"{% endif %}><span class="phone-bar-name">{{ r.label }}</span><b class="phone-bar-value">{{ r.value|money }}</b><span class="phone-bar-track"><i style="width:{{ '%.1f'|format([r.width or 0, 1]|max) }}%"></i></span></{{ tag }}>
 {% endfor %}</div>{% endmacro %}
@@ -22,18 +31,17 @@
   {% set show_kind = with_kind and not same %}
   {% set parts = [] %}
   {% if r.balance %}{% set _ = parts.append((r.kind|tr(locale)) if show_kind else ('Cash in the account'|tr(locale))) %}
-    {% if r.priced and r.gain_pct is not none %}{% set _ = parts.append((r.gain_pct|signed_pct) ~ '%') %}{% endif %}
   {% else %}
     {% if show_kind %}{% set _ = parts.append(r.kind|tr(locale)) %}{% endif %}
-    {% if not show_kind and r.gain_pct is not none %}{% set _ = parts.append(r.units|units_of(h.unit)) %}{% endif %}
-    {% set _ = parts.append(((r.gain_pct|signed_pct) ~ '%') if r.gain_pct is not none else (r.units|units_of(h.unit))) %}
+    {% set _ = parts.append(r.units|units_of(h.unit)) %}
   {% endif %}
+  {% set pct = (r.gain_pct|signed_pct) ~ '%' if r.gain_pct is not none and (r.priced or not r.balance) else '' %}
   <a class="phone-txn phone-invest-row" href="{{ ('/accounts/' ~ r.account_id) if r.balance else ('/investments/holding/' ~ h.asset_id ~ '?account=' ~ h.account_id ~ '&date=' ~ end ~ '&start=' ~ start) }}">{{ arrow('invest') }}
     <span class="phone-txn-who"><b>{{ name }}</b><small>{{ parts|join(' · ') }}</small></span>
-    <span class="phone-txn-amount"><b>{{ r.value|money if r.value is not none else 'Unavailable'|tr(locale) }}</b></span></a>
+    <span class="phone-txn-amount"><b>{{ r.value|money if r.value is not none else 'Unavailable'|tr(locale) }}</b>{% if pct %}<small class="{{ 'is-good' if r.gain_pct > 0 else 'is-bad' if r.gain_pct < 0 }}">{{ pct }}</small>{% endif %}</span></a>
 {% endmacro %}
 {% block content %}
-<a class="btn primary phone-save" href="/investments/add">{{ 'Add investment'|tr(locale) }}</a>
+{% if accounts %}<div class="phone-actions-pair"><a class="phone-pill" href="/investments/prices">{{ 'Update prices'|tr(locale) }}</a><a class="phone-pill is-strong" href="/investments/new?kind=buy">{{ 'Record a buy'|tr(locale) }}</a></div>{% endif %}
 {% if period_error %}<p class="flash error">{{ period_error }}</p>{% endif %}
 {% if not accounts %}
 <section class="card phone-card"><p class="phone-note">{{ "Investments live in a brokerage account or a physical asset account."|tr(locale) }}</p><a class="btn primary phone-save" href="/accounts/new?type=BROKERAGE">{{ "Add a brokerage account"|tr(locale) }}</a></section>
@@ -42,14 +50,14 @@
 <section class="card phone-card"><h2 class="phone-card-title">{{ 'No holdings yet'|tr(locale) }}</h2><p class="phone-note">{% if investment_report.investment_cash %}{{ investment_report.investment_cash|money }} {{ base }} of brokerage cash is ready. {% endif %}Record a holding to see its value, result and allocation.</p><div class="phone-rows">{% include "phone/investments/_add_sheet.html" %}</div><a class="phone-quiet" href="/accounts">{{ 'Open accounts'|tr(locale) }}</a></section>
 {% else %}
 {% set ph = invest_phone %}
-{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}
-{% include "phone/investments/_explain.html" %}
-{% if investment_report.missing %}<p class="flash">Prices missing: {% for issue in investment_report.missing %}{{ issue.asset }}{% if not loop.last %}, {% endif %}{% endfor %}. Their value may be out of date.</p>{% endif %}
-
-{% if since_return and (since_return.percent is not none or since_return.annualized) %}<div class="phone-rows phone-invest-return"><div class="phone-row"><span>{{ ('XIRR' if since_return.annualized else 'Return')|tr(locale) }}<small>{% if since_return.explanation %}{{ since_return.explanation|tr(locale) }}{% else %}{{ ('Held {n} day' if since_return.days_held == 1 else 'Held {n} days')|tr(locale, n=since_return.days_held) }}{% endif %}</small></span><b>{% if since_return.percent is not none %}{{ since_return.percent|signed_pct }}{{ ('% a year' if since_return.annualized else '%')|tr(locale) }}{% else %}—{% endif %}</b></div></div>{% endif %}
+{% if not ph.six.too_short %}<section class="phone-section phone-six" aria-labelledby="six-heading">
+  <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M22 7l-8.5 8.5-5-5L2 17M16 7h6v6"/></svg></span><span class="phone-head-text"><h2 id="six-heading">{{ 'Six months'|tr(locale) }}</h2><small>{{ 'From {a} to {b}'|tr(locale, a=ph.six.first|money, b=ph.six.last|money) }}</small></span></header>
+  {{ trend(ph.six, 'Portfolio value over time'|tr(locale), '', 150) }}
+</section>
+{% endif %}
 
 <section class="phone-section" aria-labelledby="holdings-heading">
-  <header class="phone-section-head"><h2 id="holdings-heading">{{ 'Holdings'|tr(locale) }}</h2>{% if ph.more %}<a class="phone-quiet" href="{{ ph.fewer_link if ph.expanded else ph.all_link }}">{{ ('Show fewer' if ph.expanded else 'See all')|tr(locale) }}</a>{% endif %}</header>
+  <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.1 10.4A6 6 0 1 1 10.4 18M7 6h1v4M16.7 13.9l.7.7-2.8 2.8"/></svg></span><span class="phone-head-text"><h2 id="holdings-heading">{{ 'Holdings'|tr(locale) }}</h2><small>{{ ('{n} asset' if ph.count == 1 else '{n} assets')|tr(locale, n=ph.count) }}</small></span><a class="phone-quiet" href="/investments/prices">{{ 'Prices'|tr(locale) }} {{ chevron() }}</a></header>
   <div class="phone-rows">{% include "phone/investments/_add_sheet.html" %}</div>
   {% if ph.expanded %}
   <div class="phone-invest-views" role="group" aria-label="{{ 'Group holdings'|tr(locale) }}">{% for key, text in views.items() %}<a class="phone-invest-chip{{ ' is-chosen' if key == view }}" href="{{ view_links[key] }}#holdings-heading">{{ text|tr(locale) }}</a>{% endfor %}</div>
@@ -62,15 +70,17 @@
   {% else %}
   <div class="phone-day-rows">{% for r in ph.rows %}{{ holding_row(r, period.start_text, period.end_text) }}{% else %}<p class="empty">{{ "No owned holdings to show."|tr(locale) }}</p>{% endfor %}</div>
   {% endif %}
+  {% if ph.more %}<a class="phone-row phone-see-all" href="{{ ph.fewer_link if ph.expanded else ph.all_link }}"><span>{{ ('Show fewer' if ph.expanded else 'See all')|tr(locale) }}</span><b>{{ chevron() }}</b></a>{% endif %}
 </section>
 
+{{ period_control("/investments", period.key, period.start_text[:7], this_month, period.start_text, period.end_text) }}
+{% include "phone/investments/_explain.html" %}
+{% if investment_report.missing %}<p class="flash">Prices missing: {% for issue in investment_report.missing %}{{ issue.asset }}{% if not loop.last %}, {% endif %}{% endfor %}. Their value may be out of date.</p>{% endif %}
+
+{% if since_return and (since_return.percent is not none or since_return.annualized) %}<div class="phone-rows phone-invest-return"><div class="phone-row"><span>{{ ('XIRR' if since_return.annualized else 'Return')|tr(locale) }}<small>{% if since_return.explanation %}{{ since_return.explanation|tr(locale) }}{% else %}{{ ('Held {n} day' if since_return.days_held == 1 else 'Held {n} days')|tr(locale, n=since_return.days_held) }}{% endif %}</small></span><b>{% if since_return.percent is not none %}{{ since_return.percent|signed_pct }}{{ ('% a year' if since_return.annualized else '%')|tr(locale) }}{% else %}—{% endif %}</b></div></div>{% endif %}
 
 {# Owner 2026-11-06: after the holdings, so the working list starts on the first screen. No chart until there are two months of history (3AN9): a card that only says "not enough history" is a wall of nothing #}
-{% if not ph.chart.too_short %}<article class="card phone-card phone-invest-card has-{{ ph.chart.count }}" aria-label="{{ 'Portfolio value over time'|tr(locale) }}">
-  {{ trend(ph.chart, 'Portfolio value over time'|tr(locale), '', 160) }}
-  <div class="phone-invest-seg" role="group" aria-label="{{ 'Choose period'|tr(locale) }}">{% for r in ph.ranges %}<a href="{{ r.href }}"{% if r.selected %} class="is-chosen" aria-current="true"{% endif %}>{{ r.text|tr(locale) }}</a>{% endfor %}</div>
-</article>
-{% endif %}
+
 
 <section class="phone-section" aria-labelledby="alloc-heading">
   <header class="phone-section-head"><h2 id="alloc-heading">{{ "Allocation"|tr(locale) }}</h2><span>{{ period.end_text }}</span></header>
@@ -104,5 +114,7 @@
     <p class="phone-note">{{ "Open a holding to set its horizon."|tr(locale) }}</p>
   </article>
 </section>
+<p class="phone-pc-note"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg>{{ 'Rebalancing and the planner are best on your PC.'|tr(locale) }}</p>
+<p class="phone-more-links"><a class="phone-quiet" href="/investments/planner">{{ 'Planner'|tr(locale) }}</a><a class="phone-quiet" href="/accounts/currencies">{{ 'Currencies'|tr(locale) }}</a></p>
 {% endif %}
 {% endblock %}

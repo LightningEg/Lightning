@@ -10,14 +10,15 @@
   {% endfor %}
 </div>
 {% endif %}
-<form method="post" class="card investment-ownership-form" data-trade-kind="{{ kind }}" {% if txn %}data-autosave-existing{% endif %} style="max-width:780px" autocomplete="off">
+<form method="post" class="card investment-ownership-form" data-trade-kind="{{ kind }}" data-trade-currency='{{ trade_currency | tojson }}' {% if txn %}data-autosave-existing{% endif %} style="max-width:780px" autocomplete="off">
+  <p class="help" data-trade-exchange aria-live="polite"{% if not trade_currency.exchange %} hidden{% endif %}>{{ trade_currency.exchange }}</p>
   {% if txn %}<input type="hidden" name="revision" value="{{ values.revision }}">{% else %}<input type="hidden" name="submission" value="{{ new_submission() }}">{% endif %}
   <div class="row">
     <div class="field {{ 'has-error' if error_field == 'account' }}">
       <label for="account_id">{{ 'Account'|tr(locale) }}</label>
       <select id="account_id" name="account_id" required data-own-picker>
         <option value="">{{ 'Choose…'|tr(locale) }}</option>
-        {% for a in (all_accounts if spec and spec.income else holding_accounts) %}<option value="{{ a.id }}" {{ 'selected' if values.account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
+        {% for a in (all_accounts if spec and spec.income else holding_accounts) %}<option data-currency="{{ a.currency }}" value="{{ a.id }}" {{ 'selected' if values.account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
       </select>
       {% if not holding_accounts %}<div class="help">{{ "No brokerage or physical-asset account yet —"|tr(locale) }}<a href="/accounts/new?type=BROKERAGE">{{ "add one"|tr(locale) }}</a>.</div>{% endif %}
     </div>
@@ -25,7 +26,7 @@
       <label for="asset_id">{{ 'Investment'|tr(locale) }}</label>
       <select id="asset_id" name="asset_id" required data-own-picker>
         <option value="">{{ 'Choose…'|tr(locale) }}</option>
-        {% for a in assets %}<option value="{{ a.id }}" {{ 'selected' if values.asset_id == a.id|string }}>{{ a.name }}</option>{% endfor %}
+        {% for a in assets %}<option data-currency="{{ a.currency }}" value="{{ a.id }}" {{ 'selected' if values.asset_id == a.id|string }}>{{ a.name }}</option>{% endfor %}
       </select>
       <div class="help"><a href="/investments/assets/new?then={{ kind }}">{{ "+ New investment"|tr(locale) }}</a></div>
     </div>
@@ -37,8 +38,8 @@
     {{ field('quantity', 'Units', values, error_field, placeholder='e.g. 100 shares, 12.5 grams', attrs='inputmode="decimal" required class="quantity-input"') }}
   </div>
   <div class="row">
-    {{ field('total', 'Amount (' ~ base ~ ')', values, error_field, help='Including fees, unless you tick Fees are extra.', placeholder='e.g. 10,000', attrs='inputmode="decimal" required class="money-input trade-total"') }}
-    <div class="field"><label>Price per unit ({{ base }})</label><input type="text" class="num unit-price-preview" readonly placeholder="Calculated from total ÷ units"><div class="help">{{ "Calculated automatically from the trade value and fee choice."|tr(locale) }}</div></div>
+    {{ field('total', trade_currency.labels.total, values, error_field, help='Including fees, unless you tick Fees are extra.', placeholder='e.g. 10,000', attrs='inputmode="decimal" required class="money-input trade-total"') }}
+    <div class="field"><label for="trade-unit-price">{{ trade_currency.labels.price }}</label><input type="text" id="trade-unit-price" class="num unit-price-preview" readonly placeholder="Calculated from total ÷ units"><div class="help">{{ "Calculated automatically from the trade value and fee choice."|tr(locale) }}</div></div>
   </div>
   {% if not spec.fees %}
   {% else %}
@@ -49,7 +50,7 @@
   </div>
   {% else %}
   <div data-fees-field>
-    {{ field('fees', 'Fees (' ~ base ~ ')', values, error_field, placeholder='e.g. 25', attrs='inputmode="decimal" class="money-input"') }}
+    {{ field('fees', trade_currency.labels.fees, values, error_field, placeholder='e.g. 25', attrs='inputmode="decimal" class="money-input"') }}
   </div>
   {% endif %}
   {% endif %}
@@ -58,7 +59,7 @@
     <label for="cash_account_id">{{ 'Cash account'|tr(locale) }}</label>
     <select id="cash_account_id" name="cash_account_id" data-own-picker>
       <option value="">{{ "The same account (its broker cash)"|tr(locale) }}</option>
-      {% for a in cash_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
+      {% for a in cash_accounts %}<option data-currency="{{ a.currency }}" value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
     </select>
     <div class="help">{{ 'Where the money came from' if spec.cash_from else 'Where the money went' }}. For gold at home, choose the wallet or bank account.</div>
   </div>
@@ -72,12 +73,11 @@
       <div class="help">{{ "For a per share amount, the total is calculated using this owner’s units held on the selected date."|tr(locale) }}</div>
     </div>
     <div class="field {{ 'has-error' if error_field == 'amount' }}">
-      <label for="amount" id="dividend-amount-label">Amount ({{ base }})</label>
+      <label for="amount" id="dividend-amount-label">{{ trade_currency.labels.amount }}</label>
       <input id="amount" type="text" name="amount" value="{{ values.amount }}" inputmode="decimal" required class="money-input">
       <div class="help">{{ "Enter the amount after any tax withheld."|tr(locale) }}</div>
     </div>
   </div>
-  <script nonce="{{ request.state.csp_nonce|default('') }}">const basis=document.getElementById('dividend-basis'),label=document.getElementById('dividend-amount-label');function syncDividendBasis(){label.textContent=window.lightningT(basis.value==='per_share'?'Amount per unit ({cur})':'Amount ({cur})',{cur:'{{ base }}'})}basis.addEventListener('change',syncDividendBasis);syncDividendBasis();</script>
   {% elif spec and spec.balance %}
   <div class="row">
     {{ date_field(values, error_field) }}
@@ -86,14 +86,14 @@
   {% elif spec and spec.capital %}
   <div class="row">
     {{ date_field(values, error_field) }}
-    {{ field('amount', 'Amount paid back (' ~ base ~ ')', values, error_field, help='The cash the fund paid you. Your units stay; your cost falls by this amount, and anything beyond your cost counts as a gain.', placeholder='e.g. 800', attrs='inputmode="decimal" required class="money-input"') }}
+    {{ field('amount', trade_currency.labels.amount, values, error_field, help='The cash the fund paid you. Your units stay; your cost falls by this amount, and anything beyond your cost counts as a gain.', placeholder='e.g. 800', attrs='inputmode="decimal" required class="money-input"') }}
   </div>
   {% if spec.cash_account %}
   <div class="field {{ 'has-error' if error_field == 'cash_account' }}">
     <label for="cash_account_id">{{ 'Cash account'|tr(locale) }}</label>
     <select id="cash_account_id" name="cash_account_id" data-own-picker>
       <option value="">{{ "The same account (its broker cash)"|tr(locale) }}</option>
-      {% for a in cash_accounts %}<option value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
+      {% for a in cash_accounts %}<option data-currency="{{ a.currency }}" value="{{ a.id }}" {{ 'selected' if values.cash_account_id == a.id|string }}>{{ a.label }}</option>{% endfor %}
     </select>
     <div class="help">{{ 'Where the money went' }}.</div>
   </div>
@@ -101,7 +101,7 @@
   {% else %}
   <div class="row">
     {{ field('quantity', 'Units', values, error_field, attrs='inputmode="decimal" required') }}
-    {{ field('total_cost', 'Cost (' ~ base ~ ')', values, error_field, help='What you paid for these units in total, fees included. THNDR shows it as average cost × units.', attrs='inputmode="decimal" required') }}
+    {{ field('total_cost', trade_currency.labels.total_cost, values, error_field, help='What you paid for these units in total, fees included. THNDR shows it as average cost × units.', attrs='inputmode="decimal" required') }}
   </div>
   <div class="field {{ 'has-error' if error_field == 'date' }}">
     <label for="date">{{ 'As of'|tr(locale) }} <span class="muted small">{{ 'yyyy-mm-dd'|tr(locale) }}</span></label>

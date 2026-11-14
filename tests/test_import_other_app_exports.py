@@ -15,7 +15,7 @@ HEADER = "Account,Date,Counterparty,Notes,Category_Group,Category,Amount,Split_A
 ROWS = (
     "Bank,2026-09-10,Ride Co,Card purchase,Work,Transportation,-120,0,Cleared\n"
     "Bank,2026-09-11,Ride Co,Card purchase,Personal,Transportation,-80,0,Cleared\n"
-    "Bank,2026-09-12,Balance adjustment,Bank showed more,Personal,Other Income,9.17,0,Not cleared\n"
+    "Bank,2026-09-12,Balance adjustment,Bank showed more,Personal,Other income,9.17,0,Not cleared\n"
     "Bank,2026-09-01,,Adjustment,Income,Starting Balances,1013.94,0,Not cleared\n"
     "Bank,2026-09-13,Kiosk,Daily expense,Usual Expenses,Daily Expenses,-30,0,Cleared\n"
     "Bank,2026-09-14,Kiosk,Daily expense,Usual Expenses,Daily Expenses,-45,0,Cleared\n"

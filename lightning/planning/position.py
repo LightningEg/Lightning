@@ -11,10 +11,13 @@ never re-adds balances its own way. The names match ai/GLOSSARY.md and the UI fi
                                   + You owe people
     Net worth                   = What you own − What you owe
     Kept apart                  = Cash you own in brokerages, other currencies or accounts set apart
-    Free cash                   = Cash you own − Kept apart − Reserves − Bills due + Bill cash already set aside
+    Counted as cash             = Holdings the person marked to count with cash (NF-7AU), at their value, unless locked
+    Free cash                   = Cash you own − Kept apart + Counted as cash − Reserves − Bills due
+                                  + Bill cash already set aside
     Portfolio value             = Holdings value + Brokerage cash
     Investments after sale      = Σ (Deposits and Holdings value by class × sale factor)
-    If you sold today           = Free cash + Kept apart + Investments after sale
+    If you sold today           = Free cash + Kept apart + Investments after sale (holdings counted as cash left out:
+                                  they are already in Free cash at their full value)
 
 A gam'eya (savings circle) is one GAMEYA account per circle: its positive balance is Gam'eya paid in (a class of
 Holdings value, sale factor 100%, not liquid so never in Cash you own or Free cash); its negative balance, the pot
@@ -55,6 +58,12 @@ class OwnedHolding:
     value: Decimal | None
     unit: str
     cost: Decimal | None = None  # what you paid, where only the account's details say (a property, NF-12M1)
+    marked_as_cash: bool = False  # NF-7AU: its investment is marked to count with cash
+
+    @property
+    def counts_as_cash(self) -> bool:
+        """Marked to count with cash and not locked (a certificate in its lock-up never counts)."""
+        return self.marked_as_cash and not self.locked_until
 
     @property
     def locked_until(self) -> str | None:
@@ -85,6 +94,20 @@ class ClassValue:
                         * getattr(item, "_realization_factor", self.factor) / 100
                         for item in self.items), ZERO)
         return self.value * self.factor / 100
+
+    @property
+    def counted_as_cash(self) -> Decimal:
+        """NF-7AU: the value of this class's holdings that count with cash (in Free cash at full value)."""
+        return sum((item.value or ZERO for item in self.items if item.counts_as_cash), ZERO)
+
+    @property
+    def after_sale_beyond_cash(self) -> Decimal:
+        """What the holdings not counted as cash would fetch if sold: If you sold today's share of this class."""
+        counted = [item for item in self.items if item.counts_as_cash]
+        if not counted:
+            return self.after_sale
+        return sum(((item.value or ZERO) * getattr(item, "_realization_factor", self.factor) / 100
+                    for item in self.items if not item.counts_as_cash), ZERO)
 
     @property
     def locked_until(self) -> str | None:
@@ -202,8 +225,18 @@ class Position:
         return None if self.reserves is None else self.spendable_cash - self.reserves - self.bills_due + self.bill_reserve_coverage
 
     @property
+    def counted_as_cash(self) -> Decimal:
+        """NF-7AU: holdings the person marked to count with cash, at their value (inside Holdings value too)."""
+        return sum((item.value or ZERO for item in self.counted_as_cash_items), ZERO)
+
+    @property
+    def counted_as_cash_items(self) -> tuple[OwnedHolding, ...]:
+        return tuple(item for cls in self.classes for item in cls.items
+                     if getattr(item, "counts_as_cash", False) and item.value)
+
+    @property
     def spendable_cash(self) -> Decimal:
-        return self.cash_you_own - self.kept_apart
+        return self.cash_you_own - self.kept_apart + self.counted_as_cash
 
     @property
     def portfolio_value(self) -> Decimal:
@@ -213,6 +246,11 @@ class Position:
     @property
     def holdings_after_sale(self) -> Decimal:
         return sum((c.after_sale for c in self.classes), ZERO)
+
+    @property
+    def holdings_after_sale_beyond_cash(self) -> Decimal:
+        """Holdings after sale, less those counted as cash (already in Free cash): If you sold today's part."""
+        return sum((c.after_sale_beyond_cash for c in self.classes), ZERO)
 
     @property
     def locked_holdings(self) -> tuple[OwnedHolding, ...]:
@@ -227,20 +265,22 @@ class Position:
     def if_you_sold_today(self) -> Decimal | None:
         if self.free_cash is None or self.unvalued:
             return None
-        return self.free_cash + self.kept_apart + self.holdings_after_sale
+        return self.free_cash + self.kept_apart + self.holdings_after_sale_beyond_cash
 
     @property
     def sale_parts(self) -> dict | None:
         """The "If you sold today" total and its parts in whole units, rounded (largest remainder) so the
         parts shown add up to the total shown: keys total, free_cash, kept_apart, holdings_after_sale, and
-        classes (class id -> after-sale value, adding up to holdings_after_sale)."""
+        classes (class id -> after-sale value, adding up to holdings_after_sale). Holdings counted as cash are in
+        free_cash, so holdings_after_sale and the classes leave them out (NF-7AU)."""
         total = self.if_you_sold_today
         if total is None:
             return None
         total = quantize(total, 0)
-        free, kept, holdings = round_to_total([self.free_cash, self.kept_apart, self.holdings_after_sale], total)
+        free, kept, holdings = round_to_total([self.free_cash, self.kept_apart, self.holdings_after_sale_beyond_cash],
+                                              total)
         shown = [c for c in self.classes if c.value]
-        shares = round_to_total([c.after_sale for c in shown], holdings) if shown else []
+        shares = round_to_total([c.after_sale_beyond_cash for c in shown], holdings) if shown else []
         return {"total": total, "free_cash": free, "kept_apart": kept, "holdings_after_sale": holdings,
                 "classes": {c.id: v for c, v in zip(shown, shares)}}
 
@@ -309,7 +349,7 @@ class PositionService:
                 continue  # the pot taken early is Gam'eya still to pay (What you owe), not a negative holding
             result.append(OwnedHolding(row.account.id, row.account.label, row.asset_id, asset.name,
                                        row.asset_class_code, quantity, value, asset.unit,
-                                       None if held else row.cost))
+                                       None if held else row.cost, asset.counts_as_cash))
         return result, unvalued
 
     def foreign_holdings(self, as_of: date | str, base_currency: str) -> dict[str, tuple[Decimal, bool]]:

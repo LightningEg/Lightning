@@ -2,7 +2,7 @@
 {% from "partials/charts.html" import lead_card %}
 {% set keep = '&show=' ~ show if show != 'all' else '' %}
 {% if lead and show_lead %}{% call lead_card(lead, base) %}<div class="compact-list">
-  {% for p in cal.paydays %}<a class="compact-row" href="{{ cal_path }}?month={{ month }}&amp;day={{ p }}{{ keep }}"><span>{{ 'Payday'|tr(locale) }}</span><b>{{ p|day }}</b></a>{% endfor %}
+  {% if cal.next_payday %}<a class="compact-row" href="{{ cal_path }}?month={{ cal.next_payday[:7] }}&amp;day={{ cal.next_payday }}{{ keep }}"><span>{{ 'Payday'|tr(locale) }}</span><b>{{ cal.next_payday|day }}</b></a>{% endif %}
   {% if cal.short_on %}<a class="compact-row is-short" href="/plan"><span>{{ 'Cash runs short'|tr(locale) }}<small>{{ 'short by {amt}'|tr(locale, amt=cal.short_by|money(False, 0)) }}</small></span><b>{{ cal.short_on|day }}</b></a>{% endif %}
   {% if cal.money_in %}<div class="compact-row"><span>{{ 'Coming in'|tr(locale) }}</span><b>{{ cal.money_in|money(False, 0) }}</b></div>{% endif %}
 </div>{% endcall %}{% endif %}
@@ -10,6 +10,7 @@
 <div class="upcoming-split">
 <section class="card upcoming-calendar" aria-labelledby="upcoming-month">
   <header class="upcoming-head">
+    {% if cal_path == "/plan" %}<a class="quiet-link" href="/plan/upcoming">{{ 'Upcoming'|tr(locale) }}</a>{% endif %}
     <nav class="month-stepper upcoming-stepper" aria-label="{{ 'Month'|tr(locale) }}">
       <a class="period-step" href="{{ cal_path }}?month={{ previous_month }}{{ keep }}" aria-label="{{ 'Previous month'|tr(locale) }}" title="{{ 'Previous month'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>
       <h2 id="upcoming-month">{{ month|month }}</h2>

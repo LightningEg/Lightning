@@ -181,10 +181,13 @@ def net_worth_trend(c, end: date, count: int = 12) -> dict:
 
 
 def free_cash_steps(position) -> dict | None:
-    """Cash you own, less cash kept apart, reserves and bills due, down to free cash."""
+    """Cash you own, less cash kept apart, plus investments counted as cash, less reserves and bills due, down to
+    free cash."""
     if position.free_cash is None:
         return None
     steps = [("Kept apart", -position.kept_apart)] if position.kept_apart else []
+    if position.counted_as_cash:
+        steps.append(("Investments counted as cash", position.counted_as_cash))
     steps += [("Reserves", -(position.reserves or ZERO)), ("Bills due", -position.bills_due)]
     if position.bill_reserve_coverage:
         steps.append(("Bill cash already set aside", position.bill_reserve_coverage))

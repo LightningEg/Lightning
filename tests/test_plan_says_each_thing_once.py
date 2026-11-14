@@ -24,4 +24,4 @@ def test_a_late_bill_is_listed_once_and_the_lead_holds_no_card(c, monkeypatch):
     assert 'id="plan-next"' in page and 'class="pay-cal"' in page and "The next 30 days" not in page
     lead = page.split('class="card lead-card', 1)[1].split("</section>", 1)[0]
     assert 'class="card' not in lead and 'id="afford-h"' not in lead
-    assert "afford" not in page
+    assert 'class="card wide-card afford-card"' in page

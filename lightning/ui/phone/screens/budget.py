@@ -13,6 +13,7 @@ from lightning.core.dates import month_of, parse_month
 from lightning.planning.domain import plan_parts
 from lightning.planning.salary_day import payday_to_plan
 from lightning.ui.charts import ranked_donut
+from lightning.ui.budget_exclusions import exclusion_context
 
 ZERO = Decimal(0)
 ATTENTION = 4          # Needs attention shows at most this many, then "and N more"
@@ -29,6 +30,7 @@ class CategoryRow:
     share: float               # 0-100 for the bar
     attention: bool
     state: str = "ok"          # "over" | "ahead" (ahead of the month's pace) | "done" (spent to the plan, nothing left) | "ok"
+    month_only: bool = False
 
 
 @dataclass(frozen=True)
@@ -48,11 +50,17 @@ class BudgetScreen:
     fixed_paid: Decimal
     fixed_count: int
     move: dict | None = None          # room to cover the largest overspend: {name, amount, href}
-    raise_offer: dict | None = None   # "your income went up": recurring pay is above the plan's average (a current month only)
+    raise_offer: dict | None = None   # recurring pay above the plan's average, or below it from a date (kind "drop"; a current month only)
     month_bar: dict | None = None     # IV-11D2: the everyday plan as one bar: spent, left, over (amounts add to the plan)
     spend: dict | None = None         # IV-11D5: where the month went: a donut of four categories then Other, and its rows
     working: object = None            # NF-12AB4: the hero's working, for its sheet
     payday: dict | None = None        # 3AY9: {amount, date} from the salary's day until this month's plan is saved
+    everyday_plan: Decimal = ZERO     # IV-11M5: the hero's Planned and Spent wells
+    everyday_spent: Decimal = ZERO
+    days_left: int = 0
+    work: tuple = ()                  # IV-11M5: open work claims, paid for someone else to pay back ({id, name, payer, outstanding})
+    trend: dict | None = None         # IV-11M5 Spending: six months of spending, the usual month, daily average, biggest day
+    exclusions: tuple = ()
 
 
 def _shift(month: str, step: int) -> str:
@@ -70,7 +78,8 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     schedule = c.schedules.view()
     prev, nxt = _shift(shown, -1), "" if shown >= this else _shift(shown, 1)
     if not c.budgets.has_plan(shown, schedule=schedule):
-        return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0)
+        return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0,
+                            exclusions=exclusion_context(c)["estimate_exclusions"])
     e = c.forecaster.everyday(shown, day)
     state = "current" if e.current else ("past" if last < day else "future")
     left = e.everyday_left
@@ -93,7 +102,7 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
             ahead = gap > 0 and pace_pct is not None and spent / limit * 100 >= pace_pct + AHEAD_POINTS  # not money
             kind = "over" if gap < 0 else ("ahead" if ahead else ("done" if limit > 0 and gap == 0 else "ok"))
             rows.append(CategoryRow(line.category_id, line.name, limit, spent, gap, share,
-                                    state != "past" and kind in ("over", "ahead"), kind))
+                                    state != "past" and kind in ("over", "ahead"), kind, line.one_off))
     rows.sort(key=lambda r: (r.left, r.name.casefold()))
     needs = [r for r in rows if r.attention]
     shown_needs = tuple(needs[:ATTENTION])
@@ -103,10 +112,44 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     return BudgetScreen(shown, prev, nxt, state, left, used,
                         e.spent_less_pace if state == "current" else None, e.per_day,
                         shown_needs, max(len(needs) - ATTENTION, 0), listed, planned, paid, count,  # not money
-                        move, c.health.raise_offer(shown) if state == "current" else None,
+                        move, c.health.income_change_offer(shown) if state == "current" else None,
                         month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, e.everyday_spent),
                         working=e.everyday_left_working,
-                        payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None)
+                        payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None,
+                        everyday_plan=e.everyday_plan, everyday_spent=e.everyday_spent, days_left=e.days_left,
+                        trend=spending_trend(c, shown, day), work=work_claims(c),
+                        exclusions=exclusion_context(c)["estimate_exclusions"])
+
+
+def work_claims(c) -> tuple:
+    """Paid for the company (or anyone) to claim back: the reimbursement claims with money still outstanding."""
+    rows = []
+    for claim in c.reimbursements.list_claims():
+        if claim["outstanding"] <= ZERO:
+            continue
+        t = dict(claim["expense"]) if claim.get("expense") else {}
+        rows.append({"id": claim["id"], "name": t.get("counterparty") or t.get("description") or "", "payer": claim.get("payer_name") or "",
+                     "outstanding": claim["outstanding"]})
+    return tuple(rows[:3])
+
+
+def spending_trend(c, month: str, day: date) -> dict | None:
+    """Six months of spending ending with ``month``, the usual month, this month's daily average and its biggest day
+    (the reporting service's ``spending_pattern``); here only the bars' heights."""
+    keys = []
+    cursor = parse_month(month)[0]
+    for _ in range(6):  # not money: six months back
+        keys.insert(0, month_of(cursor))
+        cursor = (cursor - timedelta(days=1)).replace(day=1)  # not money: the month before
+    if parse_month(month)[0] > day:
+        return None
+    pattern = c.reporting.spending_pattern(keys, day)
+    months, usual = pattern["months"], pattern["usual"]
+    top = max(months.values())
+    return {"months": [{"month": k, "spent": v, "share": float(v / top * 100) if top > 0 else 0.0, "current": k == month}  # not money: bar heights
+                       for k, v in months.items()],
+            "usual": usual, "usual_share": float(usual / top * 100) if usual and top > 0 else None,  # not money: the line's height
+            "daily": pattern["daily"], "daily_usual": pattern["daily_usual"], "biggest": pattern["biggest"]}
 
 
 def month_bar(plan: Decimal, spent: Decimal) -> dict | None:
@@ -157,6 +200,7 @@ class PlanRow:
     value: str          # what the field holds: "20%" or "1500.00", "" when the month has no limit of its own
     placeholder: str    # the limit it has from elsewhere (an average, a parent), else ""
     spent: Decimal
+    month_only: bool = False
 
 
 @dataclass(frozen=True)
@@ -165,6 +209,9 @@ class PlanList:
     groups: tuple[tuple[str, tuple[PlanRow, ...]], ...]   # (group name, its categories) in the plan's order
     # No plan yet: Lightning's proposal from what was spent, (group, ((category id, name, amount), ...)), saved at once
     first: tuple = ()
+    income: Decimal | None = None   # IV-11M5: the plan's income (the average, or Recurring standing in)
+    planned: Decimal = ZERO         # everything the month plans: everyday, bills and loans
+    left: Decimal | None = None     # Left to plan: income less what is planned; None with no income to plan from
 
 
 def plan_list(c, month: str) -> PlanList:
@@ -191,10 +238,12 @@ def plan_list(c, month: str) -> PlanList:
             value = (f"{line.income_percent.normalize():f}%" if line.income_percent is not None
                      else _plain_amount(line.direct) if line.direct is not None and not line.average_months else "")
             holder = f"{line.budget:,.0f}" if line.budget is not None and not value else ""
-            rows.append(PlanRow(line.category_id, line.name, value, holder, line.actual))
+            rows.append(PlanRow(line.category_id, line.name, value, holder, line.actual, line.one_off))
         if rows:
             groups.append((current, tuple(rows)))
-    return PlanList(shown, tuple(groups), tuple((g, tuple(rows)) for g, rows in first.items()))
+    income, planned, left = c.budgets.plan_gap(shown, view, schedule=c.schedules.view())
+    return PlanList(shown, tuple(groups), tuple((g, tuple(rows)) for g, rows in first.items()),
+                    income=income, planned=planned, left=left)
 
 
 def _plain_amount(amount) -> str:

@@ -44,6 +44,7 @@ def _asset(row: sqlite3.Row) -> FinancialAsset:
         mic=row["mic"] if "mic" in row.keys() else None,
         country=row["country"] if "country" in row.keys() else None,
         market_key=row["market_key"] if "market_key" in row.keys() else None,
+        counts_as_cash=bool(row["counts_as_cash"]) if "counts_as_cash" in row.keys() else False,
     )
 
 
@@ -105,6 +106,10 @@ class AssetRepository:
             (a.code, a.name, a.asset_class_id, a.exposure.value, a.isin, a.external_symbol, int(a.active), a.notes,
              a.mic, a.country, a.market_key, now_iso(), a.id),
         )
+
+    def set_counts_as_cash(self, asset_id: int, counts: bool) -> None:
+        self.db.execute("UPDATE financial_assets SET counts_as_cash=?, updated_at=? WHERE id=?",
+                        (int(counts), now_iso(), asset_id))
 
     # prices
     def upsert_price(self, asset_id: int, date: str, price, currency: str, source: str) -> None:

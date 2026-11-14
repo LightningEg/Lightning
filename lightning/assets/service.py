@@ -308,6 +308,16 @@ class AssetService:
             self.repo.update_asset(updated)
         return self.get_asset(asset_id)
 
+    def set_counts_as_cash(self, asset_id: int, counts: bool) -> FinancialAsset:
+        """NF-7AU: count this investment's owned value with Free cash, or not. The ledger never changes."""
+        asset = self.get_asset(asset_id)
+        if asset.is_cash:
+            raise ValidationError("Currencies cannot be edited here.")
+        if asset.counts_as_cash != bool(counts):
+            with self.db.transaction():
+                self.repo.set_counts_as_cash(asset_id, bool(counts))
+        return self.get_asset(asset_id)
+
     def link_market(self, asset_id: int, key: str | None) -> None:
         """Remember which market-file instrument an asset is (EG:COMI, EG:FUND:4104)."""
         asset = self.get_asset(asset_id)
@@ -331,6 +341,10 @@ class AssetService:
         asset = self.get_asset(asset_id)
         if asset.is_cash:
             raise ValidationError("Currencies do not need a price.")
+        if self.get_class(asset.asset_class_id).code == "DEPOSIT.CD":
+            raise ValidationError("Certificate value is set by its principal. Use the certificate workflow for terms or redemption.", "price")
+        if asset.code.startswith("OTH:ITEM-"):
+            raise ValidationError("Use the item's total valuation instead of a unit price.", "price")
         day = parse_date(date)
         if day > today():
             raise ValidationError("Prices cannot be dated in the future.", "date")

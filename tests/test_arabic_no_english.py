@@ -187,15 +187,15 @@ def test_localize_html_translates_text_and_attributes_and_leaves_data():
 
 
 def test_patterns_and_months():
-    assert translate("Delete Eating Out", "ar") == "احذف المطاعم"
+    assert translate("Delete Eating out", "ar") == "احذف المطاعم"
     assert translate("Oct 2026", "ar") == "أكتوبر 2026"
-    assert translate("Personal › Food & Groceries", "ar") == "شخصي › الأكل والبقالة"
+    assert translate("Personal › Food & groceries", "ar") == "شخصي › الأكل والبقالة"
 
 
 def test_a_name_or_list_closing_a_sentence_is_translated():
     """Keynotes close a list of category names with a full stop (Budget › Categories over plan)."""
     assert translate("Transportation.", "ar") == "المواصلات."
-    assert translate("Transportation, Eating Out and 2 more.", "ar") == "المواصلات، المطاعم و2 كمان."
+    assert translate("Transportation, Eating out and 2 more.", "ar") == "المواصلات، المطاعم و2 كمان."
     assert translate("CIB, THNDR", "ar") == "CIB, THNDR"  # typed names stay as typed
 
 

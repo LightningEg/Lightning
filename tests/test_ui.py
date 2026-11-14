@@ -51,7 +51,7 @@ def test_full_flow(client, c):
     assert "CIB-CUR-EGP" not in page.text  # ordinary account UI leads with the name, not its code
 
     r = client.post(f"/accounts/{cib.id}/register", data={"date": "2026-09-25", "counterparty": "Carrefour",
-                    "counterparty_choice": "create", "category": "Personal › Food & Groceries",
+                    "counterparty_choice": "create", "category": "Personal › Food & groceries",
                     "amount": "-450", "notes": "Groceries"})
     assert r.status_code == 200 and "Saved." in r.text
     txn = c.transactions.get_by_ref("OUT-2026-09-25-001")
@@ -73,7 +73,7 @@ def test_full_flow(client, c):
     r = client.get(f"/accounts/{cib.id}?edit={txn.id}&acct={cib.id}")
     assert 'id="f-edit"' in r.text and 'value="-450.00"' in r.text
     r = client.post(f"/accounts/{cib.id}/register/{txn.id}", data={"date": "2026-09-25", "counterparty": "Carrefour",
-                    "category": "Personal › Food & Groceries", "amount": "-540", "notes": ""})
+                    "category": "Personal › Food & groceries", "amount": "-540", "notes": ""})
     assert "Saved." in r.text
     assert c.reporting.account_balance(cib.id) == 50000 - 540 - 2000
 
@@ -97,7 +97,7 @@ def test_all_accounts_register(client, c, setup):
     accounts, cats = setup
     wallet, cib = accounts["wallet"], accounts["cib"]
     r = client.post("/transactions/register", data={"date": "2026-09-20", "account_id": wallet.id, "counterparty": "Kiosk",
-                    "counterparty_choice": "create", "category": "Food & Groceries", "amount": "-30"})
+                    "counterparty_choice": "create", "category": "Food & groceries", "amount": "-30"})
     assert "Saved." in r.text
     t = client.post("/transactions/register", data={"date": "2026-09-21", "account_id": cib.id,
                     "counterparty": wallet.label, "amount": "-100"})
@@ -113,7 +113,7 @@ def test_edit_changing_kind_replaces_transaction(client, c, setup):
     w, cib = accounts["wallet"], accounts["cib"]
     txn = c.transactions.record_transfer("2026-09-10", cib.id, w.id, "100")
     r = client.post(f"/accounts/{w.id}/register/{txn.id}", data={"date": "2026-09-10", "counterparty": "Kiosk",
-                    "counterparty_choice": "create", "category": "Food & Groceries", "amount": "-100"})
+                    "counterparty_choice": "create", "category": "Food & groceries", "amount": "-100"})
     assert "Saved as OUT-2026-09-10-001" in r.text
     assert c.transactions.get(txn.id).is_void
     assert c.reporting.account_balance(w.id) == 1100
@@ -205,9 +205,9 @@ def test_register_entry(client, c, setup):
     assert "EXP.PERSONAL" not in page.text  # plain names only
 
     r = client.post(f"/accounts/{wallet.id}/register", data={"date": "2026-09-20", "counterparty": "Carrefour",
-                    "counterparty_choice": "create", "category": "Personal › Food & Groceries",
+                    "counterparty_choice": "create", "category": "Personal › Food & groceries",
                     "amount": "-150", "notes": "milk"})
-    assert "Saved." in r.text and 'title="Personal › Food &amp; Groceries">Food &amp; Groceries<' in r.text
+    assert "Saved." in r.text and 'title="Personal › Food &amp; groceries">Food &amp; groceries<' in r.text
     assert c.reporting.account_balance(wallet.id) == 1200 - 150
 
     r = client.post(f"/accounts/{wallet.id}/register", data={"date": "2026-09-21", "counterparty": "CIB Current",
@@ -234,7 +234,7 @@ def test_register_entry(client, c, setup):
 
     # Counterparty remembers its category
     page = client.get(f"/accounts/{wallet.id}")
-    assert "Carrefour" in page.text and "Personal › Food &amp; Groceries" in page.text
+    assert "Carrefour" in page.text and "Personal › Food &amp; groceries" in page.text
 
 
 def test_account_form_has_no_class_picker(client):
@@ -296,7 +296,7 @@ def test_settings_saves_and_lists_dated_fx_rates(client, c):
 
 def test_categories_page_is_plain(client):
     r = client.get("/categories")
-    assert "Food &amp; Groceries" in r.text and "EXP.PERSONAL.FOOD" not in r.text
+    assert "Food &amp; groceries" in r.text and "EXP.PERSONAL.FOOD" not in r.text
 
 
 def test_counterparties_tab_lists_and_creates_canonical_names(client, c):
@@ -314,7 +314,7 @@ def test_counterparty_review_offers_canonical_match_or_explicit_new_name(client,
     cib = accounts["cib"]
     canonical_id = c.counterparties.create("Talabat")
     values = {"date": "2026-09-25", "counterparty": "Talabaat",
-              "category": "Food & Groceries", "amount": "-20"}
+              "category": "Food & groceries", "amount": "-20"}
     response = client.post(f"/accounts/{cib.id}/register", data=values)
     assert response.status_code == 400 and "Review this Counterparty" in response.text
     assert "Use Talabat" in response.text and "Create “Talabaat”" in response.text
@@ -329,7 +329,7 @@ def test_category_create_requires_review_when_a_similar_l2_exists(client, c):
     personal = c.categories.get_by_code("EXP.PERSONAL")
     response = client.post(f"/categories/new?parent={personal.id}", data={"name": "Food and Groceries"})
     assert response.status_code == 400 and "Check for a similar category" in response.text
-    assert "Use Food &amp; Groceries <small>in Personal</small>" in response.text
+    assert "Use Food &amp; groceries <small>in Personal</small>" in response.text
     assert c.db.scalar("SELECT 1 FROM categories WHERE code=?", ("EXP.PERSONAL.FOOD_AND_GROCERIES",)) is None
 
 
@@ -355,7 +355,7 @@ def test_register_manual_counterparty_alias_uses_canonical_record(client, c, set
     account = accounts["cib"]
     counterparty_id = c.counterparties.create("Talabat", alias="Talabaat")
     response = client.post(f"/accounts/{account.id}/register", data={
-        "date": "2026-09-20", "counterparty": "Talabaat", "category": "Food & Groceries", "amount": "-25"
+        "date": "2026-09-20", "counterparty": "Talabaat", "category": "Food & groceries", "amount": "-25"
     })
     assert response.status_code == 200
     row = c.db.one("SELECT counterparty,counterparty_id FROM transactions WHERE counterparty_id=?", (counterparty_id,))
@@ -367,7 +367,7 @@ def test_register_near_match_requires_explicit_reuse_or_create(client, c, setup)
     account = accounts["cib"]
     c.counterparties.create("Talabat")
     values = {"date": "2026-09-20", "counterparty": "Talabaat",
-              "category": "Food & Groceries", "amount": "-25"}
+              "category": "Food & groceries", "amount": "-25"}
     response = client.post(f"/accounts/{account.id}/register", data=values)
     assert response.status_code == 400 and "Review this Counterparty" in response.text
     assert c.db.scalar("SELECT COUNT(*) FROM transactions WHERE counterparty='Talabat'") == 0
@@ -397,7 +397,7 @@ def test_register_learns_alias_and_fills_the_usual_category(client, c, setup):
     assert row["category_id"] == food
     # A different name picked instead of what was typed is not a spelling: no alias.
     client.post(f"/accounts/{account.id}/register", data={
-        "date": "2026-09-21", "counterparty": "Careem", "counterparty_typed": "Uber", "category": "Food & Groceries", "amount": "-25"})
+        "date": "2026-09-21", "counterparty": "Careem", "counterparty_typed": "Uber", "category": "Food & groceries", "amount": "-25"})
     assert c.counterparties.resolve("Uber") is None
     # The register picker offers the usual category for autofill.
     page = client.get(f"/accounts/{account.id}")
@@ -537,7 +537,7 @@ def test_saving_says_saved_and_the_budget_left_in_whole_pounds_with_undo(client,
     c.budgets.set_budget(food.id, "2026-11", "1000", schedule=c.schedules.view())
     r = client.post(f"/accounts/{accounts['cib'].id}/register", data={
         "date": "2026-11-05", "counterparty": "Spar", "counterparty_choice": "create",
-        "category": "Personal › Food & Groceries", "amount": "-1"}, follow_redirects=True)
+        "category": "Personal › Food & groceries", "amount": "-1"}, follow_redirects=True)
     flash = re.search(r'<div class="flash"[^>]*>(.*?)</div>', r.text, re.S).group(1)
     assert "Saved." in flash and "999 left this month" in flash and "OUT-" not in flash and ".00" not in flash
 

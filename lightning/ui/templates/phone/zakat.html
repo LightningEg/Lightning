@@ -42,5 +42,5 @@
     {% if a.zakat_day %}<p class="phone-note">{{ 'Your zakat day is {date}. The next is 354 days later: it follows the lunar year, so it comes about 11 days earlier each year.'|tr(locale, date=a.zakat_day) }}</p>{% endif %}
   </article>
 </section>
-<p class="phone-note">{{ 'This is an estimate by the common rule: 2.5% of your zakatable wealth when it reaches the nisab on your zakat day; a scholar answers your own case. Lightning counts cash, deposits, gam’eya, shares and funds, and gold. Other assets are not in it.'|tr(locale) }}</p>
+<p class="phone-note">{{ 'This is an estimate by the common rule: 2.5% of your zakatable wealth when it reaches the nisab on your zakat day; a scholar answers your own case. Lightning counts cash, deposits, gam\'eya, shares and funds, and gold. Other assets are not in it.'|tr(locale) }}</p>
 {% endblock %}

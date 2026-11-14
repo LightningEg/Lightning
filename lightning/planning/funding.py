@@ -17,8 +17,9 @@ WHOLE = Decimal("1")
 
 
 class CashFundingService:
-    def __init__(self, db, budgets, reporting, reserves, planning, categories, settings, schedules):
+    def __init__(self, db, budgets, reporting, reserves, planning, categories, settings, schedules, position=None):
         self.db, self.budgets, self.reporting = db, budgets, reporting
+        self.position = position  # NF-7AU: investments counted as cash join the cash this pool starts from
         self.schedules = schedules
         self.reserves, self.planning, self.categories, self.settings = reserves, planning, categories, settings
 
@@ -68,6 +69,8 @@ class CashFundingService:
         reserves = self.reserves.list_active()
         assigned_reserves = sum((r["effective_allocated"] for r in reserves), ZERO)
         own_cash = self.reporting.owned_spendable_cash(day)
+        if self.position is not None:
+            own_cash += self.position.at(day, match_payments=False).counted_as_cash
         for account in self.reporting.accounts.list():
             if account.account_type not in {AccountType.BANK, AccountType.CASH, AccountType.BROKERAGE}:
                 continue

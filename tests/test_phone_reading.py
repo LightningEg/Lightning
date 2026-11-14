@@ -58,7 +58,7 @@ def test_the_category_sheet_is_arabic(phone):
     src = re.search(r'href="(/budget/category/\d+/sheet\?month=[\d-]+)"', html).group(1)
     page, sheet, empty = _in_arabic(phone, "/budget?period=month", src, src.split("?")[0] + "?month=2020-01")
     assert _english(page) == [] and _english(sheet) == [] and _english(empty) == []
-    assert "آخر المدفوعات" in sheet or "لسه ماصرفتش" in sheet
+    assert "الشهر ده" in sheet or "لسه ماصرفتش" in sheet   # IV-11M5 (mockup v2.0): This month's payments
 
 
 def test_cash_planning_forecast_months_ahead_and_what_is_promised_are_rows_that_open_sheets(phone):
@@ -88,11 +88,11 @@ def test_reserves_names_financial_health_in_the_app_bar(phone):
 def test_investments_draws_no_chart_card_until_it_has_two_months(phone, monkeypatch):
     """3AN9: a card that only says "Not enough history yet" is a wall of nothing; the holdings follow the hero."""
     from lightning.ui import charts
-    assert "phone-invest-card" in phone.get("/investments").text  # two months or more: the chart, then the holdings
+    assert "phone-six" in phone.get("/investments").text  # two months or more: the chart (IV-11M8, mockup v2.0: Six months), then the holdings
     real = charts.trend
     monkeypatch.setattr(charts, "trend", lambda *a, **k: {**real(*a, **k), "too_short": True})
     html = phone.get("/investments").text
-    assert "phone-invest-card" not in html and "phone-invest-seg" not in html
+    assert "phone-six" not in html and "phone-invest-seg" not in html
     assert html.index('id="holdings-heading"') < html.index('id="alloc-heading"')  # the owner's order after the hero
 
 

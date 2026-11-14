@@ -23,7 +23,7 @@ def paid_bill(c, setup, monkeypatch):
 
 
 def _edit(c, client, bank, txn, **changes):
-    row = dict(date="2026-02-05", amount="-500", category="Food & Groceries", counterparty="", notes="",
+    row = dict(date="2026-02-05", amount="-500", category="Food & groceries", counterparty="", notes="",
                revision=c.transactions.revision(txn)) | changes
     row["early_checked"] = row["date"]  # the test account opened later than these dates: the 2E ask is answered
     reply = client.post(f"/accounts/{bank.id}/register/{txn}", data=row, follow_redirects=False)
