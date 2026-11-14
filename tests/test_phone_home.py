@@ -90,7 +90,7 @@ def test_the_page_shows_accounts_safe_to_spend_quick_actions_to_do_and_latest_in
     html = _page(sample).text
     assert (html.index('id="home-hero"') < html.index('id="home-safe"') < html.index('class="phone-quick"')
             < html.index('id="todo-heading"') < html.index('id="latest-heading"'))
-    assert "Left in budget" in html and "Bills before payday" in html and 'id="month-heading"' not in html
+    assert "Bills before payday" in html and 'id="month-heading"' not in html
     for kind in ("out", "in", "transfer"):
         assert f"/accounts/add-transaction?kind={kind}" in html
     assert html.count('class="phone-row') >= 4

@@ -62,7 +62,7 @@
   <p class="phone-hero-line"><b class="{{ vclass }}">{{ verdict|tr(locale) }}</b> {{ line|keep_dates }}</p></div>{% endset %}
 <div class="phone-safe-card">
 {% call sheet(fig.safe_to_spend.label, lead, 'phone-home-hero') %}{{ working_rows(s.working) }}{% endcall %}
-<div class="phone-wells">{% if s.everyday_left is not none %}<a class="phone-well" href="/budget/flexible"><span>{{ 'Left in budget'|tr(locale) }}</span><b class="fig">{{ s.everyday_left|money }}</b></a>{% endif %}
+<div class="phone-wells">{% if s.everyday_left is not none %}<a class="phone-well" href="/budget/flexible"><span>{{ fig.everyday_left.label }}</span><b class="fig">{{ s.everyday_left|money }}</b></a>{% endif %}
   <a class="phone-well" href="/plan"><span>{{ 'Bills before payday'|tr(locale) }}</span><b class="fig">{{ s.bills_before_payday|money }}</b></a></div>
 </div>
 {# Four quick actions, by meaning (IV-11M3). #}

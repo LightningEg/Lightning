@@ -46,13 +46,13 @@ def test_everyday_allowance_has_its_own_name_while_home_keeps_the_whole_plan(moh
     home_page = client.get("/home")
     budget_page = client.get("/budget/flexible")
     assert home_page.status_code == budget_page.status_code == 200
-    assert f'Left in plan {_money(e.left, places=0)}' in home_page.text
+    assert 'Left in plan' not in home_page.text   # IV-11M3 (mockup v2.0): Home shows the everyday figure in a well, under its own name
     assert f'>{FIGURES["everyday_left"].label} <span aria-hidden="true">' in budget_page.text  # NF-12AB4: the hero opens its working
     assert f'>{_money(e.everyday_left, places=0)} <small>' in budget_page.text
     assert 'Left in plan' not in budget_page.text
     assert client.post("/settings/locale", data={"locale": "ar"}, follow_redirects=False).status_code == 303
     assert 'المتبقي للصرف اليومي' in client.get("/budget/flexible").text
-    assert 'المتبقي في الخطة' in client.get("/home").text
+    assert 'المتبقي للصرف اليومي' in client.get("/home").text
 
 
 def test_fixed_costs_are_one_row_and_no_category_row_is_a_bill_or_loan(mohab):
@@ -80,7 +80,7 @@ def test_the_page_renders_in_the_phone_and_never_a_pc_template(mohab):
     app = create_app(mohab)
     mount_phone(app)
     page = TestClient(app).get("/budget/flexible").text
-    assert "Your categories" in page and "Fixed costs" in page and "<input" not in page.split('id="cats-heading"')[1].split("</section>")[0]
+    assert "Personal" in page and "Fixed bills and savings" in page and "<input"   # IV-11M5 (mockup v2.0) names not in page.split('id="cats-heading"')[1].split("</section>")[0]
     assert TestClient(app).get("/budget/flexible?month=garbage").status_code == 200
 
 

@@ -28,6 +28,7 @@ from test_mohab_year import Answer, Mohab, _live_the_year
 DETOURS = {
     "Add account": ("Money", "accounts", "Add account"),           # the PC's sidebar +; the phone's Accounts ⋯
     "Held for others": ("Money", "accounts", "Held for others"),   # an Accounts tab; Transactions opens on this month
+    "Change the plan": ("Edit plan",),                             # Budget's track: Categories, Spending, Edit plan (IV-11M5)
     "Accounts": ("Money", "accounts"),                             # Money's Accounts card: All n accounts (IV-11H, IV-11M7)
     "Cash planning": ("Money", "Reports and reviews", "Cash planning"),  # the analysis is one row on Money (IV-11H)
     "Investments": ("Money", "Investments"),
