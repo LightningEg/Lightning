@@ -308,6 +308,16 @@ class AssetService:
             self.repo.update_asset(updated)
         return self.get_asset(asset_id)
 
+    def set_counts_as_cash(self, asset_id: int, counts: bool) -> FinancialAsset:
+        """NF-7AU: count this investment's owned value with Free cash, or not. The ledger never changes."""
+        asset = self.get_asset(asset_id)
+        if asset.is_cash:
+            raise ValidationError("Currencies cannot be edited here.")
+        if asset.counts_as_cash != bool(counts):
+            with self.db.transaction():
+                self.repo.set_counts_as_cash(asset_id, bool(counts))
+        return self.get_asset(asset_id)
+
     def link_market(self, asset_id: int, key: str | None) -> None:
         """Remember which market-file instrument an asset is (EG:COMI, EG:FUND:4104)."""
         asset = self.get_asset(asset_id)

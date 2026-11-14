@@ -62,7 +62,7 @@ def test_upgrade_renames_only_exact_defaults(monkeypatch, tmp_path, encrypted):
         before = {r["id"]: dict(r) for r in db.all("SELECT * FROM categories")}
         monkeypatch.setattr(migrator, "MIGRATIONS_DIR", bundled)
 
-        assert migrator.migrate(db) == ["0083_category_sentence_case (APPLIED)"]
+        assert migrator.migrate(db) == ["0083_category_sentence_case (APPLIED)", "0084_investment_counts_as_cash (APPLIED)"]
         seed(db)
         after = {r["id"]: dict(r) for r in db.all("SELECT * FROM categories")}
         expected = {key: dict(row) for key, row in before.items()}

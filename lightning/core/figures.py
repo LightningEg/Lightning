@@ -99,12 +99,15 @@ _TABLE = [
      "(Bills and subscriptions a month + Loan payments a month) ÷ Average monthly income"),
     ("kept_apart", "Kept apart", "Cash you own that is not ready to spend: cash in a brokerage, cash in another "
      "currency, or an account you set apart. It stays in what you own and in If you sold today."),
+    ("counted_as_cash", "Counted as cash", "Investments you marked to count with cash (Count in free cash on the "
+     "investment), such as a fund you can sell in days at no loss. Their value joins Free cash; they stay in "
+     "Holdings and Net worth, and If you sold today counts them once. A certificate in its lock-up never counts."),
     ("bill_reserve_coverage", "Bill cash already set aside",
      "Saved cash in a reserve explicitly linked to a bill, covering its earliest unpaid payments once. "
      "Added back when those payments are deducted, because Reserves already holds the same cash."),
     ("free_cash", "Free cash", "Cash you can spend without touching reserves or leaving a bill unpaid. Cash kept "
      "apart (brokerage, other currencies) is left out.",
-     "Cash you own − Kept apart − Reserves − Bills due + Bill cash already set aside"),
+     "Cash you own − Kept apart + Counted as cash − Reserves − Bills due + Bill cash already set aside"),
     ("portfolio_value", "Portfolio value", "Holdings value under the name the Investments tab uses: everything "
      "you own that is not cash. Cash waiting in a brokerage account counts in Cash you own (owner decisions "
      "2026-10-04).", "Holdings value"),
@@ -297,6 +300,7 @@ _SOURCES = {
     "loan_payments_to_income": (BOTH, "lightning.planning.health.Ratio.percent"),
     "fixed_costs_to_income": (BOTH, "lightning.planning.health.Ratio.percent"),
     "kept_apart": (LEDGER, "lightning.reporting.service.ReportingService.owned_cash_kept_apart"),
+    "counted_as_cash": (LEDGER, f"{P}.counted_as_cash"),
     "bill_reserve_coverage": (PLAN, "lightning.planning.service.PlanningService.bill_reserve_coverage"),
     "free_cash": (BOTH, f"{P}.free_cash"),
     "portfolio_value": (LEDGER, f"{P}.portfolio_value"),

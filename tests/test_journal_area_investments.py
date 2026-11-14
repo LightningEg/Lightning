@@ -429,3 +429,16 @@ def test_bonus_or_split_travels_and_changes_the_units_on_both_devices(devices):
                               units_after="125", notes="", owner_id=None))
     quantity = lambda d: next(p.quantity for p in d.c.investments.portfolio("2026-09-30").positions)
     assert quantity(hd) == quantity(pc) == Decimal("125")
+
+
+def test_count_as_cash_switch_replays_on_both_devices(devices):
+    hd, pc = devices
+    _, stock = setup(hd, pc)
+    changed = pc.command("assets.set_counts_as_cash", asset_id=stock, counts=True)
+    settle(hd, pc, changed)
+    assert hd.c.assets.get_asset_by_code("STK:ALPH").counts_as_cash
+    assert pc.c.assets.get_asset_by_code("STK:ALPH").counts_as_cash
+    reset = pc.command("assets.set_counts_as_cash", asset_id=stock, counts=False)
+    settle(hd, pc, reset)
+    assert not hd.c.assets.get_asset_by_code("STK:ALPH").counts_as_cash
+    assert not pc.c.assets.get_asset_by_code("STK:ALPH").counts_as_cash

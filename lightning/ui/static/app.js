@@ -75,9 +75,33 @@ window.lightningNumber = (value, {min = 0, max = 2, signed = false} = {}) => {
 };
 
 // Give every server-rendered or dynamically-inserted message the same
-// accessible behavior. Success/status messages are transient; errors stay
-// visible so users can correct the cause or dismiss them through the flow.
+// accessible behavior. Success/status messages leave after 5 seconds, Undo
+// ones too (owner, 2026-11-14), paused while pointed at or focused so Undo
+// can still be pressed; errors stay. Every message has an X to close it now.
 const flashTimers = new WeakMap();
+const FLASH_SECONDS = 5000;
+const dismissFlash = (flash) => {
+  const prior = flashTimers.get(flash);
+  if (prior) clearTimeout(prior);
+  flashTimers.delete(flash);
+  // The phone's message box is reused for the next save; hide it rather than remove it.
+  if (flash.matches(".phone-flash")) flash.hidden = true;
+  else if (flash.isConnected) flash.remove();
+};
+const startFlashTimer = (flash) => {
+  const prior = flashTimers.get(flash);
+  if (prior) clearTimeout(prior);
+  flashTimers.set(flash, setTimeout(() => dismissFlash(flash), FLASH_SECONDS));
+};
+const addFlashClose = (flash) => {
+  if (flash.querySelector(":scope > .flash-close")) return;
+  const close = document.createElement("button");
+  close.type = "button"; close.className = "flash-close";
+  close.setAttribute("aria-label", t("Close"));
+  close.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+  close.addEventListener("click", () => dismissFlash(flash));
+  flash.append(close);
+};
 const initFlashMessages = (root = document, refresh = false) => {
   const flashes = [
     ...(root.matches?.(".flash") ? [root] : []),
@@ -88,17 +112,24 @@ const initFlashMessages = (root = document, refresh = false) => {
     flash.setAttribute("role", isError ? "alert" : "status");
     flash.setAttribute("aria-live", isError ? "assertive" : "polite");
     flash.setAttribute("aria-atomic", "true");
+    if (flash.classList.contains("device-line")) return;
+    addFlashClose(flash);
     const prior = flashTimers.get(flash);
     if (prior) clearTimeout(prior);
     flashTimers.delete(flash);
-    if (isError || !flash.textContent.trim() || flash.classList.contains("device-line") || flash.querySelector(".history-form")) return;
+    if (isError || !flash.textContent.trim()) return;
     // Only newly inserted or explicitly refreshed messages get a fresh timer.
     if (!refresh && flash.dataset.flashReady) return;
+    if (!flash.dataset.flashReady) {
+      const pause = () => { const timer = flashTimers.get(flash); if (timer) clearTimeout(timer); flashTimers.delete(flash); };
+      const resume = () => { if (!flash.hidden && flash.isConnected && !flash.matches(":hover, :focus-within")) startFlashTimer(flash); };
+      flash.addEventListener("pointerenter", pause);
+      flash.addEventListener("focusin", pause);
+      flash.addEventListener("pointerleave", resume);
+      flash.addEventListener("focusout", () => setTimeout(resume, 0));
+    }
     flash.dataset.flashReady = "1";
-    flashTimers.set(flash, setTimeout(() => {
-      if (flash.isConnected) flash.remove();
-      flashTimers.delete(flash);
-    }, 5000));
+    startFlashTimer(flash);
   });
 };
 initFlashMessages();

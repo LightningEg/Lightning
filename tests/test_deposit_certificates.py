@@ -297,3 +297,12 @@ def test_a_matured_certificate_asks_in_needs_you_and_opens_its_prefilled_redempt
     assert reminders.get("Certificate can be withdrawn from tomorrow") == "CIB next"
     report = investment_period(c.db, c.accounts, c.assets, c.reporting, "2026-09-01", "2026-12-31")
     assert not explain_period(report, "2026-09-01", "2026-12-31")["stale"]
+
+
+def test_marked_certificate_does_not_count_as_cash_until_unlocked(c, setup):
+    accounts, _ = setup
+    _buy(c, accounts)
+    locked = c.position.at('2026-10-14').locked_holdings[0]
+    c.assets.set_counts_as_cash(locked.asset_id, True)
+    assert c.position.at('2026-10-14').counted_as_cash == 0
+    assert c.position.at('2026-11-01').counted_as_cash == Decimal('5000')

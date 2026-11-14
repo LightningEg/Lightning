@@ -49,6 +49,7 @@
       {% if not asset %}<div class="field"><label for="currency">{{ 'Trading currency'|tr(locale) }}</label><input id="currency" name="currency" value="{{ values.currency }}" maxlength="3" placeholder="{{ 'Follows the exchange'|tr(locale) }}" autocomplete="off"><p class="muted small">{{ 'Only when it trades in another currency than its exchange, e.g. a dollar fund or a USD line in London.'|tr(locale) }}</p></div>{% endif %}
       <div class="field"><label for="notes">{{ 'Notes'|tr(locale) }}</label><textarea id="notes" name="notes" rows="2">{{ values.notes }}</textarea></div>
       {% if asset %}<label class="small"><input type="checkbox" name="active" value="1" {{ 'checked' if values.active }}>{{ "Show in lists"|tr(locale) }}</label>{% endif %}
+      {% if asset %}<input type="hidden" name="cash_switch" value="1"><label class="small"><input type="checkbox" name="counts_as_cash" value="1" {{ 'checked' if values.counts_as_cash }}>{{ "Count in free cash"|tr(locale) }}</label><p class="muted small">{{ "For a fund you can sell within days at no loss: its value joins Free cash and Safe to spend, like money in the bank."|tr(locale) }}</p>{% endif %}
     </div>
   </details>
   <div class="actions" style="margin-top:12px">
