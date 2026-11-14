@@ -29,7 +29,7 @@
 
 {% if spending_ai_prompt %}<details class="ai-line ai-more"><summary>{{ "Get another analysis"|tr(locale) }}</summary><p class="muted small">{{ 'Want a second opinion on this period? This prompt gives your AI tool Lightning’s own words and your category names, which it cannot guess. Add the numbers with'|tr(locale) }} <a href="/settings/ask-ai?period={{ period }}&amp;month={{ month }}&amp;date_from={{ custom_from }}&amp;date_to={{ custom_to }}">{{ 'Ask an AI'|tr(locale) }}</a>.</p>
 {% set ai_text = spending_ai_prompt %}<div class="actions">{% include "partials/ai_prompt.html" %}</div></details>{% endif %}
-<details class="flow-disclosure spend-more" id="spend-usual" data-remember-open><summary class="overview-section-head inv-head"><h2 id="usual-heading">{{ 'Is this period unusual?'|tr(locale) }}</h2><span>{{ ('This month' if a.months_in == 1 else 'A month in this period')|tr(locale) }} {{ ('against the 1 month before it'|tr(locale)) if a.history_months == 1 else ('against the {n} months before it'|tr(locale, n=a.history_months)) }}</span></summary>
+<section class="flow-section spend-more" id="spend-usual"><header class="overview-section-head inv-head"><h2 id="usual-heading">{{ 'Is this period unusual?'|tr(locale) }}</h2><span>{{ ('This month' if a.months_in == 1 else 'A month in this period')|tr(locale) }} {{ ('against the 1 month before it'|tr(locale)) if a.history_months == 1 else ('against the {n} months before it'|tr(locale, n=a.history_months)) }}</span></header>
 {% if a.has_history %}
 <section class="card wide-card"><div class="overview-split{{ ' is-single' if a.rows|length <= 1 }}">
   <section><div class="overview-block-head"><div><h3>{{ 'Now against your usual month'|tr(locale) }}</h3><p>{% set um = a.usual_months or 6 %}{{ (('Usual: the same days last month' if a.partial else 'Usual: last month') if um == 1 else ('Usual: the same days in the last {n} months' if a.partial else 'Usual: the average of the last {n} months'))|tr(locale, n=um) }} · {{ ('now' if a.months_in == 1 else 'now is the period’s monthly average')|tr(locale) }}</p></div><span class="bullet-key"><span><i class="k usual"></i>{{ 'Usual'|tr(locale) }}</span><span><i class="k now"></i>{{ 'Now'|tr(locale) }}</span></span></div>
@@ -43,8 +43,8 @@
     <div class="ranges">{% for r in a.rows if a.has_range %}{% if r.range %}<a class="range-row{{ ' is-above' if r.above and not a.partial }}{{ ' is-below' if r.below and not a.partial }}" href="{{ r.href }}" title="Lowest {{ r.low|money }} · middle {{ r.median|money }} · highest {{ r.high|money }} · now {{ r.per_month|money }}"><span class="range-name">{{ r.name }}</span><span class="range-low">{{ r.low|compact }}</span><span class="range-track"><i class="range-pill" style="left:{{ '%.2f'|format(r.range.low) }}%;width:{{ '%.2f'|format([r.range.high - r.range.low, 2]|max) }}%"></i><i class="range-mid" style="left:{{ '%.2f'|format(r.range.median) }}%"></i><i class="range-now" style="left:{{ '%.2f'|format(r.range.now) }}%"></i></span><span class="range-high">{{ r.high|compact }}</span><span class="range-note">{% if r.above %}<em class="{{ 'over' if not a.partial }}">{{ 'Above its range'|tr(locale) }}</em>{% elif r.below %}<em class="{{ 'under' if not a.partial }}">{{ 'Below its range'|tr(locale) }}</em>{% else %}<em>{{ 'Within range'|tr(locale) }}</em>{% endif %}<small>now {{ r.per_month|compact }}</small></span></a>{% endif %}{% endfor %}</div></section>
 </div></section>
 
-{% else %}<section class="card"><p class="chart-empty">{{ 'Comparisons start once there is a whole month before this period.'|tr(locale) }}</p></section>{% endif %}</details>
-<details class="flow-disclosure spend-more" id="spend-days" data-remember-open><summary class="overview-section-head inv-head"><h2>{{ 'Month by month' if calendar.long_period else 'Day by day' }}</h2><span>{{ date_from }} to {{ date_to }}</span></summary>
+{% else %}<section class="card"><p class="chart-empty">{{ 'Comparisons start once there is a whole month before this period.'|tr(locale) }}</p></section>{% endif %}</section>
+<section class="flow-section spend-more" id="spend-days"><header class="overview-section-head inv-head"><h2>{{ 'Month by month' if calendar.long_period else 'Day by day' }}</h2><span>{{ date_from }} to {{ date_to }}</span></header>
 {% from 'partials/charts.html' import day_calendar %}
 {# Feedback ticket 85: Net cash flow left Spending (a day's net says little); the Overview shows it by month. #}
 <section class="card wide-card spending-calendar">
@@ -53,14 +53,14 @@
     {% else %}
     {{ day_calendar(calendar, 'spend') }}
     <p class="heat-key" role="img" aria-label="{{ 'less to more spent'|tr(locale) }}"><span class="heat-1"></span><span class="heat-2"></span><span class="heat-3"></span><span class="heat-4"></span></p>{% endif %}
-</section></details>
+</section></section>
 
 {% endif %}
 {% if not category_filter %}{# all money in and out: a category filter does not narrow it #}
 {% from "partials/charts.html" import sankey %}
 <div class="overview-stack spending-flows">
-  <details class="flow-disclosure overview-section spend-more" id="spend-flow" data-remember-open aria-labelledby="cashflow-analysis-heading">
-    <summary class="overview-section-head"><h2 id="cashflow-analysis-heading">{{ 'Cash flow'|tr(locale) }}</h2><span>{{ date_from }} to {{ date_to }}</span></summary>
+  <section class="flow-section overview-section spend-more" id="spend-flow" aria-labelledby="cashflow-analysis-heading">
+    <header class="overview-section-head"><h2 id="cashflow-analysis-heading">{{ 'Cash flow'|tr(locale) }}</h2><span>{{ date_from }} to {{ date_to }}</span></header>
     {% if money_sankey_six %}<article class="overview-block wide-card overview-sankey-card is-pair" aria-label="{{ 'Where money in went'|tr(locale) }}"><div class="overview-split">
       <section aria-labelledby="sankey-heading"><div class="overview-block-head"><div><h3 id="sankey-heading">{{ "Where money in went"|tr(locale) }}</h3><p>{{ date_from[:7] }}</p></div></div>
         {{ sankey(money_sankey, 'Where money in went', base) }}</section>
@@ -71,18 +71,18 @@
       <div class="overview-block-head"><div><h3 id="sankey-heading">{{ "Where money in went"|tr(locale) }}</h3></div></div>
       {{ sankey(money_sankey, 'Where money in went', base) }}
     </article>{% endif %}
-  </details>
+  </section>
 
   {# Feedback tickets 79 and 86: the Overview keeps net cash flow by month, drawn as a calendar; the daily
      expenses calendar lives on Spending. #}
-  {% from "partials/charts.html" import sankey, month_calendar as month_cal %}{% set mc = month_calendar %}{% if mc.years %}<details class="flow-disclosure overview-section spend-more" id="spend-months" data-remember-open aria-labelledby="months-heading">
-    <summary class="overview-section-head"><h2 id="months-heading">{{ 'Month by month'|tr(locale) }}</h2><span>{{ mc.from }} to today</span></summary>
+  {% from "partials/charts.html" import sankey, month_calendar as month_cal %}{% set mc = month_calendar %}{% if mc.years %}<section class="flow-section overview-section spend-more" id="spend-months" aria-labelledby="months-heading">
+    <header class="overview-section-head"><h2 id="months-heading">{{ 'Month by month'|tr(locale) }}</h2><span>{{ mc.from }} to today</span></header>
     <article class="overview-block wide-card overview-months-card">
       <div class="overview-block-head"><div><h3>{{ "Net cash flow"|tr(locale) }}</h3><p>{{ mc.kept }} of {{ mc.count }} month{{ '' if mc.count == 1 else 's' }} kept money{% if mc.best and mc.best.net > 0 %} · best {{ mc.best.key }} · {{ mc.best.net|money(True) }}{% endif %}</p></div></div>
       {{ month_cal(mc, 'net') }}
       <p class="muted small heat-key"><span class="flow-in-2"></span><span class="flow-in-4"></span>{{ "kept"|tr(locale) }}<span class="flow-out-2"></span><span class="flow-out-4"></span>{{ "short · darker is more"|tr(locale) }}</p>
     </article>
-  </details>{% endif %}
+  </section>{% endif %}
 </div>
 {% endif %}
 {% endblock %}

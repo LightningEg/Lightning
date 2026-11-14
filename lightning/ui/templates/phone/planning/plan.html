@@ -122,7 +122,7 @@
     {% call sheet(fig.what_you_owe.label, row) %}
     {% if has_accounts or owe.total or gameya_owed %}<div class="phone-lead">{{ (owe.total + gameya_owed)|money }} <small>{{ base }}</small></div>{% endif %}
     <div class="phone-rows">
-      {% if owe.other_bills_due > 0 %}<div class="phone-row"><span>{{ "Bills due, loans apart"|tr(locale) }}</span><b>{{ owe.other_bills_due|money }}</b></div>{% endif %}
+      {% if owe.other_bills_due > 0 %}<div class="phone-row"><span>{{ "Bills due now"|tr(locale) }}</span><b>{{ owe.other_bills_due|money }}</b></div>{% endif %}
       <a class="phone-row" href="/plan/loans"><span>{{ fig.loans_still_to_pay.label }}</span><b>{{ owe.loans_still_to_pay|money }}</b></a>
       {% if gameya_owed %}<div class="phone-row"><span>{{ fig.gameya_still_to_pay.label }}</span><b>{{ gameya_owed|money }}</b></div>{% endif %}
     </div>

@@ -177,7 +177,7 @@ GOOD_LOCKED = frozenset({"emergency_fund"})  # its Good boundary is the six-mont
 
 def _gap(flow) -> str:
     """The Overview's words for a month whose money out is more than twice its money in."""
-    return f"{fmt(-flow.net, 0)} more went out than the {fmt(flow.inflows, 0)} that came in"
+    return flow.gap_sentence
 
 
 def compare_to_limit(value: Decimal | None, limit: Decimal | None, direction: str) -> str | None:

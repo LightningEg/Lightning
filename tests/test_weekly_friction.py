@@ -57,8 +57,7 @@ def test_a_small_overspend_is_a_rose_bar_not_a_needs_you_row(c, setup):
 def test_the_gameya_is_in_the_next_30_days(c, setup):
     circle = _circle(c, setup, first_date=fmt_date(today()), my_turn=10)
     page = TestClient(create_app(c)).get("/plan").text
-    text = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", page))
-    assert f'/gameya/{circle.id}"' in page and "Gam&#39;eya · 1 instalment due" in text  # due today: first, as late
+    assert f'/gameya/{circle.id}"' in page  # due today: the calendar opens on its day
 
 
 def test_register_has_month_lines_with_the_closing_balance(c, setup):
@@ -102,4 +101,4 @@ def test_one_bill_sheet_opens_from_recurring_and_the_next_30_days(c, setup):
     assert "bill-sheet" in sheet and "Internet" in sheet and "650" in sheet
     assert f"/plan/items/{bill_id}/pay?due={fmt_date(today())}" in sheet  # due today: Mark paid on its row
     assert f"/plan/items/{bill_id}/sheet" in client.get("/plan/recurring").text
-    assert f"/plan/items/{bill_id}/sheet" in client.get("/plan").text
+    assert f"/plan/items/{bill_id}/pay?due={fmt_date(today())}" in client.get("/plan").text  # NF-7AR: the calendar's day list

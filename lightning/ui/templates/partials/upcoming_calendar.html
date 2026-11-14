@@ -1,0 +1,52 @@
+{# NF-7AR: the month calendar and the chosen day; Upcoming's page and Plan's page both include it. cal_path is the page it links back to. #}
+{% from "partials/charts.html" import lead_card %}
+{% set keep = '&show=' ~ show if show != 'all' else '' %}
+{% if lead and show_lead %}{% call lead_card(lead, base) %}<div class="compact-list">
+  {% for p in cal.paydays %}<a class="compact-row" href="{{ cal_path }}?month={{ month }}&amp;day={{ p }}{{ keep }}"><span>{{ 'Payday'|tr(locale) }}</span><b>{{ p|day }}</b></a>{% endfor %}
+  {% if cal.short_on %}<a class="compact-row is-short" href="/plan"><span>{{ 'Cash runs short'|tr(locale) }}<small>{{ 'short by {amt}'|tr(locale, amt=cal.short_by|money(False, 0)) }}</small></span><b>{{ cal.short_on|day }}</b></a>{% endif %}
+  {% if cal.money_in %}<div class="compact-row"><span>{{ 'Coming in'|tr(locale) }}</span><b>{{ cal.money_in|money(False, 0) }}</b></div>{% endif %}
+</div>{% endcall %}{% endif %}
+
+<div class="upcoming-split">
+<section class="card upcoming-calendar" aria-labelledby="upcoming-month">
+  <header class="upcoming-head">
+    <nav class="month-stepper upcoming-stepper" aria-label="{{ 'Month'|tr(locale) }}">
+      <a class="period-step" href="{{ cal_path }}?month={{ previous_month }}{{ keep }}" aria-label="{{ 'Previous month'|tr(locale) }}" title="{{ 'Previous month'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>
+      <h2 id="upcoming-month">{{ month|month }}</h2>
+      <a class="period-step" href="{{ cal_path }}?month={{ next_month }}{{ keep }}" aria-label="{{ 'Next month'|tr(locale) }}" title="{{ 'Next month'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a>
+      {% if month != this_month %}<a class="btn small" href="{{ cal_path }}{{ '?show=' ~ show if show != 'all' else '' }}">{{ 'This month'|tr(locale) }}</a>{% endif %}
+    </nav>
+    {% if cal.groups|length > 1 %}<div class="chips upcoming-chips" role="group" aria-label="{{ 'Show'|tr(locale) }}">
+      <a class="chip{{ ' selected' if show == 'all' }}" href="{{ cal_path }}?month={{ month }}&amp;day={{ chosen }}"{% if show == 'all' %} aria-current="true"{% endif %}>{{ 'All'|tr(locale) }}</a>
+      {% for g in cal.groups %}<a class="chip{{ ' selected' if show == g }}" href="{{ cal_path }}?month={{ month }}&amp;day={{ chosen }}&amp;show={{ g }}"{% if show == g %} aria-current="true"{% endif %}>{{ groups[g]|tr(locale) }}</a>{% endfor %}
+    </div>{% endif %}
+  </header>
+  {% if cal.entries %}
+  <div class="pay-cal" role="grid" aria-label="{{ month|month }}">
+    {% for w in weekdays %}<span class="pay-cal-wd" role="columnheader">{{ w|tr(locale) }}</span>{% endfor %}
+    {% for week in weeks %}{% for d in week %}{% if d is none %}<span class="pay-cal-day is-pad" aria-hidden="true"></span>{% else %}
+    <a class="pay-cal-day{{ ' is-today' if d.today }}{{ ' is-chosen' if d.chosen }}{{ ' is-payday' if d.payday }}{{ ' is-short' if d.short }}{{ ' is-late' if d.late }}" role="gridcell" href="{{ cal_path }}?month={{ month }}&amp;day={{ d.date }}{{ keep }}"{% if d.chosen %} aria-current="date"{% endif %} title="{{ d.date|day }}{% for e in d.entries %} · {{ e.name }}{% endfor %}">
+      <i>{{ d.day }}</i>
+      {% if d.entries %}<span class="pay-cal-marks">{% for e in d.entries %}<b class="pay-mark is-{{ e.state }}{{ ' is-in' if e.incoming }}" aria-hidden="true">{{ e.name[:1] }}</b>{% endfor %}{% if d.more %}<small>+{{ d.more }}</small>{% endif %}</span>{% endif %}
+      {% if d.payday %}<em class="pay-cal-flag is-in">{{ 'Payday'|tr(locale) }}</em>{% elif d.short %}<em class="pay-cal-flag is-short">{{ 'Short'|tr(locale) }}</em>{% endif %}
+    </a>{% endif %}{% endfor %}{% endfor %}
+  </div>
+  <p class="pay-cal-key muted small"><span><b class="pay-mark is-upcoming" aria-hidden="true"></b> {{ 'To pay'|tr(locale) }}</span><span><b class="pay-mark is-late" aria-hidden="true"></b> {{ 'Late'|tr(locale) }}</span><span><b class="pay-mark is-paid" aria-hidden="true"></b> {{ 'Paid'|tr(locale) }}</span><span><b class="pay-mark is-in" aria-hidden="true"></b> {{ 'Coming in'|tr(locale) }}</span></p>
+  {% else %}
+  <p class="muted">{{ 'Nothing is planned for this month. Add your rent, bills, subscriptions or a loan, and each one appears on the day it is due.'|tr(locale) }}</p>
+  {% endif %}
+</section>
+
+{% if cal.entries %}
+<section class="card upcoming-day" aria-labelledby="upcoming-day">
+  <header class="overview-section-head"><h2 id="upcoming-day">{{ chosen|day }}</h2></header>
+  {% if shown %}<div class="compact-list">{% for e in shown %}
+    {% if e.item_id %}<a class="compact-row" data-popup-open href="/plan/items/{{ e.item_id }}/pay?due={{ e.date }}&amp;back={{ day_back|urlencode }}">{% else %}<a class="compact-row" href="/gameya/{{ e.circle_id }}">{% endif %}
+      <span>{{ e.name }}<small>{{ groups[e.group]|tr(locale) }}{% if e.number %} · {{ '{n} of {m}'|tr(locale, n=e.number, m=e.of) }}{% endif %} · {{ ('Payout' if e.group == 'gameya' and e.incoming else {'paid': 'Paid', 'skipped': 'Skipped', 'late': 'Late', 'today': 'Due today', 'upcoming': ('Expected' if e.incoming else 'To pay')}[e.state])|tr(locale) }}</small></span>
+      <b class="{{ 'is-in' if e.incoming else ('is-late' if e.state == 'late' else '') }}">{{ ('+' if e.incoming else '') }}{{ e.amount|money(False, 0) }}</b>
+    </a>{% endfor %}</div>
+  {% else %}<p class="muted">{{ 'Nothing due on this day. Pick a day with a mark to see what it takes.'|tr(locale) }}</p>{% endif %}
+  <p class="small mt-card"><a href="/plan/upcoming.ics" download>{{ 'Save the next three months to your calendar'|tr(locale) }}</a></p>
+</section>
+{% endif %}
+</div>

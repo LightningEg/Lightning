@@ -73,6 +73,24 @@ async def licences_page(request: Request):
     return render(request, "settings/licences.html", licence_rows=licences())
 
 
+@router.get("/glossary")
+async def glossary_page(request: Request):
+    """The words Lightning uses, in plain language (Settings › Glossary): each term, what it means, where it is read."""
+    from lightning.ui.glossary import glossary_terms
+    from lightning.ui.i18n import translate
+    from lightning.ui.web import ui_locale
+    locale = ui_locale()
+    rows = []
+    for term in glossary_terms():
+        if locale == "ar":
+            name = translate(term.name, "ar")
+            rows.append({"id": term.key, "name": name if name != term.name else term.name_ar,
+                         "meaning": term.meaning_ar, "where": term.where_ar})
+        else:
+            rows.append({"id": term.key, "name": term.name, "meaning": term.meaning, "where": term.where})
+    return render(request, "settings/glossary.html", terms=rows)
+
+
 @router.get("")
 async def settings_page(request: Request):
     c = container(request)

@@ -173,8 +173,16 @@ class Mohab:
         return self.b.submit({}, button="Record and mark")
 
     def receive_salary(self, employer: str) -> Screen:
-        """Cash planning › Mark received › Record and mark received."""
-        self.b.open(self._pay_link(self.b.go("Cash planning"), employer))
+        """Cash planning › its payday on the calendar › Mark received › Record and mark received."""
+        plan = self.b.go("Cash planning")
+        # NF-7AR: the next payments are the Upcoming calendar; salary sits on its payday, so open that day first.
+        days = [m for m in re.finditer(r'<a class="pay-cal-day[^"]*is-payday[^"]*"[^>]*href="([^"]+)".*?</a>', plan.html, re.S)
+                if re.search(r'pay-mark is-(upcoming|late)', m.group(0))]
+        if days:
+            plan = self.b.open(days[0].group(1).replace("&amp;", "&"))
+        else:
+            assert "pay-cal" not in plan.html, f"No payday still to receive on the calendar of {plan.path}"  # the phone lists it
+        self.b.open(self._pay_link(plan, employer))
         return self.b.submit({}, button="Record and mark received")
 
     def transaction_id(self, account: str, party: str) -> str:
@@ -1240,7 +1248,9 @@ def test_end_of_service_is_not_monthly_pay(mohab):
 
 def test_between_jobs_the_next_pay_is_the_new_employer(mohab):
     answer = mohab.answers["next_pay"]
-    assert answer.shows("Safe to spend until 2027-10-01", "Valeo 2027-10-01 · Income +55,000")
+    # NF-7AR: with no payday left in September the calendar opens on October, and its payday day lists Valeo.
+    assert answer.shows("Safe to spend until 2027-10-01", "Payday")
+    assert "Valeo" in answer.screen.text and "55,000" in answer.screen.text
 
 
 def test_looks_recurring_offers_fixed_monthly_spending_but_not_investment_income(mohab):

@@ -3296,12 +3296,38 @@ window.lightningPrivacy = (() => {
     }, 0);
   });
   window.addEventListener("pageshow", (event) => { if (event.persisted) reset(); });
+  // A screen that is working must say so, whichever way it was asked: a script that changes the address, a form sent
+  // by code, a phone page fetched in place, a pop-up still loading. Any move off this page, and any request that takes
+  // more than a moment, shows the same turning square (guideline A10.6); downloads and quiet background asks do not.
+  let downloading = 0, inflight = 0, fetchShown = false, fetchSlow = 0;
+  document.addEventListener("click", (event) => {
+    const a = event.target.closest?.("a[href]");
+    if (a && (a.hasAttribute("download") || /^\/(exports|samples)\//.test(new URL(a.href, location.href).pathname))) downloading = Date.now();
+  }, true);
+  window.addEventListener("beforeunload", () => {
+    if (Date.now() - downloading < 2000) return;
+    window.clearTimeout(slow);
+    slow = window.setTimeout(() => show("Opening…"), 300);
+    safety = window.setTimeout(reset, 20000);
+  });
+  if (toast && window.fetch) {
+    const nativeFetch = window.fetch.bind(window);
+    window.fetch = (input, init) => {
+      if (init?.headers && new Headers(init.headers).has("X-Lightning-Quiet")) return nativeFetch(input, init);
+      if (++inflight === 1) fetchSlow = window.setTimeout(() => { fetchShown = true; show("Working…"); }, 400);
+      return nativeFetch(input, init).finally(() => {
+        if (--inflight > 0) return;
+        window.clearTimeout(fetchSlow);
+        if (fetchShown) { fetchShown = false; hide(); }
+      });
+    };
+  }
   const watch = toast?.dataset.watch;
   if (watch) {
     show(toast.dataset.watchLabel || "Working…");
     const ask = async () => {
       try {
-        const state = await (await fetch(watch, { headers: { "X-Requested-With": "fetch" } })).json();
+        const state = await (await fetch(watch, { headers: { "X-Requested-With": "fetch", "X-Lightning-Quiet": "1" } })).json();
         if (state.running) { window.setTimeout(ask, 2000); return; }
         if (state.note) { show(state.note, true); fade = window.setTimeout(hide, 8000); } else hide();
       } catch (error) { hide(); }

@@ -1,31 +1,10 @@
-"""PC pass 2026-10-28: Can I afford this?, price upload from a spreadsheet, Settings as rows."""
+"""PC pass 2026-10-28: price upload from a spreadsheet, Settings as rows."""
 from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
 
 from lightning.assets.price_csv import read_prices
-from lightning.planning.afford import can_afford
-
-
-def test_fits_inside_safe_to_spend_is_yes():
-    a = can_afford(Decimal(3000), Decimal(5000), Decimal(9000), "2026-11-01")
-    assert a.verdict == "yes" and a.left == Decimal(2000)
-
-
-def test_fits_only_in_free_cash_eats_the_plan():
-    a = can_afford(Decimal(7000), Decimal(5000), Decimal(9000), None)
-    assert a.verdict == "plan" and a.left == Decimal(-2000) and a.short == 0
-
-
-def test_past_free_cash_is_no_with_the_shortfall():
-    a = can_afford(Decimal(12000), Decimal(5000), Decimal(9000), None)
-    assert a.verdict == "no" and a.short == Decimal(3000)
-
-
-def test_zero_or_negative_amount_is_refused():
-    with pytest.raises(ValueError):
-        can_afford(Decimal(0), Decimal(5000), Decimal(9000), None)
 
 
 ASSETS = [SimpleNamespace(id=1, name="Commercial International Bank", ticker="COMI", isin="EGS60121C018"),

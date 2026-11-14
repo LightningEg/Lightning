@@ -152,8 +152,8 @@ def test_neighbouring_figures_no_longer_disagree_or_read_wrong(mohab, monkeypatc
     health = _page(client, "/financial-health")                                # (d) only figures with a limit count
     judged = re.search(r"of the (\d+) figures you set a limit for", health)
     assert judged and int(judged.group(1)) <= len([i for i in c.health.overview(date(2026, 10, 19))["figures"] if i.limit is not None])
-    plan = client.get("/plan").text                                            # (e) no "Bills due, loans apart 0"
-    assert not re.search(r"Bills due, loans apart\s*</span>\s*<b>\s*0\s*<", plan)
+    plan = client.get("/plan").text                                            # (e) no "Bills due now 0"
+    assert not re.search(r"Bills due now\s*</span>\s*<b>\s*0\s*<", plan)
     accounts = _page(client, "/accounts")                                      # (f) no plus on a debt
     assert not re.search(r"Gam.eya still to pay\s*\+", accounts)  # the sample has no circle owed; the plus is gone from the template
     spending = _page(client, "/birdview/expenses?period=month&month=2026-10")  # (i) the usual month is not a repeat

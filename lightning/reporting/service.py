@@ -19,7 +19,7 @@ from lightning.categories.domain import CategoryFamily, IncomeClass, Scope
 from lightning.categories.service import CategoryService
 from lightning.core.dates import fmt_date, parse_date, parse_month, previous_day
 from lightning.core.memo import request_cached
-from lightning.core.money import ZERO, from_e6
+from lightning.core.money import ZERO, fmt, from_e6
 from lightning.money_from_others import MoneyFromOthersService
 from lightning.core.refs import DOC_LABELS, DocType
 from lightning.database.connection import Database
@@ -150,7 +150,20 @@ class CashFlow:
         """Money out more than twice money in (a rate below −100%, such as a month whose pay came early):
         screens say the gap in words instead of a rate like −1,177% (guideline A01)."""
         rate = self.savings_rate
-        return rate is not None and rate < -100
+        return rate is not None and (rate < -100 or self.refunds_beat_spending)
+
+    @property
+    def refunds_beat_spending(self) -> bool:
+        """Refunds came back larger than spending, so Money out is below zero and Net flow is more than Money in:
+        a rate above 100% would say nothing true (savings cannot exceed what came in)."""
+        return self.outflows < ZERO
+
+    @property
+    def gap_sentence(self) -> str:
+        """The words a screen shows in place of a rate that says nothing."""
+        if self.refunds_beat_spending:
+            return "Refunds were more than your spending, so there is no savings rate yet"
+        return f"{fmt(-self.net, 0)} more went out than the {fmt(self.inflows, 0)} that came in"
 
 
 @dataclass

@@ -35,6 +35,8 @@ def overview(inflows: Decimal, outflows: Decimal, net: Decimal, savings_rate: De
         if outflows > ZERO:
             return sentence("{amt} went out " + when + " and nothing came in.", amt=fmt(outflows, 0))
         return sentence("Nothing came in or went out " + when + ".")
+    if thin and outflows < ZERO:
+        return sentence("Refunds were more than your spending, so there is no savings rate yet.")
     if thin or net < ZERO:
         return sentence("{amt} more went out than came in " + when + ".", amt=fmt(-net, 0))
     return sentence("You kept {n}% of what came in " + when + ".", n=f"{savings_rate:.0f}")

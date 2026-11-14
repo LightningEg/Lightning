@@ -93,7 +93,7 @@
 </section>
 
 {# IV-12Z4: the table answers the first follow-up; income and the flows by class open on request and remember it #}
-<details class="flow-disclosure" id="inv-flows-more" data-remember-open><summary class="overview-section-head inv-head"><h2>{{ "Income collected (dividends and interest)"|tr(locale) }}</h2>{% if flows.rows %}<span>{{ "Money and value by class"|tr(locale) }}</span>{% endif %}</summary>
+<section class="flow-section" id="inv-flows-more"><header class="overview-section-head inv-head"><h2>{{ "Income collected (dividends and interest)"|tr(locale) }}</h2>{% if flows.rows %}<span>{{ "Money and value by class"|tr(locale) }}</span>{% endif %}</header>
 <section class="card wide-card inv-flows" aria-label="Dividends and flows">
   <div class="overview-split{{ ' is-single' if not flows.rows }}">
     <section><div class="overview-block-head"><div><h3>{{ "Income collected (dividends and interest)"|tr(locale) }}</h3><p>Year to date · {{ ytd_year }}-01-01 to today</p></div><a class="quiet-link" data-popup-open href="/investments/report-detail?kind=dividends&amp;from={{ ytd_year }}-01-01&amp;to={{ today }}">{{ "See them"|tr(locale) }}</a></div>
@@ -102,7 +102,7 @@
       {{ diverging(flows, 'Money in and out, and change in value by asset class') }}</section>{% endif %}
   </div>
 </section>
-</details>
+</section>
 
 {% if horizons.get('Unassigned', 0) < holdings_total %}<header class="overview-section-head inv-head"><h2>{{ 'Intended investment horizon'|tr(locale) }}</h2><span>{{ 'Today'|tr(locale) }}</span></header>
 <section class="card wide-card analysis-card"><div class="horizon-stack" role="img" aria-label="Portfolio value by intended investment horizon">{% for label in ['Short','Medium','Long','Unassigned'] %}{% set v=horizons.get(label,0) %}{% set pct=(v/holdings_total*100) if holdings_total else 0 %}<button type="button" class="horizon-segment horizon-{{ label|lower }}" style="width:{{ pct }}%" title="{{ label|tr(locale) }} {{ v|money }} · {{ pct|round(1) }}%" data-horizon-filter="{{ label|tr(locale) }}">{% if pct>8 %}{{ label|tr(locale) }} · {{ pct|round(1) }}%{% endif %}</button>{% endfor %}</div><div class="horizon-legend">{% for label in ['Short','Medium','Long','Unassigned'] %}{% set v=horizons.get(label,0) %}<button type="button" data-horizon-filter="{{ label|tr(locale) }}"><i class="dot horizon-dot-{{ label|lower }}"></i><span>{{ label|tr(locale) }}<small>{{ ((v/holdings_total*100) if holdings_total else 0)|round(1) }}% · {{ v|money }}</small></span></button>{% endfor %}</div></section>{% endif %}
