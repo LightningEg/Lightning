@@ -1,9 +1,9 @@
 -r requirements.txt
 # The encrypted extras (pyproject.toml): without them a third of the tests fail.
-sqlcipher3>=0.6.4
+sqlcipher3>=0.6.5
 cryptography>=50
 pytest>=9.2.0
 httpx>=0.27
-import-linter>=2.1
+import-linter>=2.16
 httpx2>=2.16.0
 pytest-xdist>=3.8
