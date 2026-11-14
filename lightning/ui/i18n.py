@@ -2134,7 +2134,7 @@ ARABIC_UI = {
     'Top up the emergency fund': 'زوّد صندوق الطوارئ',
     'Keep it as cash': 'سيبها كاش',
     'Refill in instalments': 'عبّي على أقساط',
-    "Instalments start on your next income and keep Safe to spend at or above zero where they can. Each figure assumes today’s cash and plan; nothing is scheduled or moved until you press Refill.": 'الأقساط تبدأ مع دخلك الجاي وتحافظ على المتاح للصرف عند صفر أو أعلى قدر الإمكان. كل رقم يفترض نقد وخطة النهارده؛ ولا يُجدول أو يُنقل شيء قبل ما تضغط تعبئة.',
+    "The first instalment falls on your next income and keeps Safe to spend at or above zero. Each later one counts the income your plan expects by then and keeps the lowest point ahead at or above zero. Nothing is scheduled or moved until you press Refill.": 'أول قسط بيكون مع دخلك الجاي ويحافظ على المتاح للصرف عند صفر أو أعلى. وكل قسط بعده بيحسب الدخل اللي خطتك مستنياه لحد وقته ويحافظ على أقل نقطة جاية عند صفر أو أعلى. ولا يُجدول أو يُنقل شيء قبل ما تضغط تعبئة.',
     'Emergency fund after': 'صندوق الطوارئ بعد',
     'Safe to spend after': 'المتاح للصرف بعد',
     'Or choose your own amount': 'أو اختر مبلغك بنفسك',

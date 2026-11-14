@@ -203,7 +203,8 @@ _TABLE = [
     ("savings_target", "Savings target", "What your Savings rate limit (Financial health) asks you to keep each "
      "month: Average monthly income times that limit."),
     ("emergency_top_up", "Emergency fund top-up", "What the emergency fund lacks to reach six months, spread over "
-     "two years (owner request 2026-10-05). Nothing once the fund is full."),
+     "two years (owner request 2026-10-05). Nothing once the fund is full. This month's is fixed on the 1st, less "
+     "what you moved in since, never below zero; money taken out shows from next month (owner, 2026-11-14)."),
     ("saving_needed", "Saving needed", "What this month's plan must leave: the Savings target, or Saving for goals plus "
      "Emergency fund top-up when they need more."),
     ("spending_room", "Most you can plan", "The largest plan that still leaves what you need to save. It replaced the "
@@ -259,10 +260,12 @@ _TABLE = [
     ("lowest_point_ahead", "Lowest point ahead", "The lowest month-end free cash in the cash forecast, everyday "
      "spending and savings included. Compare scenarios shows the same figure and moves it by what a scenario changes "
      "in scheduled cash (IV-12P)."),
-    ("saving_for_goals", "Saving for goals", "What dated reserve goals still need this month, spread over the months left."),
+    ("saving_for_goals", "Saving for goals", "What dated reserve goals still need this month, spread over the months left. "
+     "This month's is fixed on the 1st, less what you moved in since (owner, 2026-11-14)."),
     ("savings_target_rest", "Rest of savings target", "What the Savings target asks a month beyond Saving for goals and "
      "Emergency fund top-up (never below zero), so Safe to spend never counts what you mean to save (owner "
-     "decision 2026-10-05).", "Savings target − Saving for goals − Emergency fund top-up"),
+     "decision 2026-10-05). What you moved into the emergency fund and goals this month and still hold counts as "
+     "saved (owner, 2026-11-14).", "Savings target − Saving for goals − Emergency fund top-up"),
 ]
 
 P, WYO, CF, BL = ("lightning.planning.position.Position", "lightning.planning.domain.WhatYouOwe",

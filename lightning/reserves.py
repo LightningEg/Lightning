@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import calendar
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from decimal import ROUND_DOWN, Decimal
 
 from lightning.core.dates import now_iso, today
@@ -15,6 +15,8 @@ from lightning.database.connection import Database
 from lightning.database.currencies import minor_units
 from lightning.database.settings import SettingsStore
 
+
+SETUP_SECONDS = 60  # BT-7AV1: an amount given this soon after a reserve is created is its set-up amount
 
 class CashReserveService:
     def __init__(self, db: Database):
@@ -83,6 +85,38 @@ class CashReserveService:
                 rows.append({"id": reserve["id"], "name": name or "Reserve", "kind": kind,
                              "planned_item_id": row["planned_item_id"], "effective_allocated": max(from_e6(row["allocated_e6"]) - from_e6(spent), ZERO)})
         return rows
+
+    @request_cached(deep=True)
+    def month_moves(self, month_start: str) -> dict[int, dict]:
+        """BT-7AV1 (owner, 2026-11-14): each active reserve as it stood when the month began, and what was moved in
+        since. ``allocated`` and ``effective`` are its assignment (and that less its spending) on the 1st; ``added``
+        is the rise in its assignment since, never below zero, so money taken out does not count as a move; ``kept``
+        is the rise in what it still holds (moves less what was spent from it), the saving that stayed saved. A
+        reserve set up this month starts from the amount it was set up with (``allocate`` writes it into its creation
+        rows): setting it up is not a move, filling it later is. A reserve without history is left out,
+        and the month's ask falls back to today's balance."""
+        rows = {row["id"]: row for row in self.db.all(
+            "SELECT r.id,"
+            "(SELECT allocated_e6 FROM reserve_allocation_history WHERE reserve_id=r.id AND effective_date<? "
+            " ORDER BY effective_date DESC,id DESC LIMIT 1) AS before_e6,"
+            # Set up this month: it starts from the amount it was set up with.
+            "(SELECT allocated_e6 FROM reserve_allocation_history WHERE reserve_id=r.id "
+            " ORDER BY effective_date,id LIMIT 1) AS first_e6,"
+            "(SELECT COALESCE(SUM(l.amount_e6),0) FROM reserve_transaction_links l JOIN transactions t "
+            " ON t.id=l.transaction_id WHERE l.reserve_id=r.id AND t.status='POSTED' AND t.date<?) AS spent_e6 "
+            "FROM cash_reserves r WHERE r.status='ACTIVE'", (month_start, month_start))}
+        result = {}
+        for reserve in self.list_active():
+            row = rows.get(reserve["id"])
+            start_e6 = None if row is None else row["before_e6"] if row["before_e6"] is not None else row["first_e6"]
+            if start_e6 is None:
+                continue
+            allocated = from_e6(start_e6)
+            effective = max(allocated - from_e6(row["spent_e6"] or 0), ZERO)
+            result[reserve["id"]] = {"allocated": allocated, "effective": effective,
+                                     "added": max(reserve["allocated"] - allocated, ZERO),
+                                     "kept": max(reserve["effective_allocated"] - effective, ZERO)}
+        return result
 
     def _record_allocation(self, reserve_id: int):
         row = self.db.one("SELECT allocated_e6,status,created_at,planned_item_id FROM cash_reserves WHERE id=?", (reserve_id,))
@@ -283,6 +317,8 @@ class CashReserveService:
         return self.get(reserve_id)
 
     def allocate(self, reserve_id: int, amount):
+        """Set what the reserve holds. The first amount, given as the reserve is set up, is written into its creation
+        rows so it is not read as money moved in this month (BT-7AV1)."""
         reserve = self.get(reserve_id)
         if reserve["status"] != "ACTIVE":
             raise ValidationError("Reopen this reserve before changing its assigned cash.")
@@ -300,8 +336,28 @@ class CashReserveService:
             "UPDATE cash_reserves SET allocated_e6=?,updated_at=? WHERE id=? AND status='ACTIVE'",
             (to_e6(value), now_iso(), reserve_id),
         )
-        self._record_allocation(reserve_id)
+        # BT-7AV1: the amount a reserve is set up with is its starting point, not money moved in this month, so it
+        # goes into the rows written while it was set up instead of a new row. Set up means: every row is still at
+        # zero and the reserve was created within the last minute (the add form, a sample, a carried-forward goal).
+        # Both steps travel together in the journal, so a replay decides the same.
+        if self._setting_up(reserve):
+            self.db.execute("UPDATE reserve_allocation_history SET allocated_e6=? WHERE reserve_id=?", (to_e6(value), reserve_id))
+        else:
+            self._record_allocation(reserve_id)
         return next((item for item in self.list_active() if item["id"] == reserve_id), self.get(reserve_id))
+
+    def _setting_up(self, reserve) -> bool:
+        if not self.db.has_table("reserve_allocation_history") or self.db.scalar(
+                "SELECT 1 FROM reserve_allocation_history WHERE reserve_id=? AND allocated_e6<>0", (reserve["id"],)):
+            return False
+        if not self.db.scalar("SELECT 1 FROM reserve_allocation_history WHERE reserve_id=?", (reserve["id"],)):
+            return False
+        try:
+            created = datetime.fromisoformat(str(reserve["created_at"]))
+            now = datetime.fromisoformat(now_iso())
+            return abs((now - created).total_seconds()) <= SETUP_SECONDS
+        except (TypeError, ValueError):
+            return False
 
     def set_expense_link(self, reserve_id: int, transaction_id: int, amount):
         reserve_id = self._id(reserve_id, "reserve_id")

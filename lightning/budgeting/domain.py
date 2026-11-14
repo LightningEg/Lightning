@@ -212,6 +212,10 @@ class EmergencyFund:
     set_aside: Decimal | None              # None while there is no emergency fund
     basis: str                             # a key of EMERGENCY_BASES
     average: IncomeAverage | SpendingAverage
+    # BT-7AV1 (owner, 2026-11-14): the month's ask is fixed on the 1st. ``start`` is what was set aside then (None:
+    # unknown, the ask follows today's balance); ``moved`` is what went in since, which the month's ask counts.
+    start: Decimal | None = None
+    moved: Decimal = ZERO
 
     @property
     def figure(self) -> str:
@@ -240,14 +244,25 @@ class EmergencyFund:
         """Six months of the chosen average."""
         return self.monthly * 6 if self.monthly else None
 
-    @property
-    def top_up(self) -> Decimal:
-        """Emergency fund top-up: what the fund lacks to reach its target, spread over
-        EMERGENCY_TOP_UP_MONTHS (two years), so a month's plan leaves room to rebuild it."""
+    def _share(self, set_aside: Decimal | None) -> Decimal:
         if self.target is None:
             return ZERO
-        gap = self.target - (self.set_aside or ZERO)
+        gap = self.target - (set_aside or ZERO)
         return (gap / EMERGENCY_TOP_UP_MONTHS).quantize(Decimal("0.01")) if gap > 0 else ZERO
+
+    @property
+    def top_up(self) -> Decimal:
+        """Emergency fund top-up, this month's: what the fund lacked on the 1st to reach its target, spread over
+        EMERGENCY_TOP_UP_MONTHS (two years), less what was moved in since, never below zero (BT-7AV1). Doing what
+        the plan asked therefore leaves Safe to spend where it was; money taken out shows from next month."""
+        if self.start is None:
+            return self.ongoing_top_up
+        return max(self._share(self.start) - self.moved, ZERO)
+
+    @property
+    def ongoing_top_up(self) -> Decimal:
+        """The top-up a later month asks, from what is set aside today."""
+        return self._share(self.set_aside)
 
 
 @dataclass(frozen=True)

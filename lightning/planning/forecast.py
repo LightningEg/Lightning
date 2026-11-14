@@ -85,9 +85,16 @@ def _deposit_cash_events(service, as_of: date, end: date):
 
 def emergency_fund(reserves, budgets, month: str, schedule):
     """The emergency fund the plan check and the forecast share: what Reserves sets aside, in months of the
-    chosen average. Read straight from Reserves: building a whole position here doubled the budget page's queries."""
+    chosen average. Read straight from Reserves: building a whole position here doubled the budget page's queries.
+    In the current month its top-up is the month's ask, fixed on the 1st less what was moved in since (BT-7AV1)."""
     reserve = next((row for row in reserves.list_active() if row["kind"] == "EMERGENCY"), None)
-    return budgets.emergency_fund(month, reserve["effective_allocated"] if reserve else None, schedule=schedule)
+    start, moved = None, ZERO
+    if reserve and month == month_of(today()) and hasattr(reserves, "month_moves"):
+        moves = reserves.month_moves(fmt_date(parse_month(month)[0])).get(reserve["id"])
+        if moves:
+            start, moved = moves["effective"], moves["added"]
+    return budgets.emergency_fund(month, reserve["effective_allocated"] if reserve else None, schedule=schedule,
+                                  start=start, moved=moved)
 
 
 class ReceiptAdjuster(Protocol):
@@ -266,10 +273,15 @@ class CashForecaster:
         # The emergency fund's top-up, as the plan check counts it: what each month must leave for it until full.
         fund = emergency_fund(self.reserves, self.budgets, month_keys[0], self.schedules.view())
         if refill:
-            fund = self.budgets.emergency_fund(month_keys[0], (fund.set_aside or ZERO) + refill, schedule=self.schedules.view())
+            # The what-if refill is a move this month: it counts against this month's ask like a real one.
+            fund = self.budgets.emergency_fund(month_keys[0], (fund.set_aside or ZERO) + refill, schedule=self.schedules.view(),
+                                               start=fund.start, moved=fund.moved + refill)
         emergency_gap = max((fund.target or ZERO) - (fund.set_aside or ZERO), ZERO)
         # Saving needed, as the plan check counts it: the savings target, or goals and the top-up when larger.
         target = (average * (self.health.limit_values()["savings_rate"] or ZERO) / 100).quantize(Decimal("0.01")) if average else ZERO
+        # BT-7AV1: what was moved into the emergency fund and goals this month is saving done; it counts against this
+        # month's savings target, as it does against their own asks. A bill's reserve is not saving.
+        saved = refill + self._saved_this_month(month_keys[0])
         for index, key in enumerate(month_keys):
             current = index == 0
             in_month = [p for p in upcoming if p.due_date[:7] == key]
@@ -299,9 +311,10 @@ class CashForecaster:
             reserved_bills = sum((bill_coverage.get((p.item.id, p.due_date), ZERO) for p in outgoing), ZERO)
             commitments = covered_bills + other_bills
             goals = self._goal_need(key, day)
-            emergency = min(fund.top_up, emergency_gap)
+            # This month asks what is left of its ask; later months ask from today's balance (BT-7AV1).
+            emergency = min(fund.top_up if current else fund.ongoing_top_up, emergency_gap)
             emergency_gap -= emergency
-            rest = max(target - goals - emergency, ZERO)
+            rest = max(target - goals - emergency - (saved if current else ZERO), ZERO)
             deposit_cash = sum((event.amount for event in deposit_events if event.date[:7] == key), ZERO)
             circle_in = sum((e.amount for e in circle_events if e.date[:7] == key and e.amount > ZERO), ZERO)
             circle_out = -sum((e.amount for e in circle_events if e.date[:7] == key and e.amount < ZERO), ZERO)
@@ -326,6 +339,15 @@ class CashForecaster:
                             safe, parts, rows, [p for p in upcoming if p.due_date <= next_date] if next_date else upcoming[:10],
                             before, dated_cash_forecast(self.reporting, *self.scheduled_inputs(day, horizon_end), day, horizon_end),
                             before_total)
+
+    def _saved_this_month(self, month: str) -> Decimal:
+        """What went into the emergency fund and goals since the 1st and is still there, when ``month`` is this
+        month: money set aside and spent the same month (the insurance paid from its goal) was not saved."""
+        if month != month_of(today()) or not hasattr(self.reserves, "month_moves"):
+            return ZERO
+        moves = self.reserves.month_moves(fmt_date(parse_month(month)[0]))
+        return sum((moves[r["id"]]["kept"] for r in self.reserves.list_active()
+                    if r["id"] in moves and not r.get("planned_item_id")), ZERO)
 
     def refill_options(self, as_of: date | None, room: Decimal, top_up: Decimal | None = None) -> dict:
         """What moving free cash into the emergency fund does to Safe to spend, for the refill prompt (BT-2AH).
@@ -364,29 +386,43 @@ class CashForecaster:
     def refill_schedule(self, as_of: date | None, gap: Decimal, options: dict, months: int = 6) -> list[dict]:
         """NF-3AZ7: the emergency refill as instalments after the upcoming needs, when one move now would not fit.
 
-        An instalment is as large as the amount that keeps Safe to spend at or above zero today (``options["safe"]``,
-        BT-2AH), or an even share of the gap over ``months`` if that is nothing, and falls on the next income date,
-        then one month apart. Each shows the fund and Safe to spend after it, from the same forecast run with every
-        instalment up to it moved from today's cash: a what-if on today's figures, never a promise about later income.
-        Nothing is stored; the person moves each one when they choose."""
+        The first instalment falls on the next income date and is what keeps Safe to spend at or above zero today
+        (``options["safe"]``, BT-2AH); its after-state is Safe to spend. Each later one falls a month apart and counts
+        the income the plan expects by then (BT-7AV3): it is at most the lowest month-end free cash from its month on,
+        with every earlier instalment moved, so no row goes below zero. Its after-state is that lowest point. A month
+        with nothing to spare gets no instalment; the schedule stops after 24 months. Nothing is stored; the person
+        moves each one when they choose. ``months`` is kept for callers and no longer shapes the steps."""
         day = as_of or today()
         if gap <= ZERO:
             return []
-        step = options["safe"] if options["safe"] > ZERO else ZERO
-        if step < gap / Decimal(months):
-            step = max(options["safe"], (gap / Decimal(months)).quantize(Decimal("1"), ROUND_UP))
-        step = step.quantize(Decimal("1"), ROUND_DOWN) or gap
         first = parse_date(options["until"]) if options.get("until") else day
         first = max(first, day)
+        start = first.year * 12 + first.month - (day.year * 12 + day.month)   # months from now to the first one
         rows, moved = [], ZERO
         emergency = next((r for r in self.reserves.list_active() if r["kind"] == "EMERGENCY"), None)
         set_aside = emergency["effective_allocated"] if emergency else ZERO
-        while moved < gap and len(rows) < 24:
-            amount = min(step, gap - moved)
+
+        def lowest(run, index):
+            ahead = run.months[index:index + HORIZON_MONTHS]
+            return min((m.closing for m in ahead), default=ZERO)
+
+        now = None
+        for step in range(24):
+            if moved >= gap:
+                break
+            index = start + step
+            if step and (now is None or len(now.months) < index + HORIZON_MONTHS):
+                now = self.forecast(day, months=index + HORIZON_MONTHS, refill=moved)
+            room = options["safe"] if step == 0 else lowest(now, index)
+            amount = min(gap - moved, max(room, ZERO).quantize(Decimal("1"), ROUND_DOWN))
+            if amount <= ZERO:
+                continue
             moved += amount
-            after = self.forecast(day, refill=moved).safe_to_spend
-            rows.append({"date": fmt_date(_months_on(first, len(rows))), "amount": amount, "fund_after": set_aside + moved,
-                         "safe_after": after, "keeps_plan": after >= ZERO})
+            # Run far enough for the next step too, so it starts from this run.
+            now = self.forecast(day, months=index + 1 + HORIZON_MONTHS, refill=moved)
+            after = now.safe_to_spend if step == 0 else lowest(now, index)
+            rows.append({"date": fmt_date(_months_on(first, step)), "amount": amount, "fund_after": set_aside + moved,
+                         "safe_after": after, "keeps_plan": after >= ZERO, "lowest": step > 0})
         return rows
 
     def scheduled_inputs(self, day, end):

@@ -456,8 +456,9 @@ class HealthService:
         """Use the Reserves page's single target and selected income-or-spending basis."""
         # Today's fund is read the way the Reserves page reads it (the active reserve), so both pages say the same
         # months; a past date uses the position's reconstructed rows.
-        rows = (self.reserves.list_active() if day == today()
-                else self.position.at(day, match_payments=False).reserve_rows or ())
+        if day == today():
+            return emergency_fund(self.reserves, self.budgets, month_of(day), self.schedules.view())
+        rows = self.position.at(day, match_payments=False).reserve_rows or ()
         reserve = next((row for row in rows if row["kind"] == "EMERGENCY"), None)
         return self.budgets.emergency_fund(month_of(day), reserve["effective_allocated"] if reserve else None, schedule=self.schedules.view())
 

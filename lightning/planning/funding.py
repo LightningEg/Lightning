@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 from hashlib import sha256
-from decimal import ROUND_DOWN, Decimal
+from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal
 import json
 
 from lightning.accounts.domain import AccountType
@@ -102,7 +102,9 @@ class CashFundingService:
             # IV-12Q1 (owner, 2026-11-09): a reserve is topped up by what it needs this month (the emergency
             # top-up, a dated goal's monthly share), less what it was given this month, never with all free cash.
             need = monthly.get(reserve["id"], ZERO)
-            add = ZERO if reserve.get("planned_item_id") else min(gap, need, pool).quantize(WHOLE, rounding=ROUND_DOWN)
+            # BT-7AV2: the need in whole pounds as the plan shows it (5,404, not 5,403); the cash on hand still caps it.
+            add = ZERO if reserve.get("planned_item_id") else min(gap, need.quantize(WHOLE, rounding=ROUND_HALF_UP),
+                                                                  pool).quantize(WHOLE, rounding=ROUND_DOWN)
             pool -= add
             reserve_rows.append({"id": reserve["id"], "name": reserve["name"], "allocated": reserve["allocated"],
                                  "effective": reserve["effective_allocated"], "gap": gap, "monthly": need,
@@ -137,28 +139,15 @@ class CashFundingService:
                 "proposal": proposal}
 
     def _monthly_needs(self, reserves, month, day):
-        """What each reserve asks of this month, less what it was already given since the month began: the
-        Emergency fund top-up for the emergency fund, Saving for goals for a dated goal; an undated goal asks nothing."""
+        """What each reserve asks of this month: the Emergency fund top-up for the emergency fund, Saving for goals
+        for a dated goal; an undated goal asks nothing. Both are already the month's ask fixed on the 1st less what
+        was moved in since (BT-7AV1), so a confirmed assignment is not offered again."""
+        from lightning.planning.forecast import emergency_fund
         from lightning.planning.schedule_view import reserve_goal_needs
         needs = {row["id"]: row["amount"] for row in reserve_goal_needs(self.reserves, month, day)}
         emergency = next((r for r in reserves if r["kind"] == "EMERGENCY"), None)
         if emergency:
-            fund = self.budgets.emergency_fund(month, emergency["effective_allocated"], schedule=self.schedules.view())
-            needs[emergency["id"]] = fund.top_up
-        start, _ = parse_month(month)
-        for reserve in reserves:
-            if reserve["id"] not in needs:
-                continue
-            before = self.db.scalar("SELECT allocated_e6 FROM reserve_allocation_history WHERE reserve_id=? AND "
-                                    "effective_date<? ORDER BY effective_date DESC,id DESC LIMIT 1",
-                                    (reserve["id"], start.isoformat()))
-            if before is None:   # set up this month: what it started with is not a top-up
-                before = self.db.scalar(
-                    "SELECT allocated_e6 FROM reserve_allocation_history WHERE reserve_id=? AND effective_date=("
-                    "SELECT MIN(effective_date) FROM reserve_allocation_history WHERE reserve_id=?) "
-                    "ORDER BY id DESC LIMIT 1", (reserve["id"], reserve["id"]))
-            given = max(reserve["allocated"] - from_e6(before or 0), ZERO)
-            needs[reserve["id"]] = max(needs[reserve["id"]] - given, ZERO)
+            needs[emergency["id"]] = emergency_fund(self.reserves, self.budgets, month, self.schedules.view()).top_up
         return needs
 
     def apply(self, fingerprint, amounts, reserve_additions):

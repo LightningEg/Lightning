@@ -13,6 +13,7 @@ from lightning.transactions.domain import TxnFilter
 from lightning.core.refs import DocType, parse_row_id
 from lightning.categories.domain import Movement
 from lightning.planning.emergency_context import emergency_liquidity_context
+from lightning.planning.forecast import emergency_fund
 from lightning.planning.domain import PlanKind
 from lightning.reserves import EmergencyRefill, effective_after, would_exceed_cash
 
@@ -44,7 +45,7 @@ def _context(request: Request, error: str = ""):
     reserves = c.reserves.list_active()
     emergency = next((item for item in reserves if item["kind"] == "EMERGENCY"), None)
     # Months of Average monthly income or of Average monthly spending, as Settings › Budget says.
-    fund = c.budgets.emergency_fund(month_of(today()), emergency["effective_allocated"] if emergency else None, schedule=c.schedules.view())
+    fund = emergency_fund(c.reserves, c.budgets, month_of(today()), c.schedules.view())
     listed = [item for item in reserves if item["kind"] != "EMERGENCY"]
     # Saving for goals, goal by goal: the same need the budget and the cash forecast count.
     needs = {row["id"]: row["amount"] for row in c.forecaster.goal_needs(month_of(today()))}

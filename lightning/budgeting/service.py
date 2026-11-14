@@ -388,11 +388,13 @@ class BudgetService:
         from lightning.database.settings import SettingsStore
         SettingsStore(self.db).set("emergency_fund_basis", basis)
 
-    def emergency_fund(self, month: str, set_aside: Decimal | None, *, schedule: ScheduleView) -> EmergencyFund:
-        """The emergency fund in months of the chosen average, and its six-month target."""
+    def emergency_fund(self, month: str, set_aside: Decimal | None, *, schedule: ScheduleView,
+                       start: Decimal | None = None, moved: Decimal = ZERO) -> EmergencyFund:
+        """The emergency fund in months of the chosen average, and its six-month target. ``start`` and ``moved``
+        fix the month's top-up on the 1st (BT-7AV1)."""
         basis = self.emergency_basis()
         average = self.income_average(month, schedule=schedule) if basis == "income" else self.spending_average(month)
-        return EmergencyFund(set_aside, basis, average)
+        return EmergencyFund(set_aside, basis, average, start, moved)
 
     def has_plan(self, month: str, *, schedule: ScheduleView) -> bool:
         return bool(self.amounts_for(month, loans=False, schedule=schedule))

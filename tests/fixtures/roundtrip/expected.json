@@ -1,5 +1,5 @@
 {
- "fingerprint": "a8c68b27ebfca8f5",
+ "fingerprint": "f04f2d16ea8e27d3",
  "lines": [
   "schema: 83",
   "before net worth: 246031.960000",
@@ -85,7 +85,7 @@
   "rows registered_currencies: 1",
   "rows reimbursement_claims: 0",
   "rows reimbursement_receipts: 0",
-  "rows reserve_allocation_history: 2",
+  "rows reserve_allocation_history: 1",
   "rows reserve_transaction_links: 0",
   "rows rule_actions: 0",
   "rows rule_conditions: 0",
