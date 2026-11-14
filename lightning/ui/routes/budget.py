@@ -864,7 +864,7 @@ async def move_room_popup(request: Request):
     if to_plan is None or from_plan is None:
         return redirect(f"/budget?month={month}", "Both categories need a plan of their own this month.")
     reason = _move_reason(c, month, to.id)
-    next_month = month_of(parse_month(month)[1] + timedelta(days=1))
+    next_month = month_of(parse_month(month)[1] + timedelta(days=1))  # not money
     later = c.budgets.amounts_for(next_month, loans=False, schedule=c.schedules.view())
     return render(request, "budget_move.html", month=month, to=to, source=source, amount=amount,
                   to_plan=to_plan, from_plan=from_plan, reason=reason, scope=_move_scope(reason),

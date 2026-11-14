@@ -117,7 +117,7 @@ def test_the_undo_button_is_in_arabic(label):
 
 @pytest.mark.parametrize("english", [
     "Plan this transaction", "1 entry", "e.g. 100 shares, 12.5 grams", "Setting", "Where",
-    "From 2026-10 on · the total plan stays the same", "System-generated · MONTH_END",
+    "The total plan stays the same", "System-generated · MONTH_END",
     "Transaction OUT-2026-08-12-001 · 2026-08-12 · 650.00 EGP. Adding this plan does not post or edit a transaction.",
 ])
 def test_the_other_strings_the_audit_found_are_translated(english):
