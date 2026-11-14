@@ -143,7 +143,8 @@ class IntegrityService:
             ledger_cash += owned
         coverage = (sum(self.planning.bill_reserve_coverage(parse_date(day), parse_date(day)).values(), ZERO)
                     if self.planning is not None else ZERO)
-        expected = ledger_cash - reserves - shown.bills_due + coverage
+        # NF-7AU: investments the person counts as cash, valued as the holdings figures value them.
+        expected = ledger_cash + shown.counted_as_cash - reserves - shown.bills_due + coverage
         return self._check(name, shown.free_cash, expected, detail, complete)
 
     @staticmethod

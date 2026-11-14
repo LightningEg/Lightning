@@ -681,6 +681,7 @@ async def edit_asset(request: Request, asset_id: int):
         raise NotFoundError("That is a currency, not an investment.")
     values = {"name": asset.name, "class_code": c.assets.get_class(asset.asset_class_id).code, "symbol": asset.ticker,
               "isin": asset.isin or "", "mic": asset.mic or "", "notes": asset.notes, "active": "1" if asset.active else "",
+              "counts_as_cash": "1" if asset.counts_as_cash else "",
               "fund_page": (asset.market_key or "").removeprefix("EG:FUND:") if (asset.market_key or "").startswith("EG:FUND:") else ""}
     return _asset_form(request, values, asset=asset)
 
@@ -691,7 +692,7 @@ async def update_asset(request: Request, asset_id: int):
     asset = c.assets.get_asset(asset_id)
     form = await request.form()
     values = {k: str(form.get(k, "")) for k in ("name", "class_code", "symbol", "isin", "mic", "notes", "active",
-                                                "fund_page")}
+                                                "fund_page", "counts_as_cash")}
     try:
         with settled_save(request, container(request)):
             if "fund_page" in form:
@@ -699,6 +700,8 @@ async def update_asset(request: Request, asset_id: int):
             asset = c.assets.update_investment(asset_id, values["name"], values["class_code"], values["isin"],
                                                values["notes"], active=bool(values["active"]), ticker=values["symbol"],
                                                mic=values["mic"])
+            if "cash_switch" in form:  # NF-7AU: only a form that showed the switch sets it
+                asset = c.assets.set_counts_as_cash(asset_id, bool(values["counts_as_cash"]))
     except LightningError as exc:
         return _asset_form(request, values, asset=asset, error=exc, status=400)
     return redirect("/investments/assets", f"Saved {asset.name}.")
