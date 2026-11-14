@@ -41,8 +41,8 @@ def nearby(devices, wires=None, *, method=None):
     return hs, lambda: NearbyPairing(pc, search=search, client_factory=factory)
 
 
-async def started(devices, wires=None):
-    hs, make = nearby(devices, wires)
+async def started(devices, wires=None, *, method=None):
+    hs, make = nearby(devices, wires, method=method)
     ps = make()
     await ps.find()
     await ps.join(ps.screen()["nearby"][0]["id"], hs.screen()["code"])

@@ -43,9 +43,9 @@ def test_public_request_cannot_choose_number_after_the_home_challenge(devices):
     asyncio.run(run())
 
 
-def test_choices_persist_across_refresh_and_wrong_choice_cannot_be_retried(devices):
+def test_legacy_choices_persist_across_refresh_and_wrong_choice_cannot_be_retried(devices):
     async def run():
-        hs, make, ps = await started(devices)
+        hs, make, ps = await started(devices, method="number-match")
         screen = ps.screen()
         choices = screen["choices"]
         assert len(choices) == len(set(choices)) == 3
@@ -64,9 +64,10 @@ def test_choices_persist_across_refresh_and_wrong_choice_cannot_be_retried(devic
 
 def test_legacy_saved_comparison_gets_persistent_choices(devices):
     async def run():
-        _, make, ps = await started(devices)
+        _, make, ps = await started(devices, method="number-match")
         state = ps._value("pairing_client")
         del state["choices"]
+        state.pop("typed_digits", None)  # the state predates the typed-digit method
         ps._save("pairing_client",state)
         choices = make().screen()["choices"]
         assert len(choices) == 3

@@ -120,6 +120,7 @@ def test_native_discovery_two_typed_digits_and_password(native_pairing_server,wi
         digits = home.locator('input[name="digits"]').input_value()
         assert len(digits) == 2 and digits.isascii() and digits.isdecimal()
         home.screenshot(path=f'/tmp/lightning-4n-home-{locale}-{width}.png',full_page=True)
+        assert home.evaluate('document.documentElement.scrollWidth <= innerWidth')
         if locale == 'ar':
             for page in (home, joining):
                 # Device names and the English-language option retain their own spelling.
