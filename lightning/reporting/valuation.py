@@ -140,7 +140,7 @@ class Valuer:
     def _price(self, asset: FinancialAsset, day: str) -> tuple[Decimal, str, str] | None:
         """Newest price wins; on one day the order is ``SOURCE_RANK`` (a price you typed, then a buy or sell, then the
         market pack and online quotes). Holdings entered as already owned fall back to their cost until a price exists."""
-        if self.q.asset_class_code(asset.asset_class_id) == "DEPOSIT.CD":
+        if asset.asset_class_id == self.q.certificate_class_id():
             principal = self.q.certificate_principal(asset.id, day)
             if principal:
                 return Decimal(principal["amount"]) / Decimal(principal["qty"]), principal["date"], "COST"

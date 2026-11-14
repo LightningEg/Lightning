@@ -94,6 +94,31 @@ def test_actual_redemption_still_records_the_real_proceeds(c, certificate):
     assert c.reporting.account_balance(bank.id, DAY) == 5050
 
 
+def test_principal_dates_share_one_read_and_void_or_rollback_cannot_leave_stale_values(c, certificate):
+    from lightning.core.memo import request_cache
+    _, _, asset_id, _ = certificate
+    purchase_id = c.deposits.certificate_for_asset(asset_id).terms.purchase_transaction_id
+    with request_cache(c.db):
+        statements = []
+        c.db.conn.set_trace_callback(statements.append)
+        try:
+            assert c.reporting.q.certificate_principal(asset_id, '2026-08-31') is None
+            for day in ('2026-09-01', DAY, '2026-09-30', '2026-10-31'):
+                principal = c.reporting.q.certificate_principal(asset_id, day)
+                assert principal == {'amount': 1_000_000_000, 'qty': 1_000_000, 'date': '2026-09-01'}
+        finally:
+            c.db.conn.set_trace_callback(None)
+        assert sum(sql.lstrip().upper().startswith('SELECT') for sql in statements) == 1
+        with pytest.raises(RuntimeError, match='roll back'):
+            with c.db.transaction():
+                c.transactions.void(purchase_id)
+                assert c.reporting.q.certificate_principal(asset_id, DAY) is None
+                raise RuntimeError('roll back')
+        assert c.reporting.q.certificate_principal(asset_id, DAY)['amount'] == 1_000_000_000
+        c.transactions.void(purchase_id)
+        assert c.reporting.q.certificate_principal(asset_id, DAY) is None
+
+
 def test_desktop_certificate_opens_its_actual_management_workflow(c, certificate, tmp_path):
     import re
     from playwright.sync_api import sync_playwright, expect
