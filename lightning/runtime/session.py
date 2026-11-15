@@ -449,6 +449,7 @@ class ProfileSession:
         except ProfileError:
             publish_keys(paths, document)  # put back a missing or damaged key file from its copy
         from lightning.runtime.restore import EncryptedBackupRestorer
+        EncryptedBackupRestorer._clear_unpublished(paths)
         EncryptedBackupRestorer._check_restore_control(paths, key)
         self._verify(paths, key)
         probe = Database(paths.db_path, key=key, read_only=True)
@@ -654,6 +655,12 @@ class ProfileSession:
         from lightning.runtime.restore import EncryptedBackupRestorer
 
         EncryptedBackupRestorer(self).resume_interrupted_restore(selected, password)
+
+    def repair_interrupted_restore(self, selected: str, password: str) -> str:
+        """IT-2A3: undo a restore that published nothing, finish one that started; "undone" or "finished"."""
+        from lightning.runtime.restore import EncryptedBackupRestorer
+
+        return EncryptedBackupRestorer(self).repair_interrupted_restore(selected, password)
 
     @staticmethod
     def _verify(paths: ProfilePaths, key: bytes) -> None:

@@ -709,6 +709,22 @@ elif boundary == "manifest":
         if path.suffix == ".state":
             os._exit(73)
     R._write_restore_manifest = staticmethod(interrupt)
+elif boundary == "accepted":
+    from lightning.database.promotion import SqlitePromotionJournalStore as S
+    initialize = S.initialize_accepted
+    def interrupt(self, *args, **kwargs):
+        initialize(self, *args, **kwargs)
+        os._exit(73)
+    S.initialize_accepted = interrupt
+elif boundary == "P2":
+    from lightning.database.promotion import PromotionPhase, SqlitePromotionJournalStore as S
+    advance = S.advance
+    def interrupt(self, old, new):
+        result = advance(self, old, new)
+        if new.phase is PromotionPhase.PREVIOUS_PROTECTED:
+            os._exit(73)
+        return result
+    S.advance = interrupt
 else:
     raise AssertionError(boundary)
 from lightning.runtime.session import ProfileSession

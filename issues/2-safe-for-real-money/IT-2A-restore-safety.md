@@ -35,6 +35,8 @@ After an interruption, one repair path finishes or undoes the restore the same w
 - **PENDING manifest with a journal:** finished forward, as resume does now.
 - The resume screen calls this one repair and says which of the two happened. Tests kill the process at each boundary and repeat the repair to show it lands the same way.
 
+**Built (#714):** `repair_interrupted_restore` and `_clear_unpublished` in `lightning/runtime/restore.py`; tests in `tests/test_restore_repair.py`.
+
 ## 2A4 Restore screens and docs · M
 Codex owns the restore UI and the Architecture text; the reboot drill joins the owner's held checks.
 
