@@ -88,7 +88,7 @@ def test_the_page_leads_with_left_to_pay_and_a_day_opens_its_pay_sheet(c):
     text = page.text
     assert "Left to pay in November" in text and "3,150" in text
     assert "12,000 paid" in text and "of 15,150 due in November" in text
-    assert 'href="/plan/upcoming"' in text                     # its tab in Cash planning
+    assert 'href="/plan"' in text  # Upcoming now belongs to the Plan tab
     # The day list opens on the late loan, the first day that still asks for money, and links to its pay sheet.
     assert f"/plan/items/{ids['loan']}/pay?due=2026-11-05&amp;back=/plan/upcoming%3Fmonth%3D2026-11%26day%3D2026-11-05" in text
     assert text.count('role="gridcell"') == 30
