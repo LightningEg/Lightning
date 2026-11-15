@@ -661,15 +661,169 @@ def test_restore_failing_before_its_record_removes_the_orphan_source_copy(tmp_pa
     selected = session.container.backup_now()
     session.close()
 
+    original = EncryptedBackupRestorer._write_restore_manifest
+
     def fail_write(path, manifest, *, replace_existing=False):
-        raise OSError("injected failure before the restore record is written")
+        if path.suffix == ".state":
+            raise OSError("injected failure before the restore record is written")
+        return original(path, manifest, replace_existing=replace_existing)
 
     monkeypatch.setattr(EncryptedBackupRestorer, "_write_restore_manifest", staticmethod(fail_write))
     with pytest.raises(ProfileError):
         session.restore_backup(str(live), str(selected), PASSWORD)
     assert not list(paths.backups_dir.glob(".lightning-restore-source-*.db"))
+    assert not list(paths.data_dir.glob(".lightning-restore-*.intent"))
     assert selected.exists()
     session.retry_at = 0.0
     session.unlock(str(live), PASSWORD)
     assert session.container.settings.get("restore_marker") == "current"
     session.close()
+
+
+_KILL_BEFORE_MANIFEST = r'''
+import os, sys
+from pathlib import Path
+from lightning.runtime.restore import EncryptedBackupRestorer as R
+root, live, source, password, boundary = sys.argv[1:]
+write, preserve = R._write_restore_manifest, R._preserve_source_backup
+if boundary == "intent":
+    def interrupt(path, record, *, replace_existing=False):
+        write(path, record, replace_existing=replace_existing)
+        if path.suffix == ".intent":
+            os._exit(73)
+    R._write_restore_manifest = staticmethod(interrupt)
+elif boundary == "copying":
+    def interrupt(source, folder, operation_id):
+        target = folder / f".lightning-restore-source-{operation_id}.db"
+        target.write_bytes(Path(source).read_bytes()[:1000])
+        os._exit(73)
+    R._preserve_source_backup = staticmethod(interrupt)
+elif boundary == "copied":
+    def interrupt(source, folder, operation_id):
+        preserve(source, folder, operation_id)
+        os._exit(73)
+    R._preserve_source_backup = staticmethod(interrupt)
+elif boundary == "manifest":
+    def interrupt(path, record, *, replace_existing=False):
+        write(path, record, replace_existing=replace_existing)
+        if path.suffix == ".state":
+            os._exit(73)
+    R._write_restore_manifest = staticmethod(interrupt)
+else:
+    raise AssertionError(boundary)
+from lightning.runtime.session import ProfileSession
+ProfileSession(root).restore_backup(live, source, password)
+'''
+
+
+def _killed_restore(tmp_path, boundary):
+    session, _ = created(tmp_path)
+    live, paths = session.paths.db_path, session.paths
+    session.container.settings.set("restore_marker", "in the backup")
+    selected = session.container.backup_now()
+    session.container.settings.set("restore_marker", "current live")
+    session.close()
+    live_before = live.read_bytes()
+    crashed = subprocess.run(
+        [sys.executable, "-c", _KILL_BEFORE_MANIFEST, str(session.root), str(live), str(selected), PASSWORD, boundary],
+        cwd=Path(__file__).resolve().parents[1], capture_output=True, text=True, timeout=45,
+    )
+    assert crashed.returncode == 73, crashed.stderr
+    return session, live, paths, selected, live_before
+
+
+@pytest.mark.parametrize("boundary", ["intent", "copying", "copied"])
+def test_kill_before_the_restore_manifest_leaves_an_intent_and_the_profile_opens(tmp_path, boundary):
+    """IT-2A1: the intent is durable before the first side effect, so a source copy a kill
+    leaves before the manifest is explained and the untouched profile still opens."""
+    from lightning.runtime.restore import RestoreIntent
+
+    session, live, paths, selected, live_before = _killed_restore(tmp_path, boundary)
+    intents = list(paths.data_dir.glob(".lightning-restore-*.intent"))
+    assert len(intents) == 1
+    intent = RestoreIntent.from_bytes(intents[0].read_bytes())
+    assert intent.source_backup_name == selected.name and intent.live_name == live.name
+    import hashlib
+    assert intent.live_sha256 == hashlib.sha256(live_before).hexdigest()
+    assert intent.source_sha256 == hashlib.sha256(selected.read_bytes()).hexdigest()
+    copies = [path.name for path in paths.backups_dir.glob(".lightning-restore-source-*.db")]
+    assert copies == ([] if boundary == "intent" else [intent.source_copy_name])
+    assert not list(paths.data_dir.glob(".lightning-restore-*.state"))
+    assert not list(paths.data_dir.glob(".lightning-restore-*.sqlite"))
+    assert live.read_bytes() == live_before
+    fresh = ProfileSession(session.root)
+    fresh.unlock(str(live), PASSWORD)
+    assert fresh.container.settings.get("restore_marker") == "current live"
+    fresh.close()
+    # A later restore runs normally beside the leftover (clearing it is IT-2A3's repair).
+    fresh.restore_backup(str(live), str(selected), PASSWORD)
+    fresh.unlock(str(live), PASSWORD)
+    assert fresh.container.settings.get("restore_marker") == "in the backup"
+    fresh.close()
+
+
+def test_kill_after_the_manifest_keeps_the_intent_beside_it_and_go_back_moves_both(tmp_path):
+    session, live, paths, _selected, _live_before = _killed_restore(tmp_path, "manifest")
+    assert len(list(paths.data_dir.glob(".lightning-restore-*.intent"))) == 1
+    assert len(list(paths.data_dir.glob(".lightning-restore-*.state"))) == 1
+    fresh = ProfileSession(session.root)
+    with pytest.raises(ProfileError, match="needs repair"):
+        fresh.unlock(str(live), PASSWORD)
+    fresh.retry_at = 0.0
+    evidence = fresh.go_back_before_restore(str(live), PASSWORD)
+    assert {path.suffix for path in evidence.iterdir()} >= {".state", ".intent"}
+    assert not list(paths.data_dir.glob(".lightning-restore-*.intent"))
+    fresh.retry_at = 0.0
+    fresh.unlock(str(live), PASSWORD)
+    assert fresh.container.settings.get("restore_marker") == "current live"
+    fresh.close()
+
+
+def test_restore_leaves_no_intent_after_success(tmp_path):
+    session, _ = created(tmp_path)
+    live, paths = session.paths.db_path, session.paths
+    selected = session.container.backup_now()
+    session.close()
+    session.restore_backup(str(live), str(selected), PASSWORD)
+    assert not list(paths.data_dir.glob(".lightning-restore-*.intent"))
+    session.unlock(str(live), PASSWORD)
+    session.close()
+
+
+@pytest.mark.parametrize("damage", ["malformed", "other profile", "renamed", "symlink"])
+def test_an_unreadable_or_foreign_restore_intent_locks_the_profile(tmp_path, damage):
+    from lightning.runtime.restore import RestoreIntent
+
+    session, live, paths, _selected, _live_before = _killed_restore(tmp_path, "copied")
+    intent_path = next(paths.data_dir.glob(".lightning-restore-*.intent"))
+    intent = RestoreIntent.from_bytes(intent_path.read_bytes())
+    if damage == "malformed":
+        intent_path.write_bytes(b'{"schema_version": 1}')
+    elif damage == "other profile":
+        intent_path.unlink()
+        intent_path.write_bytes(RestoreIntent(**{**intent.__dict__, "profile_id": "someone-else"}).to_bytes())
+    elif damage == "renamed":
+        intent_path.rename(paths.data_dir / f".lightning-restore-{'0' * 32}.intent")
+    else:
+        target = tmp_path / "elsewhere.intent"
+        target.write_bytes(intent_path.read_bytes())
+        intent_path.unlink()
+        intent_path.symlink_to(target)
+    fresh = ProfileSession(session.root)
+    with pytest.raises(ProfileError, match="intent|source copy"):
+        fresh.unlock(str(live), PASSWORD)
+    assert fresh.container is None
+
+
+def test_restore_intent_rejects_bad_records():
+    from lightning.runtime.restore import RestoreIntent
+
+    good = dict(operation_id="a" * 32, profile_id="p", live_name="Home.db", live_sha256="b" * 64,
+                source_backup_name="x.db", source_sha256="c" * 64, source_copy_name=f".lightning-restore-source-{'a' * 32}.db")
+    assert RestoreIntent.from_bytes(RestoreIntent(**good).to_bytes()) == RestoreIntent(**good)
+    for change in ({"schema_version": 2}, {"live_sha256": "B" * 64}, {"live_name": "../Home.db"},
+                   {"source_copy_name": ".lightning-restore-source-other.db"}, {"operation_id": "x"}):
+        with pytest.raises(ValueError):
+            RestoreIntent(**{**good, **change})
+    with pytest.raises(ValueError):
+        RestoreIntent.from_bytes(RestoreIntent(**good).to_bytes().replace(b"}", b',"extra":"1"}'))
