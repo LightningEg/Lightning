@@ -178,6 +178,7 @@ _TABLE = [
     ("average_monthly_income", "Average monthly income",
      "Income in your chosen income categories, averaged over the last 3 or 6 completed months that had any "
      "(Settings › Budget). Until a completed month has income, the income set up in Recurring stands in. "
+     "When scheduled pay falls and you plan on it, the lower pay counts from its month. "
      "The budget, reserves and the cash forecast all use it."),
     ("average_monthly_spending", "Average monthly spending",
      "Money out in your budget categories, leaving out investments and categories outside the budget, averaged over the same "
@@ -265,8 +266,9 @@ _TABLE = [
     ("income_before_payday", "Income before payday",
      "Scheduled income other than the salary that arrives before the next payday (BT-7AZ)."),
     ("lowest_point_ahead", "Lowest point ahead", "The lowest month-end free cash in the cash forecast, everyday "
-     "spending and savings included. Compare scenarios shows the same figure and moves it by what a scenario changes "
-     "in scheduled cash (IV-12P)."),
+     "spending and savings included. Compare scenarios shows the same figure, day by day: each day "
+     "is its month's closing moved by what the scenario changes in scheduled cash that day, so a late salary shows on "
+     "its lowest day (IV-12P, BV-7AW)."),
     ("saving_for_goals", "Saving for goals", "What dated reserve goals still need this month, spread over the months left."),
     ("savings_target_rest", "Rest of savings target", "What the Savings target asks a month beyond Saving for goals and "
      "Emergency fund top-up (never below zero), so Safe to spend never counts what you mean to save (owner "

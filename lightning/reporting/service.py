@@ -18,6 +18,7 @@ from lightning.assets.service import AssetService
 from lightning.categories.domain import CategoryFamily, IncomeClass, Scope
 from lightning.categories.service import CategoryService
 from lightning.core.dates import fmt_date, parse_date, parse_month, previous_day
+from lightning.core.matching import fold_search_text
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, from_e6
 from lightning.money_from_others import MoneyFromOthersService
@@ -455,7 +456,7 @@ class ReportingService:
                                            "account_id": pos["account_id"], "account_name": account.name,
                                            "amount": ZERO})
             row["amount"] += valuation.value
-        return sorted(grouped.values(), key=lambda row: (row["owner"].casefold(), row["account_name"].casefold()))
+        return sorted(grouped.values(), key=lambda row: (fold_search_text(row["owner"]), fold_search_text(row["account_name"])))
 
     def money_from_others_history(self, limit: int = 100) -> list[dict]:
         return self.money_from_others.history(limit)
@@ -470,7 +471,7 @@ class ReportingService:
             rows.append({"owner": pos["owner"], "account_name": account.name, "asset_name": asset.name,
                          "units": pos["units"], "unit": asset.unit, "value": valuation.value,
                          "currency": self.base_currency})
-        return sorted(rows, key=lambda row: (row["owner"].casefold(), row["asset_name"].casefold()))
+        return sorted(rows, key=lambda row: (fold_search_text(row["owner"]), fold_search_text(row["asset_name"])))
 
     def _money_from_others_value(self, as_of: date | str) -> tuple[Decimal, list[str]]:
         return self._money_from_others_value_on(self._day(as_of))
@@ -673,6 +674,17 @@ class ReportingService:
             if not money_in:
                 totals[row["category_id"]] = totals.get(row["category_id"], ZERO) + money_out
         return totals
+
+    def money_out_by_category_by_day(self, date_from: date | str, date_to: date | str) -> dict[str, dict[int, Decimal]]:
+        """Money out per day (yyyy-mm-dd) and category, counted as money_out_by_category counts it: how a category's
+        spending falls across its months (NF-12AL2). Days with nothing are left out."""
+        out: dict[str, dict[int, Decimal]] = {}
+        for row in self.q.category_totals_by_date(self._day(date_from), self._day(date_to), 10):
+            money_in, money_out = flow_of(row["effect"], from_e6(row["total"]), self.categories.get(row["category_id"]))
+            if not money_in:
+                day = out.setdefault(row["key"], {})
+                day[row["category_id"]] = day.get(row["category_id"], ZERO) + money_out
+        return out
 
     def money_in_by_category(self, date_from: date | str, date_to: date | str) -> list[Group]:
         """Income by category, excluding custody and expense refunds."""

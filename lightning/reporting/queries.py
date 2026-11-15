@@ -326,9 +326,9 @@ class ReportQueries:
         """IV-12J3: the terms of every certificate whose interest stays with the bank until maturity (compound, or
         simple paid at maturity), by asset id, in one read: their value grows as that interest is earned."""
         return {int(row["asset_id"]): dict(row) for row in self.db.all(
-            "SELECT id,asset_id,start_date,maturity_date,principal_e6,annual_rate,interest_method,payout_frequency,"
-            "compounding_frequency FROM cd_certificates "
-            "WHERE interest_method='COMPOUND' OR payout_frequency='AT_MATURITY'")}
+            "SELECT cd.id,cd.asset_id,cd.start_date,cd.maturity_date,cd.principal_e6,cd.annual_rate,cd.interest_method,cd.payout_frequency,"
+            "cd.compounding_frequency,a.currency FROM cd_certificates cd JOIN accounts a ON a.id=cd.account_id "
+            "WHERE cd.interest_method='COMPOUND' OR cd.payout_frequency='AT_MATURITY'")}
 
     def certificate_rates(self, certificate_id: int) -> list:
         """IV-12J4: a variable certificate's dated rate changes, oldest first: [(date, annual rate)]."""
@@ -371,6 +371,26 @@ class ReportQueries:
             (asset_id, as_of),
         )
         return dict(row) if row and row["qty"] else None
+
+    @request_cached
+    def certificate_class_id(self) -> int | None:
+        return self.db.scalar("SELECT id FROM asset_classes WHERE code='DEPOSIT.CD'")
+
+    @request_cached(deep=True)
+    def _certificate_principals_of(self, asset_id: int) -> list[dict]:
+        """Read principal entries once per asset, even when a page values several dates."""
+        return [dict(row) for row in self.db.all(
+            f"SELECT le.amount_e6 AS amount, le.quantity_e6 AS qty, le.date FROM ledger_entries le {POSTED}"
+            " WHERE le.asset_id=? AND t.type IN ('BUY','OPN') AND le.quantity_e6>0", (asset_id,))]
+
+    def certificate_principal(self, asset_id: int, as_of: str) -> dict | None:
+        """Principal paid or brought in at opening, in the certificate's native currency. Quotes and
+        redemption proceeds are never a new principal valuation."""
+        rows = [row for row in self._certificate_principals_of(asset_id) if row["date"] <= as_of]
+        if not rows:
+            return None
+        return {"amount": sum(row["amount"] for row in rows), "qty": sum(row["qty"] for row in rows),
+                "date": max(row["date"] for row in rows)}
 
     def investment_lines(self, as_of: str, account_id: int | None = None) -> list[dict]:
         """Every posted line of a non-cash asset (and dividend lines), oldest first — for positions."""

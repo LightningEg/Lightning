@@ -1403,6 +1403,7 @@ def test_certificate_keeps_its_purchase_value_without_month_end_price_prompts(mo
                        if asset.name == "NBE 3-year certificate · 22%")
     screen = mohab.b.go("Investments", "Prices")
     assert certificate.name in screen.text and f'name="p_{certificate.id}"' not in screen.html
+    assert f'name="value_{certificate.id}"' not in screen.html
     assert all(row["asset_id"] != certificate.id for row in mohab.c.reevaluations.pending_prices())
 
 
@@ -1488,6 +1489,9 @@ def test_a_fund_can_be_valued_by_its_total(mohab):
     mohab.b.open(screen.path)
     saved = mohab.b.submit({"date": "2027-09-30", field: "20000"}, button="Save prices")
     assert saved.shows("Saved 1 price")
+    asset_id = int(field.removeprefix("value_"))
+    values = [p.value for p in mohab.c.investments.portfolio("2027-09-30").open if p.asset_id == asset_id]
+    assert abs(sum(values) - D("20000")) < D("0.01")
 
 
 def test_other_investments_are_in_the_investment_analysis(mohab):

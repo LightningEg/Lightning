@@ -73,10 +73,11 @@ def test_prices_page_uses_purchase_value_for_certificate_and_does_not_ask_for_a_
     assert "CIB 1-year certificate" in page
     assert "Set at purchase" in page
     assert f'name="p_{certificate.terms.asset_id}"' not in page
-    assert c.reevaluations._price(certificate.terms.asset_id, "2026-12-31") == (Decimal("5000"), "TRADE")
+    assert f'name="value_{certificate.terms.asset_id}"' not in page
+    assert c.reevaluations._price(certificate.terms.asset_id, "2026-12-31") == (Decimal("5000"), "COST")
 
 
-def test_saving_a_certificate_value_posts_its_month_end_revaluation(c, setup):
+def test_generic_certificate_value_is_refused_without_inventing_a_month_end_gain(c, setup):
     accounts, _ = setup
     certificate, _ = _purchase(c, accounts)
     client = TestClient(create_app(c), follow_redirects=False)
@@ -87,11 +88,13 @@ def test_saving_a_certificate_value_posts_its_month_end_revaluation(c, setup):
     })
 
     assert response.status_code == 303
-    assert "CD%20portfolio%20cannot%20hold%20cash" not in response.headers["location"]
-    row = next(row for row in c.reevaluations.history()
-               if row["asset_id"] == certificate.terms.asset_id and row["date"] == "2026-09-30")
-    assert row["return_base_e6"] == Decimal("1000")
-    assert row["status"] == "POSTED"
+    assert "principal" in response.headers["location"]
+    assert c.assets.price_history(certificate.terms.asset_id) == []
+    assert not any(row["return_base_e6"] for row in c.reevaluations.history()
+                   if row["asset_id"] == certificate.terms.asset_id)
+    holding = next(p for p in c.investments.portfolio("2026-09-30").open
+                   if p.asset_id == certificate.terms.asset_id)
+    assert holding.value == holding.cost_basis == Decimal("5000") and holding.unrealized == 0
     assert c.reporting.account_balance(accounts["cd"].id) == cash_before
 
 

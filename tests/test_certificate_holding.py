@@ -173,3 +173,16 @@ def test_simple_interest_paid_at_maturity_accrues_evenly_to_the_maturity_amount(
     assert total == Decimal("3650")
     assert schedule.accrued(terms, date(2027, 9, 1)) == total
     assert schedule.accrued(terms, date(2026, 9, 11)) == Decimal("100.00")   # 10 of 365 days
+
+
+def test_growing_foreign_certificate_uses_the_dated_exchange_rate(c):
+    from lightning.fx import save_rate
+    from lightning.database.currencies import CurrencyRegistry
+
+    CurrencyRegistry(c.db).register('USD')
+    save_rate(c.db, '2026-09-01', 'USD', 'EGP', Decimal('50'), 'MANUAL')
+    save_rate(c.db, '2026-10-01', 'USD', 'EGP', Decimal('51'), 'MANUAL')
+    bank = c.account_flows.open_account('Dollar bank', 'BANK', '2026-09-01', '20000', currency='USD')
+    portfolio = c.account_flows.open_account('Dollar certificates', 'DEPOSIT', '2026-09-01', '0', institution='CIB', currency='USD')
+    certificate = _short_compound(c, {'cib': bank, 'cd': portfolio})
+    assert _value(c, certificate.terms.asset_id, '2026-10-01') == Decimal('520200')

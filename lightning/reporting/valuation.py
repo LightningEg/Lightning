@@ -54,6 +54,7 @@ class Valuer:
 
     def value(self, asset: FinancialAsset, quantity: Decimal, as_of: date | str) -> Valuation:
         day = as_of if isinstance(as_of, str) else as_of.isoformat()
+        currency = asset.currency
         if asset.is_cash:
             price, price_date, source = ONE, None, "CASH"
         else:
@@ -102,18 +103,20 @@ class Valuer:
                 return Valuation(None, None, None, f"No gold reference or recorded cost for {asset.name}")
             growing = self._certificate(asset, day)
             if growing is not None:
-                return Valuation((quantity * growing).quantize(Decimal("0.000001")), growing, day, "", "ACCRUED")
-            found = self._gold_price(asset, day) or self._price(asset, day)
-            if found is None:
-                return Valuation(None, None, None, f"No price for {asset.label} on or before {day}")
-            price, price_date, source = found
-        rate = self.fx(asset.currency, day)
+                price, currency = growing
+                price_date, source = day, "ACCRUED"
+            else:
+                found = self._gold_price(asset, day) or self._price(asset, day)
+                if found is None:
+                    return Valuation(None, None, None, f"No price for {asset.label} on or before {day}")
+                price, price_date, source = found
+        rate = self.fx(currency, day)
         if rate is None:
-            return Valuation(None, price, price_date, f"No {asset.currency}/{self.base} rate within {MISSING_DAYS} days before {day}")
+            return Valuation(None, price, price_date, f"No {currency}/{self.base} rate within {MISSING_DAYS} days before {day}")
         return Valuation((quantity * price * rate.rate).quantize(Decimal("0.000001")), price, price_date, "", source,
                          rate.as_of)
 
-    def _certificate(self, asset: FinancialAsset, day: str) -> Decimal | None:
+    def _certificate(self, asset: FinancialAsset, day: str) -> tuple[Decimal, str] | None:
         """IV-12J3: a certificate paid at maturity is worth its principal plus the interest earned to ``day`` (an
         estimate from its terms, source ACCRUED); the redemption then records what the bank actually paid."""
         if not asset.code.startswith("CD:"):
@@ -123,7 +126,7 @@ class Valuer:
             return None
         terms = _GrowingTerms(row)
         when = min(date.fromisoformat(day), date.fromisoformat(terms.maturity_date))
-        return terms.principal + certificate_schedule.accrued(terms, when, self.q.certificate_rates(row["id"]))
+        return terms.principal + certificate_schedule.accrued(terms, when, self.q.certificate_rates(row["id"])), row["currency"]
 
     def reference_price(self, reference_id: int, day: str) -> dict | None:
         """A gold reference's price per gram on ``day``. PR-2 (3H2): a karat with no price of its own is worked out
@@ -166,6 +169,11 @@ class Valuer:
     def _price(self, asset: FinancialAsset, day: str) -> tuple[Decimal, str, str] | None:
         """Newest price wins; on one day the order is ``SOURCE_RANK`` (a price you typed, then a buy or sell, then the
         market pack and online quotes). Holdings entered as already owned fall back to their cost until a price exists."""
+        if asset.asset_class_id == self.q.certificate_class_id():
+            principal = self.q.certificate_principal(asset.id, day)
+            if principal:
+                return Decimal(principal["amount"]) / Decimal(principal["qty"]), principal["date"], "COST"
+            return None
         typed = self.q.latest_price(asset.id, day)
         trade = self.q.latest_trade_price(asset.id, day)
         if typed and (not trade or typed["date"] > trade["date"]

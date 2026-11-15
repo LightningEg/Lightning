@@ -84,6 +84,7 @@ PHONE_READING = {
     'short of your target': 'أقل من هدفك',
     'over plan 2 months': 'زيادة عن الخطة شهرين',
     'runs out around day {n}': 'هتخلص حوالي يوم {n}',
+    'may run out around day {n}': 'ممكن تخلص حوالي يوم {n}',
     '1 needs an account': 'واحدة محتاجة حساب',
     '{n} need an account': '{n} محتاجين حساب',
     '1 kept for you': 'واحدة محفوظة ليك',
