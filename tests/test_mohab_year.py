@@ -1403,6 +1403,7 @@ def test_certificate_keeps_its_purchase_value_without_month_end_price_prompts(mo
                        if asset.name == "NBE 3-year certificate · 22%")
     screen = mohab.b.go("Investments", "Prices")
     assert certificate.name in screen.text and f'name="p_{certificate.id}"' not in screen.html
+    assert f'name="value_{certificate.id}"' not in screen.html
     assert all(row["asset_id"] != certificate.id for row in mohab.c.reevaluations.pending_prices())
 
 
@@ -1474,7 +1475,10 @@ def test_food_over_plan_two_months_running_gets_room_from_shopping(mohab):
     answer = mohab.answers["food_over"]
     assert answer.shows("Food & groceries over plan two months running Over its plan in July and August, by up to "
                         "450 EGP. Move 450 from Shopping, which had that left both months. Move it")
-    assert mohab.notes["move_popup"].shows("Move plan to Food & groceries", "From 2027-09 on · the total plan stays the same")
+    popup = mohab.notes["move_popup"]  # NF-12AJ: two months running starts on the usual plan; this month alone is offered too
+    assert popup.shows("Move plan to Food & groceries", "The total plan stays the same", "Cover this month September 2027 only",
+                       "Change my usual plan Every month from September 2027")
+    assert 'value="usual" checked' in popup.html
     assert mohab.notes["moved"].shows("Moved plan from Shopping to Food & groceries from 2027-09 on.")
     assert not mohab.answers["food_over_after"].shows("over plan two months running")
 

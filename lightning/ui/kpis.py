@@ -168,7 +168,9 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
     if check is not None and check.planned is not None and check.plan_saves is not None and check.planned_savings_rate is not None:
         rate, target = check.planned_savings_rate, check.target_percent
         scale = max(rate, target, Decimal(1)) * Decimal("1.4")  # not money: the meter's scale
-        if raise_offer:
+        if raise_offer and raise_offer.get("kind") == "drop":  # NF-12AL1: scheduled pay falls from a date
+            tail = line(f"Income down {fmt(raise_offer['drop'], 0)}", "Choose", f"/budget/raise?month={month}", popup=True)
+        elif raise_offer:
             tail = line(f"Income up {fmt(raise_offer['raise'], 0)}", "Raise the plan", f"/budget/raise?month={month}", popup=True)
         elif check.over_by:
             tail = line(f"Plan {fmt(check.over_by, 0)} less to keep {fmt(check.to_save, 0)} a month")

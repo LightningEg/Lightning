@@ -18,6 +18,8 @@ from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TE
 
 ARABIC_UI = {
     'The total value is too small for this holding quantity.': 'القيمة الإجمالية صغيرة جدًا بالنسبة لعدد الوحدات دي.',
+    'Certificate value is set by its principal. Use the certificate workflow for terms or redemption.': 'قيمة الشهادة حسب أصل المبلغ. استخدم صفحة الشهادة لتعديل الشروط أو تسجيل الاسترداد.',
+    'View certificate': 'عرض الشهادة',
     'Quantities and total values cover all accounts, including units held for others. Use the currency shown beside each investment.': 'الكميات والقيم الإجمالية تشمل كل الحسابات، بما فيها الوحدات اللي محتفظ بيها لغيرك. استخدم العملة الموضحة جنب كل استثمار.',
     'Enter a total estimate': 'اكتب التقدير الإجمالي',
     'A total value must be greater than zero.': 'القيمة الإجمالية لازم تكون أكبر من صفر.',
@@ -1449,7 +1451,13 @@ ARABIC_UI = {
     'e.g. 100 shares, 12.5 grams': 'مثلًا 100 سهم، 12.5 جرام',
     'Setting': 'الإعداد',
     'Where': 'فين',
-    'From {a} on · the total plan stays the same': 'من {a} وطالع · إجمالي الخطة زي ما هو',
+    'The total plan stays the same': 'إجمالي الخطة زي ما هو',
+    'How long the move lasts': 'النقل ده لمدة قد إيه',
+    'Cover this month': 'غطّي الشهر ده',
+    'Change my usual plan': 'غيّر خطتي المعتادة',
+    '{month} only': '{month} بس',
+    '{month} only · {next} stays {to} {a} · {from} {b}': '{month} بس · {next} يفضل {to} {a} · {from} {b}',
+    'Every month from {month} · {to} {a} · {from} {b}': 'كل شهر من {month} · {to} {a} · {from} {b}',
     '{to} {a} → {b} · {from} {c} → {d}': '{to} من {a} إلى {b} · {from} من {c} إلى {d}',
     'MONTH_END': 'نهاية الشهر',
     'SALE': 'يوم البيع',
@@ -2065,6 +2073,18 @@ ARABIC_UI = {
     'Budget carryover': 'ترحيل الميزانية',
     'Carryover into {month}': 'الترحيل إلى {month}',
     'Plan in {month}': 'الخطة في {month}',
+    'This is how {month} starts. You can change it from {day}.': 'كده هيبدأ {month}. تقدر تغيّره من {day}.',
+    'Income the plan counts': 'الدخل اللي الخطة بتحسبه',
+    'No income to count yet.': 'لسه مفيش دخل يتحسب.',
+    'Left after limits': 'الباقي بعد الحدود',
+    'Scheduled in {month}': 'المجدول في {month}',
+    'Nothing is scheduled in this month.': 'مفيش حاجة مجدولة في الشهر ده.',
+    'Limits that carry into {month}': 'الحدود اللي بتترحّل لـ {month}',
+    'No limits carry into this month yet.': 'لسه مفيش حدود بتترحّل للشهر ده.',
+    'Includes bills': 'فيها فواتير',
+    'Your scheduled pay from {month}': 'مرتبك المجدول من {month}',
+    'Average of {first} to {last}': 'المتوسط من {first} لـ {last}',
+    'Carryover from this month is added once it ends.': 'ترحيل الشهر ده بيتضاف لما يخلص.',
     'Spent in {month}': 'المصروف في {month}',
     'Carried over': 'اللي اترحّل',
     'base': 'أساسي',
@@ -3533,6 +3553,23 @@ ARABIC_UI = {
     'Move {amt} from {name}': 'انقل {amt} من {name}',
     'of income, target {x}': 'من الدخل، والهدف {x}',
     'Income up {amt}': 'الدخل زاد {amt}',
+    # NF-12AL1: regular pay that falls from a date, offered to the plan like a raise.
+    'Income down {amt}': 'الدخل قلّ {amt}',
+    'Your income falls': 'دخلك هيقلّ',
+    'Your income falls to {amt} from {day}': 'دخلك هيقلّ لـ {amt} من {day}',
+    'Your average is {amt}, {amt2} more a month': 'متوسطك {amt}، يعني {amt2} زيادة في الشهر',
+    'What should the plan count from {month}?': 'الخطة تحسب إيه من {month}؟',
+    'Plan on it from then': 'خطّط عليه من ساعتها',
+    'Plan on it': 'خطّط عليه',
+    '{label} becomes {amt}; your plan is {amt2} over it': '{label} يبقى {amt}؛ وخطتك فوقه بـ {amt2}',
+    '{label} becomes {amt}; your plan still fits': '{label} يبقى {amt}؛ وخطتك لسه مناسبة',
+    'The plan waits until the lower income shows in completed months': 'الخطة تستنى لحد ما الدخل الأقل يبان في شهور خلصت',
+    'Plan on it from then, or keep the average of {x}.': 'خطّط عليه من ساعتها، أو خليك على المتوسط {x}.',
+    '{amt} a month less than your average of {x}. Plan on it from then, or keep the average.': '{amt} في الشهر أقل من متوسطك {x}. خطّط عليه من ساعتها، أو خليك على المتوسط.',
+    'Your income falls to {amt} from {n} {mon}': 'دخلك هيقلّ لـ {amt} من {n} {mon}',  # Needs you: "25 Dec" from Python
+    'Planning on {amt} a month from {month}': 'الخطة على {amt} في الشهر من {month}',
+    'Count the average again': 'ارجع للمتوسط',
+    'less a month': 'أقل في الشهر',
     'Plan {amt} less to keep {x} a month': 'خطط {amt} أقل عشان تحوّش {x} في الشهر',
     '{amt} a month to save': '{amt} في الشهر للادخار',
     'of the {amt} plan': 'من خطة الـ{amt}',
@@ -3930,6 +3967,28 @@ ARABIC_UI = {
     'A payment': 'دفعة',
     'These two are no longer offered as possible duplicates.': 'الاتنين دول مبقوش معروضين كتكرار محتمل.',
     'These two are no longer offered.': 'الاتنين دول مبقوش معروضين.',
+    # NF-12AK3: a refund names its purchase.
+    'This refunds…': 'ده استرداد لـ…',
+    'Bought {date} · estimates count this refund in that month': 'اتشترى {date} · التقديرات بتحسب الاسترداد ده في الشهر ده',
+    'Name the purchase this money returns, so budget averages count it in the month you bought it.': 'اختار الشراء اللي الفلوس دي راجعة منه، عشان متوسطات الميزانية تحسبها في الشهر اللي اشتريت فيه.',
+    'Another purchase': 'شراء تاني',
+    'Type to find the purchase': 'اكتب عشان تلاقي الشراء',
+    'up to {amt}': 'لحد {amt}',
+    'Amount it returns': 'المبلغ اللي بيرجّعه',
+    'The whole refund': 'الاسترداد كله',
+    'Link refund': 'اربط الاسترداد',
+    'Refunds': 'الاستردادات',
+    'Returned {date}': 'رجع {date}',
+    '{amt} not returned': '{amt} مرجعش',
+    'Amount back': 'المبلغ اللي رجع',
+    'Record a refund': 'سجّل استرداد',
+    'Split across categories: record the refund from its account, then name this purchase on it.': 'متقسم على كذا فئة: سجّل الاسترداد من حسابه، وبعدين اختار الشراء ده عليه.',
+    'Fully returned': 'رجع كله',
+    'Link refund to its purchase': 'ربط الاسترداد بالشراء بتاعه',
+    'Unlink refund from its purchase': 'فك ربط الاسترداد من الشراء بتاعه',
+    'This refund no longer names a purchase.': 'الاسترداد ده مبقاش مربوط بشراء.',
+    'Linked this refund to its purchase.': 'اتربط الاسترداد ده بالشراء بتاعه.',
+    'Recorded the refund and linked it to this purchase.': 'اتسجّل الاسترداد واتربط بالشراء ده.',
 }
 
 
@@ -4030,7 +4089,7 @@ def _translate_text(value: str) -> str:
         return _DATE_WORDS[month.group(1)] + (month.group(2) or "")
     if value in WEEKDAYS:
         return WEEKDAYS[value]
-    if value.endswith(".") and not value.endswith(".."):
+    if value.endswith(".") and not value.endswith("..") and len(_SENTENCES.split(value)) == 1:  # several: each below
         head = _translate_text(value[:-1])  # a name or list closing a sentence: "Transportation."
         if head != value[:-1]:
             return head + "."

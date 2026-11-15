@@ -80,7 +80,8 @@ def test_the_page_renders_in_the_phone_and_never_a_pc_template(mohab):
     app = create_app(mohab)
     mount_phone(app)
     page = TestClient(app).get("/budget/flexible").text
-    assert "Personal" in page and "Fixed bills and savings" in page and "<input"   # IV-11M5 (mockup v2.0) names not in page.split('id="cats-heading"')[1].split("</section>")[0]
+    assert "Personal" in page and "Fixed bills and savings" in page
+    assert "<input" not in page.split('id="cats-heading"', 1)[1].split("</section>", 1)[0]
     assert TestClient(app).get("/budget/flexible?month=garbage").status_code == 200
 
 

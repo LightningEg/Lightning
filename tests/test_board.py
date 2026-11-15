@@ -98,3 +98,11 @@ def test_the_owners_priority_issue_orders_every_list_and_is_not_itself_a_row():
     text = board.tally(data, board.derive(data), 2)
     assert text.index("#1 ") < text.index("#2 ") < text.index("#4 ")
     assert [i["n"] for i in board.pick(board.derive(data), cap=2)] == [1, 2], "AIs start the owner's first ready issues"
+
+
+def test_an_issue_the_owner_marked_ready_still_says_why_it_cannot_start():
+    data = {"issues": [issue(1, ["when:launch", "status:ready"], body="Area: lightning/budgeting"),
+                       issue(2, ["when:launch"], body="Area: lightning/budgeting/domain.py")],
+            "prs": [pr(9, "Closes #2")], "merged": [], "now": NOW}
+    text = board.tally(data, board.derive(data), 2)
+    assert "Issue 1  [held: same area as #2]" in text, "a held issue in Ready must not look free"

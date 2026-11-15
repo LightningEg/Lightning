@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 {% from "partials/macros.html" import amount with context %}
-{% from "partials/linked.html" import touched_panel, suggested_links with context %}
+{% from "partials/linked.html" import touched_panel, refund_panel, suggested_links with context %}
 {% macro category_context(label) %}{% set parts = label.split(' › ') %}{% if parts|length > 1 %}<b>{{ parts[0]|tr(locale) }}</b>{% for part in parts[1:] %}<div>{{ part|tr(locale) }}</div>{% endfor %}{% else %}{{ label|tr(locale) }}{% endif %}{% endmacro %}
 {% block title %}{{ txn.ref }}{% endblock %}
 {% block heading %}<h1>{{ ('Refund' if txn.type.value == 'IN' and lines and lines[0].effect == 'OUTFLOW' else summary.type_label)|tr(locale) }}</h1>
@@ -45,6 +45,7 @@
     </div>
   </div>
   {{ touched_panel(touched, txn, base) }}
+  {{ refund_panel(refund, txn, base) }}
 </div>
 {% set suggest = review and (review.can_recategorize or review.planned_choices or review.reserve_choices) %}
 <div class="grid g2 mt-card">

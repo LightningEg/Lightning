@@ -637,7 +637,8 @@ def create_app(c: Container | None = None) -> FastAPI:
                 return RedirectResponse(f"{request.url.path}?{urlencode({**dict(request.query_params), **saved})}", status_code=303)
             return await call_next(request)
         response = await call_next(request)
-        if response.status_code == 200:  # only a period that worked is remembered
+        if response.status_code == 200 and picked.get("month", "") <= month_of(today()):
+            # only a period that worked is remembered; a month not started yet (Budget's read-only next month, NF-12AL4) is not
             response.set_cookie(PERIOD_COOKIE, urlencode({**picked, "seen_in": month_of(today())}),
                                 httponly=True, samesite="strict")
         return response

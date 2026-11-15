@@ -178,6 +178,7 @@ _TABLE = [
     ("average_monthly_income", "Average monthly income",
      "Income in your chosen income categories, averaged over the last 3 or 6 completed months that had any "
      "(Settings › Budget). Until a completed month has income, the income set up in Recurring stands in. "
+     "When scheduled pay falls and you plan on it, the lower pay counts from its month. "
      "The budget, reserves and the cash forecast all use it."),
     ("average_monthly_spending", "Average monthly spending",
      "Money out in your budget categories, leaving out investments and categories outside the budget, averaged over the same "
