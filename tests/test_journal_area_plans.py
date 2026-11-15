@@ -237,12 +237,19 @@ def test_move_room_and_fill_between_budgets(devices):
     keys = [uid(pc, "categories", item.id) for item in (food, other)]
     fill = pc.command("budgets.apply_fill", month="2026-09", lines=[
         dict(category=keys[0], amount="1000.00", average_months=None), dict(category=keys[1], amount="400.00", average_months=None)])
-    move = pc.command("budgets.move_room", month="2026-09", to_id=keys[1], from_id=keys[0], amount="150.00")
+    move = pc.command("budgets.move_room", month="2026-09", to_id=keys[1], from_id=keys[0], amount="150.00")  # queued before NF-12AJ
     pc.sync_with(hd.home)
     assert status(hd, fill)["status"] == status(hd, move)["status"] == "accepted"
     amounts = hd.c.budgets.amounts_for("2026-09", schedule=hd.c.schedules.view())
     assert (amounts[food.id][0], amounts[other.id][0]) == (Decimal("850"), Decimal("550")) == tuple(
         pc.c.budgets.amounts_for("2026-09", schedule=pc.c.schedules.view())[item.id][0] for item in (food, other))
+    cover = pc.command("budgets.move_room_scoped", month="2026-09", to_id=keys[1], from_id=keys[0], amount="50.00",
+                       only_this_month=True)  # NF-12AJ: this month only, October keeps the usual plan
+    pc.sync_with(hd.home)
+    assert status(hd, cover)["status"] == "accepted"
+    for month, plan in (("2026-09", ("800", "600")), ("2026-10", ("850", "550"))):
+        amounts = hd.c.budgets.amounts_for(month, schedule=hd.c.schedules.view())
+        assert (amounts[food.id][0], amounts[other.id][0]) == tuple(Decimal(x) for x in plan)
     percent = pc.command("budgets.set_income_percent", category_id=keys[0], month="2026-10", percent="12.50", only_this_month=False)
     pc.sync_with(hd.home)
     assert status(hd, percent)["status"] == "accepted"

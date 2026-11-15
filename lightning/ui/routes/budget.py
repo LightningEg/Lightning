@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import timedelta
 from decimal import Decimal
 import json
 import uuid
@@ -877,8 +878,18 @@ async def move_room_popup(request: Request):
     to_plan, from_plan = plans.get(to.id, (None,))[0], plans.get(source.id, (None,))[0]
     if to_plan is None or from_plan is None:
         return redirect(f"/budget?month={month}", "Both categories need a plan of their own this month.")
+    reason = _move_reason(c, month, to.id)
+    next_month = month_of(parse_month(month)[1] + timedelta(days=1))  # not money
+    later = c.budgets.amounts_for(next_month, loans=False, schedule=c.schedules.view())
     return render(request, "budget_move.html", month=month, to=to, source=source, amount=amount,
-                  to_plan=to_plan, from_plan=from_plan, reason=_move_reason(c, month, to.id))
+                  to_plan=to_plan, from_plan=from_plan, reason=reason, scope=_move_scope(reason),
+                  next_month=next_month, to_next=later.get(to.id, (None,))[0], from_next=later.get(source.id, (None,))[0])
+
+
+def _move_scope(reason: str) -> str:
+    """NF-12AJ: the choice the Move dialog starts on. Over plan two months running is the usual plan falling short,
+    so change it; ahead of pace or over this month is one month's problem, so cover this month only."""
+    return "usual" if reason == "twice" else "month"
 
 
 def _move_reason(c, month: str, category_id: int) -> str:
@@ -899,14 +910,18 @@ async def move_room(request: Request):
     c = container(request)
     form = await request.form()
     month = str(form.get("month", month_of(today())))
+    only_this_month = form.get("scope") == "month"  # NF-12AJ: otherwise the usual plan, as before
     try:
         parse_month(month)
         to_id, from_id = int(str(form.get("to", ""))), int(str(form.get("from", "")))
         with settled_save(request, container(request)):
-            c.budgets.move_room(month, to_id, from_id, str(form.get("amount", "")), schedule=c.schedules.view())
+            c.budgets.move_room(month, to_id, from_id, str(form.get("amount", "")), only_this_month,
+                                schedule=c.schedules.view())
     except ValueError:
         return redirect(f"/budget?month={month}", "Choose two categories.")
     except LightningError as exc:
         return redirect(f"/budget?month={month}", exc.message)
     names = c.categories.get(to_id).name, c.categories.get(from_id).name
+    if only_this_month:
+        return redirect(f"/budget?month={month}", f"Moved plan from {names[1]} to {names[0]} for {month} only.")
     return redirect(f"/budget?month={month}", f"Moved plan from {names[1]} to {names[0]} from {month} on.")

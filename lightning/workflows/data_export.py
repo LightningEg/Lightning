@@ -18,7 +18,7 @@ TABLES = ("profile_identity", "accounts", "asset_classes", "financial_assets", "
           "physical_item_trade_details", "other_asset_valuations", "other_asset_details", "property_contracts", "property_flows", "rules", "rule_conditions", "rule_actions",
           "bank_import_batches", "bank_import_rows", "bank_import_column_maps", "reevaluation_periods",
           "reevaluation_entries", "reevaluation_account_posts", "reevaluation_suppressed_accounts", "zakat_settings",
-          "reconciled_through", "saved_views", "reimbursement_claims", "reimbursement_receipts",
+          "reconciled_through", "saved_views", "reimbursement_claims", "reimbursement_receipts", "refund_links",
           "cd_interest_receipt_events", "cd_interest_receipt_links", "cash_funding", "audit_log")
 
 

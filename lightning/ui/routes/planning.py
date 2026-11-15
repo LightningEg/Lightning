@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import calendar
+from dataclasses import asdict
 from datetime import timedelta
 from decimal import Decimal
 from urllib.parse import urlencode
@@ -253,7 +254,7 @@ async def recurring_page(request: Request):
                               "note": r["item"].kind_label + (" · " + r["category"] if r["category"] else "")}  # not money
                              for r in rows if not r["item"].is_income])
     return render(request, "planning/recurring.html", tabs=TABS, plan_tab="recurring", rows=rows, stopped=stopped,
-                  answer=page_status.recurring(monthly_out, fixed.percent),
+                  answer=page_status.recurring(monthly_out, fixed.whole),
                   bill_bars=bill_bars, fixed_tiles=fixed_tiles,
                   recurring_kpis=kpis.recurring(
                       monthly_out=monthly_out, fixed=fixed, limit=c.health.limit_values().get(fixed.key),
@@ -771,6 +772,7 @@ async def pay_form(request: Request, item_id: int, error: str = ""):
     effects = _payment_effects(c, item, payment, min(payment.due_date, fmt_date(today()))) if payment.outstanding else None
     return render(request, "planning/pay.html", item=item, payment=payment, effects=effects, has_match=bool(exact_open),
                   exact=[r for r in exact if r["id"] not in linked], others=[r for r in others if r["id"] not in linked][:8],
+                  categories=_category_options(c, Movement.INFLOW if item.is_income else Movement.OUTFLOW),
                   accounts=_paying_accounts(c), currency=currency, bill_reserve=c.reserves.bill_reserve(item.id),
                   back=str(request.query_params.get("back", "/plan")), today=fmt_date(today()), error=error)
 
@@ -795,6 +797,14 @@ async def settle_payment(request: Request, item_id: int):
                         for r in c.planning.candidates(due_payment, any_account=True)):
                     raise LightningError("A payment that matches this bill is already recorded. Link it instead, "
                                          "or tick \"This is a different payment\" to record a second one.")
+                if not item.category_id:
+                    category = str(form.get("category_id", ""))
+                    allowed = _category_options(c, Movement.INFLOW if item.is_income else Movement.OUTFLOW)
+                    if category not in {str(option["id"]) for option in allowed}:
+                        raise ValidationError("Choose a valid category.", "category_id")
+                    values = {key: value for key, value in asdict(item).items()
+                              if key not in {"id", "active", "month_day"}}
+                    c.planning.update(item_id, **(values | {"category_id": category}))
                 c.planning.record_payment(item_id, due, str(form.get("date_paid", "")), str(form.get("amount", "")),
                                           int(str(form.get("account_id"))) if str(form.get("account_id", "")).isdigit() else None)
                 message = f"{item.name} · {due} recorded and marked paid."
