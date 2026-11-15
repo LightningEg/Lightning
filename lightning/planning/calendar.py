@@ -124,10 +124,16 @@ def _circle_entries(gameya, db, base: str, first: date, last: date, day: date) -
     return out
 
 
-def _out_total(planning, month: str, day: date) -> Decimal:
+def _month_entries(planning, gameya, month: str, day: date) -> list[CalendarEntry]:
     first, last = parse_month(month)
-    return sum((planning.amount_in_base(p, p.amount, day) for p in planning.all_payments(last, day)
-                if p.due_date >= fmt_date(first) and not p.item.is_income and p.status != PaymentStatus.SKIPPED), ZERO)
+    start = fmt_date(first)
+    entries = [_payment_entry(planning, p, day) for p in planning.all_payments(last, day) if p.due_date >= start]
+    entries += _circle_entries(gameya, planning.db, planning.transactions.base_currency, first, last, day)
+    return entries
+
+
+def _outgoing(entries: list[CalendarEntry]) -> list[CalendarEntry]:
+    return [e for e in entries if not e.incoming and e.state != "skipped"]
 
 
 def month_calendar(planning, gameya, month: str, day: date, forecaster=None) -> PaymentMonth:
@@ -135,11 +141,9 @@ def month_calendar(planning, gameya, month: str, day: date, forecaster=None) -> 
     shortfall when it falls in the month (the forecast looks ahead only, so a past month never has one)."""
     first, last = parse_month(month)
     start = fmt_date(first)
-    entries = [_payment_entry(planning, p, day) for p in planning.all_payments(last, day) if p.due_date >= start]
-    base = planning.transactions.base_currency
-    entries += _circle_entries(gameya, planning.db, base, first, last, day)
+    entries = _month_entries(planning, gameya, month, day)
     entries.sort(key=lambda e: (e.date, e.incoming, e.name.casefold()))
-    outgoing = [e for e in entries if not e.incoming and e.state != "skipped"]
+    outgoing = _outgoing(entries)
     left = sum((e.left for e in outgoing), ZERO)
     paid = sum((e.amount - e.left for e in outgoing), ZERO)
     money_in = sum((e.amount for e in entries if e.incoming and e.state != "skipped"), ZERO)
@@ -153,7 +157,8 @@ def month_calendar(planning, gameya, month: str, day: date, forecaster=None) -> 
         if shortfall and start <= shortfall.date <= fmt_date(last):
             short_on, short_by = shortfall.date, -shortfall.balance
     groups = tuple(g for g in GROUPS if any(e.group == g for e in entries))
-    return PaymentMonth(month, fmt_date(day), tuple(entries), left, paid, _out_total(planning, previous, day),
+    last_total = sum((e.amount for e in _outgoing(_month_entries(planning, gameya, previous, day))), ZERO)
+    return PaymentMonth(month, fmt_date(day), tuple(entries), left, paid, last_total,
                         money_in, paydays, short_on, short_by, groups, next_income_date(planning, day))
 
 

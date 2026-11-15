@@ -83,8 +83,8 @@ COMMANDS = {
     "budgets.save_month": Command("budgets.save_month", dict(month=MONTH, lines=CELLS, only_this_month=FLAG),
                                   adapt=_month),
     "budgets.apply_fill": Command("budgets.apply_fill", dict(month=MONTH, lines=CELLS), adapt=_fill),
-    "budgets.move_room": Command("budgets.move_room", dict(
-        month=MONTH, to_id=ref("categories"), from_id=ref("categories"), amount=AMOUNT)),
+    "budgets.move_room_scoped": Command("budgets.move_room", dict(
+        month=MONTH, to_id=ref("categories"), from_id=ref("categories"), amount=AMOUNT, only_this_month=FLAG)),
     "budgets.set_carryover": Command("budgets.set_carryover", dict(
         month=MONTH, lines=items(category=ref("categories"), enabled=FLAG)), adapt=_carryover),
     "budgets.reset_carryover": Command("budgets.reset_carryover", dict(
@@ -102,6 +102,10 @@ COMMANDS = {
 
 
 # Retain previously queued wire actions while native routes use the service methods.
+def _move_room(c, **values):  # queued before a move could cover one month only (NF-12AJ): the usual plan
+    return c.budgets.move_room(**values, schedule=c.schedules.view())
+
+
 def _purchase(c, **values):
     return c.planning.create_purchase(**values)
 
@@ -114,3 +118,5 @@ COMMANDS["plans.buy_in_instalments"] = Command(_purchase, **{
     key: value for key, value in vars(COMMANDS["planning.create_purchase"]).items() if key != "call"})
 COMMANDS["plans.pay_loan_early"] = Command(_early, **{
     key: value for key, value in vars(COMMANDS["planning.record_early_payment"]).items() if key != "call"})
+COMMANDS["budgets.move_room"] = Command(_move_room, dict(
+    month=MONTH, to_id=ref("categories"), from_id=ref("categories"), amount=AMOUNT))

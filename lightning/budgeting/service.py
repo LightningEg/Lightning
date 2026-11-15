@@ -246,8 +246,11 @@ class BudgetService:
             return [Decimal(t) / days for t in range(days + 1)], False
         return [sum((share[t] for share in shares), ZERO) / len(shares) for t in range(days + 1)], True
 
-    def move_room(self, month: str, to_id: int, from_id: int, amount: object, *, schedule: ScheduleView) -> None:
-        """Move plan from one category to another from `month` on: both keep fixed amounts, the total is unchanged."""
+    def move_room(self, month: str, to_id: int, from_id: int, amount: object, only_this_month: bool = False, *,
+                  schedule: ScheduleView) -> None:
+        """Move plan from one category to another: both keep fixed amounts and the total is unchanged. With
+        ``only_this_month`` it covers `month` alone (limits for this month only, the usual plan stays); otherwise it
+        changes the usual plan from `month` on (NF-12AJ)."""
         value = to_decimal(amount, "amount")
         if value <= 0:
             raise ValidationError("Move an amount above zero.", "amount")
@@ -260,7 +263,7 @@ class BudgetService:
         if give < value:
             raise ValidationError(f"{self.categories.get(from_id).name} plans only {fmt(give, 0)} this month.", "amount")
         with self.db.transaction():
-            self.save_month(month, {to_id: take + value, from_id: give - value}, schedule=schedule)
+            self.save_month(month, {to_id: take + value, from_id: give - value}, only_this_month, schedule=schedule)
 
     @request_cached  # has_plan, loan_lines, bill_lines and month_view all ask for it
     def amounts_for(self, month: str, loans: bool = True, *, schedule: ScheduleView) -> dict[int, tuple[Decimal | None, bool, int | None, Decimal | None]]:
@@ -930,9 +933,10 @@ class BudgetService:
 
     def estimate_spending(self, start, end) -> dict[int, Decimal]:
         """What estimates read for a period (NF-12AK1, owner 2026-11-13): plan-funded spending, with money back that is
-        linked to its expense (a reimbursement receipt) counted in the expense's month rather than the month it
-        arrived, and each category floored at zero, so a refund on its own never makes a negative month. Cash, Spent
-        and every report keep the real dates; only averages and the estimates built on them read this."""
+        linked to its expense (a reimbursement receipt, or a refund that names its purchase: NF-12AK3) counted in the
+        expense's month rather than the month it arrived, and each category floored at zero, so a refund on its own
+        never makes a negative month. Cash, Spent and every report keep the real dates; only averages and the
+        estimates built on them read this."""
         first, last = str(start)[:10], str(end)[:10]
         basis, moved = self.plan_funded_spending(start, end), set()
         for shift in self._recovery_shifts():
@@ -947,8 +951,9 @@ class BudgetService:
     @request_cached(deep=True)
     def _recovery_shifts(self) -> list[dict]:
         """Linked money back that arrived in another month than its expense: per receipt and spending category, the
-        amount the receipt took off that category (never more than the amount linked) and both dates."""
-        rows = self.db.all(
+        amount the receipt took off that category (never more than the amount linked) and both dates. Money back is a
+        claim's receipt or a refund that names its purchase (NF-12AK3); money that is both counts once, as a receipt."""
+        rows = [*self.db.all(
             "SELECT rr.id link_id,rr.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,"
             "le.category_id,SUM(le.amount_base_e6) total_e6 "
             "FROM reimbursement_receipts rr JOIN reimbursement_claims rc ON rc.id=rr.claim_id "
@@ -956,7 +961,16 @@ class BudgetService:
             "JOIN ledger_entries le ON le.transaction_id=r.id "
             "WHERE r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
             "AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
-            "GROUP BY rr.id,le.category_id ORDER BY rr.id,le.category_id")
+            "GROUP BY rr.id,le.category_id ORDER BY rr.id,le.category_id"), *self.db.all(
+            "SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,"
+            "le.category_id,SUM(le.amount_base_e6) total_e6 "
+            "FROM refund_links rl JOIN transactions r ON r.id=rl.refund_id JOIN transactions e ON e.id=rl.expense_id "
+            "JOIN ledger_entries le ON le.transaction_id=r.id "
+            "WHERE r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
+            "AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
+            "AND NOT EXISTS (SELECT 1 FROM reimbursement_receipts x WHERE x.receipt_id=rl.refund_id) "
+            "AND le.category_id IN (SELECT category_id FROM ledger_entries WHERE transaction_id=rl.expense_id) "
+            "GROUP BY rl.id,le.category_id ORDER BY rl.id,le.category_id")]
         investment, shifts, left = self._investment_ids(), [], {}
         for row in rows:
             category = self.categories.get(int(row["category_id"]))

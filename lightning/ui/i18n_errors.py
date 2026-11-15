@@ -234,4 +234,16 @@ ERRORS_AR = {
     "Choose a size: {a}.": "اختار حجم: {a}.",
     "Enter the total in {a}.": "اكتب الإجمالي بـ {a}.",
     "That is not a tag.": "ده مش وسم.",
+    # NF-12AK3: a refund names its purchase.
+    'That is more than the refund, or more than the purchase has left to return.': 'ده أكتر من الاسترداد، أو أكتر من اللي فاضل يرجع من الشراء.',
+    'Choose a valid refund action.': 'اختار إجراء استرداد صحيح.',
+    'Choose the purchase this refunds.': 'اختار الشراء اللي ده استرداد ليه.',
+    'Choose posted money back in an expense category.': 'اختار فلوس راجعة متسجلة في فئة مصروف.',
+    'Choose a posted purchase of your own.': 'اختار شراء متسجل بتاعك.',
+    'A refund can only return a purchase made on or before its date.': 'الاسترداد يرجّع بس شراء اتعمل في تاريخه أو قبله.',
+    'This money is already linked to a reimbursement claim.': 'الفلوس دي مربوطة بالفعل بمطالبة استرداد.',
+    'Choose a purchase in the same category with something left to return.': 'اختار شراء في نفس الفئة لسه فاضل منه حاجة ترجع.',
+    'Enter an amount greater than zero.': 'اكتب مبلغ أكبر من صفر.',
+    'This refund does not name a purchase.': 'الاسترداد ده مش مربوط بشراء.',
+    'This purchase is split across categories: record the refund from its account, then name the purchase on it.': 'الشراء ده متقسم على كذا فئة: سجّل الاسترداد من حسابه، وبعدين اختار الشراء عليه.',
 }
