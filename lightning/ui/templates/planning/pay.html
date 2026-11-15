@@ -3,7 +3,6 @@
 {% block heading %}<div><h1>{{ item.name }}</h1><p class="muted small page-subtitle">{{ item.kind_label|tr(locale) }} due {{ payment.due_date }} · {{ payment.amount|money }} {{ currency }}</p></div>{% endblock %}
 {% block content %}
 {% if bill_reserve and payment.outstanding %}<p class="muted">{{ 'Saved for this bill: {amount} {currency} in {name}.'|tr(locale, amount=bill_reserve.effective_allocated|money(places=0), currency=base, name=bill_reserve.name) }}</p>{% endif %}
-{% if msg %}<div class="flash error">{{ msg }}</div>{% endif %}
 {% if not payment.outstanding %}
 <section class="card stack">
   <h2>{{ 'Paid' if payment.status.value == 'PAID' else 'Skipped' }}</h2>{% if payment.status.value == 'SKIPPED' %}<p class="muted">{{ 'Still owed: this payment moved to the end of the loan.' if item.kind.value == 'LOAN' else 'It does not count as due or in the forecast.' }}</p>{% endif %}
@@ -40,6 +39,7 @@
     <div class="field"><label for="pay-amount">Amount ({{ currency }})</label><input id="pay-amount" name="amount" value="{{ '%.2f'|format(payment.still_owed) }}" inputmode="decimal" class="money-input"></div>
   </div>
   <div class="field"><label for="pay-account">{{ 'Account'|tr(locale) }}</label><select id="pay-account" name="account_id" data-own-picker>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if a.id == item.account_id }}>{{ a.name }}</option>{% endfor %}</select></div>
+  {% if not item.category_id %}<div class="field"><label for="pay-category">{{ 'Category'|tr(locale) }}</label><select id="pay-category" name="category_id" data-own-picker required><option value="">{{ 'Choose…'|tr(locale) }}</option>{% from "partials/macros.html" import category_options %}{{ category_options(category_groups(categories|map(attribute='id')|list), '') }}</select></div>{% endif %}
   <input type="hidden" name="outcome" value="record">
   <div class="actions"><button class="btn primary">Record and mark {{ 'received' if item.is_income else 'paid' }}</button></div>
 <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>

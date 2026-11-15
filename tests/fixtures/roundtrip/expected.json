@@ -1,5 +1,5 @@
 {
- "fingerprint": "07f951a9526db612",
+ "fingerprint": "14ddcd73b07a2d50",
  "lines": [
   "schema: 85",
   "before net worth: 246031.960000",
@@ -82,6 +82,7 @@
   "rows reevaluation_entries: 18",
   "rows reevaluation_periods: 4",
   "rows reevaluation_suppressed_accounts: 0",
+  "rows refund_links: 0",
   "rows registered_currencies: 1",
   "rows reimbursement_claims: 0",
   "rows reimbursement_receipts: 0",
