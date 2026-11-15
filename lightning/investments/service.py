@@ -122,7 +122,7 @@ class InvestmentService:
 
     def target_weights(self) -> dict[str, Decimal]:
         """The required share of each risk level, in percent. A class target an older device sends is kept
-        but not read: risk levels replaced classes (migration 0085)."""
+        but not read: risk levels replaced classes (migration 0087)."""
         return {row["bucket"]: Decimal(str(row["target_weight"]))
                 for row in self.db.all("SELECT bucket,target_weight FROM investment_targets")
                 if row["bucket"] in RISK_LEVELS}

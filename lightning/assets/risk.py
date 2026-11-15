@@ -9,7 +9,7 @@ from __future__ import annotations
 LOW, MEDIUM, HIGH = "Low risk", "Medium risk", "High risk"
 RISK_LEVELS = (LOW, MEDIUM, HIGH)  # the order every page lists them in
 
-# Where a class starts; the most specific code wins and anything unlisted is Medium risk. Migration 0085 holds
+# Where a class starts; the most specific code wins and anything unlisted is Medium risk. Migration 0087 holds
 # the same table for profiles that set targets by class before.
 DEFAULT_RISK = {
     "STOCK": HIGH,
