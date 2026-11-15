@@ -158,6 +158,7 @@ def test_existing_inflated_checkpoint_is_rebuilt_on_upgrade_and_then_stays_idemp
 
 def test_desktop_certificate_opens_its_actual_management_workflow(c, certificate, tmp_path):
     import re
+    pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright, expect
     from tests.browser_support import require_chromium
     from lightning.runtime.http import Host
