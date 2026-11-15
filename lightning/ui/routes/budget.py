@@ -666,10 +666,15 @@ async def budget_page(request: Request):
         month = _month(request)
     except ValidationError:
         return redirect("/budget", "That month is invalid. Use YYYY-MM, for example 2026-09.")
-    if month > month_of(today()):
+    this = month_of(today())
+    if month == neighbours(this)[1]:  # NF-12AL4: next month as it will start, read only
+        c = container(request)
+        return render(request, "budget_next.html", preview=c.budgets.preview(month, schedule=c.schedules.view()),
+                      month=month, this_month=this)
+    if month > this:
         # Budget amounts repeat into later months, so this month's plan is next month's plan too.
-        return redirect("/budget", f"{month} has not started yet. This month's amounts carry on into it "
-                                   "until you change them.")
+        return redirect(f"/budget?month={neighbours(this)[1]}", f"{month} has not started yet. This month's "
+                                                                "amounts carry on into it until you change them.")
     return _page(request, month)
 
 
