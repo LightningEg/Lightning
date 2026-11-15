@@ -476,6 +476,7 @@ class EncryptedBackupRestorer:
                 key = unwrap_key(read_slot(paths.keys_path), password)
             except (ProfileError, ValueError) as exc:
                 raise ProfileError("The profile password could not unlock its encrypted database.") from exc
+            self._clear_unpublished(paths)
             self._check_restore_control(paths, key)
             self._require_clean_database_file(paths.db_path)
             entries = list_backups(paths.backups_dir, paths.db_path)
@@ -822,6 +823,156 @@ class EncryptedBackupRestorer:
             raise ProfileError("Restore recovery failed safely; the profile remains locked and evidence was preserved.") from exc
         finally:
             lock.close()
+
+    @classmethod
+    def _clear_unpublished(cls, paths: ProfilePaths) -> None:
+        """IT-2A3: clear what a restore left when it stopped before its manifest.
+
+        Such a restore published nothing (2A1). Its source copy is deleted when the
+        chosen backup still holds the same bytes, else kept in a restore-evidence
+        folder; then its intent goes. Run with the profile lock held."""
+        manifests = {path.name.removesuffix(".state") for path in cls._restore_marker_paths(paths)}
+        for intent_path in cls._restore_intent_paths(paths):
+            intent = cls._read_intent(intent_path)
+            if (paths.profile is None or intent.profile_id != paths.profile.profile_id or
+                    intent.live_name != paths.db_path.name):
+                raise ProfileError("A restore intent record belongs to another profile.")
+            stem = f".lightning-restore-{intent.operation_id}"
+            if stem in manifests or any(
+                    path.exists() or path.is_symlink()
+                    for path in (paths.data_dir / f"{stem}.sqlite", paths.data_dir / f"{stem}.previous.db")):
+                continue  # not unpublished: the manifest, or the unlock check, governs it
+            copy = paths.backups_dir / intent.source_copy_name
+            if copy.exists() or copy.is_symlink():
+                original = paths.backups_dir / intent.source_backup_name
+                try:
+                    cls._require_clean_database_file(copy)
+                    cls._require_clean_database_file(original)
+                    duplicate = cls._digest(original) == intent.source_sha256
+                except (ProfileError, OSError):
+                    duplicate = False
+                if duplicate:
+                    copy.unlink()
+                else:
+                    evidence = cls._evidence_folder(paths, intent.operation_id)
+                    os.replace(copy, evidence / copy.name)
+                cls._fsync_directory(paths.backups_dir)
+            intent_path.unlink()
+            cls._fsync_directory(paths.data_dir)
+
+    @staticmethod
+    def _evidence_folder(paths: ProfilePaths, operation_id: str) -> Path:
+        folder = paths.data_dir / f"restore-evidence-{operation_id}"
+        if folder.is_symlink() or (folder.exists() and not folder.is_dir()):
+            raise ProfileError("A restore evidence folder is not a plain folder; this profile is locked for repair.")
+        folder.mkdir(mode=0o700, exist_ok=True)
+        return folder
+
+    def repair_interrupted_restore(self, selected: str, password: str) -> str:
+        """IT-2A3: the one repair for an interrupted restore, chosen by the state on disk.
+
+        A PENDING restore whose promotion journal never started published nothing:
+        it is undone ("undone"); the live file is left as it is and the restore's
+        files move to a restore-evidence folder. One whose journal started is
+        finished forward ("finished"). Anything uncertain stays locked with its
+        evidence; going back (IT-2C4) is then the way out. Repeating the repair
+        after another interruption lands the same way."""
+        self.session._attempt()
+        self.session._locked()
+        paths = self.session._select(selected)
+        if paths.profile is None:
+            raise ProfileError("Restore recovery requires a named Lightning profile.")
+        lock = self.session._acquire(paths)
+        try:
+            try:
+                key = unwrap_key(read_slot(paths.keys_path), password)
+            except (ProfileError, ValueError) as exc:
+                raise ProfileError("The profile password could not unlock its encrypted database.") from exc
+            reserved = (paths.data_dir / ".sync", paths.data_dir / "sync-control.sqlite",
+                        paths.data_dir / ".lightning-sync.sqlite")
+            if any(path.exists() or path.is_symlink() for path in reserved):
+                raise ProfileError("Restore recovery is unavailable while sync authority state exists or cannot be verified.")
+            self._clear_unpublished(paths)
+            pending = []
+            for marker in self._restore_marker_paths(paths):
+                try:
+                    info = marker.stat(follow_symlinks=False)
+                    if marker.is_symlink() or not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                        raise OSError("unsafe restore manifest")
+                    manifest = RestoreManifest.from_bytes(marker.read_bytes()[:_MAX_MANIFEST_BYTES + 1])
+                except Exception as exc:
+                    raise ProfileError("A restore operation manifest is malformed or unsafe; this profile remains locked.") from exc
+                if (marker.name != f".lightning-restore-{manifest.operation_id}.state" or
+                        manifest.profile_id != paths.profile.profile_id or manifest.live_name != paths.db_path.name):
+                    raise ProfileError("A restore manifest belongs to another operation or profile.")
+                if manifest.state == "PENDING":
+                    pending.append((marker, manifest))
+            if not pending:
+                self._check_restore_control(paths, key)
+                self.session.retry_at = 0.0
+                return "undone"  # nothing was pending: what was left is cleared and the profile opens
+            if len(pending) != 1:
+                raise ProfileError("Repair needs exactly one interrupted restore; this profile remains locked.")
+            marker, manifest = pending[0]
+            stem = f".lightning-restore-{manifest.operation_id}"
+            journal_path = paths.data_dir / f"{stem}.sqlite"
+            started = False
+            if journal_path.exists() or journal_path.is_symlink():
+                try:
+                    info = journal_path.stat(follow_symlinks=False)
+                    if journal_path.is_symlink() or not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                        raise OSError("unsafe restore journal")
+                    # Read-write under the lock, as resume does: a hot journal is rolled back.
+                    observed = SqlitePromotionJournalStore(journal_path).read_state()
+                except Exception as exc:
+                    raise ProfileError("The pending restore has no readable matching journal; this profile remains locked.") from exc
+                started = observed.journal is not None
+                if (not started and observed.accepted is not None and
+                        (observed.accepted.checkpoint_id, observed.accepted.sha256) !=
+                        (manifest.old_checkpoint_id, manifest.old_sha256)):
+                    raise ProfileError("Pending restore manifest and journal disagree; this profile remains locked.")
+            if not started:
+                self._undo_unpublished(paths, marker, manifest, key)
+                self.session.retry_at = 0.0
+                return "undone"
+        except ProfileError:
+            raise
+        except Exception as exc:
+            raise ProfileError("Restore repair could not finish. The profile remains locked and every file was kept.") from exc
+        finally:
+            lock.close()
+        self.session.retry_at = 0.0
+        self.resume_interrupted_restore(selected, password)
+        return "finished"
+
+    def _undo_unpublished(self, paths: ProfilePaths, marker: Path, manifest: RestoreManifest, key: bytes) -> None:
+        """A PENDING restore whose journal never started: the live file was never touched. Move its files aside."""
+        stem = f".lightning-restore-{manifest.operation_id}"
+        previous = paths.data_dir / manifest.previous_name
+        if previous.exists() or previous.is_symlink():
+            raise ProfileError("A restore with no journal kept a checkpoint; this profile remains locked.")
+        try:
+            self._require_clean_database_file(paths.db_path)
+            if self._digest(paths.db_path) != manifest.old_sha256:
+                raise ProfileError("changed")
+            self._verify_file(paths.db_path, key)
+        except Exception as exc:
+            raise ProfileError("The profile changed after the restore began, so it cannot be undone safely. "
+                               "It stays locked and every file was kept.") from exc
+        evidence = self._evidence_folder(paths, manifest.operation_id)
+        # The manifest moves last: an interruption before it leaves a PENDING
+        # restore with no journal, and the repair undoes it again the same way.
+        moving = [paths.data_dir / manifest.candidate_name, paths.backups_dir / manifest.source_copy_name,
+                  paths.data_dir / f"{stem}.sqlite", paths.data_dir / f"{stem}.intent"]
+        for path in moving:
+            for item in (path, *self._sidecars(path)):
+                if item.exists() or item.is_symlink():
+                    os.replace(item, evidence / item.name)
+        self._fsync_directory(paths.backups_dir)
+        self._fsync_directory(paths.data_dir)
+        os.replace(marker, evidence / marker.name)
+        self._fsync_directory(paths.data_dir)
+        self._check_restore_control(paths, key)
 
     def _pending_manifest(self, paths: ProfilePaths) -> tuple[Path, RestoreManifest]:
         """The one readable PENDING restore record of this profile, or ProfileError."""

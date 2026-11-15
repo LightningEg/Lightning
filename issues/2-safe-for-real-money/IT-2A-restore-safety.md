@@ -29,6 +29,14 @@ The restore marker is published atomically on Windows (`database/promotion_windo
 ## 2A3 Explicit deterministic repair · L
 After an interruption, one repair path finishes or undoes the restore the same way every time.
 
+**Done when:** the state on disk alone picks the repair. A restore that published nothing is undone; one whose journal reached P1 is finished forward; anything else stays locked with its evidence (go back, IT-2C4, stays the owner's way out).
+- **Intent only** (2A1: no manifest): cleared at unlock and before the next restore. The source copy is deleted when the chosen backup still matches the intent's hash, else moved to `restore-evidence-<id>/`; then the intent goes.
+- **PENDING manifest, no journal yet** (no file, or a store with no journal): undone when the live file still has the manifest's old hash. Record, store, candidate, intent and source copy move to `restore-evidence-<id>/`; the live file is untouched. Today resume refuses this and only go back (a full second restore) gets out.
+- **PENDING manifest with a journal:** finished forward, as resume does now.
+- The resume screen calls this one repair and says which of the two happened. Tests kill the process at each boundary and repeat the repair to show it lands the same way.
+
+**Built (#714):** `repair_interrupted_restore` and `_clear_unpublished` in `lightning/runtime/restore.py`; tests in `tests/test_restore_repair.py`.
+
 ## 2A4 Restore screens and docs · M
 Codex owns the restore UI and the Architecture text; the reboot drill joins the owner's held checks.
 
