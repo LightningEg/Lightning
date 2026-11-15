@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from lightning.core.memo import request_cached
 from lightning.core.money import from_e6, to_e6
 from lightning.database.connection import Database
 
@@ -70,6 +71,7 @@ class DepositRepository:
         )
 
     # -- gam'eya terms (one row per circle account) -------------------------------------------------
+    @request_cached(deep=True)
     def get_gameya(self, account_id: int) -> GameyaTerms | None:
         row = self.db.one("SELECT * FROM gameya_terms WHERE account_id=?", (account_id,))
         if row is None:

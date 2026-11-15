@@ -15,7 +15,9 @@ def certificate(c):
     bank = c.account_flows.open_account('Certificate bank', 'BANK', '2026-09-01', '5000')
     account = c.account_flows.open_account('Certificates', 'DEPOSIT', '2026-09-01', '0', institution='Certificate bank')
     cd, _ = c.deposits.purchase(account.id, 'Contract certificate', '2026-09-01', '2026-09-01',
-        '2027-09-01', '1000', '12', 'SIMPLE', 'AT_MATURITY', 'MONTHLY', bank.id, bank.id)
+        '2027-09-01', '1000', '12', 'SIMPLE', 'MONTHLY', 'MONTHLY', bank.id, bank.id)
+    # Monthly payouts keep it at principal; one paid at maturity grows by its earned interest (IV-12J3), a gain
+    # from its terms, which a quote still cannot change (test_a_quote_cannot_move_a_growing_certificate).
     return account, bank, cd.terms.asset_id, cd.terms.id
 
 
@@ -80,7 +82,7 @@ def test_legacy_opening_certificate_also_ignores_market_quotes(c):
     bank = c.account_flows.open_account('Legacy bank', 'BANK', '2026-09-01', '100')
     account = c.account_flows.open_account('Legacy certificates', 'DEPOSIT', '2026-09-01', '0', institution='Legacy bank')
     cd, _ = c.deposits.record_owned(account.id, 'Legacy certificate', '2026-08-01', '2026-09-01',
-        '2027-08-01', '2000', '12', 'SIMPLE', 'AT_MATURITY', 'MONTHLY', bank.id)
+        '2027-08-01', '2000', '12', 'SIMPLE', 'MONTHLY', 'MONTHLY', bank.id)
     c.assets.repo.upsert_price(cd.terms.asset_id, DAY, D('3000'), 'EGP', 'ONLINE')
     h = c.investments.portfolio(DAY, account.id).open[0]
     assert h.quantity == 1 and h.value == h.cost_basis == 2000 and h.unrealized == 0
@@ -158,6 +160,7 @@ def test_existing_inflated_checkpoint_is_rebuilt_on_upgrade_and_then_stays_idemp
 
 def test_desktop_certificate_opens_its_actual_management_workflow(c, certificate, tmp_path):
     import re
+    pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright, expect
     from tests.browser_support import require_chromium
     from lightning.runtime.http import Host
@@ -178,3 +181,15 @@ def test_desktop_certificate_opens_its_actual_management_workflow(c, certificate
                 page.screenshot(path=str(tmp_path / 'certificate-management-desktop.png'), animations='disabled')
     finally:
         host.stop()
+
+
+def test_a_quote_cannot_move_a_growing_certificate(c):
+    """IV-12J3 with BT-12AQ: paid at maturity, it is worth principal plus interest earned from its terms; a typed or
+    online quote still changes nothing."""
+    bank = c.account_flows.open_account('Growing bank', 'BANK', '2026-09-01', '5000')
+    account = c.account_flows.open_account('Growing certificates', 'DEPOSIT', '2026-09-01', '0', institution='Growing bank')
+    cd, _ = c.deposits.purchase(account.id, 'Growing certificate', '2026-09-01', '2026-09-01',
+        '2027-09-01', '3650', '10', 'SIMPLE', 'AT_MATURITY', 'MONTHLY', bank.id, bank.id)
+    c.assets.repo.upsert_price(cd.terms.asset_id, '2026-09-11', D('9000'), 'EGP', 'ONLINE')
+    h = c.investments.portfolio('2026-09-11', account.id).open[0]
+    assert h.value == D('3660')   # 3,650 plus 10 of 365 days of its 365 interest

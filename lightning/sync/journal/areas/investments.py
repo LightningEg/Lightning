@@ -68,7 +68,7 @@ COMMANDS = {
     "investments.make_pocket": Command("accounts.make_pocket", dict(account_id=ref("accounts"), broker_id=ref("accounts"))),
     # No precondition on a bucket or class: the last typed target or factor wins.
     "investments.set_target": Command("investments.set_target_weight", dict(
-        bucket=TEXT, weight=AMOUNT, class_id=ref("asset_classes"))),
+        bucket=TEXT, weight=AMOUNT, class_id=optional(ref("asset_classes")))),
     "investments.clear_target": Command("investments.clear_target_weight", dict(bucket=TEXT)),
     "investments.set_factor": Command("investments.set_liquidation_factor", dict(
         asset_class_id=ref("asset_classes"), factor=TEXT)),

@@ -6,7 +6,7 @@ preview is refused. Automatic plan matching runs only through home automation.
 from .spec import AMOUNT, DATE, FLAG, INT, LONG, MONTH, TEXT, Command, choice, items, listof, optional, ref
 
 TABLES = ("planned_items", "planned_payments", "loan_extra_payments", "installment_purchases", "budgets",
-          "budget_carryover", "budget_carryover_resets", "cash_funding")
+          "budget_carryover", "budget_carryover_resets", "cash_funding", "budget_estimate_exclusions")
 
 PLAN = dict(kind=choice("BILL", "SUBSCRIPTION", "INCOME", "LOAN"), name=TEXT, amount=AMOUNT,
             frequency=choice("ONCE", "WEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"), interval_count=INT, start_date=DATE,
@@ -83,8 +83,8 @@ COMMANDS = {
     "budgets.save_month": Command("budgets.save_month", dict(month=MONTH, lines=CELLS, only_this_month=FLAG),
                                   adapt=_month),
     "budgets.apply_fill": Command("budgets.apply_fill", dict(month=MONTH, lines=CELLS), adapt=_fill),
-    "budgets.move_room": Command("budgets.move_room", dict(
-        month=MONTH, to_id=ref("categories"), from_id=ref("categories"), amount=AMOUNT)),
+    "budgets.move_room_scoped": Command("budgets.move_room", dict(
+        month=MONTH, to_id=ref("categories"), from_id=ref("categories"), amount=AMOUNT, only_this_month=FLAG)),
     "budgets.set_carryover": Command("budgets.set_carryover", dict(
         month=MONTH, lines=items(category=ref("categories"), enabled=FLAG)), adapt=_carryover),
     "budgets.reset_carryover": Command("budgets.reset_carryover", dict(
@@ -93,6 +93,9 @@ COMMANDS = {
     "budgets.set_recurring_income": Command("budgets.set_recurring_income", dict(
         category_id=ref("categories"), recurring=FLAG), target=CATEGORY),
     "budgets.set_emergency_basis": Command("budgets.set_emergency_basis", dict(basis=choice("spending", "income"))),
+    # NF-12AK2: one expense left out of estimates; its row is keyed by the transaction.
+    "budgets.set_left_out": Command("budgets.set_left_out", dict(transaction_id=ref("transactions"), left_out=FLAG),
+                                    target=("transactions", "transaction_id")),
     "budgets.restore_rows": Command("budgets.restore_rows", dict(category_ids=listof(ref("categories")), rows=BUDGET_ROW)),
     "funding.apply": Command("funding.apply", dict(
         fingerprint=TEXT, amounts=items(category=ref("categories"), amount=TEXT),
@@ -102,6 +105,10 @@ COMMANDS = {
 
 
 # Retain previously queued wire actions while native routes use the service methods.
+def _move_room(c, **values):  # queued before a move could cover one month only (NF-12AJ): the usual plan
+    return c.budgets.move_room(**values, schedule=c.schedules.view())
+
+
 def _purchase(c, **values):
     return c.planning.create_purchase(**values)
 
@@ -114,3 +121,5 @@ COMMANDS["plans.buy_in_instalments"] = Command(_purchase, **{
     key: value for key, value in vars(COMMANDS["planning.create_purchase"]).items() if key != "call"})
 COMMANDS["plans.pay_loan_early"] = Command(_early, **{
     key: value for key, value in vars(COMMANDS["planning.record_early_payment"]).items() if key != "call"})
+COMMANDS["budgets.move_room"] = Command(_move_room, dict(
+    month=MONTH, to_id=ref("categories"), from_id=ref("categories"), amount=AMOUNT))

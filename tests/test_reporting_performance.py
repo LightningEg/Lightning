@@ -201,10 +201,12 @@ PAGE_READ_BUDGET = {
     "/": 450,  # three years of history; tools/perf_check.py keeps the sample's 400-query limit
     # 3AC (2026-10-22): the budget's month view, plan summary, income average and cash flow are cached; Budget for
     # the month 92 reads, for all months 119 (was 334), Expense analysis 139.
+    # NF-7AR (2026-11-14): /plan shows the Upcoming calendar (its month's payments and the first shortfall) instead of the
+    # 30-day table, which it paid for with its own reads: 250 to 260.
     # 7T3 (2026-10-28): an account that plans pay from reads the dated forecast once for the day it goes below zero.
     # IV-12J3 (2026-11-14): one read of the certificates paid at maturity, whose value grows as they earn.
     "/accounts/1": 152, "/transactions": 110, "/budget?period=month": 120,
-    "/budget?period=all": 160, "/plan": 250, "/investments": 175, "/birdview/expenses?period=all": 180,
+    "/budget?period=all": 160, "/plan": 260, "/investments": 175, "/birdview/expenses?period=all": 180,
 }
 
 

@@ -11,7 +11,7 @@ from lightning.foreign_amounts import ForeignAmounts
 from lightning.transactions.figures import cash_amount
 
 from lightning.core.errors import LightningError
-from lightning.core.dates import fmt_date, parse_date
+from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.money import to_decimal
 from lightning.core.errors import ValidationError
 from lightning.core.plural import counted
@@ -118,7 +118,8 @@ async def edit_transaction_popup(request: Request, txn_id: int):
     values = {"kind": kind, "date": txn.date, "amount": str(amount), "category_id": category_id,
               "counterparty": txn.counterparty or "", "owner_id": str(owner_id or ""),
               "to_account_id": str(target.account_id) if target else "", "notes": txn.notes,
-              "return_to": _back(request, f"/accounts/{source.account_id}"), "account_id": str(source.account_id)}
+              "return_to": _back(request, f"/accounts/{source.account_id}"), "account_id": str(source.account_id),
+              "left_out": "1" if c.budgets.is_left_out(txn_id) else ""}
     from .accounts import _transaction_popup_context
     return render(request, "transactions/form_popup.html", **_transaction_popup_context(
         request, c.accounts.get(source.account_id), values, f"/transactions/{txn_id}/edit-popup", txn_id=txn_id,
@@ -131,8 +132,10 @@ async def save_transaction_popup(request: Request, txn_id: int):
     c = container(request)
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in
-              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes", "account_id", "early_checked")}
+              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes", "account_id", "early_checked",
+               "left_out")}
     values["revision"] = form.get("revision")
+    shown = str(form.get("left_out_shown", "")) == "1"  # the switch was on the form: its state is the person's choice
     from .accounts import _safe_return, _transaction_popup_context
     txn = c.transactions.get(txn_id)
     account_id = int(values["account_id"]) if values["account_id"].isdigit() else txn.lines[0].account_id
@@ -147,6 +150,8 @@ async def save_transaction_popup(request: Request, txn_id: int):
                 from .accounts import _popup_counterparty
                 cp = _popup_counterparty(c, values["counterparty"])
                 updated = c.transactions.update_metadata(txn_id, values["date"], cp, values["notes"])
+                if shown:
+                    c.budgets.set_left_out(updated.id, values["left_out"] == "1")
                 return redirect(values["return_to"], f"Saved {updated.ref}; split amounts are unchanged.")
             if values["kind"] not in {"out", "in", "transfer"}:
                 raise ValidationError("Choose a transaction type.", "kind")
@@ -173,6 +178,8 @@ async def save_transaction_popup(request: Request, txn_id: int):
             updated = c.transactions.update_in_account(txn_id, account_id, day, signed, category_id, other,
                                                        counterparty=cp, notes=values["notes"], owner_id=owner_id)
             c.reserves.auto_link_transaction(updated.id)
+            if shown:  # NF-12AK2: only an expense can be left out; any other kind counts as it always did
+                c.budgets.set_left_out(updated.id, values["left_out"] == "1" and values["kind"] == "out")
             notice = " ".join(filter(None, (c.reserves.carry_links(reserve_links, updated.id) if reserve_links else "",
                                             c.planning.review_links(updated.id))))  # 7R, 7U
             return redirect(values["return_to"],
@@ -460,7 +467,61 @@ def detail_page(request: Request, txn_id: int, status_code: int = 200, error: st
                   cash_effects=cash_effects,
                   expense_categories=expense_categories, split_lines=split_lines,
                   touched=c.linked.transaction(txn_id), review=review, reserves=c.reserves.list_active(),
-                  foreign=ForeignAmounts(c.db).get(txn_id))
+                  foreign=ForeignAmounts(c.db).get(txn_id), refund=_refund_context(c, txn))
+
+
+def _refund_context(c, txn) -> dict | None:
+    """NF-12AK3: a refund names its purchase; a purchase lists its refunds and offers *Record a refund*."""
+    if txn.is_void or txn.type.value not in ("IN", "OUT"):
+        return None
+    if txn.type.value == "IN":
+        link = c.refunds.refunded_purchase(txn.id)
+        candidates = c.refunds.candidates(txn.id)
+        if not link and not candidates:
+            return None
+        return {"role": "refund", "link": link, "candidates": candidates}
+    refunds = c.refunds.refunds_of(txn.id)
+    room = c.refunds.room_for_refund(txn.id)
+    if not refunds and room is None:
+        return None
+    return {"role": "purchase", "refunds": refunds, "room": room, "today": today().isoformat()}
+
+
+@router.post("/transactions/{txn_id:int}/refund-link")
+async def link_refund(request: Request, txn_id: int):
+    """This refunds…: name (or stop naming) the purchase a refund returns."""
+    c = container(request)
+    form = await request.form()
+    action = str(form.get("action", "link"))
+    try:
+        with settled_save(request, c):
+            if action == "unlink":
+                c.refunds.unlink(txn_id)
+                return redirect(f"/transactions/{txn_id}", "This refund no longer names a purchase.")
+            if action != "link":
+                raise LightningError("Choose a valid refund action.")
+            expense_id = str(form.get("expense_id", "")).strip()
+            if not expense_id:
+                raise LightningError("Choose the purchase this refunds.")
+            c.refunds.link(txn_id, int(expense_id), str(form.get("amount", "")).strip() or None)
+    except (ValueError, LightningError) as exc:
+        msg = exc.message if isinstance(exc, LightningError) else "Choose the purchase this refunds."
+        return redirect(f"/transactions/{txn_id}", msg)
+    return redirect(f"/transactions/{txn_id}", "Linked this refund to its purchase.")
+
+
+@router.post("/transactions/{txn_id:int}/refund")
+async def record_refund_for_purchase(request: Request, txn_id: int):
+    """Record a refund on a purchase: the money back, already naming the purchase."""
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            c.refunds.record_refund(txn_id, str(form.get("date", "")), str(form.get("amount", "")),
+                                             str(form.get("notes", "")))
+    except LightningError as exc:
+        return redirect(f"/transactions/{txn_id}", exc.message)
+    return redirect(f"/transactions/{txn_id}", "Recorded the refund and linked it to this purchase.")
 
 
 @router.post("/transactions/{txn_id:int}/split")

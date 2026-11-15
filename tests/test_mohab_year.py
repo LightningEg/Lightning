@@ -176,8 +176,16 @@ class Mohab:
         return self.b.submit({}, button="Record and mark")
 
     def receive_salary(self, employer: str) -> Screen:
-        """Cash planning › Mark received › Record and mark received."""
-        self.b.open(self._pay_link(self.b.go("Cash planning"), employer))
+        """Cash planning › its payday on the calendar › Mark received › Record and mark received."""
+        plan = self.b.go("Cash planning")
+        # NF-7AR: the next payments are the Upcoming calendar; salary sits on its payday, so open that day first.
+        days = [m for m in re.finditer(r'<a class="pay-cal-day[^"]*is-payday[^"]*"[^>]*href="([^"]+)".*?</a>', plan.html, re.S)
+                if re.search(r'pay-mark is-(upcoming|late)', m.group(0))]
+        if days:
+            plan = self.b.open(days[0].group(1).replace("&amp;", "&"))
+        else:
+            assert "pay-cal" not in plan.html, f"No payday still to receive on the calendar of {plan.path}"  # the phone lists it
+        self.b.open(self._pay_link(plan, employer))
         return self.b.submit({}, button="Record and mark received")
 
     def transaction_id(self, account: str, party: str) -> str:
@@ -650,7 +658,7 @@ def _the_rest_of_lightning(o: Mohab) -> None:
     o.notes["view_report"] = b.click("Summary and export")
 
     b.open("/investments/targets")
-    for bucket, weight in (("Stocks", "50"), ("Gold", "30")):
+    for bucket, weight in (("High risk", "50"), ("Medium risk", "30")):  # by risk level, not class (NF-12AM)
         o.notes[f"target_{bucket}"] = b.submit({"bucket": bucket, "target_weight": weight}, action="/investments/targets")
 
     loans = b.go("Cash planning", "Loans")
@@ -1247,7 +1255,9 @@ def test_end_of_service_is_not_monthly_pay(mohab):
 
 def test_between_jobs_the_next_pay_is_the_new_employer(mohab):
     answer = mohab.answers["next_pay"]
-    assert answer.shows("Safe to spend until 2027-10-01", "Valeo 2027-10-01 · Income +55,000")
+    # NF-7AR: with no payday left in September the calendar opens on October, and its payday day lists Valeo.
+    assert answer.shows("Safe to spend until 2027-10-01", "Payday")
+    assert "Valeo" in answer.screen.text and "55,000" in answer.screen.text
 
 
 def test_looks_recurring_offers_fixed_monthly_spending_but_not_investment_income(mohab):
@@ -1475,7 +1485,10 @@ def test_food_over_plan_two_months_running_gets_room_from_shopping(mohab):
     answer = mohab.answers["food_over"]
     assert answer.shows("Food & groceries over plan two months running Over its plan in July and August, by up to "
                         "450 EGP. Move 450 from Shopping, which had that left both months. Move it")
-    assert mohab.notes["move_popup"].shows("Move plan to Food & groceries", "From 2027-09 on · the total plan stays the same")
+    popup = mohab.notes["move_popup"]  # NF-12AJ: two months running starts on the usual plan; this month alone is offered too
+    assert popup.shows("Move plan to Food & groceries", "The total plan stays the same", "Cover this month September 2027 only",
+                       "Change my usual plan Every month from September 2027")
+    assert 'value="usual" checked' in popup.html
     assert mohab.notes["moved"].shows("Moved plan from Shopping to Food & groceries from 2027-09 on.")
     assert not mohab.answers["food_over_after"].shows("over plan two months running")
 
@@ -1795,7 +1808,7 @@ def test_a_register_view_is_saved_and_summarised(mohab):
 
 
 def test_investing_targets_are_kept(mohab):
-    assert mohab.notes["target_Stocks"].shows("Target saved") and mohab.notes["target_Gold"].shows("Target saved")
+    assert mohab.notes["target_High risk"].shows("Target saved") and mohab.notes["target_Medium risk"].shows("Target saved")
 
 
 def test_paying_the_phone_early_shortens_it(mohab):

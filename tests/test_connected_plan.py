@@ -5,6 +5,8 @@ from dataclasses import replace
 import shutil
 from decimal import Decimal
 
+import pytest
+
 from lightning.core.dates import today
 from lightning.database import migrator
 from lightning.database.connection import Database
@@ -333,10 +335,62 @@ def test_over_plan_two_months_running_offers_to_move_room(c, setup):
     dialog = visible_text(browser.get(item["href"]).text)
     assert "Food & groceries 5,000 → 6,000" in dialog
     assert "Food & groceries was over its plan two months running; Transportation had room both months." in dialog
-    browser.post("/budget/move", data={"month": MONTH, "to": food, "from": transport, "amount": "1000"})
+    assert 'value="usual" checked' in browser.get(item["href"]).text  # two months running: the usual plan falls short
+    browser.post("/budget/move", data={"month": MONTH, "to": food, "from": transport, "amount": "1000", "scope": "usual"})
     plans = c.budgets.amounts_for(MONTH, loans=False, schedule=c.schedules.view())
     assert (plans[food][0], plans[transport][0]) == (Decimal("6000"), Decimal("2000"))
     assert c.budgets.amounts_for("2026-11", loans=False, schedule=c.schedules.view())[food][0] == Decimal("5000")  # history unchanged
+
+
+NEXT = "2027-01"
+
+
+def _plans(c, food, transport):
+    """Food and Transport's plans in December and January, and each month's total plan."""
+    out = {}
+    for month in (MONTH, NEXT):
+        plans = c.budgets.amounts_for(month, loans=False, schedule=c.schedules.view())
+        out[month] = (plans[food][0], plans[transport][0], sum(v[0] for v in plans.values() if v[0] is not None))
+    return out
+
+
+@pytest.mark.parametrize("only_this_month, january", [(True, ("5000", "3000")), (False, ("5500", "2500"))])
+def test_move_room_covers_this_month_or_changes_the_usual_plan(c, setup, only_this_month, january):
+    # NF-12AJ (#626 stress test): a December move used to change January too; now that is the person's choice.
+    from lightning.undo import user_action
+    food, transport = _salaried(c, setup)
+    before = _plans(c, food, transport)
+    with user_action("Move budget"):
+        c.budgets.move_room(MONTH, food, transport, "500", only_this_month, schedule=c.schedules.view())
+    after = _plans(c, food, transport)
+    assert after[MONTH][:2] == (Decimal("5500"), Decimal("2500"))
+    assert after[NEXT][:2] == tuple(Decimal(x) for x in january)
+    assert after[MONTH][2] == before[MONTH][2] and after[NEXT][2] == before[NEXT][2]  # the total plan is unchanged
+    c.undo.replay()
+    assert _plans(c, food, transport) == before  # undo restores both months
+
+
+@pytest.mark.parametrize("phone", [False, True])
+def test_move_dialog_offers_both_and_starts_on_this_month_without_two_months_of_evidence(c, setup, phone):
+    from tests.test_budget_exclusions_ui import client_for
+    food, transport = _salaried(c, setup)
+    browser = client_for(c, phone, "en")
+    href = f"/budget/move?month={MONTH}&to={transport}&from={food}&amount=500"  # Transportation was never over
+    page = browser.get(href).text
+    text = visible_text(page)
+    assert 'value="month" checked' in page and 'value="usual" checked' not in page
+    assert ("Transportation 3,000 → 3,500 Food & groceries 5,000 → 4,500" if phone
+            else "Transportation 3,000 → 3,500 · Food & groceries 5,000 → 4,500") in text
+    assert "December 2026 only · January 2027 stays Transportation 3,000 · Food & groceries 5,000" in text
+    assert "Every month from December 2026 · Transportation 3,500 · Food & groceries 4,500" in text
+    browser.post("/budget/move", data={"month": MONTH, "to": transport, "from": food, "amount": "500", "scope": "month"})
+    assert _plans(c, food, transport)[MONTH][:2] == (Decimal("4500"), Decimal("3500"))
+    assert _plans(c, food, transport)[NEXT][:2] == (Decimal("5000"), Decimal("3000"))
+    assert browser.post("/settings/locale", data={"locale": "ar"}, follow_redirects=False).status_code == 303
+    arabic = visible_text(browser.get(href).text)
+    for english in ("Cover this month", "Change my usual plan", "only", "stays", "Every month", "total plan"):
+        assert english not in arabic
+    assert "غطّي الشهر ده" in arabic and "غيّر خطتي المعتادة" in arabic
 
 
 def test_editing_a_goal_saves_and_returns_it(c):

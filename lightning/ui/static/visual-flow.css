@@ -23,3 +23,9 @@ html:not(.phone) .main .card { margin-block-end:20px; }
 .phone .phone-group-head { grid-template-columns:minmax(0,1fr) auto; }
 .phone .phone-group-left { white-space:nowrap; }
 
+
+/* Section headers: a soft wash that fades out is the break between sections, not a hairline (owner 2026-11-14,
+   as the phone's cards already do). The colour is the theme's own meadow, so every theme follows. */
+.main .overview-section-head { padding:10px 16px; border-bottom:0; border-radius:14px;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--meadow, #14A874) 16%, transparent), color-mix(in srgb, var(--azure, #0B6DD6) 5%, transparent) 60%, transparent 100%); }
+[dir="rtl"] .main .overview-section-head { background:linear-gradient(270deg, color-mix(in srgb, var(--meadow, #14A874) 16%, transparent), color-mix(in srgb, var(--azure, #0B6DD6) 5%, transparent) 60%, transparent 100%); }

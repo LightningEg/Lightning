@@ -51,6 +51,7 @@ from lightning.workflows.accounts import AccountWorkflows
 from lightning.undo import UndoService
 from lightning.saved_views import SavedViewService
 from lightning.reimbursements import ReimbursementService
+from lightning.transactions.refunds import RefundLinkService
 from lightning.planning.funding import CashFundingService
 from lightning.deposits.receipts import DepositReceiptService
 
@@ -95,6 +96,7 @@ class Container:
     zakat: ZakatService
     saved_views: SavedViewService
     reimbursements: ReimbursementService
+    refunds: RefundLinkService
     funding: CashFundingService
     deposit_receipts: DepositReceiptService
     freshness: FreshnessService
@@ -322,6 +324,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         undo=undo,
         saved_views=SavedViewService(db, categories, transactions, reporting),
         reimbursements=ReimbursementService(db),
+        refunds=RefundLinkService(db, transactions),
         funding=CashFundingService(db, budgets, reporting, reserves, planning, categories, settings, schedules,
                                    position),
         deposit_receipts=deposit_receipts,

@@ -2,6 +2,68 @@
 
 What changed in each version, in plain words. Generated from `ai/changelog/` by `python tools/release_notes.py`; do not edit by hand. The full detail for each version is in the same folder.
 
+## 2.3.2 · 2026-11-15
+
+**Capture**
+
+- Cash planning shows the upcoming calendar, refunds no longer give a 7,000% savings rate, and Settings has a Glossary.
+- Cash planning has no separate Upcoming tab; its calendar is on the Plan page.
+
+**Plan**
+
+- Refilling the emergency fund or a goal by what the plan asks no longer lowers Safe to spend, and payday no longer offers the same saving twice.
+- Lightning can now remember a purchase you want budget averages to leave out.
+- Budget averages and Fill can leave out one purchase, with its refunds, while Cash flow and Spent still count it.
+- A Leave out of estimates switch on a purchase keeps one big buy from inflating your budget averages.
+- Moving budget between categories now asks whether to cover just this month or change your usual plan, so a December move no longer changes January unless you choose it.
+- Upcoming compares the same payments each month, Recurring shows the right income share, and bills can get a category when paid.
+- A refund can now name the purchase it returns, so budget averages count it in that purchase's month.
+- On a refund you can pick the purchase it returns, and a purchase can record its own refund.
+- Budget now shows next month as it will start, read only, so you can see your plan, bills and income before the month begins.
+- Running-out warnings now follow how you usually spend in a category and leave its bills aside, and say "may" until there are two months of history.
+- When your scheduled salary falls from a date, Budget offers to plan on the lower pay from then or keep your average.
+- Cash planning links to budget and savings controls and offers payday funding after salary receipt.
+- Compare scenarios now gives one answer, shows a late salary on the day it hurts, and a purchase you check can be added to your plan in one tap.
+- A side income before your salary now adds to Safe to spend instead of moving payday earlier.
+- You can now mark an investment, such as a fixed-income fund you can sell in days, to count in your free cash and safe to spend.
+- Fill this month now opens on what actually changed, keeps the limits you set unless you choose otherwise, and says when nothing needs doing.
+- See and restore categories outside the budget on PC and phone.
+- Categories you leave out of the budget are now called Outside the budget, Budget says their spending still counts in Cash flow, and a limit set for this month only is marked as such.
+- Budget suggestions no longer treat one large purchase as a monthly cost, and money paid back counts against the month you spent it, so a refund can no longer make an average negative.
+- The Move plan popup now says why a category needs room, instead of always claiming it was over its plan two months running.
+
+**Own**
+
+- Target allocation is now set by risk level (low, medium, high), and you can move any holding to the level you want, so a money market fund counts toward your low-risk share.
+- Certificate values stay at their recorded principal and cannot be overridden by ordinary price updates.
+- Total investment estimates now cover every account and gold item estimates update their actual value.
+- Sales entered by cash received now remove the correct number of investment units.
+- Foreign investment purchase returns now match the holding value.
+- Investment forms now show the currency you are entering.
+- Workbook import now explains problems and shows a clearer review.
+
+**Everywhere**
+
+- Arabic names sort by their letters in recurring plans, held-money reports and name pickers.
+- Application dates use one consistent clock.
+- Date pickers now start the week on Saturday, matching the other calendars on PC and phone.
+
+**Feel**
+
+- The phone has a new card design on every screen, a Plan tab with what is due before payday, your bills, loans and what you set aside, and Activity now opens from Money.
+- Messages after a save now go away by themselves after five seconds, and you can close one at once with its X.
+- Built-in categories use consistent sentence case.
+- Make English and Arabic wording more consistent.
+- Get an optional reminder when expected income is late.
+- Edit headings show names and transaction details.
+- Papyrus and Dendera scroll smoothly on the phone and no longer keep the phone busy while it rests.
+- Scrolling on the phone does less work on every frame.
+- Saving on any page now keeps you where you are, without reloading; the transaction registers still reload for now.
+
+**Build**
+
+- The Investments holdings table shows average cost and current price per unit.
+
 ## 2.2.0 · 2026-11-12
 
 **Capture**

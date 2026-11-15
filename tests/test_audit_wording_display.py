@@ -32,8 +32,8 @@ def test_the_late_chip_shows_on_the_plan_and_the_review(c, setup):
     _overdue_bill(c, accounts)
     browser = _ScreenClient(create_app(c), "http://testserver")
     plan = visible_text(browser.get("/plan").text)
-    # IV-12Z2: a late bill is a Needs you row with its days late; the next 30 days start at today with its next one.
-    assert "Landlord is late" in plan and "11 days late" in plan and "Landlord 20 Jan 2027" in plan
+    # IV-12Z2: a late bill is a Needs you row with its days late; the calendar below shows the month.
+    assert "Landlord is late" in plan and "11 days late" in plan
     assert "Late · 11 days" not in plan
     assert "Late · 11 days" in visible_text(browser.get("/review").text)
 

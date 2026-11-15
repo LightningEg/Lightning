@@ -6,6 +6,7 @@ Bills protected is one of its parts; the second line is named "To your plan", no
 from __future__ import annotations
 
 from datetime import date
+from decimal import ROUND_HALF_UP, Decimal
 
 import pytest
 from fastapi.testclient import TestClient
@@ -63,7 +64,9 @@ def test_reserves_get_their_monthly_need_not_all_free_cash(mohab):
     plan, pr = _sums(mohab, date(2026, 10, 21))
     fund = mohab.health.emergency_fund(date(2026, 10, 21))
     emergency = next(r for r in plan["reserves"] if r["name"] == "Emergency Fund")
-    assert 0 < emergency["suggested"] <= fund.top_up < emergency["gap"]
-    assert all(r["suggested"] <= r["monthly"] and r["suggested"] == r["suggested"].to_integral() for r in plan["reserves"])
+    # BT-7AV2: in whole pounds as the plan shows the need (5,404 for 5,403.86), never more than that.
+    whole = lambda v: v.quantize(Decimal("1"), ROUND_HALF_UP)
+    assert 0 < emergency["suggested"] <= whole(fund.top_up) < emergency["gap"]
+    assert all(r["suggested"] <= whole(r["monthly"]) and r["suggested"] == r["suggested"].to_integral() for r in plan["reserves"])
     assert all(r["suggested"] == r["suggested"].to_integral() for r in plan["rows"])
     assert pr["unassigned"] > 0

@@ -7,7 +7,7 @@ from __future__ import annotations
 from datetime import date
 from decimal import Decimal
 
-from lightning.core.dates import parse_month, today
+from lightning.core.dates import month_of, parse_month, today
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO
 
@@ -16,6 +16,9 @@ def reserve_goal_needs(reserves, month: str, as_of: date | None = None) -> list[
     """Informational monthly saving needs for dated project reserves."""
     day = as_of or today()
     month_start, _ = parse_month(month)
+    # BT-7AV1 (owner, 2026-11-14): the current month's need is fixed on the 1st, less what was moved in since.
+    moves = (reserves.month_moves(month_start.isoformat())
+             if month == month_of(today()) and month_of(day) == month and hasattr(reserves, "month_moves") else {})
     result = []
     for reserve in reserves.list_active():
         if reserve["kind"] == "EMERGENCY" or reserve.get("planned_item_id") or not reserve.get("due_date"):
@@ -28,6 +31,10 @@ def reserve_goal_needs(reserves, month: str, as_of: date | None = None) -> list[
         missing = max(reserve["target"] - reserve["allocated"], ZERO)
         months_left = max((due.year - day.year) * 12 + due.month - day.month + 1, 1)
         amount = (missing / months_left).quantize(Decimal("0.01"))
+        if reserve["id"] in moves:
+            start = moves[reserve["id"]]
+            asked = (max(reserve["target"] - start["allocated"], ZERO) / months_left).quantize(Decimal("0.01"))
+            amount = max(asked - start["added"], ZERO)
         if amount:
             result.append({"id": reserve["id"], "name": reserve["name"], "amount": amount,
                            "due_date": reserve["due_date"], "missing": missing})

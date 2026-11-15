@@ -28,6 +28,40 @@
 </section>
 {%- endmacro %}
 
+{# NF-12AK3: a refund names its purchase; a purchase lists its refunds and records one. `r` is the route's refund
+   context: role 'refund' (link, candidates) or 'purchase' (refunds, room, today). Counted in the purchase's month for
+   estimates only; cash keeps the refund's date. #}
+{% macro refund_panel(r, txn, base) -%}
+{% if r %}{% set editable = not request.state.read_only|default(false) %}
+<section class="card linked-panel" id="refund-link" aria-labelledby="refund-title">
+  {% if r.role == 'refund' %}
+  <h2 id="refund-title">{{ 'This refunds…'|tr(locale) }}</h2>
+  {% if r.link %}<div class="{{ 'phone-row' if phone_mode() else 'compact-row' }} linked-row"><span><a class="linked-name" href="/transactions/{{ r.link.expense_id }}">{{ r.link.description or r.link.ref }}</a><small>{{ 'Bought {date} · estimates count this refund in that month'|tr(locale, date=r.link.date|day(locale)) }}</small></span><b class="num">{{ r.link.amount|money }}</b>
+    {% if editable %}<form method="post" action="/transactions/{{ txn.id }}/refund-link"><input type="hidden" name="action" value="unlink"><button class="btn small">{{ 'Remove link'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div>
+  {% else %}<p class="muted small">{{ 'Name the purchase this money returns, so budget averages count it in the month you bought it.'|tr(locale) }}</p>{% endif %}
+  {% if editable and r.candidates %}<form method="post" action="/transactions/{{ txn.id }}/refund-link">
+    <input type="hidden" name="action" value="link">
+    <div class="field"><label for="refund-expense">{{ ('Another purchase' if r.link else 'Purchase')|tr(locale) }}</label><select id="refund-expense" name="expense_id" data-own-picker required>
+      <option value="">{{ 'Type to find the purchase'|tr(locale) }}</option>{% for p in r.candidates %}<option value="{{ p.id }}">{{ p.description or p.ref }} · {{ p.date|day(locale) }} · {{ 'up to {amt}'|tr(locale, amt=p.max_amount|money) }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="refund-amount">{{ 'Amount it returns'|tr(locale) }}</label><input id="refund-amount" type="text" name="amount" inputmode="decimal" placeholder="{{ 'The whole refund'|tr(locale) }}"></div>
+    <div class="actions"><button class="btn primary{{ ' phone-save' if phone_mode() }}">{{ 'Link refund'|tr(locale) }}</button></div>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  </form>{% endif %}
+  {% else %}
+  <h2 id="refund-title">{{ 'Refunds'|tr(locale) }}</h2>
+  {% if r.refunds %}<div class="linked-rows">{% for x in r.refunds %}{{ link_row('/transactions/' ~ x.refund_id, x.description or x.ref, 'Returned {date}'|tr(locale, date=x.date|day(locale)), x.amount|money) }}{% endfor %}</div>{% endif %}
+  {% if r.room and r.room.left > 0 %}<p class="muted small">{{ '{amt} not returned'|tr(locale, amt=r.room.left|money) }}</p>
+  {% if editable and r.room.one_category %}<form method="post" action="/transactions/{{ txn.id }}/refund">
+    <div class="field"><label for="refund-date">{{ 'Date'|tr(locale) }}</label><input id="refund-date" type="date" name="date" value="{{ r.today }}" required></div>
+    <div class="field"><label for="refund-amount">{{ 'Amount back'|tr(locale) }}</label><input id="refund-amount" type="text" name="amount" inputmode="decimal" value="{{ r.room.left|typed }}" required></div>
+    <div class="actions"><button class="btn{{ ' phone-save' if phone_mode() }}">{{ 'Record a refund'|tr(locale) }}</button></div>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  </form>{% elif editable %}<p class="muted small">{{ 'Split across categories: record the refund from its account, then name this purchase on it.'|tr(locale) }}</p>{% endif %}
+  {% elif r.refunds %}<p class="muted small">{{ 'Fully returned'|tr(locale) }}</p>{% endif %}
+  {% endif %}
+</section>{% endif %}
+{%- endmacro %}
+
 {# The one-tap suggested links (was /activity/{id}): `d` is ActivityReview.summary. #}
 {% macro suggested_links(d, base) -%}
 <section class="card linked-panel" aria-labelledby="suggested-title">

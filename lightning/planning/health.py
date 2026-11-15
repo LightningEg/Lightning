@@ -196,7 +196,7 @@ def _month_label(month: str) -> str:
 
 def _gap(flow) -> str:
     """The Overview's words for a month whose money out is more than twice its money in."""
-    return f"{fmt(-flow.net, 0)} more went out than the {fmt(flow.inflows, 0)} that came in"
+    return flow.gap_sentence
 
 
 def compare_to_limit(value: Decimal | None, limit: Decimal | None, direction: str) -> str | None:
@@ -530,8 +530,9 @@ class HealthService:
         """Use the Reserves page's single target and selected income-or-spending basis."""
         # Today's fund is read the way the Reserves page reads it (the active reserve), so both pages say the same
         # months; a past date uses the position's reconstructed rows.
-        rows = (self.reserves.list_active() if day == today()
-                else self.position.at(day, match_payments=False).reserve_rows or ())
+        if day == today():
+            return emergency_fund(self.reserves, self.budgets, month_of(day), self.schedules.view())
+        rows = self.position.at(day, match_payments=False).reserve_rows or ()
         reserve = next((row for row in rows if row["kind"] == "EMERGENCY"), None)
         return self.budgets.emergency_fund(month_of(day), reserve["effective_allocated"] if reserve else None, schedule=self.schedules.view())
 

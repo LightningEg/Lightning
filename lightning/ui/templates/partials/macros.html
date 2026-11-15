@@ -149,3 +149,15 @@
 {%- endmacro %}
 
 {# The watermark (A02.3) is CSS: .lead-card::after, the mark in the corner of the page's Lead card. #}
+
+{# NF-12AK2: leave one expense out of budget averages and Fill, with its linked refunds and claim receipts. Optional,
+   never automatic; Cash flow and Spent still count it. On the PC edit and on the phone's add and edit under More.
+   `left_out_shown` tells the route the switch was on the form, so a form without it never changes the choice. #}
+{% macro left_out_switch(values) -%}
+<div class="field out-only left-out-field"{{ ' hidden' if values.kind and values.kind != 'out' }}>
+  <input type="hidden" name="left_out_shown" value="1">
+  <label for="popup-left-out">{{ 'Leave out of estimates'|tr(ui_locale()) }}</label>
+  <label class="switch"><input id="popup-left-out" type="checkbox" name="left_out" value="1"{{ ' checked' if values.left_out }}><span class="sr-only">{{ 'Leave out of estimates'|tr(ui_locale()) }}</span></label>
+  <small class="muted">{{ 'Budget averages skip it and its refunds. Cash flow and Spent still count it.'|tr(ui_locale()) }}</small>
+</div>
+{%- endmacro %}

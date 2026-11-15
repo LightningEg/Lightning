@@ -119,5 +119,5 @@ jewellery, foreign-currency certificates, shared ownership, zakat on these kinds
 - **2026-11-14, IV-12J built (PR #697).** C2, C7, N4: a certificate has its own holding page (`investments/certificate.html`,
   PC and phone; `tests/test_certificate_holding.py`) and the certificates page leads with its list. C4: a certificate
   paid at maturity is valued at principal plus interest earned (`core/certificate_schedule.py`, `Valuer._certificate`).
-  C8: a variable rate is dated (`cd_rate_changes`, migration 0085); part redemption stays an inbox line. C3, C5, C6 were
+  C8: a variable rate is dated (`cd_rate_changes`, migration 0088); part redemption stays an inbox line. C3, C5, C6 were
   built earlier (IV-12J2, IV-12J4's notices). Mohab has no compound certificate yet: inbox line, owner pick.

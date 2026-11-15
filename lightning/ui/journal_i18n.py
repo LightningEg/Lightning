@@ -157,7 +157,7 @@ COMMAND_NAMES = {
     "planning.record_early_payment": "Record early payment",
     "planning.create": "Create planned item", "planning.update": "Edit planned item",
     "planning.record_payment": "Pay planned item", "planning.mark_paid": "Pay planned item",
-    "budgets.set_budget": "Save budget", "budgets.move_room": "Move budget",
+    "budgets.set_budget": "Save budget", "budgets.move_room": "Move budget", "budgets.move_room_scoped": "Move budget",
     "reconciliation.close": "Record account reconciliation",
     "bank_imports.stage": "Import bank statement", "bank_imports.confirm": "Confirm bank import",
     "bank_imports.stage_chunked": "Import bank statement", "bank_imports.confirm_packed": "Confirm bank import",

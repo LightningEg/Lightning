@@ -45,7 +45,7 @@ def test_comprehensive_roundtrip_and_legacy_headers(c, tmp_path):
     target = build(tmp_path/'new.db', key=b'k' * 32)
     target.db.execute("INSERT INTO profile_identity(singleton,profile_id) VALUES(1,'00000000-0000-0000-0000-000000000001')")
     prepared = prepare_import(target, data)
-    assert len(prepared) == 63  # property_contracts and property_flows (NF-12M) are the 60th and 61st, foreign_amounts (NF-7AK3) the 62nd, cd_rate_changes (IV-12J4) the 63rd
+    assert len(prepared) == 65  # property_contracts and property_flows (NF-12M) are the 60th and 61st, foreign_amounts (NF-7AK3) the 62nd, refund_links (NF-12AK3) the 63rd, budget_estimate_exclusions (NF-12AK2) the 64th, cd_rate_changes (IV-12J4) the 65th
     assert target.db.scalar('SELECT count(*) FROM transactions') == 0
     confirm_import(target, data)
     assert target.db.scalar('SELECT profile_id FROM profile_identity') == '00000000-0000-0000-0000-000000000001'
@@ -194,7 +194,7 @@ def test_custom_master_setup_is_not_overwritten(c):
 
 def test_custom_nonledger_setup_is_not_overwritten(c):
     from lightning.workflows.workbook_import import _unused
-    c.investments.set_target_weight('Stocks', Decimal('70'), c.assets.get_class_by_code('STOCK').id)
+    c.investments.set_target_weight('High risk', Decimal('70'))
     with pytest.raises(ValueError, match='existing setup'):
         _unused(c)
 

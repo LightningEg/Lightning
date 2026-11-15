@@ -11,6 +11,7 @@ from decimal import Decimal
 
 from lightning.budgeting.domain import over_plan_by
 from lightning.core.money import ZERO, fmt
+from lightning.planning.health import Ratio
 from lightning.reporting.spending import change as spending_change
 
 
@@ -35,6 +36,8 @@ def overview(inflows: Decimal, outflows: Decimal, net: Decimal, savings_rate: De
         if outflows > ZERO:
             return sentence("{amt} went out " + when + " and nothing came in.", amt=fmt(outflows, 0))
         return sentence("Nothing came in or went out " + when + ".")
+    if thin and outflows < ZERO:
+        return sentence("Refunds were more than your spending, so there is no savings rate yet.")
     if thin or net < ZERO:
         return sentence("{amt} more went out than came in " + when + ".", amt=fmt(-net, 0))
     return sentence("You kept {n}% of what came in " + when + ".", n=f"{savings_rate:.0f}")
@@ -135,10 +138,11 @@ def count(n: int, one: str, many: str, none: str) -> dict:
     return sentence(one) if n == 1 else sentence(many, n=n)
 
 
-def recurring(monthly_out: Decimal, percent: Decimal | None) -> dict:
+def recurring(monthly_out: Decimal, income: Decimal | None) -> dict:
     """What do my bills take? Told against income when income is known (IV-12Y4)."""
     if monthly_out <= ZERO:
         return sentence("No bills or subscriptions yet.")
+    percent = Ratio("fixed_costs_to_income", monthly_out, income).percent
     if percent is not None:
         return sentence("Your bills take {amt} a month, {n}% of your income.", amt=fmt(monthly_out, 0), n=f"{percent:.0f}")
     return sentence("Your bills take {amt} a month.", amt=fmt(monthly_out, 0))

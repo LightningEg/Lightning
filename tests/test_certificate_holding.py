@@ -226,14 +226,14 @@ def test_a_dated_rate_moves_the_growing_value_of_a_compound_certificate(c, setup
     assert _value(c, certificate.terms.asset_id, "2026-12-01") == Decimal("10508.04")
 
 
-def test_migration_0085_adds_the_rate_changes_table_to_an_older_profile(tmp_path, monkeypatch):
+def test_migration_0088_adds_the_rate_changes_table_to_an_older_profile(tmp_path, monkeypatch):
     import shutil
     from lightning.database import migrator
     from lightning.database.connection import Database
-    old = tmp_path / "migrations_84"
+    old = tmp_path / "migrations_87"
     old.mkdir()
     for path in migrator.MIGRATIONS_DIR.glob("*.sql"):
-        if int(path.name[:4]) <= 84:
+        if int(path.name[:4]) <= 87:
             shutil.copy(path, old / path.name)
     bundled = migrator.MIGRATIONS_DIR
     monkeypatch.setattr(migrator, "MIGRATIONS_DIR", old)
@@ -242,7 +242,7 @@ def test_migration_0085_adds_the_rate_changes_table_to_an_older_profile(tmp_path
         migrator.migrate(db)
         assert not db.has_table("cd_rate_changes")
         monkeypatch.setattr(migrator, "MIGRATIONS_DIR", bundled)
-        assert migrator.migrate(db) == ["0085_cd_rate_changes (APPLIED)"]
+        assert migrator.migrate(db) == ["0088_cd_rate_changes (APPLIED)"]
         assert db.has_table("cd_rate_changes") and db.scalar("SELECT COUNT(*) FROM cd_rate_changes") == 0
         assert migrator.migrate(db) == []
     finally:
