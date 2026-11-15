@@ -1,7 +1,7 @@
-"""Household records: saved register views, reimbursement claims and their receipts, and the zakat settings."""
+"""Household records: saved register views, reimbursement claims and their receipts, refund links and the zakat settings."""
 from .spec import AMOUNT, DATE, FLAG, TEXT, Command, filtered, optional, ref
 
-TABLES = ("saved_views", "reimbursement_claims", "reimbursement_receipts", "zakat_settings")
+TABLES = ("saved_views", "reimbursement_claims", "reimbursement_receipts", "refund_links", "zakat_settings")
 # The one zakat row exists on every device from the start, so its identity is fixed rather than random.
 NATURAL = {"zakat_settings": ("id",)}
 
@@ -23,6 +23,14 @@ COMMANDS = {
         claim_id=ref("reimbursement_claims"), link_id=ref("reimbursement_receipts")), target=CLAIM),
     "reimbursements.delete_claim": Command("reimbursements.delete_claim", dict(claim_id=ref("reimbursement_claims")),
                                            target=CLAIM),
+    # NF-12AK3: a refund names its purchase; one link per refund, so the refund identifies it.
+    "refunds.link": Command("refunds.link", dict(
+        refund_id=ref("transactions"), expense_id=ref("transactions"), amount=optional(AMOUNT)),
+        target=("transactions", "refund_id"), creates="refund_links"),
+    "refunds.record_refund": Command("refunds.record_refund", dict(
+        expense_id=ref("transactions"), date=DATE, amount=AMOUNT, notes=TEXT), creates="transactions"),
+    "refunds.unlink": Command("refunds.unlink", dict(refund_id=ref("transactions")),
+                              target=("transactions", "refund_id")),
     # The settings are one row that always exists; the last save wins.
     "zakat.save_settings": Command("zakat.save_settings", dict(
         zakat_day=optional(TEXT), typed_nisab=optional(AMOUNT), count_worn_gold=FLAG, deduct_debts_due=FLAG)),
