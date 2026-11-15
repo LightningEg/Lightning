@@ -2554,6 +2554,7 @@ initCurrencySearch();
       const kind = kinds.find((input) => input.checked)?.value || "out";
       form.querySelectorAll(".transfer-only").forEach((field) => field.hidden = kind !== "transfer");
       form.querySelectorAll(".money-only").forEach((field) => field.hidden = kind === "transfer");
+      form.querySelectorAll(".out-only").forEach((field) => field.hidden = kind !== "out");
       if (category) {
         let cleared = false;
         [...category.options].forEach((option) => {
