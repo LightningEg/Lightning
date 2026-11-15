@@ -118,7 +118,8 @@ async def edit_transaction_popup(request: Request, txn_id: int):
     values = {"kind": kind, "date": txn.date, "amount": str(amount), "category_id": category_id,
               "counterparty": txn.counterparty or "", "owner_id": str(owner_id or ""),
               "to_account_id": str(target.account_id) if target else "", "notes": txn.notes,
-              "return_to": _back(request, f"/accounts/{source.account_id}"), "account_id": str(source.account_id)}
+              "return_to": _back(request, f"/accounts/{source.account_id}"), "account_id": str(source.account_id),
+              "left_out": "1" if c.budgets.is_left_out(txn_id) else ""}
     from .accounts import _transaction_popup_context
     return render(request, "transactions/form_popup.html", **_transaction_popup_context(
         request, c.accounts.get(source.account_id), values, f"/transactions/{txn_id}/edit-popup", txn_id=txn_id,
@@ -131,8 +132,10 @@ async def save_transaction_popup(request: Request, txn_id: int):
     c = container(request)
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in
-              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes", "account_id", "early_checked")}
+              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes", "account_id", "early_checked",
+               "left_out")}
     values["revision"] = form.get("revision")
+    shown = str(form.get("left_out_shown", "")) == "1"  # the switch was on the form: its state is the person's choice
     from .accounts import _safe_return, _transaction_popup_context
     txn = c.transactions.get(txn_id)
     account_id = int(values["account_id"]) if values["account_id"].isdigit() else txn.lines[0].account_id
@@ -147,6 +150,8 @@ async def save_transaction_popup(request: Request, txn_id: int):
                 from .accounts import _popup_counterparty
                 cp = _popup_counterparty(c, values["counterparty"])
                 updated = c.transactions.update_metadata(txn_id, values["date"], cp, values["notes"])
+                if shown:
+                    c.budgets.set_left_out(updated.id, values["left_out"] == "1")
                 return redirect(values["return_to"], f"Saved {updated.ref}; split amounts are unchanged.")
             if values["kind"] not in {"out", "in", "transfer"}:
                 raise ValidationError("Choose a transaction type.", "kind")
@@ -173,6 +178,8 @@ async def save_transaction_popup(request: Request, txn_id: int):
             updated = c.transactions.update_in_account(txn_id, account_id, day, signed, category_id, other,
                                                        counterparty=cp, notes=values["notes"], owner_id=owner_id)
             c.reserves.auto_link_transaction(updated.id)
+            if shown:  # NF-12AK2: only an expense can be left out; any other kind counts as it always did
+                c.budgets.set_left_out(updated.id, values["left_out"] == "1" and values["kind"] == "out")
             notice = " ".join(filter(None, (c.reserves.carry_links(reserve_links, updated.id) if reserve_links else "",
                                             c.planning.review_links(updated.id))))  # 7R, 7U
             return redirect(values["return_to"],

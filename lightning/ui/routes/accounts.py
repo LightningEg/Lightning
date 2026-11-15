@@ -587,7 +587,8 @@ async def save_transaction_popup(request: Request, account_id: int):
     account = c.accounts.require_usable(account_id)
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in
-              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes", "early_checked")}
+              ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes", "early_checked",
+               "left_out")}
     values["return_to"] = _safe_return(form.get("return_to"), f"/accounts/{account_id}")
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = {key: value for key, value in values.items() if key != "return_to"} | {"account": account_id}
@@ -598,6 +599,8 @@ async def save_transaction_popup(request: Request, account_id: int):
             if earlier is None:
                 c.transactions.remember_submission(submission, payload, txn.id)
                 matched_reserve = c.reserves.auto_link_transaction(txn.id)
+                if values["left_out"] == "1" and values["kind"] == "out":  # NF-12AK2: chosen under More
+                    c.budgets.set_left_out(txn.id, True)
                 _remember_sms(c, form, account_id)
         if earlier is not None:
             return redirect(values["return_to"], "Saved.")
