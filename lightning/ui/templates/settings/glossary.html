@@ -1,0 +1,13 @@
+{# Glossary (Settings): Lightning's own words in plain language, each with where it is read. #}
+{% extends "base.html" %}
+{% block title %}{{ 'Glossary'|tr(locale) }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Settings'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<div><h1>{{ 'Glossary'|tr(locale) }}</h1><p class="muted">{{ 'The words Lightning uses, in plain language'|tr(locale) }}</p></div>{% endblock %}
+{% block content %}
+<section class="card settings-list" aria-labelledby="glossary-heading">
+  <h2 id="glossary-heading">{{ 'Terms'|tr(locale) }}</h2>
+  {% for t in terms %}<div class="settings-row glossary-term" id="{{ t.id }}"><div><span class="settings-name">{{ t.name }}</span>
+    <span class="settings-hint">{{ t.meaning }}</span>
+    {% if t.where %}<small class="muted">{{ 'Where you see it'|tr(locale) }}: {{ t.where }}</small>{% endif %}</div></div>{% endfor %}
+</section>
+{% endblock %}

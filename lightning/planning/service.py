@@ -101,6 +101,7 @@ class PlanningService:
         items = self.repo.items(active_only)
         return [i for i in items if kinds is None or i.kind in kinds]
 
+    @request_cached(deep=True)
     def payday_item_ids(self) -> set[int]:
         """The income items whose dates are payday (BT-7AZ, owner 2026-11-14: payday is the salary only).
 
