@@ -21,6 +21,27 @@ def test_windows_adapter_import_and_name_validation_are_portable():
 windows_only = pytest.mark.skipif(os.name != "nt", reason="Windows file-operation adapter tests")
 
 
+def test_move_write_through_is_windows_only(tmp_path):
+    from lightning.database.promotion_windows import move_write_through
+    if os.name != "nt":
+        with pytest.raises(OSError, match="only on Windows"):
+            move_write_through(tmp_path / "a", tmp_path / "b")
+
+
+@windows_only
+def test_move_write_through_moves_across_folders_and_never_replaces(tmp_path):
+    from lightning.database.promotion_windows import move_write_through
+    (tmp_path / "evidence").mkdir()
+    put(tmp_path / "record.state", b"record")
+    move_write_through(tmp_path / "record.state", tmp_path / "evidence" / "record.state")
+    assert (tmp_path / "evidence" / "record.state").read_bytes() == b"record"
+    assert not (tmp_path / "record.state").exists()
+    put(tmp_path / "other.state", b"other")
+    with pytest.raises(OSError):
+        move_write_through(tmp_path / "other.state", tmp_path / "evidence" / "record.state")
+    assert (tmp_path / "evidence" / "record.state").read_bytes() == b"record"
+
+
 def put(path, value):
     path.write_bytes(value)
 

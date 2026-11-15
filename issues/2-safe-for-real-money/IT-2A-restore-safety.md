@@ -30,6 +30,8 @@ Built before: the manifest and intent are published through `WindowsPromotionFil
 
 **Done when:** restore moves and discards go through one durable step: on Windows a `MOVEFILE_WRITE_THROUGH` move (a discard is a write-through rename to a `.lightning-discard-*` name, then a delete; leftovers are swept at unlock); on POSIX a rename followed by an fsync of both folders. The copy is gone durably before its intent, and the record moves after its files, on both. Tests pin the order on Linux; the adapter's move runs in the Windows job.
 
+**Built (#715):** `_durable_move`/`_durable_discard` in `lightning/runtime/restore.py`, `move_write_through` in `lightning/database/promotion_windows.py`; tests in `tests/test_restore_durable_moves.py` and `tests/test_database_promotion_windows.py`, both added to the Windows job.
+
 ## 2A3 Explicit deterministic repair · L
 After an interruption, one repair path finishes or undoes the restore the same way every time.
 

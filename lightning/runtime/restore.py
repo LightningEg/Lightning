@@ -188,6 +188,45 @@ class RestoreIntent:
         return cls(**_parse_record(raw, _INTENT_FIELDS))
 
 
+def _fsync_folder(folder: Path) -> None:
+    descriptor = os.open(folder, os.O_RDONLY)
+    try:
+        os.fsync(descriptor)
+    finally:
+        os.close(descriptor)
+
+
+def _durable_move(source: Path, destination: Path) -> None:
+    """IT-2A2: move one file, never over another, and return once the move is on disk.
+
+    Windows: MoveFileExW with MOVEFILE_WRITE_THROUGH. POSIX: rename, then fsync both folders.
+    Restore relies on the order of these moves (a copy goes before its record)."""
+    if destination.exists() or destination.is_symlink():
+        raise FileExistsError(destination)
+    if os.name == "nt":
+        from lightning.database.promotion_windows import move_write_through
+        move_write_through(source, destination)
+    else:
+        os.rename(source, destination)
+        for folder in {source.parent, destination.parent}:
+            _fsync_folder(folder)
+
+
+def _durable_discard(path: Path) -> None:
+    """IT-2A2: make a file's removal durable: a durable move to a discard name, then a delete.
+
+    A delete alone has no write-through on Windows. A discard name left by an interruption
+    explains nothing and is swept by `_clear_unpublished`."""
+    if not (path.exists() or path.is_symlink()):
+        return
+    discarded = path.with_name(f".lightning-discard-{uuid4().hex}")
+    _durable_move(path, discarded)
+    try:
+        discarded.unlink()
+    except OSError:
+        pass
+
+
 @contextmanager
 def _held_profile_lock(lock):
     """Expose the already-acquired process gate to the promotion service."""
@@ -312,24 +351,24 @@ class EncryptedBackupRestorer:
     @staticmethod
     def _preserve_source_backup(source: Path, folder: Path, operation_id: str) -> Path:
         target = folder / f".lightning-restore-source-{operation_id}.db"
+        # Written under a .partial name and moved durably into place (IT-2A2), so
+        # the copy's name is on disk before the manifest that records it.
+        partial = folder / f"{target.name}.partial"
         source_fd = os.open(source, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
         target_fd = None
         try:
-            target_fd = os.open(target, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+            target_fd = os.open(partial, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
             with os.fdopen(source_fd, "rb", closefd=False) as input_file, os.fdopen(
                 target_fd, "wb", closefd=False
             ) as output_file:
                 shutil.copyfileobj(input_file, output_file, length=1024 * 1024)
                 output_file.flush()
                 os.fsync(output_file.fileno())
-            if os.name != "nt":
-                directory_fd = os.open(folder, os.O_RDONLY)
-                try:
-                    os.fsync(directory_fd)
-                finally:
-                    os.close(directory_fd)
+            os.close(target_fd)
+            target_fd = None
+            _durable_move(partial, target)
         except BaseException:
-            target.unlink(missing_ok=True)
+            partial.unlink(missing_ok=True)
             raise
         finally:
             os.close(source_fd)
@@ -603,12 +642,11 @@ class EncryptedBackupRestorer:
                 manifest_written = True
                 # The manifest now holds everything the intent said; a kill before
                 # this unlink leaves an intent beside its manifest, which is ignored.
-                intent_path.unlink()
-                self._fsync_directory(paths.data_dir)
+                _durable_discard(intent_path)
             except BaseException:
                 if (not manifest_written and preserved_source is not None
                         and not (marker_path.exists() or marker_path.is_symlink())):
-                    preserved_source.unlink(missing_ok=True)
+                    _durable_discard(preserved_source)
                 file_ops.close()
                 raise
             try:
@@ -667,8 +705,7 @@ class EncryptedBackupRestorer:
             if (intent_path is not None and not manifest_written and
                     not (source_copy_path.exists() or source_copy_path.is_symlink())):
                 try:
-                    intent_path.unlink(missing_ok=True)
-                    self._fsync_directory(paths.data_dir)
+                    _durable_discard(intent_path)
                 except OSError:
                     pass  # an intent left behind is harmless: unlock reads it as unpublished
             lock.close()
@@ -831,6 +868,12 @@ class EncryptedBackupRestorer:
         Such a restore published nothing (2A1). Its source copy is deleted when the
         chosen backup still holds the same bytes, else kept in a restore-evidence
         folder; then its intent goes. Run with the profile lock held."""
+        for folder in (paths.data_dir, paths.backups_dir):
+            for leftover in folder.glob(".lightning-discard-*"):
+                try:
+                    leftover.unlink()  # an interrupted discard: already explains nothing
+                except OSError:
+                    pass
         manifests = {path.name.removesuffix(".state") for path in cls._restore_marker_paths(paths)}
         for intent_path in cls._restore_intent_paths(paths):
             intent = cls._read_intent(intent_path)
@@ -843,6 +886,7 @@ class EncryptedBackupRestorer:
                     for path in (paths.data_dir / f"{stem}.sqlite", paths.data_dir / f"{stem}.previous.db")):
                 continue  # not unpublished: the manifest, or the unlock check, governs it
             copy = paths.backups_dir / intent.source_copy_name
+            _durable_discard(copy.with_name(copy.name + ".partial"))
             if copy.exists() or copy.is_symlink():
                 original = paths.backups_dir / intent.source_backup_name
                 try:
@@ -851,14 +895,13 @@ class EncryptedBackupRestorer:
                     duplicate = cls._digest(original) == intent.source_sha256
                 except (ProfileError, OSError):
                     duplicate = False
+                # The copy is gone durably before the intent that explains it (IT-2A2).
                 if duplicate:
-                    copy.unlink()
+                    _durable_discard(copy)
                 else:
                     evidence = cls._evidence_folder(paths, intent.operation_id)
-                    os.replace(copy, evidence / copy.name)
-                cls._fsync_directory(paths.backups_dir)
-            intent_path.unlink()
-            cls._fsync_directory(paths.data_dir)
+                    _durable_move(copy, evidence / copy.name)
+            _durable_discard(intent_path)
 
     @staticmethod
     def _evidence_folder(paths: ProfilePaths, operation_id: str) -> Path:
@@ -967,11 +1010,8 @@ class EncryptedBackupRestorer:
         for path in moving:
             for item in (path, *self._sidecars(path)):
                 if item.exists() or item.is_symlink():
-                    os.replace(item, evidence / item.name)
-        self._fsync_directory(paths.backups_dir)
-        self._fsync_directory(paths.data_dir)
-        os.replace(marker, evidence / marker.name)
-        self._fsync_directory(paths.data_dir)
+                    _durable_move(item, evidence / item.name)
+        _durable_move(marker, evidence / marker.name)
         self._check_restore_control(paths, key)
 
     def _pending_manifest(self, paths: ProfilePaths) -> tuple[Path, RestoreManifest]:
@@ -1064,9 +1104,7 @@ class EncryptedBackupRestorer:
             for path in moving:
                 for item in (path, *self._sidecars(path)):
                     if item.exists() or item.is_symlink():
-                        os.replace(item, evidence / item.name)
-            self._fsync_directory(paths.data_dir)
-            self._fsync_directory(paths.backups_dir)
+                        _durable_move(item, evidence / item.name)
             if not live_opens:
                 temporary = paths.data_dir / f".lightning-go-back-{uuid4().hex}.partial"
                 try:
@@ -1077,7 +1115,7 @@ class EncryptedBackupRestorer:
                     if self._digest(temporary) != manifest.pre_restore_sha256:
                         raise ProfileError(COPY_FROM_BEFORE_CHANGED)
                     self._verify_file(temporary, key)
-                    os.replace(temporary, paths.db_path)
+                    _durable_move(temporary, paths.db_path)  # the unreadable live file is in the evidence folder
                 finally:
                     temporary.unlink(missing_ok=True)
                 self._fsync_directory(paths.data_dir)
