@@ -246,4 +246,6 @@ ERRORS_AR = {
     'Enter an amount greater than zero.': 'اكتب مبلغ أكبر من صفر.',
     'This refund does not name a purchase.': 'الاسترداد ده مش مربوط بشراء.',
     'This purchase is split across categories: record the refund from its account, then name the purchase on it.': 'الشراء ده متقسم على كذا فئة: سجّل الاسترداد من حسابه، وبعدين اختار الشراء عليه.',
+    # NF-12AK2: one expense left out of estimates.
+    'Only an expense can be left out of estimates.': 'المصروف بس هو اللي ينفع يتستبعد من التقديرات.',
 }
