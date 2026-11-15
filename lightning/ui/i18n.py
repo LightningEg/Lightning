@@ -3999,6 +3999,10 @@ ARABIC_UI = {
     'This refund no longer names a purchase.': 'الاسترداد ده مبقاش مربوط بشراء.',
     'Linked this refund to its purchase.': 'اتربط الاسترداد ده بالشراء بتاعه.',
     'Recorded the refund and linked it to this purchase.': 'اتسجّل الاسترداد واتربط بالشراء ده.',
+    # NF-12AK2: one expense left out of estimates.
+    'Leave out of estimates': 'استبعده من التقديرات',
+    'Budget averages skip it and its refunds. Cash flow and Spent still count it.': 'متوسطات الميزانية بتتجاهله هو واستردّاداته. التدفق النقدي والمنفق لسه بيحسبوه.',
+    'Count in estimates': 'احسبه في التقديرات',
 }
 
 

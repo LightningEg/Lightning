@@ -19,7 +19,7 @@ TABLES = ("profile_identity", "accounts", "asset_classes", "financial_assets", "
           "bank_import_batches", "bank_import_rows", "bank_import_column_maps", "reevaluation_periods",
           "reevaluation_entries", "reevaluation_account_posts", "reevaluation_suppressed_accounts", "zakat_settings",
           "reconciled_through", "saved_views", "reimbursement_claims", "reimbursement_receipts", "refund_links",
-          "cd_interest_receipt_events", "cd_interest_receipt_links", "cash_funding", "audit_log")
+          "budget_estimate_exclusions", "cd_interest_receipt_events", "cd_interest_receipt_links", "cash_funding", "audit_log")
 
 
 def _safe_text(value):
