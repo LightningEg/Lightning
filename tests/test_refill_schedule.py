@@ -30,8 +30,12 @@ def test_the_schedule_covers_the_gap_and_each_step_shows_its_after_state(tmp_pat
     assert sum((r["amount"] for r in rows), D(0)) == gap and len(rows) >= 2
     assert [r["date"] for r in rows] == sorted(r["date"] for r in rows)
     funds = [r["fund_after"] for r in rows]
-    assert funds == sorted(funds) and all(r["safe_after"] == c.forecaster.forecast(today(), refill=sum(
-        (x["amount"] for x in rows[:i + 1]), D(0))).safe_to_spend for i, r in enumerate(rows))
+    assert funds == sorted(funds)
+    # The first instalment's after-state is Safe to spend with it moved today.
+    assert rows[0]["safe_after"] == c.forecaster.forecast(today(), refill=rows[0]["amount"]).safe_to_spend
+    # BT-7AV3: each later one counts the income expected by its date, so no row goes below zero.
+    assert all(r["safe_after"] >= 0 and r["keeps_plan"] for r in rows)
+    assert not rows[0]["lowest"] and all(r["lowest"] for r in rows[1:])
     assert c.forecaster.refill_schedule(today(), D(0), options) == []
 
 
