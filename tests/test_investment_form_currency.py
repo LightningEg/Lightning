@@ -68,6 +68,7 @@ def test_buy_and_edit_labels_agree_with_cash(c, book):
 
 
 def test_pc_popup_currency_switch_and_save(c, book):
+    pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright, expect
     from tests.browser_support import require_chromium
     from lightning.runtime.http import Host

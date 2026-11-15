@@ -121,6 +121,7 @@ def test_physical_unit_price_is_refused_and_bad_total_rolls_back_the_batch(c, bo
 
 
 def test_desktop_total_save_shows_the_result_for_the_selected_day(c, book, tmp_path):
+    pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright, expect
     from tests.browser_support import require_chromium
     from lightning.runtime.http import Host

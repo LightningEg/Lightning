@@ -109,6 +109,7 @@ def test_base_currency_and_short_returns_stay_plain(c):
 
 
 def test_desktop_purchase_value_and_return(c, foreign, tmp_path):
+    pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright, expect
     from tests.browser_support import require_chromium
     from lightning.runtime.http import Host

@@ -139,6 +139,7 @@ def test_foreign_amount_only_sale_keeps_native_cash_and_base_gains(c):
 
 
 def test_desktop_amount_only_sale_records_eleven_units(c, book, tmp_path):
+    pytest.importorskip("playwright")
     from playwright.sync_api import sync_playwright, expect
     from tests.browser_support import require_chromium
     from lightning.runtime.http import Host
