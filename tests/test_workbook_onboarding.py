@@ -194,7 +194,7 @@ def test_custom_master_setup_is_not_overwritten(c):
 
 def test_custom_nonledger_setup_is_not_overwritten(c):
     from lightning.workflows.workbook_import import _unused
-    c.investments.set_target_weight('Stocks', Decimal('70'), c.assets.get_class_by_code('STOCK').id)
+    c.investments.set_target_weight('High risk', Decimal('70'))
     with pytest.raises(ValueError, match='existing setup'):
         _unused(c)
 

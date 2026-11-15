@@ -98,7 +98,7 @@ def test_dollars_were_bought_with_pounds_and_a_flat_is_valued(sample):
 
 def test_investing_has_targets_a_monthly_goal_and_a_saved_report(sample):
     c, _ = sample
-    assert set(c.investments.target_weights()) == {"Stocks", "Money Market Fund", "Gold"}
+    assert c.investments.target_weights() == {"High risk": 40, "Low risk": 30, "Medium risk": 30}
     assert c.settings.get("investment_monthly_goal") == "3000"
     assert [v["name"] for v in c.saved_views.list()] == ["Eid"]
 

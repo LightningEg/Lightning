@@ -10,12 +10,11 @@ from lightning.ui.web import create_app
 from tests.browser_support import require_chromium
 
 
-def test_phone_planner_remainder_is_available_at_narrow_widths(c):
+def test_phone_planner_risk_levels_fit_narrow_widths(c):
     executable = require_chromium()
-    names = ('Alpha', 'Beta', 'Gamma', 'Delta', 'Epsilon')
-    codes = ('STOCK', 'GOLD', 'FUND.GOLD', 'FUND.FIXED_INCOME', 'FUND.MONEY_MARKET')
-    for name, code in zip(names, codes):
-        c.investments.set_target_weight(name, Decimal('20'), c.assets.get_class_by_code(code).id)
+    names = ('Low risk', 'Medium risk', 'High risk')
+    for name in names:
+        c.investments.set_target_weight(name, Decimal('20'))
     app = create_app(c)
     async def phone_app(scope, receive, send):
         scope.setdefault('state', {})['phone'] = True
@@ -33,13 +32,8 @@ def test_phone_planner_remainder_is_available_at_narrow_widths(c):
                     assert page.goto(host.origin + '/investments/planner?amount=1000').status == 200
                     assert page.locator('html').get_attribute('lang') == ('ar-EG' if language == 'ar' else 'en')
                     rows = page.locator('.planner-popup-rows [data-planner-bucket]')
-                    assert rows.count() == 5
-                    assert page.locator('.planner-popup-rows [data-planner-bucket]:visible').count() == 4
+                    assert page.locator('.planner-popup-rows [data-planner-bucket]:visible').count() == 3
                     assert set(rows.evaluate_all('es => es.map(e => e.dataset.plannerBucket)')) == set(names)
-                    summary = page.locator('details.planner-other > summary')
-                    assert summary.evaluate('e => { const r=e.getBoundingClientRect(); return r.height >= 48 && r.left >= 0 && r.right <= innerWidth; }')
-                    summary.click()
-                    assert page.locator('.planner-popup-rows [data-planner-bucket]:visible').count() == 5
                     assert rows.evaluate_all('es => es.every(e => e.scrollWidth <= e.clientWidth + 1)')
                     assert page.locator('input[name=mode]').count() == 2
                 context.close()
