@@ -75,6 +75,17 @@ def test_old_connect_address_keeps_manual_form_secondary_and_errors_visible(devi
     assert app.session.journal is None
 
 
+def test_manual_fallback_prefills_this_network_but_keeps_the_submitted_address(device, monkeypatch):
+    client, _, _, _ = device
+    monkeypatch.setattr('lightning.sync.nearby._own_addresses', lambda: ['192.168.42.9'])
+    page = client.get('/profiles/connect')
+    assert 'name="address" type="text" required value="192.168.42."' in page.text
+    refused = client.post('/profiles/connect', data={
+        'csrf': token(page.text), 'address': '192.168.99.8:47513', 'code': '', 'pc_name': 'PC'})
+    assert refused.status_code == 400
+    assert 'value="192.168.99.8:47513"' in refused.text
+
+
 @pytest.mark.parametrize('locale', ['en', 'ar'])
 def test_existing_profile_gets_explicit_setup_without_conversion(device, locale):
     client, app, _, phone = device

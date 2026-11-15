@@ -8,16 +8,17 @@ from __future__ import annotations
 import os
 
 from .codec import JournalError, authenticate, digest, fields, hash_value, seal, unpack
-from .pairing import matching_digits, number_choices, prove_pairing, request_pairing, require_live_offer
+from .pairing import (TWO_DIGIT_MATCH, is_number_match, matching_digits, number_choices,
+                      prove_pairing, request_pairing, require_live_offer)
 
 
 def begin(candidate, identity, incarnation, code=""):
     offer = unpack(candidate["offer"].encode())["body"]
-    secret = os.urandom(32) if offer.get("method") == "number-match" else None
+    secret = os.urandom(32) if is_number_match(offer) else None
     wire, digits = request_pairing(candidate["offer"].encode(), code, identity, incarnation,
                                    home_key=offer["home_key"], secret=secret)
     return dict(candidate=candidate, wire=wire.decode(), request=digest(unpack(wire)["body"]),
-                secret=secret.hex() if secret else None, digits=digits, incarnation=incarnation,
+                secret=secret.hex() if secret else None, digits=digits, typed_digits=offer.get("method") == TWO_DIGIT_MATCH, incarnation=incarnation,
                 profile=offer["profile"], generation=offer["generation"], home_key=offer["home_key"], stage="handshake")
 
 
@@ -35,7 +36,7 @@ async def handshake(state, identity, exchange, save):
         return
     offer = require_live_offer(state["candidate"])
     request = unpack(state["wire"].encode())["body"]
-    if offer.get("method") == "number-match":
+    if is_number_match(offer):
         if not state.get("challenge"):
             answer = _answer(await exchange(state["wire"].encode()), state)
             fields(answer, ("type", "request", "challenge"))
@@ -58,7 +59,7 @@ async def handshake(state, identity, exchange, save):
         answer = _answer(await exchange(state["wire"].encode()), state)
         if answer != dict(type="pairing-wait", request=state["request"]):
             raise JournalError("Pairing transcript changed")
-    state.update(stage="compare", choices=number_choices(state["digits"]))
+    state.update(stage="compare", choices=[] if state.get("typed_digits") else number_choices(state["digits"]))
     state.pop("secret", None)
     state.pop("reveal_wire", None)
     save(state)

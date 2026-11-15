@@ -58,6 +58,11 @@ EN = {
 }
 
 AR = {
+    "Recover saved edits": "استرجع التعديلات المحفوظة",
+    "Manage this journal and its paired devices.": "إدارة ربط الأجهزة بالملف ده.",
+    "Paired devices": "الأجهزة المربوطة",
+    "No other devices paired yet.": "مفيش أجهزة تانية مربوطة لسه.",
+    "Pair a device": "اربط جهاز",
     "The home removed this device, so it no longer syncs. Edits made here stay on this device.":
         "الجهاز الأساسي شال الجهاز ده، فمبقاش بيتزامن. التعديلات اللي اتعملت هنا فاضلة على الجهاز ده.",
     "The home refused the last sync. Your edits stay saved here, and it tries again.":
@@ -79,6 +84,14 @@ AR = {
     "Pairing was interrupted. Resume to check its saved state.": "الربط اتقطع. كمّل عشان نراجع الحالة المحفوظة.",
     "Resume pairing": "كمّل الربط",
     "On your other device, select this device from Nearby devices.": "على الجهاز التاني، اختيار الجهاز ده من الأجهزة القريبة.",
+    "This pairing offer is closed. Open pairing again.": "عرض الربط ده اتقفل. ممكن يبدأ ربط جديد.",
+    "Type these two digits on your other device, then approve here.": "كتابة الرقمين دول على الجهاز التاني، وبعدها الموافقة هنا.",
+    "Type the two digits shown on the home.": "كتابة الرقمين اللي ظاهرين على الجهاز الأساسي.",
+    "The two digits on the home": "الرقمين على الجهاز الأساسي",
+    "Enter the two digits shown on the home": "كتابة الرقمين اللي ظاهرين على الجهاز الأساسي",
+    "Check that both devices show the same two digits": "الرقمين على الجهازين لازم يكونوا مطابقين",
+    "Pairing request budget exhausted; reopen pairing": "محاولات الربط خلصت. الربط محتاج يبدأ من الجهاز الأساسي تاني.",
+    "Compare the numbers again: cancel and start a new pairing": "لازم يتلغي الربط ويبدأ من جديد عشان مطابقة الرقمين.",
     "Select this number on your other device, then approve here.": "اختيار الرقم ده على الجهاز التاني، وبعدها الموافقة هنا.",
     "Waiting for the other device to enter the profile password.": "مستنيين الجهاز التاني يدخل كلمة سر الملف.",
     "Approve this device": "وافق على الجهاز ده",

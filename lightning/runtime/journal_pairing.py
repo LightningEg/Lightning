@@ -12,8 +12,9 @@ from lightning.sync.journal.codec import JournalError, authenticate, digest, fie
 from lightning.sync.journal.discovery import nearby_devices
 from lightning.sync.journal.local import PinnedLocalClient
 from lightning.sync.journal.membership import Membership
-from lightning.sync.journal.pairing import (CLOCK_SKEW_SECONDS, MAX_PROOF_ATTEMPTS, PairingDesk, RECEIPT_LIFETIME, approval_receipt, number_choices,
-                                            request_budget)
+from lightning.sync.journal.pairing import (CLOCK_SKEW_SECONDS, MAX_PROOF_ATTEMPTS, TWO_DIGIT_MATCH,
+                                            PairingDesk, RECEIPT_LIFETIME, approval_receipt,
+                                            is_number_match, number_choices, request_budget)
 from lightning.sync.journal import pairing_client
 from .journal_pairing_driver import JoiningDriver
 
@@ -52,29 +53,31 @@ class NearbyPairing(JoiningDriver):
         state = self._value("pairing",{})
         if state and self.desk:
             state, _ = self.desk.current()
-        if state and unpack(state["offer"].encode())["body"]["expires"] <= self._now():
+        offer = unpack(state["offer"].encode())["body"] if state else {}
+        exhausted = bool(state and not state.get("request") and state["attempts"] >= request_budget(offer))
+        if state and (offer["expires"] <= self._now() or exhausted):
             state = {}
         request = unpack(state["request"].encode())["body"] if state.get("request") else None
         digits = self.desk.digits(state, unpack(state["offer"].encode())["body"]) if request else None
         client = self._value("pairing_client",{})
-        if client.get("stage") == "compare" and not client.get("choices"):
+        if client.get("stage") == "compare" and not client.get("typed_digits") and not client.get("choices"):
             client["choices"] = number_choices(client["digits"])
             with self.db.transaction():
                 self._save("pairing_client",client)
         revoked = self.device.home is None and self.membership.revoked() is not None
         # By this device's clock, a minute's grace past the offer's ten minutes; the home's clock decides.
         expired = bool(client) and unpack(client["candidate"]["offer"].encode())["body"]["expires"] + CLOCK_SKEW_SECONDS <= self._now()
-        return dict(enabled=True, revoked=revoked,
+        return dict(enabled=True, revoked=revoked, exhausted=exhausted,
                     paired=not revoked and self.device.identity.device_id in self.membership.state()["members"], code=state.get("code"), request_name=request["name"] if digits else None,
                     digits=digits, request_id=digest(request) if request else None,
-                    confirmed=bool(state.get("confirmed")), number_match=bool(state and unpack(state["offer"].encode())["body"].get("method") == "number-match"),
-                    choices=client.get("choices", []), failed=client.get("failed", False),
+                    confirmed=bool(state.get("confirmed")), number_match=bool(state and is_number_match(unpack(state["offer"].encode())["body"])),
+                    typed_digits=client.get("typed_digits", False), choices=client.get("choices", []), failed=client.get("failed", False),
                     members=[names.get(identifier,"Paired device") for identifier in self.membership.state()["members"]
                              if identifier != self.device.identity.device_id],
                     member_details=[dict(id=identifier, name=names.get(identifier, "Paired device"))
                                     for identifier in self.membership.state()["members"]
                                     if identifier != self.device.identity.device_id],
-                    nearby=[dict(id=identifier,name=value["name"], number_match=unpack(value["offer"].encode())["body"].get("method") == "number-match") for identifier,value in self._value("nearby",{}).items()],
+                    nearby=[dict(id=identifier,name=value["name"], number_match=is_number_match(unpack(value["offer"].encode())["body"])) for identifier,value in self._value("nearby",{}).items()],
                     pending=client.get("digits") or ("…" if client else None), stage=client.get("stage"),
                     expired=expired, problem=client.get("problem"))
 
@@ -88,7 +91,7 @@ class NearbyPairing(JoiningDriver):
     def begin(self, password):
         if self.desk is None or self.keys is None:
             raise JournalError("Open pairing on the home")
-        self.desk.begin(self.keys(),password,method="number-match")
+        self.desk.begin(self.keys(),password,method=TWO_DIGIT_MATCH)
 
     def stop(self):
         self.db.execute("DELETE FROM journal_local WHERE name='pairing'")

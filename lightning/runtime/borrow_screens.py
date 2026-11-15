@@ -71,8 +71,10 @@ def register(app, screens: BorrowScreens) -> None:
         if session.container:
             return RedirectResponse("/profiles", 303)
         import socket as _socket
-        phones = await asyncio.to_thread(_find, "pair")
-        return page(request, "connect", pc_name=_socket.gethostname()[:60] or "This PC", phones=phones)
+        from lightning.sync.nearby import address_prefix
+        phones, address = await asyncio.gather(asyncio.to_thread(_find, "pair"), asyncio.to_thread(address_prefix))
+        return page(request, "connect", pc_name=_socket.gethostname()[:60] or "This PC", phones=phones,
+                    address=address)
 
     @app.post("/profiles/connect")
     async def connect(request: Request):
@@ -210,10 +212,12 @@ def register(app, screens: BorrowScreens) -> None:
     @app.get("/profiles/move")
     async def move_page(request: Request):
         import socket as _socket
+        from lightning.sync.nearby import address_prefix
         if session.container is None or session.borrowed is not None or not session.role.writable:
             return RedirectResponse("/profiles", 303)
-        phones = await asyncio.to_thread(_find, "move")
-        return page(request, "move", pc_name=_socket.gethostname()[:60] or "This PC", phones=phones)
+        phones, address = await asyncio.gather(asyncio.to_thread(_find, "move"), asyncio.to_thread(address_prefix))
+        return page(request, "move", pc_name=_socket.gethostname()[:60] or "This PC", phones=phones,
+                    address=address)
 
     @app.post("/profiles/move")
     async def move(request: Request):

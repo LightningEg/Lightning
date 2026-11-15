@@ -61,6 +61,12 @@ def destinations() -> list[str]:
     return list(dict.fromkeys(hosts))
 
 
+def address_prefix() -> str:
+    """A suggestion for the folded manual form; discovery and trust still use the full address."""
+    addresses = _own_addresses()
+    return addresses[0].rsplit(".", 1)[0] + "." if addresses else ""
+
+
 def _parse(wire: bytes) -> dict | None:
     if len(wire) > MAX_PACKET:
         return None

@@ -7,6 +7,14 @@ import socket
 from lightning.sync.nearby import NearbyResponder, destinations, find_phones
 
 
+def test_manual_prefix_uses_own_interface_and_is_empty_when_offline(monkeypatch):
+    from lightning.sync import nearby
+    monkeypatch.setattr(nearby, '_own_addresses', lambda: ['10.12.34.9'])
+    assert nearby.address_prefix() == '10.12.34.'
+    monkeypatch.setattr(nearby, '_own_addresses', lambda: [])
+    assert nearby.address_prefix() == ''
+
+
 def responder(state):
     return NearbyResponder(state, host="127.0.0.1", port=0).start()
 
