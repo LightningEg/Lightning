@@ -31,7 +31,8 @@ def test_an_older_profile_upgrades_and_keeps_its_rows(monkeypatch, tmp_path, enc
                    "VALUES('OUT-0001','OUT','2026-09-02','POSTED','Laptop','2026-09-02','2026-09-02')")
         before = [dict(r) for r in db.all("SELECT * FROM transactions")]
         monkeypatch.setattr(migrator, "MIGRATIONS_DIR", bundled)
-        assert migrator.migrate(db) == ["0086_budget_estimate_exclusions (APPLIED)"]
+        assert migrator.migrate(db) == ["0086_budget_estimate_exclusions (APPLIED)",
+                                       "0087_targets_by_risk_level (APPLIED)"]
         assert [dict(r) for r in db.all("SELECT * FROM transactions")] == before
         assert db.scalar("SELECT count(*) FROM budget_estimate_exclusions") == 0
         txn = before[0]["id"]
@@ -41,7 +42,7 @@ def test_an_older_profile_upgrades_and_keeps_its_rows(monkeypatch, tmp_path, enc
             db.execute("INSERT INTO budget_estimate_exclusions(transaction_id,created_at,updated_at) VALUES(?,?,?)",
                        (txn, "2026-11-14", "2026-11-14"))
         assert migrator.migrate(db) == []  # a second run does nothing
-        assert db.scalar("SELECT max(version) FROM schema_migrations") == 86
+        assert db.scalar("SELECT max(version) FROM schema_migrations") == 87
     finally:
         db.close()
 
