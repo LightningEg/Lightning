@@ -246,8 +246,11 @@ class BudgetService:
             return [Decimal(t) / days for t in range(days + 1)], False
         return [sum((share[t] for share in shares), ZERO) / len(shares) for t in range(days + 1)], True
 
-    def move_room(self, month: str, to_id: int, from_id: int, amount: object, *, schedule: ScheduleView) -> None:
-        """Move plan from one category to another from `month` on: both keep fixed amounts, the total is unchanged."""
+    def move_room(self, month: str, to_id: int, from_id: int, amount: object, only_this_month: bool = False, *,
+                  schedule: ScheduleView) -> None:
+        """Move plan from one category to another: both keep fixed amounts and the total is unchanged. With
+        ``only_this_month`` it covers `month` alone (limits for this month only, the usual plan stays); otherwise it
+        changes the usual plan from `month` on (NF-12AJ)."""
         value = to_decimal(amount, "amount")
         if value <= 0:
             raise ValidationError("Move an amount above zero.", "amount")
@@ -260,7 +263,7 @@ class BudgetService:
         if give < value:
             raise ValidationError(f"{self.categories.get(from_id).name} plans only {fmt(give, 0)} this month.", "amount")
         with self.db.transaction():
-            self.save_month(month, {to_id: take + value, from_id: give - value}, schedule=schedule)
+            self.save_month(month, {to_id: take + value, from_id: give - value}, only_this_month, schedule=schedule)
 
     @request_cached  # has_plan, loan_lines, bill_lines and month_view all ask for it
     def amounts_for(self, month: str, loans: bool = True, *, schedule: ScheduleView) -> dict[int, tuple[Decimal | None, bool, int | None, Decimal | None]]:
