@@ -113,25 +113,79 @@ class RestoreManifest:
 
     @classmethod
     def from_bytes(cls, raw: bytes) -> RestoreManifest:
-        if not isinstance(raw, bytes) or len(raw) > _MAX_MANIFEST_BYTES:
-            raise ValueError("Restore manifest is too large or not bytes")
-        def no_duplicates(pairs):
-            result = {}
-            for key, value in pairs:
-                if key in result:
-                    raise ValueError("Duplicate restore manifest field")
-                result[key] = value
-            return result
+        return cls(**_parse_record(raw, _MANIFEST_FIELDS))
 
-        record = json.loads(raw, object_pairs_hook=no_duplicates)
-        if not isinstance(record, dict) or set(record) != _MANIFEST_FIELDS:
-            raise ValueError("Restore manifest fields do not match schema")
-        if type(record["schema_version"]) is not int:
-            raise ValueError("Restore manifest version must be an integer")
-        for name in _MANIFEST_FIELDS - {"schema_version"}:
-            if not isinstance(record[name], str):
-                raise ValueError("Restore manifest values must be text")
-        return cls(**record)
+
+def _parse_record(raw: bytes, fields: set[str]) -> dict:
+    """One strict JSON object with exactly `fields`: text values and an integer schema version."""
+    if not isinstance(raw, bytes) or len(raw) > _MAX_MANIFEST_BYTES:
+        raise ValueError("Restore record is too large or not bytes")
+
+    def no_duplicates(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("Duplicate restore record field")
+            result[key] = value
+        return result
+
+    record = json.loads(raw, object_pairs_hook=no_duplicates)
+    if not isinstance(record, dict) or set(record) != fields:
+        raise ValueError("Restore record fields do not match schema")
+    if type(record["schema_version"]) is not int:
+        raise ValueError("Restore record version must be an integer")
+    for name in fields - {"schema_version"}:
+        if not isinstance(record[name], str):
+            raise ValueError("Restore record values must be text")
+    return record
+
+
+_INTENT_FIELDS = {
+    "schema_version", "operation_id", "profile_id", "live_name", "live_sha256",
+    "source_backup_name", "source_sha256", "source_copy_name",
+}
+
+
+@dataclass(frozen=True)
+class RestoreIntent:
+    """IT-2A1: what a restore is about to do, made durable before its first side effect.
+
+    It names the file it will replace and the backup it will copy from, so a copy
+    left by a kill before the PENDING manifest is explained, not unknown. An intent
+    with no manifest and no journal is a restore that published nothing."""
+
+    operation_id: str
+    profile_id: str
+    live_name: str
+    live_sha256: str
+    source_backup_name: str
+    source_sha256: str
+    source_copy_name: str
+    schema_version: int = 1
+
+    def __post_init__(self) -> None:
+        if self.schema_version != 1:
+            raise ValueError("Unsupported restore intent version")
+        if not re.fullmatch(r"[0-9a-f]{32}", self.operation_id):
+            raise ValueError("Invalid restore operation ID")
+        if not isinstance(self.profile_id, str) or not self.profile_id or len(self.profile_id) > 200:
+            raise ValueError("Invalid restore profile ID")
+        for name in (self.live_name, self.source_backup_name, self.source_copy_name):
+            if not _manifest_name(name):
+                raise ValueError("Restore intent names must be sibling basenames")
+        for digest in (self.live_sha256, self.source_sha256):
+            if not _manifest_hash(digest):
+                raise ValueError("Restore intent hashes must be lowercase SHA-256")
+        if self.source_copy_name != f".lightning-restore-source-{self.operation_id}.db":
+            raise ValueError("Protected source copy path does not match operation ID")
+
+    def to_bytes(self) -> bytes:
+        record = {field: getattr(self, field) for field in _INTENT_FIELDS}
+        return (json.dumps(record, sort_keys=True, separators=(",", ":")) + "\n").encode("utf-8")
+
+    @classmethod
+    def from_bytes(cls, raw: bytes) -> RestoreIntent:
+        return cls(**_parse_record(raw, _INTENT_FIELDS))
 
 
 @contextmanager
@@ -195,7 +249,29 @@ class EncryptedBackupRestorer:
         return tuple(paths.data_dir.glob(".lightning-restore-*.state"))
 
     @staticmethod
-    def _write_restore_manifest(path: Path, manifest: RestoreManifest, *, replace_existing: bool = False) -> None:
+    def _restore_intent_paths(paths: ProfilePaths) -> tuple[Path, ...]:
+        return tuple(paths.data_dir.glob(".lightning-restore-*.intent"))
+
+    @staticmethod
+    def _read_intent(path: Path) -> RestoreIntent:
+        """The intent at `path`, or ProfileError: an unreadable or unsafe one is evidence and locks."""
+        try:
+            info = path.stat(follow_symlinks=False)
+            if path.is_symlink() or not stat.S_ISREG(info.st_mode) or info.st_nlink != 1:
+                raise OSError("unsafe restore intent")
+            with path.open("rb") as handle:
+                intent = RestoreIntent.from_bytes(handle.read(_MAX_MANIFEST_BYTES + 1))
+        except OSError as exc:
+            raise ProfileError("A restore intent record cannot be read; this profile is locked for repair.") from exc
+        except (TypeError, ValueError, json.JSONDecodeError) as exc:
+            raise ProfileError("A restore intent record is malformed; this profile is locked for repair.") from exc
+        if path.name != f".lightning-restore-{intent.operation_id}.intent":
+            raise ProfileError("A restore intent record belongs to another operation.")
+        return intent
+
+    @staticmethod
+    def _write_restore_manifest(path: Path, manifest: RestoreManifest | RestoreIntent, *,
+                                replace_existing: bool = False) -> None:
         temporary = path.with_name(f".{path.name}-{secrets.token_hex(12)}.partial")
         fd = os.open(temporary, os.O_CREAT | os.O_EXCL | os.O_WRONLY, 0o600)
         try:
@@ -359,9 +435,20 @@ class EncryptedBackupRestorer:
             journals[marker_id] = journal
         if set(journals) != set(manifests):
             raise ProfileError("A restore operation manifest has no complete matching journal; this profile is locked for repair.")
-        expected_source_copies = {manifest.source_copy_name for manifest in manifests.values()}
+        # IT-2A1: an intent with no manifest stopped before the manifest, so before any
+        # journal or publication (both of which need the manifest and are checked above):
+        # the live file was never touched. Its source copy, whole or partial, is explained.
+        unpublished_copies = set()
+        for intent_path in cls._restore_intent_paths(paths):
+            intent = cls._read_intent(intent_path)
+            if (paths.profile is None or intent.profile_id != paths.profile.profile_id or
+                    intent.live_name != paths.db_path.name):
+                raise ProfileError("A restore intent record belongs to another profile.")
+            if f".lightning-restore-{intent.operation_id}" not in manifests:
+                unpublished_copies.add(intent.source_copy_name)
+        recorded_copies = {manifest.source_copy_name for manifest in manifests.values()}
         actual_source_copies = {path.name for path in paths.backups_dir.glob(".lightning-restore-source-*.db")}
-        if actual_source_copies != expected_source_copies:
+        if not recorded_copies <= actual_source_copies or not actual_source_copies <= recorded_copies | unpublished_copies:
             raise ProfileError("A protected source copy is missing or has no matching restore manifest.")
         for previous in paths.data_dir.glob(".lightning-restore-*.previous.db"):
             operation_marker = previous.name.removesuffix(".previous.db") + ".state"
@@ -381,6 +468,9 @@ class EncryptedBackupRestorer:
             raise ProfileError("Restore requires a named Lightning profile.")
         lock = self.session._acquire(paths)
         staged = None
+        intent_path = None
+        source_copy_path = None
+        manifest_written = False
         try:
             try:
                 key = unwrap_key(read_slot(paths.keys_path), password)
@@ -406,6 +496,7 @@ class EncryptedBackupRestorer:
                 paths.data_dir / f".lightning-restore-{operation_id}.state",
                 paths.data_dir / f".lightning-restore-{operation_id}.previous.db",
                 paths.backups_dir / f".lightning-restore-source-{operation_id}.db",
+                paths.data_dir / f".lightning-restore-{operation_id}.intent",
             )
             if any(path.exists() or path.is_symlink() for path in possible_collision):
                 raise ProfileError("Restore operation ID collision; no files were replaced.")
@@ -419,6 +510,26 @@ class EncryptedBackupRestorer:
                 raise ProfileError(NOT_THIS_PROFILES_BACKUP) from exc
             if self._digest(source) != source_hash:
                 raise ProfileError("The selected backup changed during verification.")
+
+            # IT-2A1: record what this restore will do before its first side effect
+            # (the pre-restore snapshot, the candidate, the protected source copy).
+            source_copy_path = paths.backups_dir / f".lightning-restore-source-{operation_id}.db"
+            intent = RestoreIntent(
+                operation_id=operation_id,
+                profile_id=paths.profile.profile_id,
+                live_name=paths.db_path.name,
+                live_sha256=self._digest(paths.db_path),
+                source_backup_name=source.name,
+                source_sha256=source_hash,
+                source_copy_name=source_copy_path.name,
+            )
+            intent_path = paths.data_dir / f".lightning-restore-{operation_id}.intent"
+            try:
+                self._write_restore_manifest(intent_path, intent)
+            except ValueError as exc:  # the Windows adapter refuses a reparse-point folder
+                raise ProfileError("Restore cannot run in this profile's folder (it may be a synced or linked folder). Nothing was replaced.") from exc
+            except OSError as exc:
+                raise ProfileError("Lightning could not record the restore before starting it. Nothing was replaced.") from exc
 
             # Preserve the current live contents, including any committed WAL
             # snapshot semantics. keep=0 is intentional: no retention pruning.
@@ -455,7 +566,6 @@ class EncryptedBackupRestorer:
             # source copy; remove it on failure so it cannot lock the profile.
             preserved_source = None
             marker_path = paths.data_dir / f".lightning-restore-{operation_id}.state"
-            manifest_written = False
             try:
                 preserved_source = self._preserve_source_backup(source, paths.backups_dir, operation_id)
                 if self._digest(preserved_source) != source_hash:
@@ -490,6 +600,10 @@ class EncryptedBackupRestorer:
                     raise ProfileError("Restore operation ID collision; no files were replaced.")
                 self._write_restore_manifest(marker_path, manifest)
                 manifest_written = True
+                # The manifest now holds everything the intent said; a kill before
+                # this unlink leaves an intent beside its manifest, which is ignored.
+                intent_path.unlink()
+                self._fsync_directory(paths.data_dir)
             except BaseException:
                 if (not manifest_written and preserved_source is not None
                         and not (marker_path.exists() or marker_path.is_symlink())):
@@ -547,6 +661,15 @@ class EncryptedBackupRestorer:
                 # unreferenced partial after it has been atomically consumed.
                 if not staged.path.exists():
                     staged.path.unlink(missing_ok=True)
+            # A restore that failed before its manifest published nothing: drop its
+            # intent, but only once no source copy is left for the intent to explain.
+            if (intent_path is not None and not manifest_written and
+                    not (source_copy_path.exists() or source_copy_path.is_symlink())):
+                try:
+                    intent_path.unlink(missing_ok=True)
+                    self._fsync_directory(paths.data_dir)
+                except OSError:
+                    pass  # an intent left behind is harmless: unlock reads it as unpublished
             lock.close()
 
     def resume_interrupted_restore(self, selected: str, password: str) -> None:
@@ -782,6 +905,7 @@ class EncryptedBackupRestorer:
             evidence = paths.data_dir / f"restore-evidence-{manifest.operation_id}"
             evidence.mkdir(mode=0o700)
             moving = [marker, paths.data_dir / f".lightning-restore-{manifest.operation_id}.sqlite",
+                      paths.data_dir / f".lightning-restore-{manifest.operation_id}.intent",
                       paths.data_dir / manifest.previous_name, paths.data_dir / manifest.candidate_name,
                       paths.backups_dir / manifest.source_copy_name]
             if not live_opens:
