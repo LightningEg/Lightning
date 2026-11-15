@@ -1119,6 +1119,41 @@ class BudgetService:
         return {"planned": planned, "spent": spent, "left": planned - spent, "estimates": estimates,
                 "low_confidence": [e for e in estimates if e["low_confidence"]]}
 
+    def preview(self, month: str, *, schedule: ScheduleView) -> dict:
+        """NF-12AL4 (owner rule 4, 2026-11-13): a month that has not started, as it will start. Read only: the limits
+        that carry forward into it (this-month-only amounts do not), the bills, subscriptions and loan payments
+        scheduled in it, and the income the plan will count (a dated basis from an income drop included). Carryover
+        is left out: it is only known once the month before has ended."""
+        view = self.month_view(month, schedule=schedule)
+        names = {category.id: category.name for category in self.categories.tree()}
+        groups = []
+        for section in view.sections:
+            group = None
+            for line in section.lines:
+                if line.depth == 1:
+                    group = {"category_id": line.category_id, "name": line.name, "planned": line.budget or ZERO,
+                             "lines": []}
+                    if line.budget:
+                        groups.append(group)
+                elif line.depth == 2 and group is not None and line.budget:
+                    group["lines"].append({"category_id": line.category_id, "name": line.name,
+                                           "planned": line.budget, "from_bills": line.from_bills,
+                                           "from_loans": line.from_loans})
+        bills = [{"category_id": cid, "name": names.get(cid, ""), "amount": row["amount"], "items": list(row["items"])}
+                 for cid, row in schedule.bills(month).items() if row["amount"]]
+        loans = [{"category_id": cid, "name": names.get(cid, ""), "amount": amount}
+                 for cid, amount in schedule.loans(month).items() if amount]
+        bills.sort(key=lambda row: (-row["amount"], row["name"].casefold()))
+        loans.sort(key=lambda row: (-row["amount"], row["name"].casefold()))
+        income = self.income_average(month, schedule=schedule)
+        planned = sum((group["planned"] for group in groups), ZERO)
+        return {"month": month, "starts": parse_month(month)[0], "groups": groups, "planned": planned,
+                "bills": bills, "bills_total": sum((row["amount"] for row in bills), ZERO),
+                "loans": loans, "loans_total": sum((row["amount"] for row in loans), ZERO),
+                "income": income.amount, "income_since": income.since, "income_manual": income.manual,
+                "income_scheduled": income.scheduled, "income_first": income.first_month, "income_last": income.last_month,
+                "left": None if income.amount is None else income.amount - planned}
+
     def set_income_percentage(self, category_id: int, month: str, percent: object,
                               only_this_month: bool = False) -> bool:
         parse_month(month); self._budgetable(category_id)

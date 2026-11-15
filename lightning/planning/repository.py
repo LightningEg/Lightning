@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from lightning.core.dates import now_iso
+from lightning.core.matching import fold_search_text
 from lightning.core.memo import request_cached
 from lightning.core.money import from_e6, to_e6
 from lightning.database.connection import Database
@@ -32,8 +33,8 @@ class PlanningRepository:
     @request_cached
     def items(self, active_only: bool = True) -> list[PlannedItem]:
         rows = self.db.all("SELECT * FROM planned_items" + (" WHERE active=1" if active_only else "")
-                           + " ORDER BY kind, name COLLATE NOCASE, id")
-        return [_item(row) for row in rows]
+                           + " ORDER BY id")
+        return sorted((_item(row) for row in rows), key=lambda item: (item.kind.value, fold_search_text(item.name)))
 
     def item(self, item_id: int) -> PlannedItem | None:
         row = self.db.one("SELECT * FROM planned_items WHERE id=?", (item_id,))
