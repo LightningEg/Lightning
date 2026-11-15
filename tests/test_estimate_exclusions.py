@@ -279,3 +279,24 @@ def test_the_switch_reads_arabic(c, setup, phone):
     laptop = _laptop_year(c, accounts)
     page = _text(c, f"/transactions/{laptop.id}/edit-popup", phone, "ar")
     assert "استبعده من التقديرات" in page and "Leave out of estimates" not in page
+
+
+def test_excluding_an_unrelated_purchase_does_not_reuse_another_purchases_reserve_funding(c, setup):
+    from tests.test_reserve_bills import prepared
+
+    bank, food, bill, _ = prepared(c, setup)
+    c.planning.record_payment(bill, '2026-12-20', '2026-12-20', '1000', bank)
+    other = c.transactions.record_outflow('2026-12-21', bank, '1000', food)
+    c.budgets.set_left_out(other.id, True)
+    # The reserve paid 800 of the bill, not the excluded purchase. Only 200 remains in the estimate.
+    assert _basis(c, food, '2026-12') == Decimal('200')
+
+
+def test_excluding_the_reserve_funded_purchase_does_not_subtract_its_funding_twice(c, setup):
+    from tests.test_reserve_bills import prepared
+
+    bank, food, bill, _ = prepared(c, setup)
+    payment = c.planning.record_payment(bill, '2026-12-20', '2026-12-20', '1000', bank)
+    c.transactions.record_outflow('2026-12-21', bank, '1000', food)
+    c.budgets.set_left_out(payment, True)
+    assert _basis(c, food, '2026-12') == Decimal('1000')

@@ -980,17 +980,21 @@ class BudgetService:
         first, last = str(start)[:10], str(end)[:10]
         basis, moved = self.plan_funded_spending(start, end), set()
         taken: dict[int, Decimal] = {}
+        excluded_funding: dict[int, Decimal] = {}
+        funding = self.funding.adjustments(start, end)
         for line in self._left_out_lines():  # NF-12AK2: an expense left out, with the money back linked to it
             if first <= line["date"] <= last:
-                taken[line["category_id"]] = taken.get(line["category_id"], ZERO) + line["amount"]
-        if taken:
-            gross = self.owned_spending(start, end)
-            for cid, amount in taken.items():
-                # Funding from a reserve or a loan already took part of the month out of the basis; a left-out
-                # purchase it paid for is not taken out twice.
-                funded = max(gross.get(cid, ZERO) - basis.get(cid, ZERO), ZERO)
-                basis[cid] = basis.get(cid, ZERO) - amount + min(funded, max(amount, ZERO))
-                moved.add(cid)
+                cid = line["category_id"]
+                taken[cid] = taken.get(cid, ZERO) + line["amount"]
+                # Only funding linked to this excluded purchase was already removed from the basis.
+                key = (line["transaction_id"], cid)
+                adjustment = funding.pop(key, None) if line["transaction_id"] is not None else None
+                if adjustment:
+                    excluded_funding[cid] = excluded_funding.get(cid, ZERO) + min(
+                        max(line["amount"], ZERO), adjustment["principal"] + adjustment["reserve"])
+        for cid, amount in taken.items():
+            basis[cid] = basis.get(cid, ZERO) - amount + excluded_funding.get(cid, ZERO)
+            moved.add(cid)
         left_out = self.left_out_ids()
         for shift in self._recovery_shifts():
             if shift["expense_id"] in left_out:  # left out above with its expense, in the month it arrived
@@ -1051,25 +1055,25 @@ class BudgetService:
         owned = ("le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
                  "AND le.category_id NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY')")
         expenses = self.db.all(
-            "SELECT NULL link_id,0 linked_e6,le.date,le.category_id,SUM(le.amount_base_e6) total_e6 "
+            "SELECT NULL link_id,0 linked_e6,t.id transaction_id,le.date,le.category_id,SUM(le.amount_base_e6) total_e6 "
             "FROM budget_estimate_exclusions x JOIN transactions t ON t.id=x.transaction_id "
             "JOIN ledger_entries le ON le.transaction_id=t.id "
             f"WHERE t.status='POSTED' AND {owned} GROUP BY t.id,le.category_id,le.date")
         back = self.db.all(  # money back: a claim's receipts, and refunds that name the purchase (NF-12AK3), once
-            "SELECT 'claim:'||rr.id link_id,rr.amount_e6 linked_e6,le.date,le.category_id,"
+            "SELECT 'claim:'||rr.id link_id,rr.amount_e6 linked_e6,NULL transaction_id,le.date,le.category_id,"
             "SUM(le.amount_base_e6) total_e6 FROM budget_estimate_exclusions x "
             "JOIN transactions e ON e.id=x.transaction_id JOIN reimbursement_claims rc ON rc.expense_id=e.id "
             "JOIN reimbursement_receipts rr ON rr.claim_id=rc.id JOIN transactions r ON r.id=rr.receipt_id "
             "JOIN ledger_entries le ON le.transaction_id=r.id "
             f"WHERE e.status='POSTED' AND r.status='POSTED' AND {owned} "
             "GROUP BY rr.id,le.category_id,le.date "
-            "UNION ALL SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,le.date,le.category_id,"
+            "UNION ALL SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,NULL transaction_id,le.date,le.category_id,"
             "SUM(le.amount_base_e6) total_e6 FROM budget_estimate_exclusions x "
             "JOIN transactions e ON e.id=x.transaction_id JOIN refund_links rl ON rl.expense_id=e.id "
             "JOIN transactions r ON r.id=rl.refund_id JOIN ledger_entries le ON le.transaction_id=r.id "
             f"WHERE e.status='POSTED' AND r.status='POSTED' AND {owned} "
             "AND NOT EXISTS (SELECT 1 FROM reimbursement_receipts y WHERE y.receipt_id=rl.refund_id) "
-            "GROUP BY rl.id,le.category_id,le.date ORDER BY 1,4,3")
+            "GROUP BY rl.id,le.category_id,le.date ORDER BY 1,5,4")
         investment, lines, left = self._investment_ids(), [], {}
         for row in [*expenses, *back]:
             category = self.categories.get(int(row["category_id"]))
@@ -1084,7 +1088,8 @@ class BudgetService:
                 left[row["link_id"]] = remaining - back_amount
                 amount = -back_amount
             if amount:
-                lines.append({"date": row["date"], "category_id": category.id, "amount": amount})
+                lines.append({"date": row["date"], "category_id": category.id, "amount": amount,
+                              "transaction_id": row["transaction_id"]})
         return lines
 
     @request_cached
