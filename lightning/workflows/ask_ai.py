@@ -6,7 +6,7 @@ before), where the money went, the plan, what is owned, and only then the rows, 
 figure comes from a reporting, budgeting or planning service; this module only chooses, orders and formats them.
 
 Privacy: notes and memos are never included (free text can hold names). "Hide names" replaces counterparties, accounts and
-personal holdings with stable labels (Counterparty 1, Account A, Holding 1) in every section and row.
+personal holdings with stable labels (Payee 1, Account A, Holding 1) in every section and row.
 """
 
 from __future__ import annotations
@@ -166,7 +166,7 @@ class Names:
         name = cell(name)
         if not self.hide or not name:
             return name
-        return self._counterparty.setdefault(name, f"Counterparty {len(self._counterparty) + 1}")
+        return self._counterparty.setdefault(name, f"Payee {len(self._counterparty) + 1}")
 
     def account(self, name: str | None) -> str:
         name = cell(name)
@@ -297,7 +297,7 @@ class AskAIService:
     def build(self, options: AskOptions) -> Brief:
         options = options.checked()
         names = Names(options.hide_names)
-        # Seed the labels in spending order so "Counterparty 1" is the biggest, in every section and row.
+        # Seed the labels in spending order so "Payee 1" is the biggest, in every section and row.
         facts = self.facts(options)
         for name, _ in facts["counterparties"]:
             names.counterparty(name)
@@ -329,7 +329,7 @@ class AskAIService:
         add(f"Prepared on this device by Lightning on {f['today']}. Lightning sent this nowhere; you chose to share it. "
             f"Currency: {base}. Totals are whole {base}; rows are exact to the piastre. Positive means money coming in or "
             "up, negative means money going out or down. Notes and memos are left out."
-            + (" Names are replaced by labels (Counterparty 1, Account A, Holding 1)." if names.hide else ""))
+            + (" Names are replaced by labels (Payee 1, Account A, Holding 1)." if names.hide else ""))
         add("")
         add(f"## Your task: {label}")
         add("")

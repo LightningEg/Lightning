@@ -1633,7 +1633,7 @@ def test_ask_ai_brief_of_mohabs_year_agrees_with_the_reports_in_every_preset_and
             if name and len(name) > 3 and name not in categories}      # a category name stays: it is the person's own word
     assert real
     assert not sorted(name for name in real if name in masked), "a real name survived hide names"
-    assert "Counterparty 1" in masked and "Names are replaced by labels" in masked
+    assert "Payee 1" in masked and "Names are replaced by labels" in masked
 
 
 # ------------------------------------------------------------------ the same number on every tab, for every period
@@ -1683,7 +1683,7 @@ def test_a_figure_reads_the_same_on_every_tab(mohab, period):
 
 
 def test_a_rule_files_a_new_phone_as_shopping_and_keeps_the_monthly_bill(mohab):
-    assert mohab.notes["rule_saved"].shows("Rule saved.", "Counterparty contains Vodafone · Amount between 1,000 and 50,000",
+    assert mohab.notes["rule_saved"].shows("Rule saved.", "Payee contains Vodafone · Amount between 1,000 and 50,000",
                                            "Shopping")
     assert route(mohab, "rule_filed") == ["/", "/accounts/1"]
     answer = mohab.answers["rule_filed"]

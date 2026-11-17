@@ -12,7 +12,7 @@
     <input type="hidden" name="counterparty" value="{{ offer.counterparty }}"><input type="hidden" name="category_id" value="{{ offer.category_id }}">
     <input type="hidden" name="token" value="{{ offer.token }}"><input type="hidden" name="return_to" value="{{ back }}">
     {% if offer.past %}
-    <div class="phone-rows">{% for t in changes %}<div class="phone-row"><span>{{ t.counterparty or 'No counterparty' }}<small>{{ t.date }} · {{ t.category_from }} → {{ offer.category }}</small></span><b class="{{ 'pos' if t.amount > 0 }}"><bdi class="fig">{{ '+' if t.amount > 0 else '−' }}{{ t.amount|abs|money }}</bdi></b></div>{% endfor %}
+    <div class="phone-rows">{% for t in changes %}<div class="phone-row"><span>{{ t.counterparty or 'No payee' }}<small>{{ t.date }} · {{ t.category_from }} → {{ offer.category }}</small></span><b class="{{ 'pos' if t.amount > 0 }}"><bdi class="fig">{{ '+' if t.amount > 0 else '−' }}{{ t.amount|abs|money }}</bdi></b></div>{% endfor %}
       {% if more %}<div class="phone-row"><span class="phone-note">{{ 'and {count} more'|tr(locale, count=more) }}</span></div>{% endif %}</div>
     <fieldset class="phone-rows"><legend class="phone-note">{{ 'Apply to'|tr(locale) }}</legend>
       <label class="phone-row"><span>{{ 'These {count} past entries and future matches'|tr(locale, count=offer.past|length) }}</span><input type="radio" name="scope" value="past" checked></label>

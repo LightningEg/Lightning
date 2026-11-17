@@ -648,7 +648,7 @@ def _resolve(request: Request, row_account: int | None, values: dict, allow_miss
     other = c.accounts.find_by_text(raw)
     if other is not None:
         if other.id == row_account:
-            raise ValidationError("That is this same account — pick a different counterparty for a transfer.", "counterparty")
+            raise ValidationError("That is this same account — pick a different account for a transfer.", "counterparty")
         return other.id, None, ""
     party = c.counterparties.resolve(raw)
     choice = values.get("counterparty_choice", "")
@@ -664,7 +664,7 @@ def _resolve(request: Request, row_account: int | None, values: dict, allow_miss
                 selected_id = _int(choice.split(":", 1)[1])
                 selected = c.counterparties.get(selected_id) if selected_id else None
                 if not selected or selected["name"] not in {name for name, _ in guesses}:
-                    raise ValidationError("Choose one of the suggested counterparties, or explicitly create this name.", "counterparty")
+                    raise ValidationError("Choose one of the suggested payees, or explicitly create this name.", "counterparty")
                 c.counterparties.add_alias(int(selected["id"]), raw)
                 canonical = selected["name"]
             elif choice == "create":
@@ -672,7 +672,7 @@ def _resolve(request: Request, row_account: int | None, values: dict, allow_miss
                 c.counterparties.create(canonical)
             else:
                 names = ", ".join(name for name, _ in guesses[:3])
-                raise ValidationError(f"Review similar Counterparties before saving: {names}.", "counterparty_review")
+                raise ValidationError(f"Review similar payees before saving: {names}.", "counterparty_review")
         else:
             # Nothing similar exists, so a new name cannot duplicate one: save it without an extra
             # question. Similar spellings above still need a deliberate choice.
@@ -850,7 +850,7 @@ def _custody_owner(c, values: dict, category) -> str | None:
     name = values.get("whom", "").strip()
     party = c.counterparties.get(c.counterparties.ensure_person(name))
     if not party["active"]:
-        raise ValidationError("That Counterparty is archived. Activate it before using it as Whom.", "whom")
+        raise ValidationError("That payee is archived. Activate it before using it in Held for.", "whom")
     return party["name"]
 
 
@@ -862,7 +862,7 @@ def _transfer_custody_owner(c, values: dict) -> str | None:
     if name:
         party = c.counterparties.get(c.counterparties.ensure_person(name))
         if not party["active"]:
-            raise ValidationError("Choose an active saved Counterparty in Whom.", "whom")
+            raise ValidationError("Choose an active saved payee in Held for.", "whom")
         return party["name"]
     return None
 

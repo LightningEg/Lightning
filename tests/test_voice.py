@@ -11,6 +11,12 @@ from tools.phone_check import PAGES as PHONE_PAGES
 
 # Add a term here when its replacement ships; keep the reason beside it.
 BANNED_WORDS = {
+    "Counterparty": "Use Payee for the transaction field and Who for the column.",
+    "Counterparties": "Use Payees for the saved names.",
+    "الطرف الآخر": "Use الجهة for the payee.",
+    "الطرف التاني": "Use الجهة for the payee.",
+    "الطرف المقابل": "Use الجهة for the payee.",
+    "الأطراف المقابلة": "Use الجهات for saved payees.",
     "Successfully": "Say what happened without a redundant success announcement.",
     "Please": "Give the next action directly, without a polite preamble.",
     "Submit": "Name the action, such as Save or Import.",
@@ -132,6 +138,8 @@ def test_main_pages_keep_retired_words_off_screen(voice_page, locale):
     ("Error:Invalid amount", ["Error:", "Invalid"]),
     ("Resubmit the unsuccessful payment after invalidation.", []),
     ("حفظ المعاملة", []),
+    ("Counterparty and Counterparties", ["Counterparty", "Counterparties"]),
+    ("اختيار الطرف الآخر", ["الطرف الآخر"]),
 ])
 def test_retired_word_matching_uses_words_and_ignores_case(text, expected):
     assert _retired_words(text) == expected

@@ -456,7 +456,7 @@ def _review_groups(c, rows: list[dict], form=None, sort: str = "") -> list[dict]
         groups.append({
             "i": index, "key": key, "rows": members, "count": len(members), "status": status, "kind": kind,
             "label": label if kind == "label" else "",
-            "name": _QUESTION_NAMES.get(kind) or members[0].get("Counterparty") or "No counterparty",
+            "name": _QUESTION_NAMES.get(kind) or members[0].get("Counterparty") or "No payee",
             "total": staged_total(members),
             "errors": sum(1 for r in members if r["_state"] == "err"),  # not money: counts
             "duplicates": sum(1 for r in members if r["_state"] == "dup"),  # not money: counts
@@ -545,7 +545,7 @@ async def create_counterparty_now(request: Request, account_id: int):
     name = " ".join(str(form.get("name", "")).split())
     try:
         if not name:
-            raise ValidationError("Enter a counterparty name.", "counterparty")
+            raise ValidationError("Enter a payee name.", "counterparty")
         with settled_save(request, container(request)):
             if str(form.get("kind", "")).upper() == "PERSON":
                 party_id = c.counterparties.ensure_person(name)
@@ -554,7 +554,7 @@ async def create_counterparty_now(request: Request, account_id: int):
                 party_id = int(found["id"]) if found else c.counterparties.create(name)
         party = c.counterparties.get(party_id)
         if not party["active"]:
-            raise ValidationError(f"{party['name']} is archived. Turn it on in Counterparties first.", "counterparty")
+            raise ValidationError(f"{party['name']} is archived. Turn it on in Payees first.", "counterparty")
     except LightningError as exc:
         return JSONResponse({"error": exc.message}, status_code=400)
     return JSONResponse({"id": party_id, "name": party["name"], "pick": f"counterparty:{party_id}"})

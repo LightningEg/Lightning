@@ -16,14 +16,14 @@
 <div class="reserve-match" role="group" aria-label="{{ label }}" data-reserve-match>
   <span class="planner-mode-label">{{ 'Match by'|tr(locale) }}</span>
   <label class="reserve-criterion-toggle"><input type="checkbox" name="match_by" value="none"{% if not reserve or not (reserve.account_id or reserve.counterparty_id or reserve.category_id) %} checked{% endif %}><span>{{ 'Ask'|tr(locale) }}</span></label>
-  {% for value, text in [('account', 'Account'), ('counterparty', 'Counterparty'), ('category', 'Category')] %}
+  {% for value, text in [('account', 'Account'), ('counterparty', 'Payee'), ('category', 'Category')] %}
   {% set active = reserve and reserve[value ~ '_id'] %}
   <div class="reserve-criterion">
     <label class="reserve-criterion-toggle"><input type="checkbox" name="match_by" value="{{ value }}"{% if active %} checked{% endif %}><span>{{ text|tr(locale) }}</span></label>
     <label data-match-picker="{{ value }}"{% if not active %} hidden{% endif %}>
       <span class="sr-only">{{ text|tr(locale) }}</span>
       <select name="{{ value }}_id" data-own-picker aria-label="{{ text|tr(locale) }}"{% if active %} required{% else %} disabled{% endif %}>
-        <option value="">{{ ('Choose an account' if value == 'account' else 'Choose a saved counterparty' if value == 'counterparty' else 'Choose a spending category')|tr(locale) }}</option>
+        <option value="">{{ ('Choose an account' if value == 'account' else 'Choose a saved payee' if value == 'counterparty' else 'Choose a spending category')|tr(locale) }}</option>
         {% if value == 'category' %}{% from 'partials/macros.html' import category_options %}{{ category_options(category_groups(categories), reserve.category_id if reserve else '') }}
         {% else %}{% for item in (accounts if value == 'account' else counterparties) %}<option value="{{ item.id }}"{% if active == item.id %} selected{% endif %}>{{ item.name }}</option>{% endfor %}{% endif %}
       </select>
