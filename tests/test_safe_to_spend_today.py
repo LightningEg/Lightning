@@ -102,4 +102,4 @@ def test_the_screens_lead_with_safe_today_and_show_expected_with_its_working(c, 
         assert "Safe to spend today" in page and "Expected by payday" in page
         assert "Side project" in page and "25 Oct" in page and "1 Nov" in page  # amounts, dates in the app's own style
         assert "Payday chosen from your salary" in page and "8,000" in page
-        assert "Fits only after EGP 8,000 arrives on 2026-10-25." in page
+        assert "Fits only after EGP 8,000 arrives on 25 Oct." in page
