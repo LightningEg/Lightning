@@ -2,7 +2,7 @@
 
 Owner, 2026-11-14: this month's Emergency fund top-up and Saving for goals are what the month asked on the 1st, less
 what was moved in since, never below zero. So doing what the plan reserved leaves Safe to spend where it was, the
-payday page's "Safe to spend stays at ..." is true after Confirm, and nothing is offered twice in a month. Money
+payday page's "Safe to spend today stays at ..." is true after Confirm, and nothing is offered twice in a month. Money
 taken out of a reserve does not raise this month's ask. The refill in instalments never goes below zero."""
 from __future__ import annotations
 
@@ -68,7 +68,7 @@ def test_confirm_on_payday_leaves_safe_to_spend_and_is_not_offered_again(demo):
     before = _safe(c)
     with TestClient(create_app(c)) as client:
         page = client.get("/payday").text
-    said = re.search(r"Safe to spend stays at ([\d,]+)", page).group(1)
+    said = re.search(r"Safe to spend today stays at ([\d,]+)", page).group(1)
     assert D(said.replace(",", "")) == before
     _confirm(c)
     assert _safe(c) == before                                  # was 38,172 in r37

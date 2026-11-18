@@ -254,8 +254,7 @@ _TABLE = [
      "your next payday arrives (the salary itself ends the window and is not counted). It is shown with the payday "
      "date, how payday was chosen (salary, highest recurring income or estimated) and each expected income with its "
      "amount and date. It was called Safe to spend until 2026-11-18; the formula has not changed.",
-     "Free cash + Income before payday − Due before payday + Bill cash already set aside − Gam'eya instalments before "
-     "payday − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target"),
+     "Free cash + Income before payday − Due before payday + Bill cash already set aside − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target"),
     ("bills_inside_the_plan", "Bills inside the plan",
      "This month's scheduled bills, due or upcoming, in a category that has a budget. They are part of that budget."),
     ("left_in_plan_after_bills", "Budget until payday",
