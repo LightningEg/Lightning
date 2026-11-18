@@ -165,8 +165,7 @@
 {# Expected by payday (owner, 2026-11-18): the figure, the payday date, how payday was chosen, and each expected income
    counted, with its amount and date. e comes from lightning/ui/expected.py. #}
 {% macro expected_block(e, base) %}{% if e %}<div class="expected-by-payday" id="expected-by-payday" data-fig="expected_by_payday">
-  <p><b>{{ e.label|tr(ui_locale()) }}</b> <span class="fig">{{ e.value|money(places=0) }}</span> <small>{{ base }}</small></p>
-  <p class="muted">{{ 'Payday'|tr(ui_locale()) }} {{ e.date|keep_dates }} · {{ 'Payday chosen from'|tr(ui_locale()) }} {{ e.source|tr(ui_locale()) }}</p>
-  {% if e.incomes %}<p class="muted">{{ 'Expected income counted'|tr(ui_locale()) }}</p><ul class="compact-list">{% for i in e.incomes %}<li>{{ i.name }} · {{ i.date|keep_dates }} · {{ i.amount|money(places=0) }} {{ base }}</li>{% endfor %}</ul>
-  {% else %}<p class="muted">{{ 'No other income is expected before payday.'|tr(ui_locale()) }}</p>{% endif %}
+  <p><b>{{ e.label|tr(ui_locale()) }}</b> <span class="fig">{{ e.value|money(places=0) }}</span> <small>{{ base }}</small>
+  <small class="muted"> · {{ 'Payday'|tr(ui_locale()) }} {{ e.date|keep_dates }} · {{ 'Payday chosen from'|tr(ui_locale()) }} {{ e.source|tr(ui_locale()) }}</small></p>
+  <p class="muted"><small>{% if e.incomes %}{{ 'Expected income counted'|tr(ui_locale()) }}: {% for i in e.incomes %}{{ i.name }} · {{ i.date|keep_dates }} · {{ i.amount|money(places=0) }} {{ base }}{{ '; ' if not loop.last }}{% endfor %}{% else %}{{ 'No other income is expected before payday.'|tr(ui_locale()) }}{% endif %}</small></p>
 </div>{% endif %}{% endmacro %}

@@ -15,9 +15,9 @@
 {% block content %}
 {% from "partials/charts.html" import stat_tiles, kpi_row, trend, bars, lead_card %}{% from "partials/macros.html" import needs_rows, expected_block %}
 {% set f = forecast %}{% set p = plan %}
-{% if lead %}{% call lead_card(lead, base) %}<div class="lead-side-head" id="plan-build"><div><h3>{{ 'How safe to spend is worked out'|tr(locale) }}</h3><p>{{ "From free cash to safe to spend"|tr(locale) }}</p></div></div>
+{% set expected_html %}{{ expected_block(expected, base) }}{% endset %}
+{% if lead %}{% call lead_card(lead, base, main_extra=expected_html) %}<div class="lead-side-head" id="plan-build"><div><h3>{{ 'How safe to spend is worked out'|tr(locale) }}</h3><p>{{ "From free cash to safe to spend"|tr(locale) }}</p></div></div>
     {{ linked_breakdown(p.build) }}
-    {{ expected_block(expected, base) }}
     {# Feedback ticket 102: when only what is left in the budget pushes safe to spend below zero, the way out is the budget. #}
     {% set budget_part = f.safe_to_spend_parts|selectattr(0, 'equalto', fig.left_in_plan_after_bills.label)|map(attribute=1)|first|default(0) %}
     {% if f.safe_to_spend < 0 and budget_part < 0 and f.safe_to_spend - budget_part >= 0 %}<p class="notice">{{ "What is still planned to spend in your budget is more than your cash allows."|tr(locale) }} <a class="btn small" href="/budget">{{ 'Adjust your budget'|tr(locale) }}</a></p>
