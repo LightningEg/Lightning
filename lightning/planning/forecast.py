@@ -13,7 +13,7 @@ from lightning.core.figures import label
 from lightning.core.money import ZERO, from_e6
 from lightning.deposits.domain import DepositEvent
 
-from .domain import CashForecast, EverydayBudget, ForecastMonth, Payment, PaymentStatus, PlanKind
+from .domain import CashForecast, EverydayBudget, ExpectedIncome, ForecastMonth, Payment, PaymentStatus, PlanKind
 from .dated_cash import dated_cash_forecast
 from .schedule import _add_months as _months_on
 from .schedule_view import reserve_goal_needs
@@ -336,13 +336,15 @@ class CashForecaster:
         before = [p for p in upcoming if not p.item.is_income and (next_date is None or p.due_date < next_date)]
         instalments = -sum((e.amount for e in circle_events if e.kind == "INSTALLMENT"
                             and (next_date is None or e.date < next_date)), ZERO)
-        income_before = sum((self.planning.amount_in_base(p, p.still_owed, day) for p in upcoming
-                             if p.item.is_income and next_date is not None and p.due_date < next_date), ZERO)
+        expected = sorted(((p.due_date, p.item.name, self.planning.amount_in_base(p, p.still_owed, day)) for p in upcoming
+                           if p.item.is_income and next_date is not None and p.due_date < next_date))
+        income_before = sum((amount for _, _, amount in expected), ZERO)
         safe, parts, before_total = self._safe_to_spend(free, before, next_date, day, rows, instalments, income_before)
+        source = "estimated" if next_estimated or not next_income else self.planning.payday_choice()[1]
         return CashForecast(fmt_date(day), free, average, average_months, next_date, next_estimated,
                             safe, parts, rows, [p for p in upcoming if p.due_date <= next_date] if next_date else upcoming[:10],
                             before, dated_cash_forecast(self.reporting, *self.scheduled_inputs(day, horizon_end), day, horizon_end),
-                            before_total)
+                            before_total, income_before, tuple(ExpectedIncome(n, d, a) for d, n, a in expected), source)
 
     def _saved_this_month(self, month: str) -> Decimal:
         """What went into the emergency fund and goals since the 1st and is still there, when ``month`` is this
@@ -367,24 +369,24 @@ class CashForecaster:
         day = as_of or today()
         now = self.forecast(day, refill=ZERO)
         everything = self.forecast(day, refill=room)
-        if everything.safe_to_spend >= ZERO:
-            safe_amount, safe_after = room, everything.safe_to_spend
-        elif now.safe_to_spend <= ZERO:
-            safe_amount, safe_after = ZERO, now.safe_to_spend
+        if everything.expected_by_payday >= ZERO:
+            safe_amount, safe_after = room, everything.expected_by_payday
+        elif now.expected_by_payday <= ZERO:
+            safe_amount, safe_after = ZERO, now.expected_by_payday
         else:
             # Safe to spend falls about one for one with the amount moved: aim there, then check and correct once.
-            guess = (room * now.safe_to_spend / (now.safe_to_spend - everything.safe_to_spend)).quantize(Decimal("1"), ROUND_DOWN)
+            guess = (room * now.expected_by_payday / (now.expected_by_payday - everything.expected_by_payday)).quantize(Decimal("1"), ROUND_DOWN)
             trial = self.forecast(day, refill=guess)
-            if trial.safe_to_spend < ZERO:
-                guess = max((guess + trial.safe_to_spend).quantize(Decimal("1"), ROUND_DOWN), ZERO)
+            if trial.expected_by_payday < ZERO:
+                guess = max((guess + trial.expected_by_payday).quantize(Decimal("1"), ROUND_DOWN), ZERO)
                 trial = self.forecast(day, refill=guess)
-            safe_amount, safe_after = guess, trial.safe_to_spend
+            safe_amount, safe_after = guess, trial.expected_by_payday
         first, first_after = safe_amount, safe_after
         modest = (top_up or ZERO).quantize(Decimal("1"), ROUND_UP)
         if ZERO < modest < safe_amount:
-            first, first_after = modest, self.forecast(day, refill=modest).safe_to_spend
-        return {"before": now.safe_to_spend, "until": now.next_income_date, "all": room,
-                "all_after": everything.safe_to_spend, "safe": safe_amount, "safe_after": safe_after,
+            first, first_after = modest, self.forecast(day, refill=modest).expected_by_payday
+        return {"before": now.expected_by_payday, "until": now.next_income_date, "all": room,
+                "all_after": everything.expected_by_payday, "safe": safe_amount, "safe_after": safe_after,
                 "first": first, "first_after": first_after}
 
     def refill_schedule(self, as_of: date | None, gap: Decimal, options: dict, months: int = 6) -> list[dict]:
@@ -424,7 +426,7 @@ class CashForecaster:
             moved += amount
             # Run far enough for the next step too, so it starts from this run.
             now = self.forecast(day, months=index + 1 + HORIZON_MONTHS, refill=moved)
-            after = now.safe_to_spend if step == 0 else lowest(now, index)
+            after = now.expected_by_payday if step == 0 else lowest(now, index)
             rows.append({"date": fmt_date(_months_on(first, step)), "amount": amount, "fund_after": set_aside + moved,
                          "safe_after": after, "keeps_plan": after >= ZERO, "lowest": step > 0})
         return rows
@@ -457,7 +459,8 @@ class CashForecaster:
     def _safe_to_spend(self, free: Decimal, before: list[Payment], until: str | None, day: date,
                        rows: list[ForecastMonth], instalments: Decimal = ZERO, income_before: Decimal = ZERO
                        ) -> tuple[Decimal, list[tuple[str, Decimal]], Decimal]:
-        """Free cash, plus income other than the salary that lands first, less what is already promised before payday.
+        """Expected by payday: free cash, plus income other than the salary that lands first, less what is already
+        promised before payday. Safe to spend today is this less that income (CashForecast.safe_to_spend).
 
         Budget, goal and savings needs count for every month until the next income, not just this one: between
         jobs, next month's spending still comes out of today's cash. The month the income lands in

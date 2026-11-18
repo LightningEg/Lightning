@@ -1,8 +1,9 @@
 """Can I afford this? One answer from the Cash planning figures, no new formula.
 
-Safe to spend already holds every promise before the next income (bills, budget, goals). A purchase
-that fits inside it is a yes; one that fits only inside free cash eats the plan; anything past free cash
-is a no. PC roadmap P4.
+Safe to spend today already holds every promise before the next income (bills, budget, goals) and counts no income
+that has not arrived. A purchase that fits inside it is a yes; one that fits only once expected income arrives
+(Expected by payday) says when; one that fits only inside free cash eats the plan; anything past free cash is a no.
+PC roadmap P4, owner 2026-11-18.
 """
 from __future__ import annotations
 
@@ -15,19 +16,29 @@ ZERO = Decimal(0)
 @dataclass(frozen=True)
 class Affordability:
     amount: Decimal
-    verdict: str          # "yes" | "plan" | "no"
-    left: Decimal         # safe to spend after the purchase (negative when it does not fit)
+    verdict: str          # "yes" | "after_income" | "plan" | "no"
+    left: Decimal         # Safe to spend today after the purchase (negative when it does not fit)
     short: Decimal        # how much is missing from free cash; 0 unless verdict is "no"
     headline: str
 
 
-def can_afford(amount: Decimal, safe_to_spend: Decimal, free_cash: Decimal, until: str | None) -> Affordability:
+def can_afford(amount: Decimal, safe_to_spend: Decimal, free_cash: Decimal, until: str | None,
+               expected_by_payday: Decimal | None = None, incomes=(), currency: str = "EGP") -> Affordability:
+    """``safe_to_spend`` is Safe to spend today. ``expected_by_payday`` and ``incomes`` (objects with ``date`` and
+    ``amount``, the expected incomes before payday) let a purchase that fits only after income arrives say when."""
     if amount <= ZERO:
         raise ValueError("Type an amount above zero.")
     left = safe_to_spend - amount
-    when = f" until {until}" if until else ""
     if left >= ZERO:
-        return Affordability(amount, "yes", left, ZERO, f"Yes. You keep {left:,.0f} safe to spend{when}.")
+        return Affordability(amount, "yes", left, ZERO, f"Yes. You keep {left:,.0f} safe to spend today.")
+    if expected_by_payday is not None and expected_by_payday - amount >= ZERO:
+        arriving = ZERO
+        for income in sorted(incomes, key=lambda i: i.date):
+            arriving += income.amount
+            if safe_to_spend + arriving >= amount:
+                return Affordability(amount, "after_income", left, ZERO,
+                                     f"Fits only after {currency} {arriving:,.0f} arrives on {income.date}.")
+    when = f" until {until}" if until else ""
     if free_cash - amount >= ZERO:
         return Affordability(amount, "plan", left, ZERO,
                              f"Only by cutting your plan: it takes {-left:,.0f} from budget, bills or goals{when}.")

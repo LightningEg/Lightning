@@ -2,6 +2,7 @@ from fastapi import APIRouter, Request
 
 from lightning.core.errors import LightningError
 from .. import kpis, status
+from ..expected import expected_by_payday
 from ..web import container, redirect, render, settled_save
 
 router = APIRouter(prefix="/payday")
@@ -18,8 +19,9 @@ def _page(request, c, **extra):
     allocation = c.funding.preview()
     lead, split = kpis.payday(allocation)
     pr = allocation["proposal"]
+    forecast = c.forecaster.forecast()
     return render(request, "planning/payday.html", enabled=c.funding.enabled, allocation=allocation,
-                  forecast=c.forecaster.forecast(), lead=lead, split=split,
+                  forecast=forecast, expected=expected_by_payday(forecast), lead=lead, split=split,
                   status=status.payday(pr["available_before"], pr["unassigned"], c.funding.enabled, pr["assigned"]), **extra)
 
 

@@ -322,6 +322,14 @@ def a_month(yearly: Decimal) -> Decimal:
 
 
 @dataclass(frozen=True)
+class ExpectedIncome:
+    """One income Expected by payday counts that has not arrived: what it is, when, and how much (profile currency)."""
+    name: str
+    date: str
+    amount: Decimal
+
+
+@dataclass(frozen=True)
 class CashForecast:
     as_of: str
     free_cash: Decimal
@@ -329,8 +337,8 @@ class CashForecast:
     average_income_months: int
     next_income_date: str | None
     next_income_estimated: bool
-    safe_to_spend: Decimal
-    safe_to_spend_parts: list[tuple[str, Decimal]]
+    expected_by_payday: Decimal
+    expected_by_payday_parts: list[tuple[str, Decimal]]
     months: list[ForecastMonth]
     upcoming: list[Payment]
     # The payments Safe to spend takes off: scheduled, not yet due, before the next income.
@@ -338,13 +346,40 @@ class CashForecast:
     dated: DatedCashForecast | None = None
     # Due before payday: what is still owed on those payments, in the profile currency (the part Safe to spend takes off).
     payments_before_income_total: Decimal = Decimal(0)
+    # Expected by payday counts these incomes (not the salary that ends the window), and says how payday was chosen:
+    # "salary", "highest recurring income", "scheduled income" (only one-offs) or "estimated" (no dated income).
+    income_before_payday: Decimal = Decimal(0)
+    income_before_payday_items: tuple[ExpectedIncome, ...] = ()
+    payday_source: str = "estimated"
+
+    @property
+    def safe_to_spend(self) -> Decimal:
+        """Safe to spend today: Expected by payday with the income that has not arrived taken out. Only money you
+        hold and promises count; nothing is assumed to land."""
+        return self.expected_by_payday - self.income_before_payday
+
+    @property
+    def safe_to_spend_parts(self) -> list[tuple[str, Decimal]]:
+        """The steps from Free cash to Safe to spend today: Expected by payday's steps without Income before payday."""
+        from lightning.core.figures import label
+        name = label("income_before_payday")
+        return [(n, v) for n, v in self.expected_by_payday_parts if n != name]
 
     @property
     def safe_to_spend_working(self):
-        """NF-12AB2: from Free cash to Safe to spend, the forecaster's own steps."""
+        """NF-12AB2: from Free cash to Safe to spend today, the forecaster's own steps."""
         from lightning.core.working import Working, WorkingRow
         return Working("safe_to_spend", self.safe_to_spend,
                        tuple(WorkingRow(name, value) for name, value in self.safe_to_spend_parts), home="/plan")
+
+    @property
+    def expected_by_payday_working(self):
+        """From Safe to spend today, plus each expected income, to Expected by payday."""
+        from lightning.core.figures import label
+        from lightning.core.working import Working, WorkingRow
+        rows = [WorkingRow(label("safe_to_spend"), self.safe_to_spend)]
+        rows += [WorkingRow(f"{i.name} · {i.date}", i.amount) for i in self.income_before_payday_items]
+        return Working("expected_by_payday", self.expected_by_payday, tuple(rows), home="/plan")
 
     @property
     def first_short_month(self) -> ForecastMonth | None:
