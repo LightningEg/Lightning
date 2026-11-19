@@ -37,6 +37,20 @@ class CounterpartyService:
             "ON a.counterparty_id=c.id WHERE a.normalized_alias=? LIMIT 1", (key, key)
         )
 
+    def sms_payee(self, value: str):
+        """Prefer the complete bank label, then a saved name or alias beside a top-up descriptor."""
+        exact = self.resolve(value)
+        if exact:
+            return exact if exact["active"] else None
+        label = normalize(value)
+        descriptor = r"(?:top ?up|recharge|شحن رصيد|شحن)"
+        stripped = re.sub(rf"^{descriptor} | {descriptor}$", "", label, count=1)
+        if stripped and stripped != label:
+            payee = self.resolve(stripped)
+            if payee and payee["active"]:
+                return payee
+        return None
+
     def resolve_many(self, values) -> dict:
         """{value: row or None} for many names at once, in one read (backend roadmap B4): a saved name wins over
         an alias, as in `resolve`."""

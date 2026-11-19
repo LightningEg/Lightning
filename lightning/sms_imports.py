@@ -36,6 +36,8 @@ QUIET_KEY = "sms_quiet_senders"        # {"Vodafone365": dismissals}: senders wh
 STATED_KEY = "sms_stated_balances"     # {account_id: {"date", "balance"}}: the newest balance a bank message stated
 BANK_SENDERS_KEY = "sms_bank_senders"  # senders that sent a message a rule read: never made quiet
 SAVED_KEY = "sms_saved"                # the last MAX_SAVED messages that saved themselves (NF-7AO2), newest last
+SAVE_MODE_KEY = "sms_save_mode"
+SAVE_MODES = ("review", "classified", "known")
 MAX_SAVED = 30
 QUIET_AFTER = 2                        # dismissing this many of a sender's unreadable messages quiets it
 MAX_UNREAD = 200
@@ -596,6 +598,10 @@ class SmsImportService:
             if sender:
                 self.settings.set(QUIET_KEY, json.dumps(dict(sorted(counts.items(), key=lambda kv: -kv[1])[:200])))
 
+    def save_mode(self) -> str:
+        value = self.settings.get(SAVE_MODE_KEY)
+        return value if value in SAVE_MODES else "classified"
+
     def _save_sure(self, staged: dict[int, int]) -> int:
         """NF-7AO1/3: the staged rows Lightning is sure about post themselves through the review's own post
         (`bank_imports.confirm`, as "Post them" does); the rest wait for the owner. Sure means all of: a named bank
@@ -605,6 +611,9 @@ class SmsImportService:
         matches one entry already typed by hand (same account and amount within the link window) is linked to
         it instead of posted (7AO3). A synchronized profile reads messages only on its home (`sms_imports.read`
         is a journal command), so this posts once. Returns how many saved themselves."""
+        mode = self.save_mode()
+        if mode == "review":
+            return 0
         count = 0
         for account_id, batch_id in staged.items():
             sure = {row["id"] for row in self.db.all("SELECT id, raw_json FROM bank_import_rows WHERE batch_id=?",
@@ -616,8 +625,11 @@ class SmsImportService:
                 if row["_import_row_id"] not in sure or row["_status"] != "REVIEW" or row.get("_errors") \
                         or row.get("_voided_earlier") or row.get("_balance_row"):
                     continue
-                if row["_ready"]:
-                    decisions[row["_import_row_id"]] = {"match": "new"}
+                if row["_ready"] or (mode == "known" and row["_known_purchase_without_category"]):
+                    decision = {"match": "new"}
+                    if row["_whom"] and not row["_transfer_target"]:
+                        decision.update(counterparty=row["_whom"], counterparty_id=row["_counterparty_id"])
+                    decisions[row["_import_row_id"]] = decision
                 elif _typed_by_hand(row):
                     decisions[row["_import_row_id"]] = {"match": row["_default_match"]}
             if not decisions:
@@ -639,7 +651,7 @@ class SmsImportService:
                 records.append({"ref": done["ref"], "account": self.accounts.get(account_id).code,
                                 "linked": done["status"] == "LINKED",
                                 "date": row["Date"], "amount": str(row["Amount"]),
-                                "who": row["Counterparty"] or row["Notes"], "text": row.get("_message", "")[:MAX_TEXT],
+                                "who": row["_whom"] or row["Counterparty"] or row["Notes"], "text": row.get("_message", "")[:MAX_TEXT],
                                 "at": today().isoformat()})
                 count += 1
             self.settings.set(SAVED_KEY, json.dumps(records[-MAX_SAVED:], ensure_ascii=False))
@@ -780,7 +792,7 @@ class SmsImportService:
     def _stage(self, account_id: int, rows: list[SmsTransaction], transfers: dict[int, str] | None = None) -> int:
         out = io.StringIO()
         writer = csv.writer(out)
-        writer.writerow(["Date", "Amount", "Counterparty", "Category", "Notes", "Reference", "Message", "Read", "Foreign"])
+        writer.writerow(["Date", "Amount", "Counterparty", "Category", "Notes", "Reference", "Message", "Read", "Foreign", "SMS kind"])
         cash = self._cash_account_name()
         for row in sorted(rows, key=lambda r: r.when):
             notes = KIND_NOTES[row.kind] + (f" · {row.place}" if row.place and row.kind != "salary" else "")
@@ -798,7 +810,7 @@ class SmsImportService:
             elif row.kind == "salary":
                 category = "Salary"
             writer.writerow([row.when[:10], format(row.signed, "f"), counterparty, category, notes, row.reference, row.text,
-                             "sure" if row.sure else "check", row.paid])
+                             "sure" if row.sure else "check", row.paid, row.kind])
         batch_id, _ = self.bank_imports.stage(account_id, f"SMS {app_now():%Y-%m-%d %H:%M}",
                                               out.getvalue().encode("utf-8"))
         return batch_id

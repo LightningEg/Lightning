@@ -161,9 +161,12 @@ class ImportProposals:
                 (batch["account_id"], batch_id, file_digest, file_digest + "#%", row["row_number"])))
             if row["bank_reference"]:
                 seen_refs.add(row["bank_reference"])
-            cp = self.counterparties.resolve(parsed["Counterparty"])
+            if batch["file_name"].startswith("SMS ") and raw.get("Message"):
+                cp = self.counterparties.sms_payee(parsed["Counterparty"])
+            else:
+                cp = self.counterparties.resolve(parsed["Counterparty"])
             parsed["_counterparty_id"] = cp["id"] if cp else None
-            parsed["_suggestions"] = self.counterparties.suggestions(parsed["Counterparty"])
+            parsed["_suggestions"] = [] if cp else self.counterparties.suggestions(parsed["Counterparty"])
             parsed["_reference_duplicate"] = ref_duplicate
             parsed["_repeat_import"] = repeat_import
             parsed["_pending_elsewhere"] = pending_elsewhere.get((parsed.get("Date"), parsed.get("Amount")), "")
@@ -225,10 +228,12 @@ class ImportProposals:
             parsed["_whom"] = cp["name"] if cp and cp["active"] else ""
             parsed["_possible_duplicate"] = bool(ref_duplicate or repeat_import or parsed["_similarity_warning"]
                                                  or parsed["_link_candidates"])
-            parsed["_ready"] = bool(not parsed.get("_errors") and not parsed["_possible_duplicate"]
-                                    and not parsed["_balance_row"]
-                                    and not parsed["_suggestions"] and not parsed["_needs_account"] and not parsed["_identity_ambiguous"]
-                                    and (parsed["_category_id"] or parsed["_transfer_target"]))
+            ready_to_file = not (parsed.get("_errors") or parsed["_possible_duplicate"] or parsed["_balance_row"]
+                                 or parsed["_suggestions"] or parsed["_needs_account"] or parsed["_identity_ambiguous"])
+            parsed["_ready"] = bool(ready_to_file and (parsed["_category_id"] or parsed["_transfer_target"]))
+            parsed["_known_purchase_without_category"] = bool(
+                ready_to_file and raw.get("SMS kind") == "purchase" and cp and cp["active"]
+                and not parsed["_category_id"] and not parsed["_transfer_target_suggestion"])
             parsed["_import_row_id"] = row["id"]
             parsed["_account_id"] = batch["account_id"]
             parsed["_status"] = row["status"]

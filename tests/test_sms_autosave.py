@@ -104,3 +104,35 @@ def test_home_says_what_saved_itself_and_from_sms_lists_it_with_undo(c, known):
     undone = client.post("/sms/undo", data={"ref": ref})
     assert "/import/" in str(undone.url) and c.sms_imports.saved() == []
     assert not [i for i in ReviewInbox(c).items(on) if i["label"] == "Saved from SMS"]
+
+
+def test_phone_saving_modes_with_a_top_up(c, known):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+
+    cib, _ = known
+    vodafone = c.counterparties.create("Vodafone", alias="Voda")
+    client = TestClient(create_app(c))
+    sender, text, when = NBE_UBER
+    message = text.replace("Uber", "VODA TOP-UP")
+    assert client.post("/sms/read-one", data={"text": message}).json()["counterparty"] == "Vodafone"
+    for mode, amount, expected in [("review", "51.00", 0), ("classified", "52.00", 0), ("known", "53.00", 1)]:
+        page = client.post("/sms/saving", data={"mode": mode})
+        assert f'value="{mode}" selected' in page.text
+        result = c.sms_imports.read([(sender, message.replace("147.87", amount), when)])
+        assert result["saved"] == expected
+        row = c.bank_imports.preview(result["staged"][cib.id])[1][0]
+        assert row["_counterparty_id"] == vodafone
+    assert c.sms_imports.saved()[0]["who"] == "Vodafone"
+    txn = c.transactions.get_by_ref(c.sms_imports.saved()[0]["ref"])
+    assert txn.counterparty == "Vodafone"
+    assert any(line.category_id == c.categories.get_by_code("EXP.UNACCOUNTED").id for line in txn.lines)
+
+
+def test_top_up_matches_only_a_complete_saved_name_or_alias(c):
+    vodafone = c.counterparties.create("Vodafone")
+    assert c.counterparties.sms_payee("vodafone top up")["id"] == vodafone
+    assert c.counterparties.sms_payee("Top-up Vodafone")["id"] == vodafone
+    assert c.counterparties.sms_payee("Vodafone Cash top up") is None
+    exact = c.counterparties.create("Vodafone Top Up")
+    assert c.counterparties.sms_payee("VODAFONE TOP-UP")["id"] == exact
