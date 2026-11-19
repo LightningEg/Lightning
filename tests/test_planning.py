@@ -2,11 +2,13 @@ from __future__ import annotations
 
 from datetime import date
 from decimal import Decimal
+from unittest.mock import Mock
 
 import pytest
 from fastapi.testclient import TestClient
 
 from lightning.core.errors import ValidationError
+from lightning.core.memo import request_cache
 from lightning.planning.domain import Frequency, PaymentStatus, PlanKind, PlannedItem, WeekendMove
 from lightning.planning.schedule import describe, on_working_day, payment_dates
 from lightning.ui.web import create_app
@@ -115,8 +117,6 @@ def test_loan_needs_payments_left_or_a_last_date(c):
 
 # ---------------------------------------------------------------- matching
 def test_checking_an_unpaid_bill_does_not_write_or_invalidate_report_cache(c, setup, monkeypatch):
-    from lightning.core.memo import request_cache
-
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-30")
     accounts, cats = setup
     c.planning.create(kind="BILL", name="Unpaid box", amount="400", frequency="MONTHLY",
@@ -130,6 +130,26 @@ def test_checking_an_unpaid_bill_does_not_write_or_invalidate_report_cache(c, se
         assert c.reporting.net_worth("2026-09-30") == before
 
 
+def test_candidate_lookups_share_one_read_until_the_ledger_changes(c, setup, monkeypatch):
+    accounts, categories = setup
+    account_id = accounts["cib"].id
+    food = categories["EXP.PERSONAL.FOOD"].id
+    txn = c.transactions.record_outflow("2026-09-13", account_id, "395", food)
+    lookup = c.planning.repo.candidates
+    args = (False, account_id, food, None, "2026-09-10", "2026-09-15", "EGP")
+    read = Mock(wraps=c.db.all)
+    monkeypatch.setattr(c.db, "all", read)
+    with request_cache(c.db):
+        first, = lookup(*args)
+        assert first["id"] == txn.id
+        first["category_ids"].clear()
+        again, = lookup(*args)
+        assert again["category_ids"] == {food}
+        read.assert_called_once()
+        c.transactions.void(txn.id)
+        assert lookup(*args) == []
+
+
 def test_a_posted_payment_settles_the_bill_and_voiding_it_reopens(c, setup, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-09-30")
     accounts, cats = setup
@@ -138,13 +158,19 @@ def test_a_posted_payment_settles_the_bill_and_voiding_it_reopens(c, setup, monk
                                 start_date="2026-09-12", account_id=str(accounts["cib"].id),
                                 category_id=str(food.id))
     txn = c.transactions.record_outflow("2026-09-13", accounts["cib"].id, "395", food.id, counterparty="Box")
-    assert c.planning.match_payments(date(2026, 9, 30)) == 1
-    payment = c.planning.payments(c.planning.get(item_id), "2026-09-30", date(2026, 9, 30))[0]
-    assert payment.status == PaymentStatus.PAID and payment.transaction_id == txn.id
-    assert c.planning.what_you_owe(date(2026, 9, 30)).bills_due == 0
-    c.transactions.void(txn.id)
-    payment = c.planning.payments(c.planning.get(item_id), "2026-09-30", date(2026, 9, 30))[0]
-    assert payment.status == PaymentStatus.DUE
+    day = date(2026, 9, 30)
+    item = c.planning.get(item_id)
+    with request_cache(c.db):
+        before = c.planning.payments(item, day, day)
+        assert before[0].status == PaymentStatus.DUE
+        before.clear()
+        assert c.planning.payments(item, "2026-09-30", day)[0].status == PaymentStatus.DUE
+        assert c.planning.match_payments(day) == 1
+        payment = c.planning.payments(item, day, day)[0]
+        assert payment.status == PaymentStatus.PAID and payment.transaction_id == txn.id
+        assert c.planning.what_you_owe(day).bills_due == 0
+        c.transactions.void(txn.id)
+        assert c.planning.payments(item, day, day)[0].status == PaymentStatus.DUE
 
 
 def test_two_candidates_are_left_for_the_user(c, setup, monkeypatch):
