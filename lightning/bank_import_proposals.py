@@ -114,10 +114,13 @@ class ImportProposals:
         result = []
         amount_dates = {}
         dates = set()
+        unreferenced_dates = set()
         for source_row in rows:
             staged = json.loads(source_row["raw_json"])["parsed"]
             if not staged.get("_errors"):
                 dates.add(staged["Date"])
+                if not source_row["bank_reference"]:
+                    unreferenced_dates.add(staged["Date"])
             if not staged.get("_errors") and not staged.get("_skip_reason"):
                 key = (staged["Date"], staged["Amount"])
                 amount_dates[key] = amount_dates.get(key, 0) + 1
@@ -134,6 +137,7 @@ class ImportProposals:
                 pending_elsewhere.setdefault((staged["Date"], staged["Amount"]), other["file_name"])
             except (TypeError, ValueError, KeyError):
                 continue
+        voided_amounts = self._voided_amounts(batch["account_id"], batch_id, unreferenced_dates)
         active_accounts = self._active()
         pairs = self._paired_rows(rows)
         seen_refs = set()
@@ -169,8 +173,8 @@ class ImportProposals:
             parsed["_pending_elsewhere"] = pending_elsewhere.get((parsed.get("Date"), parsed.get("Amount")), "")
             parsed["_similarity_warning"] = (self._similarity_warning(batch["account_id"], parsed)
                 or amount_dates.get((parsed["Date"], parsed["Amount"]), 0) > 1 or bool(parsed["_pending_elsewhere"]))
-            parsed["_voided_earlier"] = not ref_duplicate and self._voided_earlier(batch["account_id"], batch_id,
-                                                                                row["bank_reference"], parsed)
+            parsed["_voided_earlier"] = not ref_duplicate and self._voided_earlier(
+                batch["account_id"], batch_id, row["bank_reference"], parsed, voided_amounts)
             parsed["_link_candidates"] = ([] if ref_duplicate or repeat_import or row["status"] != "REVIEW"
                                           else self._link_candidates(batch["account_id"], parsed, batch["id"]))
             self._split_path(parsed)
@@ -306,7 +310,25 @@ class ImportProposals:
                           "settles": item["settles"], "estimate": format(item["estimate"], "f")})
         return found
 
-    def _voided_earlier(self, account_id: int, batch_id: int, reference: str | None, parsed: dict) -> bool:
+    def _voided_amounts(self, account_id: int, batch_id: int, dates: set[str]) -> set[tuple[str, int]]:
+        """Read prior voided imports on the dates where a statement row has no reference."""
+        amounts = set()
+        days = sorted(dates)
+        for start in range(0, len(days), 500):
+            chunk = days[start:start + 500]
+            marks = ",".join("?" for _ in chunk)
+            rows = self.db.all(
+                "SELECT t.date, SUM(l.amount_e6) AS amount_e6 "
+                "FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
+                "JOIN transactions t ON t.id=r.transaction_id AND t.status='VOID' "
+                "JOIN ledger_entries l ON l.transaction_id=t.id AND l.account_id=b.account_id "
+                f"WHERE b.account_id=? AND b.id<>? AND t.date IN ({marks}) GROUP BY t.id",
+                (account_id, batch_id, *chunk))
+            amounts.update((r["date"], r["amount_e6"]) for r in rows)
+        return amounts
+
+    def _voided_earlier(self, account_id: int, batch_id: int, reference: str | None, parsed: dict,
+                        voided_amounts: set[tuple[str, int]]) -> bool:
         """An earlier import of this row was voided: importing it again must not quietly bring it back."""
         if parsed.get("_errors"):
             return False
@@ -319,12 +341,7 @@ class ImportProposals:
                 "WHERE b.account_id=? AND b.id<>? AND r.bank_reference=? LIMIT 1",
                 (account_id, batch_id, reference)))
         amount_e6 = int(Decimal(parsed["Amount"]) * 1_000_000)
-        return bool(self.db.scalar(
-            "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
-            "JOIN transactions t ON t.id=r.transaction_id AND t.status='VOID' AND t.date=? "
-            "JOIN ledger_entries l ON l.transaction_id=t.id AND l.account_id=b.account_id "
-            "WHERE b.account_id=? AND b.id<>? GROUP BY t.id HAVING SUM(l.amount_e6)=? LIMIT 1",
-            (parsed["Date"], account_id, batch_id, amount_e6)))
+        return (parsed["Date"], amount_e6) in voided_amounts
 
     def _own_account(self, source_account_id: int, name: str):
         """The name of another of your accounts typed as the counterparty, if it is one."""

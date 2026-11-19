@@ -144,6 +144,22 @@ class TestCategories:
         assert {"EXP.SYSTEM.CUSTODY", "EXP.SYSTEM.LOANS", "EXP.SYSTEM.TRANSFERS",
                 "EXP.SYSTEM.CAPITAL", "EXP.SYSTEM.ADJUSTMENT"} <= set(system)
 
+    def test_repeated_category_text_is_resolved_once_and_refreshed_after_a_write(self, c):
+        from unittest.mock import patch
+        from lightning.core.memo import request_cache
+
+        personal = c.categories.get_by_code("EXP.PERSONAL")
+        with request_cache(c.db), patch.object(c.categories, "pickable", wraps=c.categories.pickable) as pickable:
+            for _ in range(2):
+                with pytest.raises(ValidationError, match="There is no category called 'Skating'"):
+                    c.categories.find_by_text("Skating")
+            assert pickable.call_count == 1
+
+            category = c.categories.create(personal.id, "Skating")
+            c.categories.find_by_text("Skating").name = "Edited copy"
+            assert c.categories.find_by_text("Skating") == category
+            assert pickable.call_count == 2
+
     def test_direction_soft_groups_income_and_expense(self, c):
         table = dict((l1.name, rows) for l1, rows in c.categories.table())
         signs = [row["category"].sign for row in table["Work"] if row["level"] == 2]
