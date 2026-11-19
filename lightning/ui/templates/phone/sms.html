@@ -45,7 +45,40 @@
 {% if batches %}
 <section class="phone-section" aria-labelledby="review-heading">
   <header class="phone-section-head"><h2 id="review-heading">{{ "Waiting for your check"|tr(locale) }}</h2></header>
-  <div class="phone-rows">{% for b in batches %}<a class="phone-row" href="/accounts/{{ b.account_id }}/import/{{ b.batch_id }}"><span>{{ b.account }}<small>{{ 'Read on {when}'|tr(locale, when=b.file_name[4:]) }}</small></span><b>{{ b.waiting }}</b></a>{% endfor %}</div>
+  {% for b,r in sms_items %}
+  <div class="sms-unread">
+    <p><b>{{ r.Amount|money }}</b> · {{ r.Counterparty or r.Notes }} <small>{{ b.account }} · {{ r.Date }}</small></p>
+    <details><summary>{{ 'Original message'|tr(locale) }}</summary><p dir="auto">{{ r._message }}</p></details>
+    {% if r._link_candidates %}
+    <p>{{ 'Is this a payment you already entered?'|tr(locale) }}</p>
+    <form method="post" action="/sms/review/{{ b.batch_id }}/{{ r._import_row_id }}">
+      {% for entry in r._link_candidates %}<button class="btn" name="link" value="{{ entry.id }}">{{ 'Link'|tr(locale) }} · {{ entry.date }} · {{ entry.counterparty or entry.notes }} · {{ entry.amount|money }}</button>{% endfor %}
+      <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    </form>
+    {% elif r._quick_purchase %}
+    <form method="post" action="/sms/review/{{ b.batch_id }}/{{ r._import_row_id }}" class="phone-form">
+      <label>{{ 'Payee'|tr(locale) }}<select required name="payee" data-own-picker>
+        <option value="">{{ 'Choose a payee'|tr(locale) }}</option>
+        {% for payee in payees %}<option value="{{ payee.id }}" {{ 'selected' if payee.id == r._counterparty_id }}>{{ payee.name }}</option>{% endfor %}
+      </select></label>
+      <label>{{ 'Category'|tr(locale) }}<select required name="category" data-own-picker>
+        <option value="">{{ 'Choose a category'|tr(locale) }}</option>
+        {% for id,name in spending %}<option value="{{ id }}" {{ 'selected' if id == r._category_id }}>{{ name }}</option>{% endfor %}
+      </select></label>
+      <label><input type="checkbox" name="remember"> {{ 'Remember for this account and merchant label'|tr(locale) }}</label>
+      {% set matches = similar[r._sms_category_key] %}
+      {% if matches|length > 1 and matches[0]._import_row_id == r._import_row_id %}<details id="matches-{{ r._import_row_id }}"><summary>{{ 'Other matching messages'|tr(locale) }} · {{ matches|length - 1 }}</summary>
+      {% for other in matches if other._import_row_id != r._import_row_id %}<p>{{ other.Date }} · {{ other.Amount|money }} · {{ other._message }}</p>{% endfor %}</details>
+      {% elif matches|length > 1 %}<a href="#matches-{{ matches[0]._import_row_id }}">{{ 'Other matching messages'|tr(locale) }} · {{ matches|length - 1 }}</a>{% endif %}
+      <button class="btn" type="submit">{{ 'Save payment'|tr(locale) }}</button>
+      <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    </form>
+    {% elif r._possible_duplicate %}<p>{{ 'Check for a duplicate payment'|tr(locale) }}</p>
+    {% elif r._needs_account %}<p>{{ 'Which account received this transfer?'|tr(locale) }}</p>
+    {% endif %}
+    <a href="/accounts/{{ b.account_id }}/import/{{ b.batch_id }}">{{ 'Review details'|tr(locale) }}</a>
+  </div>
+  {% endfor %}
 </section>
 {% endif %}
 {% if unread %}
@@ -77,5 +110,11 @@
 {% endif %}
 <section class="phone-section">
   {% include "partials/sms_saving.html" %}
+  {% if sms_counts and sms_counts.total %}
+  <details><summary>{{ 'SMS history'|tr(locale) }}</summary>
+    <p>{{ '{review} of {total} imported messages needed review.'|tr(locale, review=sms_counts.needed_review, total=sms_counts.total) }}</p>
+    {% if sms_counts.automatic %}<p>{{ '{changed} of {total} automatic entries were edited or undone.'|tr(locale, changed=sms_counts.changed, total=sms_counts.automatic) }}</p>{% endif %}
+  </details>
+  {% endif %}
 </section>
 {% endblock %}

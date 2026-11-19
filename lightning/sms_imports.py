@@ -642,10 +642,13 @@ class SmsImportService:
             by_id = {row["_import_row_id"]: row for row in rows}
             records = self._json(SAVED_KEY, [])
             for row_id in decisions:
-                done = self.db.one("SELECT r.status, r.transaction_id, t.ref FROM bank_import_rows r "
+                done = self.db.one("SELECT r.status, r.transaction_id, t.ref, t.updated_at FROM bank_import_rows r "
                                    "LEFT JOIN transactions t ON t.id=r.transaction_id WHERE r.id=?", (row_id,))
                 if not done or done["status"] not in ("POSTED", "LINKED"):
                     continue
+                self.db.execute(
+                    "UPDATE bank_import_rows SET raw_json=json_set(raw_json, '$.sms_auto_ref', ?, "
+                    "'$.sms_auto_updated', ?) WHERE id=?", (done["ref"], done["updated_at"], row_id))
                 row = by_id[row_id]
                 # Keyed by the entry's ref: row ids differ between synchronized devices, refs do not.
                 records.append({"ref": done["ref"], "account": self.accounts.get(account_id).code,
@@ -660,6 +663,18 @@ class SmsImportService:
     def saved(self) -> list[dict]:
         """The messages that saved themselves, newest first, with what became of each (NF-7AO2)."""
         return list(reversed(self._json(SAVED_KEY, [])))
+
+    def review_counts(self):
+        """Outcomes for retained SMS import rows from versions that record automatic decisions."""
+        return dict(self.db.one(
+            "SELECT COUNT(*) AS total, COUNT(*) - COUNT(auto_ref) AS needed_review, "
+            "COUNT(auto_ref) AS automatic, COUNT(CASE WHEN auto_ref IS NOT NULL AND "
+            "(auto_ref IS NOT ref OR auto_updated IS NOT updated_at OR status='VOID') THEN 1 END) AS changed "
+            "FROM (SELECT json_extract(r.raw_json,'$.sms_auto_ref') AS auto_ref, "
+            "json_extract(r.raw_json,'$.sms_auto_updated') AS auto_updated, t.ref, t.updated_at, t.status "
+            "FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
+            "LEFT JOIN transactions t ON t.id=r.transaction_id WHERE b.file_name LIKE 'SMS %' "
+            "AND json_extract(r.raw_json,'$.raw.SMS kind') IS NOT NULL)"))
 
     def saved_recently(self, on, days: int = 7) -> int:
         """How many saved themselves in the last `days` days: Home's "saved from SMS" line (marked as reviewed, it

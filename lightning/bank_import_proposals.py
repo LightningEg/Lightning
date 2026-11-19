@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import difflib
 import functools
+import hashlib
 import json
 import re
 from decimal import Decimal
@@ -10,6 +11,8 @@ from decimal import Decimal
 from lightning.bank_import_rows import is_balance_row, is_internal, split_category_path
 from lightning.categories.domain import Movement
 from lightning.core.errors import NotFoundError, ValidationError
+from lightning.counterparties import normalize
+from lightning.database.settings import SettingsStore
 from lightning.foreign_amounts import ForeignAmounts
 from lightning.transactions.tags import tags_in
 
@@ -166,6 +169,24 @@ class ImportProposals:
                 cp, sms_ambiguous = self.counterparties.sms_match(parsed["Counterparty"])
             else:
                 cp = self.counterparties.resolve(parsed["Counterparty"])
+            parsed["_sms_category_key"] = ""
+            remembered_category = None
+            if (batch["file_name"].startswith("SMS ") and raw.get("SMS kind") == "purchase"
+                    and raw.get("Read") == "sure" and raw.get("Message") and parsed["Counterparty"]):
+                label = normalize(parsed["Counterparty"])
+                digest = hashlib.sha256(label.encode()).hexdigest()
+                key = f"sms_purchase_choice:{self._account(batch['account_id']).code}:{digest}"
+                parsed["_sms_category_key"] = key
+                saved = SettingsStore(self.db).get(key)
+                if saved:
+                    try:
+                        name, code = json.loads(saved)
+                        party = self.counterparties.resolve(name)
+                        category = self.categories.get_by_code(code)
+                        if party and party["active"] and category.active and category.movement == Movement.OUTFLOW:
+                            cp, sms_ambiguous, remembered_category = party, False, category
+                    except (ValueError, TypeError, NotFoundError):
+                        pass
             parsed["_counterparty_id"] = cp["id"] if cp else None
             parsed["_suggestions"] = [] if cp else self.counterparties.suggestions(parsed["Counterparty"])
             parsed["_reference_duplicate"] = ref_duplicate
@@ -185,6 +206,8 @@ class ImportProposals:
             parsed["_balance_row"] = bool(parsed.get("_skip_reason")) or is_balance_row(parsed["Category"], parsed["Counterparty"])
             outcome = self._rules_outcome(batch["account_id"], parsed, cp)
             parsed["_category_id"] = None if parsed["_internal"] else self._category_for(parsed, cp, outcome, usual)
+            if remembered_category and not parsed["_rule_id"]:
+                parsed["_category_id"] = remembered_category.id
             if parsed.get("_file_split") and not parsed["_internal"]:
                 parts = self._file_split_parts(parsed)
                 if parts:
