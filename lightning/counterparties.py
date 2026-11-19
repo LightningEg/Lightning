@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from lightning.core.matching import match_score
+from rapidfuzz.distance import DamerauLevenshtein
+
+from lightning.core.matching import fold_search_text, match_score
 
 from lightning.core.dates import now_iso
 from lightning.core.memo import request_cached
@@ -22,6 +24,23 @@ def normalize(value: str) -> str:
     return " ".join(value.split())
 
 
+def _sms_fragment_matches(fragment, spellings):
+    """Exact folded spellings take priority over edit-distance matches for the same words."""
+    size = len(fragment)
+    exact = spellings.get(size, {}).get(fragment)
+    if exact:
+        return exact, True
+    owners = set()
+    if size >= 6 and fragment.isalpha():
+        for length in range(max(6, size - 2), size + 3):
+            for name, parties in spellings.get(length, {}).items():
+                stable_ends = name[:2] == fragment[:2] and name[-2:] == fragment[-2:]
+                limit = 2 if min(length, size) >= 8 and stable_ends else 1
+                if name.isalpha() and DamerauLevenshtein.distance(name, fragment, score_cutoff=limit) <= limit:
+                    owners.update(parties)
+    return owners, False
+
+
 class CounterpartyService:
     def __init__(self, db: Database):
         self.db = db
@@ -37,19 +56,55 @@ class CounterpartyService:
             "ON a.counterparty_id=c.id WHERE a.normalized_alias=? LIMIT 1", (key, key)
         )
 
-    def sms_payee(self, value: str):
-        """Prefer the complete bank label, then a saved name or alias beside a top-up descriptor."""
+    @request_cached
+    def _sms_spellings(self):
+        """Account and archived names also take part so they can block a misleading payee match."""
+        rows = self.db.all(
+            "SELECT id, name, active FROM counterparties UNION ALL "
+            "SELECT c.id, a.alias, c.active FROM counterparties c JOIN counterparty_aliases a "
+            "ON a.counterparty_id=c.id UNION ALL SELECT NULL, name, 0 FROM accounts WHERE active=1"
+        )
+        by_length = {}
+        for row in rows:
+            spelling = normalize(fold_search_text(row["name"])).replace(" ", "")
+            bucket = by_length.setdefault(len(spelling), {})
+            bucket.setdefault(spelling, set()).add(row["id"] if row["active"] else None)
+        return by_length
+
+    def sms_match(self, value: str):
+        """Return (payee, needs review) for a bank's merchant label."""
         exact = self.resolve(value)
         if exact:
-            return exact if exact["active"] else None
-        label = normalize(value)
-        descriptor = r"(?:top ?up|recharge|شحن رصيد|شحن)"
-        stripped = re.sub(rf"^{descriptor} | {descriptor}$", "", label, count=1)
-        if stripped and stripped != label:
-            payee = self.resolve(stripped)
-            if payee and payee["active"]:
-                return payee
-        return None
+            return (exact, False) if exact["active"] else (None, True)
+        words = normalize(fold_search_text(value)).split()
+        if not words:
+            return None, False
+        spellings = self._sms_spellings()
+        longest = max(spellings, default=0)
+        hits = {}
+        for start in range(len(words)):
+            fragment = ""
+            for stop in range(start, len(words)):
+                fragment += words[stop]
+                if len(fragment) > longest + 2:
+                    break
+                if len(fragment) < 3 or not any(ch.isalpha() for ch in fragment):
+                    continue
+                owners, literal = _sms_fragment_matches(fragment, spellings)
+                if owners:
+                    hits[start, stop] = owners, literal
+        # A longer saved name explains a nested one. Separate names, tied spellings and account names need review.
+        candidates = set()
+        for (start, stop), (owners, literal) in hits.items():
+            if not any(left <= start and stop <= right and (left, right) != (start, stop) and (longer_literal or not literal)
+                       for (left, right), (_, longer_literal) in hits.items()):
+                candidates.update(owners)
+        if len(candidates) == 1 and None not in candidates:
+            return self.get(candidates.pop()), False
+        return None, bool(candidates)
+
+    def sms_payee(self, value: str):
+        return self.sms_match(value)[0]
 
     def resolve_many(self, values) -> dict:
         """{value: row or None} for many names at once, in one read (backend roadmap B4): a saved name wins over

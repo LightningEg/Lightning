@@ -133,6 +133,38 @@ def test_top_up_matches_only_a_complete_saved_name_or_alias(c):
     vodafone = c.counterparties.create("Vodafone")
     assert c.counterparties.sms_payee("vodafone top up")["id"] == vodafone
     assert c.counterparties.sms_payee("Top-up Vodafone")["id"] == vodafone
-    assert c.counterparties.sms_payee("Vodafone Cash top up") is None
+    wallet = c.counterparties.create("Vodafone Cash")
+    assert c.counterparties.sms_payee("Vodafone Cash top up")["id"] == wallet
     exact = c.counterparties.create("Vodafone Top Up")
     assert c.counterparties.sms_payee("VODAFONE TOP-UP")["id"] == exact
+
+
+def test_sms_matches_profile_spellings_inside_unfamiliar_labels(c):
+    bookshop = c.counterparties.create("Cedar Books", alias="Papertrail")
+    telco = c.counterparties.create("Vodafone")
+    coffee = c.counterparties.create("بن النيل")
+    for label, expected in [("POS CedarBooks terminal 42", bookshop), ("PAPERTRAIL monthly fee", bookshop),
+                            ("web Papertrali invoice", bookshop), ("vodaphone top up", telco),
+                            ("عمليّة بُنّ النّيل فرع ٣", coffee)]:
+        assert c.counterparties.sms_payee(label)["id"] == expected
+    assert c.counterparties.sms_match("Papertrail via Vodafone") == (None, True)
+    assert c.counterparties.sms_payee("SuperPapertrailExpress") is None
+    c.counterparties.create("Papertrain")
+    assert c.counterparties.sms_match("POS Papertraix invoice") == (None, True)
+
+
+def test_sms_account_label_blocks_an_embedded_payee(c, known):
+    c.account_flows.open_account("Metro Wallet", "CASH", "2026-09-01", "0")
+    c.counterparties.create("Metro")
+    assert c.counterparties.sms_match("Metro Wallet payment") == (None, True)
+
+
+def test_two_saved_payees_in_a_bank_label_wait_for_review(c, known):
+    account, transport = known
+    c.counterparties.create("Metroline", transport.id)
+    c.settings.set("sms_save_mode", "known")
+    sender, text, received = NBE_UBER
+    result = c.sms_imports.read([(sender, text.replace("Uber", "Uber via Metroline"), received)])
+    row = c.bank_imports.preview(result["staged"][account.id])[1][0]
+    assert row["_identity_ambiguous"] and row["_status"] == "REVIEW"
+    assert result["saved"] == 0

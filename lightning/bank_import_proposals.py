@@ -161,8 +161,9 @@ class ImportProposals:
                 (batch["account_id"], batch_id, file_digest, file_digest + "#%", row["row_number"])))
             if row["bank_reference"]:
                 seen_refs.add(row["bank_reference"])
+            sms_ambiguous = False
             if batch["file_name"].startswith("SMS ") and raw.get("Message"):
-                cp = self.counterparties.sms_payee(parsed["Counterparty"])
+                cp, sms_ambiguous = self.counterparties.sms_match(parsed["Counterparty"])
             else:
                 cp = self.counterparties.resolve(parsed["Counterparty"])
             parsed["_counterparty_id"] = cp["id"] if cp else None
@@ -206,7 +207,7 @@ class ImportProposals:
                            if a.name == parsed["_transfer_target_suggestion"]), None)
             same_name = [a for a in active_accounts if a.id != batch["account_id"]
                          and a.name.casefold() == parsed["Counterparty"].strip().casefold()]
-            parsed["_identity_ambiguous"] = len(same_name) > 1 or bool(same_name and cp)
+            parsed["_identity_ambiguous"] = (sms_ambiguous and not same_name) or len(same_name) > 1 or bool(same_name and cp)
             if parsed["_identity_ambiguous"]:
                 target = None
                 parsed["_transfer_target_suggestion"] = None
