@@ -21,6 +21,7 @@ PRESENTERS: dict[str, str] = {
     "budget.html": "budget",
     "register.html": "register",
     "dashboard/index.html": "home",
+    "sms.html": "sms",
     "search.html": "search",
     "planning/plan.html": "cash_planning",
     "planning/upcoming.html": "upcoming",

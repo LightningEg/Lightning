@@ -56,12 +56,6 @@ def _enter_url(c, message: dict) -> str:
     return "/accounts/add-transaction?" + urlencode({k: v for k, v in values.items() if v})
 
 
-def _quick_purchase(row):
-    return bool(row["_sms_category_key"] and not any(row.get(flag) for flag in (
-        "_possible_duplicate", "_balance_row", "_errors", "_voided_earlier", "_transfer_target_suggestion",
-        "_internal", "_is_custody", "_rule_split", "_rule_id")))
-
-
 def _page(request, c, **context):
     source = phone_source(request)
     try:
@@ -72,21 +66,6 @@ def _page(request, c, **context):
     names = {a.id: a.name for a in c.accounts.list()}
     batches = [b | {"account": names.get(b["account_id"], "")} for b in c.bank_imports.waiting_all()
                if str(b["file_name"]).startswith("SMS ")]
-    if getattr(request.state, "phone", False):
-        context["sms_counts"] = c.sms_imports.review_counts()
-    if batches and getattr(request.state, "phone", False):
-        items = []
-        similar = {}
-        for batch in batches:
-            for row in c.bank_imports.preview(batch["batch_id"])[1]:
-                if row["_status"] != "REVIEW":
-                    continue
-                items.append((batch, row))
-                row["_quick_purchase"] = _quick_purchase(row)
-                if row["_quick_purchase"]:
-                    similar.setdefault(row["_sms_category_key"], []).append(row)
-        context.update(sms_items=items, similar=similar, payees=c.counterparties.list_active(),
-                       spending=[(cat.id, c.categories.display_name(cat.id)) for cat in c.categories.pickable(Movement.OUTFLOW)])
     # Every ending not known yet is asked in one form, each with the account it most likely is already chosen.
     waiting = [g | {"guess": c.sms_imports.guess(g["ending"], g.get("banks", []))} for g in c.sms_imports.waiting()]
     unread = [m | {"enter": _enter_url(c, m)} for m in c.sms_imports.unread()]
@@ -117,7 +96,7 @@ async def review_message(request: Request, batch_id: int, row_id: int):
             link = str(form.get("link") or "")
             if link and any(str(item["id"]) == link for item in row["_link_candidates"]):
                 decision = {"match": f"link:{link}"}
-            elif not link and _quick_purchase(row):
+            elif not link and row["_quick_purchase"]:
                 party = c.counterparties.get(int(form["payee"]))
                 category = int(form["category"])
                 if not party or not party["active"] or category not in {cat.id for cat in c.categories.pickable(Movement.OUTFLOW)}:
@@ -180,7 +159,7 @@ async def paste(request: Request):
         parts.append(f"{result['unread']} kept for you")
     if result["skipped"]:
         parts.append(f"{result['skipped']} skipped")
-    if len(result["staged"]) == 1 and not result["waiting"] and found and not getattr(request.state, "phone", False):  # one account's rows and nothing to ask: check them now
+    if len(result["staged"]) == 1 and not result["waiting"] and found and form.get("return_to") != "/sms":  # one account's rows and nothing to ask: check them now
         account_id, batch = next(iter(result["staged"].items()))
         return redirect(f"/accounts/{account_id}/import/{batch}", " · ".join(parts))
     return redirect("/sms", " · ".join(parts) or "Nothing new in these messages.")
@@ -234,7 +213,7 @@ async def assign(request: Request):
     except (LightningError, ValueError) as exc:
         return _page(request, c, error=getattr(exc, "message", "") or "Choose the account for these messages.")
     distinct = sorted(set(batches.values()))
-    if len(distinct) == 1 and not c.sms_imports.waiting() and not getattr(request.state, "phone", False):
+    if len(distinct) == 1 and not c.sms_imports.waiting() and form.get("return_to") != "/sms":
         account_id = c.bank_imports.preview(distinct[0])[0]["account_id"]
         return redirect(f"/accounts/{account_id}/import/{distinct[0]}", "Check each row, then post them.")
     return redirect("/sms", "Saved." if not distinct else "Check each account's messages below.")

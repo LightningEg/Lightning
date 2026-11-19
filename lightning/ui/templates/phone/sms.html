@@ -11,6 +11,7 @@
 {% set lead = waiting or batches or unread %}
 {% macro paste_form() %}
 <form method="post" action="/sms/paste" class="phone-form phone-sms-paste-form">
+  <input type="hidden" name="return_to" value="/sms">
   <div class="field"><label for="sms-messages">{{ "Messages"|tr(locale) }}</label><textarea id="sms-messages" name="messages" rows="6" required dir="auto" aria-describedby="sms-hint"></textarea></div>
   <p id="sms-hint" class="phone-note">{{ "Paste one or more, a blank line between each."|tr(locale) }}</p>
   <button class="btn primary phone-save" type="submit">{{ "Read them"|tr(locale) }}</button>
@@ -32,6 +33,7 @@
   <header class="phone-section-head"><h2 id="endings-heading">{{ "Which account is each card?"|tr(locale) }}</h2></header>
   <p class="phone-note">{{ "Asked once: Lightning remembers your answers."|tr(locale) }}</p>
   <form method="post" action="/sms/assign" class="phone-form">
+    <input type="hidden" name="return_to" value="/sms">
     {% for group in waiting %}
     <div class="field"><label for="account-{{ group.ending }}">{% if group.ending == salary %}{{ 'Your salary'|tr(locale) }}{% elif group.ending.startswith(wallet_prefix) %}{{ 'Wallet {name}'|tr(locale, name=wallet_name(group.ending)) }}{% else %}{{ 'Card ending {digits}'|tr(locale, digits=group.ending) }}{% endif %}<small class="muted"> · {% if group.banks %}{{ group.banks|join(', ') }} · {% endif %}{{ group.count }} {{ ('message' if group.count == 1 else 'messages')|tr(locale) }}</small></label>
       <select id="account-{{ group.ending }}" name="account_{{ group.ending }}" data-own-picker><option value="">{{ 'Choose an account'|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if group.guess == a.id }}>{{ a.name }}</option>{% endfor %}</select></div>

@@ -255,6 +255,9 @@ class ImportProposals:
             ready_to_file = not (parsed.get("_errors") or parsed["_possible_duplicate"] or parsed["_balance_row"]
                                  or parsed["_suggestions"] or parsed["_needs_account"] or parsed["_identity_ambiguous"])
             parsed["_ready"] = bool(ready_to_file and (parsed["_category_id"] or parsed["_transfer_target"]))
+            parsed["_quick_purchase"] = bool(parsed["_sms_category_key"] and not any(parsed.get(flag) for flag in (
+                "_possible_duplicate", "_balance_row", "_errors", "_voided_earlier", "_transfer_target_suggestion",
+                "_internal", "_is_custody", "_rule_split", "_rule_id")))
             parsed["_known_purchase_without_category"] = bool(
                 ready_to_file and raw.get("SMS kind") == "purchase" and cp and cp["active"]
                 and not parsed["_category_id"] and not parsed["_transfer_target_suggestion"])
