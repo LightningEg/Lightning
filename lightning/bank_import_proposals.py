@@ -11,7 +11,6 @@ from decimal import Decimal
 from lightning.bank_import_rows import is_balance_row, is_internal, split_category_path
 from lightning.categories.domain import Movement
 from lightning.core.errors import NotFoundError, ValidationError
-from lightning.counterparties import normalize
 from lightning.database.settings import SettingsStore
 from lightning.foreign_amounts import ForeignAmounts
 from lightning.transactions.tags import tags_in
@@ -173,6 +172,7 @@ class ImportProposals:
             remembered_category = None
             if (batch["file_name"].startswith("SMS ") and raw.get("SMS kind") == "purchase"
                     and raw.get("Read") == "sure" and raw.get("Message") and parsed["Counterparty"]):
+                from lightning.counterparties import normalize
                 label = normalize(parsed["Counterparty"])
                 digest = hashlib.sha256(label.encode()).hexdigest()
                 key = f"sms_purchase_choice:{self._account(batch['account_id']).code}:{digest}"
