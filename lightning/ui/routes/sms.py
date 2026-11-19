@@ -71,7 +71,7 @@ def _page(request, c, **context):
     codes = {a.code: a.name for a in c.accounts.list()}
     saved = [m | {"amount": Decimal(m["amount"]), "account": codes.get(m.get("account"), "")} for m in c.sms_imports.saved()]
     return render(request, "sms.html", waiting=waiting, accounts=accounts, batches=batches, saved=saved,
-                  save_mode=c.sms_imports.save_mode(), unread=unread, permission=permission, last_read=c.sms_imports.last_read(),
+                  save_mode=c.sms_imports.get_save_mode(), unread=unread, permission=permission, last_read=c.sms_imports.last_read(),
                   salary=SALARY_ENDING, wallet_prefix=WALLET_PREFIX, wallet_name=wallet_name, **context)
 
 

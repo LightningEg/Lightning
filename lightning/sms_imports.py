@@ -598,7 +598,7 @@ class SmsImportService:
             if sender:
                 self.settings.set(QUIET_KEY, json.dumps(dict(sorted(counts.items(), key=lambda kv: -kv[1])[:200])))
 
-    def save_mode(self) -> str:
+    def get_save_mode(self) -> str:
         value = self.settings.get(SAVE_MODE_KEY)
         return value if value in SAVE_MODES else "classified"
 
@@ -611,7 +611,7 @@ class SmsImportService:
         matches one entry already typed by hand (same account and amount within the link window) is linked to
         it instead of posted (7AO3). A synchronized profile reads messages only on its home (`sms_imports.read`
         is a journal command), so this posts once. Returns how many saved themselves."""
-        mode = self.save_mode()
+        mode = self.get_save_mode()
         if mode == "review":
             return 0
         count = 0
