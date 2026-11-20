@@ -225,7 +225,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Income before payday** | Scheduled income other than the salary that arrives before the next payday (BT-7AZ). | Read directly from the plan | `planning.forecast.CashForecaster._safe_to_spend` |
 | **Lowest point ahead** | The lowest month-end free cash in the cash forecast, everyday spending and savings included. Compare scenarios shows the same figure, day by day: each day is its month's closing moved by what the scenario changes in scheduled cash that day, so a late salary shows on its lowest day (IV-12P, BV-7AW). | Read directly from the plan | `planning.domain.CashForecast.lowest` |
 | **Saving for goals** | What dated reserve goals still need this month, spread over the months left. This month's is fixed on the 1st, less what you moved in since (owner, 2026-11-14). | Read directly from the plan | `planning.forecast.CashForecaster._goal_need` |
-| **Rest of savings target** | What the Savings target asks a month beyond Saving for goals and Emergency fund top-up (never below zero), so Safe to spend never counts what you mean to save (owner decision 2026-10-05). What you moved into the emergency fund and goals this month and still hold counts as saved (owner, 2026-11-14). | Savings target − Saving for goals − Emergency fund top-up | `planning.forecast.CashForecaster.forecast` |
+| **Rest of savings target** | What the Savings target asks a month beyond Saving for goals and Emergency fund top-up (never below zero), so Safe to spend today never counts what you mean to save (owner decision 2026-10-05). What you moved into the emergency fund and goals this month and still hold counts as saved (owner, 2026-11-14). | Savings target − Saving for goals − Emergency fund top-up | `planning.forecast.CashForecaster.forecast` |
 
 ### Ledger + Plan — real money after your plans
 
@@ -252,8 +252,9 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 | **Carryover** | Unused plan from last month, added to this month when carryover is on. | Left in plan last month | `budgeting.domain.BudgetLine.opening_carryover` |
 | **Planned** | What you plan to spend this month. The month's total also counts background estimates for untracked categories; one from a single month of spending is low confidence and shows a "!" that says why. | Base budget + Carryover | `budgeting.domain.BudgetLine.available` |
 | **Left in plan** | What is left of the plan; the Overview and Budget show the same month figure, and a negative one reads "Over plan". Categories outside the budget are left out of Spent. | Planned − Spent | `budgeting.domain.BudgetLine.remaining` |
-| **Left for everyday** | The plan's remaining money after unpaid planned bills and loans, floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance and the phone Home's lead (owner, 2026-11-09); Safe to spend leads Cash planning on both apps (IV-12P). | Read directly from the plan | `planning.domain.EverydayBudget.everyday_left` |
-| **Safe to spend** | Free cash after what is promised before your next payday (the salary; other income before it counts as money in). An estimate. Budget until payday, Saving for goals, Emergency fund top-up and Rest of savings target count for every month until payday (only the days before it in the month it lands), so a long gap between pays is covered. | Free cash + Income before payday − Due before payday + Bill cash already set aside − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target | `planning.forecast.CashForecaster._safe_to_spend` |
+| **Left for everyday** | The plan's remaining money after unpaid planned bills and loans, floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance and the phone Home's lead (owner, 2026-11-09); Safe to spend today leads Cash planning on both apps (IV-12P). | Read directly from the plan | `planning.domain.EverydayBudget.everyday_left` |
+| **Safe to spend today** | What you can spend now without leaning on money that has not arrived: Free cash after what is promised before your next payday. Income that is only expected, the salary included, is not counted. Budget until payday, Saving for goals, Emergency fund top-up and Rest of savings target count for every month until payday (only the days before it in the month it lands), so a long gap between pays is covered. An estimate. Home leads with it, and Can I afford this? checks against it (owner, 2026-11-18). | Expected by payday − Income before payday | `planning.domain.CashForecast.safe_to_spend` |
+| **Expected by payday** | What Safe to spend today becomes once the income expected before your next payday arrives (the salary itself ends the window and is not counted). It is shown with the payday date, how payday was chosen (salary, highest recurring income or estimated) and each expected income with its amount and date. It was called Safe to spend until 2026-11-18; the formula has not changed. | Free cash + Income before payday − Due before payday + Bill cash already set aside − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target | `planning.forecast.CashForecaster._safe_to_spend` |
 | **Budget until payday** | This month's left in plan less the scheduled bills it already covers, so a bill is never counted twice. | Left in plan − Bills inside the plan | `planning.domain.ForecastMonth.budget_spending` |
 | **Everyday spending** | This month's Spent less the plan's bills and loan payments already paid (or paid to that bill's payee in its category): what Budget's day rate is about. Budget compares it with the plan's straight-line pace and with last month by the same day. | Read directly from the plan | `planning.domain.EverydayBudget.everyday_spent` |
 
@@ -314,6 +315,7 @@ These names no longer appear on screens. Each is now called:
 | Estimated cash after sale | Holdings after sale (estimate) |
 | Estimated available value | If you sold today (estimate) |
 | Yours | What you own |
+| Safe to spend | Expected by payday |
 | Total spending | Money out |
 | Net income less spending | Net flow |
 | Cashflow | Net flow |
@@ -569,7 +571,8 @@ Asset class and exposure are separate. **Risk level** (Low, Medium or High risk)
 | Spread paid | فرق السعر المدفوع |
 | Price part | جزء السعر |
 | FX part | جزء العملة |
-| Safe to spend | المتاح للصرف |
+| Safe to spend today | المتاح للصرف النهارده |
+| Expected by payday | المتوقع لحد القبض |
 | Day’s net | صافي اليوم |
 | Investments moved | حركة الاستثمارات |
 | Bills inside the plan | الفواتير ضمن الخطة |

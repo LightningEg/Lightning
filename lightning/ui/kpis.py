@@ -228,7 +228,7 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
     saving = f.taken_off(*(figure_label(k) for k in ("saving_for_goals", "emergency_top_up", "savings_target_rest")))
     due = f.taken_off(figure_label("payments_before_next_income"), "Gam'eya instalments before next income")
     cards = [card(figure_label("safe_to_spend"), f.safe_to_spend, safe_compare, tone="hold" if f.safe_to_spend >= 0 else "over",
-                  key="safe", chip_=chip(f"until {until}" if until else "3 months"),
+                  key="safe", chip_=chip("today"),
                   visual=segments([("Safe", max(f.safe_to_spend, ZERO), "hold"),
                                    ("Budget", -parts.get(figure_label("left_in_plan_after_bills"), ZERO), "out"),
                                    ("Savings", saving, "in"), ("Due", due, "over")]),
@@ -326,9 +326,10 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
                         else compare("more is promised than your free cash", fmt(-f.safe_to_spend, 0), "bad") if f.safe_to_spend < 0
                         else compare("No free cash today"))
         cards.append(card(figure_label("safe_to_spend"), f.safe_to_spend, safe_compare, tone="hold" if f.safe_to_spend >= 0 else "over",
-                          key="safe", chip_=chip(f"until {until}" if until else "3 months"),
+                          key="safe", chip_=chip("today"),
                           visual=segments([("Safe", max(f.safe_to_spend, ZERO), "hold"), ("Promised", promised, "out")]),
-                          line_=line("On top of your plan", "How it is worked out", "/plan#safe-section"), href="/plan#safe-section"))
+                          line_=line(f"Expected by payday {fmt(f.expected_by_payday, 0)} on {until}" if until else "On top of your plan",
+                                     "How it is worked out", "/plan#safe-section"), href="/plan#safe-section"))
 
     if plan is not None:
         planned, left = plan["planned"], plan["left"]

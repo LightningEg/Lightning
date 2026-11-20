@@ -1908,7 +1908,7 @@ SERVICES = {
     "Set aside": "متجنب",
     "{pct}% of goals": "{pct}٪ من الأهداف",
     "of goals": "من الأهداف",
-    "Kept out of Safe to spend, so it is there when you need it.": "بعيد عن المتاح للصرف، علشان يكون موجود وقت ما تحتاجه.",
+    "Kept out of Safe to spend today, so it is there when you need it.": "بعيد عن المتاح للصرف، علشان يكون موجود وقت ما تحتاجه.",
     "Goals": "الأهداف",
     "For when things go wrong": "لما الدنيا تلخبط",
     "Debt ratios": "نسب الدين",

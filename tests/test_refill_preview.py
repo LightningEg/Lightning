@@ -45,4 +45,4 @@ def test_the_suggested_refill_keeps_safe_to_spend_and_all_of_it_is_a_choice(tmp_
     first = c.forecaster.refill_options(today(), free, top_up=c.budgets.emergency_fund(
         "2026-11", base, schedule=c.schedules.view()).top_up)["first"]
     assert D(suggested.replace(",", "")) == base + first                  # IV-12AA2: the modest amount is filled
-    assert "Safe to spend after:" in page and "Move more" in page and "anyway</button>" in page
+    assert "Expected by payday after:" in page and "Move more" in page and "anyway</button>" in page

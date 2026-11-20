@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "partials/macros.html" import page_title %}{% from "partials/charts.html" import lead_card %}
+{% from "partials/macros.html" import page_title, expected_block %}{% from "partials/charts.html" import lead_card %}
 {% block title %}{{ 'Fund your payday plan'|tr(locale) }}{% endblock %}
 {% block heading %}{{ page_title('Fund your payday plan'|tr(locale), status, allocation.month|month(locale), 'cash already posted') }}{% endblock %}
 {% block top_actions %}<a class="btn" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>{% endblock %}
@@ -12,7 +12,8 @@
 <div class="grid g2">
 <section class="card" aria-labelledby="before-payday-h"><h2 id="before-payday-h">{{ 'Before your next payday'|tr(locale) }}</h2>
 <div class="compact-list">{% for payment in forecast.payments_before_income %}<div class="compact-row"><span>{{ payment.item.name }} <small class="muted">{{ payment.due_date|day(locale) }}</small></span><b>{{ payment.still_owed|money(places=0) }}</b></div>{% else %}<p class="muted">{{ 'Nothing is due before payday.'|tr(locale) }}</p>{% endfor %}</div>
-<p class="muted">{{ 'Due before payday'|tr(locale) }} {{ forecast.payments_before_income_total|money(places=0) }} {{ base }} · {{ 'Safe to spend'|tr(locale) }} {{ forecast.safe_to_spend|money(places=0) }} {{ base }}</p></section>
+<p class="muted">{{ 'Due before payday'|tr(locale) }} {{ forecast.payments_before_income_total|money(places=0) }} {{ base }} · {{ 'Safe to spend today'|tr(locale) }} {{ forecast.safe_to_spend|money(places=0) }} {{ base }}</p>
+{{ expected_block(expected, base) }}</section>
 <section class="card" aria-labelledby="cash-funding-h"><h2 id="cash-funding-h">{{ 'Cash funding'|tr(locale) }}</h2>
 <div class="settings-row"><div><span class="settings-name">{{ ('Cash funding is on' if enabled else 'Cash funding is off')|tr(locale) }}</span><small>{{ 'Assigns cash you already own; moves no money and changes no budget limit.'|tr(locale) }}</small></div>
 <form method="post" action="/payday/enable"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="enabled" value="{{ '0' if enabled else '1' }}"><button class="btn{{ ' primary' if not enabled }}" type="submit">{{ ('Pause cash funding' if enabled else 'Turn on cash funding')|tr(locale) }}</button></form></div>
