@@ -6,6 +6,7 @@ Reserved codes: none
 
 | Who | Work | Files | Since |
 |---|---|---|---|
+| Claude | 11N: phone first launch (intro, tour, setup 3-6, first day) | `lightning/ui/phone/start.py`, `templates/phone/start/`, `profile_tour.html`, `profiles.*` | 2026-11-20 |
 | Claude | O5 | `lightning/deposits/` | 2026-11-10 |
 | Claude | Journal: 7 review fixes, then J6. | `lightning/sync/journal/`, `lightning/runtime/journal*`, `lightning/ui/journal*`, `tests/test_*journal*` | 2026-10-16 |
 

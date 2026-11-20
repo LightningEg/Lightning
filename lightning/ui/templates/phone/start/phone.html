@@ -1,0 +1,39 @@
+{# Setup step 6 (IV-11N2): what this phone can do for you, each optional: bank messages that log themselves (Play's
+   SMS policy: what is read and why comes before the system's question, NF-11B2) and unlocking with a fingerprint. #}
+{% extends "phone/start/base.html" %}
+{% block title %}{{ 'Make this phone quick'|tr(locale) }}{% endblock %}
+{% block intro %}<h1 id="page-title">{{ 'Make this phone quick'|tr(locale) }}</h1>
+<p>{{ 'Two helpers, both optional. You can change either later in Settings.'|tr(locale) }}</p>{% endblock %}
+{% block content %}
+<section class="start-helper" aria-labelledby="sms-heading">
+  <span class="start-helper-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>
+  <h2 id="sms-heading">{{ 'Bank messages log themselves'|tr(locale) }}</h2>
+  {% if sms == 'granted' %}
+  <p class="start-on">{{ 'On. Card payments from your bank messages save themselves.'|tr(locale) }}</p>
+  {% else %}
+  <p>{{ "Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction. It reads messages from senders with a name or a short code, like CIB or NBE, never from people’s numbers. The messages stay on this phone: nothing is sent anywhere. A payment Lightning is sure about saves itself, marked and undoable; the rest wait for your check."|tr(locale) }}</p>
+  {% if sms == 'not_granted' %}
+  <form method="post" action="/sms/allow"><input type="hidden" name="return_to" value="/start/phone"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="button button-secondary start-helper-button" type="submit">{{ 'Allow reading SMS'|tr(locale) }}</button></form>
+  {% else %}
+  <p class="start-small">{{ 'On this device, paste a bank message from Add › From SMS instead.'|tr(locale) }}</p>
+  {% endif %}
+  {% endif %}
+</section>
+{% if fingerprint %}
+<section class="start-helper" aria-labelledby="fingerprint-heading">
+  <span class="start-helper-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 12a3 3 0 0 0-3 3c0 2-1 4-2 5M12 8a7 7 0 0 0-7 7M12 4a11 11 0 0 0-11 11M16 15c0 3-1 5-2 7M20 15a8 8 0 0 0-8-8"/></svg></span>
+  <h2 id="fingerprint-heading">{{ 'Unlock with your fingerprint'|tr(locale) }}</h2>
+  {% if fingerprint == 'on' %}
+  <p class="start-on">{{ 'Fingerprint unlock is on. Your password still works.'|tr(locale) }}</p>
+  {% else %}
+  <p>{{ 'Open Lightning with a touch instead of typing your password. Type your password once to turn it on.'|tr(locale) }}</p>
+  <form method="post" action="/profiles/fingerprint" class="form-stack">
+    <input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="action" value="on"><input type="hidden" name="return_to" value="/start/phone">
+    <div class="field"><label for="start-password">{{ 'Password'|tr(locale) }}</label><input id="start-password" name="password" type="password" required autocomplete="current-password" enterkeyhint="done"></div>
+    <button class="button button-secondary start-helper-button" type="submit">{{ 'Turn on fingerprint'|tr(locale) }}</button>
+  </form>
+  {% endif %}
+</section>
+{% endif %}
+<form method="post" action="/start/finish"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><div class="form-actions"><button class="button button-primary v2-big" type="submit">{{ 'Finish setup'|tr(locale) }}{{ chevron() }}</button></div></form>
+{% endblock %}

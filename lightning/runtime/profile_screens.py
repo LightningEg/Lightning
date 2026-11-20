@@ -130,6 +130,23 @@ def register(app, screens: ProfileScreens) -> ProfileScreens:
         except (OSError, ValueError):
             return page(request, "choose", error="That folder could not be read. Choose another location.", status=400)
 
+    @app.get("/profiles/tour")
+    async def tour(request: Request):
+        """How Lightning works (IV-11N1): four example cards from Welcome; ?card= picks one, 1 to 4."""
+        from lightning.samples.tour import cards, comparison
+        shown = cards()
+        asked = request.query_params.get("card", "1")
+        n = int(asked) if asked.isdigit() and 1 <= int(asked) <= len(shown) else 1
+        locale = request.cookies.get("lightning_ui_locale", "en")
+        locale = locale if locale in ("en", "ar") else "en"
+        card = shown[n - 1]
+        response = templates.TemplateResponse(request, "phone/profile_tour.html", dict(
+            locale=locale, card=card, n=n, total=len(shown), compare=comparison(card)))
+        if locale == "ar":
+            response.body = localize_html(response.body.decode("utf-8")).encode("utf-8")
+            response.headers["content-length"] = str(len(response.body))
+        return response
+
     @app.post("/profiles/locale")
     async def save_gate_locale(request: Request):
         """Remember the locked-screen language separately from encrypted profile settings."""
@@ -180,7 +197,13 @@ def register(app, screens: ProfileScreens) -> ProfileScreens:
             return page(request, "setup", error="Setup expired. Create the profile again.", status=400)
         pending = session.pending
         # Owner, 2026-10-06: the key is shown once and confirmed with a press, not typed back.
-        return await action(request, "recovery-key", lambda: session.confirm(pending.recovery),
+        def operation():
+            session.confirm(pending.recovery)
+            # IV-11N2: on the phone a new profile goes on to setup's step 3; an imported old file opens as it is.
+            if getattr(request.state, "phone", False) and pending.legacy_source is None:
+                return RedirectResponse("/start", 303)
+            return None
+        return await action(request, "recovery-key", operation,
                             recovery=pending.recovery, name=pending.paths.profile.name if pending.paths.profile else "")
 
     @app.get("/profiles/open-file")
@@ -315,6 +338,15 @@ def register(app, screens: ProfileScreens) -> ProfileScreens:
             return RedirectResponse("/settings" if session.container else "/profiles", 303)
         form = await request.form()
         profile_id = session.paths.profile.profile_id
+        if form.get("return_to") == "/start/phone":  # setup's step 6 (IV-11N2): the answer shows there
+            from lightning.ui.web import redirect
+            try:
+                key = session.prove_password(str(form.get("password", "")))
+            except ProfileError as exc:
+                return redirect("/start/phone", str(exc))
+            outcome = await asyncio.to_thread(fingerprint.enrol, profile_id, key)
+            return redirect("/start/phone", "Fingerprint unlock is on. Your password still works."
+                            if outcome is Outcome.OK else ENROL_MESSAGES[outcome])
         if form.get("action") == "off":
             await asyncio.to_thread(fingerprint.disable, profile_id)
             return fingerprint_page(request, notice="Fingerprint unlock is off. Your password still unlocks this profile.")

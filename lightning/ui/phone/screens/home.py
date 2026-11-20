@@ -114,7 +114,24 @@ def _cash_accounts(c, day: date) -> tuple[tuple, Decimal, int]:
     return tuple(rows), total, count
 
 
-def _first_run(c) -> bool:
+def _first_steps(c, has_rows: bool, has_payment: bool) -> tuple:
+    """The first day's steps as (key, done). Without the phone's setup (IV-11N2): the salary account, the payday, the
+    first payment. After it: whatever setup skipped (account, payday), then the regular bills and the first payment
+    (owner, 2026-11-20); bills are done by adding one or by "I have no regular bills"."""
+    account = bool(c.accounts.list())
+    payday = bool(c.planning.items((PlanKind.INCOME,)))
+    after_setup = c.settings.get("first_day_bills") or ""
+    if not after_setup:
+        return (("account", account), ("payday", payday), ("payment", has_rows))
+    bills = after_setup == "none" or bool(c.planning.items((PlanKind.BILL, PlanKind.SUBSCRIPTION)))
+    steps = [("account", account)] if not account else []
+    steps += [("payday", payday)] if not payday else []  # not money: steps
+    return tuple(steps + [("bills", bills), ("payment", has_payment)])  # not money: steps
+
+
+def _first_run(c, steps: tuple) -> bool:
+    if c.settings.get("first_day_bills"):
+        return not all(done for _, done in steps)
     return not c.accounts.list() or not c.planning.items((PlanKind.INCOME,))
 
 
@@ -139,7 +156,9 @@ def build(c, day: date) -> HomeScreen:
     next_month = (day.replace(day=28) + timedelta(days=4)).replace(day=1)  # not money
     recent, total, _ = c.reporting.register_page(None, "1900-01-01", "9999-12-31", 1, 30)
     latest = tuple([r for r in recent if r.type != DocType.VAL][:LATEST])
-    if _first_run(c):
+    # After setup an opening balance is not a payment: the first payment is the first row of real money.
+    steps = _first_steps(c, bool(total), any(r.type not in (DocType.OPN, DocType.VAL) for r in recent))
+    if _first_run(c, steps):
         state = "first_run"
     elif away.away:
         state = "catch_up"
@@ -151,7 +170,6 @@ def build(c, day: date) -> HomeScreen:
         state = "calm"
     first_run = state == "first_run"
     accounts, accounts_total, accounts_count = _cash_accounts(c, day)
-    steps = (("account", bool(c.accounts.list())), ("payday", bool(c.planning.items((PlanKind.INCOME,)))), ("payment", bool(total)))
     return HomeScreen(state=state, safe=None if first_run else safe, until=until, per_day=per_day,
                       per_day_days=everyday.days_left if everyday else 0,
                       per_day_to_payday=bool(until) and until <= next_month.isoformat(),

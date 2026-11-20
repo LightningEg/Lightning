@@ -42,7 +42,7 @@
     {% endfor %}
   </div>
 </section>
-<section class="phone-section sample-section">
+<section class="phone-section sample-section" id="samples">
   <header class="phone-section-head"><h2>{{ 'Or explore a sample'|tr(locale) }}</h2></header>
   <div class="phone-rows sample-boxes">
     <form method="post" action="/sample/mohab-2026" class="phone-row sample-box"><button type="submit"><span class="sample-box-name"><b>Mohab · {{ 'A full year'|tr(locale) }}</b></span><small>{{ 'Salary, a raise, Ramadan, THNDR and gold, January to today'|tr(locale) }}</small><span class="sample-box-load">{{ 'Load'|tr(locale) }}</span></button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>

@@ -1,0 +1,34 @@
+{# Setup step 5 (IV-11N2; owner, 2026-11-20): a cash wallet is made by default, and how to keep it without logging
+   every small purchase is told as one week's story: count, log the gap once, track on its own only what you follow. #}
+{% extends "phone/start/base.html" %}
+{% block title %}{{ 'Your cash wallet'|tr(locale) }}{% endblock %}
+{% block intro %}<h1 id="page-title">{{ 'Your cash wallet'|tr(locale) }}</h1>
+<p>{{ 'This account is your real wallet: the notes and coins you carry. It does not mean logging every small purchase.'|tr(locale) }}</p>{% endblock %}
+{% block content %}
+{% macro story() %}
+<section class="start-story" aria-labelledby="story-heading">
+  <h2 id="story-heading">{{ 'One week with your wallet'|tr(locale) }}</h2>
+  <ol>
+    <li><b>{{ 'Saturday'|tr(locale) }}</b><span>{{ 'You have 2,000 in your wallet. That is the balance you type above.'|tr(locale) }}</span></li>
+    <li><b>{{ 'During the week'|tr(locale) }}</b><span>{{ 'Tea, a microbus, a snack. You pay and move on: nothing to log.'|tr(locale) }}</span></li>
+    <li><b>{{ 'Friday'|tr(locale) }}</b><span>{{ 'Count your wallet: 1,500 left. Log the missing 500 as one expense in a general category, like Other personal. One minute, and your wallet matches.'|tr(locale) }}</span></li>
+  </ol>
+  <p class="start-tip"><b>{{ 'Want to follow one kind of spending?'|tr(locale) }}</b> {{ 'If you want to see what transport costs you, log each ride in Transportation as it happens. Everything else stays in the one weekly sum.'|tr(locale) }}</p>
+  <p class="start-small">{{ 'Cash from an ATM moves here by itself once bank messages are on.'|tr(locale) }}</p>
+</section>
+{% endmacro %}
+{% if wallet %}
+<p class="start-note">{{ '{name} is ready.'|tr(locale, name=wallet.name) }}</p>
+{{ story() }}<form method="post" action="/start/cash"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><div class="form-actions"><button class="button button-primary v2-big" type="submit">{{ 'Continue'|tr(locale) }}{{ chevron() }}</button></div></form>
+{% else %}
+<form method="post" action="/start/cash" class="form-stack">
+  <div class="field{{ ' has-error' if error_field == 'opening_balance' }}"><label for="start-cash">{{ 'Cash in your wallet now'|tr(locale) }} ({{ base }}) <small>{{ 'optional'|tr(locale) }}</small></label>
+    <input id="start-cash" name="opening_balance" type="text" inputmode="decimal" value="{{ values.opening_balance }}" autocomplete="off" placeholder="0"></div>
+  {{ story() }}
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  <div class="form-actions"><button class="button button-primary v2-big" type="submit">{{ 'Add my cash wallet'|tr(locale) }}{{ chevron() }}</button></div>
+</form>
+{% if not salary_in_cash %}<form method="post" action="/start/skip" class="start-skip"><input type="hidden" name="step" value="cash"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="text-button" type="submit">{{ 'I never use cash'|tr(locale) }}</button></form>
+{% else %}<p class="start-small">{{ 'Your salary arrives in cash, so it needs this wallet.'|tr(locale) }}</p>{% endif %}
+{% endif %}
+{% endblock %}
