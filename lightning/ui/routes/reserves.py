@@ -72,9 +72,9 @@ def _context(request: Request, error: str = ""):
     if fund.target and set_aside < fund.target and position.free_cash and position.free_cash > ZERO:
         fill = EmergencyRefill(set_aside, fund.target)
         room = fill.room(position.free_cash)
-        # BT-2AH: the suggestion keeps Safe to spend at or above zero; moving all of it is a separate, explicit choice.
+        # BT-2AH: the suggestion keeps Expected by payday at or above zero; moving all of it is a separate, explicit choice.
         # IV-12AA2 (owner, 2026-11-10): the filled button offers the plan's monthly top-up, the modest amount; the
-        # largest safe amount stays under "Move more". Both say what Safe to spend (Home's lead) is afterwards.
+        # largest safe amount stays under "Move more". Both say what Expected by payday is afterwards.
         options = c.forecaster.refill_options(today(), room, top_up=fund.top_up)
         safe, move = options["safe"], options["first"]
         refill = {"move": move, "to": fill.to(move), "full": fill.fills(move),
@@ -97,7 +97,7 @@ def _context(request: Request, error: str = ""):
                 amount = ZERO
             if ZERO < amount <= position.free_cash:
                 refill["manual"] = {"amount": amount, "to": fill.to(amount),
-                                    "after": c.forecaster.forecast(today(), refill=amount).safe_to_spend}
+                                    "after": c.forecaster.forecast(today(), refill=amount).expected_by_payday}
             refill["manual_raw"] = raw
     bills = c.planning.items((PlanKind.BILL, PlanKind.SUBSCRIPTION))
     goals_set, goals_target, set_aside_total = c.reserves.totals(listed, set_aside)      # IV-11M6: the phone's Set aside hero

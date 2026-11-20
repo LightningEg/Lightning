@@ -458,7 +458,7 @@ def cash_plan(c, forecast, day: date) -> dict:
     f = forecast
     parts = dict(f.safe_to_spend_parts)
     steps = [(name, value) for name, value in f.safe_to_spend_parts[1:]]
-    build = charts.waterfall((f.safe_to_spend_parts[0][0], f.free_cash), steps, ("Safe to spend", f.safe_to_spend))
+    build = charts.waterfall((f.safe_to_spend_parts[0][0], f.free_cash), steps, (label("safe_to_spend"), f.safe_to_spend))
     display_parts = _safe_display_parts(f.safe_to_spend_parts, f.safe_to_spend)
     for row, (_, amount) in zip(build["rows"], display_parts):
         row["display_value"] = amount

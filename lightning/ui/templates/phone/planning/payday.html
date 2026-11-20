@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% from "phone/partials/hero.html" import hero %}
+{% from "phone/partials/hero.html" import hero %}{% from "partials/macros.html" import expected_block %}
 {% block title %}{{ 'Fund your payday plan'|tr(locale) }}{% endblock %}
 {% block heading %}<h1>{{ 'Fund your payday plan'|tr(locale) }}</h1>{% endblock %}
 {% block top_actions %}<a class="btn" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>{% endblock %}
@@ -11,7 +11,8 @@
 {% if a.ready is not none %}{% include "partials/payday_proposal.html" %}{% include "partials/payday_customize.html" %}{% endif %}
 <section class="card phone-card"><h2>{{ 'Before your next payday'|tr(locale) }}</h2>
 {% for payment in forecast.payments_before_income %}<div class="compact-row"><span>{{ payment.item.name }} <small class="muted">{{ payment.due_date|day(locale) }}</small></span><b>{{ payment.still_owed|money(places=0) }}</b></div>{% else %}<p class="muted">{{ 'Nothing is due before payday.'|tr(locale) }}</p>{% endfor %}
-<p class="muted">{{ 'Due before payday'|tr(locale) }} {{ forecast.payments_before_income_total|money(places=0) }} {{ base }} · {{ 'Safe to spend'|tr(locale) }} {{ forecast.safe_to_spend|money(places=0) }} {{ base }}</p>
+<p class="muted">{{ 'Due before payday'|tr(locale) }} {{ forecast.payments_before_income_total|money(places=0) }} {{ base }} · {{ 'Safe to spend today'|tr(locale) }} {{ forecast.safe_to_spend|money(places=0) }} {{ base }}</p>
+{{ expected_block(expected, base) }}
 </section>
 <form class="phone-form" method="post" action="/payday/enable"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="enabled" value="{{ '0' if enabled else '1' }}"><button class="btn{{ ' primary phone-save' if not enabled }}" type="submit">{{ ('Pause cash funding' if enabled else 'Turn on cash funding')|tr(locale) }}</button></form>
 <details class="phone-note-details"><summary>{{ 'About cash funding'|tr(locale) }}</summary><div class="card phone-card"><p>{{ 'Assign cash you already own. Expected salary is excluded; reserves and unpaid bills stay protected. This does not change budget limits or move money. Cash in another account or brokerage still needs a transfer before payment.'|tr(locale) }}</p></div></details>
