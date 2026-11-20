@@ -27,6 +27,6 @@ def test_the_filled_button_is_the_top_up_and_below_safe_to_spend(c, monkeypatch)
     more = prompt.split('id="refill-more"', 1)[1]
     bigger = D(re.search(r'btn small">Refill ([\d,]+)</button>', more).group(1).replace(",", ""))
     assert 0 < filled < safe_now < bigger                     # the gap is larger than Safe to spend
-    assert "Safe to spend after:" in prompt
+    assert "Expected by payday after:" in prompt
     assert EMERGENCY_FUND_MONTHS == 6 and "The aim is six" in page
     assert "At least 6 months" in limits

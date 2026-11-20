@@ -11,6 +11,7 @@ from decimal import Decimal
 
 from lightning.core.dates import month_of, now, parse_date
 from lightning.accounts.domain import AccountType
+from lightning.ui.expected import expected_by_payday
 from lightning.ui.phone.screens.budget import month_bar
 from lightning.planning import bill_state
 from lightning.planning.domain import PlanKind
@@ -79,6 +80,7 @@ class HomeScreen:
     greeting: str = "Good evening"
     name: str = ""
     steps: tuple = ()                  # first day: (key, done) for the salary account, the payday, the first payment
+    expected: dict | None = None       # Expected by payday, the secondary line under Safe to spend today (lightning.ui.expected)
 
 
 CASH_KINDS = (AccountType.BANK, AccountType.CASH)
@@ -163,4 +165,5 @@ def build(c, day: date) -> HomeScreen:
                       accounts=accounts, accounts_total=accounts_total, accounts_count=accounts_count,
                       bills_before_payday=forecast.payments_before_income_total,
                       spent_today=c.reporting.cash_flow(day, day).outflows,
-                      greeting=_greeting(now().hour), name=c.settings.get("display_name") or "", steps=steps)
+                      greeting=_greeting(now().hour), name=c.settings.get("display_name") or "", steps=steps,
+                      expected=None if first_run else expected_by_payday(forecast))
