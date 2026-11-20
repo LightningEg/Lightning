@@ -102,14 +102,15 @@ class PlanningService:
         return [i for i in items if kinds is None or i.kind in kinds]
 
     @request_cached(deep=True)
-    def payday_item_ids(self) -> set[int]:
-        """The income items whose dates are payday (BT-7AZ, owner 2026-11-14: payday is the salary only).
+    def payday_choice(self) -> tuple[set[int], str]:
+        """The income items whose dates are payday (BT-7AZ, owner 2026-11-14: payday is the salary only) and how they
+        were chosen: "salary", "highest recurring income", or "scheduled income" when only one-offs exist.
 
         The items set up as the salary (category Salary or one under it); with none, the largest regular income
         by what it brings in a year; with no regular income, every income item, so a one-off still ends the window."""
         incomes = self.items((PlanKind.INCOME,))
         if not incomes:
-            return set()
+            return set(), "estimated"
         ids = [i.category_id for i in incomes if i.category_id is not None]
         salary_cats = set()
         if ids:
@@ -119,11 +120,15 @@ class PlanningService:
                 "AND (code='EXP.WORK.SALARY' OR code LIKE 'EXP.WORK.SALARY.%')", tuple(set(ids)))}
         salary = {i.id for i in incomes if i.category_id in salary_cats}
         if salary:
-            return salary
+            return salary, "salary"
         regular = [i for i in incomes if per_year(i) > ZERO]
         if regular:
-            return {max(regular, key=lambda i: (per_year(i), -i.id)).id}
-        return {i.id for i in incomes}
+            return {max(regular, key=lambda i: (per_year(i), -i.id)).id}, "highest recurring income"
+        return {i.id for i in incomes}, "scheduled income"
+
+    def payday_item_ids(self) -> set[int]:
+        """The income items whose dates are payday: see payday_choice."""
+        return self.payday_choice()[0]
 
     def get(self, item_id: int) -> PlannedItem:
         item = self.repo.item(item_id)

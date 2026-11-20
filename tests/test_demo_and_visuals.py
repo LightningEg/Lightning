@@ -104,7 +104,7 @@ def test_needs_you_leads_with_the_first_item_and_counts_the_rest():
     first = keynotes.needs_you(items, D(100), "2026-10-01")
     assert first["title"] == "Bill due: Rent and 1 more" and first["popup"] and first["tone"] == "attention"
     calm = keynotes.needs_you([], D(1500), "2026-10-01")
-    assert calm["title"] == "1,500 safe to spend until 2026-10-01" and calm["tone"] == "info"
+    assert calm["title"] == "1,500 safe to spend today" and calm["tone"] == "info"
 
 
 def test_loan_notes_answer_the_end_date():  # Recurring's share of income is its Fixed costs card now

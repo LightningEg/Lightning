@@ -247,7 +247,7 @@ def test_right_now_appears_only_when_the_period_includes_today(c, household):
     assert "## Right now" not in build(c).text           # September ended before 2026-12-31
     period = parse_period({"period": "custom", "date_from": "2026-12", "date_to": "2026-12"}, today(), "2026-08-01")
     text = AskAIService(c).build(AskOptions(period)).text
-    assert "## Right now" in text and "Safe to spend until your next income" in text
+    assert "## Right now" in text and "Safe to spend today" in text and "Expected by payday" in text
 
 
 def test_all_time_has_no_earlier_period_and_says_so(c, household):

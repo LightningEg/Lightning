@@ -73,10 +73,9 @@ def needs_you(attention: list[dict], safe_to_spend: Decimal | None, next_income:
         return note("attention", first["label"] + more, first["detail"], first["href"], first.get("action") or "Review",  # not money
                     popup=bool(first.get("popup")))
     if safe_to_spend is not None:
-        until = f" until {next_income}" if next_income else ""
-        return note("info", f"{fmt(safe_to_spend, 0)} safe to spend{until}",
+        return note("info", f"{fmt(safe_to_spend, 0)} safe to spend today",
                     "Free cash less what is due before your next income.", "/plan", "See the plan",
-                    label="Safe to spend" + until, figure=fmt(safe_to_spend, 0))
+                    label="Safe to spend today", figure=fmt(safe_to_spend, 0))
     return note("info", "Nothing needs you today", "No bills are due and nothing is waiting for a decision.")
 
 

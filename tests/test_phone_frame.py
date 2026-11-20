@@ -375,7 +375,7 @@ def test_the_safe_to_spend_card_opens_its_own_explanation():  # F11 (r24)
     from types import SimpleNamespace
     from decimal import Decimal
     from lightning.ui.routes.dashboard import _safe_tile
-    tile = _safe_tile(SimpleNamespace(next_income_date="2026-12-01", safe_to_spend=Decimal("100"), free_cash=Decimal("400")))
+    tile = _safe_tile(SimpleNamespace(next_income_date="2026-12-01", safe_to_spend=Decimal("100"), expected_by_payday=Decimal("100"), free_cash=Decimal("400")))
     assert tile["href"] == "/plan#safe-section"
     phone_home = Path(__file__).resolve().parents[1] / "lightning/ui/templates/phone/home.html"
     assert 'id="home-safe"' in phone_home.read_text(encoding="utf-8")   # IV-11M6: on the phone, Home's card opens it

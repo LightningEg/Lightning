@@ -13,7 +13,7 @@
 <span class="phone-ring{{ ' is-bad' if bad }}" role="img" aria-label="{{ big }} {{ small }}"><svg viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="35"/><circle class="is-fill" cx="42" cy="42" r="35" pathLength="100" stroke-dasharray="{{ '%.1f'|format(pct) }} 100"/></svg><span><b>{{ big }}</b><small>{{ small }}</small></span></span>
 {%- endmacro %}
 {% block content %}
-{% from "partials/macros.html" import inst_tile with context %}
+{% from "partials/macros.html" import inst_tile, expected_block with context %}
 {% set s = screen %}
 {# IV-11M3 (owner, 2026-11-14): one Ink line in the display face, the greeting lighter than the name, never grey. #}
 <p class="phone-greeting">{% if s.state == 'first_run' %}{{ 'Welcome'|tr(locale) }}{% else %}{{ s.greeting|tr(locale) }}{% endif %}{% if s.name %}, <b>{{ s.name }}</b>{% endif %}</p>
@@ -59,9 +59,10 @@
 {% set lead %}<div class="phone-safe" id="home-safe"><div class="phone-hero-top"><div><span class="phone-hero-label">{{ fig.safe_to_spend.label }} <span aria-hidden="true">{{ chevron() }}</span></span>
   <div class="phone-lead{{ ' is-negative' if s.safe < 0 }}" data-fig="safe_to_spend">{{ s.safe|money }} <small>{{ base }}</small></div></div>
   {% if pct is not none %}{{ ring(pct, '%d%%'|format(pct|round|int), 'spent'|tr(locale), s.meter.ahead) }}{% endif %}</div>
-  <p class="phone-hero-line"><b class="{{ vclass }}">{{ verdict|tr(locale) }}</b> {{ line|keep_dates }}</p></div>{% endset %}
+  <p class="phone-hero-line"><b class="{{ vclass }}">{{ verdict|tr(locale) }}</b> {{ line|keep_dates }}</p>
+  {% if s.expected %}<p class="phone-hero-line" id="home-expected">{{ s.expected.label|tr(locale) }} <b class="fig">{{ s.expected.value|money }}</b> <small>{{ base }}</small> · {{ 'Payday'|tr(locale) }} {{ s.expected.date|keep_dates }}</p>{% endif %}</div>{% endset %}
 <div class="phone-safe-card">
-{% call sheet(fig.safe_to_spend.label, lead, 'phone-home-hero') %}{{ working_rows(s.working) }}{% endcall %}
+{% call sheet(fig.safe_to_spend.label, lead, 'phone-home-hero') %}{{ working_rows(s.working) }}{{ expected_block(s.expected, base) }}{% endcall %}
 <div class="phone-wells">{% if s.everyday_left is not none %}<a class="phone-well" href="/budget/flexible"><span>{{ fig.everyday_left.label }}</span><b class="fig">{{ s.everyday_left|money }}</b></a>{% endif %}
   <a class="phone-well" href="/plan"><span>{{ 'Bills before payday'|tr(locale) }}</span><b class="fig">{{ s.bills_before_payday|money }}</b></a></div>
 </div>
