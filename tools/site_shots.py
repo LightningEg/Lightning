@@ -10,7 +10,8 @@ pc   starts `python -m lightning --sample` on 8767 (prices offline, the date pin
      (it leaves a pending import). The Get set up card is dismissed first and the pointer parked, so no screen
      shows the card or a hover ring.
 pair two real profiles in this process, a phone (360 x 760 at 2x) holding Mohab's year and a PC borrowing it:
-     phone-overview, phone-plan, phone-account (scrolled so the + button sits between rows), then sync-pc and
+     phone-overview, phone-plan, phone-account (scrolled so the + button sits between rows), phone-expenses, phone-investments,
+     then sync-pc and
      sync-phone. Arabic: both profiles in Arabic.
 Files are WebP at quality 78, named as the website uses them; compare a new set with the old by eye first.
 """
@@ -129,6 +130,8 @@ def pc_set() -> None:
             full.mouse.move(0, 0)  # a parked pointer leaves a hover ring on the next screen
             for name, url in FULL.items():
                 show(full, BASE + url)
+                full.evaluate("() => window.scrollTo(0, 0)")  # dismissing Get set up scrolls the window; the reload restores it
+                full.mouse.move(0, 0)
                 png = full.screenshot()
                 save(png, name)
                 if name in SIDELESS:
@@ -211,9 +214,11 @@ def pair_set() -> None:
                 if LANG == "ar":
                     ph.goto(phone.origin + "/")
                     post(ph, "/settings/locale", locale="ar")
-                for name, path in (("phone-overview", "/?period=ytd"), ("phone-plan", "/plan"), ("phone-account", "/accounts/1")):
+                # Home is "/" (the phone's "/?period=ytd" is the Report page now); the three after it answer the home page's questions
+                for name, path in (("phone-overview", "/"), ("phone-plan", "/plan"), ("phone-account", "/accounts/1"),
+                                   ("phone-expenses", EXPENSES), ("phone-investments", "/investments?period=ytd")):
                     show(ph, phone.origin + path, wait=700)
-                    lift = {"phone-plan": 200, "phone-account": 88 if LANG == "ar" else 60}.get(name)
+                    lift = {"phone-overview": 150, "phone-account": 88 if LANG == "ar" else 60}.get(name)
                     if lift:  # the + button would cover a figure (3Z)
                         ph.evaluate("(y) => window.scrollBy(0, y)", lift)
                         ph.wait_for_timeout(400)
