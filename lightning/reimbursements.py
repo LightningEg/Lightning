@@ -197,7 +197,7 @@ class ReimbursementService:
         claim.update({"expense": expense.get("transaction"), "current_expense": from_e6(int(expense.get("net_e6", 0))),
                       "categories": expense.get("categories", []), "accounts": expense.get("accounts", []),
                       "receipts": receipt_rows, "received": from_e6(received_e6),
-                      "outstanding": from_e6(max(current_limit - received_e6, 0)),
+                      "outstanding": from_e6(0 if claim["work_closed_on"] else max(current_limit - received_e6, 0)),
                       "over_received": from_e6(max(received_e6 - current_limit, 0)),
                       "issues": issues})
         return claim
@@ -340,6 +340,82 @@ class ReimbursementService:
             "LEFT JOIN counterparties cp ON cp.id=rc.payer_id WHERE rc.id=?", (cur.lastrowid,),
         )
         return self._claim_summary(row)
+
+    def create_work_claim(self, transaction_id: int, expected=None, payer_id: int | None = None):
+        """Use the posted base-currency expense for the default, including foreign account payments."""
+        self._require_writable()
+        with self.db.transaction(undo_label="Create work claim"):
+            if expected is None:
+                expected = from_e6(self._expense_capacity(transaction_id)["net_e6"])
+            claim = self.create_claim(transaction_id, expected, payer_id)
+            self.mark_paid_for_work(claim["id"])
+            return claim | {"paid_for_work": 1}
+
+    def mark_paid_for_work(self, claim_id: int):
+        self._require_writable()
+        with self.db.transaction(undo_label="Mark paid for work"):
+            if not self.db.execute("UPDATE reimbursement_claims SET paid_for_work=1,updated_at=? WHERE id=?",
+                                   (now_iso(), claim_id)).rowcount:
+                raise NotFoundError("Reimbursement claim not found.")
+
+    def close_work_claim(self, claim_id: int, on: str):
+        self._require_writable()
+        day = date.fromisoformat(on)
+        with self.db.transaction(undo_label="Close work claim"):
+            row = self.db.one("SELECT * FROM reimbursement_claims WHERE id=? AND paid_for_work=1", (claim_id,))
+            if not row:
+                raise NotFoundError("Work claim not found.")
+            claim = self._claim_summary(row)
+            if claim["issues"] or day > today() or day.isoformat() < max(
+                    [claim["expense"]["date"]] + [r["date"] for r in claim["receipts"]]):
+                raise ValidationError("Check the expense and its receipts before closing this claim.")
+            if not row["work_closed_on"]:
+                self.db.execute("UPDATE reimbursement_claims SET work_closed_on=?,updated_at=? WHERE id=?",
+                                (day.isoformat(), now_iso(), claim_id))
+
+    def sms_work_matches(self):
+        """Posted SMS deposits that could settle an open work claim. A person chooses the allocation."""
+        if not self.db.scalar("SELECT 1 FROM reimbursement_claims WHERE paid_for_work=1 AND work_closed_on IS NULL LIMIT 1"):
+            return []
+        ids = {r[0] for r in self.db.all(
+            "SELECT DISTINCT r.transaction_id FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
+            "JOIN transactions t ON t.id=r.transaction_id WHERE b.file_name LIKE 'SMS %' AND t.type='IN' "
+            "AND r.status IN ('LINKED','POSTED') AND t.status='POSTED'")}
+        claims = [c for c in self.list_claims() if c["paid_for_work"] and c["outstanding"] and not c["issues"]]
+        suggested = {(p["claim_id"], p["receipt_id"]) for p in self.suggested_pairs(claims=claims)}
+        matches = []
+        for receipt in self.available_receipts():
+            if receipt["transaction_id"] not in ids:
+                continue
+            txn = receipt["transaction"]
+            for claim in claims:
+                same_payer = claim["payer_id"] is not None and claim["payer_id"] == txn["counterparty_id"]
+                if claim["expense"]["date"] <= txn["date"] and (
+                        same_payer or (claim["id"], txn["id"]) in suggested):
+                    matches.append({"claim": claim, "receipt": txn, "amount": min(receipt["amount"], claim["outstanding"])})
+        return matches
+
+    def work_period(self, start, end):
+        """Personal cost for the purchase period, with outstanding measured at the end of the period."""
+        first, last = str(start), str(end)
+        rows = self.db.all(
+            "SELECT rc.id,rc.expected_e6,rc.work_closed_on,t.date,t.ref,t.description,t.counterparty,"
+            "SUM(CASE WHEN w.is_receipt=0 THEN -w.amount_e6 ELSE 0 END) excluded,"
+            "SUM(CASE WHEN w.is_receipt=1 AND w.date<=? THEN w.amount_e6 ELSE 0 END) received,"
+            "SUM(CASE WHEN w.is_receipt=1 AND w.date BETWEEN ? AND ? THEN w.amount_e6 ELSE 0 END) repaid,"
+            "(SELECT SUM(-le.amount_base_e6) FROM ledger_entries le JOIN financial_assets a ON a.id=le.asset_id "
+            "WHERE le.transaction_id=t.id AND a.is_cash=1 AND le.effect='OUTFLOW' AND le.owner_id IS NULL) capacity "
+            "FROM reimbursement_claims rc JOIN transactions t ON t.id=rc.expense_id "
+            "JOIN work_claim_allocations w ON w.claim_id=rc.id WHERE t.date<=? GROUP BY rc.id ORDER BY t.date,rc.id",
+            (last, first, last, last))
+        result = []
+        for row in rows:
+            owed = 0 if row["work_closed_on"] and row["work_closed_on"] <= last else max(
+                0, min(row["expected_e6"], row["capacity"]) - row["received"])
+            excluded = row["excluded"] if row["date"] >= first else 0
+            if owed or excluded or row["repaid"]:
+                result.append(dict(row) | {"owed": from_e6(owed), "excluded": from_e6(excluded), "repaid": from_e6(row["repaid"])})
+        return result
 
     def link_receipt(self, claim_id: int, transaction_id: int, amount) -> dict:
         self._require_writable()

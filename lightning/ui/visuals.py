@@ -311,7 +311,7 @@ def day_calendars(c, first: date, last: date, code_filter: str = "", months: int
     busiest = max(spend_days, key=lambda kv: kv[1]) if spend_days else None
     days_in = (last - shown_from).days + 1
     monthly_flows = c.reporting.flows_by_date(first, last, "month", code_filter)
-    monthly = [{"key": key, "spend": values["outflows"], "net": values["net"]}
+    monthly = [{"key": key, "spend": values["spending"], "net": values["net"]}
                for key, values in sorted(monthly_flows.items())]
     return {"months": cal, "weekdays": [WEEKDAYS[i] for i in order], "single": len(cal) == 1,
             "long_period": days_in > 92, "monthly": monthly,

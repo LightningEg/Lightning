@@ -3,6 +3,7 @@
 {% block title %}{{ 'Compare periods'|tr(locale) }}{% endblock %}
 {% block heading %}<h1>{{ 'Compare periods'|tr(locale) }}</h1><p class="phone-note">{{ '{sa} to {sb}'|tr(locale, sa=fmt_date(a[0]), sb=fmt_date(a[1]))|isolate_dates }}</p>{% endblock %}
 {% block content %}
+{% include "partials/work_claim_period.html" %}
 <section class="phone-hero has-seam" aria-labelledby="lead-heading"><div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ lead.label }}</div>
   <div class="phone-lead">{{ lead.value|money(lead.signed) if lead.value is not none else '—' }} <small>{{ base }}</small></div><p class="phone-hero-line">{% if lead.compare.figure %}<b>{{ lead.compare.figure }}</b> {% endif %}<span>{{ status|tr(locale) }}</span></p></section>
 <nav class="phone-segment" aria-label="{{ 'Preset'|tr(locale) }}">{% for k, label in (('month','Month'),('quarter','Quarter'),('year','Year')) %}<a href="/spending/compare?preset={{ k }}&amp;by={{ by }}"{% if kind == k %} aria-current="true"{% endif %}><span>{{ label|tr(locale) }}</span></a>{% endfor %}</nav>

@@ -1,0 +1,11 @@
+<div class="field out-only" {{ 'hidden' if values.kind != 'out' }}>
+  <label><input type="checkbox" name="paid_for_work" value="1" {{ 'checked' if values.paid_for_work }}> {{ 'Paid for work'|tr(locale) }}</label>
+  <div data-work-options><label>{{ 'Expected reimbursement'|tr(locale) }} ({{ base }})
+    <input type="text" inputmode="decimal" name="work_expected" value="{{ values.work_expected or '' }}" placeholder="{{ 'Full expense if blank'|tr(locale) }}">
+  </label>
+  <label>{{ 'Payer'|tr(locale) }}
+    <select name="work_payer" data-own-picker><option value="">{{ 'Optional'|tr(locale) }}</option>
+      {% for p in counterparties %}<option value="{{ p.id }}" {{ 'selected' if values.work_payer == p.id|string }}>{{ p.name }}</option>{% endfor %}
+    </select>
+  </label></div>
+</div>

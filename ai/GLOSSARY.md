@@ -588,3 +588,5 @@ Asset class and exposure are separate. **Risk level** (Low, Medium or High risk)
 | Due | مستحق |
 | Upcoming | قادم |
 | From | من |
+
+**Paid for work** marks the part of an expense the employer owes. It is excluded from personal spending until the user absorbs an unpaid balance.

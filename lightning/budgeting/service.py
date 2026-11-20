@@ -430,8 +430,9 @@ class BudgetService:
             if chosen:
                 marks = ",".join("?" for _ in chosen)
                 rows = self.db.all(
-                    "SELECT le.category_id,SUM(le.amount_base_e6) AS total_e6 "
+                    "SELECT le.category_id,SUM(le.amount_base_e6-COALESCE(w.amount_e6,0)) AS total_e6 "
                     "FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id "
+                    "LEFT JOIN work_claim_allocations w ON w.transaction_id=le.transaction_id AND w.line_no=le.line_no "
                     "LEFT JOIN planned_payments pp ON pp.transaction_id=t.id AND pp.status='PAID' "
                     "LEFT JOIN planned_items pi ON pi.id=pp.planned_item_id AND pi.kind='INCOME' "
                     "WHERE t.status='POSTED' AND le.effect='INFLOW' AND le.owner_id IS NULL "
@@ -1020,7 +1021,7 @@ class BudgetService:
             "FROM reimbursement_receipts rr JOIN reimbursement_claims rc ON rc.id=rr.claim_id "
             "JOIN transactions r ON r.id=rr.receipt_id JOIN transactions e ON e.id=rc.expense_id "
             "JOIN ledger_entries le ON le.transaction_id=r.id "
-            "WHERE r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
+            "WHERE rc.paid_for_work=0 AND r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
             "AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
             "GROUP BY rr.id,le.category_id ORDER BY rr.id,le.category_id"), *self.db.all(
             "SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
@@ -1057,9 +1058,10 @@ class BudgetService:
         owned = ("le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
                  "AND le.category_id NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY')")
         expenses = self.db.all(
-            "SELECT NULL link_id,0 linked_e6,t.id transaction_id,le.date,le.category_id,SUM(le.amount_base_e6) total_e6 "
+            "SELECT NULL link_id,0 linked_e6,t.id transaction_id,le.date,le.category_id,SUM(le.amount_base_e6-COALESCE(w.amount_e6,0)) total_e6 "
             "FROM budget_estimate_exclusions x JOIN transactions t ON t.id=x.transaction_id "
             "JOIN ledger_entries le ON le.transaction_id=t.id "
+            "LEFT JOIN work_claim_allocations w ON w.transaction_id=le.transaction_id AND w.line_no=le.line_no "
             f"WHERE t.status='POSTED' AND {owned} GROUP BY t.id,le.category_id,le.date")
         back = self.db.all(  # money back: a claim's receipts, and refunds that name the purchase (NF-12AK3), once
             "SELECT 'claim:'||rr.id link_id,rr.amount_e6 linked_e6,NULL transaction_id,le.date,le.category_id,"
@@ -1067,7 +1069,7 @@ class BudgetService:
             "JOIN transactions e ON e.id=x.transaction_id JOIN reimbursement_claims rc ON rc.expense_id=e.id "
             "JOIN reimbursement_receipts rr ON rr.claim_id=rc.id JOIN transactions r ON r.id=rr.receipt_id "
             "JOIN ledger_entries le ON le.transaction_id=r.id "
-            f"WHERE e.status='POSTED' AND r.status='POSTED' AND {owned} "
+            f"WHERE rc.paid_for_work=0 AND e.status='POSTED' AND r.status='POSTED' AND {owned} "
             "GROUP BY rr.id,le.category_id,le.date "
             "UNION ALL SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,NULL transaction_id,le.date,le.category_id,"
             "SUM(le.amount_base_e6) total_e6 FROM budget_estimate_exclusions x "

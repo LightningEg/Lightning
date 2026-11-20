@@ -588,10 +588,13 @@ async def save_transaction_popup(request: Request, account_id: int):
     form = await request.form()
     values = {key: str(form.get(key, "")) for key in
               ("kind", "date", "amount", "category_id", "counterparty", "owner_id", "to_account_id", "notes", "early_checked",
-               "left_out")}
+               "left_out", "paid_for_work", "work_expected", "work_payer")}
     values["return_to"] = _safe_return(form.get("return_to"), f"/accounts/{account_id}")
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
-    payload = {key: value for key, value in values.items() if key != "return_to"} | {"account": account_id}
+    payload = {key: value for key, value in values.items() if key not in
+               ("return_to", "paid_for_work", "work_expected", "work_payer")} | {"account": account_id}
+    if values["kind"] == "out" and values["paid_for_work"] == "1":
+        payload.update({key: values[key] for key in ("paid_for_work", "work_expected", "work_payer")})
     try:
         with register.resent_guard(c, form), settled_save(request, c):
             earlier = c.transactions.submitted(submission, payload)  # a resent form returns its first save (2J)
@@ -601,6 +604,9 @@ async def save_transaction_popup(request: Request, account_id: int):
                 matched_reserve = c.reserves.auto_link_transaction(txn.id)
                 if values["left_out"] == "1" and values["kind"] == "out":  # NF-12AK2: chosen under More
                     c.budgets.set_left_out(txn.id, True)
+                if values["paid_for_work"] == "1" and values["kind"] == "out":
+                    payer = int(values["work_payer"]) if values["work_payer"] else None
+                    c.reimbursements.create_work_claim(txn.id, values["work_expected"] or None, payer)
                 _remember_sms(c, form, account_id)
         if earlier is not None:
             return redirect(values["return_to"], "Saved.")

@@ -60,7 +60,8 @@
       <div class="field"><label for="receipt-amount-{{ claim.id }}">{{ 'Receipt amount'|tr(locale) }} ({{ base }})</label><input id="receipt-amount-{{ claim.id }}" type="text" name="amount" inputmode="decimal" value="{{ claim.outstanding|money(False, 2) }}" required enterkeyhint="done"></div>
       <button class="btn primary">{{ 'Link receipt'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
     </form>{% endif %}
-    <form method="post" action="/reimbursements/{{ claim.id }}/delete" data-confirm-delete="{{ 'Delete this claim and its receipt links?'|tr(locale) }}"><button class="btn danger">{{ 'Delete claim'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
+    {% include "partials/work_claim_actions.html" %}
+        <form method="post" action="/reimbursements/{{ claim.id }}/delete" data-confirm-delete="{{ 'Delete this claim and its receipt links?'|tr(locale) }}"><button class="btn danger">{{ 'Delete claim'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>
   </article>{% endfor %}
   {% endif %}
 </section>

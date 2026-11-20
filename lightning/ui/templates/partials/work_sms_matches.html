@@ -1,0 +1,9 @@
+{% for match in sms_work_matches %}
+<form method="post" action="/reimbursements/{{ match.claim.id }}/receipts">
+  <p>{{ match.receipt.counterparty or match.receipt.ref }} · {{ match.receipt.date }} → <a href="/reimbursements#claim-{{ match.claim.id }}">{{ match.claim.expense.description or match.claim.expense.ref }} · {{ match.claim.expense.date }}</a></p>
+  <label>{{ 'Reimbursement amount'|tr(locale) }} ({{ base }}) <input required name="amount" inputmode="decimal" value="{{ match.amount|money(False, 2) }}"></label>
+  <input type="hidden" name="receipt_id" value="{{ match.receipt.id }}">
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  <button class="btn">{{ 'Apply to work claim'|tr(locale) }}</button>
+</form>
+{% endfor %}

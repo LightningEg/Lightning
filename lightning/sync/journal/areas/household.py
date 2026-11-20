@@ -16,6 +16,11 @@ COMMANDS = {
     "reimbursements.create_claim": Command("reimbursements.create_claim", dict(
         transaction_id=ref("transactions"), expected=AMOUNT, payer_id=optional(ref("counterparties")),
         due_date=optional(DATE)), creates="reimbursement_claims"),
+    "reimbursements.create_work_claim": Command("reimbursements.create_work_claim", dict(
+        transaction_id=ref("transactions"), expected=optional(AMOUNT), payer_id=optional(ref("counterparties"))),
+        creates="reimbursement_claims"),
+    "reimbursements.mark_paid_for_work": Command("reimbursements.mark_paid_for_work", dict(claim_id=ref("reimbursement_claims")), target=CLAIM),
+    "reimbursements.close_work_claim": Command("reimbursements.close_work_claim", dict(claim_id=ref("reimbursement_claims"), on=DATE), target=CLAIM),
     "reimbursements.link_receipt": Command("reimbursements.link_receipt", dict(
         claim_id=ref("reimbursement_claims"), transaction_id=ref("transactions"), amount=AMOUNT), target=CLAIM,
         creates="reimbursement_receipts"),

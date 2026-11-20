@@ -64,7 +64,7 @@ def test_upgrade_renames_only_exact_defaults(monkeypatch, tmp_path, encrypted):
 
         assert migrator.migrate(db) == ["0083_category_sentence_case (APPLIED)", "0084_investment_counts_as_cash (APPLIED)",
                                         "0085_refund_links (APPLIED)", "0086_budget_estimate_exclusions (APPLIED)",
-                                        "0087_targets_by_risk_level (APPLIED)"]
+                                        "0087_targets_by_risk_level (APPLIED)", "0088_paid_for_work (APPLIED)"]
         seed(db)
         after = {r["id"]: dict(r) for r in db.all("SELECT * FROM categories")}
         expected = {key: dict(row) for key, row in before.items()}

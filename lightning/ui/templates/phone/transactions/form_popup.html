@@ -82,6 +82,7 @@
       <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}{% set usual_account = (usual_accounts or {}).get(person.name) %}<option value="{{ person.name }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}{% if usual_account %} data-account="{{ usual_account }}"{% endif %}>{% endfor %}</datalist>
       {% if error_field == 'counterparty' %}<small class="field-error">{{ "Choose a saved counterparty."|tr(locale) }}</small>{% endif %}
     </div>
+    {% if fresh %}{% include "partials/work_claim_entry.html" %}{% endif %}
     <details class="phone-more"{% if values.owner_id or values.notes or values.left_out %} open{% endif %}>
       <summary>{{ "Notes and held for"|tr(locale) }}<span class="phone-chevron">{{ chevron() }}</span></summary>
       <div class="field"><label for="popup-notes">{{ 'Notes'|tr(locale) }}</label><input id="popup-notes" name="notes" value="{{ values.notes }}" enterkeyhint="done"></div>

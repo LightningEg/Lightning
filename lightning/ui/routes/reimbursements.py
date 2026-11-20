@@ -4,6 +4,7 @@ from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
 
+from lightning.core.dates import today
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.money import to_decimal
 
@@ -80,6 +81,25 @@ async def create_claim(request: Request):
         message = exc.message if isinstance(exc, LightningError) else "Choose an expense and enter an amount."
         return render(request, "reimbursements.html", status_code=400, **_context(request, message, values))
     return redirect(f"/reimbursements#claim-{claim['id']}", f"Created reimbursement claim for {claim['expense']['ref']}.")
+
+
+@router.post("/{claim_id:int}/work")
+async def mark_work(request: Request, claim_id: int):
+    c = container(request)
+    with settled_save(request, c):
+        c.reimbursements.mark_paid_for_work(claim_id)
+    return redirect(f"/reimbursements#claim-{claim_id}", "Saved.")
+
+
+@router.post("/{claim_id:int}/close-work")
+async def close_work(request: Request, claim_id: int):
+    c = container(request)
+    try:
+        with settled_save(request, c):
+            c.reimbursements.close_work_claim(claim_id, today().isoformat())
+    except LightningError as exc:
+        return redirect(f"/reimbursements#claim-{claim_id}", exc.message)
+    return redirect(f"/reimbursements#claim-{claim_id}", "Saved.")
 
 
 @router.post("/{claim_id:int}/pair")
