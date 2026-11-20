@@ -166,6 +166,16 @@ def test_a_sample_instead_ends_setup(phone):
     assert 'id="samples"' in page.text
 
 
+def test_loading_the_demo_from_setup_ends_it(phone):
+    """The browser tests make a profile, then load the demo from the page they land on: setup's step 3."""
+    client, app = phone
+    page = create(client, setup=True)
+    assert 'name="lightning-session"' in page.text
+    home = post(client, "/demo", page)
+    assert ask(client, app, lambda c: c.settings.get("phone_start")) == "done"
+    assert home.url.path in ("/", "/home") and "/start/" not in str(home.url)
+
+
 def test_step_six_explains_sms_before_asking(phone):
     client, _ = phone
     page = create(client, setup=True)
