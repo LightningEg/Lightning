@@ -60,6 +60,10 @@ async def dashboard(request: Request):
         period_error = exc.message
     first, as_of = period.start, period.end
     accounts = c.accounts.list()
+    if not accounts and getattr(request.app.state, "phone_screens", False):
+        from lightning.ui.phone.start import running
+        if running(c):   # IV-11N2: setup was left half way on the phone; it resumes where it stopped
+            return redirect("/start")
     if not accounts:
         from lightning.samples.profiles import sample_stories
         registry = c.currencies

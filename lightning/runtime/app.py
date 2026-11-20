@@ -141,10 +141,11 @@ class SessionGate:
             return ""
 
     def fingerprint_row(self, path: str) -> str:
-        """For Settings › This phone: "" when fingerprint unlock is not offered here, else "on" or "off"."""
+        """For Settings › This phone and setup's step 6 (IV-11N2): "" when fingerprint unlock is not offered here, else
+        "on" or "off"."""
         fingerprint = getattr(self, "fingerprint", None)
         session = self.session
-        if (path != "/settings" or fingerprint is None or session.container is None or session.borrowed is not None
+        if (path not in ("/settings", "/start/phone") or fingerprint is None or session.container is None or session.borrowed is not None
                 or session.paths is None or session.paths.profile is None or not fingerprint.available()):
             return ""
         return "on" if fingerprint.enabled(session.paths.profile.profile_id) else "off"

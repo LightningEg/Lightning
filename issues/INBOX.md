@@ -30,3 +30,4 @@ Things seen, not yet planned. One line each: date, pillar, what and where (a pag
 - **Loan as its payments (own, 2026-11-14, r37 M5):** a loan of 80,000 repaid as 36 x 3,000 lowers net worth by 108,000 when added; for the owner's eye.
 - **Bill changes once (plan, 2026-11-14, r37 M3):** the scenario moves one occurrence; a rent rise that stays cannot be tried.
 - Phone v2.0 follow-ups (2026-11-14): the Arabic wording in guideline Part C v2.0 needs a native read; check the new phone screens on a real phone (launch checklist #579); a transaction has no time of day and no record that it came from an SMS (the mockup shows both); holdings have no "bought at" price; the first-run fingerprint switch is not possible before the first unlock.
+- **Recovery key says "computer" on the phone (feel, 2026-11-20, from IV-11N):** setup step 2 warns "keep it away from this computer"; `profiles.html` shares the sentence with the PC.
