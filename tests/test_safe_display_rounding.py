@@ -31,8 +31,8 @@ def test_pc_safe_to_spend_waterfall_and_table_use_the_same_display_parts(c, setu
     parts = [('Free cash', D('312504.51')), ('Budget until payday', D('-1283.51')),
              ('Emergency fund top-up', D('-11520.51')), ('Rest of savings target', D('-2012.51'))]
     from dataclasses import replace
-    f = replace(f, free_cash=parts[0][1], safe_to_spend_parts=parts,
-                safe_to_spend=sum((value for _, value in parts), D(0)))
+    f = replace(f, free_cash=parts[0][1], expected_by_payday_parts=parts, income_before_payday=D(0),
+                expected_by_payday=sum((value for _, value in parts), D(0)))
     monkeypatch.setattr(c.forecaster, 'forecast', lambda *args, **kwargs: f)
     with TestClient(create_app(c)) as client:
         response = client.get('/plan')
@@ -42,7 +42,7 @@ def test_pc_safe_to_spend_waterfall_and_table_use_the_same_display_parts(c, setu
     rows = re.findall(r'<span class="chart-fall-label">([^<]+)</span>.*?'
                       r'<b class="chart-fall-value">([^<]+)</b>', section, re.S)
     values = [int(value.replace(',', '').replace('−', '-')) for _, value in rows]
-    assert [name for name, _ in rows] == [name for name, _ in parts] + ['Safe to spend']
+    assert [name for name, _ in rows] == [name for name, _ in parts] + ['Safe to spend today']
     assert values[0] == 312505 and values[-1] == 297688
     assert sum(values[:-1]) == values[-1]
     panel = response.text.split('id="working-safe"', 1)[1].split('</table>', 1)[0]  # NF-12AB3: How it adds up
@@ -60,8 +60,8 @@ def test_phone_safe_to_spend_bars_use_the_reconciled_display(c, setup, monkeypat
     original = c.forecaster.forecast()
     parts = [('Free cash', D('312504.51')), ('Budget until payday', D('-1283.51')),
              ('Emergency fund top-up', D('-11520.51')), ('Rest of savings target', D('-2012.51'))]
-    f = replace(original, free_cash=parts[0][1], safe_to_spend_parts=parts,
-                safe_to_spend=sum((value for _, value in parts), D(0)))
+    f = replace(original, free_cash=parts[0][1], expected_by_payday_parts=parts, income_before_payday=D(0),
+                expected_by_payday=sum((value for _, value in parts), D(0)))
     monkeypatch.setattr(c.forecaster, 'forecast', lambda *args, **kwargs: f)
     inner = create_app(c)
     from lightning.ui.phone.router import mount_phone
