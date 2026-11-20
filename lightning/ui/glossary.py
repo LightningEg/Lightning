@@ -31,12 +31,20 @@ _ROWS = (
      "Cash you can spend without touching your reserves and without leaving a bill unpaid.",
      "الفلوس اللي تقدر تصرفها من غير ما تلمس احتياطيك ومن غير ما تسيب فاتورة من غير دفع.",
      "Overview, Cash planning", "النظرة العامة، تخطيط النقدية"),
-    ("safe_to_spend", None, "الآمن للصرف",
+    ("safe_to_spend", None, "المتاح للصرف النهارده",
      "Free cash after everything already promised until your next pay: bills, what is left of your budget, goals and "
-     "your emergency fund top-up. It is an estimate. If it is below zero, more is promised than you have free.",
+     "your emergency fund top-up. Income that has not arrived yet is not counted, the salary included. It is an "
+     "estimate. If it is below zero, more is promised than you have free.",
      "النقدية المتاحة بعد كل اللي وعدت بيه لحد المرتب الجاي: الفواتير وباقي الميزانية والأهداف وتكملة صندوق الطوارئ. "
-     "تقدير مش رقم نهائي. لو أقل من صفر يبقى الملتزم بيه أكتر من المتاح.",
-     "Overview, Cash planning", "النظرة العامة، تخطيط النقدية"),
+     "الدخل اللي لسه ما وصلش مش محسوب، ولا المرتب. تقدير مش رقم نهائي. لو أقل من صفر يبقى الملتزم بيه أكتر من المتاح.",
+     "Overview, Cash planning, Home", "النظرة العامة، تخطيط النقدية، الرئيسية"),
+    ("expected_by_payday", None, "المتوقع لحد القبض",
+     "What Safe to spend today becomes once the income expected before your next payday arrives. It shows the payday "
+     "date, how payday was chosen (salary, highest recurring income or estimated) and each expected income with its "
+     "amount and date. It was called Safe to spend before 2026-11-18.",
+     "اللي المتاح للصرف النهارده هيبقى عليه لما الدخل المتوقع قبل يوم القبض الجاي يوصل. بيعرض تاريخ القبض واتحدد "
+     "إزاي (المرتب أو أعلى دخل متكرر أو تقدير) وكل دخل متوقع بمبلغه وتاريخه. كان اسمه المتاح للصرف قبل 2026-11-18.",
+     "Cash planning, Home", "تخطيط النقدية، الرئيسية"),
     ("left_in_plan", None, "المتبقي في الخطة",
      "What is left of this month's plan: planned spending minus what you have spent. Refunds reduce what you spent.",
      "اللي فاضل من خطة الشهر: المخطط ناقص اللي صرفته. الاسترداد بيقلل المصروف.",

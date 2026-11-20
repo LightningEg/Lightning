@@ -94,7 +94,7 @@ def test_the_afford_date_counts_without_an_account_and_a_past_date_is_refused(mo
     later = date.fromisoformat(payday).replace(day=10).isoformat()
     before = _text(_get(c, "/plan", phone, afford="30000").text)
     after = _text(_get(c, "/plan", phone, afford="30000", afford_date=later).text)
-    assert "safe to spend until" in before and "safe to spend until" not in after
+    assert "safe to spend today" in before and "safe to spend today" not in after
     assert "Your lowest point ahead would be" in after or "short in" in after
     past = _text(_get(c, "/plan", phone, afford="30000", afford_date="2025-01-01").text)
     assert "Pick today or a later date." in past and "Plan this purchase" not in past

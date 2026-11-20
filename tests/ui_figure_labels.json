@@ -55,5 +55,5 @@
  "templates/tag.html": 3,
  "templates/transactions/detail.html": 3,
  "templates/transactions/form_popup.html": 2,
- "visuals.py": 30
+ "visuals.py": 29
 }

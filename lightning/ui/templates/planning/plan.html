@@ -13,9 +13,10 @@
 {# 3AM3: page actions stay in the header’s More actions (A05), above the Lead #}
 {% block top_actions %}<details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">{{ icon_more() }}</summary><div><a href="/plan/scenarios">{{ 'Compare scenarios'|tr(locale) }}</a><a href="/plan/inputs">{{ 'Forecast inputs'|tr(locale) }}</a><a href="/plan/reserves">{{ fig.reserves.label }}</a><a href="/payday">{{ 'Fund your payday plan'|tr(locale) }}</a></div></details>{% endblock %}
 {% block content %}
-{% from "partials/charts.html" import stat_tiles, kpi_row, trend, bars, lead_card %}{% from "partials/macros.html" import needs_rows %}
+{% from "partials/charts.html" import stat_tiles, kpi_row, trend, bars, lead_card %}{% from "partials/macros.html" import needs_rows, expected_block %}
 {% set f = forecast %}{% set p = plan %}
-{% if lead %}{% call lead_card(lead, base) %}<div class="lead-side-head" id="plan-build"><div><h3>{{ 'How safe to spend is worked out'|tr(locale) }}</h3><p>{{ "From free cash to safe to spend"|tr(locale) }}</p></div></div>
+{% set expected_html %}{{ expected_block(expected, base) }}{% endset %}
+{% if lead %}{% call lead_card(lead, base, main_extra=expected_html) %}<div class="lead-side-head" id="plan-build"><div><h3>{{ 'How safe to spend is worked out'|tr(locale) }}</h3><p>{{ "From free cash to safe to spend"|tr(locale) }}</p></div></div>
     {{ linked_breakdown(p.build) }}
     {# Feedback ticket 102: when only what is left in the budget pushes safe to spend below zero, the way out is the budget. #}
     {% set budget_part = f.safe_to_spend_parts|selectattr(0, 'equalto', fig.left_in_plan_after_bills.label)|map(attribute=1)|first|default(0) %}
@@ -36,7 +37,7 @@
     <small class="muted">{{ 'Basis: posted cash plus bills, income and certificate events already scheduled for this account. It assumes no other spending, transfers or budget use before then.'|tr(locale) }}</small>{% endif %}
     <p><a class="btn small" href="{{ afford_account.record_url }}">{{ 'Record this purchase'|tr(locale) }}</a> {% if afford_plan_url %}<a class="btn small" data-popup-open href="{{ afford_plan_url }}">{{ 'Plan this purchase'|tr(locale) }}</a> {% endif %}<small class="muted">{{ 'Nothing is recorded until you save it.'|tr(locale) }}</small></p></div>
   {% endif %}
-  {% if afford and not afford_account %}<p class="afford-answer is-{{ afford.verdict }}" role="status">{{ afford.headline|tr(locale) }}{% if afford_plan_url %} <a class="btn small" data-popup-open href="{{ afford_plan_url }}">{{ 'Plan this purchase'|tr(locale) }}</a>{% endif %}</p>{% elif afford_error %}<p class="afford-answer is-no" role="status">{{ afford_error|tr(locale) }}</p>{% endif %}
+  {% if afford and not afford_account %}<p class="afford-answer is-{{ 'plan' if afford.verdict == 'after_income' else afford.verdict }}" role="status">{{ afford.headline|tr(locale) }}{% if afford_plan_url %} <a class="btn small" data-popup-open href="{{ afford_plan_url }}">{{ 'Plan this purchase'|tr(locale) }}</a>{% endif %}</p>{% elif afford_error %}<p class="afford-answer is-no" role="status">{{ afford_error|tr(locale) }}</p>{% endif %}
 </form></section>
 {% else %}{{ stat_tiles(stats, base, 'Your cash') }}{% endif %}
 

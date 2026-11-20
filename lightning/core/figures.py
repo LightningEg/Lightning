@@ -195,7 +195,7 @@ _TABLE = [
      "figure, and a negative one reads \"Over plan\". Categories outside the budget are left out of Spent.", "Planned − Spent"),
     ("everyday_left", "Left for everyday", "The plan's remaining money after unpaid planned bills and loans, "
      "floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance and "
-     "the phone Home's lead (owner, 2026-11-09); Safe to spend leads Cash planning on both apps (IV-12P)."),
+     "the phone Home's lead (owner, 2026-11-09); Safe to spend today leads Cash planning on both apps (IV-12P)."),
     ("plan_leaves_to_save", "Plan leaves to save", "What this month's plan leaves of average monthly income.",
      "Average monthly income − Planned"),
     ("not_yet_given_a_job", "Not yet given a job", "Income no plan, goal or emergency top-up has claimed this "
@@ -244,10 +244,16 @@ _TABLE = [
     ("fx_part", "FX part", "The part of a foreign holding’s unrealized gain that comes from the exchange rate.",
      "Unrealized gain − Price part"),
     # ------------------------------------------------------------ cash planning
-    ("safe_to_spend", "Safe to spend", "Free cash after what is promised before your next payday (the salary; other "
-     "income before it counts as money in). An estimate. Budget until payday, Saving for goals, Emergency fund top-up "
-     "and Rest of savings target count for every month until payday (only the days before it in the month it lands), "
-     "so a long gap between pays is covered.",
+    ("safe_to_spend", "Safe to spend today", "What you can spend now without leaning on money that has not arrived: Free "
+     "cash after what is promised before your next payday. Income that is only expected, the salary included, is not "
+     "counted. Budget until payday, Saving for goals, Emergency fund top-up and Rest of savings target count for every "
+     "month until payday (only the days before it in the month it lands), so a long gap between pays is covered. An "
+     "estimate. Home leads with it, and Can I afford this? checks against it (owner, 2026-11-18).",
+     "Expected by payday − Income before payday"),
+    ("expected_by_payday", "Expected by payday", "What Safe to spend today becomes once the income expected before "
+     "your next payday arrives (the salary itself ends the window and is not counted). It is shown with the payday "
+     "date, how payday was chosen (salary, highest recurring income or estimated) and each expected income with its "
+     "amount and date. It was called Safe to spend until 2026-11-18; the formula has not changed.",
      "Free cash + Income before payday − Due before payday + Bill cash already set aside − Budget until payday − Saving for goals − Emergency fund top-up − Rest of savings target"),
     ("bills_inside_the_plan", "Bills inside the plan",
      "This month's scheduled bills, due or upcoming, in a category that has a budget. They are part of that budget."),
@@ -273,7 +279,7 @@ _TABLE = [
     ("saving_for_goals", "Saving for goals", "What dated reserve goals still need this month, spread over the months left. "
      "This month's is fixed on the 1st, less what you moved in since (owner, 2026-11-14)."),
     ("savings_target_rest", "Rest of savings target", "What the Savings target asks a month beyond Saving for goals and "
-     "Emergency fund top-up (never below zero), so Safe to spend never counts what you mean to save (owner "
+     "Emergency fund top-up (never below zero), so Safe to spend today never counts what you mean to save (owner "
      "decision 2026-10-05). What you moved into the emergency fund and goals this month and still hold counts as "
      "saved (owner, 2026-11-14).", "Savings target − Saving for goals − Emergency fund top-up"),
 ]
@@ -375,7 +381,8 @@ _SOURCES = {
     "spread_paid": (LEDGER, "lightning.fx.spread_cost"),
     "price_part": (LEDGER, f"{INV}.foreign_gain_split"),
     "fx_part": (LEDGER, f"{INV}.foreign_gain_split"),
-    "safe_to_spend": (BOTH, f"{FC}._safe_to_spend"),
+    "safe_to_spend": (BOTH, "lightning.planning.domain.CashForecast.safe_to_spend"),
+    "expected_by_payday": (BOTH, f"{FC}._safe_to_spend"),
     "bills_inside_the_plan": (PLAN, f"{FC}.forecast"),
     "left_in_plan_after_bills": (BOTH, "lightning.planning.domain.ForecastMonth.budget_spending"),
     "everyday_spending": (BOTH, "lightning.planning.domain.EverydayBudget.everyday_spent"),
@@ -404,6 +411,7 @@ RETIRED_NAMES = {
     "Estimated liquid investments": "holdings_after_sale", "Estimated cash after sale": "holdings_after_sale",
     "Estimated available value": "if_you_sold_today",
     "Yours": "what_you_own",
+    "Safe to spend": "expected_by_payday",
     "Total spending": "money_out", "Net income less spending": "net_flow", "Cashflow": "net_flow",
     "Average monthly salary": "average_monthly_income", "Budgeted": "planned", "Current budget": "planned",
     "Invested capital": "cost", "What you paid in total": "cost",

@@ -960,9 +960,9 @@ def test_safe_to_spend_until_payday(mohab):
     # 20,000 of a 270,000 emergency target: the top-up the budget asks for (250,000 over 24 months,
     # 10,417) is kept back too, as Saving for goals is (owner request 2026-10-05: one plan).
     # Audit 2026-10-15: the 400 of cash in THNDR is kept apart from spendable cash (40,937 before).
-    assert answer.figure("Safe to spend until 2026-10-01") == D("40486")  # BU-3: a plan 51 rounder than before
-    assert answer.shows("On top of your plan")  # the date is the card's chip, not repeated in its line (A16)
-    assert answer.shows("Budget until payday −1,360 Emergency fund top-up −10,417 Safe to spend 40,486")
+    assert answer.figure("Safe to spend today") == D("40486")  # BU-3: a plan 51 rounder than before
+    assert answer.shows("Expected by payday")  # the secondary line (owner, 2026-11-18); the chip says today
+    assert answer.shows("Budget until payday −1,360 Emergency fund top-up −10,417 Safe to spend today 40,486")
 
 
 def test_free_cash_shows_what_was_taken_off(mohab):
@@ -1171,14 +1171,14 @@ def test_safe_to_spend_keeps_the_rest_of_the_savings_target(mohab, monkeypatch):
     assert (summary["planned"], summary["spent"], summary["left"]) == (D("26750"), D("25415") + vodafone, D("1335") - vodafone)
     assert route(mohab, "safe_keeps_saving") == ["/", "/plan"]
     answer = mohab.answers["safe_keeps_saving"]
-    assert answer.shows("Free cash 312,505", "Emergency fund top-up", "Rest of savings target", "Safe to spend")
+    assert answer.shows("Free cash 312,505", "Emergency fund top-up", "Rest of savings target", "Safe to spend today")
     section = answer.screen.html.split('id="plan-build"', 1)[1].split('</details>', 1)[0]
     rows = re.findall(r'<span class="chart-fall-label">([^<]+)</span>.*?'
                       r'<b class="chart-fall-value">([^<]+)</b>', section, re.S)
     values = [int(value.replace(',', '').replace('−', '-')) for _, value in rows]
     raw = mohab.notes["safe_raw_forecast"]
     assert [name for name, _ in rows[:-1]] == [name for name, _ in raw.safe_to_spend_parts]
-    assert rows[-1][0] == "Safe to spend" and values[0] == 312505
+    assert rows[-1][0] == "Safe to spend today" and values[0] == 312505
     assert sum(values[:-1]) == values[-1]
     assert raw.safe_to_spend == sum((value for _, value in raw.safe_to_spend_parts), D(0))
     from lightning.core.money import quantize
@@ -1256,7 +1256,7 @@ def test_end_of_service_is_not_monthly_pay(mohab):
 def test_between_jobs_the_next_pay_is_the_new_employer(mohab):
     answer = mohab.answers["next_pay"]
     # NF-7AR: with no payday left in September the calendar opens on October, and its payday day lists Valeo.
-    assert answer.shows("Safe to spend until 2027-10-01", "Payday")
+    assert answer.shows("Safe to spend today", "Expected by payday", "2027-10-01", "Payday")
     assert "Valeo" in answer.screen.text and "55,000" in answer.screen.text
 
 

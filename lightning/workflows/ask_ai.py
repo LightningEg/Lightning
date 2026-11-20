@@ -57,7 +57,7 @@ LIMITS = {"digest": {"categories": 6, "counterparties": 5, "largest": 3},
           "full": {"categories": 25, "counterparties": 15, "largest": 12}}
 # The figures whose meaning the reader needs (Lightning's registry is the one home of these definitions).
 GLOSSARY_KEYS = ("money_in", "money_out", "net_flow", "savings_rate", "what_you_own", "net_worth", "result", "planned",
-                 "spent", "left_in_plan", "safe_to_spend", "free_cash")
+                 "spent", "left_in_plan", "safe_to_spend", "expected_by_payday", "free_cash")
 ROLE_NOTES = (
     ("income, expense, refund, dividend", "money that came in or went out of what you own; these are what the totals count"),
     ("transfer", "money moved between your own accounts: neither income nor spending"),
@@ -81,7 +81,8 @@ GLOSSARY_OVERRIDES = {
     "savings_rate": "The share of money in that you kept (net flow divided by money in).",
     "planned": "What you planned to spend in the month, per category.",
     "left_in_plan": "What is left of the plan. Negative means you went over it.",
-    "safe_to_spend": "Free cash after everything promised before your next income. An estimate.",
+    "safe_to_spend": "Free cash after everything promised before your next income, counting no income that has not arrived. An estimate.",
+    "expected_by_payday": "Safe to spend today plus the income expected before your next payday. An estimate.",
 }
 SPENDING_ROLES = {"income", "expense", "refund", "expense paid externally", "dividend"}
 
@@ -570,7 +571,13 @@ class AskAIService:
         add("")
         add(f"As of {f['today']}, calculated by Lightning:")
         add("")
-        add(f"- Safe to spend until your next income: {money(ahead.safe_to_spend)} {base}")
+        add(f"- Safe to spend today (no expected income counted): {money(ahead.safe_to_spend)} {base}")
+        if ahead.next_income_date:
+            how = {"salary": "your salary", "highest recurring income": "your highest recurring income",
+                   "scheduled income": "your next scheduled income"}.get(ahead.payday_source, "an estimate from average income")
+            add(f"- Expected by payday ({ahead.next_income_date}, payday chosen from {how}): {money(ahead.expected_by_payday)} {base}")
+            for income in ahead.income_before_payday_items:
+                add(f"  - counts {income.name}, {income.date}: {money(income.amount)} {base}")
         add(f"- Free cash (cash you can spend without touching reserves or leaving a bill unpaid): {money(ahead.free_cash)} {base}")
         add(f"- Bills and payments due before then: {money(ahead.payments_before_income_total)} {base}")
         if ahead.next_income_date:

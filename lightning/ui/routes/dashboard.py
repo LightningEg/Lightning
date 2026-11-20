@@ -380,8 +380,9 @@ def _safe_tile(f) -> dict:
     share = f"{share_of_free_cash(f.safe_to_spend, f.free_cash):.0f}% of your {fmt(f.free_cash, 0)} free cash" if f.free_cash > 0 else "No free cash today"
     return {"key": "safe", "surface": "over" if f.safe_to_spend < 0 else "hold", "label": label("safe_to_spend"),
             "value": f.safe_to_spend, "kind": "money",
-            "badge": {"tone": "over" if f.safe_to_spend < 0 else "flat", "text": f"until {until}" if until else "3 months"},
-            "sub": share, "href": "/plan#safe-section"}
+            "badge": {"tone": "over" if f.safe_to_spend < 0 else "flat", "text": "today"},
+            "sub": f"Expected by payday {fmt(f.expected_by_payday, 0)} on {until}" if until else share,
+            "href": "/plan#safe-section"}
 
 
 @router.post("/demo")

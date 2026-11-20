@@ -24,6 +24,7 @@ from lightning.planning.totals import (LoanTotals, RecurringEntry, RecurringTota
                                        reserve_effect, total)
 
 from .. import charts, keynotes, kpis, visuals, status as page_status
+from ..expected import expected_by_payday
 from ..web import container, redirect, render, settled_save
 from . import reserves as reserve_routes
 
@@ -162,7 +163,7 @@ async def plan_page(request: Request):
                   afford_accounts=[a for a in _paying_accounts(c) if a.currency == c.base_currency],
                   afford_date=str(request.query_params.get("afford_date", "")),
                   afford_account_id=str(request.query_params.get("afford_account", "")), tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,
-                  lead=lead, needs=needs, status=status, afford=afford, afford_error=afford_error,
+                  lead=lead, expected=expected_by_payday(forecast), needs=needs, status=status, afford=afford, afford_error=afford_error,
                   afford_amount=raw_afford, afford_plan_url=afford_plan_url,
                   gameya_owed=position.gameya_still_to_pay,
                   notes=[], plan=plan, breakdown_links=breakdown_links, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),
@@ -180,8 +181,8 @@ def _plan_stats(f, plan, day, has_income: bool = True) -> list[dict]:
     nxt = plan["before_income"][0] if plan["before_income"] else None
     return [
         {"key": "safe", "surface": "hold", "label": label("safe_to_spend"), "value": f.safe_to_spend, "kind": "money",
-         "badge": {"tone": "over" if f.safe_to_spend < 0 else "flat", "text": f"until {until}" if until else "3 months"},
-         "sub": (f"On top of your plan until {until}" if f.safe_to_spend > 0 and until
+         "badge": {"tone": "over" if f.safe_to_spend < 0 else "flat", "text": "today"},
+         "sub": (f"Expected by payday {fmt(f.expected_by_payday, 0)} on {until}" if f.safe_to_spend > 0 and until
                  else "On top of your plan for the next 3 months" if f.safe_to_spend > 0
                  else "Promised payments are larger than your free cash" if f.safe_to_spend < 0 else "Nothing left to spend safely"),
          "href": "#plan-build"},
@@ -694,7 +695,8 @@ def _afford_answer(c, request, raw: str, forecast, day):
     from lightning.planning.afford import after_payday, can_afford, plan_purchase_url
     try:
         amount = Decimal(raw)
-        afford = can_afford(amount, forecast.safe_to_spend, forecast.free_cash, forecast.next_income_date)
+        afford = can_afford(amount, forecast.safe_to_spend, forecast.free_cash, forecast.next_income_date,
+                            forecast.expected_by_payday, forecast.income_before_payday_items, c.base_currency)
     except (ArithmeticError, ValueError):
         return None, "Type an amount above zero.", ""
     raw_date = str(request.query_params.get("afford_date", "")).strip()
