@@ -17,7 +17,7 @@ from lightning.samples import load_mohab_2026
 from lightning.ui.phone.router import mount_phone
 from lightning.ui.web import create_app
 
-LABELS = ("Left in plan", "Left for everyday", "Safe to spend", "Lowest point ahead", "Due before payday",
+LABELS = ("Left in plan", "Left for everyday", "Safe to spend today", "Expected by payday", "Lowest point ahead", "Due before payday",
           "Not yet given a job", "Plan leaves to save")
 PC = ("/", "/budget", "/plan", "/plan/scenarios")
 PHONE = ("/home", "/budget/flexible", "/budget", "/plan", "/plan/scenarios")
@@ -84,7 +84,7 @@ def test_each_label_has_one_value_on_both_apps(c, monkeypatch, household, day):
     twice = {name: {value: sorted(pages) for value, pages in values.items()}
              for name, values in seen.items() if len(values) > 1}
     assert not twice, twice
-    assert {"Safe to spend", "Left in plan"} <= set(seen)
+    assert {"Safe to spend today", "Left in plan"} <= set(seen)
 
 
 def test_home_leads_with_left_for_everyday_and_cash_planning_with_safe_to_spend(c, monkeypatch):
@@ -96,14 +96,14 @@ def test_home_leads_with_left_for_everyday_and_cash_planning_with_safe_to_spend(
     phone = _client(c, True)
     home = _tokens(phone.get("/home").text)
     hero = home[home.index("Left for everyday") + 1:]
-    if hero[0].startswith("Safe to spend"):   # the note on the label's right opens Cash planning
+    if hero[0].startswith("Safe to spend today"):   # the note on the label's right opens Cash planning
         hero = hero[1:]
     assert hero[0] == f"{everyday.everyday_left:,.0f}"
     assert any(t.startswith(f"About {everyday.per_day:,.0f} a day") for t in home)   # the line is the hero's own idea
     plan = _tokens(phone.get("/plan").text)
     pc_plan = _tokens(_client(c, False).get("/plan").text)
     first = lambda tokens: next(t for t in tokens if t in LABELS)                     # noqa: E731
-    assert first(pc_plan) == "Safe to spend"
+    assert first(pc_plan) == "Safe to spend today"
     assert first(plan) == "Due before payday"   # IV-11M6 (mockup v2.0): the phone's Coming up leads with it; Safe to spend is Home's card
 
 

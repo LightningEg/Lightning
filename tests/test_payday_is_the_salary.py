@@ -26,8 +26,9 @@ def test_a_side_income_before_the_salary_adds_to_safe_to_spend_and_keeps_payday(
 
     after = c.forecaster.forecast(day)
     assert after.next_income_date == before.next_income_date
-    assert after.safe_to_spend == before.safe_to_spend + 8000
-    assert dict(after.safe_to_spend_parts)[label("income_before_payday")] == 8000
+    assert after.expected_by_payday == before.expected_by_payday + 8000   # Expected by payday counts it
+    assert after.safe_to_spend == before.safe_to_spend                    # Safe to spend today does not: it has not arrived
+    assert dict(after.expected_by_payday_parts)[label("income_before_payday")] == 8000
     assert next_income_date(c.planning, day) == before.next_income_date
     assert side not in c.planning.payday_item_ids()
 

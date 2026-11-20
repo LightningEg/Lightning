@@ -80,7 +80,7 @@ def cash_plan(safe: Decimal, until: str | None, has_income: bool) -> dict:
     if safe < ZERO:
         return sentence("Promised payments are {amt} more than your free cash.", amt=fmt(-safe, 0))
     if until:
-        return sentence("You can spend {amt} before payday and stay on plan.", amt=fmt(safe, 0))
+        return sentence("You can spend {amt} today and stay on plan.", amt=fmt(safe, 0))
     return sentence("You can spend {amt} in the next 3 months and stay on plan.", amt=fmt(safe, 0))
 
 

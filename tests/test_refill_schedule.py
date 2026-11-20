@@ -44,7 +44,7 @@ def test_the_page_shows_instalments_and_a_manual_preview_and_moves_nothing(tmp_p
     before = c.db.scalar("SELECT count(*) FROM transactions"), [dict(r) for r in c.db.all("SELECT * FROM cash_reserves")]
     client = TestClient(create_app(c))
     page = client.get("/plan/reserves").text
-    assert "Refill in instalments" in page and "Emergency fund after" in page and "Safe to spend after" in page
+    assert "Refill in instalments" in page and "Emergency fund after" in page and "Expected by payday after" in page
     manual = client.get("/plan/reserves?refill_amount=1000").text
-    assert "Moving 1,000" in manual and "Safe to spend becomes" in manual
+    assert "Moving 1,000" in manual and "Expected by payday becomes" in manual
     assert (c.db.scalar("SELECT count(*) FROM transactions"), [dict(r) for r in c.db.all("SELECT * FROM cash_reserves")]) == before
