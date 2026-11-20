@@ -110,12 +110,16 @@ def register(app, session, devices, page) -> None:
             return page(request, "resume-restore", status=400, selected=selected,
                         error="Confirm that Lightning should check and resume this restore.")
         try:
-            session.resume_interrupted_restore(selected, str(form.get("password", "")))
+            outcome = session.repair_interrupted_restore(selected, str(form.get("password", "")))
         except ProfileError as exc:
             return page(request, "resume-restore", status=400, selected=selected, error=str(exc))
         except Exception:
             return page(request, "resume-restore", status=400, selected=selected,
                         error="Restore recovery needs inspection. The profile remains locked and its copies were kept.")
+        if outcome == "undone":
+            return page(request, "unlock", selected=selected,
+                        notice="The restore had not changed anything yet, so it was undone. Its files were kept in a "
+                               "restore-evidence folder. Unlock this profile to check it.")
         return page(request, "unlock", selected=selected,
                     notice="Restore checks finished. Unlock this profile to review the recovered database.")
 

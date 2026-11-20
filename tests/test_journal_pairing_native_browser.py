@@ -1,5 +1,5 @@
 """Actual native first-enrollment and Devices pages discover and match in Chromium."""
-import shutil
+import re
 import socket
 import threading
 import time
@@ -13,13 +13,13 @@ from playwright.sync_api import sync_playwright
 
 from test_journal_finance import devices as device_fixture
 from test_journal_nearby import setup
+from browser_support import require_chromium
 
 
-@pytest.fixture
-def native_pairing_server(tmp_path):
-    executable = shutil.which("chromium")
-    if not executable:
-        pytest.skip("Chromium unavailable")
+@pytest.fixture(params=['en', 'ar'])
+def native_pairing_server(tmp_path, request):
+    executable = require_chromium()
+    locale = request.param
     probe = socket.socket()
     probe.bind(("127.0.0.1",0))
     port = probe.getsockname()[1]
@@ -49,7 +49,10 @@ def native_pairing_server(tmp_path):
                 return exchange
             replica = NewJournalReplica(tmp_path/'first-native-copy',"New laptop",search=search,client_factory=factory)
             locked = SimpleNamespace(container=None, paths=None, root=tmp_path/'profiles',csrf='test-native-csrf',enrollment=replica)
-            native = SimpleNamespace(token='test-native-token',container=None,journal=SimpleNamespace(device=home,pairing=pairing,trust=None))
+            # Locale is presentation state here; keep the journal's real write authorizer intact.
+            native = SimpleNamespace(token='test-native-token',
+                container=SimpleNamespace(settings=SimpleNamespace(get=lambda key: locale)),
+                journal=SimpleNamespace(device=home,pairing=pairing,trust=None))
             app = FastAPI()
             @app.middleware("http")
             async def device_frame(request: Request, call_next):
@@ -77,7 +80,7 @@ def native_pairing_server(tmp_path):
             time.sleep(.025)
         assert not errors, errors
         assert state.get('server') and state['server'].started
-        yield f'http://127.0.0.1:{port}', executable
+        yield f'http://127.0.0.1:{port}', executable, locale
     finally:
         if state.get('server'):
             state['server'].should_exit = True
@@ -86,40 +89,54 @@ def native_pairing_server(tmp_path):
         assert not errors, errors
 
 
-@pytest.mark.parametrize('width,phone',[(1366,False),(360,True),(320,True)])
-def test_native_discovery_number_choices_and_password(native_pairing_server,width,phone):
-    url, executable = native_pairing_server
+@pytest.mark.parametrize('width,phone',[(1280,False),(390,True),(320,True)])
+def test_native_discovery_two_typed_digits_and_password(native_pairing_server,width,phone):
+    url, executable, locale = native_pairing_server
+    labels = {'join': 'وصّل بالجهاز ده', 'approve': 'وافق على الجهاز ده', 'continue': 'كمّل',
+              'password': 'كلمة سر الملف', 'waiting': 'مستنيين الجهاز الأساسي'} if locale == 'ar' else {
+              'join': 'Pair with this device', 'approve': 'Approve this device', 'continue': 'Continue',
+              'password': 'Profile password', 'waiting': 'Waiting for the home device'}
     with sync_playwright() as p:
         browser = p.chromium.launch(executable_path=executable)
         context = browser.new_context(viewport=dict(width=width,height=900),user_agent='Android Mobile' if phone else None)
+        context.add_cookies([{'name': 'lightning_ui_locale', 'value': locale, 'url': url}])
         home = context.new_page()
         home.goto(url+'/journal/devices')
         joining = context.new_page()
         joining.goto(url+'/profiles/journal/join')
-        joining.get_by_role('button',name='Pair with this device').wait_for()
+        joining.get_by_role('button',name=labels['join']).wait_for()
         assert joining.locator('input[name="code"]').count() == 0
-        joining.get_by_role('button',name='Pair with this device').click()
-        choices = joining.locator('button[name="digits"]')
-        assert choices.count() == 3
-        assert len(set(choices.all_text_contents())) == 3
-        assert joining.locator('input[name="digits"], input[name="password"]').count() == 0
-        joining.screenshot(path=f'/tmp/lightning-4d-native-{width}.png',full_page=True)
+        joining.get_by_role('button',name=labels['join']).click()
+        assert joining.locator('button[name="digits"]').count() == 0
+        assert joining.locator('input[name="password"]').count() == 0
+        typed = joining.locator('input[name="digits"]')
+        assert typed.count() == 1 and typed.input_value() == ''
+        assert typed.get_attribute('maxlength') == '2'
+        joining.screenshot(path=f'/tmp/lightning-4n-join-{locale}-{width}.png',full_page=True)
         assert joining.evaluate('document.documentElement.scrollWidth <= innerWidth'), joining.locator('*').evaluate_all('nodes=>nodes.filter(n=>n.getBoundingClientRect().right>innerWidth).map(n=>[n.tagName,n.className,n.getBoundingClientRect().right,n.textContent.slice(0,80)])')
         # The existing home notices the incoming request through its own polling.
         home.bring_to_front()
-        home.get_by_role('button',name='Approve this device').wait_for()
+        home.get_by_role('button',name=labels['approve']).wait_for()
         digits = home.locator('input[name="digits"]').input_value()
-        home.screenshot(path=f'/tmp/lightning-4d-home-{width}.png',full_page=True)
+        assert len(digits) == 2 and digits.isascii() and digits.isdecimal()
+        home.screenshot(path=f'/tmp/lightning-4n-home-{locale}-{width}.png',full_page=True)
+        assert home.evaluate('document.documentElement.scrollWidth <= innerWidth')
+        if locale == 'ar':
+            for page in (home, joining):
+                # Device names and the English-language option retain their own spelling.
+                visible = page.locator('body').inner_text().replace('New laptop', '').replace('Lightning', '').replace('English', '')
+                assert not re.search(r'[A-Za-z]{3,}', visible), visible
         joining.bring_to_front()
-        joining.locator(f'button[name="digits"][value="{digits}"]').click()
-        joining.get_by_label('Profile password',exact=True).fill('Pairing password')
-        joining.get_by_role('button',name='Continue',exact=True).click()
-        joining.get_by_role('heading',name='Waiting for the home device').wait_for()
+        typed.fill(digits.translate(str.maketrans('0123456789', '٠١٢٣٤٥٦٧٨٩')) if locale == 'ar' else digits)
+        joining.get_by_role('button',name=labels['continue'],exact=True).click()
+        joining.get_by_label(labels['password'],exact=True).fill('Pairing password')
+        joining.get_by_role('button',name=labels['continue'],exact=True).click()
+        joining.get_by_role('heading',name=labels['waiting']).wait_for()
         home.bring_to_front()
-        home.get_by_role('button',name='Approve this device').click()
+        home.get_by_role('button',name=labels['approve']).click()
         # First enrollment retains the password required to unwrap the checkpoint.
         joining.bring_to_front()
-        assert joining.get_by_label('Profile password',exact=True).count() == 1
+        assert joining.get_by_label(labels['password'],exact=True).count() == 1
         denied = joining.request.post(url+'/profiles/journal/join/poll',form={'csrf':'wrong'})
         assert denied.status == 400
         native_denied = joining.request.post(url+'/journal/devices/poll',form={'__session':'wrong'})

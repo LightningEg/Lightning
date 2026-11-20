@@ -17,7 +17,7 @@ from lightning.sync.journal.codec import JournalError, authenticate, digest, sea
 from lightning.sync.journal.discovery import nearby_devices
 from lightning.sync.journal.enrollment import install_replica
 from lightning.sync.journal.local import PinnedLocalClient
-from lightning.sync.journal.pairing import number_choices
+from lightning.sync.journal.pairing import is_number_match, number_choices
 from lightning.sync.journal import pairing_client
 from .journal_pairing_driver import JoiningDriver
 from .session import read_slot, write_slot
@@ -48,14 +48,14 @@ class NewJournalReplica(JoiningDriver):
     def state(self):
         path = self.root/"enrollment.json"
         state = read_slot(path) if path.exists() else None
-        if state is not None and state.get("stage") == "compare" and not state.get("choices"):
+        if state is not None and state.get("stage") == "compare" and not state.get("typed_digits") and not state.get("choices"):
             state["choices"] = number_choices(state["digits"])
             write_slot(path,state,replace=True)
         return state
 
     async def find(self):
         self.candidates = {digest(dict(home=item["home"],offer=item["offer"])):item for item in await self.search(self.identity)}
-        return [dict(id=identifier,name=item["name"], number_match=unpack(item["offer"].encode())["body"].get("method") == "number-match") for identifier,item in self.candidates.items()]
+        return [dict(id=identifier,name=item["name"], number_match=is_number_match(unpack(item["offer"].encode())["body"])) for identifier,item in self.candidates.items()]
 
     async def join(self, candidate_id, code=""):
         if self.state() is not None or (self.root/"ledger.db").exists():

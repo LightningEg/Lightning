@@ -12,7 +12,7 @@ from __future__ import annotations
 import hmac
 
 from lightning.sync.journal.codec import JournalError
-from lightning.sync.journal.pairing import require_live_offer
+from lightning.sync.journal.pairing import TWO_DIGIT_MATCH, normalize_matching_digits, require_live_offer
 from lightning.sync.journal import pairing_client
 
 NOT_STARTED = "Choose a nearby device and enter its number first"
@@ -56,14 +56,18 @@ class JoiningDriver:
     def compare(self, digits):
         """The joining user's confirmation that the home shows the same digits. Nothing leaves the device here."""
         state = self._started()
-        require_live_offer(state["candidate"])
+        offer = require_live_offer(state["candidate"])
         if state.get("failed"):
             raise JournalError("Compare the numbers again: cancel and start a new pairing")
         if state["stage"] != "compare":
             raise JournalError("This step is already done")
+        typed = offer.get("method") == TWO_DIGIT_MATCH
+        if typed:
+            digits = normalize_matching_digits(digits)
         if type(digits) is not str or not hmac.compare_digest(digits, state["digits"]):
             self._save_join(dict(state, failed=True))
-            raise JournalError("Check that both devices show the same six digits")
+            raise JournalError("Check that both devices show the same two digits" if typed
+                               else "Check that both devices show the same six digits")
         self._save_join(dict(state, stage="password"))
 
     async def prove(self, password):

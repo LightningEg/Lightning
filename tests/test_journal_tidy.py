@@ -30,7 +30,10 @@ def test_a_code_offer_stops_advertising_once_its_three_requests_are_spent(device
     assert hs.advertise("0" * 64, 47513) is not None
     _with_attempts(hs, MAX_CODE_REQUESTS)
     assert hs.advertise("0" * 64, 47513) is None
-    hs.begin("Pairing password")  # number matching takes twelve
+    hs.begin("Pairing password")  # new typed-digit offers also close after three
+    _with_attempts(hs, MAX_CODE_REQUESTS)
+    assert hs.advertise("0" * 64, 47513) is None
+    hs.desk.begin(keys, "Pairing password", method="number-match")  # older number matching takes twelve
     _with_attempts(hs, MAX_CODE_REQUESTS)
     assert hs.advertise("0" * 64, 47513) is not None
     _with_attempts(hs, MAX_REQUESTS)

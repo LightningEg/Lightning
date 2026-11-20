@@ -1,11 +1,9 @@
 """Chromium acceptance for the isolated journal UI, including phone C05 targets."""
 from __future__ import annotations
 
-import shutil
 import socket
 import threading
 import time
-from pathlib import Path
 
 import pytest
 
@@ -13,13 +11,12 @@ pytest.importorskip("playwright")
 from playwright.sync_api import sync_playwright
 
 from test_journal_finance import devices as device_fixture
+from browser_support import require_chromium
 
 
 @pytest.fixture
 def journal_server(tmp_path,request):
-    executable = shutil.which("chromium") or "/opt/pw-browsers/chromium"
-    if not Path(executable).exists():
-        pytest.skip("Chromium is unavailable")
+    executable = require_chromium()
     from lightning.runtime.journal_lab import LabServer
     from lightning.ui.journal import create_journal_app
     import uvicorn
@@ -143,15 +140,19 @@ def test_named_device_numeric_pairing_layout(journal_server,width,phone):
         page.get_by_role("button",name="Pair with",exact=False).wait_for()
         assert not page.locator('input[name="code"],input[name="address"],input[name="port"]').count()
         page.get_by_role("button",name="Pair with",exact=False).click()
-        page.get_by_text("Select the number shown on the other device.",exact=True).wait_for()
-        choices = page.locator('button[name="digits"]')
-        assert choices.count() == 3
+        page.get_by_text("Type the two digits shown on the home.",exact=True).wait_for()
+        typed = page.get_by_label("The two digits on the home", exact=True)
+        assert typed.count() == 1 and typed.input_value() == ''
+        assert page.locator('button[name="digits"]').count() == 0
         assert not page.get_by_label("Profile password").count()
         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth")
         if phone:
-            assert all(box["height"] >= 48 for box in choices.evaluate_all("nodes=>nodes.map(n=>n.getBoundingClientRect().toJSON())"))
+            assert typed.bounding_box()["height"] >= 48
+            assert page.get_by_role("button", name="Continue", exact=True).bounding_box()["height"] >= 48
         digits = state["digits"]
-        page.locator(f'button[name="digits"][value="{digits}"]').click()
+        assert len(digits) == 2 and digits.isascii() and digits.isdecimal()
+        typed.fill(digits)
+        page.get_by_role("button", name="Continue", exact=True).click()
         page.get_by_label("Profile password").fill("Pairing password")
         page.get_by_role("button",name="Continue").click()
         page.get_by_text("Confirm on the home. This screen will continue automatically.",exact=True).wait_for()
