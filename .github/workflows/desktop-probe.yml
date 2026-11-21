@@ -113,6 +113,7 @@ jobs:
           tests/test_runtime_paths.py tests/test_runtime_instance.py
           tests/test_encrypted_database.py tests/test_database_staging.py
           tests/test_database_promotion.py tests/test_database_promotion_windows.py
+          tests/test_restore_repair.py tests/test_restore_durable_moves.py
           tests/test_migration_safety.py tests/test_database.py tests/test_device_roundtrip.py
           tests/test_sync_control.py tests/test_sync_lend.py tests/test_sync_transport.py tests/test_devices_app.py
           tests/test_figures.py tests/test_ui.py
