@@ -31,8 +31,8 @@
 {# NF-12AK3: a refund names its purchase; a purchase lists its refunds and records one. `r` is the route's refund
    context: role 'refund' (link, candidates) or 'purchase' (refunds, room, today). Counted in the purchase's month for
    estimates only; cash keeps the refund's date. #}
-{# NF-12AK5: paid · returned · expected back · yours, for one purchase (the transaction page) or a month's purchases in
-   a category (the category sheet). `rec` comes from budgeting/recoveries.py; None draws nothing. #}
+{# NF-12AK5: paid · returned · expected back · yours for a month's personal purchases in a category (the category
+   sheet; the transaction page keeps its claim and refund panels). `rec` comes from budgeting/recoveries.py; None draws nothing. #}
 {% macro recovery_rows(rec, whole=False) -%}
 {% if rec %}{% set row = 'phone-row' if phone_mode() else 'compact-row' %}
 <div class="{{ 'phone-rows' if phone_mode() else 'compact-list' }} recovery-rows">
@@ -43,9 +43,6 @@
 </div>{% endif %}
 {%- endmacro %}
 
-{% macro recovery_panel(rec) -%}
-{% if rec %}<section class="card linked-panel" id="money-back" aria-labelledby="money-back-title"><h2 id="money-back-title">{{ 'Money back'|tr(locale) }}</h2>{{ recovery_rows(rec) }}</section>{% endif %}
-{%- endmacro %}
 
 {% macro refund_panel(r, txn, base) -%}
 {% if r %}{% set editable = not request.state.read_only|default(false) %}

@@ -3,7 +3,8 @@
 One purchase's money back, read from the claims service (receipts counted, what open claims still wait for) and the
 refund links (posted refunds that name the purchase). A refund link and a claim receipt are never the same money
 (the refund link refuses a receipt), so nothing counts twice. *Yours* is what is left after both, never below zero.
-The transaction page shows one purchase; the Budget category sheet shows the month's purchases in its categories.
+The Budget category sheet shows the month's personal purchases in its categories; a purchase with a work claim stays
+in the work-claim card (NF-12AM), so it is never counted twice. The transaction page keeps its own claim panels.
 """
 
 from __future__ import annotations
@@ -45,6 +46,7 @@ class ExpenseRecoveries:
             "JOIN financial_assets a ON a.id=le.asset_id "
             "WHERE t.type='OUT' AND t.status='POSTED' AND t.date BETWEEN ? AND ? AND a.is_cash=1 "
             "AND le.effect='OUTFLOW' AND le.owner_id IS NULL "
+            "AND t.id NOT IN (SELECT expense_id FROM reimbursement_claims WHERE paid_for_work=1 AND expense_id IS NOT NULL) "
             "AND (t.id IN (SELECT expense_id FROM reimbursement_claims WHERE expense_id IS NOT NULL) "
             "OR t.id IN (SELECT expense_id FROM refund_links)) GROUP BY t.id HAVING here_e6>0 ORDER BY t.date,t.id",
             (*wanted, str(start)[:10], str(end)[:10]))

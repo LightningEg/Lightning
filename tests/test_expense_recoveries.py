@@ -64,18 +64,25 @@ def test_the_four_figures_match_the_claims_service(c, setup):
 
 
 @pytest.mark.parametrize("phone", [False, True])
-def test_the_transaction_and_the_category_sheet_show_them(c, setup, phone):
+def test_the_category_sheet_shows_them(c, setup, phone):
     accounts, _ = setup
     food = _food(c)
     purchase = c.transactions.record_outflow("2026-12-02", accounts["cib"].id, "1200", food, description="Team lunch")
     c.reimbursements.create_claim(purchase.id, "1200")
-    client = _client(c, phone)
-    page = visible_text(client.get(f"/transactions/{purchase.id}").text)
-    assert "Money back" in page and "Expected back" in page and "1,200" in page
-    sheet = visible_text(client.get(f"/budget/category/{food}/sheet?month=2026-12").text)
+    sheet = visible_text(_client(c, phone).get(f"/budget/category/{food}/sheet?month=2026-12").text)
     assert "Money back" in sheet and "1 purchase this month" in sheet and "Expected back" in sheet
-    arabic = _client(c, phone, "ar")
-    assert "مستني يرجع" in visible_text(arabic.get(f"/transactions/{purchase.id}").text)
+    assert "Money back" not in visible_text(_client(c, phone).get(f"/transactions/{purchase.id}").text)  # one home
+    arabic = visible_text(_client(c, phone, "ar").get(f"/budget/category/{food}/sheet?month=2026-12").text)
+    assert "مستني يرجع" in arabic
+
+
+def test_a_work_claim_stays_in_its_own_card(c, setup):
+    accounts, _ = setup
+    food = _food(c)
+    purchase = c.transactions.record_outflow("2026-12-02", accounts["cib"].id, "800", food, description="Client dinner")
+    c.reimbursements.create_work_claim(purchase.id, "800")
+    assert _recoveries(c).for_categories({food}, *parse_month("2026-12")) is None
+    assert c.reimbursements.recovery(purchase.id)["expected"] == 0
 
 
 def _laptop(c, setup):

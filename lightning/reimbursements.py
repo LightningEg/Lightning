@@ -475,11 +475,12 @@ class ReimbursementService:
     def recovery(self, expense_id: int) -> dict:
         """NF-12AK5: what a purchase cost and what its claims say about money back, as the claims page reads them:
         ``paid`` (the owned expense), ``received`` (receipts counted against its claims) and ``expected`` (what its
-        open claims still wait for). Refunds that name the purchase are the refund links' to add."""
+        open personal claims still wait for). Refunds that name the purchase are the refund links' to add."""
         expense_id = self._id(expense_id, "expense_id")
         paid_e6 = int(self._expense_capacity(expense_id).get("expense_e6", 0))
         received = expected = from_e6(0)
-        for row in self.db.all("SELECT * FROM reimbursement_claims WHERE expense_id=? ORDER BY id", (expense_id,)):
+        for row in self.db.all("SELECT * FROM reimbursement_claims WHERE expense_id=? AND paid_for_work=0 ORDER BY id",
+                               (expense_id,)):  # a work claim stays in the work-claim card (NF-12AM)
             claim = self._claim_summary(row)
             received += claim["received"]
             expected += claim["outstanding"]
