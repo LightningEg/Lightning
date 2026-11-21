@@ -110,11 +110,12 @@ class RuleService:
         return engine.split(abs(Decimal(amount)), rule.parts, rule.category_id)
 
     def describe(self, rule: Rule) -> dict:
-        """The rule in words: "Counterparty contains Vodafone · amount between 100 and 300" and "Phone"."""
+        """The rule in words: "Payee contains Vodafone · amount between 100 and 300" and "Phone"."""
         when = []
         for c in rule.conditions:
             if c.field in ("counterparty", "notes"):
-                when.append(f"{c.field.capitalize()} {TEXT_WORDS[c.op]} {c.value}")
+                field = "Payee" if c.field == "counterparty" else "Notes"
+                when.append(f"{field} {TEXT_WORDS[c.op]} {c.value}")
             elif c.field == "amount":
                 text = (f"{fmt(Decimal(c.value), 0)} and {fmt(Decimal(c.value_to), 0)}" if c.op == "between"
                         else fmt(Decimal(c.value), 0))
@@ -369,7 +370,7 @@ class RuleService:
         if direction in ("in", "out"):
             conditions.append(Condition("direction", "is", direction))
         if not conditions:
-            raise ValidationError("Say when the rule applies: a counterparty, words in the notes or an amount.",
+            raise ValidationError("Say when the rule applies: a payee, words in the notes or an amount.",
                                   "counterparty")
         return match_all, conditions
 

@@ -80,7 +80,7 @@ def _lines(c, start: date, end: date) -> list[dict]:
 
 
 def _payee(row) -> str:
-    return (row.get("counterparty") or row.get("description") or "No counterparty").strip()
+    return (row.get("counterparty") or row.get("description") or "No payee").strip()
 
 
 def compare(c, a: tuple[date, date], b: tuple[date, date], by: str = "category") -> list[dict]:
@@ -181,6 +181,8 @@ def _item(c, kind: str, request: Request, item_id: int | None):
     name = str(request.query_params.get("name", "")).strip()
     if not name:
         raise HTTPException(404)
+    if name.casefold() == "no counterparty":  # keep links from before the label changed
+        name = "No payee"
     return name, name
 
 

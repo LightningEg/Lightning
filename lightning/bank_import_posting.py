@@ -92,7 +92,7 @@ class ImportPoster:
         if typed:
             party = self.counterparties.get(self.counterparties.ensure_person(typed))
             if not party["active"]:
-                raise ValidationError(f"CSV row {line}: choose a saved active Counterparty in Whom.", "whom")
+                raise ValidationError(f"CSV row {line}: choose a saved active payee in Held for.", "whom")
             return party["name"], None
         if not (category and category.code == "EXP.SYSTEM.CUSTODY"):
             return None, None
@@ -158,7 +158,7 @@ class ImportPoster:
         account_matches = [a for a in accounts if a.name.casefold() == cp_text.casefold()]
         if not explicit_party and not selected_target and (
                 len(account_matches) > 1 or (account_matches and self.counterparties.resolve(cp_text))):
-            raise ValidationError("Choose an account or counterparty explicitly for this name.", "counterparty")
+            raise ValidationError("Choose an account or payee explicitly for this name.", "counterparty")
         target = None if explicit_party else account_matches[0] if account_matches else None
         if not explicit_party and "transfer_account_id" not in decision and row.get("_transfer_account_id"):
             selected_target = row["_transfer_account_id"]
@@ -187,7 +187,7 @@ class ImportPoster:
             if name:
                 counterparty_id = self._create_once(name, alias_text or cp_text)
         elif row.get("_suggestions") and not row.get("_counterparty_id") and not choice:
-            raise ValidationError(f"CSV row {row['_line']}: choose a Counterparty match or leave it unlinked.",
+            raise ValidationError(f"CSV row {row['_line']}: choose a payee match or leave it unlinked.",
                                   "counterparty")
         if counterparty_id and not target:
             if alias_text:

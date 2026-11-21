@@ -90,7 +90,7 @@ def test_a_rule_needs_a_condition_and_something_to_set(c):
     rule_id = c.rules.save({"counterparty": "Vodafone", "amount_op": "between", "amount": "100", "amount_to": "300",
                             "category_id": str(cats["EXP.PERSONAL.UTILITIES"]), "tag": "#Bills"})
     words = c.rules.describe(c.rules.get(rule_id))
-    assert words["when"] == "Counterparty contains Vodafone · Amount between 100 and 300"
+    assert words["when"] == "Payee contains Vodafone · Amount between 100 and 300"
     assert words["then"].endswith("#bills")
 
 
@@ -161,7 +161,7 @@ def test_the_past_changes_only_when_asked_and_one_undo_puts_it_back(c, setup):
     category_of = lambda txn_id: next(l.category_id for l in c.transactions.get(txn_id).lines if l.category_id)
     assert category_of(old[0]) == cats["EXP.PERSONAL.UTILITIES"] and category_of(old[1]) == cats["EXP.PERSONAL.FOOD"]
     listing = client.get(applied.headers["location"]).text
-    assert "Undo" in listing and "Counterparty contains Vodafone · Amount more than 300" in listing
+    assert "Undo" in listing and "Payee contains Vodafone · Amount more than 300" in listing
     token = applied.headers["location"].split("undo=")[1].split("&")[0]
     client.post("/rules/undo", data={"token": token})
     assert category_of(old[0]) == cats["EXP.PERSONAL.FOOD"]

@@ -3228,7 +3228,7 @@ window.lightningPrivacy = (() => {
   if (!bar) return;
   const field = bar.querySelector(".command-input"), list = bar.querySelector(".command-results");
   const groups = { Transaction: "Transaction", Page: "Pages", Action: "Actions", Account: "Accounts",
-    Person: "People", Reserve: "Reserves", Counterparty: "Counterparties", Category: "Categories", Investment: "Investments", Tag: "Tags", Search: "Transactions" };
+    Person: "People", Reserve: "Reserves", Counterparty: "Payees", Category: "Categories", Investment: "Investments", Tag: "Tags", Search: "Transactions" };
   let results = [], active = 0, asked = "", waiting = null, timer = null;
   const paint = () => {
     list.replaceChildren();

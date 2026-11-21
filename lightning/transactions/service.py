@@ -369,7 +369,7 @@ class TransactionService:
         if other_account_id is not None:
             return DocType.TRF, value, None
         if category_id is None:
-            raise ValidationError("Choose a category — or pick one of your accounts as the counterparty for a transfer.",
+            raise ValidationError("Choose a category — or pick one of your accounts for a transfer.",
                                   "category")
         category = self.categories.get(category_id)
         return (DocType.OUT if value < 0 else DocType.IN), value, category.id
@@ -1114,7 +1114,7 @@ class TransactionService:
         canonical = self.counterparties.resolve(name)
         if not canonical:
             if self.counterparties.suggestions(name):
-                raise ValidationError("This Counterparty resembles a saved one. Confirm reuse or explicitly create it.",
+                raise ValidationError("This payee resembles a saved one. Confirm reuse or explicitly create it.",
                                       "counterparty")
             canonical = self.counterparties.get(self.counterparties.create(name))
         return canonical

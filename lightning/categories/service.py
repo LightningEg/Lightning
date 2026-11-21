@@ -101,7 +101,7 @@ class CategoryService:
         """Resolve repeated statement labels once per request, including ambiguous or unknown names."""
         wanted = " ".join((text or "").split()).casefold()
         if not wanted:
-            return "Choose a category — or pick one of your accounts as the counterparty for a transfer."
+            return "Choose a category — or pick one of your accounts for a transfer."
         options = self.pickable()
         for key in (lambda c: self.display_name(c.id), lambda c: c.name, lambda c: c.code):
             matches = [c for c in options if key(c).casefold() == wanted]

@@ -573,7 +573,7 @@ async def add_money_from_others(request: Request):
         owner_text = str(form.get("owner", "")).strip()
         party = c.counterparties.resolve(owner_text)
         if not party or not party["active"]:
-            raise ValidationError("Choose an active saved Counterparty as Whom.", "owner")
+            raise ValidationError("Choose an active saved payee in Held for.", "owner")
         owner = party["name"]
         account = c.accounts.require_usable(int(form.get("account_id", "0")))
         amount = to_decimal(form.get("amount", ""))

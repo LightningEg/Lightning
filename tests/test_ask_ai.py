@@ -187,7 +187,7 @@ def test_hide_names_removes_every_real_name_from_every_section_and_row(c, househ
     text = build(c, size="full", hide_names=True).text
     for real in ("Carrefour", "ACME", "Uber", "CIB Current", "Pocket money", "Dollar bank", "THNDR", "Quiet Holdings", "QUIET"):
         assert real not in text, f"{real} leaked"
-    assert "Counterparty 1" in text and "Account A" in text and "Holding 1" in text
+    assert "Payee 1" in text and "Account A" in text and "Holding 1" in text
     assert "Names are replaced by labels" in text
 
 

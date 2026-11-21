@@ -9,7 +9,7 @@
 <form class="phone-form compare-picker" method="get" action="/spending/compare">
   <label>{{ 'This period'|tr(locale) }}<input type="date" name="a_from" value="{{ fmt_date(a[0]) }}"></label><input type="date" name="a_to" value="{{ fmt_date(a[1]) }}" aria-label="{{ 'This period'|tr(locale) }}">
   <label>{{ 'Against'|tr(locale) }}<input type="date" name="b_from" value="{{ fmt_date(b[0]) }}"></label><input type="date" name="b_to" value="{{ fmt_date(b[1]) }}" aria-label="{{ 'Against'|tr(locale) }}">
-  <label>{{ 'By'|tr(locale) }}<select name="by"><option value="category" {{ 'selected' if by == 'category' }}>{{ 'Category'|tr(locale) }}</option><option value="payee" {{ 'selected' if by == 'payee' }}>{{ 'Counterparty'|tr(locale) }}</option></select></label>
+  <label>{{ 'By'|tr(locale) }}<select name="by"><option value="category" {{ 'selected' if by == 'category' }}>{{ 'Category'|tr(locale) }}</option><option value="payee" {{ 'selected' if by == 'payee' }}>{{ 'Payee'|tr(locale) }}</option></select></label>
   <button class="btn primary phone-save">{{ 'Compare'|tr(locale) }}</button></form>
 <section class="phone-section" aria-labelledby="compare-rows"><header class="phone-section-head"><h2 id="compare-rows">{{ 'Biggest changes first'|tr(locale) }}</h2></header>
   {% if not rows %}<p class="phone-note">{{ 'No spending in either period.'|tr(locale) }}</p>{% else %}
