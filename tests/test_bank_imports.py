@@ -483,6 +483,8 @@ def test_preview_flags_are_the_same_when_read_together_or_row_by_row(c, setup):
     c.bank_imports.confirm(first_id, {row["_import_row_id"]: {} for row in first_rows})
     voided = c.db.scalar("SELECT transaction_id FROM bank_import_rows WHERE batch_id=? AND bank_reference='REF-C'", (first_id,))
     c.transactions.void(voided, "test deletion")
+    gym = c.db.scalar("SELECT transaction_id FROM bank_import_rows WHERE id=?", (first_rows[-1]["_import_row_id"],))
+    c.transactions.void(gym, "test deletion without a reference")
     again = (b"Date,Counterparty,Amount,Reference\n2026-09-20,Shop,-5,REF-A\n2026-09-24,Bakery,-3,REF-NEW\n"
              b"2026-09-22,Kiosk,-9,REF-C\n2026-09-23,Gym,-11,\n2026-09-25,Other,-2,REF-NEW\n")
     second_id, _ = c.bank_imports.stage(account_id, "again.csv", again)
@@ -496,6 +498,7 @@ def test_preview_flags_are_the_same_when_read_together_or_row_by_row(c, setup):
         type(proposals)._read_together = original
     assert together == alone
     flags = [(r["_reference_duplicate"], r["_voided_earlier"]) for r in together]
+    assert flags[3] == (False, True)
     assert flags[0][0] and flags[2][1] and flags[4][0]  # a seen reference, a voided one, a repeat inside the file
 
 
@@ -504,8 +507,10 @@ def test_import_review_asks_a_fixed_number_of_queries_however_long_the_file(c, s
     account_id = accounts["cib"].id
 
     def count(rows: int) -> int:
-        lines = ["Date,Counterparty,Amount,Reference"] + [f"2026-09-{1 + i % 28:02d},Shop {i},-{10 + i},R{rows}-{i}"
-                                                         for i in range(rows)]
+        lines = ["Date,Counterparty,Amount,Reference"]
+        for i in range(rows):
+            reference = f"R{rows}-{i}" if i % 2 else ""
+            lines.append(f"2026-09-{1 + i % 28:02d},Shop {i},-{10 + i},{reference}")
         batch_id, _ = c.bank_imports.stage(account_id, f"f{rows}.csv", ("\n".join(lines) + "\n").encode())
         seen: list[str] = []
         c.db.conn.set_trace_callback(seen.append)
@@ -515,7 +520,8 @@ def test_import_review_asks_a_fixed_number_of_queries_however_long_the_file(c, s
             c.db.conn.set_trace_callback(None)
         # the reads each row used to ask alone: seen-before, account by name, look-alike, opposite side of a transfer
         asked = ("SELECT 1 FROM bank_import_rows r JOIN", "SELECT id FROM accounts WHERE active=1",
-                 "SELECT 1 FROM transactions t JOIN ledger_entries l", "SELECT DISTINCT le.account_id")
+                 "SELECT 1 FROM transactions t JOIN ledger_entries l", "SELECT DISTINCT le.account_id",
+                 "SELECT t.date, SUM(l.amount_e6) AS amount_e6 FROM bank_import_rows")
         return sum(" ".join(sql.split()).startswith(asked) for sql in seen)
 
     assert count(10) == count(90)  # the same few questions for any length of file (was four or more a row)
