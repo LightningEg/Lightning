@@ -38,6 +38,13 @@
       <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
       <button class="btn primary">{{ 'Unlock'|tr(locale) }}</button>
     </form>
+    {% if play_offers is none %}<form method="post" action="/settings/theme/link" class="theme-unlock-form" data-link-profile>{# NF-10H6: never in the Play build #}
+      <label for="link-code">{{ 'Add this profile to your website account'|tr(locale) }}</label>
+      <small class="muted">{{ 'Bought a theme on Google Play? On your account page, press Link the app and paste the code here. The website then shows the theme as Owned and gives codes for your other profiles.'|tr(locale) }}</small>
+      <input id="link-code" name="code" autocomplete="off" spellcheck="false" dir="ltr" maxlength="64" required placeholder="XXXXXXXX-XXXXXXXX-XXXXXXXX-XXXXXXXX">
+      <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+      <button class="btn">{{ 'Link'|tr(locale) }}</button>
+    </form>{% endif %}
   </details>{% endif %}
 </section>
 {% endif %}

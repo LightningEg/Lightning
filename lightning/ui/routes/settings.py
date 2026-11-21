@@ -321,6 +321,26 @@ async def unlock_theme(request: Request):
     return redirect("/settings", translate(done, ui_locale(), name=theme_name(theme)))
 
 
+@router.post("/theme/link")
+async def link_profile(request: Request):
+    """Add this profile to the website account that issued the code (NF-10H6): themes bought on Google Play for this
+    profile then show on the website as Owned. PC and GitHub APK only: the Play build never names the website."""
+    if getattr(request.app.state, "play_billing", None) is not None:
+        return Response(status_code=404)
+    from ..entitlements import UnlockError, link_profile as link
+    form = await request.form()
+    db = container(request).db
+    if not db.read_only:  # the store records this profile's own id
+        from lightning.sync.copies import ensure_profile_id
+        ensure_profile_id(db)
+    try:
+        found = link(str(form.get("code", "")))
+    except UnlockError as exc:
+        return redirect("/settings", str(exc))
+    return redirect("/settings", "Linked. The themes you bought on Google Play for this profile now show on your website account."
+                    if found else "Linked. A theme you buy on Google Play for this profile will show on your website account.")
+
+
 def _play_context(request: Request) -> dict:
     """The Play build's theme offers (NF-11B3): settle what Play says was bought, then Play's prices. None elsewhere."""
     billing = getattr(request.app.state, "play_billing", None)
