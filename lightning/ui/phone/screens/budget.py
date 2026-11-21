@@ -121,7 +121,8 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
                         everyday_plan=e.everyday_plan, everyday_spent=e.everyday_spent, days_left=e.days_left,
                         trend=spending_trend(c, shown, day), work=work_claims(c),
                         exclusions=exclusion_context(c)["estimate_exclusions"],
-                        changes=ReviewInbox(c).changes(day) if state == "current" else None)
+                        changes=[item for item in ReviewInbox(c).changes(day) if not item["href"].startswith("/budget/raise")]  # the raise keeps its card
+                        if state == "current" else None)
 
 
 def work_claims(c) -> tuple:

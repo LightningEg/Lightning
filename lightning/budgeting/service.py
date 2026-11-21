@@ -42,6 +42,9 @@ def round_limit(amount: Decimal) -> Decimal:
     return max((amount / step).quantize(Decimal("1"), ROUND_HALF_UP) * step, LIMIT_STEP_SMALL)
 
 
+# NF-12AK5: a purchase this small never asks to be left out of estimates, however it compares with its category.
+UNUSUAL_PURCHASE_FLOOR = Decimal("1000")
+
 class BudgetService:
     def __init__(self, db: Database, categories: CategoryService, reporting: ReportingService, *, funding):
         self.db = db
@@ -810,7 +813,8 @@ class BudgetService:
     def unusual_purchases(self, month: str) -> list[dict]:
         """NF-12AK5 (owner, 2026-11-13): purchases that make up more than half of their category's estimate basis in
         the three completed months before ``month``, in a category that also had spending in another of those months,
-        so one large buy stands out against normal spending (a 9,000 laptop beside 1,000 a month of food). A purchase
+        so one large buy stands out against normal spending (a 9,000 laptop beside 1,000 a month of food); below
+        UNUSUAL_PURCHASE_FLOOR a purchase is never worth a question. A purchase
         already left out of estimates, paid by a scheduled bill or funded from a reserve or a loan is never offered.
         Largest first, one per category."""
         cursor, windows = parse_month(month)[0], []
@@ -839,7 +843,8 @@ class BudgetService:
         found: dict[int, dict] = {}
         for row in purchases.values():
             cid, total = row["category_id"], totals.get(row["category_id"], ZERO)
-            if total <= ZERO or months_with.get(cid, 0) < 2 or row["amount"] * 2 <= total:
+            if (total <= ZERO or months_with.get(cid, 0) < 2 or row["amount"] * 2 <= total
+                    or row["amount"] < UNUSUAL_PURCHASE_FLOOR):
                 continue
             if cid not in found or row["amount"] > found[cid]["amount"]:
                 found[cid] = row | {"window_total": total, "category": self.categories.get(cid).name}

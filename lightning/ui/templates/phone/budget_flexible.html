@@ -55,7 +55,7 @@
 {% endif %}
 {% else %}
 {% set changes = s.changes %}{% set month = s.month %}{% include 'partials/budget_changes.html' %}
-{% if s.raise_offer and s.changes is none %}<section class="phone-section" aria-labelledby="raise-heading">
+{% if s.raise_offer %}<section class="phone-section" aria-labelledby="raise-heading">
   {% if s.raise_offer.kind == 'drop' %}<header class="phone-section-head"><h2 id="raise-heading">{{ 'Your income falls to {amt} from {day}'|tr(locale, amt=s.raise_offer.recurring|money(False, 0), day=s.raise_offer.from|day(locale)) }}</h2></header>
   <p class="phone-note">{{ 'Plan on it from then, or keep the average of {x}.'|tr(locale, x=s.raise_offer.average|money(False, 0)) }}</p>
   {% else %}<header class="phone-section-head"><h2 id="raise-heading">{{ 'Your income went up'|tr(locale) }}</h2></header>
