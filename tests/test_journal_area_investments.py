@@ -311,6 +311,10 @@ def test_certificate_purchase_terms_and_redemption(devices):
     settle(hd, pc, edit)
     home_cert = hd.c.deposits.list_certificates(account(hd, "CDs").id)[0]
     assert home_cert.terms.annual_rate == 21 and hd.c.assets.get_asset(home_cert.terms.asset_id).name == "NBE three"
+    # IV-12J4: a variable certificate's dated rate change reaches the home as its own command.
+    rate = pc.command("deposits.set_rate_change", certificate_id=certificate, effective_date="2026-09-15", annual_rate="18")
+    settle(hd, pc, rate)
+    assert [(d.isoformat(), str(r)) for d, r in hd.c.deposits.rates(home_cert.terms.id)] == [("2026-09-15", "18")]
     redeem = pc.command("deposits.redeem", certificate_id=certificate, date_value="2026-10-01", proceeds="600.00",
                         destination_account_id=bank)
     settle(hd, pc, redeem)

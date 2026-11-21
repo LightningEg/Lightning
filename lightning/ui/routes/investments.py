@@ -373,6 +373,9 @@ async def holding_detail(request: Request, asset_id: int):
     h=next((x for x in portfolio.open if x.asset_id==asset_id and (account_id is None or x.account_id==account_id)),None)
     if h is None: raise NotFoundError("No holding found for that asset and account.")
     h=h.owned_only()
+    certificate=c.deposits.certificate_for_asset(asset_id)
+    if certificate is not None:  # IV-12J1: a certificate reads as a certificate, not as a stock
+        return _certificate_page(request, c, h, certificate, parse_date(day))
     asset=c.assets.get_asset(asset_id)
     bucket, saved_horizon = c.assets.investment_preferences(asset_id)
     horizon=saved_horizon or "Unassigned"
@@ -401,6 +404,16 @@ async def holding_detail(request: Request, asset_id: int):
                   period_dividends=h.dividends_since(previous),
                   allocation_classes=_allocation_classes(c), default_risk=default_risk(c.assets.get_class(asset.asset_class_id).code),
                   show_popup=request.headers.get("X-Lightning-Popup")=="1")
+
+
+def _certificate_page(request: Request, c, h, certificate, day: date):
+    """IV-12J1: rate and payouts, interest received against expected, the next payment, days to unlock and to
+    maturity, and what cashing it in would bring. Every figure comes from DepositService.holding."""
+    factor = c.investments.liquidation_factors()[c.assets.get_class_by_code("DEPOSIT.CD").id]
+    info = c.deposits.holding(certificate, day, h.dividends, factor)
+    return render(request, "investments/certificate.html", h=h, cd=info, t=info["terms"], day=fmt_date(day),
+                  portfolio=c.accounts.get(certificate.terms.account_id),
+                  payout_account=c.accounts.get(certificate.terms.destination_account_id))
 
 
 def target_plan(c) -> dict:

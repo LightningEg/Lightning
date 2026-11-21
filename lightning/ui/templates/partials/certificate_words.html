@@ -1,0 +1,7 @@
+{# IV-12J1: a certificate's schedule and payments in the bank's words, shared by its PC and phone pages. #}
+{% macro schedule_label(t) -%}
+{%- if t.interest_method.value == 'COMPOUND' -%}{{ {'MONTHLY': 'Compounds monthly, paid at maturity', 'QUARTERLY': 'Compounds quarterly, paid at maturity', 'YEARLY': 'Compounds yearly, paid at maturity'}[t.compounding_frequency.value]|tr(locale) }}
+{%- else -%}{{ {'MONTHLY': 'Interest paid monthly', 'QUARTERLY': 'Interest paid quarterly', 'YEARLY': 'Interest paid yearly', 'AT_MATURITY': 'Interest paid at maturity'}[t.payout_frequency.value]|tr(locale) }}{%- endif -%}
+{%- endmacro %}
+{% macro payment_kind(kind) -%}{{ {'INTEREST': 'Interest', 'PRINCIPAL': 'Principal back', 'MATURITY': 'Principal and interest'}[kind]|tr(locale) }}{%- endmacro %}
+{% macro status_label(cert, t) -%}{% if cert.redeemed or cert.units == 0 %}{{ 'Redeemed'|tr(locale) }}{% elif today_iso >= t.maturity_date %}{{ 'Matured · awaiting redemption'|tr(locale) }}{% elif today_iso >= t.lockup_end_date %}{{ 'Can redeem'|tr(locale) }}{% else %}{{ 'Locked'|tr(locale) }}{% endif %}{%- endmacro %}

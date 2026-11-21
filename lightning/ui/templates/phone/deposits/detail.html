@@ -1,3 +1,11 @@
 {% extends "deposits/detail.html" %}
+{% from "partials/certificate_words.html" import schedule_label, status_label with context %}
 {% block redeem_tone %} primary{% endblock %}
+{# IV-12J1: on the phone each certificate is a row (name, rate, next payment, maturity, status), never a cut table. #}
+{% block certificate_list %}<div class="phone-rows">{% for cert in certificates %}{% set t = cert.terms %}{% set n = next_payments[t.id] %}
+  <div class="phone-section" id="certificate-{{ t.id }}">
+    <a class="phone-row" href="/investments/holding/{{ t.asset_id }}?account={{ account.id }}"><span>{{ t.name }}<small>{{ t.annual_rate }}% · {{ schedule_label(t) }} · {{ status_label(cert, t) }}</small></span><b>{% if n %}<bdi class="fig">{{ n.amount|money }}</bdi>{% endif %}</b></a>
+    <p class="phone-note">{% if n %}{{ 'Next payment'|tr(locale) }} {{ n.date }} · {% endif %}{{ 'Maturity'|tr(locale) }} {{ t.maturity_date }}</p>
+    {% include "partials/certificate_actions.html" %}
+  </div>{% endfor %}</div>{% endblock %}
 {% block receipt_reconciliation %}{% include "phone/deposits/receipt_events.html" %}{% endblock %}

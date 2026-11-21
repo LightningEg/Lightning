@@ -1,0 +1,43 @@
+{# IV-12J1: a certificate on the phone. What it is worth leads, then interest received against expected, the next
+   payment and maturity as rows, the payments from the bank, and its terms in a sheet. Same figures as the PC page
+   (DepositService.holding). #}
+{% extends "base.html" %}
+{% from "phone/partials/sheet.html" import sheet with context %}
+{% from "partials/certificate_words.html" import schedule_label, payment_kind with context %}
+{% block title %}{{ h.asset_name }}{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/investments"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Investments'|tr(locale) }}</span></a>{% endblock %}
+{% block heading %}<h1>{{ h.asset_name }}</h1><p class="phone-note">{{ portfolio.institution or portfolio.name }} · {{ '{rate}% a year'|tr(locale, rate='%g'|format(cd.rate)) }} · {{ schedule_label(t) }}</p>{% endblock %}
+{% block content %}
+{% set cert_href = '/deposits/' ~ portfolio.id ~ '#certificate-' ~ t.id %}
+<section class="phone-hero has-seam" aria-labelledby="lead-heading"><div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Worth today'|tr(locale) }}</div>
+  <div class="phone-lead">{{ cd.value|money }} <small>{{ base }}</small></div>
+  <p class="phone-hero-line">{% if cd.pays_at_maturity and cd.held %}{{ 'Principal {principal} plus {earned} interest earned so far'|tr(locale, principal=t.principal|money, earned=cd.earned|money) }} · {{ 'estimate'|tr(locale) }}{% elif cd.held %}{{ 'Principal {principal}; its interest is paid into {account}'|tr(locale, principal=t.principal|money, account=payout_account.name) }}{% else %}{{ 'Redeemed'|tr(locale) }}{% endif %}</p></section>
+<dl class="phone-facts">
+  <div><dt>{{ 'Interest received'|tr(locale) }}</dt><dd><bdi class="fig">{{ cd.received|money }}</bdi>{% if not cd.pays_at_maturity %} <small>{{ 'Its terms expected {amount} by now'|tr(locale, amount=cd.expected|money) }}</small>{% endif %}</dd></div>
+  <div><dt>{{ 'Next payment'|tr(locale) }}</dt><dd>{% if cd.next_date %}<bdi class="fig">{{ cd.next_amount|money }}</bdi> <small>{{ cd.next_date }} · {{ ('in {n} day' if cd.next_days == 1 else 'in {n} days')|tr(locale, n=cd.next_days) }}</small>{% else %}{{ 'No payments left'|tr(locale) }}{% endif %}</dd></div>
+  <div><dt>{{ 'Maturity'|tr(locale) }}</dt><dd>{{ t.maturity_date }}{% if cd.maturity_days is not none %} <small>{{ ('in {n} day' if cd.maturity_days == 1 else 'in {n} days')|tr(locale, n=cd.maturity_days) }}</small>{% endif %}</dd></div>
+  <div><dt>{{ 'Earliest withdrawal'|tr(locale) }}</dt><dd>{% if cd.unlock_days is not none %}{{ 'Locked until {date}, in {n} days'|tr(locale, date=t.lockup_end_date, n=cd.unlock_days) }}{% else %}{{ t.lockup_end_date }}{% endif %}</dd></div>
+</dl>
+{% if cd.held and cd.unlock_days is none %}<a class="btn primary phone-save" href="/deposits/{{ portfolio.id }}?redeem={{ t.id }}#certificate-{{ t.id }}">{{ 'Record what the bank paid'|tr(locale) }}</a>{% endif %}
+<section class="phone-section" aria-labelledby="h-payments">
+  <header class="phone-section-head"><h2 id="h-payments">{{ 'Payments from the bank'|tr(locale) }}</h2></header>
+  {% set ahead = cd.payments|rejectattr('past')|list %}
+  <div class="phone-rows">{% for p in ahead[:4] %}<div class="phone-row"><span>{{ payment_kind(p.kind) }}<small>{{ p.date }}</small></span><b><bdi class="fig">{{ p.amount|money }}</bdi></b></div>{% else %}<p class="phone-note">{{ 'No payments left'|tr(locale) }}</p>{% endfor %}
+  {% if cd.payments|length > 4 %}{% set row %}<span>{{ 'Every payment'|tr(locale) }}<small>{{ ('{n} interest payment' if cd.interest_payments == 1 else '{n} interest payments')|tr(locale, n=cd.interest_payments) }}</small></span><b>{{ chevron() }}</b>{% endset %}{% call sheet('Payments from the bank'|tr(locale), row) %}<div class="phone-rows">{% for p in cd.payments %}<div class="phone-row"><span>{{ payment_kind(p.kind) }}<small>{{ p.date }} · {{ ('Was due' if p.past else 'Expected')|tr(locale) }}</small></span><b><bdi class="fig">{{ p.amount|money }}</bdi></b></div>{% endfor %}</div>{% endcall %}{% endif %}
+  </div>
+  <p class="phone-note">{{ 'A forecast from its terms. Interest counts as received once it is on your statement as money in from {bank}.'|tr(locale, bank=portfolio.institution or portfolio.name) }}</p>
+</section>
+<div class="phone-rows phone-section">
+  {% set row %}<span>{{ 'Its terms'|tr(locale) }}<small>{{ t.principal|money }} · {{ '%g'|format(cd.rate) }}%</small></span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('Its terms'|tr(locale), row) %}<dl class="phone-facts">
+    <div><dt>{{ 'Bought'|tr(locale) }}</dt><dd>{{ t.start_date }}</dd></div>
+    <div><dt>{{ 'Principal'|tr(locale) }}</dt><dd><bdi class="fig">{{ t.principal|money }}</bdi></dd></div>
+    <div><dt>{{ 'Annual rate'|tr(locale) }}</dt><dd>{{ '%g'|format(cd.rate) }}%{% if cd.rates %} · {{ 'variable'|tr(locale) }}{% endif %}</dd></div>
+    <div><dt>{{ 'Maturity'|tr(locale) }}</dt><dd>{{ 'about {amount} paid that day'|tr(locale, amount=cd.maturity_amount|money) }}</dd></div>
+    <div><dt>{{ 'Paid into'|tr(locale) }}</dt><dd>{{ payout_account.name }}</dd></div>
+    <div><dt>{{ 'Cashing it in today'|tr(locale) }}</dt><dd>{% if cd.cash_in is none and cd.held %}{{ 'Not before {date}'|tr(locale, date=t.lockup_end_date) }}{% elif cd.cash_in is none %}—{% elif cd.maturity_days is none %}<bdi class="fig">{{ cd.cash_in|money }}</bdi>{% else %}{{ 'About {amount}, at your sale factor of {factor}%'|tr(locale, amount=cd.cash_in|money ~ ' ' ~ base, factor='%g'|format(cd.sale_factor)) }}{% endif %}</dd></div>
+  </dl>{% if cd.rates %}<p class="phone-note">{{ 'Rate changes'|tr(locale) }}: {% for when, rate in cd.rates %}{{ '{rate}% from {date}'|tr(locale, rate='%g'|format(rate), date=when.isoformat()) }}{{ ' · ' if not loop.last }}{% endfor %}</p>{% endif %}{% endcall %}
+  <a class="phone-row" href="{{ cert_href }}"><span>{{ 'Change its terms'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+  <a class="phone-row" href="/deposits/{{ portfolio.id }}#buy-certificate"><span>{{ 'Buy another certificate'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+</div>
+{% endblock %}

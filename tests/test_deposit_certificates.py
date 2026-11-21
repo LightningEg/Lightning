@@ -103,7 +103,8 @@ def test_new_certificate_terms_change_its_sale_factor_and_say_saved(c, setup):
     c.investments.set_liquidation_factor(c.assets.get_class_by_code("DEPOSIT.CD").id, "65")
     certificate, _ = _buy(c, accounts)
     cd_id = accounts["cd"].id
-    assert _cd_class(c, "2026-12-31").after_sale == Decimal("6500")
+    # IV-12J3: paid at maturity, so it is worth 5,000 plus 121 of 365 days of its 600 interest (198.90).
+    assert _cd_class(c, "2026-12-31").after_sale == (Decimal("5000") + Decimal("5198.90")) * Decimal("0.65")
 
     response = TestClient(create_app(c), follow_redirects=False).post(
         f"/deposits/{cd_id}/certificates/{certificate.terms.id}/terms",
@@ -120,7 +121,7 @@ def test_new_certificate_terms_change_its_sale_factor_and_say_saved(c, setup):
         maturity_date="2026-12-31", annual_rate="12", interest_method="SIMPLE",
         payout_frequency="AT_MATURITY", compounding_frequency="MONTHLY",
         destination_account_id=accounts["cib"].id)
-    assert _cd_class(c, "2026-12-31").after_sale == Decimal("8250")
+    assert _cd_class(c, "2026-12-31").after_sale == Decimal("3250") + Decimal("5198.90")  # matured: all of it
 
 
 def test_bank_interest_is_split_across_the_certificates_held_that_day_by_cost(c, setup):
@@ -195,13 +196,13 @@ def test_locked_certificate_has_a_separate_value_and_settings_use_the_same_sale_
     _buy(c, accounts)
     position = c.position.at("2026-10-14")
     assert len(position.locked_holdings) == 1
-    assert position.locked_holdings[0].value == Decimal("5000")
+    assert position.locked_holdings[0].value == Decimal("5070.68")  # IV-12J3: 43 days of its 600 interest earned
     assert position.locked_holdings[0].locked_until == "2026-11-01"
     assert _cd_class(c, "2026-10-14").after_sale == Decimal("4750")  # legacy 5,000 at 95%; locked certificate excluded
     client = TestClient(create_app(c))
     for path in ("/", "/investments", "/settings?section=assets-valuations"):
         page = client.get(path).text
-        assert said("not counted until 2026-11-01") in page and "5,000" in page
+        assert said("not counted until 2026-11-01") in page and "5,071" in page
     assert not c.position.at("2026-11-01").locked_holdings
 
 
@@ -305,4 +306,4 @@ def test_marked_certificate_does_not_count_as_cash_until_unlocked(c, setup):
     locked = c.position.at('2026-10-14').locked_holdings[0]
     c.assets.set_counts_as_cash(locked.asset_id, True)
     assert c.position.at('2026-10-14').counted_as_cash == 0
-    assert c.position.at('2026-11-01').counted_as_cash == Decimal('5000')
+    assert c.position.at('2026-11-01').counted_as_cash == Decimal('5100.27')  # with 61 days of interest earned

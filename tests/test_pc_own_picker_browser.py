@@ -36,7 +36,7 @@ def test_certificate_and_budget_pickers_preserve_submitted_ids(c, setup):
                 assert fieldsets.count() >= 3
                 assert all(style == '0px' for style in fieldsets.evaluate_all(
                     'els => els.map(el => getComputedStyle(el).borderTopWidth)'))
-                page.locator('table details > summary').first.click()
+                page.locator('#buy-certificate > summary').click()
                 assert page.locator('button.btn.primary:visible').count() == 1
                 assert page.get_by_role('button', name='Record CD purchase').evaluate("el => el.classList.contains('primary')")
                 funding = page.get_by_role('combobox', name='Buy from')
