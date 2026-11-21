@@ -53,7 +53,7 @@ PHONE_PAGES = ("/exports/all", "/plan/purchases/new", "/", "/budget", "/plan", "
                "/financial-health", "/settings", "/categories", "/zakat")
 
 # Brand, keyboard keys, data sources and the one prompt meant to be pasted into an AI tool.
-ALLOWED_WORDS = {"Lightning", "Ctrl", "Enter", "Esc", "TradingView", "Yahoo", "Finance", "Mubasher", "Nasdaq",
+ALLOWED_WORDS = {"Lightning", "Google", "Play", "Ctrl", "Enter", "Esc", "TradingView", "Yahoo", "Finance", "Mubasher", "Nasdaq",
                  "NYSE", "Arca", "Xetra", "Cboe", "BZX", "Analyze", "Excel", "UCITS", "American", "Thndr"}
 LATIN = re.compile(r"[A-Za-z][A-Za-z']+")
 

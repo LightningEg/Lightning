@@ -171,7 +171,7 @@ ARABIC_UI = {
     'Update Lightning to wear this theme.': 'حدّث لايتنينج عشان تلبس السمة دي.',
     'Unlock a theme you bought': 'افتح سمة اشتريتها',
     'Add this profile to your website account': 'ضيف البروفايل ده لحسابك على الموقع',
-    'Bought a theme on Google Play? On your account page, press Link the app and paste the code here. The website then shows the theme as Owned and gives codes for your other profiles.': 'اشتريت سمة من Google Play؟ في صفحة حسابك دوس Link the app والصق الكود هنا. الموقع هيعرض السمة إنها بتاعتك ويديك أكواد لباقي بروفايلاتك.',
+    'Bought a theme on Google Play? On your account page, press Link the app and paste the code here. The website then shows the theme as Owned and gives codes for your other profiles.': 'اشتريت سمة من Google Play؟ خد كود الربط من صفحة حسابك على الموقع والصقه هنا. الموقع هيعرض السمة إنها بتاعتك ويديك أكواد لباقي بروفايلاتك.',
     'Linked. The themes you bought on Google Play for this profile now show on your website account.': 'اتربط. السمات اللي اشتريتها من Google Play للبروفايل ده بقت ظاهرة في حسابك على الموقع.',
     'Linked. A theme you buy on Google Play for this profile will show on your website account.': 'اتربط. أي سمة تشتريها من Google Play للبروفايل ده هتظهر في حسابك على الموقع.',
     'This profile is linked to another website account.': 'البروفايل ده مربوط بحساب تاني على الموقع.',
