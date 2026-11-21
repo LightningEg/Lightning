@@ -4081,6 +4081,9 @@ ARABIC_UI = {
 from lightning.ui.i18n_phone_reading import PHONE_READING as _PHONE_READING  # noqa: E402
 
 ARABIC_UI.update(_PHONE_READING)
+from lightning.ui.i18n_onboarding import ONBOARDING as _ONBOARDING  # noqa: E402
+
+ARABIC_UI.update(_ONBOARDING)
 from lightning.ui.i18n_errors import ERRORS_AR as _ERRORS_AR  # noqa: E402
 
 ARABIC_UI.update(_ERRORS_AR)

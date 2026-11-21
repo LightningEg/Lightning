@@ -1,0 +1,27 @@
+{% from "partials/chevron.html" import chevron with context %}
+<!doctype html>
+{# Setup steps 3 to 6 on the phone (IV-11N2): the same frame as steps 1 and 2 (profiles.html, mode setup): the step
+   bar, one question, soft-well fields, the main action at the bottom, the meadow wash behind (guideline C02.6). #}
+<html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}" class="phone">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  {% if request.state.secure_profiles|default(false) %}<meta name="lightning-session" content="{{ request.state.session_token|default('') }}">{% endif %}
+  <title>{% block title %}{% endblock %} · Lightning</title>
+  <link rel="icon" type="image/svg+xml" href="/static/lightning-mark.svg">
+  <link rel="stylesheet" href="/static/fonts/fonts.css?v=2">
+  <link rel="stylesheet" href="/static/profiles{{ '.rtl' if locale == 'ar' else '' }}.css?v=7">
+</head>
+<body>
+  <main class="profile-page is-step is-start" id="profile-ready">
+    <header class="v2-steps">{% if back %}<a class="v2-steps-back" href="{{ back }}" aria-label="{{ 'Back'|tr(locale) }}">{{ chevron(true) }}</a>{% else %}<span class="v2-steps-back" aria-hidden="true"></span>{% endif %}<span class="v2-steps-bar" role="img" aria-label="{{ '{n} of {total}'|tr(locale, n=n, total=total) }}">{% for i in range(total) %}<i{% if i < n %} class="is-done"{% endif %}></i>{% endfor %}</span><span class="v2-steps-n">{{ '{n} of {total}'|tr(locale, n=n, total=total) }}</span></header>
+    <div class="content-wrap">
+      <section class="intro" aria-labelledby="page-title">{% block intro %}{% endblock %}</section>
+      {% if msg %}<div class="alert alert-notice" role="status">{{ msg|tr(locale) }}</div>{% endif %}
+      {% if error %}<div class="alert alert-error" role="alert" aria-live="assertive">{{ error|tr(locale) }}</div>{% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</body>
+</html>

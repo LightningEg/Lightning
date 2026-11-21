@@ -1,0 +1,25 @@
+{# Setup step 3 (IV-11N2): the first account: its name, institution and type, and today's balance if known. #}
+{% extends "phone/start/base.html" %}
+{% block title %}{{ 'Your first account'|tr(locale) }}{% endblock %}
+{% block intro %}<h1 id="page-title">{{ 'Your first account'|tr(locale) }}</h1>
+<p>{{ 'Start with the account you use most, usually the one your salary lands in. Add the others whenever you like.'|tr(locale) }}</p>{% endblock %}
+{% block content %}
+{% if made %}<p class="start-made">{% for a in made %}<span>{{ a.name }}</span>{% endfor %}</p>{% endif %}
+<form method="post" action="/start/account" class="form-stack">
+  <fieldset class="start-kinds"><legend>{{ 'Type'|tr(locale) }}</legend>
+    {% for kind, label, note in kinds %}<label class="start-kind"><input type="radio" name="account_type" value="{{ kind }}"{% if values.account_type == kind %} checked{% endif %}><span><b>{{ label|tr(locale) }}</b><small>{{ note|tr(locale) }}</small></span></label>{% endfor %}
+  </fieldset>
+  <div class="field{{ ' has-error' if error_field == 'institution' }}"><label for="start-institution">{{ 'Bank or wallet'|tr(locale) }}</label>
+    <input id="start-institution" name="institution" type="text" value="{{ values.institution }}" list="start-institutions" autocomplete="off" placeholder="{{ 'Type and pick, like CIB'|tr(locale) }}">
+    <datalist id="start-institutions">{% for name in institutions %}<option value="{{ name }}">{% endfor %}</datalist></div>
+  <div class="field{{ ' has-error' if error_field == 'name' }}"><label for="start-name">{{ 'Name'|tr(locale) }} <small>{{ 'optional'|tr(locale) }}</small></label>
+    <input id="start-name" name="name" type="text" value="{{ values.name }}" maxlength="80" autocomplete="off" placeholder="{{ 'Like Salary account'|tr(locale) }}"></div>
+  <div class="field{{ ' has-error' if error_field == 'opening_balance' }}"><label for="start-balance">{{ 'Balance today'|tr(locale) }} ({{ base }}) <small>{{ 'optional'|tr(locale) }}</small></label>
+    <input id="start-balance" name="opening_balance" type="text" inputmode="decimal" value="{{ values.opening_balance }}" autocomplete="off" placeholder="0">
+    <small>{{ 'As your bank app shows it now. Without it, what you can spend starts at zero.'|tr(locale) }}</small></div>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  <div class="form-actions"><button class="button button-primary v2-big" type="submit">{{ 'Add account'|tr(locale) }}{{ chevron() }}</button></div>
+</form>
+<form method="post" action="/start/skip" class="start-skip"><input type="hidden" name="step" value="account"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="text-button" type="submit">{{ ('Continue' if made else 'Skip for now')|tr(locale) }}</button></form>
+<p class="start-quiet"><a href="/start/samples">{{ 'Explore a sample instead'|tr(locale) }}</a></p>
+{% endblock %}
