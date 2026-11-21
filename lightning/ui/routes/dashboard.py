@@ -60,6 +60,10 @@ async def dashboard(request: Request):
         period_error = exc.message
     first, as_of = period.start, period.end
     accounts = c.accounts.list()
+    if not accounts and getattr(request.app.state, "phone_screens", False):
+        from lightning.ui.phone.start import running
+        if running(c):   # IV-11N2: setup was left half way on the phone; it resumes where it stopped
+            return redirect("/start")
     if not accounts:
         from lightning.samples.profiles import sample_stories
         registry = c.currencies
@@ -385,6 +389,13 @@ def _safe_tile(f) -> dict:
             "href": "/plan#safe-section"}
 
 
+def _sample_ends_setup(request: Request, c) -> None:
+    """A sample instead of setup (IV-11N2): a profile filled with one no longer resumes the phone's setup steps."""
+    if c.settings.get("phone_start") == "open":
+        with settled_save(request, c):
+            c.settings.set("phone_start", "done")
+
+
 @router.post("/demo")
 async def add_demo_household(request: Request):
     """Fill an empty Lightning with the sample household (only while nothing has been added yet)."""
@@ -396,6 +407,7 @@ async def add_demo_household(request: Request):
         summary = build_demo(c)
     except (LightningError, ValueError) as exc:  # nothing is kept: the ledger part is one transaction
         return redirect("/", f"The sample household could not be added: {getattr(exc, 'message', exc)}")
+    _sample_ends_setup(request, c)
     return redirect("/", f"Sample household added: Mohab's money from {summary['from']} to {summary['to']}.")
 
 
@@ -410,6 +422,7 @@ async def add_sample_2026(request: Request):
         summary = load_mohab_2026(c)
     except (LightningError, ValueError) as exc:
         return redirect("/", f"The 2026 sample could not be added: {getattr(exc, 'message', exc)}")
+    _sample_ends_setup(request, c)
     return redirect("/", f"Mohab's 2026 added: {summary['rows']} imported rows across {summary['accounts']} accounts, "
                          f"{summary['from']} to {summary['to']}.")
 
@@ -424,6 +437,7 @@ async def add_sample_story(request: Request, story: str):
         summary = load_story(c, story)
     except (LightningError, ValueError) as exc:
         return redirect("/", f"The sample story could not be added: {getattr(exc, 'message', exc)}")
+    _sample_ends_setup(request, c)
     return redirect("/", f"{summary['name']}'s sample added: {summary['rows']} fictional entries, "
                          f"{summary['from']} to {summary['to']}.")
 

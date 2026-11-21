@@ -91,27 +91,32 @@ class CategoryService:
     def find_by_text(self, text: str) -> Category:
         """What someone typed in the Category box -> the category. Accepts the full name
         ('Personal › Food & Groceries'), the plain name ('Food & Groceries') or the code; case does not matter."""
+        match = self._text_match(text)
+        if isinstance(match, str):
+            raise ValidationError(match, "category")
+        return match
+
+    @request_cached(deep=True)
+    def _text_match(self, text: str) -> Category | str:
+        """Resolve repeated statement labels once per request, including ambiguous or unknown names."""
         wanted = " ".join((text or "").split()).casefold()
         if not wanted:
-            raise ValidationError("Choose a category — or pick one of your accounts for a transfer.",
-                                  "category")
-        options = [c for c in self.pickable()]
+            return "Choose a category — or pick one of your accounts for a transfer."
+        options = self.pickable()
         for key in (lambda c: self.display_name(c.id), lambda c: c.name, lambda c: c.code):
             matches = [c for c in options if key(c).casefold() == wanted]
             if len(matches) == 1:
                 return matches[0]
             if len(matches) > 1:
                 names = " or ".join(self.display_name(c.id) for c in matches)
-                raise ValidationError(f"Which one — {names}?", "category")
+                return f"Which one — {names}?"
         partial = [c for c in options if wanted in self.display_name(c.id).casefold()]
         if len(partial) == 1:
             return partial[0]
         if partial:
             names = ", ".join(self.display_name(c.id) for c in partial[:4])
-            raise ValidationError(f"'{text}' matches several categories: {names}. Pick one from the list.",
-                                  "category")
-        raise ValidationError(f"There is no category called '{text}'. Pick one from the list, or add it under "
-                              "Categories.", "category")
+            return f"'{text}' matches several categories: {names}. Pick one from the list."
+        return f"There is no category called '{text}'. Pick one from the list, or add it under Categories."
 
     def suggestions(self, text: str, parent_id: int | None = None, limit: int = 3) -> list[tuple[Category, float]]:
         """Suggest existing L2 categories so near-duplicates can be reviewed before creation."""

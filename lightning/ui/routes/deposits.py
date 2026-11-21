@@ -50,13 +50,14 @@ def _page(request: Request, account_id: int, values=None, error="", status_code=
     except NotFoundError:
         legacy = None
     outlooks = {cert.terms.id: c.deposits.maturity_outlook(cert) for cert in certificates}
+    next_payments = {cert.terms.id: c.deposits.next_payment(cert, today()) for cert in certificates}
     interest_receipts = c.deposit_receipts.match_plan(account_id)
     suggestions = sum(1 for item in interest_receipts if item["suggested"])  # not money: a count
     return render(request, "deposits/detail.html", status_code=status_code, account=account,
                   certificates=certificates, values=values or _values(), error=error,
                   liquid_accounts=liquid, liquid_by_id=liquid_by_id, sale_factor=factor, legacy=legacy,
                   legacy_cash=c.deposits.legacy_cash_balance(account_id), today_iso=fmt_date(today()),
-                  interest_receipts=interest_receipts, suggestions=suggestions, outlooks=outlooks,
+                  interest_receipts=interest_receipts, suggestions=suggestions, outlooks=outlooks, next_payments=next_payments,
                   redeem_id=_query_int(request, "redeem"))
 
 
@@ -113,18 +114,22 @@ async def update_terms(request: Request, account_id: int, certificate_id: int):
         cert = c.deposits.certificate(certificate_id)
         if cert.terms.account_id != account_id:
             raise NotFoundError("Certificate not found in this portfolio.")
+        rate, rate_from = str(form.get("annual_rate", "")), str(form.get("rate_from", "")).strip()
         with settled_save(request, container(request)):
+            # IV-12J4: a rate with a "from" date is a dated change; the rate it was bought at stays.
             c.deposits.update_certificate(
                 certificate_id, name=str(form.get("name", "")).strip(),
                 lockup_end_date=str(form.get("lockup_end_date", "")),
                 maturity_date=str(form.get("maturity_date", "")),
-                annual_rate=str(form.get("annual_rate", "")),
+                annual_rate=str(cert.terms.annual_rate) if rate_from else rate,
                 interest_method=str(form.get("interest_method", "")),
                 payout_frequency=str(form.get("payout_frequency", "")),
                 compounding_frequency=str(form.get("compounding_frequency", "")),
                 destination_account_id=_int(str(form.get("destination_account_id", ""))),
                 term_years=str(form.get("term_years", "")),
             )
+            if rate_from:
+                c.deposits.set_rate_change(certificate_id, rate_from, rate)
     except (LightningError, ValueError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a valid payout account."
         return _page(request, account_id, error=message, status_code=400)

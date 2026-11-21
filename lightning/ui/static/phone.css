@@ -1639,3 +1639,6 @@ html[dir="rtl"] .phone-keypad { direction: ltr; }  /* 1 2 3 left to right, as on
 .phone-txn-quiet .phone-quiet { min-height: 44px; display: inline-flex; align-items: center; font-weight: 700; text-decoration: none; }
 .phone-txn-delete { margin: 20px 0 0; }
 .phone-delete { width: 100%; min-height: 52px; border: 0; border-radius: 18px; background: var(--v2-wash-bad); color: var(--v2-bad); font: 700 15px/1.2 var(--body, inherit); cursor: pointer; }
+/* IV-11N3: Home's first day after setup: "I have no regular bills" passes the bills step, quietly under the steps. */
+.phone-first-none { display: flex; justify-content: center; margin: 8px 0 0; }
+.phone-quiet-button { min-height: 48px; padding: 0 12px; border: 0; background: none; color: var(--c-ink); font: inherit; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }

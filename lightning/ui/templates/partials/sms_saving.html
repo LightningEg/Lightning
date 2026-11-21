@@ -1,0 +1,10 @@
+<form method="post" action="/sms/saving">
+  <label for="sms-saving">{{ "New SMS payments"|tr(locale) }}</label>
+  <select id="sms-saving" name="mode">
+    {% for value, label in [('review', 'Review every payment'), ('classified', 'Auto-save classified payments'), ('known', 'Also auto-save known purchases without a category')] %}
+    <option value="{{ value }}" {{ 'selected' if save_mode == value }}>{{ label|tr(locale) }}</option>
+    {% endfor %}
+  </select>
+  <button class="btn" type="submit">{{ "Save"|tr(locale) }}</button>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+</form>

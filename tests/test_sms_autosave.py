@@ -73,7 +73,9 @@ def test_the_same_payment_typed_by_hand_is_linked_not_posted_twice(c, known):
     assert result["saved"] == 1 and len(_posted(c, cib.id)) == before
     saved = c.sms_imports.saved()[0]
     assert saved["linked"] and saved["ref"] == typed.ref
+    assert c.sms_imports.review_counts() == {"total": 1, "needed_review": 0, "automatic": 1, "changed": 0}
     c.sms_imports.undo_saved(saved["ref"])  # undoing a link keeps the typed entry
+    assert c.sms_imports.review_counts()["changed"] == 1
     assert not c.transactions.get(typed.id).is_void
 
 
@@ -104,3 +106,118 @@ def test_home_says_what_saved_itself_and_from_sms_lists_it_with_undo(c, known):
     undone = client.post("/sms/undo", data={"ref": ref})
     assert "/import/" in str(undone.url) and c.sms_imports.saved() == []
     assert not [i for i in ReviewInbox(c).items(on) if i["label"] == "Saved from SMS"]
+
+
+def test_phone_saving_modes_with_a_top_up(c, known):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+
+    cib, _ = known
+    vodafone = c.counterparties.create("Vodafone", alias="Voda")
+    client = TestClient(create_app(c))
+    sender, text, when = NBE_UBER
+    message = text.replace("Uber", "VODA TOP-UP")
+    assert client.post("/sms/read-one", data={"text": message}).json()["counterparty"] == "Vodafone"
+    for mode, amount, expected in [("review", "51.00", 0), ("classified", "52.00", 0), ("known", "53.00", 1)]:
+        page = client.post("/sms/saving", data={"mode": mode})
+        assert f'value="{mode}" selected' in page.text
+        result = c.sms_imports.read([(sender, message.replace("147.87", amount), when)])
+        assert result["saved"] == expected
+        row = c.bank_imports.preview(result["staged"][cib.id])[1][0]
+        assert row["_counterparty_id"] == vodafone
+    assert c.sms_imports.saved()[0]["who"] == "Vodafone"
+    txn = c.transactions.get_by_ref(c.sms_imports.saved()[0]["ref"])
+    assert txn.counterparty == "Vodafone"
+    assert any(line.category_id == c.categories.get_by_code("EXP.UNACCOUNTED").id for line in txn.lines)
+
+
+def test_top_up_matches_only_a_complete_saved_name_or_alias(c):
+    vodafone = c.counterparties.create("Vodafone")
+    assert c.counterparties.sms_payee("vodafone top up")["id"] == vodafone
+    assert c.counterparties.sms_payee("Top-up Vodafone")["id"] == vodafone
+    wallet = c.counterparties.create("Vodafone Cash")
+    assert c.counterparties.sms_payee("Vodafone Cash top up")["id"] == wallet
+    exact = c.counterparties.create("Vodafone Top Up")
+    assert c.counterparties.sms_payee("VODAFONE TOP-UP")["id"] == exact
+
+
+def test_sms_matches_profile_spellings_inside_unfamiliar_labels(c):
+    bookshop = c.counterparties.create("Cedar Books", alias="Papertrail")
+    telco = c.counterparties.create("Vodafone")
+    coffee = c.counterparties.create("بن النيل")
+    for label, expected in [("POS CedarBooks terminal 42", bookshop), ("PAPERTRAIL monthly fee", bookshop),
+                            ("web Papertrali invoice", bookshop), ("vodaphone top up", telco),
+                            ("عمليّة بُنّ النّيل فرع ٣", coffee)]:
+        assert c.counterparties.sms_payee(label)["id"] == expected
+    assert c.counterparties.sms_match("Papertrail via Vodafone") == (None, True)
+    assert c.counterparties.sms_payee("SuperPapertrailExpress") is None
+    c.counterparties.create("Papertrain")
+    assert c.counterparties.sms_match("POS Papertraix invoice") == (None, True)
+
+
+def test_sms_account_label_blocks_an_embedded_payee(c, known):
+    c.account_flows.open_account("Metro Wallet", "CASH", "2026-09-01", "0")
+    c.counterparties.create("Metro")
+    assert c.counterparties.sms_match("Metro Wallet payment") == (None, True)
+
+
+def test_two_saved_payees_in_a_bank_label_wait_for_review(c, known):
+    account, transport = known
+    c.counterparties.create("Metroline", transport.id)
+    c.settings.set("sms_save_mode", "known")
+    sender, text, received = NBE_UBER
+    result = c.sms_imports.read([(sender, text.replace("Uber", "Uber via Metroline"), received)])
+    row = c.bank_imports.preview(result["staged"][account.id])[1][0]
+    assert row["_identity_ambiguous"] and row["_status"] == "REVIEW"
+    assert result["saved"] == 0
+
+
+def test_phone_remembers_one_purchase_label_and_shows_which_rows_it_covers(c, known):
+    from test_phone_capture import _phone
+    account, transport = known
+    c.settings.set("sms_save_mode", "review")
+    party = c.counterparties.create("Mobile Company")
+    sender, text, received = NBE_UBER
+
+    def read(label, amount):
+        msg = text.replace("Uber", label).replace("147.87", amount)
+        batch = c.sms_imports.read([(sender, msg, received)])["staged"][account.id]
+        return batch, c.bank_imports.preview(batch)[1][0]
+
+    batch, first = read("TERMINAL TOP UP", "50.00")
+    second, _ = read("terminal top up", "75.00")
+    other, _ = read("TERMINAL HANDSET", "600.00")
+    phone = _phone(c)
+    page = phone.get("/sms").text
+    assert "Other matching messages" in page and "75.00" in page
+    route = f"/sms/review/{batch}/{first['_import_row_id']}"
+    import re
+    token = re.search(r'name="__session" value="([^"]*)"', page).group(1)
+    data = {"payee": party, "category": transport.id, "remember": "on", "__session": token}
+    assert phone.post(route, data=data).status_code == 200
+    assert c.bank_imports.preview(batch)[1][0]["_status"] == "POSTED"
+    pending = c.bank_imports.preview(second)[1][0]
+    assert (pending["_counterparty_id"], pending["_category_id"], pending["_status"]) == (party, transport.id, "REVIEW")
+    assert c.bank_imports.preview(other)[1][0]["_counterparty_id"] is None
+    phone.post(route, data=data)
+    assert c.bank_imports.summary(batch)["posted"] == 1
+    c.settings.set("sms_save_mode", "classified")
+    _, future = read("TERMINAL TOP UP", "80.00")
+    assert future["_status"] == "POSTED" and future["_counterparty_id"] == party
+
+
+def test_phone_links_the_sms_to_the_chosen_entry(c, known):
+    import re
+    from test_phone_capture import _phone
+    account, category = known
+    typed = c.transactions.record_outflow("2026-10-06", account.id, "147.87", category.id, counterparty="Uber")
+    c.settings.set("sms_save_mode", "review")
+    batch = c.sms_imports.read([NBE_UBER])["staged"][account.id]
+    row = c.bank_imports.preview(batch)[1][0]
+    phone = _phone(c)
+    page = phone.get("/sms").text
+    assert "Is this a payment you already entered?" in page
+    token = re.search(r'name="__session" value="([^"]*)"', page).group(1)
+    phone.post(f"/sms/review/{batch}/{row['_import_row_id']}", data={"link": typed.id, "__session": token})
+    assert c.bank_imports.summary(batch)["linked"] == 1
+    assert len(_posted(c, account.id)) == 1

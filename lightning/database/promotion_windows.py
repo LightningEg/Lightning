@@ -43,6 +43,24 @@ _WINDOWS_RESERVED_NAMES = {
 }
 
 
+def move_write_through(source: str | Path, destination: str | Path) -> None:
+    """Move one file on the same volume, never over another, returning only once the move is on disk.
+
+    IT-2A2: restore's moves and discards outside the promotion adapter use this, so their order
+    survives a power cut as far as MOVEFILE_WRITE_THROUGH promises (see the module docstring)."""
+    if os.name != "nt":
+        raise OSError("move_write_through is available only on Windows")
+    kernel = ctypes.WinDLL("kernel32", use_last_error=True)
+    kernel.MoveFileExW.argtypes = (wintypes.LPCWSTR, wintypes.LPCWSTR, wintypes.DWORD)
+    kernel.MoveFileExW.restype = wintypes.BOOL
+    if not kernel.MoveFileExW(WindowsPromotionFileOps._extended(Path(os.path.abspath(source))),
+                              WindowsPromotionFileOps._extended(Path(os.path.abspath(destination))),
+                              MOVEFILE_WRITE_THROUGH):
+        error = ctypes.WinError(ctypes.get_last_error())
+        error.strerror = f"Move restore file: {error.strerror}"
+        raise error
+
+
 class _FileTime(ctypes.Structure):
     _fields_ = [("low", wintypes.DWORD), ("high", wintypes.DWORD)]
 

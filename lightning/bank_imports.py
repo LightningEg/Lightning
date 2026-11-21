@@ -17,6 +17,7 @@ from lightning.bank_import_rows import (INTERNAL_WORDS as INTERNAL_WORDS, MAX_BY
 from lightning.bank_import_proposals import ImportProposals, LINK_WINDOW_DAYS as LINK_WINDOW_DAYS
 from lightning.bank_import_posting import ImportPoster
 from lightning.bank_import_parsing import normalize_rows
+from lightning.database.settings import SettingsStore
 from lightning.import_profile import profile_dates
 
 
@@ -384,6 +385,10 @@ class BankImportService:
                         with self.db.transaction():
                             matched = self._post_import_row(batch, row_id, decision, row, accounts)
                             ambiguous_reserves += int(matched < 0)
+                            if decision.get("remember_sms_category") and row.get("_sms_category_key") and decision.get("category_id") and decision.get("counterparty_id"):
+                                category = self.categories.get(int(decision["category_id"]))
+                                party = self.counterparties.get(int(decision["counterparty_id"]))
+                                SettingsStore(self.db).set(row["_sms_category_key"], json.dumps([party["name"], category.code]))
                         if row.get("_file_label") and str(decision.get("category_id") or "").isdigit():
                             learned[str(row["_file_label"]).casefold()] = int(decision["category_id"])
                         self._poster._created_in_batch.update(self._poster._pending_created)

@@ -312,3 +312,20 @@ def test_lockout_message_and_budget_and_categories_are_all_arabic(sample):
     page = client.get("/categories")
     assert page.status_code == 200 and not _english(page.text, names)
     assert "r.ref" not in page.text
+
+
+@pytest.mark.parametrize("phone", [False, True], ids=["pc", "phone"])
+def test_a_certificate_and_its_portfolio_are_all_arabic(sample, phone):
+    """IV-12J1: the certificate's own holding page and its portfolio's list, PC and phone."""
+    c, names = sample
+    certificate = next(cert for account in c.accounts.list(active_only=True) if account.account_type.value == "DEPOSIT"
+                       for cert in c.deposits.list_certificates(account.id))
+    client = _client(c, phone)
+    problems = {}
+    for path in (f"/investments/holding/{certificate.terms.asset_id}", f"/deposits/{certificate.terms.account_id}"):
+        page = client.get(path)
+        assert page.status_code == 200, path
+        bad = _english(page.text, names)
+        if bad:
+            problems[path] = sorted(set(bad))[:8]
+    assert not problems, problems
