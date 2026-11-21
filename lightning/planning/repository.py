@@ -132,6 +132,7 @@ class PlanningRepository:
     def add_installment_terms(self, item_id, price, fee, count):
         self.db.execute("INSERT INTO installment_purchases VALUES (?,?,?,?)", (item_id, to_e6(price), to_e6(fee), count))
 
+    @request_cached(deep=True)
     def candidates(self, incoming: bool, account_id: int | None, category_id: int | None,
                    counterparty_id: int | None, date_from: str, date_to: str, currency: str,
                    require_all_identity: bool = False) -> list[dict]:

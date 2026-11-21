@@ -257,7 +257,11 @@ class PlanningService:
 
     # --------------------------------------------------------------- payments
     def payments(self, item: PlannedItem, until: str | date, as_of: date | None = None) -> list[Payment]:
-        day = as_of or today()
+        end = until if isinstance(until, str) else fmt_date(until)
+        return self._payments(item, end, as_of or today())
+
+    @request_cached
+    def _payments(self, item: PlannedItem, end: str, day: date) -> list[Payment]:
         settled = self.repo.settled()
         original = item
         if item.kind == PlanKind.LOAN:
@@ -271,7 +275,7 @@ class PlanningService:
         terms = self.repo.installment_terms().get(item.id) if item.kind == PlanKind.LOAN else None
         extras = [row for row in self.repo.extra_payments(fmt_date(day)) if row["planned_item_id"] == item.id] if item.kind == PlanKind.LOAN else []
         out = []
-        for number, calendar_day, due in scheduled_dates(item, "2999-12-31" if terms or extras else until):
+        for number, calendar_day, due in scheduled_dates(item, "2999-12-31" if terms or extras else end):
             # A payment settled before its weekend move changed stays settled under its old date.
             row = settled.get((item.id, due)) or settled.get((item.id, calendar_day))
             # A cash receipt dated later cannot clear debt in an earlier historical balance.
@@ -287,7 +291,6 @@ class PlanningService:
         if terms or extras:
             from .loan_actions import adjusted_payments
             out = adjusted_payments(out, terms, extras)
-        end = until if isinstance(until, str) else fmt_date(until)
         return [p for p in out if p.due_date <= end]
 
     def all_payments(self, until: str | date, as_of: date | None = None,
