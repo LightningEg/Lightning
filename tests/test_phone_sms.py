@@ -28,6 +28,21 @@ def test_a_sheet_filled_from_an_sms_remembers_the_ending_and_marks_the_message_r
     assert fingerprint(message) in c.sms_imports._json("sms_seen", [])               # the phone's inbox will not offer it again
 
 
+def test_review_preference_on_the_phone_holds_a_classified_payment(month):
+    from test_sms_autosave import NBE_UBER
+
+    c, accounts, cats = month
+    c.counterparties.create("Uber", cats["EXP.PERSONAL.FOOD"].id)
+    c.sms_imports.assign("2093", accounts["cib"].id)
+    phone = _phone(c)
+    page = phone.get("/sms").text
+    token = re.search(r'name="__session" value="([^"]*)"', page).group(1)
+    saved = phone.post("/sms/saving", data={"__session": token, "mode": "review"})
+    assert 'value="review" selected' in saved.text
+    result = c.sms_imports.read([NBE_UBER])
+    assert result["saved"] == 0 and result["staged"]
+
+
 def test_an_sms_for_a_foreign_account_is_not_remembered(month):
     """Bank SMS are EGP: an ending is never tied to an account in another currency."""
     c, accounts, _ = month

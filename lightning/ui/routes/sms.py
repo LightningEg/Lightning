@@ -9,10 +9,11 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
+from lightning.categories.domain import Movement
 from lightning.core.dates import now as app_now
 from lightning.core.errors import LightningError
-from lightning.sms_imports import (MAX_TEXT, SALARY_ENDING, WALLET_PREFIX, _IGNORE as _IGNORE_RE, fingerprint, parse_sms,
-                                    prefill, wallet_name)
+from lightning.sms_imports import (MAX_TEXT, SALARY_ENDING, SAVE_MODE_KEY, SAVE_MODES, WALLET_PREFIX,
+                                   _IGNORE as _IGNORE_RE, fingerprint, parse_sms, prefill, wallet_name)
 
 from ..web import container, redirect, render, settled_save
 
@@ -39,12 +40,17 @@ def read_phone_sms(request, c) -> dict | None:
         return None
 
 
-def _enter_url(message: dict) -> str:
+def _payee_name(c, label: str) -> str:
+    party = c.counterparties.sms_payee(label)
+    return party["name"] if party else label
+
+
+def _enter_url(c, message: dict) -> str:
     """Add, filled from a kept message as far as it can be read: the amount, its day and which way it went, with the
     message itself in Notes. Saving it takes the message off From SMS."""
     found = prefill(message.get("text", ""))
     values = {"kind": found["kind"], "amount": found["amount"], "date": found["date"] or str(message.get("received", ""))[:10],
-              "counterparty": found["counterparty"],
+              "counterparty": _payee_name(c, found["counterparty"]),
               "notes": str(message.get("text", ""))[:200], "sms_fp": str(message.get("id", "")).split("@")[0],
               "return_to": "/sms"}
     return "/accounts/add-transaction?" + urlencode({k: v for k, v in values.items() if v})
@@ -62,7 +68,7 @@ def _page(request, c, **context):
                if str(b["file_name"]).startswith("SMS ")]
     # Every ending not known yet is asked in one form, each with the account it most likely is already chosen.
     waiting = [g | {"guess": c.sms_imports.guess(g["ending"], g.get("banks", []))} for g in c.sms_imports.waiting()]
-    unread = [m | {"enter": _enter_url(m)} for m in c.sms_imports.unread()]
+    unread = [m | {"enter": _enter_url(c, m)} for m in c.sms_imports.unread()]
     codes = {a.code: a.name for a in c.accounts.list()}
     saved = [m | {"amount": Decimal(m["amount"]), "account": codes.get(m.get("account"), "")} for m in c.sms_imports.saved()]
     if any(m["amount"] > 0 for m in saved):
@@ -70,7 +76,8 @@ def _page(request, c, **context):
         for item in saved:
             item["receipt_id"] = available.get(item["ref"])
     return render(request, "sms.html", waiting=waiting, accounts=accounts, batches=batches, saved=saved,
-                  sms_work_matches=c.reimbursements.sms_work_matches(), unread=unread, permission=permission, last_read=c.sms_imports.last_read(),
+                  sms_work_matches=c.reimbursements.sms_work_matches(), save_mode=c.sms_imports.get_save_mode(),
+                  unread=unread, permission=permission, last_read=c.sms_imports.last_read(),
                   salary=SALARY_ENDING, wallet_prefix=WALLET_PREFIX, wallet_name=wallet_name, **context)
 
 
@@ -79,6 +86,49 @@ async def sms_page(request: Request):
     c = container(request)
     read_phone_sms(request, c)
     return _page(request, c)
+
+
+@router.post("/review/{batch_id:int}/{row_id:int}")
+async def review_message(request: Request, batch_id: int, row_id: int):
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            batch, rows = c.bank_imports.preview(batch_id)
+            row = next((r for r in rows if r["_import_row_id"] == row_id and r["_status"] == "REVIEW"), None)
+            if not batch["file_name"].startswith("SMS ") or not row or not row["_message"]:
+                return redirect("/sms", "This message is no longer waiting.")
+            link = str(form.get("link") or "")
+            if link and any(str(item["id"]) == link for item in row["_link_candidates"]):
+                decision = {"match": f"link:{link}"}
+            elif not link and row["_quick_purchase"]:
+                party = c.counterparties.get(int(form["payee"]))
+                category = int(form["category"])
+                if not party or not party["active"] or category not in {cat.id for cat in c.categories.pickable(Movement.OUTFLOW)}:
+                    raise ValueError
+                decision = {"match": "new", "category_id": category, "counterparty_id": party["id"],
+                            "counterparty": party["name"]}
+                if form.get("remember") == "on":
+                    decision["remember_sms_category"] = True
+            else:
+                return redirect(f"/accounts/{batch['account_id']}/import/{batch_id}", "Check this message before posting.")
+            result = c.bank_imports.confirm(batch_id, {row_id: decision})
+            if result["errors"]:
+                return redirect("/sms", next(iter(result["errors"].values())))
+    except (LightningError, ValueError, KeyError) as exc:
+        return redirect("/sms", getattr(exc, "message", "") or "Choose a payee and category.")
+    return redirect("/sms", "Saved.")
+
+
+@router.post("/saving")
+async def saving(request: Request):
+    c = container(request)
+    mode = (await request.form()).get("mode")
+    if mode not in SAVE_MODES:
+        return _page(request, c, error="Choose how to save SMS payments.")
+    with settled_save(request, c):
+        c.settings.set(SAVE_MODE_KEY, mode)
+    return redirect("/sms", "Saved.")
 
 
 @router.post("/allow")
@@ -117,7 +167,7 @@ async def paste(request: Request):
         parts.append(f"{result['unread']} kept for you")
     if result["skipped"]:
         parts.append(f"{result['skipped']} skipped")
-    if len(result["staged"]) == 1 and not result["waiting"] and found:  # one account's rows and nothing to ask: check them now
+    if len(result["staged"]) == 1 and not result["waiting"] and found and form.get("return_to") != "/sms":  # one account's rows and nothing to ask: check them now
         account_id, batch = next(iter(result["staged"].items()))
         return redirect(f"/accounts/{account_id}/import/{batch}", " · ".join(parts))
     return redirect("/sms", " · ".join(parts) or "Nothing new in these messages.")
@@ -171,7 +221,7 @@ async def assign(request: Request):
     except (LightningError, ValueError) as exc:
         return _page(request, c, error=getattr(exc, "message", "") or "Choose the account for these messages.")
     distinct = sorted(set(batches.values()))
-    if len(distinct) == 1 and not c.sms_imports.waiting():
+    if len(distinct) == 1 and not c.sms_imports.waiting() and form.get("return_to") != "/sms":
         account_id = c.bank_imports.preview(distinct[0])[0]["account_id"]
         return redirect(f"/accounts/{account_id}/import/{distinct[0]}", "Check each row, then post them.")
     return redirect("/sms", "Saved." if not distinct else "Check each account's messages below.")
@@ -188,19 +238,20 @@ async def read_one_message(request: Request):
     except ValueError:  # a clock or date the bank wrote wrongly (29:13): nothing to fill in
         found = None
     c = container(request)
+
     if found is None:
         # No bank pattern read it: fill what the words still say (amount, day, shop) and ask the person to check
         # the account and who, instead of an error. Only a message with no amount at all is refused.
         loose = prefill(text)
         if not loose["amount"] or _IGNORE_RE.search(text):
             return JSONResponse({"error": "No amount found in this message."}, status_code=422)
-        return JSONResponse({"amount": f"{Decimal(loose['amount']):.2f}", "counterparty": loose["counterparty"],
+        return JSONResponse({"amount": f"{Decimal(loose['amount']):.2f}", "counterparty": _payee_name(c, loose["counterparty"]),
                              "date": loose["date"], "kind": loose["kind"], "bank": "", "sure": False,
                              "ending": "", "account_id": None, "currency": loose["currency"],
                              "note": "Check the account and who.", "fingerprint": fingerprint(text)})
     # No account is asked (3AN5): the card or account ending in the message is the account, once it has been said. An
     # ending not seen before comes back with no account; the sheet asks once, and saving remembers the answer.
-    return JSONResponse({"amount": f"{found.amount:.2f}", "counterparty": found.place, "date": found.when[:10],
+    return JSONResponse({"amount": f"{found.amount:.2f}", "counterparty": (found.place if found.kind == "withdrawal" else _payee_name(c, found.place)), "date": found.when[:10],
                          "kind": "in" if found.inflow else "out", "bank": found.bank, "sure": found.sure,
                          "ending": found.ending, "account_id": c.sms_imports.account_for(found.ending),
                          "fingerprint": fingerprint(text)})

@@ -2678,7 +2678,7 @@ INSIGHTS = {
     "Undone. It waits for your check.": "اتلغت. مستنية مراجعتك.",
     "That message is no longer in the saved list.": "الرسالة دي مبقتش في قايمة اللي اتسجل.",
     "Saved for you": "اتسجلت لك",
-    "Messages Lightning was sure about saved themselves: a bank it knows, your account, and a category from your rules or habits. Undo puts one back for your check.": "رسايل Lightning كان متأكد منها اتسجلت لوحدها: بنك يعرفه، وحسابك، وفئة من قواعدك أو عاداتك. التراجع بيرجّعها لمراجعتك.",
+    "Undo returns a saved payment to review.": "التراجع بيرجّع الدفعة للمراجعة.",
     "linked to your entry": "اتربطت بالمعاملة اللي سجلتها",
     "Imported activity needs a decision": "النشاط المستورد محتاج قرار",
     "{file} · {n} rows wait · from row {m} · {date}.": "{file} · {n} صفوف مستنية · من الصف {m} · {date}.",
