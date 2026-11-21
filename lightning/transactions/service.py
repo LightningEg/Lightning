@@ -25,6 +25,7 @@ from lightning.core.refs import DOC_LABELS, DocType, format_ref, ref_prefix
 from lightning.database.audit import AuditLog
 from lightning.database.connection import Database
 from lightning.fx import MISSING_DAYS, rate_for
+from lightning.transactions.refunds import returned_e6
 
 from . import conversion, search, submissions
 from .balances import BalanceChecks
@@ -1133,11 +1134,14 @@ class TransactionService:
         """A reserve never pays out more than was assigned to it, also after a restore or an undo brings back an
         expense that was linked to it while another one took its place (audit 2026-10-26)."""
         marks = ",".join("?" * len(txn_ids))
-        over = self.db.one(
-            f"SELECT r.name FROM cash_reserves r WHERE r.id IN (SELECT reserve_id FROM reserve_transaction_links "
-            f"WHERE transaction_id IN ({marks})) AND r.allocated_e6 < (SELECT COALESCE(SUM(l.amount_e6),0) "
+        rows = self.db.all(
+            f"SELECT r.id,r.name,r.allocated_e6,(SELECT COALESCE(SUM(l.amount_e6),0) "
             f"FROM reserve_transaction_links l JOIN transactions t ON t.id=l.transaction_id "
-            f"WHERE l.reserve_id=r.id AND t.status='POSTED') LIMIT 1", tuple(txn_ids)) if txn_ids else None
+            f"WHERE l.reserve_id=r.id AND t.status='POSTED') AS spent_e6 FROM cash_reserves r WHERE r.id IN "
+            f"(SELECT reserve_id FROM reserve_transaction_links WHERE transaction_id IN ({marks})) ORDER BY r.id",
+            tuple(txn_ids)) if txn_ids else []
+        over = next((row for row in rows if int(row["allocated_e6"]) < int(row["spent_e6"] or 0)
+                     - returned_e6(self.db, int(row["id"]))), None)
         if over is not None:
             raise ValidationError(f"This would spend more from the reserve {over['name']} than is assigned to it. "
                                   "Assign more cash to it, or unlink a payment, first.")

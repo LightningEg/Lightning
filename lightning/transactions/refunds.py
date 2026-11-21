@@ -15,6 +15,7 @@ from datetime import date, timedelta
 
 from lightning.core.dates import now_iso
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
+from lightning.core.memo import request_cached
 from lightning.core.money import check_places, from_e6, to_decimal, to_e6
 from lightning.core.refs import parse_row_id
 from lightning.database.connection import Database
@@ -26,6 +27,52 @@ PICK_DAYS = 183
 # The user's own posted money in an ordinary expense category: what a refund or a purchase is made of.
 _OWNED = ("le.category_id IS NOT NULL AND le.owner_id IS NULL AND c.movement='OUTFLOW' AND c.is_system=0 "
           "AND a.is_cash=1 AND le.effect='OUTFLOW'")
+
+
+@request_cached(deep=True)
+def refund_returns(db) -> list[dict]:
+    """NF-12AK4 (owner, 2026-11-13): a refund that names a reserve-funded purchase goes back to the reserve first.
+
+    Per refund and reserve, the part of a linked refund (``refund_links``) that lowers the purchase's reserve-funded
+    part (``reserve_transaction_links``): never more than the refund's link, and a purchase's refunds together never
+    hand back more than the reserves paid for it. Refunds hand back oldest first; a purchase funded by several
+    reserves refills them in the order they were linked. Anything beyond goes to the month's plan as before.
+    Derived on every read, so editing, unlinking or voiding either side moves the money back where it was.
+    Each row: reserve_id, refund_id, expense_id, date (the refund's), amount_e6 (positive)."""
+    rows = db.all(
+        "SELECT rl.refund_id,rl.expense_id,rl.amount_e6,r.date FROM refund_links rl "
+        "JOIN transactions r ON r.id=rl.refund_id JOIN transactions e ON e.id=rl.expense_id "
+        "WHERE r.status='POSTED' AND e.status='POSTED' "
+        "AND rl.expense_id IN (SELECT transaction_id FROM reserve_transaction_links) "
+        "ORDER BY rl.expense_id,r.date,rl.refund_id")
+    if not rows:
+        return []
+    funded: dict[int, list[list[int]]] = {}
+    for link in db.all("SELECT reserve_id,transaction_id,amount_e6 FROM reserve_transaction_links "
+                       f"WHERE transaction_id IN ({','.join('?' * len(rows))}) ORDER BY id",
+                       tuple(int(row["expense_id"]) for row in rows)):
+        funded.setdefault(int(link["transaction_id"]), []).append([int(link["reserve_id"]), int(link["amount_e6"])])
+    returns = []
+    for row in rows:
+        left = int(row["amount_e6"])
+        for part in funded.get(int(row["expense_id"]), []):
+            back = min(left, part[1])
+            if back <= 0:
+                continue
+            part[1] -= back
+            left -= back
+            returns.append({"reserve_id": part[0], "refund_id": int(row["refund_id"]),
+                            "expense_id": int(row["expense_id"]), "date": row["date"], "amount_e6": back})
+    return returns
+
+
+def returned_e6(db, reserve_id: int, *, before: str | None = None, through: str | None = None,
+                besides_expense: int | None = None) -> int:
+    """What linked refunds handed back to one reserve, optionally only those dated before or through a day, or
+    leaving out the refunds of one purchase."""
+    return sum(row["amount_e6"] for row in refund_returns(db) if row["reserve_id"] == reserve_id
+               and (before is None or row["date"] < before) and (through is None or row["date"] <= through)
+               and row["expense_id"] != besides_expense)
 
 
 class RefundLinkService:

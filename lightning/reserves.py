@@ -14,9 +14,11 @@ from lightning.core.refs import parse_row_id
 from lightning.database.connection import Database
 from lightning.database.currencies import minor_units
 from lightning.database.settings import SettingsStore
+from lightning.transactions.refunds import refund_returns, returned_e6
 
 
 SETUP_SECONDS = 60  # BT-7AV1: an amount given this soon after a reserve is created is its set-up amount
+
 
 class CashReserveService:
     def __init__(self, db: Database):
@@ -38,17 +40,21 @@ class CashReserveService:
 
     @request_cached(deep=True)
     def list_active(self):
-        return [self._row(row) for row in self.db.all(
+        return [self._row(self._net(row)) for row in self.db.all(
             "SELECT r.*,(SELECT COALESCE(SUM(l.amount_e6),0) FROM reserve_transaction_links l "
-            "JOIN transactions t ON t.id=l.transaction_id WHERE l.reserve_id=r.id AND t.status='POSTED') AS spent_e6 "
+            "JOIN transactions t ON t.id=l.transaction_id WHERE l.reserve_id=r.id AND t.status='POSTED') AS spent_e6,"
+            "EXISTS(SELECT 1 FROM reserve_transaction_links x JOIN refund_links rl ON rl.expense_id=x.transaction_id "
+            "WHERE x.reserve_id=r.id) AS has_returns "
             "FROM cash_reserves r WHERE r.status='ACTIVE' ORDER BY "
             "CASE r.kind WHEN 'EMERGENCY' THEN 0 ELSE 1 END,r.due_date IS NULL,r.due_date,r.name COLLATE NOCASE"
         )]
 
     def list_completed(self):
-        return [self._row(row) for row in self.db.all(
+        return [self._row(self._net(row)) for row in self.db.all(
             "SELECT r.*,(SELECT COALESCE(SUM(l.amount_e6),0) FROM reserve_transaction_links l "
-            "JOIN transactions t ON t.id=l.transaction_id WHERE l.reserve_id=r.id AND t.status='POSTED') AS spent_e6 "
+            "JOIN transactions t ON t.id=l.transaction_id WHERE l.reserve_id=r.id AND t.status='POSTED') AS spent_e6,"
+            "EXISTS(SELECT 1 FROM reserve_transaction_links x JOIN refund_links rl ON rl.expense_id=x.transaction_id "
+            "WHERE x.reserve_id=r.id) AS has_returns "
             "FROM cash_reserves r WHERE r.status='COMPLETE' AND r.kind!='EMERGENCY' "
             "ORDER BY r.due_date DESC,r.id DESC LIMIT 100"
         )]
@@ -85,6 +91,7 @@ class CashReserveService:
                     "SELECT COALESCE(SUM(l.amount_e6),0) FROM reserve_transaction_links l "
                     "JOIN transactions t ON t.id=l.transaction_id WHERE l.reserve_id=? AND t.status='POSTED' AND t.date<=?",
                     (reserve["id"], as_of)) or 0)
+                spent -= returned_e6(self.db, reserve["id"], through=as_of)
                 reserve_data = self.db.one("SELECT name,kind FROM cash_reserves WHERE id=?", (reserve["id"],))
                 name = reserve_data["name"] if reserve_data else "Reserve"
                 kind = reserve_data["kind"] if reserve_data else "PROJECT"
@@ -118,7 +125,8 @@ class CashReserveService:
             if start_e6 is None:
                 continue
             allocated = from_e6(start_e6)
-            effective = max(allocated - from_e6(row["spent_e6"] or 0), ZERO)
+            spent_e6 = (row["spent_e6"] or 0) - returned_e6(self.db, reserve["id"], before=month_start)
+            effective = max(allocated - from_e6(spent_e6), ZERO)
             result[reserve["id"]] = {"allocated": allocated, "effective": effective,
                                      "added": max(reserve["allocated"] - allocated, ZERO),
                                      "kept": max(reserve["effective_allocated"] - effective, ZERO)}
@@ -134,11 +142,13 @@ class CashReserveService:
         reserve_id = self._id(reserve_id, "reserve_id")
         row = self.db.one(
             "SELECT r.*,(SELECT COALESCE(SUM(l.amount_e6),0) FROM reserve_transaction_links l "
-            "JOIN transactions t ON t.id=l.transaction_id WHERE l.reserve_id=r.id AND t.status='POSTED') AS spent_e6 "
+            "JOIN transactions t ON t.id=l.transaction_id WHERE l.reserve_id=r.id AND t.status='POSTED') AS spent_e6,"
+            "EXISTS(SELECT 1 FROM reserve_transaction_links x JOIN refund_links rl ON rl.expense_id=x.transaction_id "
+            "WHERE x.reserve_id=r.id) AS has_returns "
             "FROM cash_reserves r WHERE r.id=?", (reserve_id,))
         if not row:
             raise NotFoundError("Reserve not found.")
-        return self._row(row)
+        return self._row(self._net(row))
 
     def set_planned_item(self, reserve_id: int, planned_item_id: int | None):
         """Explicitly authorize one reserve to fund future payments of one bill."""
@@ -239,6 +249,31 @@ class CashReserveService:
             (reserve_id,),
         )
 
+    def returns_for_reserve(self, reserve_id: int) -> list[dict]:
+        """Refunds that came back to this reserve (NF-12AK4), newest first: id, ref, date, amount."""
+        back = {}
+        for row in refund_returns(self.db):
+            if row["reserve_id"] == reserve_id:
+                back[row["refund_id"]] = back.get(row["refund_id"], 0) + row["amount_e6"]
+        if not back:
+            return []
+        rows = self.db.all(f"SELECT id,ref,date FROM transactions WHERE id IN ({','.join('?' * len(back))}) "
+                           "ORDER BY date DESC,id DESC", tuple(back))
+        return [{**dict(row), "amount": from_e6(back[row["id"]])} for row in rows]
+
+    def returned_by_refund(self, refund_id: int) -> list[dict]:
+        """Where a refund went back to (NF-12AK4): each reserve it refilled, with the amount."""
+        back = {}
+        for row in refund_returns(self.db):
+            if row["refund_id"] == refund_id:
+                back[row["reserve_id"]] = back.get(row["reserve_id"], 0) + row["amount_e6"]
+        if not back:
+            return []
+        names = {int(row["id"]): row["name"] for row in self.db.all(
+            f"SELECT id,name FROM cash_reserves WHERE id IN ({','.join('?' * len(back))})", tuple(back))}
+        return [{"reserve_id": rid, "name": names.get(rid) or "Reserve", "amount": from_e6(amount)}
+                for rid, amount in back.items()]
+
     def set_emergency_fund(self, amount, salary_target=ZERO):
         """Set what the Emergency Fund holds now. Payments already taken from the fund are added back,
         so typing the figure every screen shows (set aside less what was used) changes nothing."""
@@ -253,7 +288,8 @@ class CashReserveService:
             if active:
                 used = from_e6(int(self.db.scalar(
                     "SELECT COALESCE(SUM(l.amount_e6),0) FROM reserve_transaction_links l JOIN transactions t "
-                    "ON t.id=l.transaction_id WHERE l.reserve_id=? AND t.status='POSTED'", (active["id"],)) or 0))
+                    "ON t.id=l.transaction_id WHERE l.reserve_id=? AND t.status='POSTED'", (active["id"],)) or 0)
+                    - returned_e6(self.db, int(active["id"])))
                 self.db.execute("UPDATE cash_reserves SET target_e6=?,updated_at=? WHERE id=?",
                                 (to_e6(max(target, value + used)), now_iso(), active["id"]))
                 return self.allocate(int(active["id"]), value + used)
@@ -335,7 +371,7 @@ class CashReserveService:
             "SELECT COALESCE(SUM(l.amount_e6),0) FROM reserve_transaction_links l "
             "JOIN transactions t ON t.id=l.transaction_id WHERE l.reserve_id=? AND t.status='POSTED'",
             (reserve_id,),
-        ) or 0)
+        ) or 0) - returned_e6(self.db, reserve_id)
         if to_e6(value) < linked:
             raise ValidationError("This amount is below payments already assigned to the reserve.", "allocated")
         self.db.execute(
@@ -406,7 +442,7 @@ class CashReserveService:
             "SELECT COALESCE(SUM(amount_e6),0) FROM reserve_transaction_links WHERE reserve_id=? "
             "AND transaction_id<>? AND transaction_id IN (SELECT id FROM transactions WHERE status='POSTED')",
             (reserve_id, transaction_id),
-        ) or 0)
+        ) or 0) - returned_e6(self.db, reserve_id, besides_expense=transaction_id)
         if other_spent + to_e6(value) > int(reserve["allocated_e6"]):
             raise ValidationError("Assign more cash to this reserve before linking that much of the payment.", "amount")
         now = now_iso()
@@ -420,7 +456,7 @@ class CashReserveService:
             "SELECT COALESCE(SUM(l.amount_e6),0) FROM reserve_transaction_links l "
             "JOIN transactions t ON t.id=l.transaction_id WHERE l.reserve_id=? AND t.status='POSTED'",
             (reserve_id,),
-        ) or 0)
+        ) or 0) - returned_e6(self.db, reserve_id)
         if reserve["recurrence"] != "NONE" and total_spent >= int(reserve["target_e6"]):
             next_due = self._next_due(reserve)
             if next_due:
@@ -590,6 +626,13 @@ class CashReserveService:
         self.db.execute("INSERT INTO reserve_allocation_history(reserve_id,created_date,effective_date,allocated_e6,status) VALUES(?,?,?,?,?)",
                         (reserve_id, str(reserve["created_at"])[:10], today().isoformat(), reserve["allocated_e6"], "DELETED"))
         self.db.execute("DELETE FROM cash_reserves WHERE id=?", (reserve_id,))
+
+    def _net(self, row) -> dict:
+        """A reserve row with what it spent net of the refunds that came back to it (NF-12AK4)."""
+        item = dict(row)
+        if item.pop("has_returns", True):  # the reserve's own query says whether any refund names its purchases
+            item["spent_e6"] = int(item.get("spent_e6") or 0) - returned_e6(self.db, int(item["id"]))
+        return item
 
     @staticmethod
     def _row(row):

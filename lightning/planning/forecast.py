@@ -231,8 +231,12 @@ class CashForecaster:
                     or (line.get("counterparty_id"), line["category_id"]) in payees):
                 continue
             key = (line["transaction_id"], line["category_id"])
-            adjustment = adjustments.get(key) if line["value"] > ZERO and key not in deducted else None
-            amount = line["value"] - (adjustment["principal"] + adjustment["reserve"] if adjustment else ZERO)
+            adjustment = adjustments.get(key) if key not in deducted else None
+            funded = adjustment["principal"] + adjustment["reserve"] if adjustment else ZERO
+            # Funding lowers spending; a refund handed back to a reserve (negative, NF-12AK4) cancels money back.
+            if (funded > ZERO) != (line["value"] > ZERO) or (funded < ZERO) != (line["value"] < ZERO):
+                adjustment, funded = None, ZERO
+            amount = line["value"] - funded
             if adjustment:
                 deducted.add(key)
             daily[line["date"]] = daily.get(line["date"], ZERO) + amount

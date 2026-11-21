@@ -17,6 +17,7 @@ from lightning.core.money import ZERO, check_places, fmt, from_e6, to_decimal
 from lightning.database.connection import Database
 from lightning.database.settings import raw_setting
 from lightning.reporting.service import ReportingService
+from lightning.transactions.refunds import refund_returns
 
 from .domain import (EMERGENCY_BASES, INCOME_BASIS_FROM, INCOME_FROM_RECURRING, dated_basis, BudgetFillProposal, BudgetFillRow, BudgetLine, BudgetMonth,
                      BudgetSection, EmergencyFund, IncomeAverage, ScheduleView, SpendingAverage)
@@ -1016,7 +1017,7 @@ class BudgetService:
         amount the receipt took off that category (never more than the amount linked) and both dates. Money back is a
         claim's receipt or a refund that names its purchase (NF-12AK3); money that is both counts once, as a receipt."""
         rows = [*self.db.all(
-            "SELECT rr.id link_id,rr.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
+            "SELECT rr.id link_id,NULL refund_id,rr.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
             "le.category_id,SUM(le.amount_base_e6) total_e6 "
             "FROM reimbursement_receipts rr JOIN reimbursement_claims rc ON rc.id=rr.claim_id "
             "JOIN transactions r ON r.id=rr.receipt_id JOIN transactions e ON e.id=rc.expense_id "
@@ -1024,7 +1025,7 @@ class BudgetService:
             "WHERE rc.paid_for_work=0 AND r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
             "AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
             "GROUP BY rr.id,le.category_id ORDER BY rr.id,le.category_id"), *self.db.all(
-            "SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
+            "SELECT 'refund:'||rl.id link_id,rl.refund_id,rl.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
             "le.category_id,SUM(le.amount_base_e6) total_e6 "
             "FROM refund_links rl JOIN transactions r ON r.id=rl.refund_id JOIN transactions e ON e.id=rl.expense_id "
             "JOIN ledger_entries le ON le.transaction_id=r.id "
@@ -1033,13 +1034,14 @@ class BudgetService:
             "AND NOT EXISTS (SELECT 1 FROM reimbursement_receipts x WHERE x.receipt_id=rl.refund_id) "
             "AND le.category_id IN (SELECT category_id FROM ledger_entries WHERE transaction_id=rl.expense_id) "
             "GROUP BY rl.id,le.category_id ORDER BY rl.id,le.category_id")]
-        investment, shifts, left = self._investment_ids(), [], {}
+        investment, shifts, left, back = self._investment_ids(), [], {}, self._back_to_reserves()
         for row in rows:
             category = self.categories.get(int(row["category_id"]))
             if category.movement != Movement.OUTFLOW or category.id in investment:
                 continue  # money back recorded as income never reduced spending, so there is nothing to move
             reduced = from_e6(int(row["total_e6"] or 0))  # a receipt line is positive when it takes from spending
-            remaining = left.setdefault(row["link_id"], from_e6(int(row["linked_e6"])))
+            # What went back to a reserve (NF-12AK4) never lowered the month, so there is nothing of it to move.
+            remaining = left.setdefault(row["link_id"], from_e6(int(row["linked_e6"]) - back.get(row["refund_id"], 0)))
             amount = min(reduced, remaining)
             if amount <= ZERO:
                 continue
@@ -1047,6 +1049,13 @@ class BudgetService:
             shifts.append({"category_id": category.id, "amount": amount, "expense_id": int(row["expense_id"]),
                            "receipt_date": row["receipt_date"], "expense_date": row["expense_date"]})
         return shifts
+
+    def _back_to_reserves(self) -> dict[int, int]:
+        """Per refund, what it handed back to reserves (NF-12AK4, e6)."""
+        back: dict[int, int] = {}
+        for row in refund_returns(self.db):
+            back[row["refund_id"]] = back.get(row["refund_id"], 0) + row["amount_e6"]
+        return back
 
     @request_cached(deep=True)
     def _left_out_lines(self) -> list[dict]:
@@ -1058,34 +1067,36 @@ class BudgetService:
         owned = ("le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
                  "AND le.category_id NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY')")
         expenses = self.db.all(
-            "SELECT NULL link_id,0 linked_e6,t.id transaction_id,le.date,le.category_id,SUM(le.amount_base_e6-COALESCE(w.amount_e6,0)) total_e6 "
+            "SELECT NULL link_id,NULL refund_id,0 linked_e6,t.id transaction_id,le.date,le.category_id,SUM(le.amount_base_e6-COALESCE(w.amount_e6,0)) total_e6 "
             "FROM budget_estimate_exclusions x JOIN transactions t ON t.id=x.transaction_id "
             "JOIN ledger_entries le ON le.transaction_id=t.id "
             "LEFT JOIN work_claim_allocations w ON w.transaction_id=le.transaction_id AND w.line_no=le.line_no "
             f"WHERE t.status='POSTED' AND {owned} GROUP BY t.id,le.category_id,le.date")
         back = self.db.all(  # money back: a claim's receipts, and refunds that name the purchase (NF-12AK3), once
-            "SELECT 'claim:'||rr.id link_id,rr.amount_e6 linked_e6,NULL transaction_id,le.date,le.category_id,"
+            "SELECT 'claim:'||rr.id link_id,NULL refund_id,rr.amount_e6 linked_e6,NULL transaction_id,le.date,le.category_id,"
             "SUM(le.amount_base_e6) total_e6 FROM budget_estimate_exclusions x "
             "JOIN transactions e ON e.id=x.transaction_id JOIN reimbursement_claims rc ON rc.expense_id=e.id "
             "JOIN reimbursement_receipts rr ON rr.claim_id=rc.id JOIN transactions r ON r.id=rr.receipt_id "
             "JOIN ledger_entries le ON le.transaction_id=r.id "
             f"WHERE rc.paid_for_work=0 AND e.status='POSTED' AND r.status='POSTED' AND {owned} "
             "GROUP BY rr.id,le.category_id,le.date "
-            "UNION ALL SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,NULL transaction_id,le.date,le.category_id,"
+            "UNION ALL SELECT 'refund:'||rl.id link_id,rl.refund_id,rl.amount_e6 linked_e6,NULL transaction_id,le.date,le.category_id,"
             "SUM(le.amount_base_e6) total_e6 FROM budget_estimate_exclusions x "
             "JOIN transactions e ON e.id=x.transaction_id JOIN refund_links rl ON rl.expense_id=e.id "
             "JOIN transactions r ON r.id=rl.refund_id JOIN ledger_entries le ON le.transaction_id=r.id "
             f"WHERE e.status='POSTED' AND r.status='POSTED' AND {owned} "
             "AND NOT EXISTS (SELECT 1 FROM reimbursement_receipts y WHERE y.receipt_id=rl.refund_id) "
-            "GROUP BY rl.id,le.category_id,le.date ORDER BY 1,5,4")
-        investment, lines, left = self._investment_ids(), [], {}
+            "GROUP BY rl.id,le.category_id,le.date ORDER BY 1,6,5")
+        investment, lines, left, gone = self._investment_ids(), [], {}, self._back_to_reserves()
         for row in [*expenses, *back]:
             category = self.categories.get(int(row["category_id"]))
             if category.movement != Movement.OUTFLOW or category.id in investment:
                 continue  # never part of the basis: income, or investment money
             amount = -from_e6(int(row["total_e6"] or 0))  # money out is a negative line, money back positive
             if row["link_id"] is not None:  # money back takes off at most what is linked to the expense
-                remaining = left.setdefault(row["link_id"], from_e6(int(row["linked_e6"])))
+                # What went back to a reserve (NF-12AK4) is already out of the refund's month.
+                remaining = left.setdefault(row["link_id"],
+                                            from_e6(int(row["linked_e6"]) - gone.get(row["refund_id"], 0)))
                 back_amount = min(-amount, remaining)
                 if back_amount <= ZERO:
                     continue

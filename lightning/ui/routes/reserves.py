@@ -55,6 +55,7 @@ def _context(request: Request, error: str = ""):
         item["late"] = late.get(item["id"])
         item["payments"] = [dict(row) | {"amount": from_e6(row["amount_e6"])}
                             for row in c.reserves.links_for_reserve(item["id"])]
+        item["payments"] += [row | {"back": True} for row in c.reserves.returns_for_reserve(item["id"])]
     # Completed dated rows are payment occurrences; undated project goals remain
     # a separate savings-goal workflow.
     completed = [item for item in c.reserves.list_completed() if item.get("due_date")]

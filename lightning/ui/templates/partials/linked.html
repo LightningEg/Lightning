@@ -38,6 +38,7 @@
   <h2 id="refund-title">{{ 'This refunds…'|tr(locale) }}</h2>
   {% if r.link %}<div class="{{ 'phone-row' if phone_mode() else 'compact-row' }} linked-row"><span><a class="linked-name" href="/transactions/{{ r.link.expense_id }}">{{ r.link.description or r.link.ref }}</a><small>{{ 'Bought {date} · estimates count this refund in that month'|tr(locale, date=r.link.date|day(locale)) }}</small></span><b class="num">{{ r.link.amount|money }}</b>
     {% if editable %}<form method="post" action="/transactions/{{ txn.id }}/refund-link"><input type="hidden" name="action" value="unlink"><button class="btn small">{{ 'Remove link'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div>
+  {% for b in r.back %}<div class="{{ 'phone-row' if phone_mode() else 'compact-row' }} linked-row"><span><a class="linked-name" href="/plan/reserves">{{ 'Went back to {name}'|tr(locale, name=b.name) }}</a><small>{{ 'The reserve paid for this purchase, so the money goes back to it, not to this month'|tr(locale) }}</small></span><b class="num">{{ b.amount|money }}</b></div>{% endfor %}
   {% else %}<p class="muted small">{{ 'Name the purchase this money returns, so budget averages count it in the month you bought it.'|tr(locale) }}</p>{% endif %}
   {% if editable and r.candidates %}<form method="post" action="/transactions/{{ txn.id }}/refund-link">
     <input type="hidden" name="action" value="link">

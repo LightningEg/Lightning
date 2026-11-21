@@ -4103,6 +4103,10 @@ ARABIC_UI = {
     'Returned {date}': 'رجع {date}',
     '{amt} not returned': '{amt} مرجعش',
     'Amount back': 'المبلغ اللي رجع',
+    # NF-12AK4: a refund of a reserve-funded purchase goes back to the reserve.
+    'Went back to {name}': 'رجع لـ{name}',
+    'The reserve paid for this purchase, so the money goes back to it, not to this month': 'المبلغ المحجوز هو اللي دفع الشراء ده، فالفلوس بترجع له مش للشهر ده',
+    'Refund {amt} back': 'استرداد {amt} رجع',
     'Record a refund': 'سجّل استرداد',
     'Split across categories: record the refund from its account, then name this purchase on it.': 'متقسم على كذا فئة: سجّل الاسترداد من حسابه، وبعدين اختار الشراء ده عليه.',
     'Fully returned': 'رجع كله',

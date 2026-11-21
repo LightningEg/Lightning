@@ -479,7 +479,8 @@ def _refund_context(c, txn) -> dict | None:
         candidates = c.refunds.candidates(txn.id)
         if not link and not candidates:
             return None
-        return {"role": "refund", "link": link, "candidates": candidates}
+        back = c.reserves.returned_by_refund(txn.id) if link else []  # NF-12AK4: what went back to a reserve
+        return {"role": "refund", "link": link, "candidates": candidates, "back": back}
     refunds = c.refunds.refunds_of(txn.id)
     room = c.refunds.room_for_refund(txn.id)
     if not refunds and room is None:
