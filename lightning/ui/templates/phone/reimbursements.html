@@ -48,6 +48,7 @@
       <div class="phone-row"><span>{{ 'Payer'|tr(locale) }}</span><b>{{ claim.payer_name or '—' }}</b></div>
       <div class="phone-row"><span>{{ 'Due date'|tr(locale) }}</span><b>{{ claim.due_date or '—' }}</b></div>
       <div class="phone-row"><span>{{ 'Expected'|tr(locale) }}</span><b>{{ claim.expected|money }} {{ base }}</b></div>
+      {% if claim.merchant_refund %}<div class="phone-row"><span>{{ "Merchant refund"|tr(locale) }}</span><b>{{ claim.merchant_refund|money }} {{ base }}</b></div>{% endif %}
       <div class="phone-row"><span>{{ 'Received'|tr(locale) }}</span><b>{{ claim.received|money }} {{ base }}</b></div>
       <div class="phone-row"><span>{{ 'Outstanding'|tr(locale) }}</span><b>{{ claim.outstanding|money }} {{ base }}</b></div>
     </div>
