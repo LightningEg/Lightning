@@ -1,0 +1,9 @@
+{# NF-12AK5: a category's month as paid · returned · expected back · yours, shown only when something came or is due
+   back. Figures come from BudgetService.recoveries; nothing is worked out here. #}
+{% if rec and (rec.returned or rec.expected_back) %}{% set row_class = 'phone-row' if phone_mode() else 'compact-row' %}
+<div class="{{ 'phone-rows' if phone_mode() else 'compact-list' }} budget-recoveries" aria-label="{{ 'Paid, returned and expected back'|tr(locale) }}">
+  <div class="{{ row_class }}"><span>{{ 'Paid'|tr(locale) }}</span><b class="num"><bdi class="fig">{{ rec.paid|money(False, 0) }}</bdi></b></div>
+  <div class="{{ row_class }}"><span>{{ 'Returned'|tr(locale) }}</span><b class="num"><bdi class="fig">{{ rec.returned|money(False, 0) }}</bdi></b></div>
+  {% if rec.expected_back %}<a class="{{ row_class }}" href="/reimbursements"><span>{{ 'Expected back'|tr(locale) }}<small>{{ 'Open claims on these purchases'|tr(locale) }}</small></span><b class="num"><bdi class="fig">{{ rec.expected_back|money(False, 0) }}</bdi></b></a>{% endif %}
+  <div class="{{ row_class }}"><span><b>{{ 'Yours'|tr(locale) }}</b><small>{{ 'What these purchases cost you'|tr(locale) }}</small></span><b class="num"><bdi class="fig">{{ rec.yours|money(False, 0) }}</bdi></b></div>
+</div>{% endif %}

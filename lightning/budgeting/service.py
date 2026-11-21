@@ -807,6 +807,65 @@ class BudgetService:
         one_offs, wanted = self.one_off_ids(), set(category_ids)
         return sum((v for cid, v in self.owned_spending(start, end).items() if cid in wanted and cid not in one_offs), ZERO)
 
+    def unusual_purchases(self, month: str) -> list[dict]:
+        """NF-12AK5 (owner, 2026-11-13): purchases that make up more than half of their category's estimate basis in
+        the three completed months before ``month``, in a category that also had spending in another of those months,
+        so one large buy stands out against normal spending (a 9,000 laptop beside 1,000 a month of food). A purchase
+        already left out of estimates, paid by a scheduled bill or funded from a reserve or a loan is never offered.
+        Largest first, one per category."""
+        cursor, windows = parse_month(month)[0], []
+        for _ in range(3):
+            start, end = parse_month(month_of(cursor - timedelta(days=1)))
+            windows.append((start, end))
+            cursor = start
+        first, last = windows[-1][0], windows[0][1]
+        basis = self._completed_months(month, 3)
+        totals = {cid: sum((m.get(cid, ZERO) for m in basis), ZERO) for m in basis for cid in m}
+        months_with = {cid: sum(1 for m in basis if m.get(cid, ZERO) > ZERO) for cid in totals}
+        skip = set(self.left_out_ids()) | {int(row["transaction_id"]) for row in self.db.all(
+            "SELECT transaction_id FROM planned_payments WHERE transaction_id IS NOT NULL "
+            "UNION SELECT transaction_id FROM reserve_transaction_links "
+            "UNION SELECT transaction_id FROM loan_extra_payments")}
+        investment = self._investment_ids()
+        purchases: dict[tuple[int, int], dict] = {}
+        for line in self.reporting.spending_lines(first, last):
+            txn, cid = line["transaction_id"], line["category_id"]
+            if txn in skip or cid in investment or line["value"] <= ZERO:
+                continue
+            row = purchases.setdefault((txn, cid), {"transaction_id": txn, "category_id": cid, "date": line["date"],
+                                                    "name": line["counterparty"] or line["description"] or "",
+                                                    "amount": ZERO})
+            row["amount"] += line["value"]
+        found: dict[int, dict] = {}
+        for row in purchases.values():
+            cid, total = row["category_id"], totals.get(row["category_id"], ZERO)
+            if total <= ZERO or months_with.get(cid, 0) < 2 or row["amount"] * 2 <= total:
+                continue
+            if cid not in found or row["amount"] > found[cid]["amount"]:
+                found[cid] = row | {"window_total": total, "category": self.categories.get(cid).name}
+        return sorted(found.values(), key=lambda row: -row["amount"])
+
+    def tree_ids(self, category_id: int) -> set[int]:
+        """A category and every category under it."""
+        return {int(category_id)} | {c.id for c in self.categories.descendants(category_id)}
+
+    def recoveries(self, category_ids, start, end, *, expected_back: Decimal) -> dict[str, Decimal]:
+        """NF-12AK5 (owner, 2026-11-13): a category's month as four figures, never mixed: *paid* (what its purchases
+        cost), *returned* (refunds and claim receipts in it), *expected back* (personal claims still open, from
+        ``ReimbursementService.expected_back``) and *yours* (paid less both). Personal spending only: work claims are
+        out already (NF-12AM)."""
+        wanted, paid, returned = set(category_ids), ZERO, ZERO
+        investment = self._investment_ids()
+        for line in self.reporting.spending_lines(start, end):
+            if line["category_id"] not in wanted or line["category_id"] in investment:
+                continue
+            if line["value"] > ZERO:
+                paid += line["value"]
+            else:
+                returned -= line["value"]
+        return {"paid": paid, "returned": returned, "expected_back": expected_back,
+                "yours": paid - returned - expected_back}
+
     def plan_funded_spending(self, start, end) -> dict[int, Decimal]:
         """Gross owned spending less confirmed funding outside this month's plan."""
         gross = self.owned_spending(start, end)
@@ -1014,7 +1073,9 @@ class BudgetService:
     def _recovery_shifts(self) -> list[dict]:
         """Linked money back that arrived in another month than its expense: per receipt and spending category, the
         amount the receipt took off that category (never more than the amount linked) and both dates. Money back is a
-        claim's receipt or a refund that names its purchase (NF-12AK3); money that is both counts once, as a receipt."""
+        claim's receipt or a refund that names its purchase (NF-12AK3); money that is both counts once, as a receipt. The part
+        of a refund that went back to the reserve that paid for the purchase (NF-12AK4) never reduced plan spending, so it
+        does not move."""
         rows = [*self.db.all(
             "SELECT rr.id link_id,rr.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
             "le.category_id,SUM(le.amount_base_e6) total_e6 "
@@ -1024,7 +1085,8 @@ class BudgetService:
             "WHERE rc.paid_for_work=0 AND r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
             "AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
             "GROUP BY rr.id,le.category_id ORDER BY rr.id,le.category_id"), *self.db.all(
-            "SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
+            "SELECT 'refund:'||rl.id link_id,rl.amount_e6-COALESCE((SELECT SUM(x.amount_e6) FROM reserve_refunds x "
+            "WHERE x.refund_id=rl.refund_id),0) linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
             "le.category_id,SUM(le.amount_base_e6) total_e6 "
             "FROM refund_links rl JOIN transactions r ON r.id=rl.refund_id JOIN transactions e ON e.id=rl.expense_id "
             "JOIN ledger_entries le ON le.transaction_id=r.id "

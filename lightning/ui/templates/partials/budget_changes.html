@@ -1,0 +1,12 @@
+{# NF-12AL3: what changed leads Budget. Rows come from ReviewInbox.changes; Accept is each row's own action, Dismiss
+   remembers the row until its evidence changes. Nothing here is mandatory. #}
+{% if changes is not none %}{% set back = '/budget?month=' ~ month ~ '#changes' %}
+<section class="{{ 'phone-section' if phone_mode() else 'card wide-card' }} budget-changes" id="changes" aria-labelledby="changes-h">
+  <h2 id="changes-h">{% if changes %}{{ ('1 change to look at' if changes|length == 1 else '{n} changes to look at')|tr(locale, n=changes|length) }}{% else %}{{ 'Your plan continues'|tr(locale) }}{% endif %}</h2>
+  {% if not changes %}<p class="muted small">{{ 'Nothing in your income, bills or spending asks for a new plan this month.'|tr(locale) }}</p>
+  {% else %}<div class="{{ 'phone-rows' if phone_mode() else 'compact-list' }}">{% for item in changes %}
+    <div class="{{ 'phone-row' if phone_mode() else 'compact-row' }} budget-change"><span><b>{{ item.label }}</b><small>{{ item.detail }}</small></span>
+      <span class="budget-change-actions">{% if item.post %}<form method="post" action="{{ item.post.href }}">{% for key, value in (item.post.fields or {}).items() %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endfor %}<button class="btn small primary">{{ item.post.label|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% else %}<a class="btn small primary" href="{{ item.href }}"{% if item.popup %} data-popup-open{% endif %}>{{ (item.action or 'Look')|tr(locale) }}</a>{% endif %}
+      <form method="post" action="/needs-you/state"><input type="hidden" name="identity" value="{{ item.review_id }}"><input type="hidden" name="action" value="reviewed"><input type="hidden" name="back" value="{{ back }}"><button class="btn small">{{ ('Keep' if item.post else 'Dismiss')|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></span>
+    </div>{% endfor %}</div>{% endif %}
+</section>{% endif %}

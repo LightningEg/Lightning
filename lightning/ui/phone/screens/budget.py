@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import ROUND_CEILING, Decimal
 
+from lightning.workflows.review import ReviewInbox
 from lightning.budgeting.domain import spent_outside
 from lightning.core.dates import month_of, parse_month
 from lightning.planning.domain import plan_parts
@@ -61,6 +62,7 @@ class BudgetScreen:
     work: tuple = ()                  # IV-11M5: open work claims, paid for someone else to pay back ({id, name, payer, outstanding})
     trend: dict | None = None         # IV-11M5 Spending: six months of spending, the usual month, daily average, biggest day
     exclusions: tuple = ()
+    changes: list | None = None       # NF-12AL3: what changed this month (current month with a plan only)
 
 
 def _shift(month: str, step: int) -> str:
@@ -118,7 +120,8 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
                         payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None,
                         everyday_plan=e.everyday_plan, everyday_spent=e.everyday_spent, days_left=e.days_left,
                         trend=spending_trend(c, shown, day), work=work_claims(c),
-                        exclusions=exclusion_context(c)["estimate_exclusions"])
+                        exclusions=exclusion_context(c)["estimate_exclusions"],
+                        changes=ReviewInbox(c).changes(day) if state == "current" else None)
 
 
 def work_claims(c) -> tuple:

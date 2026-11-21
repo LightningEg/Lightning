@@ -17,6 +17,7 @@
   <p class="category-sheet-figure"><b>{{ spent|money(False, 0) }}</b> <small>{{ base }}</small></p>
   <p class="muted small">{{ 'No limit for this category this month.'|tr(locale) }}</p>
   {% endif %}
+  {% include "partials/budget_recoveries.html" %}
   {% if rows %}<h3 class="category-sheet-sub">{{ 'Last payments'|tr(locale) }}</h3>
   <div class="compact-list">{% for t in rows %}<a class="compact-row" href="/transactions/{{ t.id }}"><span>{{ t.counterparty or t.description or t.type_label }}<small>{{ t.date }}</small></span><b>{{ t.amount|amount_role('row', True) }}</b></a>{% endfor %}</div>
   {% elif earlier %}<p class="muted small"><a href="{{ see_last }}">{{ 'Last month'|tr(locale) }} {{ last_month }}</a> · {{ earlier|money(False, 0) }} {{ base }}</p>
