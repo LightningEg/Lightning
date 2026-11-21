@@ -30,8 +30,5 @@ Reproductions: the scripts in #626.
 
 Acceptance: the #626 cases above give 1,000 (laptop left out), 2,000 labelled, 0 not −6,000, "1,200 expected back", and reserve 200 restored with the month at 0; Cash flow and the ledger are byte-for-byte unchanged in every case; Mohab's year still passes; PC and phone, English and Arabic.
 
-## 12AK4 Reserve-funded refunds go back to the reserve · M · opus · #647
-Rule 4 in `workflows/budget_funding.py` for linked refunds; the reserve page and the month say where the 200 went. Done when: #626's reserve case shows reserve used 800, 200 still in the reserve, the month's plan spending 0; reserve balances otherwise unchanged (number-audit skill).
-
 ## 12AK5 Paid, returned, expected back on Budget, and the unusual-purchase review · M · opus · #648
 Already built, so not part of this step (inventory 2026-11-21): the transaction page shows *Claimed · received · still owed* and links refunds (`partials/linked.html`, #694); work purchases are kept out of personal spending with their own period card (NF-12AM, #722, migration 0089); one purchase can be left out of estimates (#704). Left: (a) the Budget category sheet shows *paid · returned · expected back · yours* for the category's personal claims and linked refunds (work claims stay in the work-claim card, never counted twice); (b) the review line "Food's average includes a 9,000 purchase on 3 Nov: leave it out of estimates?" with Keep / Leave out (the #704 exclusion), dismissal remembered, only when one purchase is over half the category's window total, offered as one row of 12AL3's card. Done when: the four figures match `ReimbursementService` and `refunds.py`, the review appears once and its choice is undoable, PC and phone in English and Arabic.
