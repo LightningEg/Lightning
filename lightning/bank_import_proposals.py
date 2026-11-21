@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import difflib
 import functools
+import hashlib
 import json
 import re
 from decimal import Decimal
@@ -10,6 +11,7 @@ from decimal import Decimal
 from lightning.bank_import_rows import is_balance_row, is_internal, split_category_path
 from lightning.categories.domain import Movement
 from lightning.core.errors import NotFoundError, ValidationError
+from lightning.database.settings import SettingsStore
 from lightning.foreign_amounts import ForeignAmounts
 from lightning.transactions.tags import tags_in
 
@@ -114,10 +116,13 @@ class ImportProposals:
         result = []
         amount_dates = {}
         dates = set()
+        unreferenced_dates = set()
         for source_row in rows:
             staged = json.loads(source_row["raw_json"])["parsed"]
             if not staged.get("_errors"):
                 dates.add(staged["Date"])
+                if not source_row["bank_reference"]:
+                    unreferenced_dates.add(staged["Date"])
             if not staged.get("_errors") and not staged.get("_skip_reason"):
                 key = (staged["Date"], staged["Amount"])
                 amount_dates[key] = amount_dates.get(key, 0) + 1
@@ -134,6 +139,7 @@ class ImportProposals:
                 pending_elsewhere.setdefault((staged["Date"], staged["Amount"]), other["file_name"])
             except (TypeError, ValueError, KeyError):
                 continue
+        voided_amounts = self._voided_amounts(batch["account_id"], batch_id, unreferenced_dates)
         active_accounts = self._active()
         pairs = self._paired_rows(rows)
         seen_refs = set()
@@ -161,16 +167,39 @@ class ImportProposals:
                 (batch["account_id"], batch_id, file_digest, file_digest + "#%", row["row_number"])))
             if row["bank_reference"]:
                 seen_refs.add(row["bank_reference"])
-            cp = self.counterparties.resolve(parsed["Counterparty"])
+            sms_ambiguous = False
+            if batch["file_name"].startswith("SMS ") and raw.get("Message"):
+                cp, sms_ambiguous = self.counterparties.sms_match(parsed["Counterparty"])
+            else:
+                cp = self.counterparties.resolve(parsed["Counterparty"])
+            parsed["_sms_category_key"] = ""
+            remembered_category = None
+            if (batch["file_name"].startswith("SMS ") and raw.get("SMS kind") == "purchase"
+                    and raw.get("Read") == "sure" and raw.get("Message") and parsed["Counterparty"]):
+                from lightning.counterparties import normalize
+                label = normalize(parsed["Counterparty"])
+                digest = hashlib.sha256(label.encode()).hexdigest()
+                key = f"sms_purchase_choice:{self._account(batch['account_id']).code}:{digest}"
+                parsed["_sms_category_key"] = key
+                saved = SettingsStore(self.db).get(key)
+                if saved:
+                    try:
+                        name, code = json.loads(saved)
+                        party = self.counterparties.resolve(name)
+                        category = self.categories.get_by_code(code)
+                        if party and party["active"] and category.active and category.movement == Movement.OUTFLOW:
+                            cp, sms_ambiguous, remembered_category = party, False, category
+                    except (ValueError, TypeError, NotFoundError):
+                        pass
             parsed["_counterparty_id"] = cp["id"] if cp else None
-            parsed["_suggestions"] = self.counterparties.suggestions(parsed["Counterparty"])
+            parsed["_suggestions"] = [] if cp else self.counterparties.suggestions(parsed["Counterparty"])
             parsed["_reference_duplicate"] = ref_duplicate
             parsed["_repeat_import"] = repeat_import
             parsed["_pending_elsewhere"] = pending_elsewhere.get((parsed.get("Date"), parsed.get("Amount")), "")
             parsed["_similarity_warning"] = (self._similarity_warning(batch["account_id"], parsed)
                 or amount_dates.get((parsed["Date"], parsed["Amount"]), 0) > 1 or bool(parsed["_pending_elsewhere"]))
-            parsed["_voided_earlier"] = not ref_duplicate and self._voided_earlier(batch["account_id"], batch_id,
-                                                                                row["bank_reference"], parsed)
+            parsed["_voided_earlier"] = not ref_duplicate and self._voided_earlier(
+                batch["account_id"], batch_id, row["bank_reference"], parsed, voided_amounts)
             parsed["_link_candidates"] = ([] if ref_duplicate or repeat_import or row["status"] != "REVIEW"
                                           else self._link_candidates(batch["account_id"], parsed, batch["id"]))
             self._split_path(parsed)
@@ -181,6 +210,8 @@ class ImportProposals:
             parsed["_balance_row"] = bool(parsed.get("_skip_reason")) or is_balance_row(parsed["Category"], parsed["Counterparty"])
             outcome = self._rules_outcome(batch["account_id"], parsed, cp)
             parsed["_category_id"] = None if parsed["_internal"] else self._category_for(parsed, cp, outcome, usual)
+            if remembered_category and not parsed["_rule_id"]:
+                parsed["_category_id"] = remembered_category.id
             if parsed.get("_file_split") and not parsed["_internal"]:
                 parts = self._file_split_parts(parsed)
                 if parts:
@@ -203,7 +234,7 @@ class ImportProposals:
                            if a.name == parsed["_transfer_target_suggestion"]), None)
             same_name = [a for a in active_accounts if a.id != batch["account_id"]
                          and a.name.casefold() == parsed["Counterparty"].strip().casefold()]
-            parsed["_identity_ambiguous"] = len(same_name) > 1 or bool(same_name and cp)
+            parsed["_identity_ambiguous"] = (sms_ambiguous and not same_name) or len(same_name) > 1 or bool(same_name and cp)
             if parsed["_identity_ambiguous"]:
                 target = None
                 parsed["_transfer_target_suggestion"] = None
@@ -225,10 +256,15 @@ class ImportProposals:
             parsed["_whom"] = cp["name"] if cp and cp["active"] else ""
             parsed["_possible_duplicate"] = bool(ref_duplicate or repeat_import or parsed["_similarity_warning"]
                                                  or parsed["_link_candidates"])
-            parsed["_ready"] = bool(not parsed.get("_errors") and not parsed["_possible_duplicate"]
-                                    and not parsed["_balance_row"]
-                                    and not parsed["_suggestions"] and not parsed["_needs_account"] and not parsed["_identity_ambiguous"]
-                                    and (parsed["_category_id"] or parsed["_transfer_target"]))
+            ready_to_file = not (parsed.get("_errors") or parsed["_possible_duplicate"] or parsed["_balance_row"]
+                                 or parsed["_suggestions"] or parsed["_needs_account"] or parsed["_identity_ambiguous"])
+            parsed["_ready"] = bool(ready_to_file and (parsed["_category_id"] or parsed["_transfer_target"]))
+            parsed["_quick_purchase"] = bool(parsed["_sms_category_key"] and not any(parsed.get(flag) for flag in (
+                "_possible_duplicate", "_balance_row", "_errors", "_voided_earlier", "_transfer_target_suggestion",
+                "_internal", "_is_custody", "_rule_split", "_rule_id")))
+            parsed["_known_purchase_without_category"] = bool(
+                ready_to_file and raw.get("SMS kind") == "purchase" and cp and cp["active"]
+                and not parsed["_category_id"] and not parsed["_transfer_target_suggestion"])
             parsed["_import_row_id"] = row["id"]
             parsed["_account_id"] = batch["account_id"]
             parsed["_status"] = row["status"]
@@ -306,7 +342,25 @@ class ImportProposals:
                           "settles": item["settles"], "estimate": format(item["estimate"], "f")})
         return found
 
-    def _voided_earlier(self, account_id: int, batch_id: int, reference: str | None, parsed: dict) -> bool:
+    def _voided_amounts(self, account_id: int, batch_id: int, dates: set[str]) -> set[tuple[str, int]]:
+        """Read prior voided imports on the dates where a statement row has no reference."""
+        amounts = set()
+        days = sorted(dates)
+        for start in range(0, len(days), 500):
+            chunk = days[start:start + 500]
+            marks = ",".join("?" for _ in chunk)
+            rows = self.db.all(
+                "SELECT t.date, SUM(l.amount_e6) AS amount_e6 "
+                "FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
+                "JOIN transactions t ON t.id=r.transaction_id AND t.status='VOID' "
+                "JOIN ledger_entries l ON l.transaction_id=t.id AND l.account_id=b.account_id "
+                f"WHERE b.account_id=? AND b.id<>? AND t.date IN ({marks}) GROUP BY t.id",
+                (account_id, batch_id, *chunk))
+            amounts.update((r["date"], r["amount_e6"]) for r in rows)
+        return amounts
+
+    def _voided_earlier(self, account_id: int, batch_id: int, reference: str | None, parsed: dict,
+                        voided_amounts: set[tuple[str, int]]) -> bool:
         """An earlier import of this row was voided: importing it again must not quietly bring it back."""
         if parsed.get("_errors"):
             return False
@@ -319,12 +373,7 @@ class ImportProposals:
                 "WHERE b.account_id=? AND b.id<>? AND r.bank_reference=? LIMIT 1",
                 (account_id, batch_id, reference)))
         amount_e6 = int(Decimal(parsed["Amount"]) * 1_000_000)
-        return bool(self.db.scalar(
-            "SELECT 1 FROM bank_import_rows r JOIN bank_import_batches b ON b.id=r.batch_id "
-            "JOIN transactions t ON t.id=r.transaction_id AND t.status='VOID' AND t.date=? "
-            "JOIN ledger_entries l ON l.transaction_id=t.id AND l.account_id=b.account_id "
-            "WHERE b.account_id=? AND b.id<>? GROUP BY t.id HAVING SUM(l.amount_e6)=? LIMIT 1",
-            (parsed["Date"], account_id, batch_id, amount_e6)))
+        return (parsed["Date"], amount_e6) in voided_amounts
 
     def _own_account(self, source_account_id: int, name: str):
         """The name of another of your accounts typed as the counterparty, if it is one."""

@@ -65,7 +65,7 @@ _TABLE = [
     ("brokerage_cash", "Brokerage cash", "Your uninvested cash inside brokerage accounts."),
     ("cash_you_own", "Cash you own", "Your cash in banks, wallets and brokerage accounts.",
      "Bank and wallet cash + Brokerage cash"),
-    ("deposits", "Deposits", "Your certificates and time deposits, at their balance. They are part of Holdings value."),
+    ("deposits", "Deposits", "Your certificates and time deposits, at their balance; a certificate paid at maturity also counts the interest it has earned so far, an estimate. They are part of Holdings value."),
     ("gameya_paid_in", "Gam'eya paid in", "What you have paid into your savings circles and not yet taken out: a "
      "circle's balance while it owes you. It is part of Holdings value, a circle cannot be sold early (100%)."),
     ("holdings_value", "Holdings value", "Everything you own that is not cash, at its latest value: certificates and "

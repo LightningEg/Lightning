@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import calendar
 from datetime import date, timedelta
 from decimal import Decimal, ROUND_HALF_UP
 
@@ -15,6 +14,7 @@ from lightning.transactions.service import TransactionService
 
 from .domain import (CertificateTerms, CompoundingFrequency, DepositEvent, DepositTerms, InterestMethod,
                      PayoutFrequency)
+from lightning.core import certificate_schedule as schedule
 from .repository import DepositRepository
 
 _MICRO = Decimal("0.000001")
@@ -65,6 +65,60 @@ class DepositService:
             received = {"transaction_id": row["transaction_id"], "date": row["date"], "account_id": row["destination_account_id"],
                         "amount": from_e6(amount_e6)}
         return {"expected_date": terms.maturity_date, "expected": expected if expected > ZERO else None, "received": received}
+
+    def holding(self, certificate, day: date, received: Decimal, sale_factor: Decimal) -> dict:
+        """IV-12J1: what a certificate's own page says on ``day``, in the bank's words: its rate and payout schedule,
+        interest received (``received``: what the ledger attributes to it) against what its terms expected by now,
+        the next payment, days to unlock and to maturity, its value (principal plus interest earned and not yet
+        paid, an estimate: IV-12J3) and what cashing it in would bring (``sale_factor`` percent of that value between
+        unlock and maturity, all of it once matured, nothing while locked)."""
+        terms = certificate.terms
+        rates = self.rates(terms.id)
+        start, unlock, maturity = (parse_date(terms.start_date), parse_date(terms.lockup_end_date),
+                                   parse_date(terms.maturity_date))
+        purchase = self.db.one("SELECT date,type FROM transactions WHERE id=?", (terms.purchase_transaction_id,))
+        counted_from = parse_date(purchase["date"]) if purchase and purchase["type"] == DocType.OPN.value else start
+        held = not certificate.redeemed and certificate.units > ZERO
+        payments = [{"date": fmt_date(when), "amount": amount, "kind": kind, "past": when <= day}
+                    for when, amount, kind in schedule.events(terms, rates)]
+        interest = [p for p in payments if p["kind"] == "INTEREST"]
+        expected = sum((p["amount"] for p in interest
+                        if p["past"] and counted_from < parse_date(p["date"])), ZERO)
+        coming = self.next_payment(certificate, day)
+        next_date = coming["date"] if coming else None
+        earned = schedule.accrued(terms, min(day, maturity), rates) if held else ZERO
+        value = terms.principal + earned if held else ZERO
+        if not held or day < unlock:
+            cash_in = None
+        elif day >= maturity:
+            cash_in = value
+        else:
+            cash_in = (value * sale_factor / Decimal(100)).quantize(Decimal("0.01"))
+        return {
+            "terms": terms, "held": held, "rate": schedule.rate_on(terms, rates, day), "rates": rates,
+            "pays_at_maturity": schedule.pays_at_maturity(terms),
+            "payments": payments, "interest_payments": len(interest),
+            "expected": expected, "received": received, "earned": earned, "value": value,
+            "next_date": next_date,
+            "next_amount": coming["amount"] if coming else None,
+            "next_days": (parse_date(next_date) - day).days if next_date else None,
+            "unlock_days": (unlock - day).days if held and unlock > day else None,
+            "maturity_days": (maturity - day).days if held and maturity > day else None,
+            "sale_factor": sale_factor, "cash_in": cash_in,
+            "maturity_amount": sum((p["amount"] for p in payments if p["date"] == terms.maturity_date), ZERO),
+        }
+
+    def next_payment(self, certificate, day: date) -> dict | None:
+        """The bank's next payment on a held certificate after ``day``: {date, amount} (interest and principal paid the
+        same day together), or None once it is redeemed or has nothing left to pay."""
+        if certificate.redeemed or certificate.units <= ZERO:
+            return None
+        ahead = [(when, amount) for when, amount, _ in schedule.events(certificate.terms, self.rates(certificate.terms.id))
+                 if when > day]
+        if not ahead:
+            return None
+        first = ahead[0][0]
+        return {"date": fmt_date(first), "amount": sum((amount for when, amount in ahead if when == first), ZERO)}
 
     def open_certificates(self):
         """Every certificate still held (not redeemed), oldest maturity first."""
@@ -284,6 +338,20 @@ class DepositService:
             self.assets.update_investment(terms.asset_id, name, notes="Certificate of deposit; interest is forecast only.")
         return self.certificate(certificate_id)
 
+    def set_rate_change(self, certificate_id: int, effective_date, annual_rate):
+        """IV-12J4: a variable certificate's new rate from a date (after purchase, before maturity): periods starting
+        on or after it earn the new rate, earlier ones keep theirs; the purchase rate is not rewritten. Saving the
+        same date again replaces that change."""
+        terms = self.certificate(certificate_id).terms
+        day = parse_date(effective_date, "rate_from")
+        if not parse_date(terms.start_date) < day < parse_date(terms.maturity_date):
+            raise ValidationError("A new rate starts after the purchase date and before maturity.", "rate_from")
+        rate = to_decimal(annual_rate, "annual_rate")
+        if not ZERO <= rate <= Decimal("100"):
+            raise ValidationError("Annual rate must be between 0 and 100 percent.", "annual_rate")
+        with self.db.transaction():
+            self.repo.set_rate_change(certificate_id, fmt_date(day), rate)
+
     def redeem(self, certificate_id: int, date_value, proceeds, destination_account_id: int):
         """Record the actual whole-CD redemption amount supplied from the bank statement."""
         if self.transactions is None:
@@ -411,50 +479,16 @@ class DepositService:
         return sorted(events, key=lambda event: (event.date, event.deposit_account_id, event.kind))
 
     def _certificate_events(self, terms: CertificateTerms, day: date, horizon: date) -> list[DepositEvent]:
-        start, maturity = date.fromisoformat(terms.start_date), date.fromisoformat(terms.maturity_date)
-        end = min(maturity, horizon)
-        if end <= day:
+        """The bank's payments after ``day`` up to ``horizon``, from lightning/core/certificate_schedule.py."""
+        if min(date.fromisoformat(terms.maturity_date), horizon) <= day:
             return []
-        principal = terms.principal
-        rate = terms.annual_rate / Decimal("100")
-        events = []
+        return [DepositEvent(fmt_date(when), terms.destination_account_id, amount, kind, terms.account_id, terms.id)
+                for when, amount, kind in schedule.events(terms, self.rates(terms.id))
+                if day < when <= horizon and amount > ZERO]
 
-        def emit(when: date, amount: Decimal, kind: str):
-            if day < when <= horizon and amount > ZERO:
-                events.append(DepositEvent(fmt_date(when), terms.destination_account_id,
-                                           amount.quantize(_MICRO, rounding=ROUND_HALF_UP), kind,
-                                           terms.account_id, terms.id))
-
-        if terms.interest_method == InterestMethod.COMPOUND:
-            accrued, previous, index = ZERO, start, 1
-            step = _COMPOUND_MONTHS[terms.compounding_frequency]
-            while True:
-                period_end = min(_add_months(start, index * step), maturity)
-                full = period_end == _add_months(start, index * step)
-                accrued += _period_interest(principal + accrued, rate, previous, period_end, step if full else 0)
-                previous = period_end
-                if period_end == maturity:
-                    break
-                index += 1
-            emit(maturity, principal + accrued, "MATURITY")
-            return events
-        previous, index = start, 1
-        if terms.payout_frequency == PayoutFrequency.AT_MATURITY:
-            emit(maturity, _period_interest(principal, rate, start, maturity, _whole_months(start, maturity)),
-                 "INTEREST")
-        else:
-            step = _MONTHS[terms.payout_frequency]
-            while True:
-                period_end = min(_add_months(start, index * step), maturity)
-                full = period_end == _add_months(start, index * step)
-                emit(period_end, _period_interest(principal, rate, previous, period_end, step if full else 0),
-                     "INTEREST")
-                previous = period_end
-                if period_end == maturity:
-                    break
-                index += 1
-        emit(maturity, principal, "PRINCIPAL")
-        return events
+    def rates(self, certificate_id: int) -> list[tuple[date, Decimal]]:
+        """IV-12J4: dated rate changes of a variable certificate, oldest first (none for a fixed one)."""
+        return [(parse_date(when), rate) for when, rate in self.repo.rate_changes(certificate_id)]
 
     def _portfolio(self, account_id: int):
         return self._typed_account(account_id, {AccountType.DEPOSIT}, "account_id")
@@ -553,26 +587,7 @@ class DepositService:
         return account
 
 
-def _whole_months(start: date, end: date) -> int:
-    """The number of whole months from start to end, or 0 when end is not a whole number of months away."""
-    months = (end.year - start.year) * 12 + end.month - start.month
-    return months if months > 0 and _add_months(start, months) == end else 0
-
-
-def _period_interest(principal: Decimal, rate: Decimal, begin: date, end: date, months: int) -> Decimal:
-    """IV-12J2: interest for one payout period the way Egyptian banks pay it. A full period of ``months`` months earns
-    principal x rate x months / 12 (a monthly payout is the same every month); a broken period (``months`` 0, shorter
-    than its schedule) earns by actual days / 365."""
-    if months:
-        return principal * rate * Decimal(months) / Decimal(12)
-    return principal * rate * Decimal((end - begin).days) / Decimal(365)
-
-
-def _add_months(start: date, months: int) -> date:
-    month_index = start.year * 12 + start.month - 1 + months
-    year, zero_month = divmod(month_index, 12)
-    month = zero_month + 1
-    return date(year, month, min(start.day, calendar.monthrange(year, month)[1]))
+_add_months = schedule.add_months  # lightning/deposits/gameya.py reads it from here
 
 
 def _maturity_date(start: date, maturity_date, term_years) -> date:

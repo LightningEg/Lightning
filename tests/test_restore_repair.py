@@ -3,8 +3,6 @@ finish what started, keep everything else locked with its evidence."""
 
 from __future__ import annotations
 
-import os
-
 import pytest
 
 from lightning.runtime.session import ProfileError, ProfileSession
@@ -70,18 +68,18 @@ def test_an_undo_interrupted_before_its_record_moves_lands_the_same_way(tmp_path
     from lightning.runtime import restore
 
     session, live, paths, _selected, live_before = _killed_restore(tmp_path, "manifest")
-    real_replace = os.replace
+    real_move = restore._durable_move
 
     def stop_at_record(source, destination):
         if str(source).endswith(".state"):
             raise OSError("injected interruption before the record moves")
-        return real_replace(source, destination)
+        return real_move(source, destination)
 
     fresh = ProfileSession(session.root)
-    monkeypatch.setattr(restore.os, "replace", stop_at_record)
+    monkeypatch.setattr(restore, "_durable_move", stop_at_record)
     with pytest.raises(ProfileError):
         fresh.repair_interrupted_restore(str(live), PASSWORD)
-    monkeypatch.setattr(restore.os, "replace", real_replace)
+    monkeypatch.setattr(restore, "_durable_move", real_move)
     assert len(list(paths.data_dir.glob(".lightning-restore-*.state"))) == 1
     fresh.retry_at = 0.0
     assert fresh.repair_interrupted_restore(str(live), PASSWORD) == "undone"

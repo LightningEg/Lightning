@@ -53,7 +53,7 @@ def test_cd_portfolio_shows_certificates_and_records_purchase(c, setup):
     page = client.get(f"/deposits/{cd.id}")
     assert page.status_code == 200
     assert "CIB 1-year certificate" in page.text
-    assert "12.5% · Simple" in page.text
+    assert "12.5%<br><small class=\"muted\">Interest paid" in page.text
     assert "Earliest withdrawal" in page.text and "Maturity" in page.text
     assert "Interest is estimated for cash forecasting only and is never posted automatically" in page.text
 
