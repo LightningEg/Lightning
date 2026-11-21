@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import difflib
 import functools
+import hashlib
 import json
 import re
 from decimal import Decimal
@@ -10,6 +11,7 @@ from decimal import Decimal
 from lightning.bank_import_rows import is_balance_row, is_internal, split_category_path
 from lightning.categories.domain import Movement
 from lightning.core.errors import NotFoundError, ValidationError
+from lightning.database.settings import SettingsStore
 from lightning.foreign_amounts import ForeignAmounts
 from lightning.transactions.tags import tags_in
 
@@ -165,9 +167,32 @@ class ImportProposals:
                 (batch["account_id"], batch_id, file_digest, file_digest + "#%", row["row_number"])))
             if row["bank_reference"]:
                 seen_refs.add(row["bank_reference"])
-            cp = self.counterparties.resolve(parsed["Counterparty"])
+            sms_ambiguous = False
+            if batch["file_name"].startswith("SMS ") and raw.get("Message"):
+                cp, sms_ambiguous = self.counterparties.sms_match(parsed["Counterparty"])
+            else:
+                cp = self.counterparties.resolve(parsed["Counterparty"])
+            parsed["_sms_category_key"] = ""
+            remembered_category = None
+            if (batch["file_name"].startswith("SMS ") and raw.get("SMS kind") == "purchase"
+                    and raw.get("Read") == "sure" and raw.get("Message") and parsed["Counterparty"]):
+                from lightning.counterparties import normalize
+                label = normalize(parsed["Counterparty"])
+                digest = hashlib.sha256(label.encode()).hexdigest()
+                key = f"sms_purchase_choice:{self._account(batch['account_id']).code}:{digest}"
+                parsed["_sms_category_key"] = key
+                saved = SettingsStore(self.db).get(key)
+                if saved:
+                    try:
+                        name, code = json.loads(saved)
+                        party = self.counterparties.resolve(name)
+                        category = self.categories.get_by_code(code)
+                        if party and party["active"] and category.active and category.movement == Movement.OUTFLOW:
+                            cp, sms_ambiguous, remembered_category = party, False, category
+                    except (ValueError, TypeError, NotFoundError):
+                        pass
             parsed["_counterparty_id"] = cp["id"] if cp else None
-            parsed["_suggestions"] = self.counterparties.suggestions(parsed["Counterparty"])
+            parsed["_suggestions"] = [] if cp else self.counterparties.suggestions(parsed["Counterparty"])
             parsed["_reference_duplicate"] = ref_duplicate
             parsed["_repeat_import"] = repeat_import
             parsed["_pending_elsewhere"] = pending_elsewhere.get((parsed.get("Date"), parsed.get("Amount")), "")
@@ -185,6 +210,8 @@ class ImportProposals:
             parsed["_balance_row"] = bool(parsed.get("_skip_reason")) or is_balance_row(parsed["Category"], parsed["Counterparty"])
             outcome = self._rules_outcome(batch["account_id"], parsed, cp)
             parsed["_category_id"] = None if parsed["_internal"] else self._category_for(parsed, cp, outcome, usual)
+            if remembered_category and not parsed["_rule_id"]:
+                parsed["_category_id"] = remembered_category.id
             if parsed.get("_file_split") and not parsed["_internal"]:
                 parts = self._file_split_parts(parsed)
                 if parts:
@@ -207,7 +234,7 @@ class ImportProposals:
                            if a.name == parsed["_transfer_target_suggestion"]), None)
             same_name = [a for a in active_accounts if a.id != batch["account_id"]
                          and a.name.casefold() == parsed["Counterparty"].strip().casefold()]
-            parsed["_identity_ambiguous"] = len(same_name) > 1 or bool(same_name and cp)
+            parsed["_identity_ambiguous"] = (sms_ambiguous and not same_name) or len(same_name) > 1 or bool(same_name and cp)
             if parsed["_identity_ambiguous"]:
                 target = None
                 parsed["_transfer_target_suggestion"] = None
@@ -229,10 +256,15 @@ class ImportProposals:
             parsed["_whom"] = cp["name"] if cp and cp["active"] else ""
             parsed["_possible_duplicate"] = bool(ref_duplicate or repeat_import or parsed["_similarity_warning"]
                                                  or parsed["_link_candidates"])
-            parsed["_ready"] = bool(not parsed.get("_errors") and not parsed["_possible_duplicate"]
-                                    and not parsed["_balance_row"]
-                                    and not parsed["_suggestions"] and not parsed["_needs_account"] and not parsed["_identity_ambiguous"]
-                                    and (parsed["_category_id"] or parsed["_transfer_target"]))
+            ready_to_file = not (parsed.get("_errors") or parsed["_possible_duplicate"] or parsed["_balance_row"]
+                                 or parsed["_suggestions"] or parsed["_needs_account"] or parsed["_identity_ambiguous"])
+            parsed["_ready"] = bool(ready_to_file and (parsed["_category_id"] or parsed["_transfer_target"]))
+            parsed["_quick_purchase"] = bool(parsed["_sms_category_key"] and not any(parsed.get(flag) for flag in (
+                "_possible_duplicate", "_balance_row", "_errors", "_voided_earlier", "_transfer_target_suggestion",
+                "_internal", "_is_custody", "_rule_split", "_rule_id")))
+            parsed["_known_purchase_without_category"] = bool(
+                ready_to_file and raw.get("SMS kind") == "purchase" and cp and cp["active"]
+                and not parsed["_category_id"] and not parsed["_transfer_target_suggestion"])
             parsed["_import_row_id"] = row["id"]
             parsed["_account_id"] = batch["account_id"]
             parsed["_status"] = row["status"]

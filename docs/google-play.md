@@ -23,8 +23,7 @@ The disclosure on screen (English; Arabic in `lightning/ui/i18n*`):
 
 > Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction. It reads
 > messages from senders with a name or a short code, like CIB or NBE, never from people's numbers. The messages stay on
-> this phone: nothing is sent anywhere. A payment Lightning is sure about saves itself, marked and undoable; the rest
-> wait for your check.
+> this phone: nothing is sent anywhere. You choose which payments save automatically. You can undo a saved payment.
 
 ## SMS: the demo video (about 60 seconds)
 

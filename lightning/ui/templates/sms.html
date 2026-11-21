@@ -38,7 +38,7 @@
 {% if saved %}
 <section class="card" id="saved" aria-labelledby="saved-heading">
   <h2 id="saved-heading">{{ "Saved for you"|tr(locale) }}</h2>
-  <p class="muted">{{ "Messages Lightning was sure about saved themselves: a bank it knows, your account, and a category from your rules or habits. Undo puts one back for your check."|tr(locale) }}</p>
+  <p class="muted">{{ "Undo returns a saved payment to review."|tr(locale) }}</p>
   {% for m in saved %}<div class="compact-row"><span><a href="/t/{{ m.ref }}">{{ m.who or m.account }}</a> <small class="muted">{{ m.account }} · {{ m.date }}{% if m.linked %} · {{ "linked to your entry"|tr(locale) }}{% endif %}</small>{% if m.text %}<small class="muted" dir="auto"> · {{ m.text }}</small>{% endif %}</span>
     <span class="actions"><b>{{ m.amount|money }}</b><form method="post" action="/sms/undo"><input type="hidden" name="ref" value="{{ m.ref }}"><button class="btn small" type="submit">{{ "Undo"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></span></div>{% endfor %}
 </section>
@@ -51,5 +51,8 @@
     <div class="actions"><button class="btn primary" type="submit">{{ "Read them"|tr(locale) }}</button></div>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
   </form>
+</section>
+<section class="card form-card">
+  {% include "partials/sms_saving.html" %}
 </section>
 {% endblock %}
