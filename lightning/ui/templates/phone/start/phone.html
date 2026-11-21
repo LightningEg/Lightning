@@ -11,7 +11,7 @@
   {% if sms == 'granted' %}
   <p class="start-on">{{ 'On. Card payments from your bank messages save themselves.'|tr(locale) }}</p>
   {% else %}
-  <p>{{ "Lightning reads the SMS your banks send and turns each payment, transfer and salary into a transaction. It reads messages from senders with a name or a short code, like CIB or NBE, never from people’s numbers. The messages stay on this phone: nothing is sent anywhere. A payment Lightning is sure about saves itself, marked and undoable; the rest wait for your check."|tr(locale) }}</p>
+  <p>{% include "phone/partials/sms_permission_text.html" %}</p>
   {% if sms == 'not_granted' %}
   <form method="post" action="/sms/allow"><input type="hidden" name="return_to" value="/start/phone"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="button button-secondary start-helper-button" type="submit">{{ 'Allow reading SMS'|tr(locale) }}</button></form>
   {% else %}

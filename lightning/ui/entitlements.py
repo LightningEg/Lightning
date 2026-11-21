@@ -6,9 +6,11 @@ every device of the profile. So one code unlocks a theme once per profile: the p
 synced envelope themselves and need no code. Losing the file loses nothing. Nothing here touches money, calculations
 or roles.
 
-One purchase unlocks a theme for one profile: the store binds each licence to the profile's own stable id (the same on
-every device that profile lives on), so a licence is worn only while that profile is open. The same computer may hold
-licences for several profiles; each wears only its own. Another profile needs another seat from the website.
+Each licence names one profile: the store binds it to the profile's own stable id (the same on every device that
+profile lives on), so a licence is worn only while that profile is open. The same computer may hold licences for
+several profiles; each wears only its own. One purchase per person (NF-10H): one website purchase or one Google Play
+purchase mints a licence for each profile of the buyer, up to 5, at no charge. A Play buyer reaches their website
+account by linking the profile once (`link_profile`, NF-10H6).
 """
 from __future__ import annotations
 
@@ -58,7 +60,8 @@ class UnlockError(ValueError):
 def store() -> dict:
     data = json.loads(STORE.read_text())
     keys = {kid: base64.urlsafe_b64decode(raw + "=" * (-len(raw) % 4)) for kid, raw in data.get("keys", {}).items()}  # not money: key padding
-    return {"keys": keys, "redeem_url": data.get("redeem_url", ""), "play_redeem_url": data.get("play_redeem_url", "")}
+    return {"keys": keys, "redeem_url": data.get("redeem_url", ""), "play_redeem_url": data.get("play_redeem_url", ""),
+            "link_url": data.get("link_url", "")}
 
 
 @lru_cache(maxsize=1)
@@ -263,15 +266,12 @@ def redeem_play(product: str, token: str, *, opener=None) -> str:
     }, "Google Play does not know this purchase.", opener=opener)
 
 
-def _exchange(url: str, body: dict, profile: str, refusals: dict[int, str], refused: str, *, opener=None) -> str:
-    """POST to the store, verify the signed licence it returns for this profile, keep it here and in the profile's
-    settings. `refusals` words the store's own refusals; `refused` is any other 4xx."""
-    supported, conf = paid_themes(), store()
-    InvalidCosmeticLicense, verify_license = _verifier()
+def _post(url: str, body: dict, refusals: dict[int, str], refused: str, *, opener=None):
+    """POST JSON to the store and read its JSON answer, wording each refusal for the person."""
     request = Request(url, data=json.dumps(body).encode(), method="POST", headers={"Content-Type": "application/json"})
     try:
         with (opener or urlopen)(request, timeout=15) as response:
-            envelope = json.loads(response.read(200_000))
+            return json.loads(response.read(200_000))
     except HTTPError as exc:
         if exc.code in refusals:
             raise UnlockError(refusals[exc.code]) from exc
@@ -284,6 +284,37 @@ def _exchange(url: str, body: dict, profile: str, refusals: dict[int, str], refu
         raise UnlockError(refused) from exc
     except (URLError, OSError, ValueError) as exc:
         raise UnlockError("Could not reach the Lightning store. Check the connection and try again.") from exc
+
+
+def link_profile(code: str, *, opener=None) -> int:
+    """Add the open profile to the website account that issued this one-time link code (NF-10H6, the account page's
+    "Link the app"). The store then lists every theme a Google Play purchase unlocked on this profile under that
+    account, owned through Play: the site wears it and gives codes for the buyer's other profiles. Nothing changes on
+    this computer. Returns how many themes reached the account. The Play build never offers this (it never names the
+    website)."""
+    conf, profile = store(), profile_id()
+    if profile is None:
+        raise UnlockError("Open the profile you want to unlock this on, then try again.")
+    code = "".join(code.split()).upper()
+    if not (8 <= len(code) <= 64):
+        raise UnlockError("Paste the whole code from your account page.")
+    if not conf.get("link_url", "").startswith("https://"):
+        raise UnlockError("Unlocking opens with the next Lightning update.")
+    answer = _post(conf["link_url"], {"code": code, "profile_id": profile}, {
+        409: "This profile is linked to another website account.",
+    }, "That code is used or expired. Get a fresh one from your account page.", opener=opener)
+    items = answer.get("items") if isinstance(answer, dict) else None
+    if not isinstance(answer, dict) or answer.get("linked") is not True or not isinstance(items, list):
+        raise UnlockError("The Lightning store is not answering right now. Try again in a few minutes.")
+    return len(items)
+
+
+def _exchange(url: str, body: dict, profile: str, refusals: dict[int, str], refused: str, *, opener=None) -> str:
+    """POST to the store, verify the signed licence it returns for this profile, keep it here and in the profile's
+    settings. `refusals` words the store's own refusals; `refused` is any other 4xx."""
+    supported, conf = paid_themes(), store()
+    InvalidCosmeticLicense, verify_license = _verifier()
+    envelope = _post(url, body, refusals, refused, opener=opener)
     try:
         names = [name for name, _ in verify_license(envelope, conf["keys"], supported, expected_profile=profile).items]
     except InvalidCosmeticLicense as exc:

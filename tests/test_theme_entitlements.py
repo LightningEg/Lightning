@@ -274,3 +274,62 @@ def test_the_marketplace_link_has_one_source_and_follows_the_language(c, store):
     java = (root / 'android/app/src/main/java/org/lightning/app/MainActivity.java').read_text()
     # the shell hands any https page (the store links among them) to the phone's browser, and loads no other host
     assert 'private boolean outsideLink' in java and '"https".equals(uri.getScheme())' in java
+
+
+def linker(status=200, body=None):
+    """The store's link-profile function (NF-10H6): the code and the open profile's id, nothing else."""
+    def opener(request, timeout):
+        assert request.full_url == "https://store.example/link" and request.get_method() == "POST" and timeout <= 15
+        sent = json.loads(request.data)
+        assert sent == {"code": "ABCD1234-ABCD1234-ABCD1234-ABCD1234", "profile_id": PROFILE}
+        if status != 200:
+            raise HTTPError(request.full_url, status, "no", {}, BytesIO(b"{}"))
+        return BytesIO(json.dumps(body if body is not None else {"linked": True, "items": ["nile"]}).encode())
+    return opener
+
+
+@pytest.fixture
+def link_store(store, monkeypatch):
+    conf = entitlements.store()
+    monkeypatch.setattr(entitlements, "store", lambda: {**conf, "link_url": "https://store.example/link"})
+    return store
+
+
+def test_linking_sends_the_code_and_the_profile_and_counts_the_themes(link_store):
+    assert entitlements.link_profile(" abcd1234-ABCD1234-abcd1234-abcd1234 ", opener=linker()) == 1
+    assert entitlements.link_profile("abcd1234-abcd1234-abcd1234-abcd1234", opener=linker(body={"linked": True, "items": []})) == 0
+    assert entitlements.owned() == frozenset(), "linking changes the website account, not this computer"
+
+
+def test_linking_refusals_say_what_to_do(link_store, monkeypatch):
+    code = "abcd1234-abcd1234-abcd1234-abcd1234"
+    with pytest.raises(entitlements.UnlockError, match="another website account"):
+        entitlements.link_profile(code, opener=linker(409))
+    with pytest.raises(entitlements.UnlockError, match="used or expired"):
+        entitlements.link_profile(code, opener=linker(400))
+    with pytest.raises(entitlements.UnlockError, match="not answering"):
+        entitlements.link_profile(code, opener=linker(body={"error": "?"}))
+    with pytest.raises(entitlements.UnlockError, match="whole code"):
+        entitlements.link_profile("abc", opener=linker())
+    monkeypatch.setattr(entitlements, "_PROFILE", None)
+    with pytest.raises(entitlements.UnlockError, match="Open the profile"):
+        entitlements.link_profile(code, opener=linker())
+
+
+def test_the_shipped_store_names_the_link_function():
+    entitlements.store.cache_clear()
+    assert entitlements.store()["link_url"].endswith("/functions/v1/link-profile")
+
+
+def test_settings_links_the_profile_on_the_pc_but_never_in_the_play_build(c, link_store, monkeypatch):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    app = create_app(c)
+    client = TestClient(app)
+    page = client.get('/settings').text
+    assert 'action="/settings/theme/link"' in page and 'Add this profile to your website account' in page
+    monkeypatch.setattr(entitlements, "urlopen", linker())
+    done = client.post('/settings/theme/link', data={'code': 'abcd1234abcd1234abcd1234abcd1234'.upper()[:8] + '-ABCD1234-ABCD1234-ABCD1234'}, follow_redirects=True)
+    assert 'now show on your website account' in done.text
+    app.state.play_billing = object()
+    assert client.post('/settings/theme/link', data={'code': 'x'}).status_code == 404
