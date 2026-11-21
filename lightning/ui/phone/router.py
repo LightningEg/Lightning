@@ -79,6 +79,9 @@ def phone_router() -> APIRouter:
             return redirect("/money/report?" + urlencode({key: asked.get(key) for key in ("period", "date_from", "date_to")
                                                           if asked.get(key)} or {"period": "month"}))
         c = container(request)
+        from lightning.ui.phone.start import running
+        if running(c):   # IV-11N2: setup was left half way; it resumes where it stopped
+            return redirect("/start")
         _read_new_sms(request, c)
         return render_phone(request, "phone/home.html", screen=screen.build(c, today()))
 
@@ -279,6 +282,8 @@ def phone_router() -> APIRouter:
         rows = bill_state.open_bills(c.planning, today(), bill_state.SOON_DAYS)
         return render_phone(request, "phone/add_bills.html", rows=rows, back=back)
 
+    from lightning.ui.phone.start import start_router
+    router.include_router(start_router())   # setup's steps 3 to 6 (IV-11N2)
     router.include_router(started)
     router.include_router(slots)
     router.include_router(months)

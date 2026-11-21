@@ -18,26 +18,27 @@
 {# IV-11M3 (owner, 2026-11-14): one Ink line in the display face, the greeting lighter than the name, never grey. #}
 <p class="phone-greeting">{% if s.state == 'first_run' %}{{ 'Welcome'|tr(locale) }}{% else %}{{ s.greeting|tr(locale) }}{% endif %}{% if s.name %}, <b>{{ s.name }}</b>{% endif %}</p>
 {% if s.state == 'first_run' %}
-{% set done = s.steps|selectattr(1)|list|length %}
+{% set done = s.steps|selectattr(1)|list|length %}{% set count = s.steps|length %}
 <section class="phone-hero phone-first-hero" aria-labelledby="home-hero">
   <div class="phone-hero-top"><div><div id="home-hero" class="phone-hero-label" role="heading" aria-level="2">{{ fig.safe_to_spend.label }} <span aria-hidden="true">{{ chevron() }}</span></div>
-    <div class="phone-lead">{{ ('1 step away' if 3 - done == 1 else '{n} steps away')|tr(locale, n=3 - done) }}</div></div>
-    {{ ring(done / 3 * 100, '%d/3'|format(done), 'done'|tr(locale)) }}</div>
+    <div class="phone-lead">{{ ('1 step away' if count - done == 1 else '{n} steps away')|tr(locale, n=count - done) }}</div></div>{# not money: steps #}
+    {{ ring(done / count * 100, '%d/%d'|format(done, count), 'done'|tr(locale)) }}</div>
   <p class="phone-hero-line">{{ 'About a minute, then this is your number.'|tr(locale) }}</p>
 </section>
 <section class="phone-section is-green" aria-labelledby="first-heading">
-  <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span class="phone-head-text"><h2 id="first-heading">{{ 'Get your number'|tr(locale) }}</h2><small>{{ 'Three steps, about a minute'|tr(locale) }}</small></span></header>
+  <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span><span class="phone-head-text"><h2 id="first-heading">{{ 'Get your number'|tr(locale) }}</h2><small>{{ ('Three steps, about a minute' if count == 3 else 'Two steps, about a minute' if count == 2 else '{n} steps, about a minute')|tr(locale, n=count) }}</small></span></header>
   <div class="phone-rows">
   {% set ns = namespace(next=true) %}
   {% for key, ok in s.steps %}
-    {% set href = '/accounts/new' if key == 'account' else '/plan/items/new?kind=INCOME' if key == 'payday' else '/accounts/add-transaction' %}
-    {% set title = 'Your salary account' if key == 'account' else 'Your payday' if key == 'payday' else 'Your first payment' %}
-    {% set note = 'Where your salary lands' if key == 'account' else 'The day it arrives' if key == 'payday' else 'The last thing you paid for' %}
+    {% set href = {'account': '/accounts/new', 'payday': '/plan/items/new?kind=INCOME', 'bills': '/plan/items/new?kind=BILL'}.get(key, '/accounts/add-transaction') %}
+    {% set title = {'account': 'Your salary account', 'payday': 'Your payday', 'bills': 'Your regular bills'}.get(key, 'Your first payment') %}
+    {% set note = {'account': 'Where your salary lands', 'payday': 'The day it arrives', 'bills': 'Rent, internet, phone: what comes every month'}.get(key, 'The last thing you paid for') %}
     <a class="phone-row phone-step{{ ' is-done' if ok }}" href="{{ href }}" data-popup-open><span class="phone-step-n" aria-hidden="true">{% if ok %}<svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>{% else %}{{ loop.index }}{% endif %}</span><span><b>{{ title|tr(locale) }}</b><small>{{ note|tr(locale) }}</small></span>
       {% if not ok and ns.next %}<b class="phone-pill is-strong">{{ 'Start'|tr(locale) }}</b>{% set ns.next = false %}{% else %}<b>{{ chevron() }}</b>{% endif %}</a>
   {% endfor %}
   </div>
 </section>
+{% if ('bills', false) in s.steps %}<form method="post" action="/start/no-bills" class="phone-first-none"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button type="submit" class="phone-quiet-button">{{ 'I have no regular bills'|tr(locale) }}</button></form>{% endif %}
 <a class="phone-wide-soft" href="/sms"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>{{ 'Paste a bank SMS instead'|tr(locale) }}</a>
 {% else %}
 {# In your accounts: the cash you can reach, each account with its share (IV-11M3). #}
