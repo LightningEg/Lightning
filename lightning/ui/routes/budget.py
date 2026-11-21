@@ -852,7 +852,9 @@ async def leave_out_of_estimates(request: Request):
     month = str(form.get("month", "")) or month_of(today())
     back = f"/budget?month={month}#changes"
     try:
-        c.budgets.set_left_out(int(str(form.get("transaction_id", "0")) or 0), True)
+        transaction_id = int(str(form.get("transaction_id", "0")) or 0)
+        with settled_save(request, c):
+            c.budgets.set_left_out(transaction_id, True)
     except (LightningError, ValueError) as exc:
         return redirect(back, getattr(exc, "message", "Choose a purchase to leave out."))
     return redirect(back, "Left out of estimates.")

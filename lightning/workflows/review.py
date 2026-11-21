@@ -353,8 +353,7 @@ class ReviewInbox:
         open_changes = self.changes(on)
         if open_changes:
             items.append({"label": _plural(len(open_changes), "change to look at in Budget", "changes to look at in Budget"),
-                          "detail": open_changes[0]["label"] + (f" · and {len(open_changes) - 1} more"
-                                                                 if len(open_changes) > 1 else ""),
+                          "detail": open_changes[0]["label"],
                           "href": f"/budget?month={month_of(on)}#changes", "action": "Look at them", "priority": 2,
                           "glance": glance("Budget", "Look", None, "1 change" if len(open_changes) == 1
                                            else "{n} changes", len(open_changes))})
@@ -543,7 +542,7 @@ class ReviewInbox:
         for row in c.budgets.unusual_purchases(month)[:UNUSUAL_SHOWN]:  # NF-12AK5
             found.append({"label": f"{row['category']}'s average includes a {fmt(row['amount'], 0)} purchase on "
                                    f"{_day_name(row['date'], on)}",
-                          "detail": f"It is {fmt(row['amount'], 0)} of {fmt(row['window_total'], 0)} {cur} spent there in "
+                          "detail": f"It is {fmt(row['amount'], 0)} of the {fmt(row['window_total'], 0)} spent there in "
                                     "the last three months. Leave it out of estimates, or keep it.",
                           "href": f"/transactions/{row['transaction_id']}", "action": "See it", "priority": 2,
                           "post": {"href": "/budget/leave-out", "label": "Leave out",

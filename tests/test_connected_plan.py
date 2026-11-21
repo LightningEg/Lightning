@@ -12,6 +12,12 @@ from lightning.database import migrator
 from lightning.database.connection import Database
 from lightning.ui.web import create_app
 from lightning.workflows.review import ReviewInbox
+
+
+def _needs(c, on):
+    """Needs you's rows and Budget's What changed rows (NF-12AL3): plan changes moved to Budget's card."""
+    inbox = ReviewInbox(c)
+    return [*inbox.items(on), *inbox.changes(on)]
 from tests.screens import _ScreenClient, visible_text
 
 MONTH = "2026-12"  # conftest pins today to 2026-12-31
@@ -67,7 +73,7 @@ def test_screens_share_the_one_check(c):
     # The Plan leaves to save card (guideline 3.32 A08): the figure, its comparison with the target, Watch, the way out.
     assert "Plan leaves to save Watch 1,000 EGP 10% of income, target 20%" in budget
     assert "Plan 1,000 less to keep 2,000 a month" in budget
-    inbox = {item["label"]: item for item in ReviewInbox(c).items(today())}
+    inbox = {item["label"]: item for item in _needs(c, today())}
     item = inbox["This month's plan is below your savings target"]
     assert item["href"] == f"/budget?month={MONTH}" and "Plan 1,000 EGP less" in item["detail"]
     health = visible_text(browser.get("/financial-health").text)
@@ -212,7 +218,7 @@ def test_needs_you_names_a_category_planned_below_its_bills(c):
     c.budgets.set_budget(food, MONTH, "500", schedule=c.schedules.view())
     assert c.budgets.below_scheduled(MONTH, schedule=c.schedules.view()) == [{"category_id": food, "name": "Food & groceries", "planned": Decimal("500"),
                                                  "scheduled": Decimal("900")}]
-    inbox = {item["label"]: item for item in ReviewInbox(c).items(today())}
+    inbox = {item["label"]: item for item in _needs(c, today())}
     item = inbox["Food & groceries is planned below its bills"]
     assert item["detail"] == "Planned 500 EGP; bills and loan payments scheduled this month come to 900."
     assert item["href"] == f"/budget?month={MONTH}&open_group=all#limit-{food}"   # where its limit is typed
@@ -239,7 +245,7 @@ def test_a_goal_the_plan_cannot_reach_says_when_it_can(c):
     c.reserves.create("Car deposit", "6000", due_date="2027-02-28")  # 2,000 a month for three months
     [late] = c.health.goal_reach()
     assert (late["need"], late["can"], late["reached"]) == (Decimal("2000.00"), Decimal("1000"), "2027-05")
-    inbox = {item["label"]: item for item in ReviewInbox(c).items(today())}
+    inbox = {item["label"]: item for item in _needs(c, today())}
     item = inbox["Car deposit will not be ready by its date"]
     assert "leaves 1,000 for it. Setting aside 1,000 a month, it is ready in May 2027." in item["detail"]
     page = visible_text(_ScreenClient(create_app(c), "http://testserver").get("/plan/reserves").text)
@@ -273,7 +279,7 @@ def test_a_raise_in_recurring_is_offered_to_the_plan(c, setup):
     offer = c.health.raise_offer()
     assert (offer["average"], offer["raise"], offer["room"], offer["keep_rate"]) == (
         Decimal("30000.00"), Decimal("6000.00"), Decimal("28800.00"), Decimal("33.3"))
-    inbox = {item["label"]: item for item in ReviewInbox(c).items(today())}
+    inbox = {item["label"]: item for item in _needs(c, today())}
     assert inbox["Your income went up"]["popup"] and inbox["Your income went up"]["href"] == f"/budget/raise?month={MONTH}"
     browser = _ScreenClient(create_app(c), "http://testserver")
     assert "Save the difference" in visible_text(browser.get(f"/budget/raise?month={MONTH}").text)
@@ -300,7 +306,7 @@ def test_a_yearly_bonus_is_not_read_as_a_raise(c, setup):
                       start_date="2027-03-01")
     assert c.planning.income_a_month() == Decimal("35500.00")  # the plan's own total still spreads the lumps
     assert c.health.raise_offer() is None
-    assert "Your income went up" not in {item["label"] for item in ReviewInbox(c).items(today())}
+    assert "Your income went up" not in {item["label"] for item in _needs(c, today())}
     # A real raise in the monthly pay is still offered, at the monthly figure only.
     c.planning.create(kind="INCOME", name="Second job", amount="6000", frequency="MONTHLY", start_date="2027-01-01")
     assert c.health.raise_offer()["recurring"] == Decimal("36000.00")
@@ -321,7 +327,7 @@ def test_a_month_that_saved_less_than_the_target_is_in_needs_you(c, setup):
     c.health.set_limit("savings_rate", "80")
     short = c.health.short_month()
     assert (short["month"], short["short"]) == ("2026-11", Decimal("500.00"))
-    item = {i["label"]: i for i in ReviewInbox(c).items(today())}["November 2026 saved less than your target"]
+    item = {i["label"]: i for i in _needs(c, today())}["November 2026 saved less than your target"]
     assert item["detail"].startswith("It saved 78% of money in; your target is 80%, 500 EGP more.")
 
 
@@ -329,7 +335,7 @@ def test_over_plan_two_months_running_offers_to_move_room(c, setup):
     food, transport = _salaried(c, setup)
     [row] = c.budgets.over_twice(MONTH, schedule=c.schedules.view())
     assert (row["category_id"], row["amount"], row["from_id"]) == (food, Decimal("1000"), transport)
-    item = {i["label"]: i for i in ReviewInbox(c).items(today())}["Food & groceries over plan two months running"]
+    item = {i["label"]: i for i in _needs(c, today())}["Food & groceries over plan two months running"]
     assert "Over its plan in October and November, by up to 1,000 EGP. Move 1,000 from Transportation" in item["detail"]
     browser = _ScreenClient(create_app(c), "http://testserver")
     dialog = visible_text(browser.get(item["href"]).text)

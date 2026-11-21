@@ -7,6 +7,12 @@ from decimal import Decimal
 
 from lightning.workflows.review import ReviewInbox
 
+
+def _needs(c, on):
+    """Needs you's rows and Budget's What changed rows (NF-12AL3): plan changes moved to Budget's card."""
+    inbox = ReviewInbox(c)
+    return [*inbox.items(on), *inbox.changes(on)]
+
 MONTH = "2026-12"
 DAY = date(2026, 12, 10)  # ten days gone of 31
 
@@ -32,7 +38,7 @@ def test_ahead_of_pace_names_the_day_and_a_category_to_move_from(c, setup):
     assert (row["category_id"], row["day"], row["limit"]) == (food, 20, Decimal("3000"))
     assert row["amount"] == Decimal("1650") and row["can_move"] and row["from_id"] == transport
     # No earlier months: the straight line, so "may" (NF-12AL2).
-    item = {i["label"]: i for i in ReviewInbox(c).items(DAY)}["Food & groceries may run out around the 20th"]
+    item = {i["label"]: i for i in _needs(c, DAY)}["Food & groceries may run out around the 20th"]
     assert "too little history" in item["detail"]
     assert item["action"] == "Move room" and item["href"].startswith(f"/budget/move?month={MONTH}&to={food}&from={transport}")
     assert item["alt"]["label"] == "Raise"
@@ -61,10 +67,10 @@ def test_snoozed_row_leaves_needs_you_and_without_a_donor_it_offers_only_raise(c
     food, transport = _plan(c, setup)
     c.budgets.set_budget(transport, MONTH, "1000", schedule=c.schedules.view())
     inbox = ReviewInbox(c)
-    [item] = [i for i in inbox.items(DAY) if "run out" in i["label"]]
+    [item] = [i for i in _needs(c, DAY) if "run out" in i["label"]]
     assert item["action"] == "Raise" and "alt" not in item and f"limit-{food}" in item["href"]
     inbox.decide(item["review_id"], "snoozed", DAY, "2026-12-20")
-    assert not [i for i in inbox.items(DAY) if "run out" in i["label"]]
+    assert not [i for i in _needs(c, DAY) if "run out" in i["label"]]
 
 
 def test_move_dialog_says_why_from_the_evidence_not_two_months(c, setup, monkeypatch):
@@ -111,7 +117,7 @@ def test_front_loaded_shopper_with_that_history_is_on_their_own_curve(c, setup):
     _front_loaded(c, setup)
     _plan(c, setup, food_spent="2400")
     assert c.budgets.running_out(MONTH, DAY, schedule=c.schedules.view()) == []
-    assert not [i for i in ReviewInbox(c).items(DAY) if "run out" in i["label"]]
+    assert not [i for i in _needs(c, DAY) if "run out" in i["label"]]
 
 
 def test_past_their_own_curve_by_more_than_ten_percent_will_run_out(c, setup):
@@ -121,7 +127,7 @@ def test_past_their_own_curve_by_more_than_ten_percent_will_run_out(c, setup):
     c.transactions.record_outflow("2026-12-08", setup[0]["cib"].id, "600", food)  # 3,000 by day 10: 517 past the curve
     [row] = c.budgets.running_out(MONTH, DAY, schedule=c.schedules.view())
     assert row["category_id"] == food and not row["may"] and row["amount"] == Decimal("650")
-    assert [i for i in ReviewInbox(c).items(DAY) if i["label"].startswith("Food & groceries will run out")]
+    assert [i for i in _needs(c, DAY) if i["label"].startswith("Food & groceries will run out")]
 
 
 def test_same_spend_without_history_says_may(c, setup):
@@ -130,7 +136,7 @@ def test_same_spend_without_history_says_may(c, setup):
     food, _ = _plan(c, setup, food_spent="2400")
     [row] = c.budgets.running_out(MONTH, DAY, schedule=c.schedules.view())
     assert (row["category_id"], row["may"], row["day"]) == (food, True, 13)  # 2,400 x 13 / 10 >= 3,000
-    labels = [i["label"] for i in ReviewInbox(c).items(DAY)]
+    labels = [i["label"] for i in _needs(c, DAY)]
     assert "Food & groceries may run out around the 13th" in labels
 
 
@@ -141,7 +147,7 @@ def test_a_100_bill_paces_the_flexible_2900(c, setup):
                       start_date="2026-12-20", category_id=food)
     [row] = c.budgets.running_out(MONTH, DAY, schedule=c.schedules.view())
     assert (row["category_id"], row["limit"], row["bills"]) == (food, Decimal("2900"), Decimal("100"))
-    [item] = [i for i in ReviewInbox(c).items(DAY) if "run out" in i["label"]]
+    [item] = [i for i in _needs(c, DAY) if "run out" in i["label"]]
     assert "passes the 2,900 EGP left after bills" in item["detail"]
 
 
@@ -152,7 +158,7 @@ def test_the_may_row_reads_in_arabic(c, setup):
     food, _ = _plan(c, setup, food_spent="2400")
     c.planning.create(kind="BILL", name="Water", amount="100", frequency="MONTHLY",
                       start_date="2026-12-20", category_id=food)
-    [item] = [i for i in ReviewInbox(c).items(DAY) if "run out" in i["label"]]
+    [item] = [i for i in _needs(c, DAY) if "run out" in i["label"]]
     assert translate(item["label"], "ar") == "الأكل والبقالة ممكن يخلص حوالي يوم 13"
     detail = translate(item["detail"], "ar")
     assert "لسه مفيش تاريخ كفاية" in detail and "بعد الفواتير" in detail and "محتاج حوالي" in detail
