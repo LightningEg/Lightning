@@ -1,0 +1,11 @@
+{% if not claim.paid_for_work %}
+<form method="post" action="/reimbursements/{{ claim.id }}/work">
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  <button class="btn small">{{ 'Paid for work'|tr(locale) }}</button>
+</form>
+{% elif claim.outstanding and not claim.issues %}
+<form method="post" action="/reimbursements/{{ claim.id }}/close-work" data-confirm-delete="{{ 'Count the unpaid balance as your own spending on the purchase date?'|tr(locale) }}">
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  <button class="btn small">{{ 'Close and absorb unpaid balance'|tr(locale) }}</button>
+</form>
+{% endif %}

@@ -15,6 +15,13 @@ POSTED = "JOIN transactions t ON t.id = le.transaction_id AND t.status = 'POSTED
 CASH_ONLY = "le.asset_id IN (SELECT id FROM financial_assets WHERE is_cash = 1)"
 
 
+def _category_basis(personal: bool):
+    if personal:
+        return ("LEFT JOIN work_claim_allocations w ON w.transaction_id=le.transaction_id AND w.line_no=le.line_no",
+                "le.amount_base_e6-COALESCE(w.amount_e6,0)")
+    return "", "le.amount_base_e6"
+
+
 class ReportQueries:
     def __init__(self, db: Database):
         self.db = db
@@ -50,10 +57,11 @@ class ReportQueries:
         return {r["effect"]: int(r["total"] or 0) for r in rows}
 
     @request_cached(deep=True)
-    def category_totals(self, date_from: str, date_to: str) -> list[dict]:
+    def category_totals(self, date_from: str, date_to: str, *, personal: bool = False) -> list[dict]:
+        join, amount = _category_basis(personal)
         rows = self.db.all(
-            f"SELECT le.category_id, le.effect, SUM(le.amount_base_e6) AS total"
-            f" FROM ledger_entries le {POSTED}"
+            f"SELECT le.category_id, le.effect, SUM({amount}) AS total"
+            f" FROM ledger_entries le {POSTED} {join}"
             f" WHERE le.date BETWEEN ? AND ? AND le.category_id IS NOT NULL"
             f" AND le.effect IN ('INFLOW','OUTFLOW')"
             " AND COALESCE(le.category_id,0) NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY')"
@@ -64,11 +72,12 @@ class ReportQueries:
         return [dict(r) for r in rows]
 
     @request_cached(deep=True)
-    def category_totals_by_date(self, date_from: str, date_to: str, key_length: int = 10) -> list[dict]:
+    def category_totals_by_date(self, date_from: str, date_to: str, key_length: int = 10, *, personal: bool = False) -> list[dict]:
         """The same totals as category_totals, split by day (key_length 10, yyyy-mm-dd) or month (7)."""
+        join, amount = _category_basis(personal)
         rows = self.db.all(
-            f"SELECT substr(le.date, 1, ?) AS key, le.category_id, le.effect, SUM(le.amount_base_e6) AS total"
-            f" FROM ledger_entries le {POSTED}"
+            f"SELECT substr(le.date, 1, ?) AS key, le.category_id, le.effect, SUM({amount}) AS total"
+            f" FROM ledger_entries le {POSTED} {join}"
             f" WHERE le.date BETWEEN ? AND ? AND le.category_id IS NOT NULL"
             f" AND le.effect IN ('INFLOW','OUTFLOW')"
             " AND COALESCE(le.category_id,0) NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY')"
@@ -78,13 +87,19 @@ class ReportQueries:
         )
         return [dict(r) for r in rows]
 
-    def spending_lines(self, date_from: str, date_to: str) -> list[dict]:
+    def work_spending_offsets(self, start, end, key_length):
+        return self.db.all(
+            "SELECT substr(date,1,?) AS key,category_id,SUM(amount_e6) total FROM work_claim_allocations "
+            "WHERE date BETWEEN ? AND ? GROUP BY key,category_id", (key_length, start, end))
+
+    def spending_lines(self, date_from: str, date_to: str, *, personal: bool = True) -> list[dict]:
         """Categorised money in and out lines with their transaction, account and counterparty: the
         same lines as category_totals, one row per line."""
+        join, amount = _category_basis(personal)
         rows = self.db.all(
-            f"SELECT le.transaction_id, le.date, le.account_id, le.category_id, le.effect, le.amount_base_e6 AS amount,"
+            f"SELECT le.transaction_id, le.date, le.account_id, le.category_id, le.effect, {amount} AS amount,"
             f" t.ref, t.counterparty, t.counterparty_id, t.description"
-            f" FROM ledger_entries le {POSTED}"
+            f" FROM ledger_entries le {POSTED} {join}"
             f" WHERE le.date BETWEEN ? AND ? AND le.category_id IS NOT NULL"
             f" AND le.effect IN ('INFLOW','OUTFLOW')"
             " AND COALESCE(le.category_id,0) NOT IN (SELECT id FROM categories WHERE code='EXP.SYSTEM.CUSTODY')"

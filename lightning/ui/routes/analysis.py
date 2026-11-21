@@ -167,7 +167,7 @@ async def compare_page(request: Request):
                      kpis.compare(f"against {fmt_date(b[0])} to {fmt_date(b[1])}",
                                   ("+" if diff > 0 else "−" if diff < 0 else "") + fmt(abs(diff), 0),  # not money
                                   "bad" if diff > 0 else "good" if diff < 0 else "plain"), tone="out")
-    return render(request, "analysis/compare.html", lead=lead, moved=moved, rows=rows, kind=kind, by=by, a=a, b=b, status=status,
+    return render(request, "analysis/compare.html", work_claims=c.reimbursements.work_period(*a), lead=lead, moved=moved, rows=rows, kind=kind, by=by, a=a, b=b, status=status,
                   total_a=total_a, total_b=total_b, total_diff=diff,
                   keep_qs=urlencode(keep), base=c.base_currency, fmt_date=fmt_date)
 

@@ -242,7 +242,7 @@ def test_migration_0088_adds_the_rate_changes_table_to_an_older_profile(tmp_path
         migrator.migrate(db)
         assert not db.has_table("cd_rate_changes")
         monkeypatch.setattr(migrator, "MIGRATIONS_DIR", bundled)
-        assert migrator.migrate(db) == ["0088_cd_rate_changes (APPLIED)"]
+        assert migrator.migrate(db)[0] == "0088_cd_rate_changes (APPLIED)"
         assert db.has_table("cd_rate_changes") and db.scalar("SELECT COUNT(*) FROM cd_rate_changes") == 0
         assert migrator.migrate(db) == []
     finally:

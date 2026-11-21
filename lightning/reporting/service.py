@@ -671,6 +671,10 @@ class ReportingService:
             item["outflows"] += signed_outflow
             if not code_prefix or cat.code.startswith(code_prefix):
                 item["spending"] += signed_outflow
+        for row in self.q.work_spending_offsets(start, end, 10 if by == "day" else 7):
+            cat = self.categories.get(row["category_id"])
+            if not cat.income_class and (not code_prefix or cat.code.startswith(code_prefix)):
+                out[row["key"]]["spending"] += from_e6(row["total"])
         for item in out.values():
             item["net"] = item["inflows"] - item["outflows"]
         return out
@@ -682,7 +686,7 @@ class ReportingService:
     @request_cached
     def _money_out_by_category(self, start: str, end: str) -> dict[int, Decimal]:
         totals: dict[int, Decimal] = {}
-        for row in self.q.category_totals(start, end):
+        for row in self.q.category_totals(start, end, personal=True):
             money_in, money_out = flow_of(row["effect"], from_e6(row["total"]), self.categories.get(row["category_id"]))
             if not money_in:
                 totals[row["category_id"]] = totals.get(row["category_id"], ZERO) + money_out
@@ -692,7 +696,7 @@ class ReportingService:
         """Money out per day (yyyy-mm-dd) and category, counted as money_out_by_category counts it: how a category's
         spending falls across its months (NF-12AL2). Days with nothing are left out."""
         out: dict[str, dict[int, Decimal]] = {}
-        for row in self.q.category_totals_by_date(self._day(date_from), self._day(date_to), 10):
+        for row in self.q.category_totals_by_date(self._day(date_from), self._day(date_to), 10, personal=True):
             money_in, money_out = flow_of(row["effect"], from_e6(row["total"]), self.categories.get(row["category_id"]))
             if not money_in:
                 day = out.setdefault(row["key"], {})
@@ -703,7 +707,7 @@ class ReportingService:
         """Income by category, excluding custody and expense refunds."""
         start, end = self._day(date_from), self._day(date_to)
         totals: dict[int, Decimal] = {}
-        for row in self.q.category_totals(start, end):
+        for row in self.q.category_totals(start, end, personal=True):
             category = self.categories.get(row["category_id"])
             money_in, _ = flow_of(row["effect"], from_e6(row["total"]), category)
             if money_in:
@@ -739,7 +743,7 @@ class ReportingService:
         """Outflows rolled up to a tree depth (1 = Personal/Work, 2 = Food, Transport, ...)."""
         start, end = self._day(date_from), self._day(date_to)
         groups: dict[str, Group] = {}
-        for row in self.q.category_totals(start, end):
+        for row in self.q.category_totals(start, end, personal=True):
             cat = self.categories.get(row["category_id"])
             money_in, money_out = flow_of(row["effect"], from_e6(row["total"]), cat)
             if money_in:

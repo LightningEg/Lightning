@@ -35,12 +35,13 @@
     <span class="actions"><a class="btn small" href="{{ m.enter }}" data-popup-open>{{ "Enter it"|tr(locale) }}</a><form method="post" action="/sms/dismiss"><input type="hidden" name="id" value="{{ m.id }}"><button class="btn small" type="submit">{{ "Dismiss"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></span></div>{% endfor %}
 </section>
 {% endif %}
+{% include "partials/work_sms_matches.html" %}
 {% if saved %}
 <section class="card" id="saved" aria-labelledby="saved-heading">
   <h2 id="saved-heading">{{ "Saved for you"|tr(locale) }}</h2>
   <p class="muted">{{ "Undo returns a saved payment to review."|tr(locale) }}</p>
   {% for m in saved %}<div class="compact-row"><span><a href="/t/{{ m.ref }}">{{ m.who or m.account }}</a> <small class="muted">{{ m.account }} · {{ m.date }}{% if m.linked %} · {{ "linked to your entry"|tr(locale) }}{% endif %}</small>{% if m.text %}<small class="muted" dir="auto"> · {{ m.text }}</small>{% endif %}</span>
-    <span class="actions"><b>{{ m.amount|money }}</b><form method="post" action="/sms/undo"><input type="hidden" name="ref" value="{{ m.ref }}"><button class="btn small" type="submit">{{ "Undo"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></span></div>{% endfor %}
+    <span class="actions"><b>{{ m.amount|money }}</b>{% if m.receipt_id %}<a class="btn small" href="/reimbursements?receipt_id={{ m.receipt_id }}#claims-title">{{ "Match reimbursement"|tr(locale) }}</a>{% endif %}<form method="post" action="/sms/undo"><input type="hidden" name="ref" value="{{ m.ref }}"><button class="btn small" type="submit">{{ "Undo"|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></span></div>{% endfor %}
 </section>
 {% endif %}
 <section class="card form-card" aria-labelledby="paste-heading">

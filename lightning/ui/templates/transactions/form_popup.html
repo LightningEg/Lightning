@@ -59,6 +59,7 @@
       </select>
     </div>
     <div class="field"><label for="popup-notes">{{ 'Notes'|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label><input id="popup-notes" name="notes" value="{{ values.notes }}"></div>
+    {% if not txn_id %}{% include "partials/work_claim_entry.html" %}{% endif %}
     {% if txn_id %}{% from "partials/macros.html" import left_out_switch %}{{ left_out_switch(values) }}{% endif %}
     <div class="transaction-effect" data-transaction-effect role="status" aria-live="polite"></div>
     <p class="small muted inline-save-status" data-popup-status aria-live="polite"></p>

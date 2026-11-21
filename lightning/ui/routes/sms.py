@@ -71,8 +71,13 @@ def _page(request, c, **context):
     unread = [m | {"enter": _enter_url(c, m)} for m in c.sms_imports.unread()]
     codes = {a.code: a.name for a in c.accounts.list()}
     saved = [m | {"amount": Decimal(m["amount"]), "account": codes.get(m.get("account"), "")} for m in c.sms_imports.saved()]
+    if any(m["amount"] > 0 for m in saved):
+        available = {r["transaction"]["ref"]: r["transaction_id"] for r in c.reimbursements.available_receipts()}
+        for item in saved:
+            item["receipt_id"] = available.get(item["ref"])
     return render(request, "sms.html", waiting=waiting, accounts=accounts, batches=batches, saved=saved,
-                  save_mode=c.sms_imports.get_save_mode(), unread=unread, permission=permission, last_read=c.sms_imports.last_read(),
+                  sms_work_matches=c.reimbursements.sms_work_matches(), save_mode=c.sms_imports.get_save_mode(),
+                  unread=unread, permission=permission, last_read=c.sms_imports.last_read(),
                   salary=SALARY_ENDING, wallet_prefix=WALLET_PREFIX, wallet_name=wallet_name, **context)
 
 

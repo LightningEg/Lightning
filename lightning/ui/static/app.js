@@ -2550,6 +2550,13 @@ initCurrencySearch();
     const note = form.querySelector('[data-transaction-effect]');
     const category = form.querySelector('[name="category_id"]');
     const destination = form.querySelector('[name="to_account_id"]');
+    const work = form.querySelector('[name="paid_for_work"]');
+    const expected = form.querySelector('[name="work_expected"]');
+    if (work && expected) {
+      const showExpected = () => { expected.closest("[data-work-options]").hidden = !work.checked; };
+      work.addEventListener("change", showExpected);
+      showExpected();
+    }
     const update = () => {
       const kind = kinds.find((input) => input.checked)?.value || "out";
       form.querySelectorAll(".transfer-only").forEach((field) => field.hidden = kind !== "transfer");

@@ -195,7 +195,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         if raise_offer and not by_key.get("saves"):
             needs.append(income_change_row(raise_offer, month))
     status = page_status.budget(everyday, has_plan, period.key, period_actual, period_budgeted)
-    return render(request, "budget.html", budget_ai_prompt=budget_prompt(), notes=notes, meter_active=meter_active, meter_rest=meter_rest, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
+    return render(request, "budget.html", work_claims=c.reimbursements.work_period(period.start, period.end), budget_ai_prompt=budget_prompt(), notes=notes, meter_active=meter_active, meter_rest=meter_rest, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
                   lead=lead, pace_card=pace_card, needs=needs, status=status,
                   raise_in_card=bool(needs and needs[-1]["href"].startswith("/budget/raise")) or any(k["key"] == "saves" for k in kpi_cards),
                   raise_offer=raise_offer, meter_lines=meter_lines, left_note=left_note, check=check,

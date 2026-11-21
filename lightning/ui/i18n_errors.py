@@ -98,6 +98,8 @@ ERRORS_AR = {
     "Choose an active saved counterparty.": "اختار طرف محفوظ شغّال.",
     "Enter a receipt amount greater than zero.": "اكتب مبلغ إيصال أكبر من صفر.",
     "Reimbursement claim not found.": "طلب الاسترداد مش موجود.",
+    "Work claim not found.": "طلب استرداد مصاريف الشغل مش موجود.",
+    "Check the expense and its receipts before closing this claim.": "راجع المصروف والدفعات اللي استلمتها قبل ما تقفل طلب الاسترداد ده.",
     "Linked receipt not found.": "الإيصال المربوط مش موجود.",
     "No expense amount.": "مفيش مبلغ مصروف.",
     "Confirm that you saved your recovery key before enabling device editing.": "أكّد إنك حفظت مفتاح الاسترداد قبل ما تفعّل التعديل من أكتر من جهاز.",
