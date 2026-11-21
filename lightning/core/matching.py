@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import re
 import unicodedata
-from rapidfuzz.fuzz import ratio
 from lightning.core.money import ascii_digits
 
 # Short account/instrument codes use exact and prefix comparison only.
@@ -68,6 +67,8 @@ def match_score(needle: str, text: str, fuzzy: bool = True, kind: str = "Text") 
         return 0.8
     if not fuzzy or len(needle) < 3 or len(text) < 4 or NUMERIC.fullmatch(needle):
         return 0.0
+    from rapidfuzz.fuzz import ratio
+
     cutoff = CUTOFFS.get(kind, CUTOFFS["Text"])
     # Near spellings of a word within a longer name also count. Three-letter queries need a near-exact word.
     cutoff = max(cutoff, 84) if len(needle) == 3 else cutoff
