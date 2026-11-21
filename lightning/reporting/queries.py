@@ -336,6 +336,24 @@ class ReportQueries:
         return {int(row["asset_id"]): dict(row) for row in self.db.all(
             "SELECT asset_id,net_gold_grams_e6,reference_asset_id,account_id,karat FROM physical_items")}
 
+    @request_cached(deep=True)
+    def growing_certificates(self) -> dict[int, dict]:
+        """IV-12J3: the terms of every certificate whose interest stays with the bank until maturity (compound, or
+        simple paid at maturity), by asset id, in one read: their value grows as that interest is earned."""
+        return {int(row["asset_id"]): dict(row) for row in self.db.all(
+            "SELECT cd.id,cd.asset_id,cd.start_date,cd.maturity_date,cd.principal_e6,cd.annual_rate,cd.interest_method,cd.payout_frequency,"
+            "cd.compounding_frequency,a.currency FROM cd_certificates cd JOIN accounts a ON a.id=cd.account_id "
+            "WHERE cd.interest_method='COMPOUND' OR cd.payout_frequency='AT_MATURITY'")}
+
+    @request_cached(deep=True)
+    def certificate_rates(self, certificate_id: int) -> list:
+        """IV-12J4: a variable certificate's dated rate changes, oldest first: [(date, annual rate)]."""
+        from datetime import date
+        from decimal import Decimal
+        return [(date.fromisoformat(row["effective_date"]), Decimal(row["annual_rate"])) for row in self.db.all(
+            "SELECT effective_date,annual_rate FROM cd_rate_changes WHERE certificate_id=? ORDER BY effective_date",
+            (certificate_id,))]
+
     def physical_item(self, asset_id: int) -> dict | None:
         """The gold item behind an asset, if it is one."""
         row = self.physical_items().get(asset_id)

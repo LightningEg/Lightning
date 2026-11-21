@@ -87,6 +87,9 @@ async def allow(request: Request):
     source = phone_source(request)
     if source is not None:
         source.request()
+    form = await request.form()
+    if form.get("return_to") == "/start/phone":  # setup's step 6 (IV-11N2)
+        return redirect("/start/phone", "Answer the phone's question, then come back here.")
     return redirect("/sms", "Answer the phone's question, then come back here.")
 
 

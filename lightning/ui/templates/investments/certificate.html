@@ -1,0 +1,48 @@
+{# IV-12J1: a certificate's own holding page. It reads in the bank's words: rate and payouts, interest received against
+   what its terms expected, the next payment, unlock and maturity, and what cashing it in would bring. Figures come
+   from DepositService.holding; no price, units, average cost or unrealized gain. #}
+{% extends "base.html" %}
+{% from "partials/charts.html" import tone_icon %}
+{% set cert_href = '/deposits/' ~ portfolio.id ~ '#certificate-' ~ t.id %}
+{% from "partials/certificate_words.html" import schedule_label, payment_kind with context %}
+{% block title %}{{ h.asset_name }}{% endblock %}
+{% block heading %}<div><h1>{{ h.asset_name }}</h1><div class="muted page-subtitle">{{ portfolio.institution or portfolio.name }} · {{ 'Certificate of deposit'|tr(locale) }} · {{ '{rate}% a year'|tr(locale, rate='%g'|format(cd.rate)) }} · {{ schedule_label(t) }} · {{ 'as of {date}'|tr(locale, date=day) }}</div></div>{% endblock %}
+{% block top_actions %}{% if cd.held and cd.unlock_days is none %}<a class="btn" href="/deposits/{{ portfolio.id }}?redeem={{ t.id }}#certificate-{{ t.id }}">{{ 'Record what the bank paid'|tr(locale) }}</a>{% endif %}<a class="btn" href="/deposits/{{ portfolio.id }}#buy-certificate">{{ 'Buy another certificate'|tr(locale) }}</a><details class="action-menu"><summary class="btn">{{ 'More actions'|tr(locale) }}</summary><div><a href="{{ cert_href }}">{{ 'Change its terms'|tr(locale) }}</a><a href="/deposits/{{ portfolio.id }}">{{ 'All certificates at {bank}'|tr(locale, bank=portfolio.institution or portfolio.name) }}</a><a href="/investments">{{ 'All holdings'|tr(locale) }}</a></div></details>{% endblock %}
+{% block content %}
+<section class="stat-tiles" aria-label="{{ 'This certificate'|tr(locale) }}">
+  <div class="stat-tile surface-hold"><span class="stat-tile-head">{{ tone_icon('hold') }}<span class="stat-tile-label">{{ 'Worth today'|tr(locale) }}</span>{% if cd.pays_at_maturity and cd.held %}<span class="stat-chip">{{ 'estimate'|tr(locale) }}</span>{% endif %}</span>
+    <span class="stat-tile-value">{{ cd.value|money }}<small>{{ base }}</small></span>
+    <span class="stat-tile-sub">{% if cd.pays_at_maturity and cd.held %}{{ 'Principal {principal} plus {earned} interest earned so far'|tr(locale, principal=t.principal|money, earned=cd.earned|money) }}{% elif cd.held %}{{ 'Principal {principal}; its interest is paid into {account}'|tr(locale, principal=t.principal|money, account=payout_account.name) }}{% else %}{{ 'Redeemed'|tr(locale) }}{% endif %}</span></div>
+  <div class="stat-tile surface-in"><span class="stat-tile-head">{{ tone_icon('in') }}<span class="stat-tile-label">{{ 'Interest received'|tr(locale) }}</span>{% if cd.expected %}<span class="stat-chip is-{{ 'up' if cd.received >= cd.expected else 'down' }}">{{ ('as expected' if cd.received >= cd.expected else 'less than expected')|tr(locale) }}</span>{% endif %}</span>
+    <span class="stat-tile-value">{{ cd.received|money }}<small>{{ base }}</small></span>
+    <span class="stat-tile-sub">{% if cd.pays_at_maturity %}{{ 'Paid at maturity: about {amount} on {date}'|tr(locale, amount=(cd.maturity_amount - t.principal)|money, date=t.maturity_date) }}{% else %}{{ 'Its terms expected {amount} by now'|tr(locale, amount=cd.expected|money) }}{% endif %}</span></div>
+  <div class="stat-tile surface-in"><span class="stat-tile-head">{{ tone_icon('in') }}<span class="stat-tile-label">{{ 'Next payment'|tr(locale) }}</span>{% if cd.next_days is not none %}<span class="stat-chip">{{ ('in {n} day' if cd.next_days == 1 else 'in {n} days')|tr(locale, n=cd.next_days) }}</span>{% endif %}</span>
+    <span class="stat-tile-value">{{ cd.next_amount|money if cd.next_amount is not none else '—' }}<small>{{ base }}</small></span>
+    <span class="stat-tile-sub">{% if cd.next_date %}{{ '{date} into {account}'|tr(locale, date=cd.next_date, account=payout_account.name) }}{% else %}{{ 'No payments left'|tr(locale) }}{% endif %}</span></div>
+  <div class="stat-tile surface-hold"><span class="stat-tile-head">{{ tone_icon('hold') }}<span class="stat-tile-label">{{ 'Maturity'|tr(locale) }}</span>{% if cd.maturity_days is not none %}<span class="stat-chip">{{ ('in {n} day' if cd.maturity_days == 1 else 'in {n} days')|tr(locale, n=cd.maturity_days) }}</span>{% endif %}</span>
+    <span class="stat-tile-value">{{ t.maturity_date }}</span>
+    <span class="stat-tile-sub">{% if not cd.held %}{{ 'Redeemed'|tr(locale) }}{% elif cd.unlock_days is not none %}{{ 'Locked until {date}, in {n} days'|tr(locale, date=t.lockup_end_date, n=cd.unlock_days) }}{% elif cd.maturity_days is none %}{{ 'Matured: record what the bank paid'|tr(locale) }}{% else %}{{ 'Can be cashed in early since {date}'|tr(locale, date=t.lockup_end_date) }}{% endif %}</span></div>
+</section>
+
+<section class="card wide-card"><div class="overview-split">
+  <section id="payments"><div class="overview-block-head"><div><h2>{{ 'Payments from the bank'|tr(locale) }}</h2><p>{{ schedule_label(t) }}{% if cd.interest_payments %} · {{ ('{n} interest payment' if cd.interest_payments == 1 else '{n} interest payments')|tr(locale, n=cd.interest_payments) }}{% endif %}</p></div></div>
+    {% set past = cd.payments|selectattr('past')|list %}{% set ahead = cd.payments|rejectattr('past')|list %}
+    {% set shown = (past[-3:] if past else []) + ahead[:9] %}
+    <table class="journey-table"><thead><tr><th>{{ 'Date'|tr(locale) }}</th><th>{{ 'What'|tr(locale) }}</th><th class="num">{{ 'Amount'|tr(locale) }}</th><th>{{ 'Status'|tr(locale) }}</th></tr></thead><tbody>
+    {% for p in shown %}<tr><td class="code">{{ p.date }}</td><td>{{ payment_kind(p.kind) }}</td><td class="num">{{ p.amount|money }}</td><td>{{ ('Was due' if p.past else 'Expected')|tr(locale) }}</td></tr>{% endfor %}
+    </tbody></table>
+    {% if past|length > 3 or ahead|length > 9 %}<p class="muted small">{% if past|length > 3 %}{{ ('{n} earlier payment' if past|length - 3 == 1 else '{n} earlier payments')|tr(locale, n=past|length - 3) }}{% endif %}{% if past|length > 3 and ahead|length > 9 %} · {% endif %}{% if ahead|length > 9 %}{{ ('{n} more to come' )|tr(locale, n=ahead|length - 9) }}{% endif %}</p>{% endif %}
+    <p class="muted small">{{ 'A forecast from its terms. Interest counts as received once it is on your statement as money in from {bank}.'|tr(locale, bank=portfolio.institution or portfolio.name) }}</p></section>
+  <section id="terms"><div class="overview-block-head"><div><h2>{{ 'Its terms'|tr(locale) }}</h2><p><a href="{{ cert_href }}">{{ 'Change its terms'|tr(locale) }}</a></p></div></div>
+    <dl class="definition-list">
+      <dt>{{ 'Bought'|tr(locale) }}</dt><dd>{{ t.start_date }}</dd>
+      <dt>{{ 'Principal'|tr(locale) }}</dt><dd>{{ t.principal|money }} {{ base }}</dd>
+      <dt>{{ 'Annual rate'|tr(locale) }}</dt><dd>{{ '%g'|format(cd.rate) }}%{% if cd.rates %} · {{ 'variable'|tr(locale) }}{% endif %}</dd>
+      <dt>{{ 'Earliest withdrawal'|tr(locale) }}</dt><dd>{{ t.lockup_end_date }}</dd>
+      <dt>{{ 'Maturity'|tr(locale) }}</dt><dd>{{ t.maturity_date }} · {{ 'about {amount} paid that day'|tr(locale, amount=cd.maturity_amount|money) }}</dd>
+      <dt>{{ 'Paid into'|tr(locale) }}</dt><dd>{{ payout_account.name }}</dd>
+      <dt>{{ 'Cashing it in today'|tr(locale) }}</dt><dd>{% if cd.cash_in is none and cd.held %}{{ 'Not before {date}'|tr(locale, date=t.lockup_end_date) }}{% elif cd.cash_in is none %}—{% elif cd.maturity_days is none %}{{ cd.cash_in|money }} {{ base }}{% else %}{{ 'About {amount}, at your sale factor of {factor}%'|tr(locale, amount=cd.cash_in|money ~ ' ' ~ base, factor='%g'|format(cd.sale_factor)) }}{% endif %}</dd>
+    </dl>
+    {% if cd.rates %}<p class="muted small">{{ 'Rate changes'|tr(locale) }}: {% for when, rate in cd.rates %}{{ '{rate}% from {date}'|tr(locale, rate='%g'|format(rate), date=when.isoformat()) }}{{ ' · ' if not loop.last }}{% endfor %}</p>{% endif %}</section>
+</div></section>
+{% endblock %}

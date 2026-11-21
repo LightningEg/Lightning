@@ -1,0 +1,27 @@
+{# Setup step 4 (IV-11N2): about how much the salary is, the day it arrives, and where it lands. Cash is offered even
+   with no account yet: the wallet is made in step 5 and the salary is saved with it. #}
+{% extends "phone/start/base.html" %}
+{% block title %}{{ 'Your salary'|tr(locale) }}{% endblock %}
+{% block intro %}<h1 id="page-title">{{ 'Your salary'|tr(locale) }}</h1>
+<p>{{ 'Lightning plans until your next payday, so it needs the day and about how much. You still record the salary when it arrives.'|tr(locale) }}</p>{% endblock %}
+{% block content %}
+{% if already %}
+<p class="start-note">{{ 'Your income is already set up. Edit it in Plan › Recurring.'|tr(locale) }}</p>
+<form method="post" action="/start/skip"><input type="hidden" name="step" value="salary"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><div class="form-actions"><button class="button button-primary v2-big" type="submit">{{ 'Continue'|tr(locale) }}{{ chevron() }}</button></div></form>
+{% else %}
+<form method="post" action="/start/salary" class="form-stack">
+  <div class="field{{ ' has-error' if error_field == 'amount' }}"><label for="start-amount">{{ 'About how much arrives each month?'|tr(locale) }} ({{ base }})</label>
+    <input id="start-amount" name="amount" type="text" inputmode="decimal" value="{{ values.amount }}" required autocomplete="off" placeholder="{{ 'Like 30,000'|tr(locale) }}"{{ ' aria-invalid=true' if error_field == 'amount' }}></div>
+  <div class="field{{ ' has-error' if error_field == 'payday' }}"><label for="start-payday">{{ 'Day it arrives'|tr(locale) }}</label>
+    <input id="start-payday" name="payday" type="text" inputmode="numeric" maxlength="2" value="{{ values.payday }}" required autocomplete="off" placeholder="{{ '1 to 31'|tr(locale) }}"{{ ' aria-invalid=true' if error_field == 'payday' }}>
+    <small>{{ 'If it moves a little each month, pick the usual day.'|tr(locale) }}</small></div>
+  <fieldset class="start-kinds{{ ' has-error' if error_field == 'account_id' }}"><legend>{{ 'It lands in'|tr(locale) }}</legend>
+    {% for a in accounts %}<label class="start-kind"><input type="radio" name="account_id" value="{{ a.id }}"{% if values.account_id == a.id|string %} checked{% endif %}><span><b>{{ a.name }}</b></span></label>{% endfor %}
+    <label class="start-kind"><input type="radio" name="account_id" value="cash"{% if values.account_id == 'cash' %} checked{% endif %}><span><b>{{ 'Cash, in hand'|tr(locale) }}</b><small>{{ 'Saved with your cash wallet, next'|tr(locale) }}</small></span></label>
+  </fieldset>
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  <div class="form-actions"><button class="button button-primary v2-big" type="submit">{{ 'Save salary'|tr(locale) }}{{ chevron() }}</button></div>
+</form>
+<form method="post" action="/start/skip" class="start-skip"><input type="hidden" name="step" value="salary"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="text-button" type="submit">{{ 'I have no fixed salary'|tr(locale) }}</button></form>
+{% endif %}
+{% endblock %}

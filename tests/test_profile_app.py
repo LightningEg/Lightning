@@ -25,7 +25,9 @@ def recovery_shown(text):
     return re.search(r'aria-label="Recovery key">([0-9-]+)<', text).group(1)
 
 
-def create(browser, name="Home", currency="EGP"):
+def create(browser, name="Home", currency="EGP", setup=False):
+    """A new profile, ready to use. On the phone a new profile goes on to setup's steps 3 to 6 (IV-11N2); they are
+    finished here unless ``setup`` keeps the response on step 3."""
     page = browser.get("/profiles/new")
     csrf = token(page.text)
     page = browser.post("/profiles/new", data={"csrf": csrf, "name": name, "currency": currency,
@@ -35,6 +37,9 @@ def create(browser, name="Home", currency="EGP"):
     csrf = token(page.text)
     response = browser.post("/profiles/confirm", data={"csrf": csrf, "recovery": recovery_shown(page.text)})
     assert response.status_code == 200, response.text
+    if not setup and response.url.path.startswith("/start/"):
+        response = browser.post("/start/finish", data={"__session": token(response.text, "__session")})
+        assert response.status_code == 200, response.text
     return response
 
 

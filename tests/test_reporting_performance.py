@@ -204,7 +204,8 @@ PAGE_READ_BUDGET = {
     # NF-7AR (2026-11-14): /plan shows the Upcoming calendar (its month's payments and the first shortfall) instead of the
     # 30-day table, which it paid for with its own reads: 250 to 260.
     # 7T3 (2026-10-28): an account that plans pay from reads the dated forecast once for the day it goes below zero.
-    "/accounts/1": 151, "/transactions": 110, "/budget?period=month": 120,
+    # IV-12J3 (2026-11-14): one read of the certificates paid at maturity, whose value grows as they earn.
+    "/accounts/1": 152, "/transactions": 110, "/budget?period=month": 120,
     "/budget?period=all": 160, "/plan": 260, "/investments": 175, "/birdview/expenses?period=all": 180,
 }
 

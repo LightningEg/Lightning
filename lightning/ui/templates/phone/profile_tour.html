@@ -1,0 +1,50 @@
+{% from "partials/chevron.html" import chevron with context %}
+<!doctype html>
+{# How Lightning works (IV-11N1): four example cards from Welcome, before any profile exists, one question each, in the
+   owner's order. Figures: lightning/samples/tour.py; served by the profile pages (runtime/profile_screens.py). Each card is its own address, so Back works without a script. #}
+<html lang="{{ 'ar-EG' if locale == 'ar' else 'en' }}" dir="{{ 'rtl' if locale == 'ar' else 'ltr' }}" class="phone">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <title>{{ 'How Lightning works'|tr(locale) }} · Lightning</title>
+  <link rel="icon" type="image/svg+xml" href="/static/lightning-mark.svg">
+  <link rel="stylesheet" href="/static/fonts/fonts.css?v=2">
+  <link rel="stylesheet" href="/static/profiles{{ '.rtl' if locale == 'ar' else '' }}.css?v=7">
+</head>
+<body>
+  <main class="profile-page is-tour" id="profile-ready">
+    <header class="v2-steps">
+      <a class="v2-steps-back" href="{{ '/profiles/tour?card=%d'|format(n - 1) if n > 1 else '/profiles' }}" aria-label="{{ 'Back'|tr(locale) }}">{{ chevron(true) }}</a>
+      <span class="v2-steps-bar" role="img" aria-label="{{ '{n} of {total}'|tr(locale, n=n, total=total) }}">{% for i in range(total) %}<i{% if i < n %} class="is-done"{% endif %}></i>{% endfor %}</span>
+      <a class="tour-skip" href="/profiles/new">{{ 'Skip'|tr(locale) }}</a>
+    </header>
+    <section class="tour-body" aria-labelledby="page-title">
+      <h1 id="page-title">{{ card.question|tr(locale) }}</h1>
+      <p class="tour-answer">{{ card.answer|tr(locale) }}</p>
+      {% if card.message %}
+      <div class="tour-sms" role="img" aria-label="{{ 'A bank message'|tr(locale) }}"><small>CIB · {{ 'now'|tr(locale) }}</small><p dir="ltr">{{ card.message }}</p></div>
+      <p class="tour-becomes"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>{{ 'Lightning logs it for you'|tr(locale) }}</p>
+      {% endif %}
+      <div class="tour-example">
+        <div class="tour-example-head"><span>{{ card.lead_label|tr(locale) }}</span><span class="tour-chip">{{ 'Example'|tr(locale) }}</span></div>
+        <div class="tour-lead"><bdi class="fig">{{ card.lead|money(False, 0) }}</bdi> <small>EGP</small></div>
+        <p class="tour-line">{{ card.line|tr(locale, amt=compare|money(False, 0)) if compare is not none else card.line|tr(locale) }}</p>
+        {% if card.bars %}
+        <ul class="tour-bars">{% for r in card.bars %}<li><span class="tour-bar-name">{{ r.label|tr(locale) }}</span><b class="fig">{{ r.amount|money(False, 0) }}</b><span class="tour-bar" aria-hidden="true"><i style="width:{{ r.note }}%"></i></span></li>{% endfor %}</ul>
+        {% endif %}
+        {% for g in card.groups %}
+        {% if g.label %}<p class="tour-group">{{ g.label|tr(locale) }}</p>{% endif %}
+        <ul class="tour-rows">{% for r in g.rows %}<li><span>{{ r.label|tr(locale) }}{% if r.note %}<small>{{ r.note|tr(locale) }}</small>{% endif %}</span><b class="fig">{{ r.amount|money(False, 0) }}</b></li>{% endfor %}</ul>
+        {% endfor %}
+      </div>
+      <p class="tour-foot">{{ card.foot|tr(locale) }}</p>
+    </section>
+    <div class="tour-actions">
+      {% if n < total %}<a class="button button-primary v2-big" href="/profiles/tour?card={{ n + 1 }}">{{ 'Next'|tr(locale) }}{{ chevron() }}</a>
+      {% else %}<a class="button button-primary v2-big" href="/profiles/new">{{ 'Set up Lightning'|tr(locale) }}{{ chevron() }}</a>
+      <a class="v2-welcome-link" href="/profiles">{{ 'Back to Welcome'|tr(locale) }}</a>{% endif %}
+    </div>
+  </main>
+</body>
+</html>

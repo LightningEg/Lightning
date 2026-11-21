@@ -164,6 +164,18 @@ class DepositRepository:
              payout_frequency.value, compounding_frequency.value, destination_account_id, certificate_id),
         )
 
+    def rate_changes(self, certificate_id: int) -> list[tuple[str, Decimal]]:
+        """IV-12J4: dated rate changes, oldest first: [(effective date, annual rate)]."""
+        return [(row["effective_date"], Decimal(row["annual_rate"])) for row in self.db.all(
+            "SELECT effective_date,annual_rate FROM cd_rate_changes WHERE certificate_id=? ORDER BY effective_date",
+            (certificate_id,))]
+
+    def set_rate_change(self, certificate_id: int, effective_date: str, annual_rate: Decimal) -> None:
+        self.db.execute(
+            "INSERT INTO cd_rate_changes(certificate_id,effective_date,annual_rate) VALUES (?,?,?) "
+            "ON CONFLICT(certificate_id,effective_date) DO UPDATE SET annual_rate=excluded.annual_rate,"
+            "updated_at=CURRENT_TIMESTAMP", (certificate_id, effective_date, str(annual_rate)))
+
     def record_redemption(self, transaction_id: int, certificate_id: int, destination_account_id: int) -> None:
         # A voided redemption no longer redeems; the new one replaces its row, so restoring the old one is a
         # plain sale the holding check refuses (audit 2026-10-26).

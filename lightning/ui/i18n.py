@@ -4006,6 +4006,58 @@ ARABIC_UI = {
     'A payment': 'دفعة',
     'These two are no longer offered as possible duplicates.': 'الاتنين دول مبقوش معروضين كتكرار محتمل.',
     'These two are no longer offered.': 'الاتنين دول مبقوش معروضين.',
+    # IV-12J: a certificate's own page and its portfolio list
+    'New rate from': 'العائد الجديد من',
+    'For a variable rate: payments from this date use the new rate; earlier ones keep theirs. Leave empty to correct the rate it was bought at.': 'للعائد المتغير: الدفعات من التاريخ ده بتاخد العائد الجديد، واللي قبله بيفضل زي ما هو. سيبه فاضي لو بتصحح العائد اللي اشتريتها بيه.',
+    '{rate}% a year': '{rate}% في السنة',
+    'Certificate of deposit': 'شهادة إيداع',
+    'Change its terms': 'غيّر شروطها',
+    'All certificates at {bank}': 'كل الشهادات في {bank}',
+    'This certificate': 'الشهادة دي',
+    'Worth today': 'قيمتها النهارده',
+    'estimate': 'تقدير',
+    'Principal {principal} plus {earned} interest earned so far': 'الأصل {principal} وفوقه {earned} فايدة اتكسبت لحد دلوقتي',
+    'Principal {principal}; its interest is paid into {account}': 'الأصل {principal}؛ فايدتها بتنزل في {account}',
+    'as expected': 'زي المتوقع',
+    'less than expected': 'أقل من المتوقع',
+    'Its terms expected {amount} by now': 'شروطها كانت متوقعة {amount} لحد دلوقتي',
+    'Paid at maturity: about {amount} on {date}': 'بتتصرف عند الاستحقاق: حوالي {amount} يوم {date}',
+    'in {n} day': 'بعد يوم واحد',
+    '{date} into {account}': '{date} في {account}',
+    'No payments left': 'مفيش دفعات فاضلة',
+    'Locked until {date}, in {n} days': 'مقفولة لحد {date}، بعد {n} يوم',
+    'Matured: record what the bank paid': 'استحقت: سجّل اللي البنك دفعه',
+    'Can be cashed in early since {date}': 'ممكن تتسيّل بدري من {date}',
+    'Payments from the bank': 'دفعات البنك',
+    '{n} interest payment': 'دفعة فايدة واحدة',
+    '{n} interest payments': '{n} دفعة فايدة',
+    '{n} earlier payment': 'دفعة واحدة قبل كده',
+    '{n} earlier payments': '{n} دفعة قبل كده',
+    '{n} more to come': '{n} دفعة جاية كمان',
+    'Was due': 'كانت مستحقة',
+    'A forecast from its terms. Interest counts as received once it is on your statement as money in from {bank}.': 'ده توقع من شروطها. الفايدة بتتحسب مستلمة لما تظهر في كشف حسابك كفلوس داخلة من {bank}.',
+    'Its terms': 'شروطها',
+    'variable': 'متغير',
+    'about {amount} paid that day': 'حوالي {amount} بتتصرف اليوم ده',
+    'Paid into': 'بتنزل في',
+    'Cashing it in today': 'لو سيّلتها النهارده',
+    'Not before {date}': 'مش قبل {date}',
+    'About {amount}, at your sale factor of {factor}%': 'حوالي {amount}، بمعامل البيع بتاعك {factor}%',
+    'Rate changes': 'تغييرات العائد',
+    '{rate}% from {date}': '{rate}% من {date}',
+    'Every payment': 'كل الدفعات',
+    'Compounds monthly, paid at maturity': 'فايدة مركبة شهريًا، بتتصرف عند الاستحقاق',
+    'Compounds quarterly, paid at maturity': 'فايدة مركبة كل ٣ شهور، بتتصرف عند الاستحقاق',
+    'Compounds yearly, paid at maturity': 'فايدة مركبة سنويًا، بتتصرف عند الاستحقاق',
+    'Interest paid monthly': 'الفايدة بتتصرف كل شهر',
+    'Interest paid quarterly': 'الفايدة بتتصرف كل ٣ شهور',
+    'Interest paid yearly': 'الفايدة بتتصرف كل سنة',
+    'Interest paid at maturity': 'الفايدة بتتصرف عند الاستحقاق',
+    'Principal back': 'رجوع الأصل',
+    'Principal and interest': 'الأصل والفايدة',
+    'bought {date}': 'اتشترت {date}',
+    'withdraw from {date}': 'تتسحب من {date}',
+    'Interest rate': 'العائد',
     # NF-12AK3: a refund names its purchase.
     'This refunds…': 'ده استرداد لـ…',
     'Bought {date} · estimates count this refund in that month': 'اتشترى {date} · التقديرات بتحسب الاسترداد ده في الشهر ده',
@@ -4038,6 +4090,9 @@ ARABIC_UI = {
 from lightning.ui.i18n_phone_reading import PHONE_READING as _PHONE_READING  # noqa: E402
 
 ARABIC_UI.update(_PHONE_READING)
+from lightning.ui.i18n_onboarding import ONBOARDING as _ONBOARDING  # noqa: E402
+
+ARABIC_UI.update(_ONBOARDING)
 from lightning.ui.i18n_errors import ERRORS_AR as _ERRORS_AR  # noqa: E402
 
 ARABIC_UI.update(_ERRORS_AR)

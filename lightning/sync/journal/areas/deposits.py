@@ -6,7 +6,7 @@ three rows per instalment, so a circle with more than twenty overdue instalments
 """
 from .spec import AMOUNT, DATE, INT, TEXT, Command, listof, optional, ref
 
-TABLES = ("cd_certificates", "cd_interest_receipt_events", "cd_interest_receipt_links", "cd_redemptions", "gameya_terms", "cd_terms")
+TABLES = ("cd_certificates", "cd_rate_changes", "cd_interest_receipt_events", "cd_interest_receipt_links", "cd_redemptions", "gameya_terms", "cd_terms")
 
 CERTIFICATE = ("cd_certificates", "certificate_id")
 # Dates and rates arrive as the form's text (a blank maturity with term years is allowed); the service decides.
@@ -30,6 +30,9 @@ COMMANDS = {
         compounding_frequency=TEXT), target=("cd_terms", ("account_id",))),
     "deposits.update_certificate": Command("deposits.update_certificate", dict(
         certificate_id=ref("cd_certificates"), name=TEXT, **TERMS), target=CERTIFICATE),
+    # IV-12J4: a variable certificate's dated rate change (table cd_rate_changes).
+    "deposits.set_rate_change": Command("deposits.set_rate_change", dict(
+        certificate_id=ref("cd_certificates"), effective_date=TEXT, annual_rate=TEXT), target=CERTIFICATE),
     "deposits.redeem": Command("deposits.redeem", dict(
         certificate_id=ref("cd_certificates"), date_value=TEXT, proceeds=AMOUNT, destination_account_id=ref("accounts")),
         target=CERTIFICATE, creates="transactions"),
