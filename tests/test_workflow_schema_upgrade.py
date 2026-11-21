@@ -33,14 +33,17 @@ def test_encrypted_roundtrip_fixture_is_current_and_keeps_its_transactions_out_o
 
 
 def test_work_refund_reporting_upgrades_existing_claims_and_ledger(tmp_path, monkeypatch):
-    from shutil import copytree, ignore_patterns
+    from shutil import copy2
 
     from lightning.bootstrap import build
     from lightning.core.dates import parse_month
     from lightning.database import migrator
 
     previous_migrations = tmp_path / "migration-89"
-    copytree(migrator.MIGRATIONS_DIR, previous_migrations, ignore=ignore_patterns("0090_*.sql"))
+    previous_migrations.mkdir()
+    for migration in sorted(migrator.MIGRATIONS_DIR.glob("*.sql")):
+        if int(migration.name[:4]) <= 89:
+            copy2(migration, previous_migrations)
     profile = tmp_path / "work-refund.db"
     with monkeypatch.context() as old_schema:
         old_schema.setattr(migrator, "MIGRATIONS_DIR", previous_migrations)
@@ -59,7 +62,7 @@ def test_work_refund_reporting_upgrades_existing_claims_and_ledger(tmp_path, mon
 
     c = build(profile)
     try:
-        assert inspect_schema(c.db).current_version == 90
+        assert inspect_schema(c.db).current_version == BUNDLED_LATEST_VERSION
         assert migrator.migrate(c.db) == []
         assert [tuple(row) for row in c.db.all("SELECT * FROM ledger_entries ORDER BY transaction_id,line_no")] == ledger
         assert c.reimbursements.list_claims()[0]["outstanding"] == 600
