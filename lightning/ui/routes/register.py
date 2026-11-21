@@ -462,7 +462,11 @@ def page(request: Request, account_id: int | None, entry: dict | None = None, ed
     filter_tag = normal_tag(active_view["tag"] if active_view else qp.get("tag", "")) or (normal_tag(q) if q.startswith("#") and " " not in q else "")
     kind = qp.get("kind", "").strip()
     kind = kind if kind in REGISTER_KINDS else ""
-    matched_ids = c.transactions.search_ids(q) if q and q.casefold() != ("#" + filter_tag).casefold() else None
+    matched_ids = None
+    if q and q.casefold() != ("#" + filter_tag).casefold():
+        locale = c.settings.get("locale")
+        category_labels = {cat.id: translate(cat.name, locale) for cat in c.categories.tree()} if locale == "ar" else None
+        matched_ids = c.transactions.search_ids(q, category_labels=category_labels)
     if filter_tag:
         tagged = c.transactions.tag_transaction_ids(filter_tag)
         matched_ids = tagged if matched_ids is None else matched_ids & tagged

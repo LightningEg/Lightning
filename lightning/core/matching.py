@@ -43,7 +43,10 @@ def fold_search_text(text: str) -> str:
     joins no words that a space or punctuation kept apart. Empty input stays empty, and the fold is its
     own fixed point, so folding twice is folding once.
     """
-    s = " ".join(str(text or "").casefold().split())
+    text = str(text or "")
+    if text.isascii():
+        return " ".join(text.lower().replace("`", "'").split())
+    s = " ".join(text.casefold().split())
     s = unicodedata.normalize("NFKD", s)
     s = ascii_digits(s)
     s = "".join(c for c in s if unicodedata.category(c) not in ("Mn", "Cf"))

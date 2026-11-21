@@ -13,6 +13,8 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
 
+from lightning.core.matching import fold_search_text
+
 # Migration 0069: the triggers that refuse a change inside a month checked against the bank put this code at the end
 # of their message; the database layer matches the code, so rewording the sentence cannot break the match (IT-9K).
 CHECKED_MONTH_CODE = "LN-E0001"
@@ -80,6 +82,7 @@ class Database:
                 # Forces wrong-key/corrupt-file rejection before migrations/seed.
                 conn.execute("SELECT count(*) FROM sqlite_master").fetchone()
                 conn.row_factory = self.driver.Row
+                conn.create_function("fold", 1, fold_search_text, deterministic=True)
                 conn.execute("PRAGMA temp_store = MEMORY")
                 conn.execute("PRAGMA foreign_keys = ON")
                 conn.execute("PRAGMA busy_timeout = 5000")

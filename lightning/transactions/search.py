@@ -31,9 +31,9 @@ def tags(repo) -> list[tuple[str, int]]:
     return sorted(counts.items(), key=lambda kv: (-kv[1], kv[0]))
 
 
-def search_ids(repo, counterparties, text: str) -> set[int]:
+def search_ids(repo, text: str, *, category_labels: dict[int, str] | None = None) -> set[int]:
     """Transaction ids matching a search (posted ones)."""
-    clause, params = repo._where(TxnFilter(search=text))
+    clause, params = repo._where(TxnFilter(search=text, category_labels=category_labels))
     return {int(row["id"]) for row in repo.db.all(f"SELECT t.id FROM transactions t WHERE {clause}", tuple(params))}
 
 

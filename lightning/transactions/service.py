@@ -382,9 +382,9 @@ class TransactionService:
         """Every tag in use, with how many posted transactions carry it, most used first."""
         return search.tags(self.repo)
 
-    def search_ids(self, text: str) -> set[int]:
+    def search_ids(self, text: str, *, category_labels: dict[int, str] | None = None) -> set[int]:
         """Transaction ids matching a search (posted ones)."""
-        return search.search_ids(self.repo, self.counterparties, text)
+        return search.search_ids(self.repo, text, category_labels=category_labels)
 
     # A counterparty's usual category is a habit, not one odd filing (as in Actual Budget): the same
     # category in at least 3 of its last 5 transactions, or in every one while it has 2 to 4. Only the

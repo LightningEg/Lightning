@@ -9,7 +9,7 @@ from lightning.core.balances import running_balances
 from lightning.core.dates import now_iso
 from lightning.core.ledger import Effect, PostingLine
 from lightning.core.money import ascii_digits, from_e6, to_e6
-from lightning.core.matching import match_score, NUMERIC
+from lightning.core.matching import fold_search_text, match_score, NUMERIC
 from lightning.core.refs import DocType, parse_ref
 from lightning.database.connection import Database
 
@@ -61,12 +61,12 @@ def _like(term: str) -> str:
 # One search word must appear somewhere in the transaction: its ref, date, counterparty, description, notes,
 # or on one of its lines — account code/name, category code/name, or the amount (e.g. 450.00).
 _TERM_SQL = (
-    "(t.ref LIKE ? ESCAPE '\\' OR t.date LIKE ? ESCAPE '\\' OR t.counterparty LIKE ? ESCAPE '\\'"
-    " OR t.description LIKE ? ESCAPE '\\' OR t.notes LIKE ? ESCAPE '\\'"
+    "(t.ref LIKE ? ESCAPE '\\' OR t.date LIKE ? ESCAPE '\\' OR fold(t.counterparty) LIKE ? ESCAPE '\\'"
+    " OR fold(t.description) LIKE ? ESCAPE '\\' OR fold(t.notes) LIKE ? ESCAPE '\\'"
     " OR EXISTS (SELECT 1 FROM ledger_entries s JOIN accounts a ON a.id = s.account_id"
     " LEFT JOIN categories c ON c.id = s.category_id WHERE s.transaction_id = t.id AND ("
-    " a.code LIKE ? ESCAPE '\\' OR a.name LIKE ? ESCAPE '\\' OR c.code LIKE ? ESCAPE '\\'"
-    " OR c.name LIKE ? ESCAPE '\\' OR printf('%.2f', abs(s.amount_e6) / 1000000.0) LIKE ? ESCAPE '\\'"
+    " a.code LIKE ? ESCAPE '\\' OR fold(a.name) LIKE ? ESCAPE '\\' OR c.code LIKE ? ESCAPE '\\'"
+    " OR fold(c.name) LIKE ? ESCAPE '\\' OR printf('%.2f', abs(s.amount_e6) / 1000000.0) LIKE ? ESCAPE '\\'"
     " OR CAST(abs(s.amount_e6) / 1000000.0 + 0.5 AS INTEGER) = ?)))"  # a whole number finds the figure the pages show
 )
 
@@ -239,15 +239,20 @@ class TransactionRepository:
         if f.date_to:
             where.append("t.date <= ?")
             params.append(f.date_to)
+        category_labels = {key: fold_search_text(label) for key, label in (f.category_labels or {}).items()}
         for term in search_terms(f.search):
-            alternatives, identity_params = self._entity_matches(term)
+            folded = fold_search_text(term)
+            alternatives, identity_params = self._entity_matches(term, folded, category_labels)
             where.append("(" + _TERM_SQL + (" OR " + " OR ".join(alternatives) if alternatives else "") + ")")
-            params.extend([_like(term)] * 10)
-            params.append(int(term) if term.isdigit() else None)
+            literal_pattern = _like(term)
+            folded_pattern = _like(folded) if folded else None
+            params.extend((literal_pattern, literal_pattern, folded_pattern, folded_pattern, folded_pattern,
+                           literal_pattern, folded_pattern, literal_pattern, folded_pattern, literal_pattern))
+            params.append(int(term) if term.isdecimal() else None)
             params.extend(identity_params)  # 3251 finds 3,250.75, shown as 3,251
         return " AND ".join(where), params
 
-    def _entity_matches(self, term: str) -> tuple[list[str], list]:
+    def _entity_matches(self, term: str, folded: str, category_labels: dict[int, str]) -> tuple[list[str], list]:
         """History includes archived identities; numeric/date/ref terms remain literal."""
         if NUMERIC.fullmatch(term) or re.fullmatch(r"[A-Z]{2,5}-\d{4}-\d{2}-\d{2}-\d+(?:/\d+)?", term.upper()):
             return [], []
@@ -259,9 +264,12 @@ class TransactionRepository:
             ("Category", "SELECT id,name label,code FROM categories", "category_id"),
         )
         for kind, sql, column in sources:
-            ids = sorted({row["id"] for row in self.db.all(sql)
-                          if max(match_score(term, row["label"], kind=kind),
-                                 match_score(term, row["code"], fuzzy=False)) > 0})
+            matches = {row["id"] for row in self.db.all(sql)
+                       if max(match_score(term, row["label"], kind=kind),
+                              match_score(term, row["code"], fuzzy=False)) > 0}
+            if kind == "Category" and folded:
+                matches.update(key for key, label in category_labels.items() if folded in label)
+            ids = sorted(matches)
             # Chunk to keep SQLite variable/expression limits bounded, including very short prefixes.
             for start in range(0, len(ids), 400):
                 chunk = ids[start:start + 400]

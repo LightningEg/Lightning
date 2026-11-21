@@ -494,6 +494,8 @@ Search is read-only retrieval; choosing a result is the user's action.
 
 **Name ordering (IT-3BI2).** Planned items keep kind groups and sort names with the shared search fold; held-money reports use the same fold for owners and account/investment names. Browser category and payee pickers compare names in the page language with base sensitivity. Only comparison keys change; stored and displayed names stay intact.
 
+**Register search (IT-3BI1).** SQLite applies the shared search fold to stored payees, descriptions, notes, account names and category names. The Arabic register also supplies translated category names as search labels. Each search word can match a different field of the same transaction.
+
 
 | Rule | Example and acceptance |
 |---|---|
