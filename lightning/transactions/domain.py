@@ -110,3 +110,4 @@ class TxnFilter:
     include_void: bool = False
     limit: int = 200
     offset: int = 0
+    category_labels: dict[int, str] | None = None

@@ -6,8 +6,10 @@ from __future__ import annotations
 
 import unicodedata
 
+import pytest
 from fastapi.testclient import TestClient
 
+from lightning.ui.phone.router import mount_phone
 from lightning.ui.routes.search import _fold_search_text, _score, matches
 from lightning.ui.web import create_app
 
@@ -169,3 +171,38 @@ def test_empty_command_bar_still_opens_the_launcher(c):
     client = TestClient(create_app(c))
     rows = client.get("/search", params={"format": "json"}).json()["results"]
     assert {row["kind"] for row in rows} >= {"Page", "Action"}
+
+
+@pytest.mark.parametrize("phone", [False, True], ids=["pc", "phone"])
+def test_register_search_folds_arabic_in_stored_text_and_localized_categories(c, phone):
+    dining = c.categories.get_by_code("EXP.PERSONAL.DINING")
+    food = c.categories.get_by_code("EXP.PERSONAL.FOOD")
+    account = c.account_flows.open_account("NBE Current", "BANK", "2026-09-01", "5,000")
+    entry = c.transactions.record_outflow("2026-09-11", account.id, "200", dining.id, counterparty="أحمد عادل",
+                                          notes="ضِيَافَة 100%")
+    other = c.transactions.record_outflow("2026-09-12", account.id, "200", food.id, counterparty="مصطفى")
+    # Older entries can have a stored name without a linked payee identity.
+    c.db.execute("UPDATE transactions SET counterparty_id=NULL WHERE id=?", (entry.id,))
+    c.settings.set("locale", "ar")
+    app = create_app(c)
+    if phone:
+        mount_phone(app)
+        inner = app
+
+        async def app(scope, receive, send):
+            if scope["type"] == "http":
+                scope.setdefault("state", {})["phone"] = True
+            await inner(scope, receive, send)
+
+    client = TestClient(app)
+    row_marker = 'data-txn="{}"' if phone else 'class="transaction-select" value="{}"'
+    for query in ("احمد", "احمّد", "ضيافه", "مطاعم", "احمد مطاعم", "100%"):
+        response = client.get("/transactions", params={"q": query})
+        assert response.status_code == 200
+        assert row_marker.format(entry.id) in response.text
+        assert row_marker.format(other.id) not in response.text
+
+    c.settings.set("locale", "en")
+    response = client.get("/transactions", params={"q": "مطاعم"})
+    assert response.status_code == 200
+    assert row_marker.format(entry.id) not in response.text
