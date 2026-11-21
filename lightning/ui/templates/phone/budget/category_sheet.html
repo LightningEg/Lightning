@@ -7,6 +7,7 @@
 {% block phone_back %}<a class="phone-back" href="/budget?month={{ month }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Budget'|tr(locale) }}</span></a><span class="phone-appbar-title">{{ category.name|tr(locale) }}</span>{% endblock %}
 {% block content %}
 {% from "phone/partials/txn.html" import arrow with context %}
+{% from "partials/linked.html" import recovery_rows with context %}
 <div class="app-popup-content category-sheet category-page">
   <h2 data-popup-title id="app-popup-title" class="sr-only">{{ category.name|tr(locale) }}</h2>
   <section class="phone-hero" aria-labelledby="cat-lead">
@@ -23,6 +24,7 @@
   </section>
   {% if editable or (r and r.cover) %}<div class="phone-two-actions">{% if editable %}<a class="btn" data-popup-open href="/budget/category/{{ category.id }}/edit?month={{ month }}">{{ ('Raise the plan' if r and r.over else 'Edit limit' if r else 'Set a limit')|tr(locale) }}</a>{% endif %}{% if r and r.cover %}<a class="btn primary" data-popup-open href="{{ r.cover }}">{{ 'Move money'|tr(locale) }}</a>{% endif %}</div>{% endif %}
   {% if r and r.line %}<p class="phone-wide-soft phone-cat-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 7 13.5 15.5 8.5 10.5 2 17M16 7h6v6"/></svg><span>{{ r.line.text|tr(locale, **r.line['values']) }}</span></p>{% endif %}
+  {% if recovery %}<section class="phone-section" aria-labelledby="cat-back"><header class="phone-section-head"><span class="phone-head-text"><h2 id="cat-back">{{ 'Money back'|tr(locale) }}</h2><small>{{ ('1 purchase this month' if recovery.count == 1 else '{n} purchases this month')|tr(locale, n=recovery.count) }}</small></span></header>{{ recovery_rows(recovery, True) }}</section>{% endif %}
   <section class="phone-section is-rose" aria-labelledby="cat-month">
     <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span><span class="phone-head-text"><h2 id="cat-month">{{ 'This month'|tr(locale) }}</h2><small>{{ ('1 payment' if rows|length == 1 else '{n} payments')|tr(locale, n=rows|length) }}</small></span><a class="phone-quiet" href="{{ see_all }}">{{ 'All'|tr(locale) }}{{ chevron() }}</a></header>
     {% if rows %}<div class="phone-rows">{% for t in rows %}<a class="phone-txn" href="/transactions/{{ t.id }}/sheet">{{ arrow('out' if t.amount < 0 else 'in', category_mark(category.id)) }}<span class="phone-txn-who"><b>{{ t.counterparty or t.description or t.type_label }}</b><small>{{ t.date|day_label(locale) }}</small></span><span class="phone-txn-amount"><b class="{{ 'pos' if t.amount > 0 }}"><bdi class="fig">{{ t.amount|amount_role('row', True) }}</bdi></b></span></a>{% endfor %}</div>

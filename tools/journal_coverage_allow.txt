@@ -37,6 +37,7 @@ POST /budget/ceiling
 POST /budget/fill
 POST /budget/limit/{category_id:int}
 POST /budget/move
+POST /budget/estimate-review
 POST /budget/one-off
 POST /budget/percentage/{category_id:int}
 POST /budget/raise

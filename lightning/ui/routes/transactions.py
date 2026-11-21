@@ -6,6 +6,7 @@ from urllib.parse import urlencode
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse, PlainTextResponse
 
+from lightning.budgeting.recoveries import ExpenseRecoveries
 from lightning.transactions.domain import TxnFilter, TxnStatus
 from lightning.foreign_amounts import ForeignAmounts
 from lightning.transactions.figures import cash_amount
@@ -467,7 +468,9 @@ def detail_page(request: Request, txn_id: int, status_code: int = 200, error: st
                   cash_effects=cash_effects,
                   expense_categories=expense_categories, split_lines=split_lines,
                   touched=c.linked.transaction(txn_id), review=review, reserves=c.reserves.list_active(),
-                  foreign=ForeignAmounts(c.db).get(txn_id), refund=_refund_context(c, txn))
+                  foreign=ForeignAmounts(c.db).get(txn_id), refund=_refund_context(c, txn),
+                  recovery=(ExpenseRecoveries(c.db, c.reimbursements, c.refunds).of(txn.id)  # NF-12AK5
+                            if txn.type.value == "OUT" and not txn.is_void else None))
 
 
 def _refund_context(c, txn) -> dict | None:

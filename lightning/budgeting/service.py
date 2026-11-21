@@ -396,6 +396,69 @@ class BudgetService:
                 self.db.execute("DELETE FROM budget_estimate_exclusions WHERE transaction_id=?", (transaction_id,))
         return True
 
+    # ------------------------------------------------------------- the unusual-purchase review (NF-12AK5)
+    REVIEW_KEPT = "budget_estimate_review_kept"  # refs of purchases the person chose to keep in estimates
+
+    def review_kept_refs(self) -> set[str]:
+        try:
+            return {str(ref) for ref in json.loads(raw_setting(self.db, self.REVIEW_KEPT) or "[]")}
+        except (ValueError, TypeError):
+            return set()
+
+    def review_kept_value(self, ref: str) -> str:
+        """The setting's new value once a purchase is kept (the route saves it, so the journal carries it)."""
+        return json.dumps(sorted(self.review_kept_refs() | {str(ref)}))
+
+    def keep_in_estimates(self, transaction_id: int) -> None:
+        """Keep: the review stops asking about this purchase; one undoable step (a journal profile saves the same
+        setting through its settings command instead)."""
+        ref = self.db.scalar("SELECT ref FROM transactions WHERE id=?", (int(transaction_id),))
+        if not ref:
+            raise NotFoundError("That transaction no longer exists.")
+        from lightning.database.settings import SettingsStore
+        with self.db.transaction(undo_label="Keep in estimates"):
+            SettingsStore(self.db).set(self.REVIEW_KEPT, self.review_kept_value(ref))
+
+    @request_cached
+    def estimate_review(self, month: str) -> dict | None:
+        """One question for Budget (owner 2026-11-13): a purchase in the averaging window that is over half its
+        category's estimate basis there, while the category has other spending too ("Food's average includes a
+        9,000 purchase on 3 Nov: leave it out of estimates?"). Never automatic: Keep is remembered by the purchase's
+        ref, Leave out is ``set_left_out``. Purchases already left out, kept, or in categories outside estimates
+        (one-off, investment) are not asked about; the largest share is asked first."""
+        months = self._completed_months(month, self._average_months())
+        first = parse_month(month)[0]
+        start = first
+        for _ in months:
+            start = parse_month((start - timedelta(days=1)).strftime("%Y-%m"))[0]
+        end = first - timedelta(days=1)
+        totals: dict[int, Decimal] = {}
+        for amounts in months:
+            for cid, amount in amounts.items():
+                totals[cid] = totals.get(cid, ZERO) + amount
+        skip = self.one_off_ids() | self._investment_ids()
+        left_out, kept = self.left_out_ids(), self.review_kept_refs()
+        best = None
+        for row in self.db.all(
+                "SELECT t.id,t.ref,t.date,t.description,t.counterparty,le.category_id,SUM(-le.amount_base_e6) amount_e6 "
+                "FROM transactions t JOIN ledger_entries le ON le.transaction_id=t.id "
+                "JOIN financial_assets a ON a.id=le.asset_id JOIN categories c ON c.id=le.category_id "
+                "WHERE t.type='OUT' AND t.status='POSTED' AND t.date BETWEEN ? AND ? AND a.is_cash=1 "
+                "AND le.effect='OUTFLOW' AND le.owner_id IS NULL AND c.movement='OUTFLOW' AND c.is_system=0 "
+                "GROUP BY t.id,le.category_id", (start.isoformat(), end.isoformat())):
+            cid, amount = int(row["category_id"]), from_e6(int(row["amount_e6"] or 0))
+            total = totals.get(cid, ZERO)
+            if (cid in skip or int(row["id"]) in left_out or row["ref"] in kept or amount <= ZERO
+                    or total <= amount or amount * 2 <= total):
+                continue  # over half the window, and not the category's only spending
+            share = amount / total
+            if best is None or share > best["share"]:
+                best = {"transaction_id": int(row["id"]), "ref": row["ref"], "date": row["date"],
+                        "description": row["description"] or row["counterparty"] or row["ref"],
+                        "category_id": cid, "category": self.categories.get(cid).name, "amount": amount,
+                        "share": share, "months": len(months)}
+        return best
+
     def budgeting_income(self, month: str, *, schedule: ScheduleView) -> Decimal | None:
         """Average monthly income for a month's budget (see income_average)."""
         return self.income_average(month, schedule=schedule).amount

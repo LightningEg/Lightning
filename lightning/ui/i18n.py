@@ -4115,6 +4115,22 @@ ARABIC_UI = {
     'Leave out of estimates': 'استبعده من التقديرات',
     'Budget averages skip it and its refunds. Cash flow and Spent still count it.': 'متوسطات الميزانية بتتجاهله هو واستردّاداته. التدفق النقدي والمنفق لسه بيحسبوه.',
     'Count in estimates': 'احسبه في التقديرات',
+    # NF-12AK5: paid, returned, expected back, yours; the unusual-purchase review.
+    'Money back': 'الفلوس اللي بترجع',
+    'Returned': 'رجع',
+    'Refunds and claim payments that came back': 'الاستردادات وفلوس المطالبات اللي رجعت',
+    'Expected back': 'مستني يرجع',
+    'Open claims still waiting': 'مطالبات مفتوحة لسه مستنية',
+    'Yours': 'عليك',
+    'What this cost you once the rest comes back': 'اللي هيتكلفه عليك بعد ما الباقي يرجع',
+    '1 purchase this month': 'شراء واحد الشهر ده',
+    '{n} purchases this month': '{n} مشتريات الشهر ده',
+    'The {cat} average includes a {amt} purchase on {date}: leave it out of estimates?': 'متوسط {cat} فيه شراء بـ{amt} يوم {date}: تستبعده من التقديرات؟',
+    'Leave it out': 'استبعده',
+    'Left out of estimates.': 'اتستبعد من التقديرات.',
+    'Kept in estimates.': 'فضل في التقديرات.',
+    'Choose Keep or Leave out.': 'اختار احتفظ بيه أو استبعده.',
+    'Choose a valid purchase.': 'اختار شراء صحيح.',
 }
 
 

@@ -4,6 +4,7 @@
 {% block title %}{{ category.name }}{% endblock %}
 {% block heading %}{% endblock %}
 {% block content %}
+{% from "partials/linked.html" import recovery_rows with context %}
 
 <section class="app-popup-content category-sheet">
   <h2 data-popup-title id="app-popup-title">{{ category.name }}</h2>
@@ -21,6 +22,7 @@
   <div class="compact-list">{% for t in rows %}<a class="compact-row" href="/transactions/{{ t.id }}"><span>{{ t.counterparty or t.description or t.type_label }}<small>{{ t.date }}</small></span><b>{{ t.amount|amount_role('row', True) }}</b></a>{% endfor %}</div>
   {% elif earlier %}<p class="muted small"><a href="{{ see_last }}">{{ 'Last month'|tr(locale) }} {{ last_month }}</a> · {{ earlier|money(False, 0) }} {{ base }}</p>
   {% else %}<p class="muted small">{{ 'Nothing spent here yet this month.'|tr(locale) }}</p>{% endif %}
+  {% if recovery %}<h3 class="category-sheet-sub">{{ 'Money back'|tr(locale) }}</h3><p class="muted small">{{ ('1 purchase this month' if recovery.count == 1 else '{n} purchases this month')|tr(locale, n=recovery.count) }}</p>{{ recovery_rows(recovery, True) }}{% endif %}
   <div class="category-sheet-actions">
     {% if r and r.cover %}<a class="btn primary" data-popup-open href="{{ r.cover }}">{{ 'Cover it'|tr(locale) }}</a>{% endif %}
     {% if editable %}<a class="btn" data-popup-open href="/budget/category/{{ category.id }}/edit?month={{ month }}">{{ ('Edit limit' if r else 'Set a limit')|tr(locale) }}</a>{% endif %}

@@ -471,3 +471,16 @@ class ReimbursementService:
             cur = self.db.execute("DELETE FROM reimbursement_claims WHERE id=?", (claim_id,))
             if cur.rowcount == 0:
                 raise NotFoundError("Reimbursement claim not found.")
+
+    def recovery(self, expense_id: int) -> dict:
+        """NF-12AK5: what a purchase cost and what its claims say about money back, as the claims page reads them:
+        ``paid`` (the owned expense), ``received`` (receipts counted against its claims) and ``expected`` (what its
+        open claims still wait for). Refunds that name the purchase are the refund links' to add."""
+        expense_id = self._id(expense_id, "expense_id")
+        paid_e6 = int(self._expense_capacity(expense_id).get("expense_e6", 0))
+        received = expected = from_e6(0)
+        for row in self.db.all("SELECT * FROM reimbursement_claims WHERE expense_id=? ORDER BY id", (expense_id,)):
+            claim = self._claim_summary(row)
+            received += claim["received"]
+            expected += claim["outstanding"]
+        return {"paid": from_e6(paid_e6), "received": received, "expected": expected}

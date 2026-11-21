@@ -31,6 +31,22 @@
 {# NF-12AK3: a refund names its purchase; a purchase lists its refunds and records one. `r` is the route's refund
    context: role 'refund' (link, candidates) or 'purchase' (refunds, room, today). Counted in the purchase's month for
    estimates only; cash keeps the refund's date. #}
+{# NF-12AK5: paid · returned · expected back · yours, for one purchase (the transaction page) or a month's purchases in
+   a category (the category sheet). `rec` comes from budgeting/recoveries.py; None draws nothing. #}
+{% macro recovery_rows(rec, whole=False) -%}
+{% if rec %}{% set row = 'phone-row' if phone_mode() else 'compact-row' %}
+<div class="{{ 'phone-rows' if phone_mode() else 'compact-list' }} recovery-rows">
+  <div class="{{ row }}"><span>{{ 'Paid'|tr(locale) }}</span><b class="num">{{ (rec.paid|money(False, 0)) if whole else (rec.paid|money) }}</b></div>
+  <div class="{{ row }}"><span>{{ 'Returned'|tr(locale) }}<small>{{ 'Refunds and claim payments that came back'|tr(locale) }}</small></span><b class="num">{{ (rec.returned|money(False, 0)) if whole else (rec.returned|money) }}</b></div>
+  <div class="{{ row }}"><span>{{ 'Expected back'|tr(locale) }}<small>{{ 'Open claims still waiting'|tr(locale) }}</small></span><b class="num">{{ (rec.expected|money(False, 0)) if whole else (rec.expected|money) }}</b></div>
+  <div class="{{ row }}"><span><b>{{ 'Yours'|tr(locale) }}</b><small>{{ 'What this cost you once the rest comes back'|tr(locale) }}</small></span><b class="num">{{ (rec.yours|money(False, 0)) if whole else (rec.yours|money) }}</b></div>
+</div>{% endif %}
+{%- endmacro %}
+
+{% macro recovery_panel(rec) -%}
+{% if rec %}<section class="card linked-panel" id="money-back" aria-labelledby="money-back-title"><h2 id="money-back-title">{{ 'Money back'|tr(locale) }}</h2>{{ recovery_rows(rec) }}</section>{% endif %}
+{%- endmacro %}
+
 {% macro refund_panel(r, txn, base) -%}
 {% if r %}{% set editable = not request.state.read_only|default(false) %}
 <section class="card linked-panel" id="refund-link" aria-labelledby="refund-title">

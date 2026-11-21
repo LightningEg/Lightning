@@ -15,6 +15,7 @@ from lightning.core.money import ZERO, fmt, to_decimal
 from lightning.core.plural import counted
 
 from lightning.budgeting.domain import INCOME_FROM_RECURRING
+from lightning.budgeting.recoveries import ExpenseRecoveries
 from lightning.budgeting.period import budget_period, category_pace, over_matters
 from lightning.planning.domain import KIND_LABELS, PaymentStatus
 from lightning.planning.health import PlanCheck
@@ -206,6 +207,7 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                   tracked=tracked, averages=averages,
                   averages6=averages6, average_observations=average_observations, average_full=average_full,
                   tracking_suggestions=tracking_suggestions,
+                  estimate_review=c.budgets.estimate_review(month) if month == month_of(today()) else None,
                   carryover=c.settings.get("budget_carryover_global") == "1",
                   overall_ceiling=c.settings.get("budget_overall_ceiling"), this_month=month_of(today()),
                   personal_group=next((cat.id for cat in c.categories.tree(Movement.OUTFLOW)
@@ -284,6 +286,33 @@ async def budget_suggestions(request: Request):
     except (ValueError, TypeError):
         return redirect("/budget", "Choose a valid category.")
     return redirect(f"/budget?month={month}", "Preference saved.")
+
+
+@router.post("/estimate-review")
+async def estimate_review(request: Request):
+    """NF-12AK5: Keep a large purchase in estimates (remembered by its ref) or leave it out (``set_left_out``)."""
+    c = container(request)
+    form = await request.form()
+    month = str(form.get("month", month_of(today())))
+    try:
+        parse_month(month)
+        txn = c.transactions.get(int(str(form.get("transaction_id", ""))))
+        action = str(form.get("action", ""))
+        with settled_save(request, c):
+            if action == "leave_out":
+                c.budgets.set_left_out(txn.id, True)
+            elif action == "keep" and getattr(c, "is_journal", False):
+                c.settings.set(c.budgets.REVIEW_KEPT, c.budgets.review_kept_value(txn.ref))
+            elif action == "keep":
+                c.budgets.keep_in_estimates(txn.id)
+            else:
+                raise ValidationError("Choose Keep or Leave out.")
+    except (ValueError, TypeError):
+        return redirect("/budget", "Choose a valid purchase.")
+    except LightningError as exc:
+        return redirect(f"/budget?month={month}", exc.message)
+    return redirect(f"/budget?month={month}", "Left out of estimates." if action == "leave_out"
+                    else "Kept in estimates.")
 
 
 @router.post("/one-off")
@@ -460,7 +489,9 @@ async def category_sheet(request: Request, category_id: int):
             r["cover"] = move["href"] if move else ""
     editable = (category.movement == Movement.OUTFLOW and not category.is_root and not category.is_system
                 and category.active and not (line is not None and line.from_loans))
-    return render(request, "budget/category_sheet.html", category=category, group=group, r=r,
+    tree = {category_id} | {child.id for child in c.categories.descendants(category_id)}
+    recovery = ExpenseRecoveries(c.db, c.reimbursements, c.refunds).for_categories(tree, first, last)  # NF-12AK5
+    return render(request, "budget/category_sheet.html", category=category, group=group, r=r, recovery=recovery,
                   spent=spent, planned=planned, editable=editable, **last_payments(c, category_id, month))
 
 

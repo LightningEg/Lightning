@@ -61,6 +61,7 @@ class BudgetScreen:
     work: tuple = ()                  # IV-11M5: open work claims, paid for someone else to pay back ({id, name, payer, outstanding})
     trend: dict | None = None         # IV-11M5 Spending: six months of spending, the usual month, daily average, biggest day
     exclusions: tuple = ()
+    review: dict | None = None        # NF-12AK5: one purchase over half its category's average window (current month)
 
 
 def _shift(month: str, step: int) -> str:
@@ -79,7 +80,8 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     prev, nxt = _shift(shown, -1), "" if shown > this else _shift(shown, 1)  # this month leads to next (NF-12AL4)
     if not c.budgets.has_plan(shown, schedule=schedule):
         return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0,
-                            exclusions=exclusion_context(c)["estimate_exclusions"])
+                            exclusions=exclusion_context(c)["estimate_exclusions"],
+                            review=c.budgets.estimate_review(shown) if shown == this else None)
     e = c.forecaster.everyday(shown, day)
     state = "current" if e.current else ("past" if last < day else "future")
     left = e.everyday_left
@@ -118,7 +120,8 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
                         payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None,
                         everyday_plan=e.everyday_plan, everyday_spent=e.everyday_spent, days_left=e.days_left,
                         trend=spending_trend(c, shown, day), work=work_claims(c),
-                        exclusions=exclusion_context(c)["estimate_exclusions"])
+                        exclusions=exclusion_context(c)["estimate_exclusions"],
+                        review=c.budgets.estimate_review(shown) if state == "current" else None)
 
 
 def work_claims(c) -> tuple:
