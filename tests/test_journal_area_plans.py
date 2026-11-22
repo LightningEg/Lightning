@@ -255,3 +255,20 @@ def test_move_room_and_fill_between_budgets(devices):
     assert status(hd, percent)["status"] == "accepted"
     assert pc.c.budgets.amounts_for("2026-10", schedule=pc.c.schedules.view())[food.id][3] == Decimal("12.5")
     same(hd, pc)
+
+
+def test_a_loan_rate_reaches_both_devices_and_a_plan_edit_keeps_it(devices):
+    """IV-3H7: the rate is its own command; an edit of the plan that does not carry it leaves it as it was."""
+    hd, pc = devices
+    created = add_rent(pc, kind="LOAN", name="Car loan", amount="3000.00", payment_count=24, principal="60000.00")
+    record = unpack(created)["body"]["record"]
+    pc.sync_with(hd.home)
+    rate = pc.command("plans.set_loan_rate", item_id=record, interest_rate="10", rate_kind="FLAT")
+    pc.sync_with(hd.home)
+    assert status(hd, rate)["status"] == "accepted"
+    assert plan(hd, "Car loan").interest_rate == plan(pc, "Car loan").interest_rate == Decimal("10")
+    item = plan(pc, "Car loan")
+    pc.command("plans.update", item_id=record, **edit_values(item, pc, notes="Bank loan", payment_count=24))
+    pc.sync_with(hd.home)
+    assert plan(hd, "Car loan").rate_kind == "FLAT" and plan(hd, "Car loan").notes == "Bank loan"
+    same(hd, pc)

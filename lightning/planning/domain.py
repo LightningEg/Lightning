@@ -72,6 +72,8 @@ class PlannedItem:
     month_day: int | None = None
     match_window_days: int = 7
     match_tolerance_pct: int = 10
+    interest_rate: Decimal | None = None   # a loan's annual %, optional (IV-3H7)
+    rate_kind: str | None = None             # FLAT or REDUCING, set with the rate
 
     @property
     def is_income(self) -> bool:
