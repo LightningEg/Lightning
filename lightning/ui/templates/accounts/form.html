@@ -5,16 +5,16 @@
 {% block content %}
 <form method="post" class="card" style="max-width:760px" data-popup-return="response">
   <div class="form-grid">
-    <div class="field {{ 'has-error' if error_field == 'institution' }}">
-      <label for="institution">{{ 'Institution'|tr(locale) }}</label>
-      <input id="institution" name="institution" {{ "" if account else "autofocus" }} value="{{ values.institution }}" list="institution-options" data-own-suggestions data-allow-add data-tile-well placeholder="{{ 'e.g. CIB'|tr(locale) }}" autocomplete="off">
-      <datalist id="institution-options">{% for o in institution_options %}<option value="{{ o.value }}" data-label="{{ o.label }}" data-search="{{ o.arabic }}" data-group="{{ o.group }}" data-mono="{{ o.mono }}" data-logo="{{ o.logo }}">{% endfor %}</datalist>
-    </div>
-    <div class="field {{ 'has-error' if error_field == 'account_type' }}">
+    <div class="field field-wide {{ 'has-error' if error_field == 'account_type' }}">{# r39: a full row, so the type's hint in brackets is never cut #}
       <label for="account_type">{{ 'Type'|tr(locale) }}</label>
       <select id="account_type" name="account_type" data-groups='{{ groups|tojson }}' data-institution-hints='{{ institution_hints|tojson }}'>
         {% for value, label in types %}<option value="{{ value }}" {{ 'selected' if values.account_type == value }}>{{ label|tr(locale) }}</option>{% endfor %}
       </select>
+    </div>
+    <div class="field {{ 'has-error' if error_field == 'institution' }}">
+      <label for="institution">{{ 'Institution'|tr(locale) }}</label>
+      <input id="institution" name="institution" {{ "" if account else "autofocus" }} value="{{ values.institution }}" list="institution-options" data-own-suggestions data-allow-add data-tile-well placeholder="{{ 'e.g. CIB'|tr(locale) }}" autocomplete="off">
+      <datalist id="institution-options">{% for o in institution_options %}<option value="{{ o.value }}" data-label="{{ o.label }}" data-search="{{ o.arabic }}" data-group="{{ o.group }}" data-mono="{{ o.mono }}" data-logo="{{ o.logo }}">{% endfor %}</datalist>
     </div>
     <div class="field {{ 'has-error' if error_field == 'currency' }}">
       <label for="currency">{{ 'Currency'|tr(locale) }}</label>

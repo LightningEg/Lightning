@@ -39,4 +39,4 @@ The audit is right that the PC's explanations are its best part (Safe to spend's
 | F14 | The phone's Home calls cash only In your accounts (p.16) | Fixed: Cash and banks (owner pick); Glossary row |
 | F15 | Next 7 days is seven boxes, six empty (p.3-4) | Fixed: a list by name with Pay (owner pick), three then "+n more" |
 | F16 | Cash planning's Free cash, Due before payday and Lowest point repeat its Lead (p.8) | Not done: A13.1 sets Cash planning's four KPI cards |
-| F17 | Notes column, truncated names, empty chart areas, the 400 gap, the afford form (p.5, 7, 8, 11, 12) | `issues/INBOX.md` line, 2026-11-22 |
+| F17 | Notes column, truncated names, empty chart areas, the 400 gap, the afford form (p.5, 7, 8, 11, 12) | Fixed in the follow-up (owner: "fix all small elements", 2026-11-22): names get the width (Notes stays the spare column, IV-12W), Rows per page one quiet line, treemap names wrap, Average payment and Everyday spending get their visual, Not yet given a job opens on its rows, Brokerage cash says it is not in Portfolio value, the afford form on one line |

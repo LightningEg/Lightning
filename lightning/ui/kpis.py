@@ -142,7 +142,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         tail = (line(f"{_signed(against)} against {previous} by day {e.day}") if against is not None
                 else line(f"Everyday plan {fmt(e.everyday_plan, 0)}"))
         cards.append(card("Everyday spending", e.everyday_spent, pace_compare, tone="out", key="everyday",
-                          chip_=chip(f"by day {e.day}"), visual=None,  # the pace chart beside it is its picture (audit 12, B1)
+                          chip_=chip(f"by day {e.day}"), visual=meter(e.everyday_spent, e.everyday_plan),  # r38: spent of the everyday plan, as past months show; the pace chart stays the picture over time
                           line_=tail, href="#budget-pace"))
     elif e.day:
         before = e.last_month_by_day[-1] if e.last_month_by_day else None
@@ -421,7 +421,8 @@ def spending(stats: list[dict]) -> list[dict]:
                           href=out.get("href", ""), key="out"))
     pay = by.get("payments")
     if pay and pay["value"] is not None:
-        cards.append(card(pay["label"], pay["value"], compare(pay["sub"]), tone="out", href=pay.get("href", ""), key="payments"))
+        cards.append(card(pay["label"], pay["value"], compare(pay["sub"]), tone="out", href=pay.get("href", ""), key="payments",
+                          visual=spark(pay["spark_values"]) if len(pay.get("spark_values") or ()) > 1 else None))  # r38: payments a month, not an empty chart area
     top, big = by.get("top"), by.get("payment")
     if top and top["value"] is not None:
         cards.append(card(top["label"], top["value"], compare(top["sub"]), tone="out",

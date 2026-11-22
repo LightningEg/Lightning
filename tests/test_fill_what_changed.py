@@ -35,7 +35,7 @@ def test_your_limit_is_kept_unless_you_tick_the_average(c, setup):
         c.transactions.record_outflow(f"{month}-05", accounts["cib"].id, "550", food)
     [row] = c.budgets.fill_proposal(MONTH, "changes", schedule=c.schedules.view()).rows
     assert (row.category_id, row.amount, row.current_amount, row.selected) == (food, Decimal("550"), Decimal("400"), False)
-    assert row.current_rule == "400 fixed" and row.conflict == "Tick to use this instead for 2026-12 only."  # r39
+    assert row.current_rule == "400 fixed" and row.conflict == ""  # r39
 
 
 def test_a_past_exception_is_not_offered_as_fixed(c, setup):

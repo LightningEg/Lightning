@@ -28,6 +28,6 @@ The demo household at 1366 × 768. A script opened every popup linked from every
 | F10 | Edit account: the institution suggestions opened over the form on load; Starting balance a box inside the card | A16 | Fixed: autofocus only when adding; a section under a hairline |
 | F11 | The focused field filled yellow (#F5EFCF); owner: "pick a lighter non-clashing one" | A10.3 | Fixed: a light mint well #F2F8F5 with the green edge, guideline Parts A and C in both repos |
 | F12 | Settings: seven cards in the left 60%, Glossary and Ask an AI each a card around one button, Features one switch, Your data mixing backup with privacy, currency and version, Theme and Language of different widths (owner: "not the best in grouping") | A09.2, A10.1 | Fixed: two columns. Appearance and region (theme, language, base currency), Your data (backup, move), Features and guide on the left; Settings in each tab, Help and about (glossary, Ask an AI, privacy, version), Advanced on the right; Back up now a secondary |
-| F13 | The rest | — | `issues/INBOX.md` line, 2026-11-22 |
+| F13 | The rest: a bill's payment rows underlined word by word, Edit account's Type cut, Fill's repeated review line, the budget category popup without a title, the English-only effect line | — | Fixed in the follow-up (owner: "fix all small elements", 2026-11-22) |
 
 Checked and fine: titles and Close on every popup, no upper case, no white fields, every `<select>` holds a fixed list, not your own data.
