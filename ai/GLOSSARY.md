@@ -362,6 +362,7 @@ Categories are not split into income and expense trees: pick the activity that e
 | **Name** | Human label on screens; account codes never show under it. Edit headings use the name without its code; transaction edits say "Edit transaction" with the date and payee below. Payee names are unique, other taxonomy names may repeat under different parents. |
 | **Code** | Stable machine identifier for links, imports and technical search; not shown in ordinary UI. |
 | **ID** | Internal database key; never shown. |
+| **Cash and banks** | The phone Home's hero: what bank, wallet and cash accounts in your own currency hold, above zero (`ui.phone.screens.home._cash_accounts`). Deposits and holdings are not in it, so it is never called In your accounts (owner, 2026-11-22, r38). |
 | **Ticker / symbol** | Public exchange symbol; not Lightning's code or ID. Optional ISIN also matches sources. |
 | **Exchange** | Where a stock or ETF trades, stored as ISO 10383 MIC, shown by common name; no exchange means EGX; funds and gold have none. |
 | **Price file** | One market's closing prices, published as a checked folder and refreshed after close; Settings › Price files picks them. Code: pack. |

@@ -54,6 +54,7 @@
 </div>
 {%- endmacro %}
 
+{# The month reads Nov 2026 and opens the month picker, never typed (A05, A06.1, A10.2; owner, 2026-11-22, r38) #}
 {% macro period_control(action, period, month, current_month, date_from='', date_to='', category_filter='', auto_apply=false) -%}
 {% if phone_mode() %}{{ phone_period(action, period, month, current_month, date_from, date_to, category_filter) }}{% else %}
 <form class="site-period-control" method="get" action="{{ action }}" data-month-picker data-current-month="{{ current_month }}" data-selected-month="{{ month }}" {% if auto_apply %}data-period-auto-apply{% endif %}>
@@ -62,7 +63,7 @@
   {% if category_filter %}<input type="hidden" name="category_id" value="{{ category_filter }}">{% endif %}
   <div class="period-buttons" role="group" aria-label="Reporting period">
     {% set labels = [('all','All time'),('ytd','This year'),('month','Month'),('custom','Custom')] %}
-    {% for key, label in labels %}{% if key == 'month' and period == 'month' %}<span class="period-month-picker month-stepper"><button class="period-step" type="button" data-month-shift="-1" aria-label="{{ 'Previous month'|tr(locale) }}" title="{{ 'Previous month'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><input type="text" name="month" value="{{ month }}" class="month-input period-month-value" data-month-select pattern="\d{4}-\d{2}" inputmode="numeric" placeholder="yyyy-mm" autocomplete="off" aria-label="{{ 'Month'|tr(locale) }}, yyyy-mm" title="{{ 'Month'|tr(locale) }}, yyyy-mm"><button class="period-step" type="button" data-month-shift="1" aria-label="{{ 'Next month'|tr(locale) }}" title="{{ 'Next month'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button><button type="submit" name="period" value="month" hidden>{{ 'Month'|tr(locale) }}</button></span>{% else %}<button type="submit" name="period" value="{{ key }}" class="period-button {{ 'selected' if period==key else '' }}">{{ label|tr(locale) }}</button>{% endif %}{% endfor %}
+    {% for key, label in labels %}{% if key == 'month' and period == 'month' %}<span class="period-month-picker month-stepper"><button class="period-step" type="button" data-month-shift="-1" aria-label="{{ 'Previous month'|tr(locale) }}" title="{{ 'Previous month'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></button><input type="hidden" name="month" value="{{ month }}" data-month-select><button type="button" class="period-month-value" data-month-face aria-haspopup="dialog" aria-label="{{ 'Month'|tr(locale) }}: {{ month|month_chip }}" title="{{ 'Choose a month'|tr(locale) }}">{{ month|month_chip }}</button><button class="period-step" type="button" data-month-shift="1" aria-label="{{ 'Next month'|tr(locale) }}" title="{{ 'Next month'|tr(locale) }}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></button><button type="submit" name="period" value="month" hidden>{{ 'Month'|tr(locale) }}</button></span>{% else %}<button type="submit" name="period" value="{{ key }}" class="period-button {{ 'selected' if period==key else '' }}">{{ label|tr(locale) }}</button>{% endif %}{% endfor %}
   </div>
   {% if period=='custom' %}<div class="period-date-range"><label>{{ 'From month'|tr(locale) }}<input type="text" name="date_from" value="{{ date_from[:7] if date_from else '' }}" class="month-input" pattern="\d{4}-\d{2}" inputmode="numeric" placeholder="yyyy-mm" autocomplete="off" required></label><label>{{ 'To month'|tr(locale) }}<input type="text" name="date_to" value="{{ date_to[:7] if date_to else '' }}" class="month-input" pattern="\d{4}-\d{2}" inputmode="numeric" placeholder="yyyy-mm" autocomplete="off" required></label>{% if not auto_apply %}<button type="submit" name="period" value="custom" class="btn small">{{ 'Apply'|tr(locale) }}</button>{% endif %}</div>{% endif %}
 </form>{% endif %}
@@ -134,12 +135,13 @@
    Three show; the rest open under "Show all". Nothing to show: no row at all. `rows` are review.grouped() groups or
    inbox items; both carry label, detail, href, action. One count (IV-12AA3): the heading and "Show all n" are both the
    number of rows shown when all are open. #}
-{% macro needs_rows(rows, heading_id='needs-heading', more=none, shown=3) -%}
-{% if rows %}{% set count = rows|length %}
+{# total: the items the rows hold when a row is a group; the count is every item (A09.2; owner, 2026-11-22, r38) #}
+{% macro needs_rows(rows, heading_id='needs-heading', more=none, shown=3, total=none) -%}
+{% if rows %}{% set count = total if total is not none else rows|length %}
 <section class="needs" aria-labelledby="{{ heading_id }}">
   <div class="needs-top"><h2 class="needs-head" id="{{ heading_id }}">{{ "Needs you"|tr(ui_locale()) }} <span>· {{ count }}</span></h2><a class="quiet-link" href="/needs-you">{{ "Manage Needs you"|tr(ui_locale()) }}</a>{% if more %}<a class="quiet-link" href="{{ more[1] }}">{{ more[0] }}</a>{% endif %}</div>
   {% for r in rows[:shown] %}{{ _needs_row(r) }}{% endfor %}
-  {% if rows|length > shown %}<details class="needs-more"><summary>{{ "Show all {n}"|tr(ui_locale(), n=rows|length) }}</summary>{% for r in rows[shown:] %}{{ _needs_row(r) }}{% endfor %}</details>{% endif %}
+  {% if rows|length > shown %}<details class="needs-more"><summary>{{ "Show all {n}"|tr(ui_locale(), n=count) }}</summary>{% for r in rows[shown:] %}{{ _needs_row(r) }}{% endfor %}</details>{% endif %}
 </section>
 {% endif %}
 {%- endmacro %}

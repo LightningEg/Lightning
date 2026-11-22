@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% from 'partials/macros.html' import period_control with context %}
 {% block title %}{{ 'Settings'|tr(locale) }}{% endblock %}
-{% block heading %}{% from "partials/macros.html" import page_title %}{% set st = page_status.count(backup_count, '1 backup is saved.', '{n} backups are saved.', 'No backup yet.') if section in ('', 'general', none) else none %}{{ page_title(('Currencies' if section == 'currencies' else 'Your data' if section in ('', 'general', none) else 'Settings')|tr(locale), st) }}{% endblock %}
+{% block heading %}{% from "partials/macros.html" import page_title %}{% set st = page_status.count(backup_count, '1 backup is saved.', '{n} backups are saved.', 'No backup yet.') if section in ('', 'general', none) else none %}{{ page_title(('Currencies' if section == 'currencies' else 'Settings')|tr(locale), st) }}{# A05: the first tab carries the section's name, as the sidebar says (r38) #}{% endblock %}
 {% block top_actions %}<button class="cat-icon fullscreen-toggle" type="button" data-fullscreen-toggle aria-label="{{ 'Full screen'|tr(locale) }}" title="{{ 'Full screen'|tr(locale) }}"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H3v5M16 3h5v5M3 16v5h5M21 16v5h-5M3 8l6-6M21 8l-6-6M3 16l6 6M21 16l-6 6"/></svg><span class="sr-only" data-fullscreen-label>{{ 'Full screen'|tr(locale) }}</span></button>{% endblock %}
 
 {% block content %}
@@ -78,7 +78,7 @@
   <div class="settings-row" id="data-portability"><div><span class="settings-name">{{ 'Move your data'|tr(locale) }}</span><small>{{ 'A full copy for a backup or another computer, or records in from another profile. Not the file for an AI.'|tr(locale) }}</small></div>
     <div class="settings-control"><a class="btn small" href="/exports/all" data-popup-open>{{ 'Export your data'|tr(locale) }}</a><a class="btn small" href="/exports/import">{{ 'Import your data'|tr(locale) }}</a></div></div>
   <div class="settings-row"><div><span class="settings-name">{{ 'Base currency'|tr(locale) }}</span></div><div class="settings-control"><b dir="ltr">{{ base }}</b><a class="btn small" href="/settings?section=currencies">{{ 'Manage currencies'|tr(locale) }}</a></div></div>
-  <div class="settings-row settings-facts"><div><span class="settings-name">{{ 'App version'|tr(locale) }}</span></div><div class="settings-control" dir="ltr">v{{ app_version }}</div></div>
+  {# r38: the version is shown once, in Lightning version below (it was also an App version row) #}
   {% include "settings/_update.html" %}
   
 </section>
