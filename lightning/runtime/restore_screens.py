@@ -1,5 +1,5 @@
-"""The restore screens: restoring a backup, choosing a backup file, resuming an interrupted restore and going back
-after a restore that needs checking (IT-9K, IT-2C). Moved out of `profile_app` unchanged, so `runtime/app.py` only
+"""The restore screens: restoring a backup, choosing a backup file, repairing an interrupted restore (it is undone or
+finished, IT-2A3/2A4) and going back after a restore that needs checking (IT-9K, IT-2C). Moved out of `profile_app` unchanged, so `runtime/app.py` only
 builds the app; a route here sees the session, `devices.blocks_restore` and the profile screens' `page`, nothing else."""
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from starlette.responses import RedirectResponse, Response
 
 from .paths import discover_profiles
 from .restore import NOT_THIS_PROFILES_BACKUP
-from .session import ProfileError
+from .session import ProfileError, RestoreNeedsRepair
 
 
 def register(app, session, devices, page) -> None:
@@ -79,13 +79,14 @@ def register(app, session, devices, page) -> None:
         except ProfileError as exc:
             if str(exc) == NOT_THIS_PROFILES_BACKUP and backup_path.endswith("_picked.db"):
                 backup_path = ""  # the restorer removed that copy
-            return page(request, "restore", status=400, selected=selected,
-                        backup=backup_path, error=str(exc))
+            return page(request, "restore", status=400, selected=selected, backup=backup_path, error=str(exc),
+                        restore_repair=isinstance(exc, RestoreNeedsRepair))
         except Exception:
             # Replacement may already have happened before a disk or process
             # error. Never promise the old live path is still unchanged.
             return page(request, "restore", status=400, selected=selected,
-                        backup=backup_path, error="Restore needs checking. Keep this profile locked and inspect the selected backup and retained copies before trying again.")
+                        backup=backup_path, restore_repair=True,
+                        error="Restore needs checking. Keep this profile locked and inspect the selected backup and retained copies before trying again.")
         if restored_copy:
             return page(request, "unlock", selected=restored_copy,
                         notice="Backup restored as a separate review copy. Pair a fresh device to recover saved edits.")
@@ -121,7 +122,7 @@ def register(app, session, devices, page) -> None:
                         notice="The restore had not changed anything yet, so it was undone. Its files were kept in a "
                                "restore-evidence folder. Unlock this profile to check it.")
         return page(request, "unlock", selected=selected,
-                    notice="Restore checks finished. Unlock this profile to review the recovered database.")
+                    notice="The interrupted restore was finished. Unlock this profile to review the restored database.")
 
     @app.get("/profiles/restore/repair")
     async def repair_restore_page(request: Request):

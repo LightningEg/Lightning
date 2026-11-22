@@ -21,7 +21,7 @@ from lightning.ui.web import templates
 
 from .paths import choose_data_root, discover_profiles, legacy_database_candidates, resolve_profile
 from .roles import SessionRole
-from .session import ProfileError
+from .session import ProfileError, RestoreNeedsRepair
 
 
 LEGACY_GONE = "That old database is no longer there. Go back to profiles and choose again."
@@ -69,7 +69,7 @@ def register(app, screens: ProfileScreens) -> ProfileScreens:
         values = dict(mode=mode, csrf=session.csrf, error=error, root=str(session.root), borrowed=[],
                       journal_enabled=session.journal is not None,
                       is_borrowed=session.borrowed is not None, writable=session.role.writable,
-                      profiles=[], backups=[], evidence=[], selected="", backup="", name="", recovery="",
+                      profiles=[], backups=[], evidence=[], restore_repair=False, selected="", backup="", name="", recovery="",
                       active_name=session.name, notice="", suggestion="", chosen_password="",
                       questions=SUGGESTED_QUESTIONS, question="", new_recovery="", locale=locale,
                       profile_currencies=CASH_ASSETS, currency="EGP", legacy="", legacy_found=[],
@@ -98,7 +98,8 @@ def register(app, screens: ProfileScreens) -> ProfileScreens:
             app.state.container = session.container
             return result or RedirectResponse("/" if session.container else "/profiles", 303)
         except ProfileError as exc:
-            return page(request, mode, error=str(exc), status=400, **context)
+            return page(request, mode, error=str(exc), status=400,
+                        restore_repair=isinstance(exc, RestoreNeedsRepair), **context)
         except Exception as exc:
             # Never render native exception strings (paths, SQL, secrets); the error's kind alone helps a report.
             return page(request, mode, error="The operation could not finish. Your existing database was not "
