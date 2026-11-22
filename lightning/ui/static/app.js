@@ -719,7 +719,9 @@ find("input[data-own-suggestions][list]").forEach((input) => {
     pinFixed(list, Math.max(8, rect.left), rect.bottom + 4);
   };
   input.addEventListener("input", () => { setPick(""); syncTile(); }); input.addEventListener("change", syncTile); syncTile();
-  input.addEventListener("input", render); input.addEventListener("focus", render);
+  // r39: a field focused as the form opens (autofocus) waits for typing; its list would cover the form on load.
+  let openedByLoad = input.hasAttribute("autofocus");
+  input.addEventListener("input", render); input.addEventListener("focus", () => { if (openedByLoad) { openedByLoad = false; return; } render(); });
   input.addEventListener("keydown", (event) => {
     const options = list.querySelectorAll('[role="option"]');
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {

@@ -11,11 +11,11 @@
     <input type="hidden" name="early_checked" value="{{ values.early_checked or '' }}">{% if txn_id %}<input type="hidden" name="revision" value="{{ revision }}">{% else %}<input type="hidden" name="submission" value="{{ new_submission() }}">{% endif %}
     {% if txn_id %}<input type="hidden" name="account_id" value="{{ values.account_id }}">{% endif %}
     {% if split_categories %}<input type="hidden" name="kind" value="{{ values.kind }}"><p class="muted">This expense is split across {{ split_categories|join(', ') }}. Editing here preserves its full amount and category split.</p>
-    {% else %}<div class="transaction-choice-grid" role="group" aria-label="{{ 'Transaction type'|tr(locale) }}">
+    {% else %}{# r39 (A10.1): a segment picks the kind; the radios are its parts, not dots on buttons #}<div class="transaction-choice-grid"><span class="planner-mode-seg" role="radiogroup" aria-label="{{ 'Transaction type'|tr(locale) }}">
       {% for value, label in [('out','Money out'),('in','Money in'),('transfer','Transfer')] %}
-      <label class="btn transaction-choice"><input type="radio" name="kind" value="{{ value }}" {{ 'checked' if values.kind == value }} required> {{ label|tr(locale) }}</label>
+      <label><input type="radio" name="kind" value="{{ value }}" {{ 'checked' if values.kind == value }} required><span>{{ label|tr(locale) }}</span></label>
       {% endfor %}
-    </div>{% endif %}
+    </span></div>{% endif %}
     <div class="row">
       <div class="field {{ 'has-error' if error_field == 'amount' }}">
         <label for="popup-amount">{{ 'Amount'|tr(locale) }} ({{ account.currency }})</label>

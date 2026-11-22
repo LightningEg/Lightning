@@ -1735,7 +1735,7 @@ def test_dollars_he_bought_show_their_cost_value_and_spread(mohab):
     register = mohab.b.go("Dollar savings")
     assert register.shows("1,000.00", "USD", "50,000")
     detail = mohab.b.click("Details")
-    assert detail.shows("1 USD = 50.000000 EGP", "Spread paid", "750.00", "Fee", "50.00 EGP")
+    assert detail.shows("1 USD = 50.000000 EGP", "Spread paid", "750", "Fee", "50 EGP")  # A06.1 (r39): whole amounts show no ".00"
 
 
 # ------------------------------------------------------------------ gam'eya (savings circle)

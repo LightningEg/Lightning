@@ -13,7 +13,7 @@ from lightning.categories.service import CategoryService
 from lightning.core.dates import month_of, now_iso, parse_month
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.memo import request_cached
-from lightning.core.money import ZERO, check_places, fmt, from_e6, to_decimal
+from lightning.core.money import ZERO, check_places, fmt, fmt as _fmt, from_e6, to_decimal
 from lightning.database.connection import Database
 from lightning.database.settings import raw_setting
 from lightning.reporting.service import ReportingService
@@ -708,7 +708,7 @@ class BudgetService:
                 conflict = ("Already using last month's plan" if source == "last_month"
                             else "Matches the current base limit.")
             elif rule is not None:  # NF-12AI: a limit you set is kept unless you tick the row
-                conflict = f"Your limit: {current_rule}. Tick to use this instead for {month} only."
+                conflict = f"Tick to use this instead for {month} only."  # r39: the limit is in its own column already
             elif auto_loan:
                 conflict = (f"{fmt(auto_loan)} of scheduled payments are already planned automatically. "
                             "Applying this amount would replace that automatic line.")
@@ -777,6 +777,8 @@ class BudgetService:
     @staticmethod
     def _fill_rule_name(rule) -> str:
         amount, _, period, percent = rule
+        def fmt(value, *args):  # r39 (A06.1): a whole amount shows no ".00"; piastres show when there are any
+            return _fmt(value, 0) if not args and value == value.to_integral_value() else _fmt(value, *args)
         if percent is not None:
             return f"{fmt(percent)}% of income" + (f" (currently {fmt(amount)})" if amount is not None else "")
         if period:
