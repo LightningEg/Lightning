@@ -18,6 +18,11 @@ _DAY_FIRST_DATE_RE = re.compile(r"^(\d{1,2})/(\d{1,2})(?:/(\d{2}|\d{4}))?$")
 _MONTH_RE = re.compile(r"^\d{4}-\d{2}$")
 
 
+def estimate_date_override(value) -> str | None:
+    """An empty date restores automatic estimate attribution."""
+    return parse_date(value, "estimate_date").isoformat() if value not in ("", None) else None
+
+
 def parse_date(value: object, field: str = "date") -> date:
     if isinstance(value, datetime):
         return value.date()

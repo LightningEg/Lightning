@@ -2,11 +2,14 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 
+from lightning.core.dates import fmt_date, today
 from lightning.core.errors import LightningError, ValidationError
+from lightning.core.money import fmt, to_decimal
 from lightning.counterparties import MAX_ALIASES_PER_COUNTERPARTY
 from lightning.workflows.ai_prompts import counterparty_cleanup_prompt
 
 from ..web import container, redirect, render, settled_save
+from .register import resent_guard
 
 router = APIRouter(prefix="/counterparties")
 
@@ -92,7 +95,7 @@ async def create_counterparty(request: Request):
                 return redirect("/counterparties", f"Removed alias from {selected['name']}.")
             elif action == "merge":
                 if getattr(c, "is_journal", False):
-                    raise ValidationError("Merging names is not available on a lent ledger. Do it on the home PC.")
+                    raise ValidationError("Merging names is not available while your records are lent. Do it on the home PC.")
                 result = c.counterparties.merge(int(counterparty_id), int(str(form.get("merge_into", "")).strip().removeprefix("counterparty:") or 0))
                 note = f" {result['source']} is archived because something still uses it." if result["archived"] else ""
                 return redirect("/counterparties", f"Merged {result['source']} into {result['target']}.{note}")
@@ -144,4 +147,86 @@ async def counterparty_page(request: Request, counterparty_id: int):
         page = c.linked.counterparty(counterparty_id)
     except LightningError as exc:
         return redirect("/counterparties", exc.message)
-    return render(request, "counterparty.html", page=page, party=page["party"])
+    return render(request, "counterparty.html", page=page, party=page["party"], **_people_money_forms(c))
+
+
+def _people_money_forms(c) -> dict:
+    """NF-12G6: what Lend, Paid back and Forgive offer: your bank and cash accounts, and the spending categories."""
+    from lightning.accounts.domain import AccountType
+    accounts = [{"id": a.id, "label": a.label} for a in c.accounts.list(active_only=True)
+                if a.account_type in (AccountType.BANK, AccountType.CASH) and a.currency == c.base_currency]
+    categories = [{"id": cat.id, "label": c.categories.display_name(cat.id)}
+                  for cat in c.categories.pickable() if cat.movement.value == "OUTFLOW" and not cat.is_system
+                  and cat.family.value != "INVESTMENT"]
+    gifts = next((cat.id for cat in c.categories.pickable() if cat.code == "EXP.PERSONAL.GIFTS"), None)
+    return {"lend_accounts": accounts, "forgive_categories": categories, "forgive_default": gifts,
+            "today_iso": fmt_date(today())}
+
+
+def _people_money_call(c, counterparty_id: int, action: str, form) -> str:
+    """Post one transaction per delivery of a form, inside the route's settled save."""
+    day, amount = str(form.get("day", "")), str(form.get("amount", ""))
+    field = "category_id" if action == "forgive" else "account_id"
+    target = str(form.get(field, ""))
+    payload = {"action": action, "person": counterparty_id, "day": day, "amount": amount, field: target}
+    submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    if c.transactions.submitted(submission, payload) is not None:
+        return "Saved."
+
+    target_id = int(target)
+    with resent_guard(c, form):
+        if action == "lend":
+            txn = c.people_money.lend(day, counterparty_id, target_id, amount)
+            message = "Lent {amt}."
+        elif action == "repay":
+            txn = c.people_money.repay(day, counterparty_id, target_id, amount)
+            message = "Paid back {amt}."
+        else:
+            txn = c.people_money.forgive(day, counterparty_id, amount, target_id)
+            message = "Forgave {amt}."
+    if submission:
+        c.transactions.remember_submission(submission, payload, txn.id)
+    return message.replace("{amt}", fmt(to_decimal(amount, "amount"), 2))
+
+
+def _people_money_refused(counterparty_id: int, action: str, exc: Exception):
+    back = f"/counterparties/{counterparty_id}"
+    if isinstance(exc, LightningError):
+        return redirect(back, exc.message)
+    return redirect(back, "Choose a category." if action == "forgive" else "Choose an account or a category.")
+
+
+@router.post("/{counterparty_id:int}/lend")
+async def lend_to_person(request: Request, counterparty_id: int):
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            message = _people_money_call(c, counterparty_id, "lend", form)
+    except (ValueError, TypeError, LightningError) as exc:
+        return _people_money_refused(counterparty_id, "lend", exc)
+    return redirect(f"/counterparties/{counterparty_id}", message)
+
+
+@router.post("/{counterparty_id:int}/repay")
+async def repaid_by_person(request: Request, counterparty_id: int):
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            message = _people_money_call(c, counterparty_id, "repay", form)
+    except (ValueError, TypeError, LightningError) as exc:
+        return _people_money_refused(counterparty_id, "repay", exc)
+    return redirect(f"/counterparties/{counterparty_id}", message)
+
+
+@router.post("/{counterparty_id:int}/forgive")
+async def forgive_person(request: Request, counterparty_id: int):
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            message = _people_money_call(c, counterparty_id, "forgive", form)
+    except (ValueError, TypeError, LightningError) as exc:
+        return _people_money_refused(counterparty_id, "forgive", exc)
+    return redirect(f"/counterparties/{counterparty_id}", message)

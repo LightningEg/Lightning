@@ -144,7 +144,7 @@ def holdings_donut(position, include_cash: bool = False, divisor: Decimal = Deci
         slices.append({"label": cls.name, "value": cls.value, "tone": charts.class_tone(cls.code)})
     if include_cash and position.other_you_own > 0:
         slices.append({"label": "Other you own", "value": position.other_you_own, "tone": "other"})
-    folded = "Smaller classes" if not include_cash else "Other"   # a real class is named Other Investments (r30 N3)
+    folded = "Smaller classes" if not include_cash else "Everything else"   # a real class is named Other Investments (r30 N3, IV-3BH8)
     return charts.donut([{**slice_, "value": slice_["value"] / divisor} for slice_ in slices] if divisor != 1 else slices,
                         folded_label=folded)
 

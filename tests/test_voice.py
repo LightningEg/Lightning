@@ -22,6 +22,17 @@ BANNED_WORDS = {
     "Submit": "Name the action, such as Save or Import.",
     "Error:": "Explain the problem and what to do instead of adding a technical prefix.",
     "Invalid": "Say what the person needs to enter or choose.",
+    "Ledger": "Say your records (what lending moves), your entries or transactions, or drop it (IV-3BH3).",
+    "Reevaluation": "Say value update.",
+    "Reevaluations": "Say value updates.",
+    "dashboard": "Say Overview (PC) or Home (phone) (IV-3BH4).",
+    "journey": "Say how it went.",
+    "YTD": "Say This year.",
+    "Completed payment occurrences": "Say Payments made (IV-3BH8).",
+    "Money at risk": "Say Late or due.",
+    "Unreconciled events": "Say To match.",
+    "Cash ownership history": "Say History.",
+    "Funded spending left": "Say Spending money left this month.",
 }
 
 
@@ -140,6 +151,8 @@ def test_main_pages_keep_retired_words_off_screen(voice_page, locale):
     ("حفظ المعاملة", []),
     ("Counterparty and Counterparties", ["Counterparty", "Counterparties"]),
     ("اختيار الطرف الآخر", ["الطرف الآخر"]),
+    ("Reevaluation ledger and reevaluations", ["Ledger", "Reevaluation", "Reevaluations"]),
+    ("Value updates match your records", []),
 ])
 def test_retired_word_matching_uses_words_and_ignores_case(text, expected):
     assert _retired_words(text) == expected

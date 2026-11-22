@@ -6,7 +6,7 @@
 {% from "phone/partials/sheet.html" import sheet with context %}
 {% block title %}{{ txn.ref }}{% endblock %}
 {% block heading %}<h1>{{ ('Refund' if txn.type.value == 'IN' and lines and lines[0].effect == 'OUTFLOW' else summary.type_label)|tr(locale) }}</h1>
-<p class="phone-note"><bdi dir="ltr">{{ txn.ref }}</bdi> · {{ txn.date }}{% if txn.source == 'SYSTEM' %} · {{ 'System-generated'|tr(locale) }}{% endif %}{% if txn.is_void %} · {{ 'deleted'|tr(locale) }}{% endif %}</p>{% endblock %}
+<p class="phone-note"><bdi dir="ltr">{{ txn.ref }}</bdi> · {% if estimate_shifts %}{{ 'Posting date'|tr(locale) }} {% endif %}{{ txn.date }}{% if txn.source == 'SYSTEM' %} · {{ 'System-generated'|tr(locale) }}{% endif %}{% if txn.is_void %} · {{ 'deleted'|tr(locale) }}{% endif %}</p>{% endblock %}
 {% block content %}
 {% set session = request.state.session_token|default('') %}
 <section class="phone-section" aria-labelledby="txn-what">
@@ -26,12 +26,14 @@
     {% for effect in cash_effects %}<div><dt>Effect · {{ effect.owner }}</dt><dd>Cash in {{ effect.account }} {{ 'increases' if effect.quantity > 0 else 'decreases' }} by {{ effect.quantity|abs|money }} {{ effect.currency }}</dd></div>{% endfor %}
     {% if txn.counterparty %}<div><dt>{{ 'Payee'|tr(locale) }}</dt><dd>{% if touched.counterparty %}<a href="/counterparties/{{ touched.counterparty.id }}">{{ txn.counterparty }}</a>{% else %}{{ txn.counterparty }}{% endif %}</dd></div>{% endif %}
     {% for owner in touched.owners %}<div><dt>{{ 'Held for'|tr(locale) }}</dt><dd><a href="/counterparties/{{ owner.id }}">{{ owner.name }}</a></dd></div>{% endfor %}
-    {% if foreign %}<div><dt>{{ 'Paid in'|tr(locale) }}</dt><dd><bdi class="fig">{{ foreign.label }}</bdi> · {{ ("the bank’s pound debit" if foreign.settled else "pounds at the day’s rate until the bank’s debit")|tr(locale) }}</dd></div>{% endif %}
+    {% for part in estimate_shifts %}<div><dt>{{ 'Estimate date'|tr(locale) }}</dt><dd><time datetime="{{ part.effective_date }}">{{ part.effective_date|day(locale) }}</time> · {{ part.amount|abs|money }} {{ base }}</dd></div>{% endfor %}
+      {% if foreign %}<div><dt>{{ 'Paid in'|tr(locale) }}</dt><dd><bdi class="fig">{{ foreign.label }}</bdi> · {{ ("the bank’s pound debit" if foreign.settled else "pounds at the day’s rate until the bank’s debit")|tr(locale) }}</dd></div>{% endif %}
     {% if txn.notes %}<div><dt>{{ 'Notes'|tr(locale) }}</dt><dd>{{ txn.notes|tagged }}</dd></div>{% endif %}
     <div><dt>{{ 'Recorded'|tr(locale) }}</dt><dd><time datetime="{{ txn.created_at }}">{{ recorded_at }}</time>{% if txn.updated_at != txn.created_at %} · {{ 'Updated'|tr(locale) }} <time datetime="{{ txn.updated_at }}">{{ updated_at }}</time>{% endif %}</dd></div>
   </dl>
+    {% import "partials/estimate_date.html" as dates with context %}{{ dates.edit_entry(txn, estimate_date, revision) }}
   {% if not txn.is_void %}
-    {% if txn.source == 'SYSTEM' %}<p class="phone-note">{{ 'Deleting this reevaluation removes its effect from the account.'|tr(locale) }}</p>
+    {% if txn.source == 'SYSTEM' %}<p class="phone-note">{{ 'Deleting this value update removes its effect from the account.'|tr(locale) }}</p>
     {% elif txn.type == 'CNV' %}<a class="btn primary phone-save" href="/transactions/{{ txn.id }}/convert/edit">{{ 'Edit'|tr(locale) }}</a>
     {% elif is_ownership %}<a class="btn primary phone-save" data-popup-open href="/transactions/{{ txn.id }}/ownership/edit">{{ 'Edit'|tr(locale) }}</a>
     {% elif txn.type in ('BUY', 'SEL', 'DIV') or (txn.type == 'OPN' and lines[0].asset != 'CASH:' ~ base) %}<a class="btn primary phone-save" href="/investments/{{ txn.id }}/edit">{{ 'Edit'|tr(locale) }}</a>
@@ -75,8 +77,8 @@
   {% if history %}<div class="phone-rows">{% for h in history %}<div class="phone-row"><span>{{ h.summary or h.action }}<small>{{ h.at }}</small></span></div>{% endfor %}</div>
   {% else %}<p class="phone-note">{{ 'No changes since it was recorded.'|tr(locale) }}</p>{% endif %}
   {% endcall %}
-  {% set row %}<span>{{ 'Ledger lines — how this transaction affects balances'|tr(locale) }}</span><b>{{ chevron() }}</b>{% endset %}
-  {% call sheet('Ledger lines — how this transaction affects balances'|tr(locale), row) %}
+  {% set row %}<span>{{ 'How this transaction affects balances'|tr(locale) }}</span><b>{{ chevron() }}</b>{% endset %}
+  {% call sheet('How this transaction affects balances'|tr(locale), row) %}
   <div class="phone-rows">{% for l in lines %}<div class="phone-row"><span>{{ l.account }}<small><bdi dir="ltr">{{ l.ref }}</bdi> · {{ {'INFLOW': 'Money in', 'OUTFLOW': 'Money out', 'INTERNAL': 'Internal', 'OPENING': 'Opening', 'REVALUATION': 'Revaluation'}.get(l.effect, l.effect)|tr(locale) }}{% if l.category %} · {{ l.category.split(' › ')|map('tr', locale)|join(' · ') }}{% endif %}</small></span><b><bdi class="fig">{{ l.amount_base|money(True) }}</bdi></b></div>{% endfor %}</div>
   {% endcall %}
 </div>

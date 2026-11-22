@@ -4,35 +4,37 @@
 {% macro category_context(label) %}{% set parts = label.split(' › ') %}{% if parts|length > 1 %}<b>{{ parts[0]|tr(locale) }}</b>{% for part in parts[1:] %}<div>{{ part|tr(locale) }}</div>{% endfor %}{% else %}{{ label|tr(locale) }}{% endif %}{% endmacro %}
 {% block title %}{{ txn.ref }}{% endblock %}
 {% block heading %}<h1>{{ ('Refund' if txn.type.value == 'IN' and lines and lines[0].effect == 'OUTFLOW' else summary.type_label)|tr(locale) }}</h1>
-<div class="muted"><bdi dir="ltr">{{ txn.ref }}</bdi> · {{ txn.date }}{% if txn.source == 'SYSTEM' %} · <span class="pill">{{ 'System-generated'|tr(locale) }}</span>{% endif %}{% if txn.is_void %} · <span class="pill void">{{ 'deleted'|tr(locale) }}</span>{% endif %}</div>{% endblock %}
+<div class="muted"><bdi dir="ltr">{{ txn.ref }}</bdi> · {% if estimate_shifts %}{{ 'Posting date'|tr(locale) }} {% endif %}{{ txn.date }}{% if txn.source == 'SYSTEM' %} · <span class="pill">{{ 'System-generated'|tr(locale) }}</span>{% endif %}{% if txn.is_void %} · <span class="pill void">{{ 'deleted'|tr(locale) }}</span>{% endif %}</div>{% endblock %}
 {% block content %}
 <div class="grid g2">
   <div class="card">
     <h2>{% if txn.description or summary.counterparty %}{{ txn.description or summary.counterparty }}{% else %}{{ txn.type_label|tr(locale) }}{% endif %}</h2>
     <table>
-      <tr><td class="muted">{{ 'Amount'|tr(locale) }}</td><td class="num">{% if txn.type == 'CNV' %}{{ summary.amount|money }} {{ summary.currency }} → {{ summary.to_amount|money }} {{ summary.to_currency }}{% elif txn.type == 'TRF' %}{{ summary.amount|money }} {{ summary.currency }}{% else %}{{ amount(summary.amount, summary.currency, True) }}{% endif %}</td></tr>
+      <tr><td class="muted">{{ 'Amount'|tr(locale) }}</td><td class="num">{% if txn.type == 'CNV' %}{{ summary.amount|amount_role('row') }} {{ summary.currency }} → {{ summary.to_amount|amount_role('row') }} {{ summary.to_currency }}{% elif txn.type == 'TRF' %}{{ summary.amount|amount_role('row') }} {{ summary.currency }}{% else %}{{ amount(summary.amount, summary.currency, True) }}{% endif %}</td></tr>
       {% if txn.type in ('TRF', 'CNV') %}
       <tr><td class="muted">{{ 'From'|tr(locale) }}</td><td>{{ summary.account_label }}</td></tr>
       <tr><td class="muted">{{ 'To'|tr(locale) }}</td><td>{{ summary.to_account_label }}</td></tr>
       {% if conversion %}
       <tr><td class="muted">{{ 'Rate'|tr(locale) }}</td><td class="num">1 {{ conversion.quote_base }} = {{ conversion.rate }} {{ conversion.quote_quote }}</td></tr>
-      {% if conversion.fee %}<tr><td class="muted">{{ 'Fee'|tr(locale) }}</td><td class="num">{{ conversion.fee|money }} {{ conversion.sent_currency }}</td></tr>{% endif %}
-      {% if conversion_spread is not none %}<tr><td class="muted">{{ 'Spread paid'|tr(locale) }}</td><td class="num">{{ conversion_spread|money }} {{ base }}</td></tr>{% endif %}
+      {% if conversion.fee %}<tr><td class="muted">{{ 'Fee'|tr(locale) }}</td><td class="num">{{ conversion.fee|amount_role('row') }} {{ conversion.sent_currency }}</td></tr>{% endif %}
+      {% if conversion_spread is not none %}<tr><td class="muted">{{ 'Spread paid'|tr(locale) }}</td><td class="num">{{ conversion_spread|amount_role('row') }} {{ base }}</td></tr>{% endif %}
       {% endif %}
       {% else %}
       <tr><td class="muted">{{ 'Account'|tr(locale) }}</td><td>{{ summary.account_label }}</td></tr>
       {% if summary.category_label %}<tr><td class="muted">{{ 'Category'|tr(locale) }}</td><td class="category-context">{{ category_context(summary.category_label) }}</td></tr>{% endif %}
       {% endif %}
-      {% for effect in cash_effects %}<tr><td class="muted">Effect · {{ effect.owner }}</td><td>Cash in {{ effect.account }} {{ 'increases' if effect.quantity > 0 else 'decreases' }} by {{ effect.quantity|abs|money }} {{ effect.currency }}</td></tr>{% endfor %}
+      {% for effect in cash_effects %}<tr><td class="muted">Effect{% if effect.owner != 'you' %} · {{ effect.owner }}{% endif %}</td><td>Cash in {{ effect.account }} {{ 'increases' if effect.quantity > 0 else 'decreases' }} by {{ effect.quantity|abs|amount_role('row') }} {{ effect.currency }}</td></tr>{% endfor %}
       {% if txn.counterparty %}<tr><td class="muted">{{ 'Payee'|tr(locale) }}</td><td>{% if touched.counterparty %}<a href="/counterparties/{{ touched.counterparty.id }}">{{ txn.counterparty }}</a>{% else %}{{ txn.counterparty }}{% endif %}</td></tr>{% endif %}
       {% for owner in touched.owners %}<tr><td class="muted">{{ 'Held for'|tr(locale) }}</td><td><a href="/counterparties/{{ owner.id }}">{{ owner.name }}</a></td></tr>{% endfor %}
+      {% for part in estimate_shifts %}<tr><td class="muted">{{ 'Estimate date'|tr(locale) }}</td><td><time datetime="{{ part.effective_date }}">{{ part.effective_date|day(locale) }}</time> · {{ part.amount|abs|money }} {{ base }}</td></tr>{% endfor %}
       {% if foreign %}<tr><td class="muted">{{ 'Paid in'|tr(locale) }}</td><td><bdi class="num">{{ foreign.label }}</bdi> · {{ ("the bank’s pound debit" if foreign.settled else "pounds at the day’s rate until the bank’s debit")|tr(locale) }}</td></tr>{% endif %}
       {% if txn.notes %}<tr><td class="muted">{{ 'Notes'|tr(locale) }}</td><td>{{ txn.notes|tagged }}</td></tr>{% endif %}
-      <tr><td class="muted">{{ "Recorded"|tr(locale) }}</td><td class="small"><time datetime="{{ txn.created_at }}">{{ recorded_at }}</time>{% if txn.updated_at != txn.created_at %} · {{ 'Updated'|tr(locale) }} <time datetime="{{ txn.updated_at }}">{{ updated_at }}</time>{% endif %}</td></tr>
+      <tr><td class="muted">{{ "Recorded"|tr(locale) }}</td><td class="small"><time datetime="{{ txn.created_at }}" title="{{ txn.created_at }}">{{ recorded_at }}</time>{% if txn.updated_at != txn.created_at %} · {{ 'Updated'|tr(locale) }} <time datetime="{{ txn.updated_at }}" title="{{ txn.updated_at }}">{{ updated_at }}</time>{% endif %}</td></tr>
     </table>
+    {% import "partials/estimate_date.html" as dates with context %}{{ dates.edit_entry(txn, estimate_date, revision) }}
     <div class="actions mt-card">
       {% if not txn.is_void %}
-        {% if txn.source == 'SYSTEM' %}<span class="muted small">{{ "Deleting this reevaluation removes its effect from the account."|tr(locale) }}</span>
+        {% if txn.source == 'SYSTEM' %}<span class="muted small">{{ "Deleting this value update removes its effect from the account."|tr(locale) }}</span>
         {% elif txn.type == 'CNV' %}<a class="btn" href="/transactions/{{ txn.id }}/convert/edit">{{ 'Edit'|tr(locale) }}</a>
         {% elif is_ownership %}<a class="btn" data-popup-open href="/transactions/{{ txn.id }}/ownership/edit">{{ 'Edit'|tr(locale) }}</a>
         {% elif txn.type in ('BUY', 'SEL', 'DIV') or (txn.type == 'OPN' and lines[0].asset != 'CASH:' ~ base) %}<a class="btn" href="/investments/{{ txn.id }}/edit">{{ 'Edit'|tr(locale) }}</a>
@@ -62,7 +64,7 @@
 {% if can_split and not txn.is_void %}
 <section class="card expense-split mt-card">
   <h2>{{ "Expense categories"|tr(locale) }}</h2>
-  <p class="muted small">Split the total across categories. The amounts must add up to {{ abs(summary.amount)|money }} {{ summary.currency }}. Refunds should be entered as money in under the original expense category.</p>
+  <p class="muted small">Split the total across categories. The amounts must add up to {{ abs(summary.amount)|amount_role('row') }} {{ summary.currency }}. Refunds should be entered as money in under the original expense category.</p>
   <form method="post" action="/transactions/{{ txn.id }}/split" id="expense-split-form">
     <input type="hidden" name="revision" value="{{ revision }}">
     <div id="expense-split-rows">
@@ -88,7 +90,7 @@
   <h2>{{ "Assign payment to a reserve"|tr(locale) }}</h2>
   <p class="muted small">{{ "Link this payment to the plan it covers. Its amount will stop counting as cash still set aside, while the project keeps its progress. Repeating projects advance when linked payments reach the target. Matching payments are suggested for your confirmation in the account transaction list."|tr(locale) }}</p>
   {% if reserves %}<form method="post" action="/transactions/{{ txn.id }}/reserve" class="reserve-allocate">
-    <select name="reserve_id" required aria-label="Reserve" data-own-picker>{% for reserve in reserves %}<option value="{{ reserve.id }}">{{ reserve.name }} · {{ reserve.effective_allocated|money }} available</option>{% endfor %}</select>
+    <select name="reserve_id" required aria-label="Reserve" data-own-picker>{% for reserve in reserves %}<option value="{{ reserve.id }}">{{ reserve.name }} · {{ reserve.effective_allocated|amount_role('row') }} available</option>{% endfor %}</select>
     <input type="text" name="amount" value="{{ abs(summary.amount) }}" inputmode="decimal" aria-label="Amount paid from reserve" required>
     <button class="btn small">{{ "Apply payment"|tr(locale) }}</button>
   <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% else %}<p class="muted small">{{ "Create a reserve before assigning payments to one."|tr(locale) }}</p>{% endif %}
@@ -97,12 +99,12 @@
 {% if pair_actions %}</div>{% endif %}
 <div class="card mt-card">
   <details>
-    <summary>{{ "Ledger lines — how this transaction affects balances"|tr(locale) }}</summary>
+    <summary>{{ "How this transaction affects balances"|tr(locale) }}</summary>
     <table style="margin-top:10px">
       <thead><tr><th>{{ "Line"|tr(locale) }}</th><th>{{ 'Account'|tr(locale) }}</th><th>{{ "Asset"|tr(locale) }}</th><th>{{ "Effect"|tr(locale) }}</th><th>{{ 'Category'|tr(locale) }}</th><th class="num">{{ "Quantity"|tr(locale) }}</th><th class="num">Value ({{ base }})</th></tr></thead>
       {% for l in lines %}
       <tr><td class="code">{{ l.ref }}</td><td class="small">{{ l.account }}</td><td class="code">{{ l.asset }}</td><td><span class="pill">{{ {'INFLOW': 'Money in', 'OUTFLOW': 'Money out', 'INTERNAL': 'Internal', 'OPENING': 'Opening', 'REVALUATION': 'Revaluation'}.get(l.effect, l.effect)|tr(locale) }}</span></td>
-          <td class="small category-context">{{ category_context(l.category) }}</td><td class="num">{{ l.quantity|money(True) }}</td><td class="num">{{ l.amount_base|money(True) }}</td></tr>
+          <td class="small category-context">{{ category_context(l.category) }}</td><td class="num">{{ l.quantity|amount_role('row', True) }}</td><td class="num">{{ l.amount_base|amount_role('row', True) }}</td></tr>
       {% endfor %}
     </table>
   </details>

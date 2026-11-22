@@ -39,6 +39,7 @@ repo: app
 The owner has done steps 1-4 and a buyer has unlocked a theme on Windows and Android.
 
 ## 10C1 Native theme acceptance · L
+**Waived by owner, 2026-11-22:** counted done without a run (launch checklist #579); a tester may still run it, and a failure becomes a bug item.
 WebView2 and Android paint, grain and blur cost on a low-end phone, Arabic mirroring of artwork, forced colours, Dendera's frieze and pigment thread.
 
 ## 10C2 Royal Obsidian & Gold needs a website version · M

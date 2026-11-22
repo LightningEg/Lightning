@@ -73,6 +73,7 @@ class LinkedSections:
             "budget": self.budget_impacts(txn),
             "settled": settled,
             "reserves": [] if txn.is_void else c.reserves.links_for_transaction(txn.id),
+            "reserve_back": [] if txn.is_void else c.reserves.refunds_back(txn.id),
             "claims": claims,
             "interest": interest,
             "sources": sources,
@@ -81,7 +82,7 @@ class LinkedSections:
             "owners": owners,
             "tags": tags_in(txn.notes),
         }
-        touched["count"] = sum(len(touched[key]) for key in ("budget", "settled", "reserves", "claims",
+        touched["count"] = sum(len(touched[key]) for key in ("budget", "settled", "reserves", "reserve_back", "claims",
                                                               "interest", "sources", "tags")) + bool(touched["rule"])
         return touched
 
@@ -216,6 +217,8 @@ class LinkedSections:
                 "this_month": latest[side] if latest else ZERO, "usual_month": usual,
                 "plans": plans, "reserves": reserves, "claims": claims,
                 "owed": sum((claim["outstanding"] for claim in claims), ZERO),
+                # NF-12G6: their Owed to you account; below zero is what you owe them
+                "lent": c.people_money.balance(party["id"], fmt_date(day)) if getattr(c, "people_money", None) else ZERO,
                 "held": held, "rules": rules}
 
     # ------------------------------------------------------------------ 7T3 an account

@@ -50,6 +50,8 @@ def glance(name: str, verb: str, amount=None, when: str = "", n=None, sa: str = 
 
 # Needs you groups its items by what they are about (feedback ticket 84): one row per group on the Overview,
 # and each group opens its own page. First match on the item's link wins; the order is the order shown.
+UNUSUAL_SHOWN = 2  # NF-12AK5: at most this many large purchases at a time
+
 GROUPS = (("checks", "Data checks", ("/checks",)),
           ("payments", "Bills and payments", ("/plan/items/", "/plan/bill-alerts/", "/gameya/", "/deposits/")),
           ("activity", "Activity to sort out", ("/rules", "/sms", "/accounts/", "/transactions", "/activity", "/reimbursements")),
@@ -65,7 +67,7 @@ def group_of(item: dict) -> str:
 
 # NF-3AZ10: the same items by job and consequence, whatever page shows them: what puts money at risk, events that
 # do not yet agree with the bank or the ledger, and cleanup that can wait. Reviewed and snoozed items are still open.
-CONSEQUENCES = (("risk", "Money at risk"), ("unreconciled", "Unreconciled events"), ("cleanup", "Optional cleanup"))
+CONSEQUENCES = (("risk", "Late or due"), ("unreconciled", "To match"), ("cleanup", "Optional cleanup"))
 CONSEQUENCE_LABELS = dict(CONSEQUENCES)
 _UNRECONCILED = ("/sms", "/accounts/", "/transactions", "/activity", "/deposits/", "/reimbursements")
 
@@ -326,14 +328,6 @@ class ReviewInbox:
                               "detail": f"{fmt(section.planned_actual - section.available, 0)} {c.base_currency} over this month's plan.",
                               "href": "/budget", "priority": 2,
                               "glance": glance(section.name, "Adjust", section.planned_actual - section.available, "over plan")})
-        # A category's own plan below what is already scheduled in it: the bill will overrun the plan.
-        for row in c.budgets.below_scheduled(month_of(on), schedule=c.schedules.view()):
-            items.append({"label": f"{row['name']} is planned below its bills",
-                          "detail": f"Planned {fmt(row['planned'], 0)} {c.base_currency}; bills and loan payments "
-                                    f"scheduled this month come to {fmt(row['scheduled'], 0)}.",
-                          "href": f"/budget?month={month_of(on)}&open_group=all#limit-{row['category_id']}",
-                          "action": "Change the plan", "priority": 2,  # where its limit is typed (IV-3AL2)
-                          "glance": glance(row["name"], "Adjust", row["scheduled"] - row["planned"], "below its bills")})
         # The month's plan against the savings target and dated goals (one check: HealthService.plan_check).
         check = c.health.plan_check(month_of(on))
         if check.planned is not None and check.over_by and check.planned_savings_rate is not None:
@@ -355,19 +349,18 @@ class ReviewInbox:
         items.extend(self._health_alerts(on, items))
         visible = []
         self.handled = {"reviewed": 0, "snoozed": 0}
+        # NF-12AL3: what changed in the plan is one row here, the count, leading to the card on Budget (one home).
+        open_changes = self.changes(on)
+        if open_changes:
+            items.append({"label": _plural(len(open_changes), "change to look at in Budget", "changes to look at in Budget"),
+                          "detail": open_changes[0]["label"],
+                          "href": f"/budget?month={month_of(on)}#changes", "action": "Look at them", "priority": 2,
+                          "glance": glance("Budget", "Look", None, "1 change" if len(open_changes) == 1
+                                           else "{n} changes", len(open_changes))})
         for item in sorted(items, key=lambda item: item["priority"]):
             # Visible facts define the situation, not days-late badges or the current date.
             # A changed amount, due date, count or recommendation gets a fresh reminder.
-            identity = review_identity(item)
-            item["review_id"] = identity
-            item["consequence"] = consequence_of(item)
-            state = self._state(identity)
-            item["review_state"] = "active"
-            if state.get("status") == "reviewed":
-                item["review_state"] = "reviewed"
-            elif state.get("status") == "snoozed" and state.get("until", "") > on.isoformat():
-                item["review_state"] = "snoozed"
-                item["snoozed_until"] = state["until"]
+            self._stamp(item, on)
             if item["review_state"] in self.handled:
                 self.handled[item["review_state"]] += 1   # still open: never counted as resolved
             if include_handled or item["review_state"] == "active":
@@ -439,7 +432,8 @@ class ReviewInbox:
         """Change only this reminder's visibility. Its financial action remains outstanding."""
         if action not in ("reviewed", "snoozed", "restore"):
             raise ValidationError("Choose Mark as reviewed, Snooze or Restore.")
-        if identity not in {item["review_id"] for item in self.items(on, include_handled=True)}:
+        if identity not in {item["review_id"] for item in [*self.items(on, include_handled=True),
+                                                           *self.changes(on, include_handled=True)]}:
             raise ValidationError("This item changed or no longer needs you. Review the current list.")
         state = {"status": action}
         if action == "snoozed":
@@ -471,6 +465,22 @@ class ReviewInbox:
                                     f"leaves {fmt(goal['can'], 0)} for it. {pace} {way}",
                           "href": "/plan/reserves", "action": "See reserves", "priority": 2,
                           "glance": glance(goal["name"], "Set aside", goal["need"], "a month")})
+        short = c.health.short_month(on)
+        if short:
+            found.append({"label": f"{_month_name(short['month'])} saved less than your target",
+                          "detail": f"It saved {fmt(short['rate'], 0)}% of money in; your target is {fmt(short['limit'], 0)}%, "
+                                    f"{fmt(short['short'], 0)} {cur} more.",
+                          "href": "/financial-health", "action": "See financial health", "priority": 2,
+                          "glance": glance(_month_name(short["month"]), "See", short["short"], "short of your target")})
+        return found
+
+    def _budget_changes(self, on: date) -> list[dict]:
+        """NF-12AL3 (owner, 2026-11-13): what changed in this month's plan, gathered for the one card that leads Budget:
+        an income change (NF-12AL1), a plan below its bills, a category over plan two months running, one running out
+        (NF-12AL2), a purchase that dominates its category's estimate (NF-12AK5) and Fill rows that would change
+        (NF-12AI). Each row is decided like any Needs you row, so a dismissal holds until its evidence changes."""
+        c, month, cur = self.c, month_of(on), self.c.base_currency
+        found = []
         offer = c.health.income_change_offer(month)
         if offer and offer["kind"] == "drop":  # NF-12AL1: scheduled pay falls from a date
             found.append({"label": f"Your income falls to {fmt(offer['recurring'], 0)} from {_day_name(offer['from'], on)}",
@@ -484,13 +494,14 @@ class ReviewInbox:
                                     f"more than your average of {fmt(offer['average'], 0)}. Plan with it, or save the difference.",
                           "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose", "priority": 2,
                           "glance": glance("Your income", "Choose", offer["raise"], "more a month")})
-        short = c.health.short_month(on)
-        if short:
-            found.append({"label": f"{_month_name(short['month'])} saved less than your target",
-                          "detail": f"It saved {fmt(short['rate'], 0)}% of money in; your target is {fmt(short['limit'], 0)}%, "
-                                    f"{fmt(short['short'], 0)} {cur} more.",
-                          "href": "/financial-health", "action": "See financial health", "priority": 2,
-                          "glance": glance(_month_name(short["month"]), "See", short["short"], "short of your target")})
+        # A category's own plan below what is already scheduled in it: the bill will overrun the plan.
+        for row in c.budgets.below_scheduled(month, schedule=c.schedules.view()):
+            found.append({"label": f"{row['name']} is planned below its bills",
+                          "detail": f"Planned {fmt(row['planned'], 0)} {c.base_currency}; bills and loan payments "
+                                    f"scheduled this month come to {fmt(row['scheduled'], 0)}.",
+                          "href": f"/budget?month={month}&open_group=all#limit-{row['category_id']}",
+                          "action": "Change the plan", "priority": 2,  # where its limit is typed (IV-3AL2)
+                          "glance": glance(row["name"], "Adjust", row["scheduled"] - row["planned"], "below its bills")})
         below = {row["category_id"] for row in c.budgets.below_scheduled(month, schedule=c.schedules.view())}  # already named: plan below its bills
         for row in (row for row in c.budgets.over_twice(month, schedule=c.schedules.view()) if row["category_id"] not in below):
             first, second = (_month_name(key).split()[0] for key in row["months"])
@@ -528,7 +539,46 @@ class ReviewInbox:
             item["glance"] = glance(row["name"], item["action"], row["amount"],
                                    "may run out around day {n}" if row["may"] else "runs out around day {n}", n=row["day"])
             found.append(item)
+        for row in c.budgets.unusual_purchases(month)[:UNUSUAL_SHOWN]:  # NF-12AK5
+            found.append({"label": f"{row['category']}'s average includes a {fmt(row['amount'], 0)} purchase on "
+                                   f"{_day_name(row['date'], on)}",
+                          "detail": f"It is {fmt(row['amount'], 0)} of the {fmt(row['window_total'], 0)} spent there in "
+                                    "the last three months. Leave it out of estimates, or keep it.",
+                          "href": f"/transactions/{row['transaction_id']}", "action": "See it", "priority": 2,
+                          "post": {"href": "/budget/leave-out", "label": "Leave out",
+                                   "fields": {"transaction_id": row["transaction_id"], "month": month}},
+                          "source_version": f"unusual:{row['transaction_id']}",
+                          "glance": glance(row["category"], "Leave out", row["amount"], "in its average")})
+        fill = c.budgets.fill_proposal(month, "changes", schedule=c.schedules.view())  # NF-12AI's What changed
+        differ = sum(1 for row in fill.rows if row.selectable)
+        if differ:
+            found.append({"label": _plural(differ, "limit could follow what changed", "limits could follow what changed"),
+                          "detail": "Fill shows each one beside what you set; nothing changes until you choose.",
+                          "href": f"/budget/fill?month={month}", "popup": True, "action": "Fill", "priority": 2,
+                          "source_version": f"fill:{month}:{differ}",
+                          "glance": glance("Fill", "Fill", None, "1 limit" if differ == 1 else "{n} limits", differ)})
+        for item in found:
+            item["change"] = True
         return found
+
+    def changes(self, on: date, *, include_handled: bool = False) -> list[dict]:
+        """The Budget card's rows (NF-12AL3), each with its review id and state."""
+        return [item for item in (self._stamp(item, on) for item in self._budget_changes(on))
+                if include_handled or item["review_state"] == "active"]
+
+    def _stamp(self, item: dict, on: date) -> dict:
+        """Give a row its identity and its remembered decision. A changed amount, date or count is a new row."""
+        identity = review_identity(item)
+        item["review_id"] = identity
+        item["consequence"] = consequence_of(item)
+        state = self._state(identity)
+        item["review_state"] = "active"
+        if state.get("status") == "reviewed":
+            item["review_state"] = "reviewed"
+        elif state.get("status") == "snoozed" and state.get("until", "") > on.isoformat():
+            item["review_state"] = "snoozed"
+            item["snoozed_until"] = state["until"]
+        return item
 
     def _sms(self, on: date) -> list[dict]:
         """Bank SMS waiting on the owner before they reach a review: an account to choose, or words to read."""

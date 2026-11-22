@@ -27,7 +27,7 @@ def test_last_month_copies_base_limit_without_spending_or_carryover(c, setup):
 
     assert row.amount == Decimal("4000")
     assert row.current_amount == Decimal("7000")
-    assert "Your limit" in row.conflict
+    assert row.current_rule == "7,000 fixed" and row.conflict.startswith("Tick to use this instead")  # r39: the limit is its own column
     assert not row.selected
     assert "From 2026-11" in row.note
 
@@ -171,7 +171,7 @@ def test_budget_fill_screen_reviews_and_posts_month_only_edits(c, setup):
     assert preview.status_code == 200
     assert "Already using last month's plan" not in preview.text
     assert 'value="4000.00"' in preview.text
-    assert "Your limit: 7,000.00 fixed" in preview.text
+    assert "7,000 fixed" in preview.text  # r39: the limit once, in its column, whole
 
     response = client.post("/budget/fill?month=2026-12", data={
         "source": "last_month", "selected": str(food.id), f"amount_{food.id}": "5200",

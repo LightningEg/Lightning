@@ -30,6 +30,7 @@ Built v1 lending; planned replacement: [edit journal](../issues/4-edit-journal-a
 | **Borrower** | A paired device (initially a PC) holding temporary write authority for one checkout. |
 | **Checkout** | One grant of write authority, with a random checkout ID and increasing home epoch. |
 | **Checkpoint** | An immutable, verified encrypted database version with an ID and ciphertext hash. |
+| **Your records** | What lending moves between phone and PC: "lend your records to your PC", "take your records back" (Arabic السجل). "Ledger" stays in code and in this Glossary's layer name, never on screen (owner, 2026-11-22; IV-3BH3). |
 | **Lend / Received** | Home goes read-only and records a grant before the borrower writes / home durably holds the complete returned candidate and has not resumed writing. |
 | **Hand back** | Borrower freezes its copy and returns an encrypted candidate for home to verify and publish. |
 | **Accepted** | Home verified and published the candidate and issued a durable receipt for the new checkpoint. |
@@ -76,7 +77,7 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Investment trade** | Ledger | Brokerage cash for units (buy) or units for cash (sell), entered in that brokerage's register. |
 | **Pocket** | Ledger | A broker's cash and holdings in one currency: a child brokerage account ("IBKR · EUR") shown inside the broker's one row, one tab per pocket on its page. Arabic: جيب. |
 | **Opening balance** | Ledger | Separately dated entry for an account's value at a chosen point; earlier transactions may still be added. |
-| **Revaluation** | Ledger | Change in investment value from price, not deposits or withdrawals. |
+| **Revaluation** | Ledger | Change in investment value from price, not deposits or withdrawals. On screen: **value update** (the page is **Value updates**); "reevaluation" stays in code only (IV-3BH3). |
 | **Reevaluation ledger** | Ledger | Monthly per-account, per-asset units, prices, values and returns; each account total is one system-generated `VAL` journal in the main ledger. |
 | **Void / delete** | Ledger | Recoverable correction: leaves active balances, keeps history. |
 | **Linked (import row)** | Ledger | A statement row tied to an already recorded transaction instead of posting again; moves no money. |
@@ -91,8 +92,11 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Budget** | Plan | Planned spending for a category and month; not a reserve or a transaction. |
 | **Monthly base budget** | Plan | A category's monthly plan before carryover: fixed EGP, a percentage of Average monthly income, or an observed-month average. Shown as **Base budget**. |
 | **Refund link** | Plan | A refund that names the purchase it returns (*This refunds…* on a refund, *Record a refund* on a purchase; `refund_links`, NF-12AK3). Estimates count it in the purchase's month; cash and Spent keep its date. |
+| **Effective date for spending estimates** | Plan | The calendar date used to assign an eligible amount to a spending-estimate period. See the [attribution rules](ARCHITECTURE.md#effective-date-for-spending-estimates-nf-12ak). |
 | **Observed-month average** | Plan | 3m/6m average of the estimate basis (`BudgetService.estimate_spending`: linked money back counted in its expense's month, no month below zero). Once the profile covers the whole window every month counts, so a quiet month is zero; while it is newer, only months with spending count (owner 2026-11-13, NF-12AK1). |
 | **Left out of estimates** | Plan | One expense the person chose to leave out of budget averages and Fill, with the refunds and claim receipts linked to it (`budget_estimate_exclusions`, NF-12AK2). Optional, never automatic; Cash flow and Spent still count it. The switch reads *Leave out of estimates*; Arabic: استبعده من التقديرات. Not **Outside the budget**, which leaves out a whole category. |
+| **Expected back** | Plan | What personal claims on a category's purchases still expect to receive; with *Paid*, *Returned* and *Yours* on the Budget category sheet (`BudgetService.recoveries`). Work claims are not in it (Paid for work). |
+| **What changed** | Plan | The card leading Budget: changes in income, bills and spending to accept or dismiss; "Your plan continues" when there are none (`ReviewInbox.changes`). |
 | **Outside the budget** | Plan | A category (its subcategories with it) left out of the budget, its averages and the forecast; its spending still counts in Cash flow and Spending (Settings › Budget, or Budget's Not tracked list). Was "One-off" until owner 2026-11-14. Arabic: بره الميزانية. Not a limit for this month only, which Budget tags **This month only**. |
 | **Budget carryover** | Plan | Optional unused room added to a later month's limit; sets aside no cash and does not reduce free cash. |
 | **Reserve** | Plan | Already-owned cash assigned to an emergency fund or goal; moves no money, does not change net worth. |
@@ -142,7 +146,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 
 | Figure | Meaning | How it is calculated | Function |
 |---|---|---|---|
-| **Age of Money** | Amount-weighted days from receipt to use of owned cash, consumed oldest first, over the last ten cash expense transactions in profile currency. Unknown opening cash makes the sample unavailable. This is historical timing, not a runway estimate. | Read directly from the ledger | `reporting.cash_analytics.cash_age` |
+| **Age of money** | Amount-weighted days from receipt to use of owned cash, consumed oldest first, over the last ten cash expense transactions in profile currency. Unknown opening cash makes the sample unavailable. This is historical timing, not a runway estimate. | Read directly from the ledger | `reporting.cash_analytics.cash_age` |
 | **In your accounts** | What your account balances add up to: what you hold for other people is in it, and a savings circle you still owe counts below zero. | What you own + Held for others − Gam'eya still to pay | `planning.position.Position.in_your_accounts` |
 | **Held for others** | Money and units in your accounts that belong to other people. | Read directly from the ledger | `reporting.service.ReportingService.money_from_others_total` |
 | **What you own** | The value of everything in your accounts that is yours. | Cash you own + Holdings value + Other you own | `reporting.service.ReportingService.net_worth` |
@@ -233,7 +237,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 |---|---|---|---|
 | **Lowest scheduled cash** | The lowest projected day-end owned cash balance from confirmed cash and scheduled payments. Excludes variable spending and savings goals; reserves remain in cash. Missing FX makes it unavailable. | Read directly from the plan | `planning.dated_cash.lowest_scheduled_balance` |
 | **Cash available to assign** | Actual owned liquid cash left after reserves and funded spending. The payday proposal shares it out in four parts that add up to it: Bills protected (bills due outside those funds), To your plan, Emergency and goals, Left unassigned. Missing FX makes it unavailable; expected income never contributes. | Read directly from the plan | `planning.funding.CashFundingService.preview` |
-| **Funded spending left** | This month's assigned category cash after owned spending and refunds, floored at zero. Unused funding does not carry automatically. | Read directly from the plan | `planning.funding.CashFundingService.preview` |
+| **Spending money left this month** | This month's assigned category cash after owned spending and refunds, floored at zero. Unused funding does not carry automatically. | Read directly from the plan | `planning.funding.CashFundingService.preview` |
 | **Outstanding reimbursement** | The eligible amount claimed for an owned expense that valid explicitly linked repayments or refunds have not covered. A claim is not cash before receipt. | Read directly from the plan | `reimbursements.ReimbursementService._claim_summary` |
 | **What you owe** | Payments you are certain to make: bills already due, loans and what you owe a savings circle. | Bills due (other than loan payments) + Loans still to pay + Gam'eya still to pay | `planning.position.Position.what_you_owe` |
 | **Net worth** | What you own after what you owe. | What you own − What you owe | `planning.position.Position.net_worth` |
@@ -359,6 +363,7 @@ Categories are not split into income and expense trees: pick the activity that e
 | **Name** | Human label on screens; account codes never show under it. Edit headings use the name without its code; transaction edits say "Edit transaction" with the date and payee below. Payee names are unique, other taxonomy names may repeat under different parents. |
 | **Code** | Stable machine identifier for links, imports and technical search; not shown in ordinary UI. |
 | **ID** | Internal database key; never shown. |
+| **Cash and banks** | The phone Home's hero: what bank, wallet and cash accounts in your own currency hold, above zero (`ui.phone.screens.home._cash_accounts`). Deposits and holdings are not in it, so it is never called In your accounts (owner, 2026-11-22, r38). |
 | **Ticker / symbol** | Public exchange symbol; not Lightning's code or ID. Optional ISIN also matches sources. |
 | **Exchange** | Where a stock or ETF trades, stored as ISO 10383 MIC, shown by common name; no exchange means EGX; funds and gold have none. |
 | **Price file** | One market's closing prices, published as a checked folder and refreshed after close; Settings › Price files picks them. Code: pack. |

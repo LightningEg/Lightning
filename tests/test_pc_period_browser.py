@@ -30,7 +30,9 @@ def test_pc_period_track_submits_months_and_custom_ranges(c, monkeypatch):
     try:
         with sync_playwright() as p:
             with p.chromium.launch(executable_path=chromium, args=['--no-sandbox']) as browser:
-                page = browser.new_page(viewport={'width': 1366, 'height': 768})
+                # Reduced motion: the app then skips its page-to-page animation, so resizing right after a click
+                # cannot abort a running transition ("Viewport size changed" on slow CI).
+                page = browser.new_page(viewport={'width': 1366, 'height': 768}, reduced_motion='reduce')
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 page.goto(host.launch_url)
@@ -40,7 +42,9 @@ def test_pc_period_track_submits_months_and_custom_ranges(c, monkeypatch):
                 assert control.locator(':scope > .month-stepper').count() == 0
                 control.locator('[data-month-shift="-1"]').click()
                 assert 'month=2026-09' in page.url and 'period=month' in page.url
-                control.locator('[data-month-select]').press('Enter')
+                face = control.locator('[data-month-face]')  # r38: the month reads as a month and opens the picker
+                assert face.inner_text() == 'Sep 2026' and control.locator('[data-month-select]').get_attribute('type') == 'hidden'
+                face.press('Enter')
                 assert page.locator('.month-popup').is_visible()
                 page.locator('.month-popup [data-value="2026-08"]').click()
                 assert 'month=2026-08' in page.url and 'period=month' in page.url
@@ -59,6 +63,7 @@ def test_pc_period_track_submits_months_and_custom_ranges(c, monkeypatch):
                 page.goto(host.origin + '/?period=month&month=2026-10')
                 assert page.locator('html').get_attribute('dir') == 'rtl'
                 assert page.locator('.period-buttons .month-stepper').count() == 1
+                assert control.locator('[data-month-face]').inner_text() == 'أكتوبر ٢٠٢٦'
                 control.locator('[data-month-shift="-1"]').click()
                 assert 'period=month' in page.url and 'month=2026-09' in page.url
                 c.settings.set('locale', 'en')

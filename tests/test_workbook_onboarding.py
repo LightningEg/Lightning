@@ -21,7 +21,8 @@ from lightning.workflows.workbook_import import prepare_import, confirm_import, 
 def _source(c):
     bank = c.account_flows.open_account('Example bank', 'BANK', '2026-01-01', '1000')
     food = c.categories.get_by_code('EXP.PERSONAL.FOOD')
-    c.transactions.record_outflow('2026-02-01', bank.id, '12.34', food.id, counterparty='Example shop')
+    purchase = c.transactions.record_outflow('2026-02-01', bank.id, '12.34', food.id, counterparty='Example shop')
+    c.budgets.set_estimate_date(purchase.id, '2026-01-31')
     c.planning.create(kind='BILL', name='Internet', amount='100', frequency='MONTHLY', start_date='2026-02-01')
     return bank
 
@@ -45,7 +46,8 @@ def test_comprehensive_roundtrip_and_legacy_headers(c, tmp_path):
     target = build(tmp_path/'new.db', key=b'k' * 32)
     target.db.execute("INSERT INTO profile_identity(singleton,profile_id) VALUES(1,'00000000-0000-0000-0000-000000000001')")
     prepared = prepare_import(target, data)
-    assert len(prepared) == 65  # property_contracts and property_flows (NF-12M) are the 60th and 61st, foreign_amounts (NF-7AK3) the 62nd, refund_links (NF-12AK3) the 63rd, budget_estimate_exclusions (NF-12AK2) the 64th, cd_rate_changes (IV-12J4) the 65th
+    assert len(prepared) == 66
+    assert 'budget_estimate_dates' in prepared
     assert target.db.scalar('SELECT count(*) FROM transactions') == 0
     confirm_import(target, data)
     assert target.db.scalar('SELECT profile_id FROM profile_identity') == '00000000-0000-0000-0000-000000000001'

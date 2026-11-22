@@ -53,4 +53,4 @@ Phone is *home*; other devices pair (discover nearby home → pick matching numb
 
 ## WF-7 Restore a backup
 
-Choose a backup of the same named profile → password → private candidate migrated → hash manifest → promotion P0–P5 under lock. If uncertain state, the profile will not open for writes until repaired. Status: restore-safety hardening still claimed in `NOW.md` (03a).
+Choose a backup of the same named profile → password → private candidate migrated → hash manifest → promotion P0–P5 under lock. If a restore stops partway (power cut, crash), unlock says so and links to **Repair an interrupted restore**: one password, and Lightning undoes a restore that had not changed the profile yet or finishes one that had started. If neither is certain the profile stays locked, every file is kept, and **Restore needs checking** puts back the copy from before. Status: built; the reboot drill on an ordinary PC is with the owner's checks (#579).

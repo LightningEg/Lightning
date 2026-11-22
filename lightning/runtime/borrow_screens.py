@@ -141,7 +141,7 @@ def register(app, screens: BorrowScreens) -> None:
             notice = ""
             if state is BorrowerState.SEALED:
                 if await asyncio.to_thread(devices.taken_back, node):
-                    notice = "The phone took the ledger back. This copy is kept here, read only."
+                    notice = "The phone took your records back. This copy is kept here, read only."
                 else:
                     node.reopen()
             elif state is BorrowerState.RETURNING:
@@ -150,16 +150,16 @@ def register(app, screens: BorrowScreens) -> None:
                     return page(request, "choose", notice=f"{found.name} is home on {found.home_name}. Open it "
                                                           "again to borrow it.", profiles=discover_profiles(session.root),
                                 borrowed=devices.borrowed())
-                notice = "The phone has not taken the ledger back yet. This copy is read only until it does."
+                notice = "The phone has not taken your records back yet. This copy is read only until it does."
             elif state is BorrowerState.NEEDS_REPAIR and form.get("start_over") == "yes":
                 kept = await asyncio.to_thread(node.start_over)
                 link = devices.link(node)
                 await asyncio.to_thread(node.fetch, link, key)
                 await asyncio.to_thread(node.borrow, link, key)
-                notice = (f"You now edit the phone's ledger. This PC's earlier copy is kept as {kept.name}."
+                notice = (f"You now edit the phone's records. This PC's earlier copy is kept as {kept.name}."
                           if kept is not None else "")
             elif state is BorrowerState.NEEDS_REPAIR:
-                notice = "The phone took the ledger back. This copy is kept here, read only."
+                notice = "The phone took your records back. This copy is kept here, read only."
             elif state is not BorrowerState.BORROWING:
                 link = devices.link(node)
                 if state is not BorrowerState.BORROW_PREPARED:
@@ -272,7 +272,7 @@ def register(app, screens: BorrowScreens) -> None:
             "returning": f"Sending to {home_name} stopped halfway. Open {name} here near the phone to finish.",
             "unpaired": f"{home_name} no longer knows this PC. Your changes are saved here; pair this PC again on "
                         f"the phone (Devices), then open {name} here.",
-            "refused": f"{home_name} took the ledger back, so this copy stays on this PC, read only. Open {name} "
+            "refused": f"{home_name} took your records back, so this copy stays on this PC, read only. Open {name} "
                        "here to borrow again; the copy is kept as a backup.",
         }
         return page(request, "choose", notice=notices.get(result, ""), profiles=discover_profiles(session.root),

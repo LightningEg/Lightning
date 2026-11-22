@@ -1,7 +1,7 @@
 {# Age of Money and the spending calendar on the phone (3AY17): the age leads, then each day of the month as a row. #}
 {% extends "base.html" %}
-{% block title %}{{ 'Age of Money and spending calendar'|tr(locale) }}{% endblock %}
-{% block heading %}<h1>{{ 'Age of Money and spending calendar'|tr(locale) }}</h1>{% endblock %}
+{% block title %}{{ 'Age of money and spending calendar'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Age of money and spending calendar'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
 <section class="phone-hero has-seam" aria-labelledby="lead-heading"><div id="lead-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig.age_of_money.label }}</div>
   <div class="phone-lead">{% if age.days is not none %}{{ age.days|money }} <small>{{ 'days'|tr(locale) }}</small>{% else %}—{% endif %}</div>

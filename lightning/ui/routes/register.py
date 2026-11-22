@@ -386,7 +386,7 @@ def _account_holdings(c, account):
 def _edit_original(c, row, txn_id: int, custody_owners) -> dict:
     """The register row being edited, as the form's own values (what a changed field is compared with)."""
     return {
-        "date": row.date, "account_id": str(row.account_id), "notes": row.notes,
+        "date": row.date, "estimate_date": c.budgets.estimate_date(txn_id), "account_id": str(row.account_id), "notes": row.notes,
         "counterparty": row.other_account_label if row.type == DocType.TRF else (row.counterparty or ""),
         "category": c.categories.get(row.category_id).name if row.category_id else "",
         "category_choice": str(row.category_id) if row.category_id else "",
@@ -775,6 +775,8 @@ async def create(request: Request, account_id: int | None, *, auto_reserves: boo
     row_account = account_id or _int(entry["account_id"])
     # A resent row returns its first save (2J). Journal profiles get their command identity from the journal.
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    if form.get("estimate_date"):
+        entry["estimate_date"] = str(form["estimate_date"])
     payload = entry | {"row_account": row_account}
     try:
         with resent_guard(c, form), settled_save(request, c):
@@ -787,8 +789,11 @@ async def create(request: Request, account_id: int | None, *, auto_reserves: boo
             check_forgotten_minus(entry, category, other_id)
             owner_name = (_transfer_custody_owner(c, entry) if other_id else _custody_owner(c, entry, category))
             owner_party = c.counterparties.resolve(owner_name) if owner_name else None
-            txn = c.transactions.record_in_account(row_account, entry["date"], entry["amount"], category_id, other_id,
-                                                   counterparty, entry["notes"], owner_id=owner_party["id"] if owner_party else None)
+            args = dict(account_id=row_account, date=entry["date"], amount=entry["amount"], category_id=category_id,
+                        other_account_id=other_id, counterparty=counterparty, notes=entry["notes"],
+                        owner_id=owner_party["id"] if owner_party else None)
+            txn = (c.dated_entries.record(entry["estimate_date"], **args) if entry.get("estimate_date") else
+                   c.transactions.record_in_account(**args))
             amount = to_decimal(entry["amount"], "amount")
             if other_id:
                 source, target = (other_id, row_account) if amount > ZERO else (row_account, other_id)
@@ -811,6 +816,8 @@ async def update(request: Request, account_id: int | None, txn_id: int):
     c = container(request)
     form = await request.form()
     values = {k: str(form.get(k, "")) for k in ENTRY_FIELDS}
+    if "estimate_date" in form:
+        values["estimate_date"] = str(form["estimate_date"])
     values["revision"] = form.get("revision")
     row_account = account_id or _int(values["account_id"])
     try:
@@ -826,8 +833,11 @@ async def update(request: Request, account_id: int | None, txn_id: int):
             category = c.categories.get(category_id) if category_id else None
             owner_name = (_transfer_custody_owner(c, values) if other_id else _custody_owner(c, values, category))
             owner_party = c.counterparties.resolve(owner_name) if owner_name else None
-            txn = c.transactions.update_in_account(txn_id, row_account, values["date"], values["amount"], category_id,
-                                                   other_id, counterparty, values["notes"], owner_party["id"] if owner_party else None)
+            args = dict(account_id=row_account, date=values["date"], amount=values["amount"], category_id=category_id,
+                        other_account_id=other_id, counterparty=counterparty, notes=values["notes"],
+                        owner_id=owner_party["id"] if owner_party else None)
+            txn = (c.dated_entries.edit(txn_id, values["estimate_date"] or None, **args) if "estimate_date" in values
+                   else c.transactions.update_in_account(txn_id, **args))
             if txn.id != txn_id:
                 c.money_from_others.sync_transaction(txn_id, values["date"], None, row_account, ZERO, "")
             values["_notice"] = " ".join(filter(None, (

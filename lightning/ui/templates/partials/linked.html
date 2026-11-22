@@ -15,6 +15,7 @@
   {% for link in t.interest %}{{ link_row('/deposits/' ~ link.account_id, link.name, 'Certificate interest · {date}'|tr(locale, date=link.event_date), link.amount|money) }}{% endfor %}
   {% for link in t.reserves %}<div class="{{ 'phone-row' if phone_mode() else 'compact-row' }} linked-row"><span><a class="linked-name" href="/reserves/{{ link.reserve_id }}/payments">{{ link.name }}</a><small>{{ 'Paid from this reserve'|tr(locale) }} · {{ link.amount|money }} {{ base }}</small></span>
     {% if not request.state.read_only|default(false) %}<form method="post" action="/transactions/{{ txn.id }}/reserve"><input type="hidden" name="reserve_id" value="{{ link.reserve_id }}"><input type="hidden" name="action" value="unlink"><button class="btn small">{{ 'Remove link'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div>{% endfor %}
+  {% for back in t.reserve_back %}{{ link_row('/reserves/' ~ back.reserve_id ~ '/payments', back.name, 'Went back to this reserve'|tr(locale), back.amount|money) }}{% endfor %}
   {% for claim in t.claims %}{% if claim.role == 'expense' %}{{ link_row('/reimbursements', ('Reimbursement from {name}'|tr(locale, name=claim.payer_name) if claim.payer_name else 'Reimbursement claim'|tr(locale)),
       'Claimed {amt} · received {amt2}'|tr(locale, amt=claim.expected|money, amt2=claim.received|money),
       ('{amt} still owed'|tr(locale, amt=claim.outstanding|money) if claim.outstanding else 'Paid back'|tr(locale))) }}
@@ -32,18 +33,27 @@
    context: role 'refund' (link, candidates) or 'purchase' (refunds, room, today). Counted in the purchase's month for
    estimates only; cash keeps the refund's date. #}
 {% macro refund_panel(r, txn, base) -%}
+{% import "partials/estimate_date.html" as dates with context %}
 {% if r %}{% set editable = not request.state.read_only|default(false) %}
 <section class="card linked-panel" id="refund-link" aria-labelledby="refund-title">
   {% if r.role == 'refund' %}
   <h2 id="refund-title">{{ 'This refunds…'|tr(locale) }}</h2>
-  {% if r.link %}<div class="{{ 'phone-row' if phone_mode() else 'compact-row' }} linked-row"><span><a class="linked-name" href="/transactions/{{ r.link.expense_id }}">{{ r.link.description or r.link.ref }}</a><small>{{ 'Bought {date} · estimates count this refund in that month'|tr(locale, date=r.link.date|day(locale)) }}</small></span><b class="num">{{ r.link.amount|money }}</b>
+  {% if r.link %}<div class="{{ 'phone-row' if phone_mode() else 'compact-row' }} linked-row"><span><a class="linked-name" href="/transactions/{{ r.link.expense_id }}">{{ r.link.description or r.link.ref }}</a><small>{{ 'Estimate date'|tr(locale) }} · {{ (r.link.estimate_date_override or r.link.automatic_date)|day(locale) }}</small></span><b class="num">{{ r.link.amount|money }}</b>
     {% if editable %}<form method="post" action="/transactions/{{ txn.id }}/refund-link"><input type="hidden" name="action" value="unlink"><button class="btn small">{{ 'Remove link'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div>
+  {% if editable %}<details class="phone-more"><summary>{{ 'Change estimate date'|tr(locale) }}</summary>
+    <form method="post" action="/transactions/{{ txn.id }}/refund-link">
+      <input type="hidden" name="action" value="estimate-date"><input type="hidden" name="link_id" value="{{ r.link.id }}"><input type="hidden" name="expense_id" value="{{ r.link.expense_id }}">
+      {{ dates.field(r.link.estimate_date_override, r.link.automatic_date) }}
+      <button class="btn small">{{ 'Save'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    </form></details>{% endif %}
   {% else %}<p class="muted small">{{ 'Name the purchase this money returns, so budget averages count it in the month you bought it.'|tr(locale) }}</p>{% endif %}
   {% if editable and r.candidates %}<form method="post" action="/transactions/{{ txn.id }}/refund-link">
     <input type="hidden" name="action" value="link">
-    <div class="field"><label for="refund-expense">{{ ('Another purchase' if r.link else 'Purchase')|tr(locale) }}</label><select id="refund-expense" name="expense_id" data-own-picker required>
-      <option value="">{{ 'Type to find the purchase'|tr(locale) }}</option>{% for p in r.candidates %}<option value="{{ p.id }}">{{ p.description or p.ref }} · {{ p.date|day(locale) }} · {{ 'up to {amt}'|tr(locale, amt=p.max_amount|money) }}</option>{% endfor %}</select></div>
+    <div class="field"><label for="refund-expense">{{ ('Another purchase' if r.link else 'Purchase')|tr(locale) }}</label><select id="refund-expense" data-estimate-purchase name="expense_id" data-own-picker required>
+      <option value="">{{ 'Type to find the purchase'|tr(locale) }}</option>{% for p in r.candidates %}<option value="{{ p.id }}" data-estimate-day="{{ p.automatic_date|day(locale) }}">{{ p.description or p.ref }} · {{ p.date|day(locale) }} · {{ 'Estimate date'|tr(locale) }} {{ p.automatic_date|day(locale) }} · {{ 'up to {amt}'|tr(locale, amt=p.max_amount|money) }}</option>{% endfor %}</select></div>
+    <p data-estimate-preview class="muted small" aria-live="polite" hidden><span>{{ 'Automatic date'|tr(locale) }}</span> · <time></time></p>
     <div class="field"><label for="refund-amount">{{ 'Amount it returns'|tr(locale) }}</label><input id="refund-amount" type="text" name="amount" inputmode="decimal" placeholder="{{ 'The whole refund'|tr(locale) }}"></div>
+    <details class="phone-more"><summary>{{ 'Estimate date'|tr(locale) }}</summary>{{ dates.field(purchase=true) }}</details>
     <div class="actions"><button class="btn primary{{ ' phone-save' if phone_mode() }}">{{ 'Link refund'|tr(locale) }}</button></div>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
   </form>{% endif %}
@@ -54,6 +64,7 @@
   {% if editable and r.room.one_category %}<form method="post" action="/transactions/{{ txn.id }}/refund">
     <div class="field"><label for="refund-date">{{ 'Date'|tr(locale) }}</label><input id="refund-date" type="date" name="date" value="{{ r.today }}" required></div>
     <div class="field"><label for="refund-amount">{{ 'Amount back'|tr(locale) }}</label><input id="refund-amount" type="text" name="amount" inputmode="decimal" value="{{ r.room.left|typed }}" required></div>
+    {{ dates.options(none, estimate_date or txn.date) }}
     <div class="actions"><button class="btn{{ ' phone-save' if phone_mode() }}">{{ 'Record a refund'|tr(locale) }}</button></div>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
   </form>{% elif editable %}<p class="muted small">{{ 'Split across categories: record the refund from its account, then name this purchase on it.'|tr(locale) }}</p>{% endif %}

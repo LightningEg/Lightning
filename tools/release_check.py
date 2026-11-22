@@ -7,11 +7,20 @@ tree is clean, on main and level with origin; LICENSE and CONTRIBUTING.md exist;
 ai/changelog/ and nothing waits in UNRELEASED.md; no tracked file looks like a secret or private data (keys, keystores, databases other than the one
 encrypted test fixture, tokens, personal emails); and no TODO/FIXME/XXX markers sit in shipped code.
 It does not run the tests: the release skill does that next.
+
+    python tools/release_check.py --artifacts Lightning-v2.3.2-Windows-x64.zip Lightning-2.3.2-1224-6aa97680.apk
+
+After publishing, inspects the downloaded archives (and the Chaquopy .imy archives inside an APK): no .git/, tests/,
+database, key store, recovery code, .env or Documents/Lightning path, nothing shaped like a secret, and an APK asks for
+exactly the permissions in packaging/android-permissions.txt. The one allowed exception is the dummy round-trip
+fixture (tests/fixtures/roundtrip) the phone's on-device check opens as `roundtrip_fixture/`.
 """
 from __future__ import annotations
 
+import io
 import re
 import subprocess
+import zipfile
 import sys
 from pathlib import Path
 
@@ -22,6 +31,19 @@ SECRET = re.compile(
 PRIVATE_FILES = re.compile(r"\.(p12|jks|keystore|pem|key|pfx|sqlite|sqlite3|env)$|(^|/)\.env|ANDROID_TEST_KEYSTORE")
 ALLOWED_DB = {"tests/fixtures/roundtrip/profile.db"}  # encrypted, dummy data
 THIRD_PARTY = ("packaging/notices/", "requirements/")
+# A published archive never carries these. Public-by-design: lightning/security/*_keys.json (pinned public keys)
+# and the CA bundle cacert.pem; the dummy round-trip fixture is the only database, key file and recovery code.
+ARCHIVE_PRIVATE = re.compile(
+    r"((^|/)\.git/|(^|/)tests/|\.(db|sqlite3?|db-wal|db-shm|jks|p12|pfx|keystore|key|bak|log)$|(^|/)recovery\.txt$|"
+    r"(^|/)keys\.json$|(^|/)\.env($|\.)|Documents/Lightning/)", re.IGNORECASE)
+ARCHIVE_ALLOWED = re.compile(r"^roundtrip_fixture/(profile\.db|keys\.json|recovery\.txt|expected\.json)$")
+PUBLIC_PEM = re.compile(r"(^|/)(cacert|certifi/cacert)\.pem$")
+# Texts that only name a key format (checks in code and libraries) are not keys: a real key has base64 after it.
+ARCHIVE_SECRET = re.compile(
+    rb"(ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|sk-[A-Za-z0-9]{32,}|AKIA[0-9A-Z]{16}|xox[bp]-[A-Za-z0-9-]{10,}|"
+    rb"sb_secret_[A-Za-z0-9_-]{10,}|-----BEGIN [A-Z ]*PRIVATE KEY-----\s+[A-Za-z0-9+/]{40,})")
+PERMISSION = re.compile(rb"android\.permission\.[A-Z_]+")
+SERVICE_GUARDS = {"android.permission.BIND_JOB_SERVICE", "android.permission.BIND_QUICK_SETTINGS_TILE"}
 
 
 def git(*args: str) -> str:
@@ -89,7 +111,53 @@ def private() -> list[str]:
     return out
 
 
+def archive_entries(archive: zipfile.ZipFile, prefix: str = ""):
+    """(name, bytes) of every file, descending into the Chaquopy .imy archives inside an APK."""
+    for info in archive.infolist():
+        if info.is_dir():
+            continue
+        data = archive.read(info)
+        if info.filename.endswith(".imy") and zipfile.is_zipfile(io.BytesIO(data)):
+            with zipfile.ZipFile(io.BytesIO(data)) as inner:
+                yield from archive_entries(inner, prefix + info.filename + "!")
+        else:
+            yield prefix + info.filename, data
+
+
+def manifest_permissions(manifest: bytes) -> set[str]:
+    """Permissions the APK asks for, read from the binary manifest's UTF-16 string pool, without the service guards."""
+    found = PERMISSION.findall(manifest.decode("utf-16-le", "ignore").encode()) + PERMISSION.findall(manifest)
+    return {name.decode() for name in found} - SERVICE_GUARDS
+
+
+def artifact(path: Path) -> list[str]:
+    out = []
+    with zipfile.ZipFile(path) as archive:
+        entries = dict(archive_entries(archive))
+    for name, data in entries.items():
+        inner = name.rsplit("!", 1)[-1]
+        if ARCHIVE_PRIVATE.search(inner) and not ARCHIVE_ALLOWED.match(inner):
+            out.append(f"{path.name}: {name} must not be published")
+        if inner.endswith(".pem") and not PUBLIC_PEM.search(inner):
+            out.append(f"{path.name}: {name} is a certificate or key file")
+        if ARCHIVE_SECRET.search(data):
+            out.append(f"{path.name}: {name} contains something shaped like a secret")
+    if path.suffix == ".apk":
+        wanted = set(re.findall(r"^android\.permission\.[A-Z_]+", (ROOT / "packaging" / "android-permissions.txt")
+                                .read_text(encoding="utf-8"), re.M))
+        asked = manifest_permissions(entries.get("AndroidManifest.xml", b""))
+        out += [f"{path.name}: asks for {name}, which packaging/android-permissions.txt does not list"
+                for name in sorted(asked - wanted)]
+        out += [f"{path.name}: lacks {name}" for name in sorted(wanted - asked)]
+    print(f"{path.name}: {len(entries)} files inspected")
+    return out
+
+
 if __name__ == "__main__":
+    if sys.argv[1:2] == ["--artifacts"]:
+        findings = [line for name in sys.argv[2:] for line in artifact(Path(name))]
+        print("\n".join(findings) or "nothing private in the published archives")
+        sys.exit(1 if findings or len(sys.argv) < 3 else 0)
     findings = [*versions(), *tree(), *files(), *private()]
     print("\n".join(findings) or "ready for the tests")
     sys.exit(1 if findings else 0)

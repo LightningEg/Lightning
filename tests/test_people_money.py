@@ -87,3 +87,59 @@ def test_an_older_profile_upgrades_and_takes_the_owed_to_you_class(monkeypatch, 
     assert db.scalar("SELECT COUNT(*) FROM owed_to_you_accounts") == 0
     migrator.migrate(db)
     db.close()
+
+
+def test_a_dinner_split_with_two_friends_spends_only_your_share_and_each_repays_their_own(c, setup):
+    """NF-12G3: a 1,200 dinner split with two people at 400 each."""
+    accounts, _ = setup
+    cib = accounts["cib"]
+    food = c.categories.get_by_code("EXP.PERSONAL.FOOD").id
+    sara, omar = c.counterparties.ensure_person("Sara"), c.counterparties.ensure_person("Omar")
+    cash0, net0, spent0 = c.reporting.account_balance(cib.id), c.position.at().net_worth, _spent(c)
+
+    txn = c.people_money.split("2026-10-05", cib.id, "1200", food, [(sara, "400"), (omar, "400")], notes="Dinner")
+    p = c.position.at()
+    assert c.reporting.account_balance(cib.id) == cash0 - 1200
+    assert _spent(c) == spent0 + 400
+    assert p.owed_to_you == D(800) and c.people_money.balance(sara) == c.people_money.balance(omar) == D(400)
+    assert p.net_worth == net0 - 400
+    assert txn.ref.startswith("OUT") and txn.description == "Split with Sara and Omar"
+    assert c.transactions.summarize(txn).amount == D(-1200)  # what the account paid, not the net
+    assert [r.amount for r in c.reporting.register(cib.id, "2026-10-01", "2026-10-31")] == [D(-1200)]
+
+    c.people_money.repay("2026-10-10", sara, cib.id, "400")
+    assert c.people_money.balance(sara) == 0 and c.people_money.balance(omar) == D(400)
+    assert c.position.at().owed_to_you == D(400) and c.position.at().net_worth == net0 - 400
+    assert c.reporting.account_balance(cib.id) == cash0 - 800
+
+    # Editing moves every line together, and the ref stays; voiding takes them all away.
+    edited = c.people_money.update_split(txn.id, "2026-10-05", cib.id, "900", food, [(sara, "400"), (omar, "300")])
+    assert edited.ref == txn.ref and c.people_money.balance(omar) == D(300) and _spent(c) == spent0 + 200
+    c.transactions.void(txn.id, "test")
+    assert c.people_money.balance(omar) == 0 and _spent(c) == spent0
+    assert c.reporting.account_balance(cib.id) == cash0 + 400  # only Sara's repayment is left
+
+
+def test_a_split_refuses_shares_that_leave_you_nothing_and_cannot_be_flattened_by_a_plain_edit(c, setup):
+    accounts, _ = setup
+    cib = accounts["cib"]
+    food = c.categories.get_by_code("EXP.PERSONAL.FOOD").id
+    sara, omar = c.counterparties.ensure_person("Sara"), c.counterparties.ensure_person("Omar")
+    with pytest.raises(ValidationError, match="less than the total"):
+        c.people_money.split("2026-10-05", cib.id, "1200", food, [(sara, "600"), (omar, "600")])
+    with pytest.raises(ValidationError, match="less than the total"):
+        c.people_money.split("2026-10-05", cib.id, "1200", food, [(sara, "1300")])
+    with pytest.raises(ValidationError, match="above zero"):
+        c.people_money.split("2026-10-05", cib.id, "1200", food, [(sara, "0")])
+    with pytest.raises(ValidationError, match="once"):
+        c.people_money.split("2026-10-05", cib.id, "1200", food, [(sara, "100"), (sara, "100")])
+    with pytest.raises(ValidationError, match="at least one person"):
+        c.people_money.split("2026-10-05", cib.id, "1200", food, [])
+
+    txn = c.people_money.split("2026-10-05", cib.id, "1200", food, [(sara, "400")])
+    with pytest.raises(ValidationError, match="split with others"):
+        c.transactions.update_money(txn.id, "2026-10-05", cib.id, "1200", food)
+    with pytest.raises(ValidationError, match="split with others"):
+        c.transactions.update_in_account(txn.id, cib.id, "2026-10-05", "-1000", food)
+    c.transactions.update_in_account(txn.id, cib.id, "2026-10-06", "-1200", food, notes="Birthday")
+    assert c.people_money.balance(sara) == D(400) and c.transactions.get(txn.id).notes == "Birthday"

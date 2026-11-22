@@ -8,8 +8,8 @@
 {% block content %}{% set session = request.state.session_token|default('') %}
 {% if pending %}
 <form method="post" class="phone-form phone-section" autocomplete="off" id="missing">
-  <header class="phone-section-head"><h2>{{ 'Prices needed to complete reevaluations'|tr(locale) }}</h2></header>
-  <p class="phone-note">These month-end checkpoints are waiting for a price. Get prices asks the sources again; {% if fails >= 2 and market %}they failed the last {{ fails }} times, so you can use the shared prices instead, or {% else %}or {% endif %}enter each price below. Its account return is then posted to the main ledger.</p>
+  <header class="phone-section-head"><h2>{{ 'Prices needed to finish value updates'|tr(locale) }}</h2></header>
+  <p class="phone-note">These month-end checkpoints are waiting for a price. Get prices asks the sources again; {% if fails >= 2 and market %}they failed the last {{ fails }} times, so you can use the shared prices instead, or {% else %}or {% endif %}enter each price below. Its account return is then added to your transactions.</p>
   <button class="btn phone-save" formaction="/investments/prices/online" formnovalidate data-busy="Fetching prices…">{{ 'Get prices'|tr(locale) }}</button>{% if fails >= 2 and market %}<button class="btn phone-save" formaction="/investments/prices/market/update" formnovalidate data-busy="Downloading…">{{ 'Use shared prices'|tr(locale) }}</button>{% endif %}
   <div class="phone-rows">{% for row in pending %}<div class="phone-row"><span>{{ row.asset_name }}<small>{{ row.date }}</small></span><input name="rp_{{ row.asset_id }}_{{ row.date }}" inputmode="decimal" placeholder="{{ 'Price per unit'|tr(locale) }}" aria-label="{{ row.asset_name }} · {{ row.date }}" required data-row-amount></div>{% endfor %}</div>
   <button class="btn primary phone-save">{{ 'Save missing prices'|tr(locale) }}</button>
