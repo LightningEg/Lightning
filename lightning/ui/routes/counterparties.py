@@ -162,40 +162,59 @@ def _people_money_forms(c) -> dict:
             "today_iso": fmt_date(today())}
 
 
-async def _people_money_action(request: Request, counterparty_id: int, action: str):
-    """Lend, Paid back or Forgive (NF-12G6): one service call inside a settled save, back to the person's page."""
-    c = container(request)
-    form = await request.form()
-    back = f"/counterparties/{counterparty_id}"
+def _people_money_call(c, counterparty_id: int, action: str, form) -> str:
+    """Lend, Paid back or Forgive (NF-12G6): the one service call; the route holds the settled save."""
     day, amount = str(form.get("day", "")), str(form.get("amount", ""))
-    try:
-        with settled_save(request, c):
-            if action == "lend":
-                c.people_money.lend(day, counterparty_id, int(str(form.get("account_id", ""))), amount)
-                message = "Lent {amt}."
-            elif action == "repay":
-                c.people_money.repay(day, counterparty_id, int(str(form.get("account_id", ""))), amount)
-                message = "Paid back {amt}."
-            else:
-                c.people_money.forgive(day, counterparty_id, amount, int(str(form.get("category_id", ""))))
-                message = "Forgave {amt}."
-    except (ValueError, TypeError):
-        return redirect(back, "Choose an account or a category." if action != "forgive" else "Choose a category.")
-    except LightningError as exc:
+    if action == "lend":
+        c.people_money.lend(day, counterparty_id, int(str(form.get("account_id", ""))), amount)
+        message = "Lent {amt}."
+    elif action == "repay":
+        c.people_money.repay(day, counterparty_id, int(str(form.get("account_id", ""))), amount)
+        message = "Paid back {amt}."
+    else:
+        c.people_money.forgive(day, counterparty_id, amount, int(str(form.get("category_id", ""))))
+        message = "Forgave {amt}."
+    return message.replace("{amt}", fmt(to_decimal(amount, "amount"), 2))
+
+
+def _people_money_refused(counterparty_id: int, action: str, exc: Exception):
+    back = f"/counterparties/{counterparty_id}"
+    if isinstance(exc, LightningError):
         return redirect(back, exc.message)
-    return redirect(back, message.replace("{amt}", fmt(to_decimal(amount, "amount"), 2)))
+    return redirect(back, "Choose a category." if action == "forgive" else "Choose an account or a category.")
 
 
 @router.post("/{counterparty_id:int}/lend")
 async def lend_to_person(request: Request, counterparty_id: int):
-    return await _people_money_action(request, counterparty_id, "lend")
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            message = _people_money_call(c, counterparty_id, "lend", form)
+    except (ValueError, TypeError, LightningError) as exc:
+        return _people_money_refused(counterparty_id, "lend", exc)
+    return redirect(f"/counterparties/{counterparty_id}", message)
 
 
 @router.post("/{counterparty_id:int}/repay")
 async def repaid_by_person(request: Request, counterparty_id: int):
-    return await _people_money_action(request, counterparty_id, "repay")
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            message = _people_money_call(c, counterparty_id, "repay", form)
+    except (ValueError, TypeError, LightningError) as exc:
+        return _people_money_refused(counterparty_id, "repay", exc)
+    return redirect(f"/counterparties/{counterparty_id}", message)
 
 
 @router.post("/{counterparty_id:int}/forgive")
 async def forgive_person(request: Request, counterparty_id: int):
-    return await _people_money_action(request, counterparty_id, "forgive")
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            message = _people_money_call(c, counterparty_id, "forgive", form)
+    except (ValueError, TypeError, LightningError) as exc:
+        return _people_money_refused(counterparty_id, "forgive", exc)
+    return redirect(f"/counterparties/{counterparty_id}", message)
