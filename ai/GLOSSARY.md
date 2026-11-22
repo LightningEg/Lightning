@@ -30,6 +30,7 @@ Built v1 lending; planned replacement: [edit journal](../issues/4-edit-journal-a
 | **Borrower** | A paired device (initially a PC) holding temporary write authority for one checkout. |
 | **Checkout** | One grant of write authority, with a random checkout ID and increasing home epoch. |
 | **Checkpoint** | An immutable, verified encrypted database version with an ID and ciphertext hash. |
+| **Your records** | What lending moves between phone and PC: "lend your records to your PC", "take your records back" (Arabic السجل). "Ledger" stays in code and in this Glossary's layer name, never on screen (owner, 2026-11-22; IV-3BH3). |
 | **Lend / Received** | Home goes read-only and records a grant before the borrower writes / home durably holds the complete returned candidate and has not resumed writing. |
 | **Hand back** | Borrower freezes its copy and returns an encrypted candidate for home to verify and publish. |
 | **Accepted** | Home verified and published the candidate and issued a durable receipt for the new checkpoint. |
@@ -76,7 +77,7 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Investment trade** | Ledger | Brokerage cash for units (buy) or units for cash (sell), entered in that brokerage's register. |
 | **Pocket** | Ledger | A broker's cash and holdings in one currency: a child brokerage account ("IBKR · EUR") shown inside the broker's one row, one tab per pocket on its page. Arabic: جيب. |
 | **Opening balance** | Ledger | Separately dated entry for an account's value at a chosen point; earlier transactions may still be added. |
-| **Revaluation** | Ledger | Change in investment value from price, not deposits or withdrawals. |
+| **Revaluation** | Ledger | Change in investment value from price, not deposits or withdrawals. On screen: **value update** (the page is **Value updates**); "reevaluation" stays in code only (IV-3BH3). |
 | **Reevaluation ledger** | Ledger | Monthly per-account, per-asset units, prices, values and returns; each account total is one system-generated `VAL` journal in the main ledger. |
 | **Void / delete** | Ledger | Recoverable correction: leaves active balances, keeps history. |
 | **Linked (import row)** | Ledger | A statement row tied to an already recorded transaction instead of posting again; moves no money. |

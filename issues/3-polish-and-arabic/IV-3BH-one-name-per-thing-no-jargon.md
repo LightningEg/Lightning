@@ -21,15 +21,13 @@ Report [r28](r28-international-polish/report.md) F16-F18.
 
 Per term, one PR: pick the plain word in the Glossary first (payee/who for counterparty, "history" or nothing for ledger, "value update" for reevaluation), rename keys and Arabic together, keep routes. Seed categories to sentence case through a migration that renames only untouched defaults (skill add-migration). Curly apostrophes in visible strings. Tests: a voice test lists banned words in rendered pages (ledger, counterparty, reevaluation, dashboard, journey) for EN and AR; Mohab's year for each rename.
 
+## Decided
+
+- 2026-11-22, owner (3BH3): what lending moves between phone and PC is **your records** (Arabic السجل); a revaluation is a **value update**. Built in 3BH3 (`tests/test_voice.py` lists Ledger and Reevaluation).
+
 ## How to work on this item
 
 Each step is one pull request, one term at a time. The Glossary (`ai/GLOSSARY.md`, read only the term's line: `grep -n "<term>" ai/GLOSSARY.md`) is changed first in the same PR; then English keys, their Arabic in `lightning/ui/i18n.py`, templates and tests. Never rename a route, a database column or a code. Run `python -m pytest tests/test_arabic_no_english.py tests/test_mohab_year.py -q` and delete the step's heading in the same commit.
-
-## 3BH3 "Ledger" and "reevaluation" leave the screen · S
-Needs 3BH1 merged first.
-Files: `grep -rn "ledger\|Ledger\|reevaluation\|Reevaluation" lightning/ui/i18n.py lightning/ui/templates` (57 + 12 keys), `lightning/deposits/service.py:296`.
-Do: "Reevaluation ledger" → "Value updates"; "reevaluation" → "value update"; sentences with "ledger" are rewritten without it ("in your records", or just dropped: "Principal cannot exceed the CD's currently owned ledger balance." → "You can take out at most {amount} from this certificate."). Add both words to the test's list.
-Done when: `tests/test_voice.py` passes with "ledger" and "reevaluation" listed.
 
 ## 3BH4 One name per place · S
 Needs 3BH1 merged first.

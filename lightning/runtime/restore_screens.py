@@ -69,7 +69,7 @@ def register(app, session, devices, page) -> None:
         backup_path = str(form.get("backup", ""))
         if devices.blocks_restore(selected):  # review H2: an old backup would fork a lent ledger
             return page(request, "restore", status=400, selected=selected, backup=backup_path,
-                        error="This profile is lent to a PC or has a hand-back to finish. Bring the ledger home "
+                        error="This profile is lent to a PC or has a hand-back to finish. Bring your records home "
                               "first (Devices), then restore.")
         if form.get("confirm") != "yes":
             return page(request, "restore", status=400, selected=selected, backup=backup_path,
@@ -105,7 +105,7 @@ def register(app, session, devices, page) -> None:
         selected = str(form.get("db", ""))
         if devices.blocks_restore(selected):
             return page(request, "resume-restore", status=400, selected=selected,
-                        error="This profile is lent to a PC or has a hand-back to finish. Bring the ledger home "
+                        error="This profile is lent to a PC or has a hand-back to finish. Bring your records home "
                               "first (Devices).")
         if form.get("confirm") != "yes":
             return page(request, "resume-restore", status=400, selected=selected,
@@ -152,7 +152,7 @@ def register(app, session, devices, page) -> None:
                 evidence = []
             return page(request, "repair-restore", status=400, selected=selected, evidence=evidence, error=error)
         if devices.blocks_restore(known):
-            return again("This profile is lent to a PC or has a hand-back to finish. Bring the ledger home first (Devices).")
+            return again("This profile is lent to a PC or has a hand-back to finish. Bring your records home first (Devices).")
         if form.get("confirm") != "yes":
             return again("Confirm that Lightning should go back to the copy from before the restore.")
         try:

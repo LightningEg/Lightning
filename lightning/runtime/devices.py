@@ -393,8 +393,8 @@ def home_state_line(node: HomeNode | None, lending: str = "ok") -> str:
 def home_state_message(node: HomeNode | None, lending: str = "ok") -> tuple[str, dict]:
     """A system template plus literal peer data for the translated status banner."""
     if lending in ("missing", "damaged"):
-        return ("This profile's lending record is missing or damaged, so it opens read only: a PC may hold the "
-                "ledger. See Devices."), {}
+        return ("This profile's lending record is missing or damaged, so it opens read only: a PC may hold your "
+                "records. See Devices."), {}
     if node is None:
         return "", {}
     home = node.model
@@ -404,8 +404,8 @@ def home_state_message(node: HomeNode | None, lending: str = "ok") -> tuple[str,
         return "The copy the PC handed back needs repair. Nothing was changed; it is read-only here.", {}
     borrower = node.store.peer(home.active.grant.borrower_id) if home.active is not None else None
     if home.state is HomeState.RETURN_RECEIVED:
-        return ("{name} handed the ledger back. Checking it…", {"name": borrower.name}) if borrower else (
-            "a PC handed the ledger back. Checking it…", {})
+        return ("{name} handed your records back. Checking them…", {"name": borrower.name}) if borrower else (
+            "a PC handed your records back. Checking them…", {})
     return ("Lent to {name} · read only", {"name": borrower.name}) if borrower else ("Lent to a PC · read only", {})
 
 
@@ -444,7 +444,7 @@ def _receive_move(devices: Devices, profile_root: Path, phone_name: str, message
             handle.flush()
             os.fsync(handle.fileno())
         if sha256_file(partial) != message.sha256:
-            raise ProtocolError("BAD_REQUEST", "The ledger was damaged on the way. Nothing was kept; try again.")
+            raise ProtocolError("BAD_REQUEST", "Your records were damaged on the way. Nothing was kept; try again.")
         publish_keys(paths, key_file, replace=False)
         os.replace(partial, arriving_path(paths.db_path))
     except BaseException:
