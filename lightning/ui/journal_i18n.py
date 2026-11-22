@@ -184,6 +184,7 @@ COMMAND_NAMES = {
     "reimbursements.link_receipt": "Link receipt", "reimbursements.unlink_receipt": "Unlink receipt",
     "rules.save": "Save rule", "rules.apply_past": "Apply rule", "rules.delete": "Delete rule",
     "people_money.lend": "Lend", "people_money.repay": "Paid back", "people_money.forgive": "Forgive",
+    "people_money.split": "Split", "people_money.update_split": "Edit split",
     "deposits.purchase": "Record deposit purchase",
     "deposits.record_owned": "Record a certificate already owned", "deposits.save": "Edit deposit terms",
     "deposits.update_certificate": "Edit deposit terms", "deposits.set_rate_change": "Change a deposit rate", "deposits.redeem": "Redeem deposit",

@@ -26,7 +26,7 @@ per person, of the account type `RECEIVABLE` that the `accounts` CHECK list alre
 `0053_gameya.sql`, worked like a Gam'eya account: lending and repayment are transfers, forgiving is spending). If the
 owner picks another option, rewrite 12G2-12G9 before anyone starts them.
 
-2026-11-10: 12G2 built (`lightning/people_money.py`, migration 0078, `tests/test_people_money.py`; synced as `people_money.lend/repay/forgive`). 2026-11-08, before it: nothing was built: `AccountType` (`lightning/accounts/domain.py`) has no
+2026-11-22: 12G3 built (`PeopleMoneyService.split/update_split`, `TransactionService.record_split`; synced). 2026-11-10: 12G2 built (`lightning/people_money.py`, migration 0078, `tests/test_people_money.py`; synced as `people_money.lend/repay/forgive`). 2026-11-08, before it: nothing was built: `AccountType` (`lightning/accounts/domain.py`) has no
 `RECEIVABLE`, no service lends or splits, and `lightning/planning/position.py` has no "Owed to you" figure. Pieces to
 reuse: `ReimbursementService` (`lightning/reimbursements.py`, claims on an expense, never posts money),
 `MoneyFromOthersService` (`lightning/money_from_others.py`, Held for others), `GameyaService`
@@ -40,16 +40,6 @@ Each step is one pull request. Read only the files a step names; money rules are
 `^## `). Run the step's test command, then `python -m pytest tests/test_issues.py -q`; for a visible change also
 `python -m pytest tests/test_mohab_year.py -q`. Delete the step's heading in the same commit (AGENTS.md §3).
 
-## 12G3 A cost split with others: the service · M · opus · #528
-Needs 12G2 merged first.
-Files: `lightning/people_money.py`, `lightning/transactions/service.py` (`post` line ~421, `record_outflow` ~83).
-Do: `PeopleMoneyService.split(day, account_id, total, category_id, shares: list[tuple[person, Decimal]], notes="")`
-posts one document: the account −total, the category your share (total − Σ shares), each person's Owed-to-you
-account +share. Shares must be > 0 and their sum < total. Repayment is `repay` from 12G2. Editing or deleting the
-entry moves all its lines together (one document).
-Done when: `tests/test_people_money.py` gains: a 1,200 dinner split with two people at 400 each shows 400 spending in
-the category, 800 Owed to you, cash −1,200, Net worth −400; one friend repays 400 and only their 400 clears; a share
-sum ≥ total is refused. `python -m pytest tests/test_people_money.py -q` and skill `number-audit`.
 
 ## 12G7 Split on the Add sheet, PC and phone · M · sonnet
 Needs 12G3 merged first.

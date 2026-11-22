@@ -126,6 +126,68 @@ class TransactionService:
         lines = [replace(line, owner_id=owner_id) for line in lines]
         return self._create(DocType.TRF, day, lines, description, "", notes, source)
 
+    def record_split(self, date: str, account_id: int, total, category_id: int,
+                     shares: list[tuple[int, object, str]], description: str = "", counterparty: str = "",
+                     notes: str = "", source: TxnSource = TxnSource.MANUAL) -> Transaction:
+        """A cost paid in full and split with others (NF-12G3): one document. The account pays ``total``; only
+        your share (``total`` less the shares) is spending in ``category_id``; each share moves to the person's Owed
+        to you account (``shares``: receivable account id, amount, memo). PeopleMoneyService.split calls it."""
+        day, lines = self._split_lines(date, account_id, total, category_id, shares)
+        return self._create(DocType.OUT, day, lines, description, counterparty, notes, source)
+
+    def update_split(self, txn_id: int, date: str, account_id: int, total, category_id: int,
+                     shares: list[tuple[int, object, str]], description: str = "", counterparty: str = "",
+                     notes: str = "") -> Transaction:
+        """Replace every line of a split together; the ref never changes."""
+        current = self._editable(txn_id, {DocType.OUT})
+        if not self.is_people_split(current):
+            raise ValidationError("This expense is not split with others.")
+        unchanged = any(line.category_id == category_id for line in current.lines)
+        day, lines = self._split_lines(date, account_id, total, category_id, shares, allow_inactive_category=unchanged)
+        return self._update(current, day, lines, description, counterparty, notes)
+
+    def is_people_split(self, t: Transaction) -> bool:
+        """A money-out document that also moves shares to people's Owed to you accounts (NF-12G3)."""
+        return t.type == DocType.OUT and any(
+            self.accounts.get(line.account_id).account_type == AccountType.RECEIVABLE for line in t.lines)
+
+    def _split_lines(self, date, account_id, total, category_id, shares, allow_inactive_category=False):
+        account = self.accounts.require_usable(account_id, "account_id")
+        if account.account_type not in (AccountType.BANK, AccountType.CASH):
+            raise ValidationError("Choose a bank or cash account.", "account_id")
+        day = self._check_date(date)
+        asset = self.assets.cash_asset(account.currency)
+        value = self._positive_amount(total, asset.quantity_decimals)
+        category = self.categories.require(category_id, Movement.OUTFLOW, allow_inactive=allow_inactive_category)
+        if category.movement != Movement.OUTFLOW or category.code == "EXP.SYSTEM.CUSTODY":
+            raise ValidationError("Choose a spending category for your share.", "category_id")
+        if not shares:
+            raise ValidationError("Add at least one person and their share.", "shares")
+        fx_rate = self._fx(account, day)
+        moved, seen, others = ZERO, set(), []
+        for receivable_id, raw, memo in shares:
+            receivable = self.accounts.require_usable(receivable_id, "shares")
+            if receivable.account_type != AccountType.RECEIVABLE or receivable.currency != account.currency:
+                raise ValidationError(f"Split in {receivable.currency}, the currency of each person's account.",
+                                      "shares")
+            if receivable.id in seen:
+                raise ValidationError("Name each person once.", "shares")
+            seen.add(receivable.id)
+            share = check_places(to_decimal(raw, "shares"), asset.quantity_decimals, "shares")
+            if share <= ZERO:
+                raise ValidationError("Each person's share must be above zero.", "shares")
+            moved += share
+            others += [PostingLine.cash(account.id, asset.id, -share, Effect.INTERNAL, fx_rate=fx_rate, memo=memo),
+                       PostingLine.cash(receivable.id, asset.id, share, Effect.INTERNAL,
+                                        fx_rate=self._fx(receivable, day), memo=memo)]
+        if moved >= value:
+            raise ValidationError(f"The others' shares ({fmt(moved)}) must add up to less than the total "
+                                  f"({fmt(value)}); your share is what is left.", "shares")
+        lines = [PostingLine.cash(account.id, asset.id, -(value - moved), Effect.OUTFLOW, category.id,
+                                  fx_rate=fx_rate, memo="Your share"), *others]
+        validate_posting(lines)
+        return day, lines
+
     def change_cash_ownership(self, date: str, account_id: int, amount, from_owner_id: int | None,
                               to_owner_id: int | None, notes: str = "", txn_id: int | None = None) -> Transaction:
         """Reassign cash ownership inside one account without changing its gross balance."""
@@ -245,6 +307,12 @@ class TransactionService:
         if current.type not in EDITABLE_TYPES:
             raise ValidationError(f"{current.type_label} transactions are edited from Investments.")
         cash_lines = [line for line in current.lines if self.assets.get_asset(line.asset_id).is_cash]
+        if self.is_people_split(current):
+            paid = sum((line.quantity for line in cash_lines if line.account_id == account_id), ZERO)
+            if to_decimal(amount, "amount") != paid or category_id not in {None, *(l.category_id for l in cash_lines)}:
+                raise ValidationError("This cost is split with others; change its amounts from the split itself. "
+                                      "This edit only changes its notes or date.")
+            return self.update_metadata(current.id, date, counterparty, notes)
         if current.type == DocType.OUT and len(cash_lines) > 1 and category_id is None:
             total = sum((line.quantity for line in cash_lines), ZERO)
             if account_id != cash_lines[0].account_id or to_decimal(amount, "amount") != total:
@@ -559,6 +627,8 @@ class TransactionService:
                      description: str = "", counterparty: str = "", notes: str = "",
                      owner_id: int | None = None) -> Transaction:
         current = self._editable(txn_id, {DocType.IN, DocType.OUT})
+        if self.is_people_split(current):
+            raise ValidationError("This cost is split with others; change it from the split itself.")
         movement = Movement.INFLOW if current.type == DocType.IN else Movement.OUTFLOW
         category = self.categories.get(category_id)
         unchanged_category = any(line.category_id == category_id for line in current.lines)
@@ -916,6 +986,9 @@ class TransactionService:
             account_id, category_id = first.account_id, first.category_id
             if t.type == DocType.VAL and t.source == TxnSource.SYSTEM:
                 amount = first.amount
+            elif self.is_people_split(t):
+                # A split shows what your account paid, not the net after the others' shares (NF-12G3).
+                amount = sum((ln.quantity for ln in cash if ln.account_id == account_id), ZERO)
             else:
                 amount = sum((ln.quantity for ln in cash), ZERO)  # 0 for a holding-only document
         currency = self.accounts.get(account_id).currency if account_id else self.base_currency
