@@ -420,9 +420,8 @@ def _display_timestamp(value: str) -> str:
         moment = datetime.fromisoformat(value)
     except (TypeError, ValueError):
         return value
-    local = moment.replace(tzinfo=None).isoformat(sep=" ")
-    offset = moment.isoformat(sep=" ")[len(local):]
-    return local + (f" UTC{offset}" if offset else "")  # not money: text
+    # r39: to the minute, as a person reads a time; the full stamp with its offset stays in <time datetime> and its title
+    return moment.replace(tzinfo=None).isoformat(sep=" ", timespec="minutes")  # not money: text
 
 
 def detail_page(request: Request, txn_id: int, status_code: int = 200, error: str = ""):

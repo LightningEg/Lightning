@@ -38,13 +38,13 @@
       </div>
     </div>
     <div class="field {{ 'has-error' if error_field in ('category_id','category') }}">
-      <label for="expense-category">{{ "Expense category"|tr(locale) }}<span class="muted">{{ "(required for “Someone paid”)"|tr(locale) }}</span></label>
+      <label for="expense-category">{{ "Expense category"|tr(locale) }} <span class="muted">{{ "(required for “Someone paid”)"|tr(locale) }}</span></label>
       <select id="expense-category" name="category_id" data-own-picker><option value="">{{ "Choose an expense category"|tr(locale) }}</option>
         {{ category_options(category_groups(categories|map(attribute='id')|list), values.category_id) }}
       </select>
     </div>
     <p class="muted small">{{ "For an ownership change, choose who it moves from and to; leave Expense category empty. For someone who paid for you, choose You as From, that person as To, and the expense category. CIB stays at the same total."|tr(locale) }}</p>
-    <div class="field"><label for="ownership-notes">{{ "Note"|tr(locale) }}<span class="muted">{{ "(optional)"|tr(locale) }}</span></label><input id="ownership-notes" name="notes" value="{{ values.notes }}" placeholder="For example, Dad paid October rent"></div>
+    <div class="field"><label for="ownership-notes">{{ "Note"|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label><input id="ownership-notes" name="notes" value="{{ values.notes }}" placeholder="For example, Dad paid October rent"></div>
     <div class="popup-actions"><a class="btn" href="/accounts/{{ account.id }}">{{ 'Cancel'|tr(locale) }}</a><button class="btn primary">{{ 'Save'|tr(locale) }}</button></div>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
   </form>

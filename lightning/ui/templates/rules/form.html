@@ -19,14 +19,14 @@
     <div class="field {{ err('amount') }}" data-rule-amount{{ ' hidden' if not values.amount_op }}><label for="amount">{{ base }}</label><span class="rule-amounts"><input id="amount" name="amount" value="{{ values.amount }}" inputmode="decimal" class="money-input" placeholder="100"><input name="amount_to" value="{{ values.amount_to }}" inputmode="decimal" class="money-input {{ err('amount_to') }}" placeholder="and 300" aria-label="Up to" data-rule-amount-to{{ ' hidden' if values.amount_op != 'between' }}></span></div>
   </div>
   <div class="row">
-    <div class="field {{ err('notes') }}"><label for="notes">{{ "Notes contain"|tr(locale) }}<span class="muted small">{{ 'optional'|tr(locale) }}</span></label><input id="notes" name="notes" value="{{ values.notes }}" placeholder="internet"></div>
+    <div class="field {{ err('notes') }}"><label for="notes">{{ "Notes contain"|tr(locale) }} <span class="muted small">{{ 'optional'|tr(locale) }}</span></label><input id="notes" name="notes" value="{{ values.notes }}" placeholder="internet"></div>
     <div class="field {{ err('account_id') }}"><label for="account_id">{{ 'Account'|tr(locale) }} <span class="muted small">{{ 'optional'|tr(locale) }}</span></label><select id="account_id" name="account_id" data-own-picker><option value="">{{ "Any account"|tr(locale) }}</option>{% for a in accounts %}<option value="{{ a.id }}" {{ 'selected' if values.account_id == a.id|string }}>{{ a.name }}</option>{% endfor %}</select></div>
   </div>
   {{ segment('direction', 'Direction', [('', 'Either'), ('out', 'Money out'), ('in', 'Money in')], values.direction) }}
   <h2>{{ "Then"|tr(locale) }}</h2>
   <div class="row">
     <div class="field {{ err('category_id') }}"><label for="category_id">{{ 'Category'|tr(locale) }}</label><select id="category_id" name="category_id" data-own-picker><option value="">{{ "Keep the usual one"|tr(locale) }}</option>{{ category_options(category_groups(categories), values.category_id) }}</select></div>
-    <div class="field {{ err('tag') }}"><label for="tag">{{ "Add a tag"|tr(locale) }}<span class="muted small">{{ 'optional'|tr(locale) }}</span></label><input id="tag" name="tag" value="{{ values.tag }}" placeholder="#bills"></div>
+    <div class="field {{ err('tag') }}"><label for="tag">{{ "Add a tag"|tr(locale) }} <span class="muted small">{{ 'optional'|tr(locale) }}</span></label><input id="tag" name="tag" value="{{ values.tag }}" placeholder="#bills"></div>
   </div>
   <details class="rule-split" {{ 'open' if values.part_category_1 or error_field.startswith('part_') }}><summary>{{ "Split money out"|tr(locale) }}</summary>
     <p class="muted small">Each part takes a fixed amount, or a percent like 30%. The rest goes to the category above.</p>

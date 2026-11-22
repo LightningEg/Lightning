@@ -1,5 +1,6 @@
+{# A06.1 (r39): a whole amount shows no ".00"; piastres show when there are any #}
 {% macro amount(value, currency='', signed=False) -%}
-<span class="num {{ value|tone }}">{{ value|money(signed) }}{% if currency %} <span class="muted small">{{ currency }}</span>{% endif %}</span>
+<span class="num {{ value|tone }}">{{ value|amount_role('row', signed) }}{% if currency %} <span class="muted small">{{ currency }}</span>{% endif %}</span>
 {%- endmacro %}
 
 {# A balance you hold: Azure, a negative one needs you (guideline A03). #}
