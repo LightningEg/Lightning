@@ -3,6 +3,6 @@
 {% block title %}Nothing was saved{% endblock %}
 {% block heading %}<h1>{{ 'Nothing was saved'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
-{% if holder %}<p>{{ holder }} has the ledger now, so this phone only reads it.</p><p class="phone-note">{{ "Hand it back on that PC, then try again here. If that PC is lost or broken, take the ledger back in Devices."|tr(locale) }}</p>{% else %}<p>{{ refusal }}</p>{% endif %}
+{% if holder %}<p>{{ holder }} has your records now, so this phone only reads them.</p><p class="phone-note">{{ "Hand it back on that PC, then try again here. If that PC is lost or broken, take your records back in Devices."|tr(locale) }}</p>{% else %}<p>{{ refusal }}</p>{% endif %}
 <a class="btn primary phone-save" href="{{ back }}">{{ 'Back'|tr(locale) }}</a>{% if action == 'take-back' %}<a class="btn phone-save" href="/profiles/devices">{{ 'Devices'|tr(locale) }}</a>{% else %}<a class="btn phone-save" href="/profiles">{{ "Profiles &amp; lock"|tr(locale) }}</a>{% endif %}
 {% endblock %}

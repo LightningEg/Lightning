@@ -119,7 +119,7 @@ def test_the_sentence_is_built_in_python():
     assert up == {"text": "Up {amt} {when} ({pct}).", "values": {"amt": "7,956", "when": "this month", "pct": "+1.9%"}}
     down = _phone_hero_line(Decimal("-1200"), Decimal("-0.44"), past, False, "en")
     assert down["text"] == "Down {amt} {when} ({pct})." and down["values"] == {"amt": "1,200", "when": "in 2026-09", "pct": "−0.4%"}
-    no_rate = _phone_hero_line(Decimal("500"), None, Period("ytd", "YTD", date(2026, 1, 1), date(2026, 10, 22)), True, "en")
+    no_rate = _phone_hero_line(Decimal("500"), None, Period("ytd", "This year", date(2026, 1, 1), date(2026, 10, 22)), True, "en")
     assert no_rate == {"text": "Up {amt} {when}.", "values": {"amt": "500", "when": "this year"}}
     assert "since your first record" in _phone_hero_line(Decimal("5"), None, Period("all", "All time", date(2026, 1, 5), date(2026, 10, 22)),
                                                           True, "en")["values"]["when"]

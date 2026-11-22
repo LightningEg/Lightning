@@ -79,7 +79,7 @@ AR = {
     "The clocks on these devices differ by more than 15 minutes. Set both to the right time, then pair again.":
         "الساعة على الجهازين دول مختلفة بأكتر من ١٥ دقيقة. اظبط الوقت الصح على الاتنين، وبعدها اربط تاني.",
     "This pairing offer expired. Open pairing on the home again.": "عرض الربط ده خلص. افتح الربط على الجهاز الأساسي تاني.",
-    "That device holds a different ledger. To bring it here, lock this profile and join it from Profiles.":
+    "That device holds different records. To bring it here, lock this profile and join it from Profiles.":
         "الجهاز ده عليه سجل تاني. عشان تجيبه هنا، اقفل الملف ده وانضم له من صفحة الملفات الشخصية.",
     "Pairing was interrupted. Resume to check its saved state.": "الربط اتقطع. كمّل عشان نراجع الحالة المحفوظة.",
     "Resume pairing": "كمّل الربط",

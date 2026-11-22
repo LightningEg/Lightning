@@ -30,6 +30,7 @@ Built v1 lending; planned replacement: [edit journal](../issues/4-edit-journal-a
 | **Borrower** | A paired device (initially a PC) holding temporary write authority for one checkout. |
 | **Checkout** | One grant of write authority, with a random checkout ID and increasing home epoch. |
 | **Checkpoint** | An immutable, verified encrypted database version with an ID and ciphertext hash. |
+| **Your records** | What lending moves between phone and PC: "lend your records to your PC", "take your records back" (Arabic السجل). "Ledger" stays in code and in this Glossary's layer name, never on screen (owner, 2026-11-22; IV-3BH3). |
 | **Lend / Received** | Home goes read-only and records a grant before the borrower writes / home durably holds the complete returned candidate and has not resumed writing. |
 | **Hand back** | Borrower freezes its copy and returns an encrypted candidate for home to verify and publish. |
 | **Accepted** | Home verified and published the candidate and issued a durable receipt for the new checkpoint. |
@@ -76,7 +77,7 @@ Layer: **Ledger** (real money moved), **Plan** (what-if, moves nothing) or **Rep
 | **Investment trade** | Ledger | Brokerage cash for units (buy) or units for cash (sell), entered in that brokerage's register. |
 | **Pocket** | Ledger | A broker's cash and holdings in one currency: a child brokerage account ("IBKR · EUR") shown inside the broker's one row, one tab per pocket on its page. Arabic: جيب. |
 | **Opening balance** | Ledger | Separately dated entry for an account's value at a chosen point; earlier transactions may still be added. |
-| **Revaluation** | Ledger | Change in investment value from price, not deposits or withdrawals. |
+| **Revaluation** | Ledger | Change in investment value from price, not deposits or withdrawals. On screen: **value update** (the page is **Value updates**); "reevaluation" stays in code only (IV-3BH3). |
 | **Reevaluation ledger** | Ledger | Monthly per-account, per-asset units, prices, values and returns; each account total is one system-generated `VAL` journal in the main ledger. |
 | **Void / delete** | Ledger | Recoverable correction: leaves active balances, keeps history. |
 | **Linked (import row)** | Ledger | A statement row tied to an already recorded transaction instead of posting again; moves no money. |
@@ -144,7 +145,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 
 | Figure | Meaning | How it is calculated | Function |
 |---|---|---|---|
-| **Age of Money** | Amount-weighted days from receipt to use of owned cash, consumed oldest first, over the last ten cash expense transactions in profile currency. Unknown opening cash makes the sample unavailable. This is historical timing, not a runway estimate. | Read directly from the ledger | `reporting.cash_analytics.cash_age` |
+| **Age of money** | Amount-weighted days from receipt to use of owned cash, consumed oldest first, over the last ten cash expense transactions in profile currency. Unknown opening cash makes the sample unavailable. This is historical timing, not a runway estimate. | Read directly from the ledger | `reporting.cash_analytics.cash_age` |
 | **In your accounts** | What your account balances add up to: what you hold for other people is in it, and a savings circle you still owe counts below zero. | What you own + Held for others − Gam'eya still to pay | `planning.position.Position.in_your_accounts` |
 | **Held for others** | Money and units in your accounts that belong to other people. | Read directly from the ledger | `reporting.service.ReportingService.money_from_others_total` |
 | **What you own** | The value of everything in your accounts that is yours. | Cash you own + Holdings value + Other you own | `reporting.service.ReportingService.net_worth` |
@@ -235,7 +236,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 |---|---|---|---|
 | **Lowest scheduled cash** | The lowest projected day-end owned cash balance from confirmed cash and scheduled payments. Excludes variable spending and savings goals; reserves remain in cash. Missing FX makes it unavailable. | Read directly from the plan | `planning.dated_cash.lowest_scheduled_balance` |
 | **Cash available to assign** | Actual owned liquid cash left after reserves and funded spending. The payday proposal shares it out in four parts that add up to it: Bills protected (bills due outside those funds), To your plan, Emergency and goals, Left unassigned. Missing FX makes it unavailable; expected income never contributes. | Read directly from the plan | `planning.funding.CashFundingService.preview` |
-| **Funded spending left** | This month's assigned category cash after owned spending and refunds, floored at zero. Unused funding does not carry automatically. | Read directly from the plan | `planning.funding.CashFundingService.preview` |
+| **Spending money left this month** | This month's assigned category cash after owned spending and refunds, floored at zero. Unused funding does not carry automatically. | Read directly from the plan | `planning.funding.CashFundingService.preview` |
 | **Outstanding reimbursement** | The eligible amount claimed for an owned expense that valid explicitly linked repayments or refunds have not covered. A claim is not cash before receipt. | Read directly from the plan | `reimbursements.ReimbursementService._claim_summary` |
 | **What you owe** | Payments you are certain to make: bills already due, loans and what you owe a savings circle. | Bills due (other than loan payments) + Loans still to pay + Gam'eya still to pay | `planning.position.Position.what_you_owe` |
 | **Net worth** | What you own after what you owe. | What you own − What you owe | `planning.position.Position.net_worth` |

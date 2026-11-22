@@ -113,7 +113,7 @@ def register(app, screens: DeviceScreens) -> None:
             app.state.container = session.container
         except (ProtocolError, OSError, ValueError) as exc:
             return device_page(request, error=str(exc), status=400)
-        return device_page(request, notice="This copy is the ledger again and opens for editing. Pair your PC "
+        return device_page(request, notice="This copy is your records again and opens for editing. Pair your PC "
                                            "again; its copy from before stays on it, read only.")
 
     @app.post("/profiles/devices/stop-pairing")
@@ -145,12 +145,12 @@ def register(app, screens: DeviceScreens) -> None:
             return RedirectResponse("/profiles/devices", 303)
         if form.get("confirm") != "yes":
             return device_page(request, error="Tick the box to confirm that the PC's edits since it borrowed "
-                                              "the ledger will not come back.", status=400)
+                                              "your records will not come back.", status=400)
         try:
             node.take_back(reopen=False)  # this request holds the gate: reopen here, not through it
             session.set_mode("home")
             app.state.container = session.container
         except ProtocolError as exc:
             return device_page(request, error=str(exc), status=400)
-        return device_page(request, notice="The ledger is back on this phone. That PC's copy can no longer be "
+        return device_page(request, notice="Your records are back on this phone. That PC's copy can no longer be "
                                            "handed back; it stays on the PC, read only.")

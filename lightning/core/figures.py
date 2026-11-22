@@ -42,14 +42,14 @@ class Figure:
 
 
 _TABLE = [
-    ("age_of_money", "Age of Money",
+    ("age_of_money", "Age of money",
      "Amount-weighted days from receipt to use of owned cash, consumed oldest first, over the last ten cash expense transactions in profile currency. Unknown opening cash makes the sample unavailable. This is historical timing, not a runway estimate."),
     ("lowest_scheduled_cash", "Lowest scheduled cash",
      "The lowest projected day-end owned cash balance from confirmed cash and scheduled payments. Excludes variable spending and savings goals; reserves remain in cash. Missing FX makes it unavailable."),
     ("cash_available_to_assign", "Cash available to assign",
      "Actual owned liquid cash left after reserves and funded spending. The payday proposal shares it out in four parts that add up to it: Bills protected (bills due outside those funds), To your plan, Emergency and goals, Left unassigned. Missing FX makes it unavailable; expected income never contributes.",
      ""),
-    ("funded_spending_left", "Funded spending left",
+    ("funded_spending_left", "Spending money left this month",
      "This month's assigned category cash after owned spending and refunds, floored at zero. Unused funding does not carry automatically.",
      ""),
     ("reimbursement_outstanding", "Outstanding reimbursement",

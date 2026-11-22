@@ -1574,7 +1574,7 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
     screen = mohab.b.go("Settings", "Your data")
     assert screen.shows("Your data", "Ask an AI") and 'href="/settings/ask-ai"' in screen.html  # IV-12Y5: its one home
     screen = mohab.b.open("/settings/ask-ai")
-    assert screen.shows("Ask an AI", "All time", "YTD", "Month", "Custom",
+    assert screen.shows("Ask an AI", "All time", "This year", "Month", "Custom",
                         "Copy for AI", "Save as a file", "Hide names", "Digest", "Standard", "Full",
                         "Review my period", "Where did the money go", "Check my budget",
                         "What changed my net worth", "My own question", "Export for AI analysis")
@@ -1590,7 +1590,7 @@ def test_settings_prepares_one_owned_ai_analysis_workbook(mohab):
         xml = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
         root = ET.fromstring(workbook.read("xl/workbook.xml"))
         assert [sheet.attrib["name"] for sheet in root.findall(f".//{{{xml}}}sheet")] == [
-            "Summary", "Transactions", "Investment ledger", "Categories"]
+            "Summary", "Transactions", "Investment history", "Categories"]
         transaction_sheet = ET.fromstring(workbook.read("xl/worksheets/sheet2.xml"))
         roles = {row.findall(f"{{{xml}}}c")[12].find(f"{{{xml}}}is/{{{xml}}}t").text
                  for row in transaction_sheet.findall(f".//{{{xml}}}row")[1:]

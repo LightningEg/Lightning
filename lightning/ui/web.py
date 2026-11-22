@@ -374,7 +374,7 @@ _HTTP_MESSAGES = {400: "That request was not complete.",
 _BARE_ERROR_PAGE = ("<!doctype html><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'>"
                     "<title>Something went wrong</title><body style='font:16px system-ui;margin:12vh auto;max-width:28rem;"
                     "padding:0 24px;color:#0D2233;background:#F5F8F7'><h1>Something went wrong</h1>"
-                    "<p>Lightning could not open this page. Your records are safe.</p><p><a href='/'>Back to the dashboard</a></p>")
+                    "<p>Lightning could not open this page. Your records are safe.</p><p><a href='/'>Back to Overview</a></p>")
 
 _PHONE: contextvars.ContextVar[bool] = contextvars.ContextVar("lightning_phone", default=False)
 

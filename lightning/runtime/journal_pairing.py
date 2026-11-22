@@ -23,7 +23,7 @@ class ApprovalPending(JournalError):
     """The home has not approved this device yet: waiting, not a failure."""
 
 
-DIFFERENT_LEDGER = "That device holds a different ledger. To bring it here, lock this profile and join it from Profiles."
+DIFFERENT_LEDGER = "That device holds different records. To bring it here, lock this profile and join it from Profiles."
 
 
 class NearbyPairing(JoiningDriver):

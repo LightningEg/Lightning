@@ -66,7 +66,7 @@ TODO_SEE_ALL = "To do: See all"
 # Sections without a tab-bar slot (phone overhaul 2026-10-22): their taps go through More.
 MOVED = {"Accounts", "Cash planning", "Investments", "Financial health", "Health", "Spending", "Currencies", "Settings"}
 # The phone's Choose period sheet (phone overhaul 2026-10-22) names the PC's period buttons in words.
-BUTTONS = {"Custom": "Apply", "YTD": "Year to date", "Monthly": "This month", "Search": None}  # the phone's Search is live: no button, Enter sends it (3AN6)
+BUTTONS = {"Custom": "Apply", "This year": "Year to date", "Monthly": "This month", "Search": None}  # the phone's Search is live: no button, Enter sends it (3AN6)
 
 
 def _phone(app):

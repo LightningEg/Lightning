@@ -94,7 +94,7 @@ async def create_counterparty(request: Request):
                 return redirect("/counterparties", f"Removed alias from {selected['name']}.")
             elif action == "merge":
                 if getattr(c, "is_journal", False):
-                    raise ValidationError("Merging names is not available on a lent ledger. Do it on the home PC.")
+                    raise ValidationError("Merging names is not available while your records are lent. Do it on the home PC.")
                 result = c.counterparties.merge(int(counterparty_id), int(str(form.get("merge_into", "")).strip().removeprefix("counterparty:") or 0))
                 note = f" {result['source']} is archived because something still uses it." if result["archived"] else ""
                 return redirect("/counterparties", f"Merged {result['source']} into {result['target']}.{note}")

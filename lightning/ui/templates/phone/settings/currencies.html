@@ -5,7 +5,7 @@
   <p class="phone-note">{{ 'Manage the currencies available to this profile and its exchange rates.'|tr(locale) }}</p>
   <nav class="phone-segment" data-two aria-label="{{ 'Currency settings'|tr(locale) }}">
     <a {% if currency_tab != 'rates' %}aria-current="page"{% endif %} href="/settings?section=currencies"><span>{{ 'Currencies'|tr(locale) }}</span></a>
-    <a {% if currency_tab == 'rates' %}aria-current="page"{% endif %} href="/settings?section=currencies&amp;tab=rates"><span>{{ 'FX rates and reevaluation'|tr(locale) }}</span></a>
+    <a {% if currency_tab == 'rates' %}aria-current="page"{% endif %} href="/settings?section=currencies&amp;tab=rates"><span>{{ 'FX rates and value updates'|tr(locale) }}</span></a>
   </nav>
   {% if currency_tab != 'rates' %}
   <dl class="phone-facts"><div><dt>{{ 'Profile currency'|tr(locale) }}</dt><dd dir="ltr">{{ base }}</dd></div></dl>
@@ -27,9 +27,9 @@
     {% if pending_fx %}<p class="phone-note">{{ 'Waiting for a rate:'|tr(locale) }} {% for row in pending_fx %}{{ row.currency }} · {{ row.date }}{% if not loop.last %}, {% endif %}{% endfor %}</p>{% endif %}
     {% if fx_rates %}<div class="phone-rows currency-rate-list">{% for rate in fx_rates %}<div class="phone-row"><span>{{ rate.currency }}<small><bdi>{{ rate.date }}</bdi></small></span><b><bdi>{{ rate.rate }}</bdi> {{ base }}</b></div>{% endfor %}</div>{% endif %}
   </section>
-  <section class="phone-section currency-history" aria-labelledby="fx-history"><header class="phone-section-head"><h2 id="fx-history">{{ 'FX reevaluation history'|tr(locale) }}</h2></header>
+  <section class="phone-section currency-history" aria-labelledby="fx-history"><header class="phone-section-head"><h2 id="fx-history">{{ 'FX value updates'|tr(locale) }}</h2></header>
     <p class="phone-note">{{ 'Changes in value caused by exchange rates, without changing the cash balance.'|tr(locale) }}</p>
-    <div class="phone-rows">{% for row in fx_history %}<div class="phone-row"><span>{{ row.account_name }}<small><span>{{ row.asset_name|tr(locale) }}</span> · <bdi>{{ row.date }}</bdi> · <bdi>{{ row.units_e6|money(False, 2) }} {{ row.currency }}</bdi></small></span><b class="{{ row.return_base_e6|tone if row.return_base_e6 is not none else '' }}"><bdi>{{ row.return_base_e6|money(True) if row.return_base_e6 is not none else '—' }}</bdi> {{ base }}</b></div>{% else %}<p class="phone-note">{{ 'No FX reevaluations yet.'|tr(locale) }}</p>{% endfor %}</div>
+    <div class="phone-rows">{% for row in fx_history %}<div class="phone-row"><span>{{ row.account_name }}<small><span>{{ row.asset_name|tr(locale) }}</span> · <bdi>{{ row.date }}</bdi> · <bdi>{{ row.units_e6|money(False, 2) }} {{ row.currency }}</bdi></small></span><b class="{{ row.return_base_e6|tone if row.return_base_e6 is not none else '' }}"><bdi>{{ row.return_base_e6|money(True) if row.return_base_e6 is not none else '—' }}</bdi> {{ base }}</b></div>{% else %}<p class="phone-note">{{ 'No FX value updates yet.'|tr(locale) }}</p>{% endfor %}</div>
   </section>
   {% endif %}
 </div>

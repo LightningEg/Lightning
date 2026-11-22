@@ -80,7 +80,7 @@
     {{ trend(j.drawdown, 'Percent below its highest month-end price', 'Plan', 190) if j.drawdown else '' }}</section>
 </div></section>{% endif %}
 
-<header class="overview-section-head inv-head"><h2>{{ "The journey"|tr(locale) }}</h2><span>{{ "What you put in and what it is worth"|tr(locale) }}</span></header>
+<header class="overview-section-head inv-head"><h2>{{ "How it went"|tr(locale) }}</h2><span>{{ "What you put in and what it is worth"|tr(locale) }}</span></header>
 <section class="card wide-card"><div class="overview-split">
   <section><div class="overview-block-head"><div><h3>{{ "Value against cost"|tr(locale) }}</h3><p>{{ "Month-end value and what you paid for the units you held"|tr(locale) }}</p></div></div>
     {{ trend(j.value_cost, 'Value against cost', 'Plan', 210) if j.value_cost else '' }}</section>

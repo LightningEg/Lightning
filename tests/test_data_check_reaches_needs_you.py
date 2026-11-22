@@ -11,7 +11,7 @@ from lightning.samples import SAMPLE_TODAY, load_mohab_2026
 from lightning.ui.web import create_app
 
 LABEL = "A data check does not add up"
-FREE_CASH = "Free cash matches the ledger"
+FREE_CASH = "Free cash matches your entries"
 
 
 @pytest.fixture

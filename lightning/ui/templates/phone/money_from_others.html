@@ -29,8 +29,8 @@
     <label>{{ 'Date'|tr(locale) }}<input name="date" type="date" value="{{ today_iso }}"></label>
     <label>{{ 'Notes'|tr(locale) }}<input name="notes"></label>
     <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button class="btn primary phone-save" type="submit">{{ 'Hold money'|tr(locale) }}</button></form>{% endcall %}
-  {% set r %}<span>{{ "Cash ownership history"|tr(locale) }}</span><b>{{ entries|length }} {{ chevron() }}</b>{% endset %}
-  {% call sheet('Cash ownership history'|tr(locale), r) %}<div class="phone-rows">{% for row in entries %}<div class="phone-row"><span>{{ row.owner }}<small>{{ row.date }} · {{ row.account_name }}{% if row.notes %} · {{ row.notes }}{% endif %}</small></span><b class="{{ row.amount|tone }}"><bdi class="fig">{{ row.amount|money(True) }} {{ row.currency }}</bdi></b></div>{% else %}<p class="phone-note">{{ "No entries yet."|tr(locale) }}</p>{% endfor %}</div>{% endcall %}
+  {% set r %}<span>{{ "History"|tr(locale) }}</span><b>{{ entries|length }} {{ chevron() }}</b>{% endset %}
+  {% call sheet('History'|tr(locale), r) %}<div class="phone-rows">{% for row in entries %}<div class="phone-row"><span>{{ row.owner }}<small>{{ row.date }} · {{ row.account_name }}{% if row.notes %} · {{ row.notes }}{% endif %}</small></span><b class="{{ row.amount|tone }}"><bdi class="fig">{{ row.amount|money(True) }} {{ row.currency }}</bdi></b></div>{% else %}<p class="phone-note">{{ "No entries yet."|tr(locale) }}</p>{% endfor %}</div>{% endcall %}
   {% set r %}<span>{{ "Investment ownership history"|tr(locale) }}</span><b>{{ investment_entries|length }} {{ chevron() }}</b>{% endset %}
   {% call sheet('Investment ownership history'|tr(locale), r) %}<div class="phone-rows">{% for row in investment_entries %}<div class="phone-row"><span>{{ row.asset_name }}<small>{{ row.date }} · {{ row.owner }} · {{ row.account_name }} · <bdi dir="ltr">{{ row.ref }}</bdi></small></span><b><bdi class="fig">{{ row.units|money(True, 4) }} {{ row.unit }}</bdi></b></div>{% else %}<p class="phone-note">{{ "No investment ownership changes yet."|tr(locale) }}</p>{% endfor %}</div>{% endcall %}
 </div>
