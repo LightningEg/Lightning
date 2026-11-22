@@ -14,6 +14,7 @@ from lightning.core.dates import fmt_date, parse_date, parse_month, today
 from lightning.core.errors import LightningError, NotFoundError, ValidationError
 from lightning.core.refs import DocType
 from lightning.core.money import ZERO, fmt, from_e6, signed_pct, to_decimal
+from lightning.core.working import Working, WorkingRow
 
 from urllib.parse import urlencode
 
@@ -145,6 +146,10 @@ async def portfolio(request: Request):
         lead = kpis.card(label("portfolio_value"), value, compare, tone="hold", key="value", chip_=kpis.chip(chip_text),
                          visual=kpis.segments([("Cost", parts.cost, "neutral"), ("Unrealized gain", parts.unrealized, "in"),
                                                ("Valued by you", parts.valued_by_you, "hold")]),
+                         # NF-12AB3: the Lead opens its parts in place; they add up to it (BT-12AC)
+                         working=Working("portfolio_value", parts.value, tuple(WorkingRow(name, amount, href) for name, amount, href in (
+                             (label("cost"), parts.cost, ""), (label("unrealized_gain"), parts.unrealized, ""),
+                             (label("valued_by_you"), parts.valued_by_you, "/settings?section=assets-valuations")) if amount)),
                          line_=kpis.line(part_line + (" · " if part_line and (six or since) else "") + (six or since)))  # not money: words; the return since purchase is also the table's All holdings row
     status = page_status.investments(investment_report.get("result"), bool(owned_rows), period.key, current)
     divisor = extras["lens"]["divisor"]   # the USD lens shows the allocation card and brokerage cash in dollars too
