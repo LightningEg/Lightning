@@ -3721,7 +3721,7 @@ ARABIC_UI = {
     'Cash planning ›': 'تخطيط النقدية ›',
     'On top of your plan until {sa}.': 'زيادة على خطتك لحد {sa}.',
     'About {amt} a day until payday on {sa}.': 'حوالي {amt} في اليوم لحد القبض يوم {sa}.',
-    '{amt} more is promised than your free cash.': 'الملتزم بيه أكتر من نقديتك المتاحة بـ{amt}.',
+    '{amt} more is promised than your free cash.': 'الملتزم بيه أكتر من نقديتك المتاحة بفرق {amt}.',
     'From free cash, after what is promised over the next 3 months.': 'من النقدية المتاحة، بعد اللي ملتزم بيه في التلات شهور الجايين.',
     '{amt} this month': '{amt} الشهر ده',
     '{amt} in that month': '{amt} في الشهر ده',
