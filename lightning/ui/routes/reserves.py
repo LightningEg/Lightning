@@ -17,7 +17,8 @@ from lightning.planning.forecast import emergency_fund
 from lightning.planning.domain import PlanKind
 from lightning.reserves import EmergencyRefill, effective_after, would_exceed_cash
 
-from .. import charts, keynotes, status as page_status
+from lightning.core.figures import FIGURES
+from .. import charts, keynotes, kpis, status as page_status
 from ..web import container, redirect, render, ui_locale, settled_save
 from ..i18n import translate
 
@@ -67,6 +68,13 @@ def _context(request: Request, error: str = ""):
     liquidity_context = emergency_liquidity_context(position)
     # Free cash is the last tile below, so the one note is how long the emergency fund lasts.
     notes = [n for n in (keynotes.emergency(fund),) if n]
+    # NF-12AB3 (A09.1): on the PC the months covered is the page's Lead, not an alert, and it opens its working
+    lead = None
+    if fund.months is not None:
+        of = FIGURES[fund.figure].label
+        lead = kpis.card("Emergency fund covers", fund.months, kpis.compare(f"Of {of[0].lower() + of[1:]}. The aim is six."),  # not money
+                         tone="in" if fund.months >= 6 else "over" if fund.months < 1 else "hold", kind="months",
+                         key="emergency", working=fund.working)
     # Refill prompt (PC roadmap P5): below target with free cash to spare, one button moves what fits.
     refill = None
     if fund.target and set_aside < fund.target and position.free_cash and position.free_cash > ZERO:
@@ -103,7 +111,7 @@ def _context(request: Request, error: str = ""):
     goals_set, goals_target, set_aside_total = c.reserves.totals(listed, set_aside)      # IV-11M6: the phone's Set aside hero
     return {"set_aside_total": set_aside_total, "goals_set": goals_set,
             "goals_pct": int(min(goals_set / goals_target, 1) * 100) if goals_target > ZERO else None,  # not money: the ring
-            "reserves": listed, "bills": bills, "completed_reserves": completed, "notes": notes, "emergency_meter": emergency_meter,
+            "reserves": listed, "bills": bills, "completed_reserves": completed, "notes": notes, "lead": lead, "emergency_meter": emergency_meter,
             "emergency_set_aside": set_aside, "emergency": emergency, "fund": fund, "refill": refill,
             "pos": position, "liquidity_context": liquidity_context, "error": error,
             "answer": page_status.reserves(fund.months, emergency is not None),

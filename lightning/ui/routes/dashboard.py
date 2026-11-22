@@ -16,6 +16,7 @@ from lightning.core.dates import fmt_date, month_of, parse_date, today, wall_now
 from lightning.core.errors import LightningError, ValidationError
 from lightning.core.figures import FIGURES, label
 from lightning.core.money import ZERO, fmt, to_decimal
+from lightning.core.working import Working, WorkingRow
 from lightning.investments.report import investing_rate, investment_period, saved_and_invested
 from lightning.planning.position import net_worth_bridge
 from lightning.workflows.review import GROUP_LABELS, ReviewInbox, by_consequence, group_of, grouped
@@ -183,6 +184,9 @@ async def dashboard(request: Request):
         kept_apart_accounts=c.reporting.owned_cash_kept_apart_by_account(position.as_of),
         attention=attention, attention_groups=attention_groups, attention_handled=inbox.handled, setup=setup,
         investment_report=investment_report, cash_flow=cash_flow,
+        # NF-12AB3: Net flow opens its working in place (the service's Money in and Money out, signed)
+        net_flow_working=Working("net_flow", cash_flow.net, (WorkingRow("Money in", cash_flow.inflows, "/birdview/expenses"),
+                                                             WorkingRow("Money out", -cash_flow.outflows, "/birdview/expenses"))),
     )
     response.set_cookie(SEEN_COOKIE, wall_now(timezone.utc).isoformat(timespec="seconds"),
                         max_age=365 * 24 * 3600, httponly=True, samesite="lax")  # not money
