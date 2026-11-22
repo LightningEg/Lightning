@@ -4,7 +4,7 @@ type: polish
 pillar: reach
 size: M
 model: opus
-status: parked
+status: building
 created: 2026-11-11
 by: Claude
 skills: none
