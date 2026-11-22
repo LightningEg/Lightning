@@ -28,7 +28,7 @@ from lightning.database.staging import stage_database
 from lightning.ownership_migration import migrate_legacy_ownership
 from lightning.runtime.paths import ProfilePaths
 from lightning.security.keys import unwrap_key
-from .session import ProfileError, read_slot
+from .session import ProfileError, RestoreNeedsRepair, read_slot
 
 
 NO_COPY_FROM_BEFORE = "Lightning cannot find the record of this restore, so it cannot tell which copy came before it. Nothing was changed."
@@ -385,6 +385,16 @@ class EncryptedBackupRestorer:
                     paths.data_dir / ".lightning-sync.sqlite")
         if any(path.exists() or path.is_symlink() for path in reserved):
             raise ProfileError("Restore is unavailable while sync authority state exists or cannot be verified.")
+        try:
+            cls._check_restore_records(paths, key)
+        except RestoreNeedsRepair:
+            raise
+        except ProfileError as exc:  # every record problem is one the repair screen answers (IT-2A4)
+            raise RestoreNeedsRepair(str(exc)) from exc
+
+    @classmethod
+    def _check_restore_records(cls, paths: ProfilePaths, key: bytes | None) -> None:
+        """The restore records, journals and kept copies agree, or ProfileError says which does not."""
         manifests: dict[str, RestoreManifest] = {}
         for marker in cls._restore_marker_paths(paths):
             try:
@@ -689,11 +699,15 @@ class EncryptedBackupRestorer:
             finally:
                 file_ops.close()
         except Exception as exc:
+            # Once the manifest is written a PENDING record holds the profile, so the screen offers Repair (IT-2A4).
+            kind = RestoreNeedsRepair if manifest_written else ProfileError
             if isinstance(exc, ProfileError):
+                if kind is RestoreNeedsRepair and not isinstance(exc, RestoreNeedsRepair):
+                    raise RestoreNeedsRepair(str(exc)) from exc
                 raise
             if isinstance(exc, PromotionBlocked):
-                raise ProfileError("Restore needs repair. The profile remains locked and recovery files were preserved.") from exc
-            raise ProfileError("Restore failed safely. The profile remains locked and recovery files were preserved.") from exc
+                raise kind("Restore needs repair. The profile remains locked and recovery files were preserved.") from exc
+            raise kind("Restore failed safely. The profile remains locked and recovery files were preserved.") from exc
         finally:
             if staged is not None:
                 # Keep failed candidates as evidence; remove only a successful

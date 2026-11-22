@@ -222,7 +222,7 @@ def test_restore_repair_screen_requires_confirmation_and_finishes_pending_operat
             "backup": str(backup_path), "password": PASSWORD, "confirm": "yes",
         })
         assert failed.status_code == 400
-        assert "Check interrupted restore" in failed.text
+        assert "Repair the interrupted restore" in failed.text
         repair = browser.get("/profiles/restore/resume", params={"db": str(live_path)})
         denied = browser.post("/profiles/restore/resume", data={
             "csrf": token(repair.text), "db": str(live_path), "password": PASSWORD,
@@ -234,7 +234,7 @@ def test_restore_repair_screen_requires_confirmation_and_finishes_pending_operat
             "password": PASSWORD, "confirm": "yes",
         })
         assert resumed.status_code == 200, resumed.text
-        assert "Restore checks finished" in resumed.text
+        assert "The interrupted restore was finished" in resumed.text
         assert app.session.container is None
         unlocked = browser.post("/profiles/unlock", data={
             "csrf": token(resumed.text), "db": str(live_path), "password": PASSWORD,

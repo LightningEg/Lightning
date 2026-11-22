@@ -29,6 +29,10 @@ class ProfileError(ValueError):
     """Safe, deliberately authored messages suitable for the locked UI."""
 
 
+class RestoreNeedsRepair(ProfileError):
+    """An interrupted or unproven restore holds this profile locked (IT-2A4): the screen offers Repair."""
+
+
 PROFILE_CURRENCIES = frozenset(code for code, _ in CASH_ASSETS)
 
 
