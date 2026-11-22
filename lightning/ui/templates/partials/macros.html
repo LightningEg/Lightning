@@ -134,12 +134,13 @@
    Three show; the rest open under "Show all". Nothing to show: no row at all. `rows` are review.grouped() groups or
    inbox items; both carry label, detail, href, action. One count (IV-12AA3): the heading and "Show all n" are both the
    number of rows shown when all are open. #}
-{% macro needs_rows(rows, heading_id='needs-heading', more=none, shown=3) -%}
-{% if rows %}{% set count = rows|length %}
+{# total: the items the rows hold when a row is a group; the count is every item (A09.2; owner, 2026-11-22, r38) #}
+{% macro needs_rows(rows, heading_id='needs-heading', more=none, shown=3, total=none) -%}
+{% if rows %}{% set count = total if total is not none else rows|length %}
 <section class="needs" aria-labelledby="{{ heading_id }}">
   <div class="needs-top"><h2 class="needs-head" id="{{ heading_id }}">{{ "Needs you"|tr(ui_locale()) }} <span>· {{ count }}</span></h2><a class="quiet-link" href="/needs-you">{{ "Manage Needs you"|tr(ui_locale()) }}</a>{% if more %}<a class="quiet-link" href="{{ more[1] }}">{{ more[0] }}</a>{% endif %}</div>
   {% for r in rows[:shown] %}{{ _needs_row(r) }}{% endfor %}
-  {% if rows|length > shown %}<details class="needs-more"><summary>{{ "Show all {n}"|tr(ui_locale(), n=rows|length) }}</summary>{% for r in rows[shown:] %}{{ _needs_row(r) }}{% endfor %}</details>{% endif %}
+  {% if rows|length > shown %}<details class="needs-more"><summary>{{ "Show all {n}"|tr(ui_locale(), n=count) }}</summary>{% for r in rows[shown:] %}{{ _needs_row(r) }}{% endfor %}</details>{% endif %}
 </section>
 {% endif %}
 {%- endmacro %}
