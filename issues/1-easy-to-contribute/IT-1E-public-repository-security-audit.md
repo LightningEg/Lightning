@@ -96,6 +96,7 @@ Do: clone each of the four repositories with all refs (`git clone --mirror`), ru
 Done when: this file has one dated line per repository: "history scanned, N real findings filed privately"; nothing else about them is public.
 
 ## 1E8 Inspect the published Windows ZIP and Android APK · S · opus
+1E8 checked 2026-11-22: Lightning-v2.3.2-Windows-x64.zip and Lightning-2.3.2-1224-6aa97680.apk (checksums matched), 0 findings filed privately. Repeat after each release: `python tools/release_check.py --artifacts <zip> <apk>`.
 Files: none changed; the newest release's ZIP from `Lightning-downloads` and the APK from the app's newest release, downloaded into their own empty scratchpad folder.
 Do: list each archive (`unzip -l`); fail on any `.git/`, `tests/`, `*.db`/`*.sqlite`, `recovery.txt`, `keys.json`, `*.pem`/`*.key`/`*.jks`/`*.p12`, `.env`, a `Documents/Lightning` path or a name from the sample households outside `lightning/samples/`; run `strings` over the binaries for the patterns of 1E7; compare the APK's permissions (`aapt dump permissions` or `apkanalyzer`) with `packaging/android-permissions.txt`. If a check belongs in every release, add it to `tools/release_check.py` with a test in `tests/test_release_check.py` (create it if missing) in its own pull request.
 Done when: this file has one dated line naming the two versions checked and "N findings filed privately"; any new release check passes `python -m pytest tests/test_release_check.py -q`.
