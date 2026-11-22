@@ -25,6 +25,8 @@ def _context(request: Request, error: str = "", values: dict | None = None):
             "expense_id": pair["expense_id"], "expected": pair["amount"],
             "payer_id": pair["payer_id"] or ""}) + "#new-claim-title"
     for claim in claims:
+        if claim["expense"]:
+            claim["automatic_date"] = c.budgets.estimate_date(claim["expense_id"]) or claim["expense"]["date"]
         claim["record_receipt_url"] = _receipt_entry(c, claim)
     return {"claims": claims, "pairs": pairs,
             "expenses": c.reimbursements.eligible_expenses(),
@@ -133,11 +135,26 @@ async def link_receipt(request: Request, claim_id: int):
         if not receipt_id.isdigit():
             raise ValueError
         with settled_save(request, container(request)):
-            c.reimbursements.link_receipt(claim_id, int(receipt_id), amount)
+            if form.get("estimate_date"):
+                c.reimbursements.link_dated_receipt(claim_id, int(receipt_id), amount, form["estimate_date"])
+            else:
+                c.reimbursements.link_receipt(claim_id, int(receipt_id), amount)
     except (ValueError, LightningError) as exc:
         message = exc.message if isinstance(exc, LightningError) else "Choose a receipt and enter an amount."
         return render(request, "reimbursements.html", status_code=400, **_context(request, message))
     return redirect("/reimbursements", "Linked the receipt; no income or cash entry was added.")
+
+
+@router.post("/receipts/{link_id:int}/estimate-date")
+async def change_receipt_estimate_date(request: Request, link_id: int):
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            c.reimbursements.set_estimate_date(link_id, form["estimate_date"] or None)
+    except LightningError as exc:
+        return render(request, "reimbursements.html", status_code=400, **_context(request, exc.message))
+    return redirect("/reimbursements", "Saved.")
 
 
 @router.post("/{claim_id:int}/receipts/{link_id:int}/unlink")

@@ -253,6 +253,7 @@ ERRORS_AR = {
     'Choose a posted purchase of your own.': 'اختار شراء متسجل بتاعك.',
     'A refund can only return a purchase made on or before its date.': 'الاسترداد يرجّع بس شراء اتعمل في تاريخه أو قبله.',
     'This money is already linked to a reimbursement claim.': 'الفلوس دي مربوطة بالفعل بمطالبة استرداد.',
+    'This money is already linked to a purchase as a refund.': 'الفلوس دي مربوطة بالفعل بعملية شراء كاسترداد.',
     'Choose a purchase in the same category with something left to return.': 'اختار شراء في نفس الفئة لسه فاضل منه حاجة ترجع.',
     'Enter an amount greater than zero.': 'اكتب مبلغ أكبر من صفر.',
     'This refund does not name a purchase.': 'الاسترداد ده مش مربوط بشراء.',

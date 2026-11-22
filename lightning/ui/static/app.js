@@ -1075,6 +1075,15 @@ document.addEventListener("keydown", (e) => {
   button.click();
 });
 
+document.addEventListener("change", (event) => {
+  const purchase = event.target.closest("[data-estimate-purchase]");
+  if (!purchase) return;
+  const preview = purchase.form.querySelector("[data-estimate-preview]");
+  const day = purchase.selectedOptions[0]?.dataset.estimateDay;
+  preview.hidden = !day;
+  preview.querySelector("time").textContent = day || "";
+});
+
 let dateFieldCount = 0;
 const normalizeDateField = (input) => {
   if (!input.value.trim()) { input.setCustomValidity(""); return true; }
@@ -2575,6 +2584,13 @@ initCurrencySearch();
         if (category.setPickerRequired) category.setPickerRequired(kind !== "transfer");
         else category.required = kind !== "transfer";
         if (cleared) category.dispatchEvent(new Event("change", { bubbles: true }));  // the picker's text follows
+      }
+      const estimateDate = form.querySelector('[name="estimate_date"]');
+      if (estimateDate) {
+        const income = kind === "in" && category?.selectedOptions?.[0]?.dataset.movement === "INFLOW";
+        estimateDate.disabled = kind === "transfer" || income;
+        const section = estimateDate.closest(".money-only");
+        if (section) section.hidden = estimateDate.disabled;
       }
       if (destination) {
         if (destination.setPickerRequired) destination.setPickerRequired(kind === "transfer");

@@ -17,6 +17,17 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'Change unlinked amount date': 'غيّر تاريخ تقدير المبلغ غير المربوط',
+    'Posting date': 'تاريخ تسجيل العملية',
+    'Linked amounts have their own estimate date.': 'المبالغ المربوطة ليها تاريخ تقدير خاص بيها.',
+    'Count in spending estimates on': 'احسبه في تقديرات المصروفات بتاريخ',
+    'Automatic date': 'التاريخ التلقائي',
+    'Leave empty to use the posting date.': 'سيبه فاضي لاستخدام تاريخ تسجيل العملية.',
+    'Leave empty to follow the selected purchase.': 'سيبه فاضي لاستخدام تاريخ تقدير المشتريات المختارة.',
+    'Estimate date': 'تاريخ التقدير',
+    'Change estimate date': 'غيّر تاريخ التقدير',
+    'Choose an entry with personal spending for an estimate date.': 'اختار عملية فيها مصروف شخصي علشان تحدد تاريخ التقدير.',
+    'This recovery link no longer exists.': 'الرابط بالدفعة دي لم يعد موجود.',
     'Choose a saved payee in Held for.': 'اختيار جهة محفوظة في خانة مملوك لـ.',
     'Choose a valid payee.': 'اختيار جهة من القائمة.',
     '+ New payee "{name}"': '+ جهة جديدة "{name}"',
@@ -970,6 +981,7 @@ ARABIC_UI = {
     'Paid for work': 'دفعت للشغل',
     'Full expense if blank': 'لو فاضي، المبلغ كله',
     'excluded from personal spending': 'مستبعد من مصاريفك الشخصية',
+    'Merchant refund': 'استرداد من التاجر',
     'Paid back this period': 'اترد في الفترة دي',
     'Owed at period end': 'المتبقي ليك آخر الفترة',
     'Apply to work claim': 'اربط بمطالبة الشغل',

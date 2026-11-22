@@ -83,8 +83,8 @@
       {% if error_field == 'counterparty' %}<small class="field-error">{{ "Choose a saved payee."|tr(locale) }}</small>{% endif %}
     </div>
     {% if fresh %}{% include "partials/work_claim_entry.html" %}{% endif %}
-    <details class="phone-more"{% if values.owner_id or values.notes or values.left_out %} open{% endif %}>
-      <summary>{{ "Notes and held for"|tr(locale) }}<span class="phone-chevron">{{ chevron() }}</span></summary>
+    <details class="phone-more"{% if values.owner_id or values.notes or values.left_out or values.estimate_date %} open{% endif %}>
+      <summary>{{ "More options"|tr(locale) }}<span class="phone-chevron">{{ chevron() }}</span></summary>
       <div class="field"><label for="popup-notes">{{ 'Notes'|tr(locale) }}</label><input id="popup-notes" name="notes" value="{{ values.notes }}" enterkeyhint="done"></div>
       <div class="field">
         <label for="popup-owner">{{ 'Held for'|tr(locale) }}</label>
@@ -92,6 +92,7 @@
           {% for person in owners %}<option value="{{ person.id }}" {{ 'selected' if values.owner_id == person.id|string }}>{{ person.name }}</option>{% endfor %}
         </select>
       </div>
+      {% import "partials/estimate_date.html" as dates with context %}<div class="money-only">{{ dates.field(values.estimate_date) }}</div>
       {% from "partials/macros.html" import left_out_switch %}{{ left_out_switch(values) }}
     </details>
     <p class="small muted inline-save-status" data-popup-status aria-live="polite"></p>

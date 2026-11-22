@@ -2,6 +2,7 @@
 {% block title %}{{ 'Reimbursements'|tr(locale) }}{% endblock %}
 {% block heading %}<h1>{{ 'Reimbursements'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
+{% import "partials/estimate_date.html" as dates with context %}
 <p class="phone-note">{{ 'Record repayments as Money in using the original expense category. They reduce spending in that category; linking a receipt only tracks what is still owed.'|tr(locale) }}</p>
 {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
 
@@ -48,17 +49,22 @@
       <div class="phone-row"><span>{{ 'Payer'|tr(locale) }}</span><b>{{ claim.payer_name or '—' }}</b></div>
       <div class="phone-row"><span>{{ 'Due date'|tr(locale) }}</span><b>{{ claim.due_date or '—' }}</b></div>
       <div class="phone-row"><span>{{ 'Expected'|tr(locale) }}</span><b>{{ claim.expected|money }} {{ base }}</b></div>
+      {% if claim.merchant_refund %}<div class="phone-row"><span>{{ "Merchant refund"|tr(locale) }}</span><b>{{ claim.merchant_refund|money }} {{ base }}</b></div>{% endif %}
       <div class="phone-row"><span>{{ 'Received'|tr(locale) }}</span><b>{{ claim.received|money }} {{ base }}</b></div>
       <div class="phone-row"><span>{{ 'Outstanding'|tr(locale) }}</span><b>{{ claim.outstanding|money }} {{ base }}</b></div>
     </div>
     {% if claim.issues %}<p class="flash">{% for issue in claim.issues %}{{ issue|tr(locale) }}{% if not loop.last %}<br>{% endif %}{% endfor %}</p>{% endif %}
 {% if claim.record_receipt_url %}<p><a class="phone-quiet" data-popup-open href="{{ claim.record_receipt_url }}">{{ 'Record repayment in the same category'|tr(locale) }}</a><small class="phone-note">{{ 'Use this only if the repayment is not recorded yet. Otherwise link its existing receipt.'|tr(locale) }}</small></p>{% endif %}
     <h4>{{ 'Receipts'|tr(locale) }}</h4>
-    {% for receipt in claim.receipts %}<div class="phone-row"><span>{% if receipt.receipt_id %}<a href="/transactions/{{ receipt.receipt_id }}">{{ receipt.ref or ('Receipt ' ~ receipt.receipt_id) }}</a>{% else %}{{ 'Deleted receipt'|tr(locale) }}{% endif %}<small>{{ receipt.counted|money }} {{ base }}{% if receipt.issue %} · {{ receipt.issue|tr(locale) }}{% endif %}</small></span><form method="post" action="/reimbursements/{{ claim.id }}/receipts/{{ receipt.id }}/unlink"><button class="btn small">{{ 'Unlink'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% else %}<p class="phone-note">{{ 'No receipts linked'|tr(locale) }}</p>{% endfor %}
+    {% for receipt in claim.receipts %}<div class="phone-row"><span>{% if receipt.receipt_id %}<a href="/transactions/{{ receipt.receipt_id }}">{{ receipt.ref or ('Receipt ' ~ receipt.receipt_id) }}</a>{% else %}{{ 'Deleted receipt'|tr(locale) }}{% endif %}<small>{{ receipt.counted|money }} {{ base }}{% if receipt.issue %} · {{ receipt.issue|tr(locale) }}{% endif %}</small></span>{% if claim.expense and not claim.paid_for_work %}<details class="phone-more"><summary>{{ 'Estimate date'|tr(locale) }} · {{ (receipt.estimate_date_override or claim.automatic_date)|day(locale) }}</summary>
+        <form method="post" action="/reimbursements/receipts/{{ receipt.id }}/estimate-date">{{ dates.field(receipt.estimate_date_override, claim.automatic_date) }}
+          <button class="btn small">{{ 'Save'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+        </form></details>{% endif %}<form method="post" action="/reimbursements/{{ claim.id }}/receipts/{{ receipt.id }}/unlink"><button class="btn small">{{ 'Unlink'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% else %}<p class="phone-note">{{ 'No receipts linked'|tr(locale) }}</p>{% endfor %}
     {% if receipts and claim.outstanding > 0 and not claim.issues %}<form method="post" action="/reimbursements/{{ claim.id }}/receipts" class="phone-form">
       <div class="field"><label for="receipt-{{ claim.id }}">{{ 'Link a receipt'|tr(locale) }}</label><select id="receipt-{{ claim.id }}" name="receipt_id" data-own-picker required><option value="">{{ 'Choose an owned inflow'|tr(locale) }}</option>{% for receipt in receipts %}{% set txn = receipt.transaction %}<option value="{{ txn.id }}">{{ txn.date }} · {{ txn.counterparty or txn.description or txn.ref }} · {{ receipt.amount|money }} {{ base }}</option>{% endfor %}</select></div>
       <div class="field"><label for="receipt-amount-{{ claim.id }}">{{ 'Receipt amount'|tr(locale) }} ({{ base }})</label><input id="receipt-amount-{{ claim.id }}" type="text" name="amount" inputmode="decimal" value="{{ claim.outstanding|money(False, 2) }}" required enterkeyhint="done"></div>
-      <button class="btn primary">{{ 'Link receipt'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+      {% if not claim.paid_for_work %}{{ dates.options(none, claim.automatic_date) }}{% endif %}
+          <button class="btn primary">{{ 'Link receipt'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
     </form>{% endif %}
     {% include "partials/work_claim_actions.html" %}
         <form method="post" action="/reimbursements/{{ claim.id }}/delete" data-confirm-delete="{{ 'Delete this claim and its receipt links?'|tr(locale) }}"><button class="btn danger">{{ 'Delete claim'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>

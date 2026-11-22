@@ -915,7 +915,11 @@ class TransactionService:
 
     def revision(self, txn_id: int) -> str:
         """Opaque form version, covering the header and every posting line."""
-        return submissions.revision(self._snapshot(self.get(txn_id)))
+        snapshot = self._snapshot(self.get(txn_id))
+        estimate_date = self.db.scalar("SELECT estimate_date FROM budget_estimate_dates WHERE transaction_id=?", (txn_id,))
+        if estimate_date is not None:
+            snapshot["estimate_date"] = estimate_date
+        return submissions.revision(snapshot)
 
     def require_revision(self, txn_id: int, expected: str | None) -> None:
         """Call inside the write transaction. None retains legacy client behavior."""
