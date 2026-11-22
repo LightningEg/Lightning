@@ -99,7 +99,8 @@ def test_a_started_restore_is_finished_forward(tmp_path):
 
 def test_an_unpublished_restore_is_not_undone_when_the_profile_changed(tmp_path):
     session, live, paths, _selected, _ = _killed_restore(tmp_path, "manifest")
-    live.write_bytes(live.read_bytes()[:-1] + b"\x01")
+    data = live.read_bytes()
+    live.write_bytes(data[:-1] + bytes([data[-1] ^ 0xFF]))  # always a change; "+ b'\x01'" was none 1 time in 256
     fresh = ProfileSession(session.root)
     with pytest.raises(ProfileError, match="changed after the restore began"):
         fresh.repair_interrupted_restore(str(live), PASSWORD)
