@@ -147,6 +147,7 @@ Every figure a screen shows is listed here once. **From** says which layer its i
 |---|---|---|---|
 | **Age of money** | Amount-weighted days from receipt to use of owned cash, consumed oldest first, over the last ten cash expense transactions in profile currency. Unknown opening cash makes the sample unavailable. This is historical timing, not a runway estimate. | Read directly from the ledger | `reporting.cash_analytics.cash_age` |
 | **In your accounts** | What your account balances add up to: what you hold for other people is in it, and a savings circle you still owe counts below zero. | What you own + Held for others − Gam'eya still to pay | `planning.position.Position.in_your_accounts` |
+| **Cash and banks** | What your bank, wallet and cash accounts in your own currency hold, above zero: the phone Home's hero. Deposits and holdings are not in it, so it is never called In your accounts (owner, 2026-11-22, r38). | Sum of those balances | `ui.phone.screens.home._cash_accounts` |
 | **Held for others** | Money and units in your accounts that belong to other people. | Read directly from the ledger | `reporting.service.ReportingService.money_from_others_total` |
 | **What you own** | The value of everything in your accounts that is yours. | Cash you own + Holdings value + Other you own | `reporting.service.ReportingService.net_worth` |
 | **Bank and wallet cash** | Your cash in bank accounts and wallets. | Read directly from the ledger | `planning.position.Position.bank_and_wallet_cash` |
