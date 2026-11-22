@@ -70,7 +70,7 @@ Remaining: deploy/verify the live Apps Script receiver and verify the replacemen
 
 - The four repositories now live under the `LightningEg` organization; `tools/security_setup.py` (preview by default, `--apply` with the owner's `gh` login) already holds rulesets for the app, website, downloads and market-data `main` branches, the `v*` tags, the environments and the secret moves. Whether the owner has run it with `--apply` is not recorded anywhere.
 - Finding 1 is still live: `git log --format=%ae -50` shows the owner account's personal address on 48 of the last 50 commits (the squash merges). The address is not copied here.
-- Finding 7 (pairing listener on all interfaces) is part of the native acceptance in [2C](../2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) and [4A](../4-edit-journal-and-devices/NF-4A-edit-journal.md); it is not repeated below.
+- Finding 7 (pairing listener on all interfaces) is part of the native acceptance in [2C](https://github.com/LightningEg/Lightning/blob/02eb128/issues/2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) and [4A](../4-edit-journal-and-devices/NF-4A-edit-journal.md); it is not repeated below.
 - The website half (finding 2, 3 and 5, the Apps Script receiver, website PR #19) lives in the website repository, which this session could not read; 1E3 starts by checking it.
 - Release checks already refuse tracked key, keystore and database files (`tools/release_check.py` `PRIVATE_FILES`), but no tool scans Git history or the built ZIP/APK.
 

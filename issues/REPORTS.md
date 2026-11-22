@@ -6,10 +6,10 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | Code | Report | Review date | Kind | Open follow-ups |
 | --- | --- | --- | --- | --- |
 | r1 | [Audit 1: is Lightning ready to demo?](12-desktop-ux/r1-demo-readiness/report.md) | 2026-10-20 | audit | none |
-| r2 | [Audit 2: backend efficiency and loose ends](2-safe-for-real-money/r2-backend-efficiency/report.md) | 2026-10-21 | audit | 2A, 2C, 4A |
+| r2 | [Audit 2: backend efficiency and loose ends](2-safe-for-real-money/r2-backend-efficiency/report.md) | 2026-10-21 | audit | 4A |
 | r3 | [Audit 5: is the backend engine efficient and streamlined?](4-edit-journal-and-devices/r3-backend-streamlining/report.md) | 2026-10-21 | audit | 4A |
 | r4 | [Audit 3: is the edit journal (multi-device sync) solid?](4-edit-journal-and-devices/r4-edit-journal/report.md) | 2026-10-21 | audit | 4A |
-| r5 | [Audit 4: backend correctness and failure boundaries](2-safe-for-real-money/r5-backend-correctness/report.md) | 2026-10-23 | audit | 2A, 2C, 4A |
+| r5 | [Audit 4: backend correctness and failure boundaries](2-safe-for-real-money/r5-backend-correctness/report.md) | 2026-10-23 | audit | 4A |
 | r7 | [Audit 6: open pull request cleanup](1-easy-to-contribute/r7-pull-request-cleanup/report.md) | 2026-10-23 | review | 1H |
 | r11 | [Pairing backend hardening and security review](4-edit-journal-and-devices/r11-pairing-hardening/report.md) | 2026-10-26 | review | 4A |
 | r12 | [v1.5.0 PR review, theme switching and package preparation](10-looks-and-store/r12-v150-release/report.md) | 2026-10-26 | release | 1H, 10A, 10C |
@@ -18,7 +18,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r17 | [Audit 10: the phone, tab by tab - quick actions and the answer first](11-phone-ux/r17-phone-tab-audit/report.md) | 2026-10-29 | audit | none |
 | r19 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](12-desktop-ux/r19-desktop-tab-audit/report.md) | 2026-10-30 | audit | none |
 | r20 | [Audit 13: the phone for quick jobs - convenience, taps and the look](11-phone-ux/r20-phone-convenience-audit/report.md) | 2026-11-01 | audit | none |
-| r22 | [Code audit: refactoring, loose ends and smart features](9-later/r22-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B |
+| r22 | [Code audit: refactoring, loose ends and smart features](9-later/r22-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 4A, 4B |
 | r23 | [CSV import stress test: where it breaks and how to rebuild it](7-planning-import-and-search/r23-csv-import-stress/report.md) | 2026-11-05 | audit | none |
 | r24 | [Desktop and phone UX: logic, visuals, simpler tasks and connected features](12-desktop-ux/r24-desktop-phone-ux/report.md) | 2026-11-05 | audit | 4A, 4B |
 | r25 | [The phone, redesigned: a phone-first architecture, tab by tab](11-phone-ux/r25-phone-ux-architecture/report.md) | 2026-11-06 | research | none |
