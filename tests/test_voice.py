@@ -25,6 +25,9 @@ BANNED_WORDS = {
     "Ledger": "Say your records (what lending moves), your entries or transactions, or drop it (IV-3BH3).",
     "Reevaluation": "Say value update.",
     "Reevaluations": "Say value updates.",
+    "dashboard": "Say Overview (PC) or Home (phone) (IV-3BH4).",
+    "journey": "Say how it went.",
+    "YTD": "Say This year.",
 }
 
 

@@ -2457,7 +2457,7 @@ CLIENT = {
     "Combined monthly budget after this change: EGP {total} for {count} categories.": "إجمالي الميزانية الشهرية بعد التغيير ده: EGP {total} لـ {count} فئات.",
     "Combined monthly budget after this change: EGP {total} for 1 category.": "إجمالي الميزانية الشهرية بعد التغيير ده: EGP {total} لفئة واحدة.",
     "Could not save.": "ما قدرناش نحفظ.",
-    "Could not save; retry with Enter or blur.": "ما قدرناش نحفظ؛ جرّب تاني بـ Enter أو بالخروج من الخانة.",
+    "Not saved. Press Enter to try again.": "ما اتحفظش. دوس Enter وجرّب تاني.",
     "Enter a percentage and set your average monthly income first.": "لازم نسبة، ومتوسط الدخل الشهري يتحدد الأول.",
     "Enter income %": "% من الدخل",
     "Every selected category changes together.": "كل الفئات المحددة بتتغير مع بعض.",
