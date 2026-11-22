@@ -26,7 +26,7 @@ Reserved codes: none
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12AB3 rest, 12Z5, 12AE4, 12Q. **Read:** 12AB.
+- **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12Z5, 12AE4, 12Q. **Read:** `tests/test_page_skeleton.py`.
 - **O1:** owner checks Home. **Read:** Overview §7.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 

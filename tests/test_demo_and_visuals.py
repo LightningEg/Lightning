@@ -186,6 +186,8 @@ def test_every_tab_of_the_demo_opens_with_its_key_notes(demo):
         elif url == "/plan/loans":  # the Lead says when it is paid off; the debt ratios are a KPI row, not notes (3Q1)
             assert "lead-hero" in page.text and page.text.count('<article class="kpi-card') == 3, url
             assert 'class="key-note' not in page.text, url
+        elif url == "/plan/reserves":  # NF-12AB3 (A09.1): the months covered is the Lead and opens its working, not an alert
+            assert "lead-hero" in page.text and 'aria-controls="working-emergency"' in page.text and 'class="key-note' not in page.text, url
         elif url in with_notes:
             assert 'class="key-note' in page.text or 'class="stat-card key-note' in page.text, url
     overview = client.get("/").text

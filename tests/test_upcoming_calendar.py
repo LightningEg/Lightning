@@ -152,12 +152,13 @@ def test_the_overview_shows_the_next_seven_days_and_a_quiet_week_names_the_next_
     _household(c)
     client = TestClient(create_app(c))
     quiet = client.get("/").text                                    # 11 to 17 Nov: nothing; the loan is late, not ahead
-    assert "Next 7 days" in quiet and 'class="week-day' not in quiet
+    assert "Next 7 days" in quiet and 'week-row' not in quiet
     assert "Next: Internet, 650 on 20 Nov." in quiet
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-11-18")
     week = client.get("/").text
-    assert week.count('class="week-day') == 7
-    assert "650 to pay, of 3,150 left this month" in week and 'href="/plan/upcoming?month=2026-11&amp;day=2026-11-20"' in week
+    rows = week.split('week-list', 1)[1].split("</section>", 1)[0]      # r38: a list by name, each with Pay
+    assert rows.count('week-row') == 1 and "Internet" in rows and "Pay</b>" in rows and "/pay?due=2026-11-20" in rows
+    assert "650 to pay, of 3,150 left this month" in week
 
 
 def test_the_overview_has_no_week_without_a_plan(c):

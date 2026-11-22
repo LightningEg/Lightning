@@ -2794,7 +2794,7 @@ initCurrencySearch();
 })();
 
 // Shared period controls use separate month/year fields and a bounded scroll list.
-// One month stepper: ‹ yyyy-mm ›. The box is typeable; arrows move a month. Runs again on a swapped phone page.
+// One month stepper: ‹ Nov 2026 ›. The month opens the picker (r38); arrows move a month. Runs again on a swapped phone page.
 const initMonthPickers = (root = document) => root.querySelectorAll("[data-month-picker]").forEach((picker) => {
   if (picker.dataset.monthPickerReady) return;
   picker.dataset.monthPickerReady = "1";
@@ -2883,9 +2883,9 @@ initMonthPickers();
   const now = new Date();
   const thisMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   let open = null;
-  const close = () => { if (open) { open.pop.remove(); open.input.setAttribute("aria-expanded", "false"); open = null; } };
+  const close = () => { if (open) { open.pop.remove(); open.anchor.setAttribute("aria-expanded", "false"); open = null; } };
   const maxFor = (input) => input.dataset.maxMonth || input.closest("[data-current-month]")?.dataset.currentMonth || "";
-  function show(input) {
+  function show(input, anchor = input) {
     close();
     const max = maxFor(input);
     const valid = /^\d{4}-\d{2}$/.test(input.value) ? input.value : (max || thisMonth);
@@ -2913,16 +2913,17 @@ initMonthPickers();
       if (button.dataset.year) { year += Number(button.dataset.year); render(); return; }
       input.value = button.dataset.value;
       input.setCustomValidity("");
+      if (anchor !== input && button.dataset.value) anchor.textContent = `${button.textContent} ${year}`;
       close();
       input.dispatchEvent(new Event("change", { bubbles: true }));
     });
     document.body.appendChild(pop);
-    const box = input.getBoundingClientRect();
+    const box = anchor.getBoundingClientRect();
     const left = Math.min(box.left + window.scrollX, window.scrollX + document.documentElement.clientWidth - pop.offsetWidth - 12);
     pop.style.left = `${Math.max(12, left)}px`;
     pop.style.top = `${box.bottom + window.scrollY + 6}px`;
-    input.setAttribute("aria-expanded", "true");
-    open = { input, pop };
+    anchor.setAttribute("aria-expanded", "true");
+    open = { input, pop, anchor };
     pop.querySelector("button.selected, .month-popup-grid button:not([disabled])")?.focus();
   }
   const bind = (root) => root.querySelectorAll("input.month-input:not(.month-picker-box)").forEach((input) => {
@@ -2935,10 +2936,19 @@ initMonthPickers();
       if (event.key === "Escape") close();
     });
   });
+  // The period control's month (r38): a button that reads "Nov 2026" over the hidden yyyy-mm field it sets.
+  const bindFaces = (root) => root.querySelectorAll("[data-month-face]:not([data-face-ready])").forEach((face) => {
+    face.dataset.faceReady = "1";
+    const input = face.parentElement.querySelector("[data-month-select]");
+    if (!input) return;
+    face.addEventListener("click", () => (open?.anchor === face ? close() : show(input, face)));
+    face.addEventListener("keydown", (event) => { if (event.key === "ArrowDown") { event.preventDefault(); show(input, face); } });
+  });
   bind(document);
-  document.addEventListener("lightning:page", (event) => { close(); bind(event.detail.root); });
+  bindFaces(document);
+  document.addEventListener("lightning:page", (event) => { close(); bind(event.detail.root); bindFaces(event.detail.root); });
   document.addEventListener("click", (event) => {
-    if (open && !open.pop.contains(event.target) && event.target !== open.input) close();
+    if (open && !open.pop.contains(event.target) && event.target !== open.input && event.target !== open.anchor) close();
   });
   document.addEventListener("keydown", (event) => { if (event.key === "Escape") close(); });
   window.addEventListener("resize", close);
