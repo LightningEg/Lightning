@@ -187,3 +187,39 @@ def test_the_refund_panel_reads_arabic(c, setup, phone):
     assert "ده استرداد لـ…" in visible_text(client.get(f"/transactions/{refund.id}").text)
     page = visible_text(client.get(f"/transactions/{purchase.id}").text)
     assert "الاستردادات" in page and "سجّل استرداد" in page
+
+
+def test_refund_first_caps_claim_and_prevents_reusing_deposit(c, setup):
+    account = setup[0]["cib"].id
+    food, _ = _ids(c)
+    purchase = c.transactions.record_outflow("2026-09-01", account, "1000", food)
+    refund = c.transactions.record_refund("2026-10-01", account, "400", food)
+    services = c.reimbursements
+    c.refunds.link(refund.id, purchase.id)
+    with pytest.raises(ValidationError):
+        services.create_claim(purchase.id, "601")
+    claim = services.create_claim(purchase.id, "600")
+    assert refund.id not in {r["transaction_id"] for r in services.available_receipts()}
+    with pytest.raises(ConflictError):
+        services.link_receipt(claim["id"], refund.id, "400")
+    c.refunds.unlink(refund.id)
+    services.link_receipt(claim["id"], refund.id, "400")
+    assert services.list_claims()[0]["outstanding"] == 200
+
+
+def test_later_refund_updates_claim_and_periods(c, setup):
+    account = setup[0]["cib"].id
+    food, _ = _ids(c)
+    purchase = c.transactions.record_outflow("2026-09-01", account, "1000", food)
+    claim = c.reimbursements.create_claim(purchase.id, "1000")
+    refund = c.transactions.record_refund("2026-10-01", account, "400", food)
+    c.refunds.link(refund.id, purchase.id)
+    assert c.reimbursements.list_claims()[0]["outstanding"] == 600
+    assert c.reimbursements.expected_back([food], *parse_month("2026-09")) == 600
+    receipt = c.transactions.record_inflow("2026-10-02", account, "700", food)
+    with pytest.raises(ValidationError):
+        c.reimbursements.link_receipt(claim["id"], receipt.id, "601")
+    c.reimbursements.link_receipt(claim["id"], receipt.id, "600")
+    c.reimbursements.mark_paid_for_work(claim["id"])
+    assert c.reimbursements.work_period(*parse_month("2026-09"))[0]["owed"] == 1000
+    assert c.reimbursements.work_period(*parse_month("2026-10"))[0]["owed"] == 0

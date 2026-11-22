@@ -28,6 +28,14 @@ _OWNED = ("le.category_id IS NOT NULL AND le.owner_id IS NULL AND c.movement='OU
           "AND a.is_cash=1 AND le.effect='OUTFLOW'")
 
 
+def linked_refunds_sql(expense_id: str, *, condition: str = "1") -> str:
+    """Scalar SQL for posted refunds. Older dual-linked deposits count only as claim receipts."""
+    return ("(SELECT COALESCE(SUM(rl.amount_e6),0) FROM refund_links rl "
+            "JOIN transactions r ON r.id=rl.refund_id AND r.status='POSTED' "
+            f"WHERE rl.expense_id={expense_id} AND {condition} "
+            "AND NOT EXISTS (SELECT 1 FROM reimbursement_receipts rr WHERE rr.receipt_id=rl.refund_id))")
+
+
 class RefundLinkService:
     def __init__(self, db: Database, transactions=None):
         self.db = db
@@ -57,10 +65,11 @@ class RefundLinkService:
     def _returned_e6(self, expense_id: int, *, besides_refund: int | None = None) -> int:
         """What has already come back for a purchase: its other refund links and its claim's receipts."""
         refunds = int(self.db.scalar(
-            "SELECT COALESCE(SUM(amount_e6),0) FROM refund_links WHERE expense_id=? AND refund_id IS NOT ?",
+            "SELECT " + linked_refunds_sql("?", condition="rl.refund_id IS NOT ?"),
             (expense_id, besides_refund)) or 0)
         receipts = int(self.db.scalar(
             "SELECT COALESCE(SUM(rr.amount_e6),0) FROM reimbursement_receipts rr "
+            "JOIN transactions r ON r.id=rr.receipt_id AND r.status='POSTED' "
             "JOIN reimbursement_claims rc ON rc.id=rr.claim_id WHERE rc.expense_id=?", (expense_id,)) or 0)
         return refunds + receipts
 
@@ -103,6 +112,8 @@ class RefundLinkService:
         """Purchases a refund can name: posted, in one of the refund's expense categories, from six months before
         it up to its date, with something still to return; newest first. Each carries the most it can take."""
         refund_id = parse_row_id(refund_id, "refund_id")
+        if self.db.scalar("SELECT 1 FROM reimbursement_receipts WHERE receipt_id=?", (refund_id,)):
+            return []
         refund = self._transaction(refund_id)
         lines = self._lines(refund_id, "IN") if refund else {}
         if not lines:
