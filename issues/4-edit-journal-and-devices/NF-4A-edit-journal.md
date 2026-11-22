@@ -285,9 +285,11 @@ Cloudflare queues, resumable snapshots, push, quotas and the privacy note. The c
 Registry, cooperative move, lost-home recovery, transport-key rotation, retired-branch reconciliation. Complete the fault and security gates before enabling replacement.
 
 ## 4A5 J6 cutover · owner
+**Waived by owner, 2026-11-22:** counted done without a run (launch checklist #579); a tester may still run it, and a failure becomes a bug item.
 Freeze legacy lends, take a verified baseline, ordinary Windows and Android acceptance, Mohab's year, security and durability review.
 
 ## 4A6 Real-device evidence · owner
+**Waived by owner, 2026-11-22:** counted done without a run (launch checklist #579); a tester may still run it, and a failure becomes a bug item.
 Ordinary-PC reboot and power-loss, and real Android sleep and background behaviour.
 
 **Left from 4K (2026-11-04):** lending (`lightning/sync/*.py`) is still live; its retirement after J6 needs an item then. `runtime/journal_setup.py` still uses `open_lab`: it is the dummy-lab enrollment tool and only accepts a lab marked dummy.
