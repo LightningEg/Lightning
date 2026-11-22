@@ -33,4 +33,8 @@ The audit is right that the PC's explanations are its best part (Safe to spend's
 | F10 | Whole EGP in Transactions (p.12) | Not done: A06.1, rows show piastres when there are any |
 | F11 | Remove the floating round button (p.3, 16) | Not done: the page jump (A10.6) shows only on scroll or near the corner; full-page captures scroll |
 | F12 | Month names, not 2026-11, in period chips (p.16) | A06.1 says "November 2026" while A05 draws "2026-09": asked the owner |
-| F13 | The rest: page titles vs sidebar, one version line, repeated cards, the 400 gap, the Notes column, truncation, empty chart areas, Next 7 days as a list | Fixed in the follow-up PRs where listed in `issues/INBOX.md` until then |
+| F13 | Page titles differ from the sidebar (Safety › Reserves, Settings › Your data) and Settings shows the version twice (p.10, 15) | Fixed: the first tab carries the section's name (A05); one version line |
+| F14 | The phone's Home calls cash only In your accounts (p.16) | Fixed: Cash and banks (owner pick); Glossary row |
+| F15 | Next 7 days is seven boxes, six empty (p.3-4) | Fixed: a list by name with Pay (owner pick), three then "+n more" |
+| F16 | Cash planning's Free cash, Due before payday and Lowest point repeat its Lead (p.8) | Not done: A13.1 sets Cash planning's four KPI cards |
+| F17 | Notes column, truncated names, empty chart areas, the 400 gap, the afford form (p.5, 7, 8, 11, 12) | `issues/INBOX.md` line, 2026-11-22 |
