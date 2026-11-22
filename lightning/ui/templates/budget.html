@@ -11,7 +11,7 @@
 {# r38: the working is rows that add up, behind the row (as What you own opens on its parts), not a formula on one line #}
 {% set job %}{% if lead and has_plan and check and check.unassigned is not none %}<div class="overview-inline-list"><details class="overview-disclosure overview-subtotal"><summary><span>{{ fig.not_yet_given_a_job.label }}</span><b>{{ check.unassigned|money(False, 0) }} {{ base }}</b></summary><div class="overview-disclosure-body">
   <div class="overview-static-row"><span>{{ 'Income'|tr(locale) }}</span><b>{{ check.income|money(False, 0) }}</b></div>
-  <div class="overview-static-row"><span>{{ 'Planned'|tr(locale) }}</span><b>{{ "−" if check.planned else "" }}{{ check.planned|money(False, 0) }}</b></div>
+  <div class="overview-static-row"><span>{{ fig.planned.label }}</span><b>{{ "−" if check.planned else "" }}{{ check.planned|money(False, 0) }}</b></div>
   <div class="overview-static-row"><span>{{ 'Goals'|tr(locale) }}</span><b>{{ "−" if check.goals else "" }}{{ check.goals|money(False, 0) }}</b></div>
   <div class="overview-static-row"><span>{{ fig.emergency_top_up.label }}</span><b>{{ "−" if check.emergency else "" }}{{ check.emergency|money(False, 0) }}</b></div>
 </div></details></div>{% endif %}{% endset %}{% set hero_rows = [] %}

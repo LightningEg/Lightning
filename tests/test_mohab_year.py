@@ -1676,7 +1676,7 @@ def test_a_figure_reads_the_same_on_every_tab(mohab, period):
                 "2027-03-31" if "2027-03-31" in period else "2027-09-30")
     period_cash = mohab.c.reporting.owned_brokerage_cash(cash_day)
     assert 'href="/accounts"' in overview and 'href="/investments"' in overview
-    investment_cash = _figure(flat(investments), r"Brokerage cash ([\d,]+)")
+    investment_cash = _figure(flat(investments), r"Brokerage cash (?:not in [a-z ]+ )?([\d,]+)")  # r38: its note says it is not in Portfolio value
     assert investment_cash is not None
     assert money(investment_cash) == period_cash
     # The Overview no longer has an Investments summary row; holdings and their period figures live on Investments.
