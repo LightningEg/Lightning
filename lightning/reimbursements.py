@@ -9,7 +9,7 @@ from __future__ import annotations
 from datetime import date, timedelta
 from decimal import Decimal
 
-from lightning.core.dates import now_iso, today
+from lightning.core.dates import estimate_date_override, now_iso, today
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
 from lightning.core.money import check_places, from_e6, to_decimal, to_e6
 from lightning.core.refs import parse_row_id
@@ -26,6 +26,17 @@ class ReimbursementService:
     @staticmethod
     def _id(value, field: str) -> int:
         return parse_row_id(value, field)
+
+    def set_estimate_date(self, link_id: int, estimate_date: str | None) -> None:
+        self._require_writable()
+        day = estimate_date_override(estimate_date)
+        with self.db.transaction(undo_label="Change estimate date"):
+            row = self.db.one("SELECT estimate_date_override FROM reimbursement_receipts WHERE id=?", (link_id,))
+            if row is None:
+                raise NotFoundError("This recovery link no longer exists.")
+            if row["estimate_date_override"] != day:
+                self.db.execute("UPDATE reimbursement_receipts SET estimate_date_override=?,updated_at=? WHERE id=?",
+                                (day, now_iso(), link_id))
 
     def _require_writable(self) -> None:
         if self.db.read_only:
@@ -501,6 +512,12 @@ class ReimbursementService:
             raise ConflictError("This receipt is already linked to a reimbursement claim.", "receipt_id") from None
         return {"id": int(cur.lastrowid), "claim_id": claim_id, "receipt_id": transaction_id,
                 "amount": from_e6(value_e6)}
+
+    def link_dated_receipt(self, claim_id, transaction_id, amount, estimate_date):
+        with self.db.transaction(undo_label="Link reimbursement receipt"):
+            link = self.link_receipt(claim_id, transaction_id, amount)
+            self.set_estimate_date(link["id"], estimate_date)
+            return link
 
     def unlink_receipt(self, claim_id: int, link_id: int) -> None:
         self._require_writable()

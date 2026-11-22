@@ -10,7 +10,7 @@ import json
 
 from lightning.categories.domain import Category, CategoryFamily, Movement, Scope
 from lightning.categories.service import CategoryService
-from lightning.core.dates import month_of, now_iso, parse_month
+from lightning.core.dates import estimate_date_override, month_of, now_iso, parse_month
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, check_places, fmt, from_e6, to_decimal
@@ -368,6 +368,30 @@ class BudgetService:
 
     def is_left_out(self, transaction_id: int) -> bool:
         return int(transaction_id) in self.left_out_ids()
+
+    def estimate_date(self, transaction_id: int) -> str | None:
+        return self.db.scalar("SELECT estimate_date FROM budget_estimate_dates WHERE transaction_id=?", (transaction_id,))
+
+    def can_set_estimate_date(self, transaction_id: int) -> bool:
+        return bool(self.db.scalar(
+            "SELECT 1 FROM transactions t JOIN ledger_entries le ON le.transaction_id=t.id "
+            "JOIN categories c ON c.id=le.category_id WHERE t.id=? AND t.status='POSTED' "
+            "AND t.type IN ('OUT','IN') AND le.owner_id IS NULL AND le.effect IN ('INFLOW','OUTFLOW') "
+            "AND c.movement='OUTFLOW' AND c.income_class IS NULL AND c.family<>'INVESTMENT' "
+            "AND c.code<>'EXP.SYSTEM.CUSTODY'", (transaction_id,)))
+
+    def set_estimate_date(self, transaction_id: int, estimate_date: str | None) -> None:
+        day = estimate_date_override(estimate_date)
+        with self.db.transaction(undo_label="Change estimate date"):
+            if day is None:
+                self.db.execute("DELETE FROM budget_estimate_dates WHERE transaction_id=?", (transaction_id,))
+                return
+            if not self.can_set_estimate_date(transaction_id):
+                raise ValidationError("Choose an entry with personal spending for an estimate date.", "estimate_date")
+            self.db.execute("INSERT INTO budget_estimate_dates(transaction_id,estimate_date) VALUES (?,?) "
+                            "ON CONFLICT(transaction_id) DO UPDATE SET estimate_date=excluded.estimate_date "
+                            "WHERE budget_estimate_dates.estimate_date<>excluded.estimate_date",
+                            (transaction_id, day))
 
     def can_leave_out(self, transaction_id: int) -> bool:
         """A posted expense with the user's own spending in an expense category: the only kind estimates can skip."""
@@ -1062,47 +1086,90 @@ class BudgetService:
         for cid, amount in taken.items():
             basis[cid] = basis.get(cid, ZERO) - amount + excluded_funding.get(cid, ZERO)
             moved.add(cid)
-        left_out = self.left_out_ids()
-        for shift in self._recovery_shifts():
-            if shift["expense_id"] in left_out:  # left out above with its expense, in the month it arrived
+        for shift in self._estimate_portions():
+            cid, amount = shift["category_id"], shift["amount"]
+            if first <= shift["posting_date"] <= last and first <= shift["effective_date"] <= last:
                 continue
-            if first <= shift["receipt_date"] <= last:  # it arrived here: undo its reduction here
-                basis[shift["category_id"]] = basis.get(shift["category_id"], ZERO) + shift["amount"]
-                moved.add(shift["category_id"])
-            if first <= shift["expense_date"] <= last:  # it belongs to the expense: count it here
-                basis[shift["category_id"]] = basis.get(shift["category_id"], ZERO) - shift["amount"]
+            if first <= shift["posting_date"] <= last:
+                basis[cid] = basis.get(cid, ZERO) - amount
+                moved.add(cid)
+            if first <= shift["effective_date"] <= last:
+                basis[cid] = basis.get(cid, ZERO) + amount
         # A month whose only line was money back that moved to its expense had no spending of its own.
         return {cid: max(amount, ZERO) for cid, amount in basis.items() if amount or cid not in moved}
 
     @request_cached(deep=True)
-    def _recovery_shifts(self) -> list[dict]:
-        """Linked money back that arrived in another month than its expense: per receipt and spending category, the
+    def _estimate_portions(self, transaction_id: int | None = None) -> list[dict]:
+        """Signed portions for display on one entry, or portions that move for the estimate calculation."""
+        excluded = self.left_out_ids()
+        linked = {}
+        shifts = []
+        for row in self._recovery_shifts(transaction_id):
+            key = (row["receipt_id"], row["category_id"])
+            linked[key] = linked.get(key, ZERO) + row["amount"]
+            if row["expense_id"] not in excluded and (transaction_id is not None or row["receipt_date"] != row["expense_date"]):
+                shifts.append(dict(transaction_id=row["receipt_id"], category_id=row["category_id"], linked=True,
+                                   posting_date=row["receipt_date"], effective_date=row["expense_date"], amount=-row["amount"]))
+        scope = "AND t.id=?" if transaction_id is not None else "AND d.estimate_date<>t.date"
+        args = (transaction_id,) if transaction_id is not None else ()
+        rows = self.db.all(
+            "SELECT t.id,t.date,COALESCE(d.estimate_date,t.date) estimate_date,le.category_id, "
+            "SUM(COALESCE(w.amount_e6,0)-le.amount_base_e6) amount_e6 "
+            "FROM transactions t LEFT JOIN budget_estimate_dates d ON d.transaction_id=t.id "
+            "JOIN ledger_entries le ON le.transaction_id=t.id JOIN categories c ON c.id=le.category_id "
+            "LEFT JOIN work_claim_allocations w ON w.transaction_id=t.id AND w.line_no=le.line_no "
+            "WHERE t.status='POSTED' AND t.type IN ('IN','OUT') "
+            "AND le.owner_id IS NULL AND le.effect IN ('INFLOW','OUTFLOW') AND c.movement='OUTFLOW' "
+            "AND c.income_class IS NULL AND c.family<>'INVESTMENT' AND c.code<>'EXP.SYSTEM.CUSTODY' "
+            f"{scope} GROUP BY t.id,le.category_id", args)
+        funding_by_day = {}
+        for row in rows:
+            tid, cid, day = row["id"], row["category_id"], row["date"]
+            if tid in excluded:
+                continue
+            if day not in funding_by_day:
+                funding_by_day[day] = self.funding.adjustments(day, day)
+            funding = funding_by_day[day].get((tid, cid), {})
+            amount = from_e6(row["amount_e6"]) - sum(funding.values(), ZERO) + linked.get((tid, cid), ZERO)
+            if amount:
+                shifts.append(dict(transaction_id=tid, category_id=cid, linked=False, posting_date=day,
+                                   effective_date=row["estimate_date"], amount=amount))
+        return shifts
+
+    def estimate_attribution(self, transaction_id: int) -> list[dict]:
+        return self._estimate_portions(transaction_id)
+
+    @request_cached(deep=True)
+    def _recovery_shifts(self, transaction_id: int | None = None) -> list[dict]:
+        """Linked money back with its posting and resolved estimate dates: per receipt and spending category, the
         amount the receipt took off that category (never more than the amount linked) and both dates. Money back is a
         claim's receipt or a refund that names its purchase (NF-12AK3); money that is both counts once, as a receipt. The part
         of a refund that went back to the reserve that paid for the purchase (NF-12AK4) never reduced plan spending, so it
         does not move."""
+        scope = "AND r.id=?" if transaction_id is not None else ""
+        args = (transaction_id,) if transaction_id is not None else ()
         rows = [*self.db.all(
-            "SELECT rr.id link_id,rr.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
+            "SELECT rr.id link_id,rr.amount_e6 linked_e6,r.id receipt_id,r.date receipt_date,COALESCE(rr.estimate_date_override,d.estimate_date,e.date) expense_date,e.id expense_id,"
             "le.category_id,SUM(le.amount_base_e6) total_e6 "
             "FROM reimbursement_receipts rr JOIN reimbursement_claims rc ON rc.id=rr.claim_id "
             "JOIN transactions r ON r.id=rr.receipt_id JOIN transactions e ON e.id=rc.expense_id "
-            "JOIN ledger_entries le ON le.transaction_id=r.id "
-            "WHERE rc.paid_for_work=0 AND r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
+            "LEFT JOIN budget_estimate_dates d ON d.transaction_id=e.id JOIN ledger_entries le ON le.transaction_id=r.id "
+            "WHERE rc.paid_for_work=0 AND r.status='POSTED' AND e.status='POSTED' "
             "AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
-            "GROUP BY rr.id,le.category_id ORDER BY rr.id,le.category_id"), *self.db.all(
+            f"{scope} GROUP BY rr.id,le.category_id ORDER BY rr.id,le.category_id", args), *self.db.all(
             "SELECT 'refund:'||rl.id link_id,"
             "rl.amount_e6-COALESCE((SELECT SUM(x.amount_e6) FROM reserve_refunds x WHERE x.refund_id=r.id),0)"
             "-COALESCE((SELECT SUM(work_e6) FROM work_claim_refund_lines WHERE transaction_id=r.id),0) linked_e6,"
-            "r.date receipt_date,e.date expense_date,e.id expense_id,le.category_id,"
+            "r.id receipt_id,r.date receipt_date,COALESCE(rl.estimate_date_override,d.estimate_date,e.date) expense_date,e.id expense_id,le.category_id,"
             "SUM(le.amount_base_e6-COALESCE(w.work_e6,0)) total_e6 "
             "FROM refund_links rl JOIN transactions r ON r.id=rl.refund_id JOIN transactions e ON e.id=rl.expense_id "
-            "JOIN ledger_entries le ON le.transaction_id=r.id "
+            "LEFT JOIN budget_estimate_dates d ON d.transaction_id=e.id JOIN ledger_entries le ON le.transaction_id=r.id "
             "LEFT JOIN work_claim_refund_lines w ON w.transaction_id=le.transaction_id AND w.line_no=le.line_no "
-            "WHERE r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
+            "WHERE r.status='POSTED' AND e.status='POSTED' "
             "AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
             "AND NOT EXISTS (SELECT 1 FROM reimbursement_receipts x WHERE x.receipt_id=rl.refund_id) "
             "AND le.category_id IN (SELECT category_id FROM ledger_entries WHERE transaction_id=rl.expense_id) "
-            "GROUP BY rl.id,le.category_id ORDER BY rl.id,le.category_id")]
+            f"{scope} GROUP BY rl.id,le.category_id ORDER BY rl.id,le.category_id", args)]
         investment, shifts, left = self._investment_ids(), [], {}
         for row in rows:
             category = self.categories.get(int(row["category_id"]))
@@ -1114,7 +1181,7 @@ class BudgetService:
             if amount <= ZERO:
                 continue
             left[row["link_id"]] = remaining - amount
-            shifts.append({"category_id": category.id, "amount": amount, "expense_id": int(row["expense_id"]),
+            shifts.append({"receipt_id": row["receipt_id"], "category_id": category.id, "amount": amount, "expense_id": int(row["expense_id"]),
                            "receipt_date": row["receipt_date"], "expense_date": row["expense_date"]})
         return shifts
 
@@ -1175,7 +1242,9 @@ class BudgetService:
         row = self.db.one("SELECT MIN(le.date) first FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id "
                           "WHERE t.status='POSTED' AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') "
                           "AND le.owner_id IS NULL")
-        return row["first"] if row and row["first"] else None
+        if not row or not row["first"]:
+            return None
+        return min([row["first"], *(shift["effective_date"] for shift in self._estimate_portions())])
 
     def _full_window(self, month: str, months: int) -> bool:
         """True when the profile was already recording in the oldest of the `months` completed months before

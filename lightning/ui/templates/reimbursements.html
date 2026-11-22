@@ -2,6 +2,7 @@
 {% block title %}{{ 'Reimbursements'|tr(locale) }}{% endblock %}
 {% block heading %}<h1>{{ 'Reimbursements'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
+{% import "partials/estimate_date.html" as dates with context %}
 <p class="muted">{{ 'Record repayments as Money in using the original expense category. They reduce spending in that category; linking a receipt only tracks what is still owed.'|tr(locale) }}</p>
 {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
 
@@ -48,7 +49,10 @@
       <td>{% if claim.expense %}<a href="/transactions/{{ claim.expense.id }}">{{ claim.expense.ref }} · {{ claim.expense.date }}</a><small class="muted">{{ claim.expense.counterparty or claim.expense.description or 'Expense' }}</small>{% else %}{{ 'Expense unavailable'|tr(locale) }}{% endif %}</td>
       <td>{{ claim.payer_name or '—' }}</td><td>{{ claim.due_date or '—' }}</td>
       <td class="num">{{ claim.expected|money }} {{ base }}{% if claim.merchant_refund %}<br><small>{{ "Merchant refund"|tr(locale) }} {{ claim.merchant_refund|money }} {{ base }}</small>{% endif %}</td><td class="num">{{ claim.received|money }} {{ base }}</td><td class="num"><b>{{ claim.outstanding|money }} {{ base }}</b></td>
-      <td>{% for receipt in claim.receipts %}<div><a href="/transactions/{{ receipt.receipt_id }}">{{ receipt.ref or ('Receipt ' ~ receipt.receipt_id if receipt.receipt_id else 'Deleted receipt') }}</a> · {{ receipt.counted|money }} {{ base }}{% if receipt.issue %}<small class="muted">{{ receipt.issue|tr(locale) }}</small>{% endif %}<form method="post" action="/reimbursements/{{ claim.id }}/receipts/{{ receipt.id }}/unlink"><button class="btn small">{{ 'Unlink'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% else %}<span class="muted">{{ 'No receipts linked'|tr(locale) }}</span>{% endfor %}</td>
+      <td>{% for receipt in claim.receipts %}<div><a href="/transactions/{{ receipt.receipt_id }}">{{ receipt.ref or ('Receipt ' ~ receipt.receipt_id if receipt.receipt_id else 'Deleted receipt') }}</a> · {{ receipt.counted|money }} {{ base }}{% if receipt.issue %}<small class="muted">{{ receipt.issue|tr(locale) }}</small>{% endif %}{% if claim.expense and not claim.paid_for_work %}<details class="phone-more"><summary>{{ 'Estimate date'|tr(locale) }} · {{ (receipt.estimate_date_override or claim.automatic_date)|day(locale) }}</summary>
+        <form method="post" action="/reimbursements/receipts/{{ receipt.id }}/estimate-date">{{ dates.field(receipt.estimate_date_override, claim.automatic_date) }}
+          <button class="btn small">{{ 'Save'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+        </form></details>{% endif %}<form method="post" action="/reimbursements/{{ claim.id }}/receipts/{{ receipt.id }}/unlink"><button class="btn small">{{ 'Unlink'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></div>{% else %}<span class="muted">{{ 'No receipts linked'|tr(locale) }}</span>{% endfor %}</td>
       <td>
         {% if claim.issues %}<p class="notice">{% for issue in claim.issues %}{{ issue|tr(locale) }}{% if not loop.last %}<br>{% endif %}{% endfor %}</p>{% endif %}
 {% if claim.record_receipt_url %}<p><a class="btn small" data-popup-open href="{{ claim.record_receipt_url }}">{{ 'Record repayment in the same category'|tr(locale) }}</a><small class="muted">{{ 'Use this only if the repayment is not recorded yet. Otherwise link its existing receipt.'|tr(locale) }}</small></p>{% endif %}
@@ -56,6 +60,7 @@
           <label>{{ 'Link a receipt'|tr(locale) }}<select name="receipt_id" data-own-picker required><option value="">{{ 'Choose an owned inflow'|tr(locale) }}</option>{% for receipt in receipts %}{% set txn = receipt.transaction %}<option value="{{ txn.id }}" {{ 'selected' if pick_receipt == txn.id|string }}>{{ txn.date }} · {{ txn.counterparty or txn.description or txn.ref }} · {{ receipt.amount|money }} {{ base }}</option>{% endfor %}</select></label>
           {% set picked = receipts|selectattr('transaction.id', 'equalto', pick_receipt|int)|list %}
           <label>{{ 'Receipt amount'|tr(locale) }} ({{ base }})<input type="text" name="amount" inputmode="decimal" value="{{ ([claim.outstanding, picked[0].amount]|min if picked else claim.outstanding)|money(False, 2) }}" required></label>
+          {% if not claim.paid_for_work %}{{ dates.options(none, claim.automatic_date) }}{% endif %}
           <button class="btn small primary">{{ 'Link receipt'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
         </form>{% endif %}
         {% include "partials/work_claim_actions.html" %}

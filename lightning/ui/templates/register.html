@@ -9,6 +9,10 @@
   <td class="register-edit-date">
     <input id="{{ form_id }}-date" form="{{ form_id }}" type="text" name="date" aria-label="{{ 'Date'|tr(locale) }}" value="{{ v.get('date', '') }}" placeholder="yyyy-mm-dd"
            inputmode="numeric" autocomplete="off" data-smart-date title="yyyy-mm-dd, like 2026-01-31" required class="{{ 'bad' if error_field == 'date' }}">
+    <details class="estimate-date-disclosure"{% if v.get('estimate_date') %} open{% endif %}>
+      <summary>{{ 'Estimate date'|tr(locale) }}</summary>
+      <input form="{{ form_id }}" type="date" name="estimate_date" aria-label="{{ 'Count in spending estimates on'|tr(locale) }}" value="{{ v.get('estimate_date') or '' }}">
+    </details>
   </td>
   <td class="register-edit-counterparty">
     <div class="counterparty-picker"><input form="{{ form_id }}" type="text" name="counterparty" aria-label="{{ 'Payee'|tr(locale) }}" value="{{ v.get('counterparty', '') }}" placeholder="Payee or your account"
