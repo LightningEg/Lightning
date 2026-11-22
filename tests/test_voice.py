@@ -28,6 +28,11 @@ BANNED_WORDS = {
     "dashboard": "Say Overview (PC) or Home (phone) (IV-3BH4).",
     "journey": "Say how it went.",
     "YTD": "Say This year.",
+    "Completed payment occurrences": "Say Payments made (IV-3BH8).",
+    "Money at risk": "Say Late or due.",
+    "Unreconciled events": "Say To match.",
+    "Cash ownership history": "Say History.",
+    "Funded spending left": "Say Spending money left this month.",
 }
 
 

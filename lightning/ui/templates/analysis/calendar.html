@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Age of Money and spending calendar'|tr(locale) }}{% endblock %}
-{% block heading %}<h1>{{ 'Age of Money and spending calendar'|tr(locale) }}</h1>{% endblock %}
+{% block title %}{{ 'Age of money and spending calendar'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Age of money and spending calendar'|tr(locale) }}</h1>{% endblock %}
 {% block content %}<section class="card"><h2>{{ fig.age_of_money.label }}</h2>
 {% if age.days is not none %}<p class="overview-headline">{{ age.days|money }} {{ 'days'|tr(locale) }}</p>{% else %}<p>{{ 'Unavailable until the sampled spending has known cash dates.'|tr(locale) }}</p>{% endif %}
 <p>{{ 'Amount-weighted age of cash used by your last {count} payments in the profile currency.'|tr(locale, count=age.payments) }}{% if age.previous_days is not none %} {{ 'Previous sample: {days} days.'|tr(locale, days=age.previous_days|money) }}{% endif %}</p>
