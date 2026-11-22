@@ -25,6 +25,7 @@ from ..periods import parse_period
 from ..budget_rows import cover_from, last_payments, neighbours, pace_line
 from ..budget_exclusions import exclusion_context
 from ..date_text import day_text
+from lightning.workflows.review import ReviewInbox
 
 router = APIRouter(prefix="/budget")
 TRACK_SUGGESTION_PERCENT = Decimal(20)
@@ -192,12 +193,17 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                           "detail": f"{fmt(r['used'], 0)} spent of {fmt(r['total'], 0)}",
                           "href": move["href"] if move else r["href"], "popup": True,  # Move room or the category sheet (3G6)
                           "action": f"Move {fmt(move['amount'], 0)} from {move['name']}" if move else "See it"})
-        if raise_offer and not by_key.get("saves"):
-            needs.append(income_change_row(raise_offer, month))
+    # NF-12AL3: one card of what changed leads the current month; the income offer is one of its rows (one home).
+    changes = (ReviewInbox(c).changes(today()) if period.key == "month" and month == month_of(today()) and has_plan
+               else None)
+    income_in_changes = bool(changes and any(item["href"].startswith("/budget/raise") for item in changes))
+    if lead is not None and raise_offer and not by_key.get("saves") and not income_in_changes:
+        needs.append(income_change_row(raise_offer, month))
     status = page_status.budget(everyday, has_plan, period.key, period_actual, period_budgeted)
     return render(request, "budget.html", work_claims=c.reimbursements.work_period(period.start, period.end), budget_ai_prompt=budget_prompt(), notes=notes, meter_active=meter_active, meter_rest=meter_rest, kpi_cards=kpi_cards, pace=pace, plan_bills=plan_bills, everyday=everyday,
                   lead=lead, pace_card=pace_card, needs=needs, status=status,
-                  raise_in_card=bool(needs and needs[-1]["href"].startswith("/budget/raise")) or any(k["key"] == "saves" for k in kpi_cards),
+                  raise_in_card=bool(needs and needs[-1]["href"].startswith("/budget/raise")) or any(k["key"] == "saves" for k in kpi_cards) or income_in_changes,
+                  changes=changes,
                   raise_offer=raise_offer, meter_lines=meter_lines, left_note=left_note, check=check,
                   plan_bar=charts.plan_bar(period_budgeted, period_actual),
                   status_code=status_code, view=view, month=month,
@@ -460,7 +466,9 @@ async def category_sheet(request: Request, category_id: int):
             r["cover"] = move["href"] if move else ""
     editable = (category.movement == Movement.OUTFLOW and not category.is_root and not category.is_system
                 and category.active and not (line is not None and line.from_loans))
-    return render(request, "budget/category_sheet.html", category=category, group=group, r=r,
+    tree = c.budgets.tree_ids(category_id)  # NF-12AK5: paid, returned, expected back and yours
+    rec = c.budgets.recoveries(tree, first, last, expected_back=c.reimbursements.expected_back(tree, first, last))
+    return render(request, "budget/category_sheet.html", category=category, group=group, r=r, rec=rec,
                   spent=spent, planned=planned, editable=editable, **last_payments(c, category_id, month))
 
 
@@ -834,6 +842,22 @@ def income_change_row(offer: dict, month: str) -> dict:
                 "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose"}
     return {"label": "Your income went up", "detail": f"Recurring expects {fmt(offer['raise'], 0)} more than your average.",
             "href": f"/budget/raise?month={month}", "popup": True, "action": "Choose"}
+
+
+@router.post("/leave-out")
+async def leave_out_of_estimates(request: Request):
+    """NF-12AK5: the review row's Leave out: one purchase leaves the estimate basis (NF-12AK2); Undo brings it back."""
+    c = container(request)
+    form = await request.form()
+    month = str(form.get("month", "")) or month_of(today())
+    back = f"/budget?month={month}#changes"
+    try:
+        transaction_id = int(str(form.get("transaction_id", "0")) or 0)
+        with settled_save(request, c):
+            c.budgets.set_left_out(transaction_id, True)
+    except (LightningError, ValueError) as exc:
+        return redirect(back, getattr(exc, "message", "Choose a purchase to leave out."))
+    return redirect(back, "Left out of estimates.")
 
 
 @router.get("/raise")

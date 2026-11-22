@@ -73,6 +73,7 @@ class LinkedSections:
             "budget": self.budget_impacts(txn),
             "settled": settled,
             "reserves": [] if txn.is_void else c.reserves.links_for_transaction(txn.id),
+            "reserve_back": [] if txn.is_void else c.reserves.refunds_back(txn.id),
             "claims": claims,
             "interest": interest,
             "sources": sources,
@@ -81,7 +82,7 @@ class LinkedSections:
             "owners": owners,
             "tags": tags_in(txn.notes),
         }
-        touched["count"] = sum(len(touched[key]) for key in ("budget", "settled", "reserves", "claims",
+        touched["count"] = sum(len(touched[key]) for key in ("budget", "settled", "reserves", "reserve_back", "claims",
                                                               "interest", "sources", "tags")) + bool(touched["rule"])
         return touched
 

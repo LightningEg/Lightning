@@ -231,7 +231,7 @@ class CashForecaster:
                     or (line.get("counterparty_id"), line["category_id"]) in payees):
                 continue
             key = (line["transaction_id"], line["category_id"])
-            adjustment = adjustments.get(key) if line["value"] > ZERO and key not in deducted else None
+            adjustment = adjustments.get(key) if line["value"] and key not in deducted else None  # a refund's is negative (NF-12AK4)
             amount = line["value"] - (adjustment["principal"] + adjustment["reserve"] if adjustment else ZERO)
             if adjustment:
                 deducted.add(key)

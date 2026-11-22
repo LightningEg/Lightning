@@ -6,6 +6,12 @@ from decimal import Decimal
 from lightning.core.dates import today
 from lightning.ui.web import create_app
 from lightning.workflows.review import ReviewInbox
+
+
+def _needs(c, on):
+    """Needs you's rows and Budget's What changed rows (NF-12AL3): plan changes moved to Budget's card."""
+    inbox = ReviewInbox(c)
+    return [*inbox.items(on), *inbox.changes(on)]
 from tests.screens import _ScreenClient, visible_text
 from tests.test_arabic_no_english import _client, _english
 
@@ -37,7 +43,7 @@ def test_a_salary_that_falls_from_a_date_is_offered_from_that_date(c, setup):
         "drop", "2026-12-25", MONTH, Decimal("18000.00"), Decimal("30000.00"), Decimal("12000.00"))
     # Spending room on 18,000 keeps the 20% target: 14,400; the 16,000 plan is 1,600 over it.
     assert (offer["room"], offer["over"]) == (Decimal("14400.00"), Decimal("1600.00"))
-    inbox = {item["label"]: item for item in ReviewInbox(c).items(today())}
+    inbox = {item["label"]: item for item in _needs(c, today())}
     row = inbox["Your income falls to 18,000 from 25 Dec"]
     assert row["popup"] and row["href"] == f"/budget/raise?month={MONTH}" and "Plan on it from then" in row["detail"]
     browser = _ScreenClient(create_app(c), "http://testserver")

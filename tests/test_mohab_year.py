@@ -529,7 +529,8 @@ def _live_the_year(o: Mohab) -> None:
     b.submit({}, button="Use 50,000 from now on")
     o.ask("raise_after", "Is the plan at 50,000 now?", "Cash planning", "Recurring")
     # Needs you notices the raise is not in his average yet; he keeps his plan and saves the 5,000.
-    o.ask_needs("income_up", "My pay went up. What should my plan do with it?", "Budget and saving", "Choose")
+    # NF-12AL3: Needs you counts what changed in the plan; the changes themselves are on Budget's card.
+    o.ask_needs("income_up", "My pay went up. What should my plan do with it?", "Budget and saving", "Look at them", "Choose")
     o.notes["raise_saved"] = b.submit({}, button="Save it")
     o.ask("raise_target", "Did my savings target go up?", "Safety", "Limits")
 
@@ -557,7 +558,7 @@ def _live_the_year(o: Mohab) -> None:
     o.enter("THNDR", "2027-04-21", "CIB Payroll", "", "-7,100")
     o.ask("sale", "What did I make on the COMI I sold?", "Investments", "COMI")
     # The phone installments started this month, on top of the car: the plan still says 2,500 for loans.
-    o.ask_needs("loans_planned", "Does my plan cover both loans?", "Budget and saving")
+    o.ask_needs("loans_planned", "Does my plan cover both loans?", "Budget and saving", "Look at them")
     b.click("Change the plan")
     o.notes["loans_replanned"] = o.plan_category("Loan payments", "4,500")
     o.ask("loans_planned_after", "And now?")
@@ -583,7 +584,7 @@ def _live_the_year(o: Mohab) -> None:
     if b.page.shows("Use 13,200 from now on"):
         b.submit({}, button="Use 13,200 from now on")
     o.ask("rent_after", "And now?", "Cash planning", "Recurring")
-    o.ask_needs("rent_planned", "Does my budget know the rent went up?", "Budget and saving")
+    o.ask_needs("rent_planned", "Does my budget know the rent went up?", "Budget and saving", "Look at them")
     b.click("Change the plan")
     o.notes["rent_replanned"] = o.plan_category("Housing & rent", "13,200")
     o.ask("rent_planned_after", "And now?")
@@ -808,7 +809,7 @@ def _the_feedback_round(o: Mohab) -> None:
     o.notes["bulk_done"] = b.submit({"txn_ids": talabat, "category_id": Choose("Food & groceries"),
                                      "back": found.path}, action="/transactions/bulk-category")
     # Talabat is food now, so Food runs over its plan every month; Needs you offers room from Shopping.
-    o.ask_needs("food_over", "Food is over its plan every month now. What can I do?", "Budget and saving")
+    o.ask_needs("food_over", "Food is over its plan every month now. What can I do?", "Budget and saving", "Look at them")
     o.notes["move_popup"] = b.click("Move it")
     o.notes["moved"] = b.submit({}, button="Move it")
     o.ask("food_over_after", "And now?")
@@ -1139,7 +1140,7 @@ def test_financial_health_says_the_early_paid_january_in_words(mohab):
 def test_needs_you_offers_the_raise_to_the_plan(mohab):
     # Recurring says 50,000 and his average still 45,000: plan with it, save the difference, or wait.
     offer = mohab.answers["income_up"]
-    assert route(mohab, "income_up") == ["/", "/needs-you/budget", "/budget/raise"]
+    assert route(mohab, "income_up") == ["/", "/needs-you/budget", "/budget", "/budget/raise"]
     assert offer.shows("Recurring expects 50,000 EGP a month; your average is 45,000",
                        "What should the plan do with 5,000 EGP more a month?",
                        "Most you can plan becomes 36,313 EGP; your 20% target stays",

@@ -7,6 +7,7 @@ All amounts are stored in the profile's base currency using each ledger line's r
 from __future__ import annotations
 
 from datetime import date, timedelta
+from decimal import Decimal
 
 from lightning.core.dates import now_iso, today
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
@@ -416,6 +417,38 @@ class ReimbursementService:
             if owed or excluded or row["repaid"]:
                 result.append(dict(row) | {"owed": from_e6(owed), "excluded": from_e6(excluded), "repaid": from_e6(row["repaid"])})
         return result
+
+    def expected_back(self, category_ids, start, end) -> Decimal:
+        """NF-12AK5: what personal claims on purchases in these categories, made between start and end, still expect
+        back today. A claim's outstanding (its expected amount, never more than the purchase, less the receipts linked
+        to it) is shared across the purchase's categories by their amounts. Work claims (NF-12AM) are already out of
+        personal spending and are left out here, so nothing is counted twice."""
+        wanted = {int(cid) for cid in category_ids}
+        if not wanted:
+            return Decimal(0)
+        rows = self.db.all(
+            "SELECT rc.id,rc.expected_e6,le.category_id,SUM(-le.amount_base_e6) line_e6,"
+            "(SELECT COALESCE(SUM(rr.amount_e6),0) FROM reimbursement_receipts rr JOIN transactions r "
+            " ON r.id=rr.receipt_id WHERE rr.claim_id=rc.id AND r.status='POSTED') received_e6 "
+            "FROM reimbursement_claims rc JOIN transactions t ON t.id=rc.expense_id "
+            "JOIN ledger_entries le ON le.transaction_id=t.id JOIN financial_assets a ON a.id=le.asset_id "
+            "WHERE rc.paid_for_work=0 AND t.type='OUT' AND t.status='POSTED' AND t.date BETWEEN ? AND ? "
+            "AND a.is_cash=1 AND le.effect='OUTFLOW' AND le.owner_id IS NULL AND le.category_id IS NOT NULL "
+            "AND NOT EXISTS (SELECT 1 FROM money_from_others m WHERE m.transaction_id=t.id) "
+            "GROUP BY rc.id,le.category_id", (str(start)[:10], str(end)[:10]))
+        claims: dict[int, dict] = {}
+        for row in rows:
+            claim = claims.setdefault(int(row["id"]), {"expected": int(row["expected_e6"]),
+                                                       "received": int(row["received_e6"]), "lines": {}})
+            claim["lines"][int(row["category_id"])] = int(row["line_e6"] or 0)
+        total_e6 = 0
+        for claim in claims.values():
+            cost = sum(claim["lines"].values())
+            outstanding = max(min(claim["expected"], cost) - claim["received"], 0)
+            share = sum(amount for cid, amount in claim["lines"].items() if cid in wanted)
+            if outstanding and cost and share:
+                total_e6 += outstanding * share // cost
+        return from_e6(total_e6)
 
     def link_receipt(self, claim_id: int, transaction_id: int, amount) -> dict:
         self._require_writable()

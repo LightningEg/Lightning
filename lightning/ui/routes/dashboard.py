@@ -532,6 +532,9 @@ async def needs_you_inbox(request: Request):
 async def needs_you_state(request: Request):
     form = await request.form()
     back = "/needs-you?tab=handled" if form.get("tab") == "handled" else "/needs-you"
+    asked = str(form.get("back", ""))
+    if asked.startswith("/budget?month=") and "//" not in asked:  # NF-12AL3: Dismiss on Budget's card returns there
+        back = asked
     try:
         ReviewInbox(container(request)).decide(str(form.get("identity", "")),
             str(form.get("action", "")), today(), str(form.get("until", "")))

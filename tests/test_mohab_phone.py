@@ -180,7 +180,7 @@ class PhoneMohab(Mohab):
             self.answers[key] = Answer(question, list(self.b.trail), screen)
             return screen
         screen = self.b.open("/budget")
-        for action in actions:
+        for action in (a for a in actions if a != "Look at them"):  # NF-12AL3: the phone is already on Budget's card
             screen = self.b.click(action)
         self.answers[key] = Answer(question, list(self.b.trail), screen)
         return screen

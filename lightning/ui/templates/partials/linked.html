@@ -15,6 +15,7 @@
   {% for link in t.interest %}{{ link_row('/deposits/' ~ link.account_id, link.name, 'Certificate interest · {date}'|tr(locale, date=link.event_date), link.amount|money) }}{% endfor %}
   {% for link in t.reserves %}<div class="{{ 'phone-row' if phone_mode() else 'compact-row' }} linked-row"><span><a class="linked-name" href="/reserves/{{ link.reserve_id }}/payments">{{ link.name }}</a><small>{{ 'Paid from this reserve'|tr(locale) }} · {{ link.amount|money }} {{ base }}</small></span>
     {% if not request.state.read_only|default(false) %}<form method="post" action="/transactions/{{ txn.id }}/reserve"><input type="hidden" name="reserve_id" value="{{ link.reserve_id }}"><input type="hidden" name="action" value="unlink"><button class="btn small">{{ 'Remove link'|tr(locale) }}</button><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form>{% endif %}</div>{% endfor %}
+  {% for back in t.reserve_back %}{{ link_row('/reserves/' ~ back.reserve_id ~ '/payments', back.name, 'Went back to this reserve'|tr(locale), back.amount|money) }}{% endfor %}
   {% for claim in t.claims %}{% if claim.role == 'expense' %}{{ link_row('/reimbursements', ('Reimbursement from {name}'|tr(locale, name=claim.payer_name) if claim.payer_name else 'Reimbursement claim'|tr(locale)),
       'Claimed {amt} · received {amt2}'|tr(locale, amt=claim.expected|money, amt2=claim.received|money),
       ('{amt} still owed'|tr(locale, amt=claim.outstanding|money) if claim.outstanding else 'Paid back'|tr(locale))) }}

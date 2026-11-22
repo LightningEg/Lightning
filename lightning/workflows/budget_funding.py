@@ -8,6 +8,20 @@ from lightning.core.money import ZERO, from_e6
 from lightning.reporting.service import flow_of
 
 
+
+def _allocate(amount, weights):
+    """Split ``amount`` over ``weights`` by largest remainders: the parts keep the total and never exceed a weight."""
+    weight_total = sum(weights.values())
+    if not weight_total:
+        return {cid: 0 for cid in weights}
+    parts = {cid: divmod(amount * weight, weight_total) for cid, weight in weights.items()}
+    out = {cid: part[0] for cid, part in parts.items()}
+    remainder = amount - sum(out.values())
+    for cid in sorted(weights, key=lambda key: (-parts[key][1], key))[:remainder]:
+        out[cid] += 1
+    return out
+
+
 class BudgetFunding:
     def __init__(self, db):
         self.db = db
@@ -54,23 +68,40 @@ class BudgetFunding:
                 continue
             principal = min(principal, total)
             reserve = min(reserve, total - principal)
-            # Largest remainders preserve the total and never exceed a category's eligible spending.
-            def allocate(amount, weights):
-                weight_total = sum(weights.values())
-                if not weight_total:
-                    return {cid: 0 for cid in weights}
-                parts = {cid: divmod(amount * weight, weight_total) for cid, weight in weights.items()}
-                out = {cid: part[0] for cid, part in parts.items()}
-                remainder = amount - sum(out.values())
-                for cid in sorted(weights, key=lambda key: (-parts[key][1], key))[:remainder]:
-                    out[cid] += 1
-                return out
-            principal_parts = allocate(principal, amounts)
+            principal_parts = _allocate(principal, amounts)
             remaining_weights = {cid: amount - principal_parts[cid] for cid, amount in amounts.items()}
-            reserve_parts = allocate(reserve, remaining_weights)
+            reserve_parts = _allocate(reserve, remaining_weights)
             for cid in amounts:
                 result[(dates[txn_id], txn_id, cid)] = {'principal': from_e6(principal_parts[cid]),
                                          'reserve': from_e6(reserve_parts[cid])}
+        result.update(self._refunds_to_reserves())
+        return result
+
+    def _refunds_to_reserves(self):
+        """NF-12AK4 (owner, 2026-11-13): money back for a reserve-funded purchase returns to the reserve first, so the
+        refund's month takes that part off monthly-plan spending's reduction: a negative reserve adjustment, spread
+        over the refund's own money-back lines in its purchase's categories."""
+        back = {int(row['refund_id']): int(row['amount_e6']) for row in self.db.all(
+            "SELECT refund_id,SUM(amount_e6) amount_e6 FROM reserve_refunds GROUP BY refund_id")}
+        if not back:
+            return {}
+        marks = ','.join('?' * len(back))
+        rows = self.db.all(
+            "SELECT t.id,t.date,le.category_id,SUM(le.amount_base_e6) total_e6 FROM transactions t "
+            "JOIN ledger_entries le ON le.transaction_id=t.id JOIN refund_links rl ON rl.refund_id=t.id "
+            "WHERE t.status='POSTED' AND le.owner_id IS NULL AND le.effect IN ('INFLOW','OUTFLOW') "
+            "AND le.amount_base_e6>0 AND le.category_id IN (SELECT category_id FROM ledger_entries "
+            f"WHERE transaction_id=rl.expense_id) AND t.id IN ({marks}) GROUP BY t.id,le.category_id",
+            tuple(back))
+        weights, dates = defaultdict(dict), {}
+        for row in rows:
+            weights[int(row['id'])][int(row['category_id'])] = int(row['total_e6'])
+            dates[int(row['id'])] = row['date']
+        result = {}
+        for refund_id, lines in weights.items():
+            amount = min(back[refund_id], sum(lines.values()))
+            for cid, part in _allocate(amount, lines).items():
+                result[(dates[refund_id], refund_id, cid)] = {'principal': ZERO, 'reserve': -from_e6(part)}
         return result
 
     def by_category(self, start, end):
