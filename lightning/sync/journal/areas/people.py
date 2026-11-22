@@ -1,14 +1,26 @@
 """People: counterparty names and aliases, money held for others."""
 from decimal import Decimal
 
-from .spec import AMOUNT, DATE, FLAG, LONG, RATE, TEXT, Command, optional, ref
+from .spec import AMOUNT, DATE, FLAG, LONG, RATE, TEXT, Command, items, optional, ref
 
 TABLES = ("counterparty_aliases", "money_from_others", "owed_to_you_accounts")
 PERSON = ("counterparties", "counterparty_id")
 CUSTODY = dict(transaction_id=ref("transactions"), day=DATE, owner=optional(TEXT), amount=AMOUNT, notes=LONG)
 # NF-12G: money lent to a person. The first lend makes the person's Owed to you account and its link row.
 LENT = dict(day=DATE, person_id=ref("counterparties"), amount=AMOUNT, notes=LONG)
+# NF-12G3: a cost split with others; each share makes that person's account on first use.
+SPLIT = dict(day=DATE, account_id=ref("accounts"), total=AMOUNT, category_id=ref("categories"),
+             shares=items(person_id=ref("counterparties"), amount=AMOUNT), notes=LONG, description=TEXT)
+
+
+def _shares(values):
+    return values | dict(shares=[(line["person_id"], line["amount"]) for line in values["shares"]])
+
+
 COMMANDS = {
+    "people_money.split": Command("people_money.split", SPLIT, creates="transactions", adapt=_shares),
+    "people_money.update_split": Command("people_money.update_split", dict(txn_id=ref("transactions")) | SPLIT,
+                                         target=("transactions", "txn_id"), adapt=_shares),
     "people_money.lend": Command("people_money.lend", LENT | dict(from_account_id=ref("accounts")),
                                  creates="transactions"),
     "people_money.repay": Command("people_money.repay", LENT | dict(to_account_id=ref("accounts")),
