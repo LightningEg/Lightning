@@ -30,9 +30,17 @@ _OWNED = ("le.category_id IS NOT NULL AND le.owner_id IS NULL AND c.movement='OU
 
 def linked_refunds_sql(expense_id: str, *, condition: str = "1") -> str:
     """Scalar SQL for posted refunds. Older dual-linked deposits count only as claim receipts."""
-    return ("(SELECT COALESCE(SUM(rl.amount_e6),0) FROM refund_links rl "
-            "JOIN transactions r ON r.id=rl.refund_id AND r.status='POSTED' "
+    return ("(SELECT COALESCE(SUM(MIN(rl.amount_e6, ("
+            "SELECT COALESCE(SUM(le.amount_base_e6),0) FROM ledger_entries le "
+            "JOIN categories c ON c.id=le.category_id JOIN financial_assets a ON a.id=le.asset_id "
+            f"WHERE le.transaction_id=r.id AND {_OWNED} AND le.amount_base_e6>0 "
+            "AND EXISTS (SELECT 1 FROM ledger_entries x WHERE x.transaction_id=rl.expense_id "
+            "AND x.category_id=le.category_id AND x.owner_id IS NULL AND x.amount_base_e6<0)"
+            "))),0) FROM refund_links rl "
+            "JOIN transactions r ON r.id=rl.refund_id AND r.status='POSTED' AND r.type='IN' "
+            "JOIN transactions e ON e.id=rl.expense_id AND r.date>=e.date "
             f"WHERE rl.expense_id={expense_id} AND {condition} "
+            "AND NOT EXISTS (SELECT 1 FROM money_from_others m WHERE m.transaction_id=r.id) "
             "AND NOT EXISTS (SELECT 1 FROM reimbursement_receipts rr WHERE rr.receipt_id=rl.refund_id))")
 
 

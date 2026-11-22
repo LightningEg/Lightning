@@ -223,3 +223,17 @@ def test_later_refund_updates_claim_and_periods(c, setup):
     c.reimbursements.mark_paid_for_work(claim["id"])
     assert c.reimbursements.work_period(*parse_month("2026-09"))[0]["owed"] == 1000
     assert c.reimbursements.work_period(*parse_month("2026-10"))[0]["owed"] == 0
+
+
+def test_editing_or_voiding_a_refund_updates_claim_capacity(c, setup):
+    account = setup[0]["cib"].id
+    food, _ = _ids(c)
+    purchase = c.transactions.record_outflow("2026-09-01", account, "1000", food)
+    c.reimbursements.create_claim(purchase.id, "1000")
+    refund = c.transactions.record_refund("2026-10-02", account, "400", food)
+    c.refunds.link(refund.id, purchase.id)
+    c.transactions.update_refund(refund.id, "2026-10-02", account, "200", food)
+    assert c.reimbursements.list_claims()[0]["outstanding"] == 800
+    assert c.refunds.room_for_refund(purchase.id)["left"] == 800
+    c.transactions.void(refund.id)
+    assert c.reimbursements.list_claims()[0]["outstanding"] == 1000
