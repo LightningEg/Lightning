@@ -16,14 +16,14 @@ def test_the_old_grey_wells_are_gone_and_the_new_ones_are_defined_once():
     for name, css in files.items():
         for old in ("#EEF4F2", "#E4EEEA"):
             assert old.lower() not in css.lower(), f"{old} still in {name}"
-    assert "--field:#EAF3EE" in files["style.css"] and "--field-focus:#F5EFCF" in files["style.css"]
+    assert "--field:#EAF3EE" in files["style.css"] and "--field-focus:#F2F8F5" in files["style.css"]
     assert len(re.findall(r"--field:\s*#", files["style.css"])) == 1
 
 
 def test_the_guideline_names_the_same_well():
     for name in ("app.html", "app-ar.html", "phone.html", "phone-ar.html"):
         text = (GUIDELINE / name).read_text(encoding="utf-8")
-        assert "--field:#EAF3EE;--field-focus:#F5EFCF" in text, name
+        assert "--field:#EAF3EE;--field-focus:#F2F8F5" in text, name
 
 
 def _luminance(hex_colour):
@@ -34,6 +34,6 @@ def _luminance(hex_colour):
 
 def test_text_on_the_wells_stays_readable():
     for text in ("#0D2233", "#304A5C", "#566E7E"):  # Ink, Ink 2, Muted (the placeholder)
-        for well in ("#EAF3EE", "#F5EFCF"):
+        for well in ("#EAF3EE", "#F2F8F5"):
             hi, lo = sorted((_luminance(text), _luminance(well)), reverse=True)
             assert (hi + 0.05) / (lo + 0.05) >= 4.5, (text, well)
