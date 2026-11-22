@@ -158,6 +158,12 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
     # KPI cards (guideline 3.32 A08): every figure against something, two to four in the row. The figures come
     # from the forecaster's EverydayBudget, the same Budget until payday Cash planning shows.
     raise_offer = c.health.income_change_offer(month) if period.key == "month" else None  # a raise, or a drop from its date
+    # On the current month's plan, the review list also controls the separate income offer.
+    changes = (ReviewInbox(c).changes(today()) if period.key == "month" and month == month_of(today()) and has_plan
+               else None)
+    income_in_changes = bool(changes and any(item["href"].startswith("/budget/raise") for item in changes))
+    if changes is not None and not income_in_changes:
+        raise_offer = None
     kpi_cards, pace, plan_bills, everyday = [], None, [], None
     if period.key == "month" and has_plan:
         everyday = c.forecaster.everyday(month, today())
@@ -193,10 +199,6 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
                           "detail": f"{fmt(r['used'], 0)} spent of {fmt(r['total'], 0)}",
                           "href": move["href"] if move else r["href"], "popup": True,  # Move room or the category sheet (3G6)
                           "action": f"Move {fmt(move['amount'], 0)} from {move['name']}" if move else "See it"})
-    # NF-12AL3: one card of what changed leads the current month; the income offer is one of its rows (one home).
-    changes = (ReviewInbox(c).changes(today()) if period.key == "month" and month == month_of(today()) and has_plan
-               else None)
-    income_in_changes = bool(changes and any(item["href"].startswith("/budget/raise") for item in changes))
     if lead is not None and raise_offer and not by_key.get("saves") and not income_in_changes:
         needs.append(income_change_row(raise_offer, month))
     status = page_status.budget(everyday, has_plan, period.key, period_actual, period_budgeted)
