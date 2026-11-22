@@ -4143,6 +4143,20 @@ ARABIC_UI = {
     'Leave out of estimates': 'استبعده من التقديرات',
     'Budget averages skip it and its refunds. Cash flow and Spent still count it.': 'متوسطات الميزانية بتتجاهله هو واستردّاداته. التدفق النقدي والمنفق لسه بيحسبوه.',
     'Count in estimates': 'احسبه في التقديرات',
+    # NF-12G6: Lend, paid back and forgive on the person's page (owner's words, 2026-11-08).
+    'Lend': 'سلّف',
+    'They paid back': 'رجّع',
+    'Forgive': 'سامح',
+    'You owe them': 'عليك ليه',
+    'Money they lent you, not yet paid back': 'فلوس سلّفها لك ولسه مارجعتهاش',
+    'Money you lent, not yet paid back': 'فلوس سلّفتها ولسه مارجعتش',
+    'Nothing between you now': 'مفيش فلوس بينكم دلوقتي',
+    'What you forgive becomes your spending: it leaves Owed to you for good.': 'اللي بتسامح فيه بيتحسب من مصروفك: بيخرج من «ليك عند الناس» نهائي.',
+    'No plan or reserve names them.': 'مفيش خطة أو مبلغ محجوز باسمه.',
+    'Lent {amt}.': 'اتسلّف {amt}.',
+    'Paid back {amt}.': 'رجع {amt}.',
+    'Forgave {amt}.': 'اتسامح في {amt}.',
+    'Choose an account or a category.': 'اختار حساب أو فئة.',
 }
 
 

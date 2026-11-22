@@ -2,7 +2,9 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Request
 
+from lightning.core.dates import fmt_date, today
 from lightning.core.errors import LightningError, ValidationError
+from lightning.core.money import fmt, to_decimal
 from lightning.counterparties import MAX_ALIASES_PER_COUNTERPARTY
 from lightning.workflows.ai_prompts import counterparty_cleanup_prompt
 
@@ -144,4 +146,75 @@ async def counterparty_page(request: Request, counterparty_id: int):
         page = c.linked.counterparty(counterparty_id)
     except LightningError as exc:
         return redirect("/counterparties", exc.message)
-    return render(request, "counterparty.html", page=page, party=page["party"])
+    return render(request, "counterparty.html", page=page, party=page["party"], **_people_money_forms(c))
+
+
+def _people_money_forms(c) -> dict:
+    """NF-12G6: what Lend, Paid back and Forgive offer: your bank and cash accounts, and the spending categories."""
+    from lightning.accounts.domain import AccountType
+    accounts = [{"id": a.id, "label": a.label} for a in c.accounts.list(active_only=True)
+                if a.account_type in (AccountType.BANK, AccountType.CASH) and a.currency == c.base_currency]
+    categories = [{"id": cat.id, "label": c.categories.display_name(cat.id)}
+                  for cat in c.categories.pickable() if cat.movement.value == "OUTFLOW" and not cat.is_system
+                  and cat.family.value != "INVESTMENT"]
+    gifts = next((cat.id for cat in c.categories.pickable() if cat.code == "EXP.PERSONAL.GIFTS"), None)
+    return {"lend_accounts": accounts, "forgive_categories": categories, "forgive_default": gifts,
+            "today_iso": fmt_date(today())}
+
+
+def _people_money_call(c, counterparty_id: int, action: str, form) -> str:
+    """Lend, Paid back or Forgive (NF-12G6): the one service call; the route holds the settled save."""
+    day, amount = str(form.get("day", "")), str(form.get("amount", ""))
+    if action == "lend":
+        c.people_money.lend(day, counterparty_id, int(str(form.get("account_id", ""))), amount)
+        message = "Lent {amt}."
+    elif action == "repay":
+        c.people_money.repay(day, counterparty_id, int(str(form.get("account_id", ""))), amount)
+        message = "Paid back {amt}."
+    else:
+        c.people_money.forgive(day, counterparty_id, amount, int(str(form.get("category_id", ""))))
+        message = "Forgave {amt}."
+    return message.replace("{amt}", fmt(to_decimal(amount, "amount"), 2))
+
+
+def _people_money_refused(counterparty_id: int, action: str, exc: Exception):
+    back = f"/counterparties/{counterparty_id}"
+    if isinstance(exc, LightningError):
+        return redirect(back, exc.message)
+    return redirect(back, "Choose a category." if action == "forgive" else "Choose an account or a category.")
+
+
+@router.post("/{counterparty_id:int}/lend")
+async def lend_to_person(request: Request, counterparty_id: int):
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            message = _people_money_call(c, counterparty_id, "lend", form)
+    except (ValueError, TypeError, LightningError) as exc:
+        return _people_money_refused(counterparty_id, "lend", exc)
+    return redirect(f"/counterparties/{counterparty_id}", message)
+
+
+@router.post("/{counterparty_id:int}/repay")
+async def repaid_by_person(request: Request, counterparty_id: int):
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            message = _people_money_call(c, counterparty_id, "repay", form)
+    except (ValueError, TypeError, LightningError) as exc:
+        return _people_money_refused(counterparty_id, "repay", exc)
+    return redirect(f"/counterparties/{counterparty_id}", message)
+
+
+@router.post("/{counterparty_id:int}/forgive")
+async def forgive_person(request: Request, counterparty_id: int):
+    c = container(request)
+    form = await request.form()
+    try:
+        with settled_save(request, c):
+            message = _people_money_call(c, counterparty_id, "forgive", form)
+    except (ValueError, TypeError, LightningError) as exc:
+        return _people_money_refused(counterparty_id, "forgive", exc)
+    return redirect(f"/counterparties/{counterparty_id}", message)

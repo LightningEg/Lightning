@@ -217,6 +217,8 @@ class LinkedSections:
                 "this_month": latest[side] if latest else ZERO, "usual_month": usual,
                 "plans": plans, "reserves": reserves, "claims": claims,
                 "owed": sum((claim["outstanding"] for claim in claims), ZERO),
+                # NF-12G6: their Owed to you account; below zero is what you owe them
+                "lent": c.people_money.balance(party["id"], fmt_date(day)) if getattr(c, "people_money", None) else ZERO,
                 "held": held, "rules": rules}
 
     # ------------------------------------------------------------------ 7T3 an account

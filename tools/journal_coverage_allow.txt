@@ -52,6 +52,9 @@ POST /categories/{category_id:int}/delete
 POST /categories/{category_id:int}/edit
 POST /categories/{category_id:int}/row
 POST /counterparties
+POST /counterparties/{counterparty_id:int}/lend
+POST /counterparties/{counterparty_id:int}/repay
+POST /counterparties/{counterparty_id:int}/forgive
 POST /deposits/{account_id:int}/certificates/{certificate_id:int}/interest/match-all
 POST /deposits/{account_id:int}/certificates/{certificate_id:int}/interest/{event_date}/confirm
 POST /deposits/{account_id:int}/certificates/{certificate_id:int}/interest/{event_date}/remove
