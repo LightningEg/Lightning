@@ -475,6 +475,7 @@ async def new_transaction_popup(request: Request, account_id: int):
               # HO-1: Held for others' Give back and Spend for them open this sheet with the person chosen
               "owner_id": str(asked.get("owner_id", "")) if str(asked.get("owner_id", "")).isdigit() else "",
               "to_account_id": str(asked.get("to_account_id", "")) if str(asked.get("to_account_id", "")).isdigit() else "",
+              "estimate_date": str(asked.get("estimate_date", ""))[:10],
               "notes": str(asked.get("notes", ""))[:200], "repeat": "1" if asked.get("repeat") else "",
               "sms_fp": str(asked.get("sms_fp", "")) if re.fullmatch(r"[0-9a-f]{32}", str(asked.get("sms_fp", ""))) else "",
               "sms_ending": str(asked.get("sms_ending", "")) if re.fullmatch(r"\d{4}|salary", str(asked.get("sms_ending", ""))) else "",
@@ -522,7 +523,14 @@ def _save_popup_transaction(c, account_id: int, values: dict):
         if counterparty and any(a.name.casefold() == counterparty.casefold()
                                 for a in c.accounts.list(active_only=True)):
             raise ValidationError("Choose Transfer and select the destination account explicitly.", "counterparty")
-        if kind == "out":
+        if values.get("estimate_date"):
+            work = kind == "out" and values.get("paid_for_work") == "1"
+            txn = c.dated_entries.capture(values["estimate_date"], day, account_id, -amount if kind == "out" else amount,
+                                          category_id, counterparty, values["notes"], owner_id, unsorted=unsorted,
+                                          left_out=kind == "out" and values.get("left_out") == "1", paid_for_work=work,
+                                          expected=(values.get("work_expected") or None) if work else None,
+                                          payer_id=int(values["work_payer"]) if work and values.get("work_payer") else None)
+        elif kind == "out":
             txn = c.transactions.record_outflow(day, account_id, amount, category_id,
                                                counterparty=counterparty, notes=values["notes"], owner_id=owner_id,
                                                allow_system_category=unsorted)
@@ -593,6 +601,9 @@ async def save_transaction_popup(request: Request, account_id: int):
     submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
     payload = {key: value for key, value in values.items() if key not in
                ("return_to", "paid_for_work", "work_expected", "work_payer")} | {"account": account_id}
+    values["estimate_date"] = str(form.get("estimate_date", ""))
+    if values["estimate_date"]:
+        payload["estimate_date"] = values["estimate_date"]
     if values["kind"] == "out" and values["paid_for_work"] == "1":
         payload.update({key: values[key] for key in ("paid_for_work", "work_expected", "work_payer")})
     try:
@@ -602,9 +613,9 @@ async def save_transaction_popup(request: Request, account_id: int):
             if earlier is None:
                 c.transactions.remember_submission(submission, payload, txn.id)
                 matched_reserve = c.reserves.auto_link_transaction(txn.id)
-                if values["left_out"] == "1" and values["kind"] == "out":  # NF-12AK2: chosen under More
+                if not values["estimate_date"] and values["left_out"] == "1" and values["kind"] == "out":  # NF-12AK2: chosen under More
                     c.budgets.set_left_out(txn.id, True)
-                if values["paid_for_work"] == "1" and values["kind"] == "out":
+                if not values["estimate_date"] and values["paid_for_work"] == "1" and values["kind"] == "out":
                     payer = int(values["work_payer"]) if values["work_payer"] else None
                     c.reimbursements.create_work_claim(txn.id, values["work_expected"] or None, payer)
                 _remember_sms(c, form, account_id)

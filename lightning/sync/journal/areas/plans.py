@@ -6,7 +6,7 @@ preview is refused. Automatic plan matching runs only through home automation.
 from .spec import AMOUNT, DATE, FLAG, INT, LONG, MONTH, RATE, TEXT, Command, choice, items, listof, optional, ref
 
 TABLES = ("planned_items", "planned_payments", "loan_extra_payments", "installment_purchases", "budgets",
-          "budget_carryover", "budget_carryover_resets", "cash_funding", "budget_estimate_exclusions")
+          "budget_carryover", "budget_carryover_resets", "cash_funding", "budget_estimate_dates", "budget_estimate_exclusions")
 
 PLAN = dict(kind=choice("BILL", "SUBSCRIPTION", "INCOME", "LOAN"), name=TEXT, amount=AMOUNT,
             frequency=choice("ONCE", "WEEKLY", "MONTHLY", "QUARTERLY", "YEARLY"), interval_count=INT, start_date=DATE,
@@ -98,6 +98,8 @@ COMMANDS = {
         category_id=ref("categories"), recurring=FLAG), target=CATEGORY),
     "budgets.set_emergency_basis": Command("budgets.set_emergency_basis", dict(basis=choice("spending", "income"))),
     # NF-12AK2: one expense left out of estimates; its row is keyed by the transaction.
+    "budgets.set_estimate_date": Command("budgets.set_estimate_date",
+        dict(transaction_id=ref("transactions"), estimate_date=optional(DATE)), target=("budget_estimate_dates", ("transaction_id",))),
     "budgets.set_left_out": Command("budgets.set_left_out", dict(transaction_id=ref("transactions"), left_out=FLAG),
                                     target=("transactions", "transaction_id")),
     "budgets.restore_rows": Command("budgets.restore_rows", dict(category_ids=listof(ref("categories")), rows=BUDGET_ROW)),

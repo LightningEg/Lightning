@@ -114,11 +114,11 @@ def test_the_loan_form_saves_the_rate_and_bad_rates_are_refused(c):
     assert c.planning.get(reducing).rate_kind == "REDUCING" and c.planning.get(reducing).interest_rate == D("18.5")
 
 
-def test_migration_0091_keeps_every_loan_as_it_was_with_no_rate(monkeypatch, tmp_path):
+def test_migration_0093_keeps_every_loan_as_it_was_with_no_rate(monkeypatch, tmp_path):
     before = tmp_path / "migrations"
     before.mkdir()
     for path in sorted(migrator._BUNDLED_MIGRATIONS_DIR.glob("*.sql")):
-        if int(path.name[:4]) <= 90:
+        if int(path.name[:4]) <= 92:
             shutil.copy(path, before / path.name)
     db = Database(":memory:")
     monkeypatch.setattr(migrator, "MIGRATIONS_DIR", before)
@@ -126,7 +126,7 @@ def test_migration_0091_keeps_every_loan_as_it_was_with_no_rate(monkeypatch, tmp
     db.execute("INSERT INTO planned_items(kind,name,amount_e6,frequency,interval_count,start_date,payment_count,principal_e6,"
                "created_at,updated_at) VALUES ('LOAN','Car loan',3000000000,'MONTHLY',1,'2026-01-15',24,60000000000,'x','x')")
     monkeypatch.setattr(migrator, "MIGRATIONS_DIR", migrator._BUNDLED_MIGRATIONS_DIR)
-    assert migrator.migrate(db) == ["0091_loan_rate (APPLIED)"]
+    assert migrator.migrate(db) == ["0093_loan_rate (APPLIED)"]
     row = db.one("SELECT amount_e6,principal_e6,payment_count,interest_rate_e6,rate_kind FROM planned_items")
     assert tuple(row) == (3000000000, 60000000000, 24, None, None)
     assert migrator.migrate(db) == []  # a second run does nothing

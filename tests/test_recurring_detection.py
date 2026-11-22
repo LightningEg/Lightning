@@ -257,7 +257,7 @@ def test_upgrade_preserves_existing_plans_and_payment_links(tmp_path, monkeypatc
         migrator.migrate(db)
         after = dict(db.one("SELECT * FROM planned_items WHERE id=1"))
         assert after.pop("match_tolerance_override_pct") is None
-        assert after.pop("interest_rate_e6") is None and after.pop("rate_kind") is None  # IV-3H7, migration 0091
+        assert after.pop("interest_rate_e6") is None and after.pop("rate_kind") is None  # IV-3H7, migration 0093
         assert after == before
         assert dict(db.one("SELECT * FROM planned_payments")) == payment
         assert not db.all("PRAGMA foreign_key_check")
