@@ -78,6 +78,15 @@ def month_text(value, locale: str = "en") -> str:
     return _digits(f"{_full(month[1], locale)} {month[0]}", locale)
 
 
+def month_chip(value, locale: str = "en") -> str:
+    """Nov 2026 for 2026-11: the period control's month (A05, A06.1; owner, 2026-11-22, r38). Arabic months have no
+    short form, so they read in full (نوفمبر ٢٠٢٦). Other text is kept."""
+    month = _as_month(value)
+    if month is None:
+        return "" if value is None else str(value)
+    return month_text(value, locale) if locale == "ar" else f"{_short(month[1], locale)} {month[0]}"
+
+
 def month_short(value, locale: str = "en") -> str:
     """Oct for 2026-10: a chart's end label, where the axis already says the year (A12). Other text is kept."""
     month = _as_month(value)

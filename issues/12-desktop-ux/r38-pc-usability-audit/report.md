@@ -16,6 +16,8 @@ The audit is right that the PC's explanations are its best part (Safe to spend's
 | Overview's Lead | **Net worth stays** (A09.1); Next 7 days becomes a named list |
 | A PC Add button or window | **No Add button**: adding lives in the account (Transactions keeps "Choose an account") |
 | "In your accounts" names two figures | The phone's Home hero becomes **Cash and banks**; In your accounts keeps the Glossary meaning |
+| Needs you's count | **Every item** (A09.2), not rows |
+| The period control's month | **"Nov 2026"**, opening the month picker |
 
 ## Findings and dispositions
 
@@ -27,12 +29,12 @@ The audit is right that the PC's explanations are its best part (Safe to spend's
 | F4 | Cash planning opens on next month while a bill is due this month (p.8) | Fixed (A05): `tests/test_pc_audit_fixes.py` |
 | F5 | Budget's header holds two page actions (p.7) | Fixed (A05): Next month is in More actions |
 | F6 | Buys shown red like spending (p.12) | Fixed (A03): no tone on a buy or sale |
-| F7 | Needs you says 3 and holds 5 (p.3) | Counts rows by design (IV-12AA3); asked the owner |
+| F7 | Needs you says 3 and holds 5 (p.3) | Fixed: the count is every item (owner pick, 2026-11-22; A09.2) |
 | F8 | Day by day, Cash flow, Month by month folded on Spending (p.5) | Not done: the answer fits one screen and the rest opens on request (owner, IV-12Z) |
 | F9 | Replace the treemap with labelled bars (p.5-6) | Not done: A12 and A13 set the treemap; seven bars break A16 "four, then Other" |
 | F10 | Whole EGP in Transactions (p.12) | Not done: A06.1, rows show piastres when there are any |
 | F11 | Remove the floating round button (p.3, 16) | Not done: the page jump (A10.6) shows only on scroll or near the corner; full-page captures scroll |
-| F12 | Month names, not 2026-11, in period chips (p.16) | A06.1 says "November 2026" while A05 draws "2026-09": asked the owner |
+| F12 | Month names, not 2026-11, in period chips (p.16) | Fixed: the control reads "Nov 2026" and opens the picker (owner pick); A05 and A10.2 drawings updated in both repos |
 | F13 | Page titles differ from the sidebar (Safety › Reserves, Settings › Your data) and Settings shows the version twice (p.10, 15) | Fixed: the first tab carries the section's name (A05); one version line |
 | F14 | The phone's Home calls cash only In your accounts (p.16) | Fixed: Cash and banks (owner pick); Glossary row |
 | F15 | Next 7 days is seven boxes, six empty (p.3-4) | Fixed: a list by name with Pay (owner pick), three then "+n more" |

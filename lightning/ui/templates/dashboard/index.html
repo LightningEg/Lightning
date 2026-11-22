@@ -57,7 +57,7 @@
       {% if e.item_id %}<a class="overview-static-row week-row" data-popup-open href="/plan/items/{{ e.item_id }}/pay?due={{ e.date }}&amp;back=/">{% elif e.circle_id %}<a class="overview-static-row week-row" href="/gameya/{{ e.circle_id }}">{% else %}<a class="overview-static-row week-row" href="/plan/upcoming?month={{ d.date[:7] }}&amp;day={{ d.date }}">{% endif %}
       <span>{{ e.name }} <small>{{ d.date|day }} · {{ ({'paid': 'Paid', 'skipped': 'Skipped', 'late': 'Late', 'today': 'Due today', 'upcoming': ('Expected' if e.incoming else 'To pay')}[e.state])|tr(locale) }}{% if d.payday and e.incoming %} · {{ 'Payday'|tr(locale) }}{% endif %}</small></span>
       <b>{{ ('+' if e.incoming else '') ~ (e.amount|money(False, 0)) }}</b>{% if open %}<b class="needs-act">{{ 'Pay'|tr(locale) }}</b>{% endif %}</a>{% endfor %}
-      {% if week_rows|length > 3 %}<a class="quiet-link" href="/plan/upcoming">{{ '+{n} more'|tr(locale, n=week_rows|length - 3) }}</a>{% endif %}</div>{% endif %}
+</div>{% if week_rows|length > 3 %}<p class="week-more muted small"><a href="/plan/upcoming">{{ '+{n} more'|tr(locale, n=week_rows|length - 3) }}</a></p>{% endif %}{% endif %}
   </section>{% endif %}
 {% set done = setup|selectattr("done")|list|length if setup else 0 %}{% if setup and done != setup|length %}{# IV-12Z5: a finished setup leaves no heading #}
 <details class="flow-disclosure setup-card"><summary class="overview-section-head"><h2>{{ "Get set up"|tr(locale) }}</h2><span>{{ '{done} of {total} done'|tr(locale, done=done, total=setup|length) }}</span></summary>
