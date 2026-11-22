@@ -30,7 +30,9 @@ def test_pc_period_track_submits_months_and_custom_ranges(c, monkeypatch):
     try:
         with sync_playwright() as p:
             with p.chromium.launch(executable_path=chromium, args=['--no-sandbox']) as browser:
-                page = browser.new_page(viewport={'width': 1366, 'height': 768})
+                # Reduced motion: the app then skips its page-to-page animation, so resizing right after a click
+                # cannot abort a running transition ("Viewport size changed" on slow CI).
+                page = browser.new_page(viewport={'width': 1366, 'height': 768}, reduced_motion='reduce')
                 errors = []
                 page.on('pageerror', lambda error: errors.append(str(error)))
                 page.goto(host.launch_url)
