@@ -46,3 +46,14 @@ def test_a_buy_is_not_toned_as_spending_in_the_register(c, monkeypatch):
     assert rows, "the demo household has a buy in these months"
     for row in rows:
         assert not re.search(r'class="num amount (neg|pos)"', row), row[:300]
+
+
+def test_settings_and_safety_titles_match_the_sidebar_and_the_version_shows_once(c, monkeypatch):
+    """A05 (r38): a section's first tab carries the section's name; Settings names the version once."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-11-21")
+    build_demo(c, date(2026, 11, 21))
+    with TestClient(create_app(c)) as browser:
+        settings = browser.get("/settings").text
+        safety = browser.get("/plan/reserves").text
+    assert re.search(r"<h1[^>]*>\s*Settings\s*</h1>", settings) and re.search(r"<h1[^>]*>\s*Safety\s*</h1>", safety)
+    assert "App version" not in settings and 'id="lightning-version"' in settings
