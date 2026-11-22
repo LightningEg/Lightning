@@ -34,6 +34,7 @@
     {% if editable %}<div class="people-money-forms">
       {% if lend_accounts %}<details><summary class="btn small">{{ 'Lend'|tr(locale) }}</summary>
         <form method="post" action="/counterparties/{{ party.id }}/lend">
+          <input type="hidden" name="submission" value="{{ new_submission() }}">
           <div class="field"><label for="lend-day">{{ 'Date'|tr(locale) }}</label><input id="lend-day" type="date" name="day" value="{{ today_iso }}" required></div>
           <div class="field"><label for="lend-account">{{ 'From account'|tr(locale) }}</label><select id="lend-account" name="account_id" data-own-picker required>{% for a in lend_accounts %}<option value="{{ a.id }}">{{ a.label }}</option>{% endfor %}</select></div>
           <div class="field"><label for="lend-amount">{{ 'Amount'|tr(locale) }}</label><input id="lend-amount" type="text" name="amount" inputmode="decimal" required></div>
@@ -41,6 +42,7 @@
           <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></details>{% endif %}
       {% if page.lent > 0 %}{% if lend_accounts %}<details><summary class="btn small">{{ 'They paid back'|tr(locale) }}</summary>
         <form method="post" action="/counterparties/{{ party.id }}/repay">
+          <input type="hidden" name="submission" value="{{ new_submission() }}">
           <div class="field"><label for="repay-day">{{ 'Date'|tr(locale) }}</label><input id="repay-day" type="date" name="day" value="{{ today_iso }}" required></div>
           <div class="field"><label for="repay-account">{{ 'To account'|tr(locale) }}</label><select id="repay-account" name="account_id" data-own-picker required>{% for a in lend_accounts %}<option value="{{ a.id }}">{{ a.label }}</option>{% endfor %}</select></div>
           <div class="field"><label for="repay-amount">{{ 'Amount'|tr(locale) }}</label><input id="repay-amount" type="text" name="amount" inputmode="decimal" value="{{ page.lent|typed }}" required></div>
@@ -48,6 +50,7 @@
           <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></details>{% endif %}
       <details><summary class="btn small">{{ 'Forgive'|tr(locale) }}</summary>
         <form method="post" action="/counterparties/{{ party.id }}/forgive" data-confirm-delete>
+          <input type="hidden" name="submission" value="{{ new_submission() }}">
           <p class="muted small">{{ 'What you forgive becomes your spending: it leaves Owed to you for good.'|tr(locale) }}</p>
           <div class="field"><label for="forgive-day">{{ 'Date'|tr(locale) }}</label><input id="forgive-day" type="date" name="day" value="{{ today_iso }}" required></div>
           <div class="field"><label for="forgive-amount">{{ 'Amount'|tr(locale) }}</label><input id="forgive-amount" type="text" name="amount" inputmode="decimal" value="{{ page.lent|typed }}" required></div>
