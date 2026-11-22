@@ -675,9 +675,10 @@ class BudgetService:
             # profile covers them, else over the months with spending), as a tidy figure; categories outside the budget
             # are left out.
             one_offs = self.one_off_ids()
+            window, full = self._completed_months(month, 3), self._full_window(month, 3)
             for category_id, amount in self.first_plan_suggestions(month).items():
                 if category_id in by_id and category_id not in one_offs:
-                    candidates[category_id] = (amount, "Your average of the last 3 months")
+                    candidates[category_id] = (amount, self._average_note(category_id, window, full))
         elif source == "schedule":
             for category_id, data in schedule.bills(month).items():
                 if category_id in by_id and data["amount"] > ZERO:
@@ -773,6 +774,17 @@ class BudgetService:
         by_id = {c.id: c for c in self.categories.tree(Movement.OUTFLOW)}
         rows.sort(key=lambda row: (by_id[row.category_id].sort_order, row.category_name.casefold()))
         return BudgetFillProposal(month, "changes", tuple(rows), unchanged=unchanged)
+
+    def _average_note(self, category_id: int, window: list[dict[int, Decimal]], full: bool) -> str:
+        """Fill's source label for an average (NF-12AK rule 5): the same words as Budget's average label, so one
+        purchase in three covered months reads "1 of 3 months had spending" and a newer profile says so."""
+        observed = self._tree_average({category_id}, window, full=full)[1]  # suggested_plan offers leaves only
+        head = "Your average of the last 3 months"
+        if full:
+            return f"{head} · {observed} of 3 months had spending"
+        if observed == 1:
+            return f"{head} · Low confidence · 1 observed month"
+        return f"{head} · Little history · {observed} months with spending"
 
     @staticmethod
     def _fill_rule_name(rule) -> str:

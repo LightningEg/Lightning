@@ -2611,6 +2611,7 @@ ARABIC_UI = {
     'Last month': 'الشهر اللي فات',
     'Your average': 'متوسطك',
     'Your average of the last 3 months': 'متوسطك في آخر 3 شهور',
+    'Your average of the last 3 months · Low confidence · 1 observed month': 'متوسطك في آخر 3 شهور · ثقة منخفضة · شهر واحد مرصود',
     'No spending in the last three months to average yet.': 'مفيش صرف في آخر 3 شهور نحسب منه متوسط لسه.',
     'Choose Last month, Your average, Schedule, or Goal as the fill source.': 'اختار الشهر اللي فات أو متوسطك أو الجدول أو الهدف مصدر للملء.',
     'Choose What changed, Last month, Your average, Schedule, or Goal as the fill source.': 'اختار اللي اتغيّر أو الشهر اللي فات أو متوسطك أو الجدول أو الهدف مصدر للملء.',
