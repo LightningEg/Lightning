@@ -185,8 +185,8 @@ async def dashboard(request: Request):
         attention=attention, attention_groups=attention_groups, attention_handled=inbox.handled, setup=setup,
         investment_report=investment_report, cash_flow=cash_flow,
         # NF-12AB3: Net flow opens its working in place (the service's Money in and Money out, signed)
-        net_flow_working=Working("net_flow", cash_flow.net, (WorkingRow("Money in", cash_flow.inflows, "/birdview/expenses"),
-                                                             WorkingRow("Money out", -cash_flow.outflows, "/birdview/expenses"))),
+        net_flow_working=Working("net_flow", cash_flow.net, (WorkingRow(label("money_in"), cash_flow.inflows, "/birdview/expenses"),
+                                                             WorkingRow(label("money_out"), -cash_flow.outflows, "/birdview/expenses"))),
     )
     response.set_cookie(SEEN_COOKIE, wall_now(timezone.utc).isoformat(timespec="seconds"),
                         max_age=365 * 24 * 3600, httponly=True, samesite="lax")  # not money
