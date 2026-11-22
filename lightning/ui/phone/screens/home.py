@@ -92,7 +92,7 @@ def _greeting(hour: int) -> str:
 
 
 def _cash_accounts(c, day: date) -> tuple[tuple, Decimal, int]:
-    """In your accounts: active bank and cash accounts with a positive balance, largest first, four then Other."""
+    """Cash and banks (r38): active bank and cash accounts with a positive balance, largest first, four then Other."""
     rows, base = [], c.reporting.base_currency
     for a in c.accounts.list(active_only=True):
         if a.parent_id or a.account_type not in CASH_KINDS or a.currency != base:

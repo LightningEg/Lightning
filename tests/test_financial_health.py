@@ -16,7 +16,7 @@ def test_financial_health_page_is_directly_reachable_and_shows_missing_values(c,
     assert "Over time" in response.text
     assert "Net worth" in response.text
     # Feedback ticket 87: each limit is one row that opens its numbers; Over time comes before the limits.
-    assert response.text.count('<details class="health-row-wrap">') >= 6 and "See details" in response.text
+    assert response.text.count('<details class="health-row-wrap">') >= 6 and "Open its page" in response.text  # NF-12AB3: one label
     assert response.text.index("Over time") < response.text.index("Against your limits")
     assert "Unavailable" in visible_text(response.text)
     assert 'href="/financial-health"' in response.text

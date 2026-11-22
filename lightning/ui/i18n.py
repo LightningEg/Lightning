@@ -1395,6 +1395,7 @@ ARABIC_UI = {
     'What is promised?': 'ما الالتزامات القادمة؟',
     'This period': 'هذه الفترة',
     'In your accounts': 'في حساباتك',
+    'Cash and banks': 'الكاش والبنوك',
     'Market moves': 'تحركات السوق',
     'Other changes': 'تغييرات تانية',
     'In US dollars': 'بالدولار الأمريكي',

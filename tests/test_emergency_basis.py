@@ -5,6 +5,13 @@ from decimal import Decimal as D
 import pytest
 from fastapi.testclient import TestClient
 
+
+def _covers(page: str, months: str) -> bool:
+    """NF-12AB3: on the PC the months covered is the Reserves Lead (its label, then the figure); the phone keeps the note."""
+    lead = page.split('class="lead-label">Emergency fund covers</h2>', 1)
+    return len(lead) == 2 and f">{months}<small>months</small>" in lead[1].split("</section>", 1)[0]
+
+
 from lightning.core.errors import ValidationError
 from lightning.ui.web import create_app
 
@@ -57,7 +64,7 @@ def test_default_spending_basis_reaches_the_screens_and_forecast(household):
     c = household
     client = TestClient(create_app(c))
     page = client.get("/plan/reserves").text
-    assert "Emergency fund covers 3.0 months" in page and "Of average monthly spending." in page
+    assert _covers(page, "3.0") and "Of average monthly spending." in page
     assert 'name="emergency_basis" value="spending" checked' in client.get("/settings?section=budget").text
     # Six months at 15,000 less the 45,000 set aside, rebuilt over 24 months.
     assert c.forecaster.forecast(date(2026, 12, 31)).months[0].emergency_saving == D("1875")
@@ -68,7 +75,7 @@ def test_the_setting_is_chosen_in_settings_and_read_on_reserves(household):
     household.budgets.set_emergency_basis("income")
     client = TestClient(create_app(household))
     page = client.get("/plan/reserves").text
-    assert "Emergency fund covers 1.5 months" in page and "Of average monthly income." in page
+    assert _covers(page, "1.5") and "Of average monthly income." in page
     assert "Counted in months of income" in page and "Towards six months of income" in page
 
     settings = client.get("/settings?section=budget").text
@@ -80,7 +87,7 @@ def test_the_setting_is_chosen_in_settings_and_read_on_reserves(household):
     assert 'value="spending" checked' in client.get("/settings?section=budget").text
 
     page = client.get("/plan/reserves").text
-    assert "Emergency fund covers 3.0 months" in page and "Of average monthly spending." in page
+    assert _covers(page, "3.0") and "Of average monthly spending." in page
     assert "Counted in months of spending" in page and "Towards six months of spending" in page
     assert "Sep – Nov 2026 · 3 months with spending" in page
 

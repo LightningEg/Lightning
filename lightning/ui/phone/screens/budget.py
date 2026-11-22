@@ -113,18 +113,21 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     listed = tuple(r for r in rows if r not in shown_needs)     # a category is never listed twice
     planned, paid, count = c.planning.month_fixed_costs(e.payments, shown, day)
     move = _cover(c, shown, schedule, [r for r in rows if r.left < 0], e.room) if state == "current" else None
+    changes = ReviewInbox(c).changes(day) if state == "current" else None
+    raise_offer = (c.health.income_change_offer(shown)
+                   if changes and any(item["href"].startswith("/budget/raise") for item in changes) else None)
     return BudgetScreen(shown, prev, nxt, state, left, used,
                         e.spent_less_pace if state == "current" else None, e.per_day,
                         shown_needs, max(len(needs) - ATTENTION, 0), listed, planned, paid, count,  # not money
-                        move, c.health.income_change_offer(shown) if state == "current" else None,
+                        move, raise_offer,
                         month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, e.everyday_spent),
                         working=e.everyday_left_working,
                         payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None,
                         everyday_plan=e.everyday_plan, everyday_spent=e.everyday_spent, days_left=e.days_left,
                         trend=spending_trend(c, shown, day), work=work_claims(c),
                         exclusions=exclusion_context(c)["estimate_exclusions"], work_period=work_period,
-                        changes=[item for item in ReviewInbox(c).changes(day) if not item["href"].startswith("/budget/raise")]  # the raise keeps its card
-                        if state == "current" else None)
+                        changes=[item for item in changes if not item["href"].startswith("/budget/raise")]
+                        if changes is not None else None)
 
 
 def work_claims(c) -> tuple:

@@ -328,8 +328,8 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
         cards.append(card(figure_label("safe_to_spend"), f.safe_to_spend, safe_compare, tone="hold" if f.safe_to_spend >= 0 else "over",
                           key="safe", chip_=chip("today"),
                           visual=segments([("Safe", max(f.safe_to_spend, ZERO), "hold"), ("Promised", promised, "out")]),
-                          line_=line(f"Expected by payday {fmt(f.expected_by_payday, 0)} on {until}" if until else "On top of your plan",
-                                     "How it is worked out", "/plan#safe-section"), href="/plan#safe-section"))
+                          line_=line(f"Expected by payday {fmt(f.expected_by_payday, 0)} on {until}" if until else "On top of your plan"),
+                          working=f.safe_to_spend_working))  # NF-12AB3: the figure opens its working; its home is one link in it
 
     if plan is not None:
         planned, left = plan["planned"], plan["left"]

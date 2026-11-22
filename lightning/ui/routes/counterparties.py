@@ -9,6 +9,7 @@ from lightning.counterparties import MAX_ALIASES_PER_COUNTERPARTY
 from lightning.workflows.ai_prompts import counterparty_cleanup_prompt
 
 from ..web import container, redirect, render, settled_save
+from .register import resent_guard
 
 router = APIRouter(prefix="/counterparties")
 
@@ -163,17 +164,28 @@ def _people_money_forms(c) -> dict:
 
 
 def _people_money_call(c, counterparty_id: int, action: str, form) -> str:
-    """Lend, Paid back or Forgive (NF-12G6): the one service call; the route holds the settled save."""
+    """Post one transaction per delivery of a form, inside the route's settled save."""
     day, amount = str(form.get("day", "")), str(form.get("amount", ""))
-    if action == "lend":
-        c.people_money.lend(day, counterparty_id, int(str(form.get("account_id", ""))), amount)
-        message = "Lent {amt}."
-    elif action == "repay":
-        c.people_money.repay(day, counterparty_id, int(str(form.get("account_id", ""))), amount)
-        message = "Paid back {amt}."
-    else:
-        c.people_money.forgive(day, counterparty_id, amount, int(str(form.get("category_id", ""))))
-        message = "Forgave {amt}."
+    field = "category_id" if action == "forgive" else "account_id"
+    target = str(form.get(field, ""))
+    payload = {"action": action, "person": counterparty_id, "day": day, "amount": amount, field: target}
+    submission = None if getattr(c, "is_journal", False) else str(form.get("submission", ""))
+    if c.transactions.submitted(submission, payload) is not None:
+        return "Saved."
+
+    target_id = int(target)
+    with resent_guard(c, form):
+        if action == "lend":
+            txn = c.people_money.lend(day, counterparty_id, target_id, amount)
+            message = "Lent {amt}."
+        elif action == "repay":
+            txn = c.people_money.repay(day, counterparty_id, target_id, amount)
+            message = "Paid back {amt}."
+        else:
+            txn = c.people_money.forgive(day, counterparty_id, amount, target_id)
+            message = "Forgave {amt}."
+    if submission:
+        c.transactions.remember_submission(submission, payload, txn.id)
     return message.replace("{amt}", fmt(to_decimal(amount, "amount"), 2))
 
 
