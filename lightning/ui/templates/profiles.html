@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1{{ ', viewport-fit=cover' if on_phone }}">
   <meta name="color-scheme" content="light">
   {% if mode == 'checking' %}<meta http-equiv="refresh" content="1">{% endif %}
-  <title>{% if mode == 'choose' %}{{ 'Choose a profile'|tr(locale) }}{% elif mode == 'setup' %}{{ 'Create a profile'|tr(locale) }}{% elif mode == 'recovery-key' %}{{ 'Save your recovery key'|tr(locale) }}{% elif mode == 'unlock' %}{{ 'Unlock your profile'|tr(locale) }}{% elif mode == 'recover' %}{{ 'Reset your password'|tr(locale) }}{% elif mode == 'restore' %}{{ 'Restore a backup'|tr(locale) }}{% elif mode == 'open-file' %}{{ 'Open a profile file'|tr(locale) }}{% elif mode == 'resume-restore' %}{{ 'Resume a restore'|tr(locale) }}{% elif mode == 'repair-restore' %}{{ 'Restore needs checking'|tr(locale) }}{% elif mode == 'manage' %}{{ 'Profile settings'|tr(locale) }}{% elif mode == 'devices' %}{{ 'Devices'|tr(locale) }}{% elif mode in ['connect', 'connected'] %}{{ 'Connect to your phone'|tr(locale) }}{% elif mode == 'borrowed' %}{{ 'Open from your phone'|tr(locale) }}{% elif mode == 'receive' %}{{ 'Bring a profile from your PC'|tr(locale) }}{% elif mode == 'checking' %}{{ 'One moment'|tr(locale) }}{% else %}{{ 'Profiles'|tr(locale) }}{% endif %} · Lightning</title>
+  <title>{% if mode == 'choose' %}{{ 'Choose a profile'|tr(locale) }}{% elif mode == 'setup' %}{{ 'Create a profile'|tr(locale) }}{% elif mode == 'recovery-key' %}{{ 'Save your recovery key'|tr(locale) }}{% elif mode == 'unlock' %}{{ 'Unlock your profile'|tr(locale) }}{% elif mode == 'recover' %}{{ 'Reset your password'|tr(locale) }}{% elif mode == 'restore' %}{{ 'Restore a backup'|tr(locale) }}{% elif mode == 'open-file' %}{{ 'Open a profile file'|tr(locale) }}{% elif mode == 'resume-restore' %}{{ 'Repair an interrupted restore'|tr(locale) }}{% elif mode == 'repair-restore' %}{{ 'Restore needs checking'|tr(locale) }}{% elif mode == 'manage' %}{{ 'Profile settings'|tr(locale) }}{% elif mode == 'devices' %}{{ 'Devices'|tr(locale) }}{% elif mode in ['connect', 'connected'] %}{{ 'Connect to your phone'|tr(locale) }}{% elif mode == 'borrowed' %}{{ 'Open from your phone'|tr(locale) }}{% elif mode == 'receive' %}{{ 'Bring a profile from your PC'|tr(locale) }}{% elif mode == 'checking' %}{{ 'One moment'|tr(locale) }}{% else %}{{ 'Profiles'|tr(locale) }}{% endif %} · Lightning</title>
   <link rel="icon" type="image/svg+xml" href="/static/lightning-mark.svg">
   <link rel="stylesheet" href="/static/fonts/fonts.css?v=2">
   <link rel="stylesheet" href="/static/profiles{{ '.rtl' if locale == 'ar' else '' }}.css?v=7">
@@ -80,8 +80,8 @@
           <h1 id="page-title">{{ 'Open a profile file'|tr(locale) }}</h1>
           <p>{{ 'A profile file is the copy Settings › Save a copy makes. It opens here as a new profile; nothing on this device is replaced.'|tr(locale) }}</p>
         {% elif mode == 'resume-restore' %}
-          <h1 id="page-title">{{ 'Resume a restore'|tr(locale) }}</h1>
-          <p>{{ 'Lightning will check the saved copies and continue a restore that stopped partway through. If it cannot prove the next step is safe, the profile stays locked.'|tr(locale) }}</p>
+          <h1 id="page-title">{{ 'Repair an interrupted restore'|tr(locale) }}</h1>
+          <p>{{ 'A restore stopped partway. Lightning reads what it left and takes the one safe step: a restore that had not changed your profile yet is undone; one that had started is finished. If neither is certain, the profile stays locked and every file is kept.'|tr(locale) }}</p>
         {% elif mode == 'devices' %}
           <h1 id="page-title">{{ 'Devices'|tr(locale) }}</h1>
         {% elif mode in ['connect', 'connected'] %}
@@ -92,7 +92,7 @@
           <h1 id="page-title">{{ 'Bring a profile from your PC'|tr(locale) }}</h1>
         {% elif mode == 'checking' %}
           <h1 id="page-title">{{ 'One moment'|tr(locale) }}</h1>
-          <p>Your PC handed the ledger back. Lightning is checking its copy; this page opens {{ active_name }} by itself in a few seconds.</p>
+          <p>Your PC handed your records back. Lightning is checking its copy; this page opens {{ active_name }} by itself in a few seconds.</p>
         {% elif mode == 'manage' %}
           <h1 id="page-title">{{ 'Profile settings'|tr(locale) }}</h1>
           <p>{{ 'Because this profile is open, each change needs one more proof: your security answer or your recovery key.'|tr(locale) }}</p>
@@ -101,7 +101,7 @@
 
       {% if error %}<div class="alert alert-error" role="alert" aria-live="assertive">{{ error|tr(locale) }}</div>{% endif %}
       {% if error and selected and mode == 'unlock' %}<p><a class="text-link" href="/profiles/journal/setup?db={{ selected|urlencode }}">{{ 'استكمال إعداد التعديل من الأجهزة' if locale == 'ar' else 'Finish device editing setup' }}</a></p>{% endif %}
-      {% if error and selected and mode in ['unlock', 'restore'] and 'restore' in error|lower %}<p><a class="text-link" href="/profiles/restore/resume?db={{ selected|urlencode }}">{{ 'Check interrupted restore →'|tr(locale) }}</a></p>{% endif %}
+      {% if restore_repair and selected and mode in ['unlock', 'restore'] %}<p><a class="text-link" href="/profiles/restore/resume?db={{ selected|urlencode }}">{{ 'Repair the interrupted restore →'|tr(locale) }}</a></p>{% endif %}
       {% if notice and not stepped %}<div class="alert alert-notice" role="status">{{ notice|tr(locale) }}</div>{% endif %}
       {% if mode == 'devices' %}<p><a class="text-link" href="/profiles">{{ '← Back to profile settings'|tr(locale) }}</a></p>{% elif mode not in ['choose', 'manage', 'checking'] and not stepped %}<p><a class="text-link" href="/profiles">{{ '← Back to profiles'|tr(locale) }}</a></p>{% endif %}
       {% if selected and not on_phone %}<p class="selected-database">{{ 'Selected database:'|tr(locale) }} <code>{{ selected }}</code></p>{% endif %}
@@ -153,7 +153,7 @@
               {% endfor %}
             </ul>
           {% else %}
-            <p class="empty-note">{{ 'Keep your ledger on your phone and borrow it here when you work on the PC.'|tr(locale) }}</p>
+            <p class="empty-note">{{ 'Keep your records on your phone and borrow them here when you work on the PC.'|tr(locale) }}</p>
           {% endif %}
           <p><a class="button button-secondary" href="/profiles/connect">{{ 'Connect to your phone'|tr(locale) }}</a></p>
         </section>{% endif %}
@@ -283,17 +283,17 @@
 
       {% elif mode == 'resume-restore' %}
         <section class="panel form-panel" aria-labelledby="resume-restore-heading">
-          <h2 id="resume-restore-heading">{{ 'Check recovery copies'|tr(locale) }}</h2>
-          <p>{{ 'Lightning checks the recorded operation and encrypted recovery copies before continuing. It will keep the profile locked if any evidence is missing or does not match.'|tr(locale) }}</p>
+          <h2 id="resume-restore-heading">{{ 'Check and repair'|tr(locale) }}</h2>
+          <p>{{ 'Your password lets Lightning open the saved copies and check them against the restore record.'|tr(locale) }}</p>
           <form method="post" action="/profiles/restore/resume" class="form-stack">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <input type="hidden" name="db" value="{{ selected }}">
             <div class="field"><label for="resume-restore-password">{{ 'Profile password'|tr(locale) }}</label><input id="resume-restore-password" name="password" type="password" required autocomplete="current-password"></div>
-            <label class="check-row"><input type="checkbox" name="confirm" value="yes" required><span>{{ 'Check and resume this interrupted restore.'|tr(locale) }}</span></label>
-            <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Check and resume'|tr(locale) }}</button><a class="text-link" href="/profiles">{{ 'Cancel'|tr(locale) }}</a></div>
+            <label class="check-row"><input type="checkbox" name="confirm" value="yes" required><span>{{ 'Check and repair this interrupted restore.'|tr(locale) }}</span></label>
+            <div class="form-actions"><button class="button button-primary" type="submit">{{ 'Repair'|tr(locale) }}</button><a class="text-link" href="/profiles">{{ 'Cancel'|tr(locale) }}</a></div>
           </form>
         </section>
-        <p><a class="text-link" href="/profiles/restore/repair?db={{ selected|urlencode }}">{{ 'Resume cannot finish? Go back to the copy from before the restore →'|tr(locale) }}</a></p>
+        <p><a class="text-link" href="/profiles/restore/repair?db={{ selected|urlencode }}">{{ 'Repair cannot finish? Go back to the copy from before the restore →'|tr(locale) }}</a></p>
 
       {% elif mode == 'repair-restore' %}
         <section class="panel form-panel" aria-labelledby="repair-restore-heading">
@@ -319,8 +319,8 @@
         {% if state_line %}<div class="alert alert-notice" role="status">{{ state_line }}</div>{% endif %}
         {% if lending in ['missing', 'damaged'] %}
           <section class="panel form-panel" aria-labelledby="keep-heading">
-            <h2 id="keep-heading">{{ 'Keep this copy as the ledger'|tr(locale) }}</h2>
-            <p>{{ 'Only if no PC holds the ledger now, or you accept losing what was changed there since it borrowed it. Afterwards pair your PCs again.'|tr(locale) }}</p>
+            <h2 id="keep-heading">{{ 'Keep this copy as your records'|tr(locale) }}</h2>
+            <p>{{ 'Only if no PC holds your records now, or you accept losing what was changed there since it borrowed them. Afterwards pair your PCs again.'|tr(locale) }}</p>
             <form method="post" action="/profiles/devices/keep-home" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
               <label class="check-row"><input type="checkbox" name="confirm" value="yes"> {{ 'A PC’s copy from before will not come back'|tr(locale) }}</label>
@@ -332,7 +332,7 @@
           <section class="panel form-panel" aria-labelledby="pair-heading"{% if not pending.paired_name %} data-refresh-seconds="3"{% endif %}>
             <h2 id="pair-heading">{% if pending.paired_name %}{{ 'Paired with {name}'|tr(locale, name=pending.paired_name) }}{% else %}{{ 'Pair a PC'|tr(locale) }}{% endif %}</h2>
             {% if pending.paired_name %}
-              <p>{{ '{name} can now borrow this ledger. If you do not know it, revoke it below.'|tr(locale, name=pending.paired_name) }}</p>
+              <p>{{ '{name} can now borrow your records. If you do not know it, revoke it below.'|tr(locale, name=pending.paired_name) }}</p>
             {% else %}
               <p>{{ 'On the PC: Connect to your phone. When it finds this phone, type these two digits.'|tr(locale) }}</p>
               <div class="recovery-value" dir="ltr" aria-label="{{ 'Pairing digits'|tr(locale) }}">{{ pending.code }}</div>
@@ -346,7 +346,7 @@
         {% else %}
           <section class="panel form-panel" aria-labelledby="new-pair-heading">
             <h2 id="new-pair-heading">{{ 'Pair a PC'|tr(locale) }}</h2>
-            <p>{{ 'The PC finds this phone on the same Wi-Fi; you type two digits. It can then borrow this ledger, edit it and hand it back. One device edits at a time.'|tr(locale) }}</p>
+            <p>{{ 'The PC finds this phone on the same Wi-Fi; you type two digits. It can then borrow your records, edit them and hand them back. One device edits at a time.'|tr(locale) }}</p>
             <form method="post" action="/profiles/devices/pair" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
               <div class="field"><label for="phone-name">{{ "This phone’s name"|tr(locale) }}</label><input id="phone-name" name="phone_name" type="text" required maxlength="60" value="{{ phone_name or 'My phone' }}" autocomplete="off"></div>
@@ -360,18 +360,18 @@
             <h2 id="peers-heading">{{ 'Paired PCs'|tr(locale) }}</h2>
             <ul class="backup-list">
               {% for peer in peers %}
-                <li><span>{{ peer.name }}{% if peer.device_id == lent_to %} · {{ 'Has the ledger'|tr(locale) }}{% elif peer.revoked %} · {{ 'Revoked'|tr(locale) }}{% endif %}</span>{% if not peer.revoked %}<form method="post" action="/profiles/devices/revoke"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="device" value="{{ peer.device_id }}"><button class="text-button" type="submit">{{ 'Revoke'|tr(locale) }}</button></form>{% endif %}</li>
+                <li><span>{{ peer.name }}{% if peer.device_id == lent_to %} · {{ 'Has your records'|tr(locale) }}{% elif peer.revoked %} · {{ 'Revoked'|tr(locale) }}{% endif %}</span>{% if not peer.revoked %}<form method="post" action="/profiles/devices/revoke"><input type="hidden" name="csrf" value="{{ csrf }}"><input type="hidden" name="device" value="{{ peer.device_id }}"><button class="text-button" type="submit">{{ 'Revoke'|tr(locale) }}</button></form>{% endif %}</li>
               {% endfor %}
             </ul>
           </section>
         {% endif %}
         {% if lent_to or state_line %}
           <section class="panel form-panel" aria-labelledby="take-back-heading">
-            <h2 id="take-back-heading">{{ 'Take the ledger back'|tr(locale) }}</h2>
-            <p>{{ 'Only when the PC is lost or broken. The phone keeps editing from its own copy; what was changed on the PC since it borrowed the ledger does not come back.'|tr(locale) }}</p>
+            <h2 id="take-back-heading">{{ 'Take your records back'|tr(locale) }}</h2>
+            <p>{{ 'Only when the PC is lost or broken. The phone keeps editing from its own copy; what was changed on the PC since it borrowed your records does not come back.'|tr(locale) }}</p>
             <form method="post" action="/profiles/devices/take-back" class="form-stack">
               <input type="hidden" name="csrf" value="{{ csrf }}">
-              <label class="check-row"><input type="checkbox" name="confirm" value="yes">{{ "The PC’s changes since it borrowed the ledger will not come back"|tr(locale) }}</label>
+              <label class="check-row"><input type="checkbox" name="confirm" value="yes">{{ "The PC’s changes since it borrowed your records will not come back"|tr(locale) }}</label>
               <div class="form-actions"><button class="button button-secondary" type="submit">{{ 'Take back'|tr(locale) }}</button></div>
             </form>
           </section>
@@ -401,7 +401,7 @@
       {% elif mode == 'connected' %}
         <section class="panel form-panel" aria-labelledby="connected-heading">
           <h2 id="connected-heading">{{ 'Connected to {name}'|tr(locale, name=home_name) }}</h2>
-          <p>{{ 'This PC can now borrow the ledger from the phone, one device editing at a time.'|tr(locale) }}</p>
+          <p>{{ 'This PC can now borrow your records from the phone, one device editing at a time.'|tr(locale) }}</p>
           <a class="button button-primary" href="/profiles/borrowed?id={{ profile_id|urlencode }}">{{ 'Open {name}'|tr(locale, name=profile_name) }}</a>
         </section>
 
@@ -409,7 +409,7 @@
         <section class="panel form-panel" aria-labelledby="borrowed-unlock-heading">
           <h2 id="borrowed-unlock-heading">{% if item.state.value in ['BORROWING', 'SEALED'] %}{{ 'On this PC'|tr(locale) }}{% elif item.state.value == 'RETURNING' %}{{ 'Going home to {name}'|tr(locale, name=item.home_name) }}{% elif item.state.value == 'NEEDS_REPAIR' %}{{ 'Taken back by {name}'|tr(locale, name=item.home_name) }}{% else %}{{ 'Borrow it from {name}'|tr(locale, name=item.home_name) }}{% endif %}</h2>
           {% if item.state.value not in ['BORROWING', 'SEALED', 'RETURNING', 'NEEDS_REPAIR'] %}<p>{{ 'Open Lightning on the phone, on the same Wi-Fi. While you work here, the phone only reads.'|tr(locale) }}</p>{% endif %}
-          {% if item.state.value == 'NEEDS_REPAIR' %}<p>{{ "Edits made here since then did not go to the phone. Borrow again to work on the phone’s ledger; this copy stays on this PC as a backup."|tr(locale) }}</p>{% endif %}
+          {% if item.state.value == 'NEEDS_REPAIR' %}<p>{{ "Edits made here since then did not go to the phone. Borrow again to work on the phone’s records; this copy stays on this PC as a backup."|tr(locale) }}</p>{% endif %}
           <form method="post" action="/profiles/borrowed" class="form-stack">
             <input type="hidden" name="csrf" value="{{ csrf }}">
             <input type="hidden" name="id" value="{{ item.profile_id }}">

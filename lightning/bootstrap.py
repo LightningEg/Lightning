@@ -53,6 +53,7 @@ from lightning.saved_views import SavedViewService
 from lightning.reimbursements import ReimbursementService
 from lightning.transactions.refunds import RefundLinkService
 from lightning.planning.funding import CashFundingService
+from lightning.workflows.dated_entries import DatedEntries
 from lightning.deposits.receipts import DepositReceiptService
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
@@ -80,6 +81,7 @@ class Container:
     reevaluations: ReevaluationService
     money_from_others: MoneyFromOthersService
     physical_items: PhysicalItemService
+    dated_entries: DatedEntries
     budgets: BudgetService
     investments: InvestmentService
     deposits: DepositService
@@ -286,6 +288,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
             validate=functools.partial(validate_replay, db=db, transactions=transactions, assets=assets,
                                        accounts=accounts, reconciliation=reconciliation),
             prepare_validation=prepare_history_validation)
+    reimbursements = ReimbursementService(db)
     result = Container(
         db=db,
         data_dir=data_dir,
@@ -306,6 +309,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         reevaluations=reevaluations,
         money_from_others=money_from_others,
         physical_items=physical_items,
+        dated_entries=DatedEntries(db, transactions, budgets, reimbursements),
         budgets=budgets,
         investments=investments,
         deposits=deposits,
@@ -323,7 +327,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         backup_dir=backup_dir,
         undo=undo,
         saved_views=SavedViewService(db, categories, transactions, reporting),
-        reimbursements=ReimbursementService(db),
+        reimbursements=reimbursements,
         refunds=RefundLinkService(db, transactions),
         funding=CashFundingService(db, budgets, reporting, reserves, planning, categories, settings, schedules,
                                    position),

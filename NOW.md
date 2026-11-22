@@ -26,11 +26,11 @@ Reserved codes: none
 
 - **Owner checks held (2026-10-28):** the owner will not run checks step by step; 1B, 1C, 2B drill, 3I, 3AH, 8C, 8I are closed and listed for end-to-end testing. Bring them up then, not before. **Read:** Overview §9.
 
-- **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12AB3 rest, 12Z5, 12AE4, 12Q. **Read:** 12AB.
+- **O6 (Claude):** to-do = `ALLOWED` in `test_page_skeleton.py`, `ui_arithmetic.json`. Next: 12Z5, 12AE4, 12Q. **Read:** `tests/test_page_skeleton.py`.
 - **O1:** owner checks Home. **Read:** Overview §7.
 - r26: BV-3BA, IV-12C, NF-12G open. **Read:** r26
 
-- **Store (11-21, Claude):** NF-10H done; 10H6 built (Play buyer links the profile to the website). Owner, after the site PR merges: apply 20261121120000, deploy `link-profile` (verify_jwt=false), redeploy `redeem-play`. Play prices at launch (#579). **Read:** site supabase/README › Google Play purchases.
+- **Store (11-21, Claude):** NF-10H done and live: migrations 20261113140000 (cap 5) and 20261121120000 applied; `link-profile` deployed, `redeem-play` and `redeem-purchase` redeployed (verify_jwt=false). Play prices at launch (#579). **Read:** site supabase/README › Google Play purchases.
 
 - **10A/10C app themes:** ready to sell, Dendera included; owner steps in 10C4. Dendera's premium pass (10F) is built; the site's demo shots are current (site #159). New themes: `guideline/themes.md` §5. **Read:** `issues/10-looks-and-store/NF-10C-theme-materials-acceptance.md`.
 

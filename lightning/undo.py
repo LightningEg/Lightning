@@ -149,7 +149,7 @@ class UndoService:
                     raise ValidationError("This history action is only available on the journal home.")
                 fingerprint = self.current_fingerprint()
                 if fingerprint != expected_fingerprint:
-                    raise ValidationError("The ledger changed. Open history again before undoing this action.")
+                    raise ValidationError("Your records changed. Open history again before undoing this action.")
             choice = self.available()["redo" if redo else "undo"]
             if choice is None or (expected_id is not None and int(expected_id) != choice["id"]):
                 raise ValidationError("History changed. Open the page again before undoing this action.")

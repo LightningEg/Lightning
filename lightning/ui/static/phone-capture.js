@@ -127,7 +127,7 @@
       if (account) {
         account.addEventListener("change", () => {
           const params = new URLSearchParams();
-          ["amount", "counterparty", "date", "notes", "sms_fp", "sms_ending"].forEach((name) => {
+          ["amount", "counterparty", "date", "estimate_date", "notes", "sms_fp", "sms_ending"].forEach((name) => {
             const field = form.querySelector(`[name="${name}"]`);
             if (field && field.value) params.set(name, field.value);
           });

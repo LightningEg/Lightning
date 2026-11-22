@@ -8,6 +8,7 @@ from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import ROUND_CEILING, Decimal
 
+from lightning.workflows.review import ReviewInbox
 from lightning.budgeting.domain import spent_outside
 from lightning.core.dates import month_of, parse_month
 from lightning.planning.domain import plan_parts
@@ -58,9 +59,11 @@ class BudgetScreen:
     everyday_plan: Decimal = ZERO     # IV-11M5: the hero's Planned and Spent wells
     everyday_spent: Decimal = ZERO
     days_left: int = 0
-    work: tuple = ()                  # IV-11M5: open work claims, paid for someone else to pay back ({id, name, payer, outstanding})
+    work: tuple = ()                  # IV-11M5: other open reimbursement claims
     trend: dict | None = None         # IV-11M5 Spending: six months of spending, the usual month, daily average, biggest day
     exclusions: tuple = ()
+    work_period: tuple[dict, ...] = ()
+    changes: list | None = None       # NF-12AL3: what changed this month (current month with a plan only)
 
 
 def _shift(month: str, step: int) -> str:
@@ -75,11 +78,12 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     except Exception:
         first, last = parse_month(this)
     shown = month_of(first)
+    work_period = tuple(c.reimbursements.work_period(first, last))
     schedule = c.schedules.view()
     prev, nxt = _shift(shown, -1), "" if shown > this else _shift(shown, 1)  # this month leads to next (NF-12AL4)
     if not c.budgets.has_plan(shown, schedule=schedule):
         return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0,
-                            exclusions=exclusion_context(c)["estimate_exclusions"])
+                            exclusions=exclusion_context(c)["estimate_exclusions"], work_period=work_period)
     e = c.forecaster.everyday(shown, day)
     state = "current" if e.current else ("past" if last < day else "future")
     left = e.everyday_left
@@ -109,23 +113,28 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     listed = tuple(r for r in rows if r not in shown_needs)     # a category is never listed twice
     planned, paid, count = c.planning.month_fixed_costs(e.payments, shown, day)
     move = _cover(c, shown, schedule, [r for r in rows if r.left < 0], e.room) if state == "current" else None
+    changes = ReviewInbox(c).changes(day) if state == "current" else None
+    raise_offer = (c.health.income_change_offer(shown)
+                   if changes and any(item["href"].startswith("/budget/raise") for item in changes) else None)
     return BudgetScreen(shown, prev, nxt, state, left, used,
                         e.spent_less_pace if state == "current" else None, e.per_day,
                         shown_needs, max(len(needs) - ATTENTION, 0), listed, planned, paid, count,  # not money
-                        move, c.health.income_change_offer(shown) if state == "current" else None,
+                        move, raise_offer,
                         month_bar(e.everyday_plan, e.everyday_spent), spend_donut(rows, e.everyday_spent),
                         working=e.everyday_left_working,
                         payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None,
                         everyday_plan=e.everyday_plan, everyday_spent=e.everyday_spent, days_left=e.days_left,
                         trend=spending_trend(c, shown, day), work=work_claims(c),
-                        exclusions=exclusion_context(c)["estimate_exclusions"])
+                        exclusions=exclusion_context(c)["estimate_exclusions"], work_period=work_period,
+                        changes=[item for item in changes if not item["href"].startswith("/budget/raise")]
+                        if changes is not None else None)
 
 
 def work_claims(c) -> tuple:
-    """Paid for the company (or anyone) to claim back: the reimbursement claims with money still outstanding."""
+    """Other reimbursement claims that still have money outstanding."""
     rows = []
     for claim in c.reimbursements.list_claims():
-        if claim["outstanding"] <= ZERO:
+        if claim["paid_for_work"] or claim["outstanding"] <= ZERO:
             continue
         t = dict(claim["expense"]) if claim.get("expense") else {}
         rows.append({"id": claim["id"], "name": t.get("counterparty") or t.get("description") or "", "payer": claim.get("payer_name") or "",

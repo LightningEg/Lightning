@@ -157,12 +157,15 @@ def test_overview_horizons_keep_the_same_status_layout_and_popup_range(client, c
 
 
 def test_overview_links_each_figure_to_its_explain_page(client, setup):
-    """IV-12T: What you own, Free cash and Net flow each open the page that shows their parts."""
+    """IV-12T: Free cash opens the page that shows its parts; NF-12AB3: What you own (or Net worth) and Net flow open
+    How it adds up in place instead, and their old explain pages still answer old links."""
     page = client.get("/?period=custom&date_from=2026-09-10&date_to=2026-09-20").text
+    href = "/explain/free-cash?period=custom&amp;date_from=2026-09-10&amp;date_to=2026-09-20"
+    assert f'href="{href}"' in page
+    for panel in ("working-net-worth", "working-net-flow"):
+        assert f'aria-controls="{panel}"' in page and f'id="{panel}"' in page
     for kind in ("owned", "free-cash", "flow"):
-        href = f"/explain/{kind}?period=custom&amp;date_from=2026-09-10&amp;date_to=2026-09-20"
-        assert f'href="{href}"' in page
-        assert client.get(href.replace("&amp;", "&")).status_code == 200
+        assert client.get(f"/explain/{kind}?period=custom&date_from=2026-09-10&date_to=2026-09-20").status_code == 200
 
 
 def test_birdview_other_assets_has_no_empty_disclosure(client, setup):
@@ -252,7 +255,7 @@ def test_settings_registers_and_selects_profile_currencies(client, c):
     assert 'data-search="usd us dollar"' in page.text.lower()
     assert 'Set active' in page.text and 'Active' in page.text
     fx_page = client.get('/settings?section=currencies&tab=rates')
-    assert 'FX reevaluation history' in fx_page.text and 'name="currency"' in fx_page.text
+    assert 'FX value updates' in fx_page.text and 'name="currency"' in fx_page.text
     assert client.post("/settings/currency", data={"action": "base", "base_currency": "USD"}).status_code == 200
     assert c.settings.base_currency == "USD"
 

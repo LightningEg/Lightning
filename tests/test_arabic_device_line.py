@@ -16,7 +16,7 @@ def test_borrowed_from_line_arabic_has_no_english() -> None:
 
 
 def test_read_only_pc_line_arabic_has_no_english() -> None:
-    line = "Read only on this PC: the ledger is going home or needs repair."
+    line = "Read only on this PC: your records are going home or need repair."
     out = translate(line, "ar")
     assert "Read only" not in out
     assert out.strip()

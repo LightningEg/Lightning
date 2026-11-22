@@ -99,7 +99,8 @@ def test_a_started_restore_is_finished_forward(tmp_path):
 
 def test_an_unpublished_restore_is_not_undone_when_the_profile_changed(tmp_path):
     session, live, paths, _selected, _ = _killed_restore(tmp_path, "manifest")
-    live.write_bytes(live.read_bytes()[:-1] + b"\x01")
+    data = live.read_bytes()
+    live.write_bytes(data[:-1] + bytes([data[-1] ^ 0xFF]))  # always a change; "+ b'\x01'" was none 1 time in 256
     fresh = ProfileSession(session.root)
     with pytest.raises(ProfileError, match="changed after the restore began"):
         fresh.repair_interrupted_restore(str(live), PASSWORD)
@@ -131,3 +132,40 @@ def test_the_resume_screen_says_when_a_restore_was_undone(tmp_path, monkeypatch)
         done = browser.post("/profiles/restore/resume", data={"csrf": token(page.text), "db": str(live),
                                                               "password": PASSWORD, "confirm": "yes"})
         assert done.status_code == 200 and "had not changed anything yet" in done.text, done.text
+
+
+def test_only_a_restore_that_needs_repair_offers_the_repair_screen(tmp_path):
+    """IT-2A4: the unlock screen links to Repair when restore records hold the profile, whatever the message says,
+    and never for an ordinary refusal that merely mentions a restore."""
+    from tests.test_profile_app import start, token
+
+    browser, app, cfg = start(tmp_path)
+    session, live, paths, selected, _ = _killed_restore(tmp_path, "manifest")
+    app.session.root = session.root
+    with browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        page = browser.get("/profiles/unlock", params={"db": str(live)})
+        refused = browser.post("/profiles/unlock", data={"csrf": token(page.text), "db": str(live),
+                                                          "password": PASSWORD})
+        assert refused.status_code == 400 and "needs repair" in refused.text
+        assert "Repair the interrupted restore" in refused.text
+        assert "/profiles/restore/resume?db=" in refused.text
+        page = browser.get("/profiles/restore", params={"db": str(live), "backup": str(selected)})
+        unconfirmed = browser.post("/profiles/restore", data={"csrf": token(page.text), "db": str(live),
+                                                              "backup": str(selected), "password": PASSWORD})
+        assert unconfirmed.status_code == 400 and "restore should proceed" in unconfirmed.text
+        assert "Repair the interrupted restore" not in unconfirmed.text
+
+
+def test_the_repair_screen_reads_in_arabic(tmp_path):
+    from tests.test_profile_app import start
+
+    browser, app, cfg = start(tmp_path)
+    with browser:
+        browser.get("/__launch", params={"code": cfg.launch_code})
+        browser.cookies.set("lightning_ui_locale", "ar")
+        page = browser.get("/profiles/restore/resume", params={"db": str(tmp_path / "x.db")})
+        assert page.status_code == 200
+        assert '<h1 id="page-title">صلّح استعادة متوقفة</h1>' in page.text
+        assert '<h2 id="resume-restore-heading">راجع وصلّح</h2>' in page.text
+        assert "<p>A restore stopped partway" not in page.text

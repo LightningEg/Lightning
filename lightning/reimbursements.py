@@ -7,14 +7,16 @@ All amounts are stored in the profile's base currency using each ledger line's r
 from __future__ import annotations
 
 from datetime import date, timedelta
+from decimal import Decimal
 
-from lightning.core.dates import now_iso, today
+from lightning.core.dates import estimate_date_override, now_iso, today
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
 from lightning.core.money import check_places, from_e6, to_decimal, to_e6
 from lightning.core.refs import parse_row_id
 from lightning.database.connection import Database
 from lightning.database.currencies import minor_units
 from lightning.database.settings import SettingsStore
+from lightning.transactions.refunds import linked_refunds_sql
 
 
 class ReimbursementService:
@@ -24,6 +26,17 @@ class ReimbursementService:
     @staticmethod
     def _id(value, field: str) -> int:
         return parse_row_id(value, field)
+
+    def set_estimate_date(self, link_id: int, estimate_date: str | None) -> None:
+        self._require_writable()
+        day = estimate_date_override(estimate_date)
+        with self.db.transaction(undo_label="Change estimate date"):
+            row = self.db.one("SELECT estimate_date_override FROM reimbursement_receipts WHERE id=?", (link_id,))
+            if row is None:
+                raise NotFoundError("This recovery link no longer exists.")
+            if row["estimate_date_override"] != day:
+                self.db.execute("UPDATE reimbursement_receipts SET estimate_date_override=?,updated_at=? WHERE id=?",
+                                (day, now_iso(), link_id))
 
     def _require_writable(self) -> None:
         if self.db.read_only:
@@ -43,8 +56,8 @@ class ReimbursementService:
         else:
             scope, params, order = f"t.id IN ({','.join('?' for _ in transaction_ids)})", tuple(transaction_ids), ""
         transactions = {int(row["id"]): row for row in self.db.all(
-            "SELECT t.id,t.ref,t.type,t.date,t.status,t.description,t.counterparty,t.counterparty_id "
-            f"FROM transactions t WHERE {scope}{order}", params)}
+            "SELECT t.id,t.ref,t.type,t.date,t.status,t.description,t.counterparty,t.counterparty_id,"
+            f"{linked_refunds_sql('t.id')} refund_e6 FROM transactions t WHERE {scope}{order}", params)}
         # Money from others and another owner's lines are not the user's expense.
         shared = {int(row["id"]) for row in self.db.all(
             f"SELECT t.id FROM transactions t WHERE {scope} AND ("
@@ -97,12 +110,11 @@ class ReimbursementService:
                     amount_e6 <= 0):
                 result[transaction_id] = {**nothing, "transaction": transaction}
                 continue
-            # A refund is not identified by category/date alone: another purchase can
-            # share both. Explicitly linked refunds and repayments reduce outstanding
-            # once, through receipt links.
+            refund_e6 = int(transaction["refund_e6"])
+            net_e6 = max(amount_e6 - refund_e6, 0)
             result[transaction_id] = {
                 "transaction_id": transaction_id, "transaction": transaction, "expense_e6": amount_e6,
-                "refund_e6": 0, "net_e6": amount_e6, "eligible": amount_e6 > 0,
+                "refund_e6": refund_e6, "net_e6": net_e6, "eligible": net_e6 > 0,
                 "suggested": suggested.get(transaction_id, False),
                 "categories": categories.get(transaction_id, []),
                 "accounts": accounts.get(transaction_id, [])}
@@ -160,7 +172,13 @@ class ReimbursementService:
         claim["expected"] = from_e6(claim["expected_e6"])
         expense = self._expense_capacity(claim["expense_id"]) if claim["expense_id"] is not None else {
             "eligible": False, "net_e6": 0, "transaction": None, "categories": [], "accounts": []}
-        current_limit = min(claim["expected_e6"], int(expense.get("net_e6", 0)))
+        expense_limit = min(claim["expected_e6"], int(expense.get("net_e6", 0)))
+        refunded_e6 = 0
+        if claim["paid_for_work"]:
+            refunded_e6 = int(self.db.scalar(
+                "SELECT COALESCE(SUM(work_e6),0) FROM work_claim_refund_lines WHERE claim_id=?", (claim["id"],)))
+            expense_limit = min(claim["expected_e6"], int(expense.get("expense_e6", 0)))
+        current_limit = max(0, expense_limit - refunded_e6)
         links = self.db.all(
             "SELECT rr.*,t.ref,t.date,t.description,t.counterparty,t.type,t.status "
             "FROM reimbursement_receipts rr LEFT JOIN transactions t ON t.id=rr.receipt_id "
@@ -188,15 +206,16 @@ class ReimbursementService:
         txn = expense.get("transaction")
         if claim["expense_id"] is None or not txn or txn["type"] != "OUT" or txn["status"] != "POSTED":
             issues.append("The linked expense is no longer a posted owned expense.")
-        elif not expense.get("eligible"):
+        elif not expense.get("expense_e6"):
             issues.append("The expense no longer has an eligible owned amount.")
-        elif claim["expected_e6"] > int(expense["net_e6"]):
+        elif claim["expected_e6"] > int(expense["expense_e6"]):
             issues.append("The expense changed; the claim exceeds its current owned amount.")
         if received_e6 > current_limit:
             issues.append("Linked receipts now exceed the current claim amount.")
         claim.update({"expense": expense.get("transaction"), "current_expense": from_e6(int(expense.get("net_e6", 0))),
                       "categories": expense.get("categories", []), "accounts": expense.get("accounts", []),
                       "receipts": receipt_rows, "received": from_e6(received_e6),
+                      "merchant_refund": from_e6(refunded_e6),
                       "outstanding": from_e6(0 if claim["work_closed_on"] else max(current_limit - received_e6, 0)),
                       "over_received": from_e6(max(received_e6 - current_limit, 0)),
                       "issues": issues})
@@ -212,7 +231,8 @@ class ReimbursementService:
 
     def available_receipts(self) -> list[dict]:
         used = {int(row["receipt_id"]) for row in self.db.all(
-            "SELECT receipt_id FROM reimbursement_receipts WHERE receipt_id IS NOT NULL")}
+            "SELECT receipt_id FROM reimbursement_receipts WHERE receipt_id IS NOT NULL "
+            "UNION SELECT refund_id FROM refund_links")}
         interest = {int(row["transaction_id"]) for row in self.db.all(
             "SELECT transaction_id FROM cd_interest_receipt_links WHERE transaction_id IS NOT NULL")}
         receipts = []
@@ -400,22 +420,58 @@ class ReimbursementService:
         first, last = str(start), str(end)
         rows = self.db.all(
             "SELECT rc.id,rc.expected_e6,rc.work_closed_on,t.date,t.ref,t.description,t.counterparty,"
-            "SUM(CASE WHEN w.is_receipt=0 THEN -w.amount_e6 ELSE 0 END) excluded,"
-            "SUM(CASE WHEN w.is_receipt=1 AND w.date<=? THEN w.amount_e6 ELSE 0 END) received,"
-            "SUM(CASE WHEN w.is_receipt=1 AND w.date BETWEEN ? AND ? THEN w.amount_e6 ELSE 0 END) repaid,"
+            "SUM(CASE WHEN w.kind='expense' THEN -w.amount_e6 ELSE 0 END) excluded,"
+            "SUM(CASE WHEN w.kind IN ('receipt','refund') AND w.date<=? THEN w.amount_e6 ELSE 0 END) recovered,"
+            "SUM(CASE WHEN w.kind='receipt' AND w.date BETWEEN ? AND ? THEN w.amount_e6 ELSE 0 END) repaid,"
+            "SUM(CASE WHEN w.kind='refund' AND w.date BETWEEN ? AND ? THEN w.amount_e6 ELSE 0 END) refunded,"
             "(SELECT SUM(-le.amount_base_e6) FROM ledger_entries le JOIN financial_assets a ON a.id=le.asset_id "
             "WHERE le.transaction_id=t.id AND a.is_cash=1 AND le.effect='OUTFLOW' AND le.owner_id IS NULL) capacity "
             "FROM reimbursement_claims rc JOIN transactions t ON t.id=rc.expense_id "
             "JOIN work_claim_allocations w ON w.claim_id=rc.id WHERE t.date<=? GROUP BY rc.id ORDER BY t.date,rc.id",
-            (last, first, last, last))
+            (last, first, last, first, last, last))
         result = []
         for row in rows:
             owed = 0 if row["work_closed_on"] and row["work_closed_on"] <= last else max(
-                0, min(row["expected_e6"], row["capacity"]) - row["received"])
+                0, min(row["expected_e6"], row["capacity"]) - row["recovered"])
             excluded = row["excluded"] if row["date"] >= first else 0
-            if owed or excluded or row["repaid"]:
-                result.append(dict(row) | {"owed": from_e6(owed), "excluded": from_e6(excluded), "repaid": from_e6(row["repaid"])})
+            if owed or excluded or row["repaid"] or row["refunded"]:
+                result.append(dict(row) | {"owed": from_e6(owed), "excluded": from_e6(excluded),
+                                           "repaid": from_e6(row["repaid"]), "refunded": from_e6(row["refunded"])})
         return result
+
+    def expected_back(self, category_ids, start, end) -> Decimal:
+        """NF-12AK5: what personal claims on purchases in these categories, made between start and end, still expect
+        back today. A claim's outstanding (its expected amount, never more than the purchase, less the receipts linked
+        to it) is shared across the purchase's categories by their amounts. Work claims (NF-12AM) are already out of
+        personal spending and are left out here, so nothing is counted twice."""
+        wanted = {int(cid) for cid in category_ids}
+        if not wanted:
+            return Decimal(0)
+        rows = self.db.all(
+            "SELECT rc.id,rc.expected_e6,le.category_id,SUM(-le.amount_base_e6) line_e6,"
+            f"{linked_refunds_sql('t.id')} refund_e6,"
+            "(SELECT COALESCE(SUM(rr.amount_e6),0) FROM reimbursement_receipts rr JOIN transactions r "
+            " ON r.id=rr.receipt_id WHERE rr.claim_id=rc.id AND r.status='POSTED') received_e6 "
+            "FROM reimbursement_claims rc JOIN transactions t ON t.id=rc.expense_id "
+            "JOIN ledger_entries le ON le.transaction_id=t.id JOIN financial_assets a ON a.id=le.asset_id "
+            "WHERE rc.paid_for_work=0 AND t.type='OUT' AND t.status='POSTED' AND t.date BETWEEN ? AND ? "
+            "AND a.is_cash=1 AND le.effect='OUTFLOW' AND le.owner_id IS NULL AND le.category_id IS NOT NULL "
+            "AND NOT EXISTS (SELECT 1 FROM money_from_others m WHERE m.transaction_id=t.id) "
+            "GROUP BY rc.id,le.category_id", (str(start)[:10], str(end)[:10]))
+        claims: dict[int, dict] = {}
+        for row in rows:
+            claim = claims.setdefault(int(row["id"]), {"expected": int(row["expected_e6"]),
+                                                       "received": int(row["received_e6"]),
+                                                       "refunded": int(row["refund_e6"]), "lines": {}})
+            claim["lines"][int(row["category_id"])] = int(row["line_e6"] or 0)
+        total_e6 = 0
+        for claim in claims.values():
+            cost = sum(claim["lines"].values())
+            outstanding = max(min(claim["expected"], cost - claim["refunded"]) - claim["received"], 0)
+            share = sum(amount for cid, amount in claim["lines"].items() if cid in wanted)
+            if outstanding and cost and share:
+                total_e6 += outstanding * share // cost
+        return from_e6(total_e6)
 
     def link_receipt(self, claim_id: int, transaction_id: int, amount) -> dict:
         self._require_writable()
@@ -435,7 +491,9 @@ class ReimbursementService:
                     raise ValidationError("The linked expense needs review before a receipt can be added.")
                 if self.db.scalar("SELECT 1 FROM cd_interest_receipt_links WHERE transaction_id=?", (transaction_id,)):
                     raise ValidationError("This receipt is already matched to certificate interest.")
-                receipt = self._receipt_capacity(int(transaction_id))
+                if self.db.scalar("SELECT 1 FROM refund_links WHERE refund_id=?", (transaction_id,)):
+                    raise ConflictError("This money is already linked to a purchase as a refund.", "receipt_id")
+                receipt = self._receipt_capacity(transaction_id)
                 if not receipt["eligible"]:
                     raise ValidationError("Choose a posted owned cash inflow receipt.", "receipt_id")
                 if self.db.scalar("SELECT 1 FROM reimbursement_receipts WHERE receipt_id=?", (transaction_id,)):
@@ -454,6 +512,12 @@ class ReimbursementService:
             raise ConflictError("This receipt is already linked to a reimbursement claim.", "receipt_id") from None
         return {"id": int(cur.lastrowid), "claim_id": claim_id, "receipt_id": transaction_id,
                 "amount": from_e6(value_e6)}
+
+    def link_dated_receipt(self, claim_id, transaction_id, amount, estimate_date):
+        with self.db.transaction(undo_label="Link reimbursement receipt"):
+            link = self.link_receipt(claim_id, transaction_id, amount)
+            self.set_estimate_date(link["id"], estimate_date)
+            return link
 
     def unlink_receipt(self, claim_id: int, link_id: int) -> None:
         self._require_writable()

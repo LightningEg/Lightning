@@ -65,3 +65,64 @@ def test_invalid_work_amount_rolls_back_expense(c, setup):
         "paid_for_work": "1", "work_expected": "110"})
     assert response.status_code == 400
     assert c.db.scalar("SELECT COUNT(*) FROM transactions") == count
+
+
+def test_merchant_refund_reduces_work_owed_and_keeps_personal_spending_zero(c, setup):
+    account = setup[0]["cib"]
+    work = c.categories.get_by_code("EXP.WORK.TRANSPORT").id
+    client = TestClient(create_app(c), follow_redirects=False)
+    response = client.post(f"/accounts/{account.id}/transaction/new", data={
+        "kind": "out", "date": "2026-09-15", "amount": "1000", "category_id": work, "paid_for_work": "1"})
+    assert response.status_code == 303
+    claim, = c.reimbursements.list_claims()
+    response = client.post(f"/transactions/{claim['expense_id']}/refund",
+                           data={"date": "2026-10-08", "amount": "400"})
+    assert response.status_code == 303
+    refund, = c.refunds.refunds_of(claim["expense_id"])
+    sep, oct_ = parse_month("2026-09"), parse_month("2026-10")
+
+    updated, = c.reimbursements.list_claims()
+    assert updated["outstanding"] == 600
+    assert updated["received"] == 0
+    assert c.reimbursements.work_period(*sep)[0]["owed"] == 1000
+    october, = c.reimbursements.work_period(*oct_)
+    assert (october["owed"], october["repaid"], october["refunded"]) == (600, 0, 400)
+    assert "Merchant refund 400" in client.get("/budget?month=2026-10").text
+    assert "Merchant refund 400" in client.get("/reimbursements").text
+    assert c.budgets.owned_spending(*oct_).get(work, 0) == 0
+    assert sum(row["value"] for row in c.reporting.spending_lines(*oct_)) == 0
+    assert c.reporting.cash_flow(*oct_).outflows == -400
+    assert c.reporting.account_balance(account.id, oct_[1]) == 49400
+    assert all(r["transaction_id"] != refund["refund_id"] for r in c.reimbursements.available_receipts())
+
+    c.refunds.unlink(refund["refund_id"])
+    assert c.reimbursements.list_claims()[0]["outstanding"] == 1000
+    assert c.budgets.owned_spending(*oct_)[work] == -400
+
+
+def test_partial_work_claim_preserves_personal_refund_and_counts_refund_before_writeoff(c, setup):
+    account = setup[0]["cib"]
+    work = c.categories.get_by_code("EXP.WORK.TRANSPORT").id
+    expense = c.transactions.record_outflow("2026-09-15", account.id, "1000", work)
+    claim = c.reimbursements.create_work_claim(expense.id, "600")
+    refund = c.refunds.record_refund(expense.id, "2026-10-08", "700")
+    receipt = c.transactions.record_inflow("2026-10-09", account.id, "200", work)
+    c.reimbursements.link_receipt(claim["id"], receipt.id, "200")
+    sep, oct_ = parse_month("2026-09"), parse_month("2026-10")
+    assert c.reimbursements.list_claims()[0]["outstanding"] == 100
+    assert c.budgets.owned_spending(*sep)[work] == 400
+    assert c.budgets.owned_spending(*oct_)[work] == -400
+    assert c.budgets.estimate_spending(*sep).get(work, 0) == 0
+    assert c.budgets.estimate_spending(*oct_).get(work, 0) == 0
+
+    c.reimbursements.close_work_claim(claim["id"], "2026-11-01")
+    assert c.budgets.owned_spending(*sep)[work] == 500
+    assert c.budgets.estimate_spending(*sep)[work] == 100
+    assert c.reimbursements.work_period(*oct_)[0]["owed"] == 100
+    assert c.reimbursements.list_claims()[0]["outstanding"] == 0
+    c.budgets.set_left_out(expense.id, True)
+    assert c.budgets.estimate_spending(*sep).get(work, 0) == 0
+    assert c.budgets.estimate_spending(*oct_).get(work, 0) == 0
+
+    c.transactions.void(refund["refund_id"])
+    assert c.budgets.owned_spending(*sep)[work] == 800

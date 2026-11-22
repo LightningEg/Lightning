@@ -70,7 +70,7 @@ Remaining: deploy/verify the live Apps Script receiver and verify the replacemen
 
 - The four repositories now live under the `LightningEg` organization; `tools/security_setup.py` (preview by default, `--apply` with the owner's `gh` login) already holds rulesets for the app, website, downloads and market-data `main` branches, the `v*` tags, the environments and the secret moves. Whether the owner has run it with `--apply` is not recorded anywhere.
 - Finding 1 is still live: `git log --format=%ae -50` shows the owner account's personal address on 48 of the last 50 commits (the squash merges). The address is not copied here.
-- Finding 7 (pairing listener on all interfaces) is part of the native acceptance in [2C](../2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) and [4A](../4-edit-journal-and-devices/NF-4A-edit-journal.md); it is not repeated below.
+- Finding 7 (pairing listener on all interfaces) is part of the native acceptance in [2C](https://github.com/LightningEg/Lightning/blob/02eb128/issues/2-safe-for-real-money/IT-2C-ordinary-pc-acceptance.md) and [4A](../4-edit-journal-and-devices/NF-4A-edit-journal.md); it is not repeated below.
 - The website half (finding 2, 3 and 5, the Apps Script receiver, website PR #19) lives in the website repository, which this session could not read; 1E3 starts by checking it.
 - Release checks already refuse tracked key, keystore and database files (`tools/release_check.py` `PRIVATE_FILES`), but no tool scans Git history or the built ZIP/APK.
 
@@ -84,6 +84,7 @@ Remaining: deploy/verify the live Apps Script receiver and verify the replacemen
 Each step below is one pull request or one owner action. **A real finding is never written in a public issue, pull request, commit message, `NOW.md` or this file** (skill `security-sweep` › After): it goes to a private GitHub security advisory and the owner hears of it in the question tool; the public line says only "checked, N findings filed privately". Read `skills/security-sweep/SKILL.md` first. Run `python -m pytest tests/test_issues.py -q` after editing this file, and delete a step's heading in the same commit that finishes it.
 
 ## 1E4 Check the live website receivers against formula injection and key leaks · S · opus
+1E4 checked 2026-11-22, 0 findings filed privately: `=1+1` sent once through signup, survey, app feedback and UX tests to the deployed receiver; all four answered ok, and the signup and survey tabs show it as text (not 2); every text field of the four goes through `websiteCell_`, and the receiver tests pass.
 1E3 done 2026-11-11 (owner: receiver deployed, analytics key rotated, secret updated).
 Files: the website repository's `apps-script/` (read-only), its tests named in website PR #19.
 Do: with the deployed receiver, send one benign formula-shaped value (`=1+1`) through each public form (feedback, UX tests, survey, signup) and check the sheet stores it as text. The dashboard half is dropped: analytics now live in the owner console on Supabase (owner, 2026-11-11) and `analytics/dashboard.html` only redirects, so no read key travels through a page. Report pass/fail per form to the owner in the question tool; a failure goes to a private advisory.
@@ -96,6 +97,7 @@ Do: clone each of the four repositories with all refs (`git clone --mirror`), ru
 Done when: this file has one dated line per repository: "history scanned, N real findings filed privately"; nothing else about them is public.
 
 ## 1E8 Inspect the published Windows ZIP and Android APK · S · opus
+1E8 checked 2026-11-22: Lightning-v2.3.2-Windows-x64.zip and Lightning-2.3.2-1224-6aa97680.apk (checksums matched), 0 findings filed privately. Repeat after each release: `python tools/release_check.py --artifacts <zip> <apk>`.
 Files: none changed; the newest release's ZIP from `Lightning-downloads` and the APK from the app's newest release, downloaded into their own empty scratchpad folder.
 Do: list each archive (`unzip -l`); fail on any `.git/`, `tests/`, `*.db`/`*.sqlite`, `recovery.txt`, `keys.json`, `*.pem`/`*.key`/`*.jks`/`*.p12`, `.env`, a `Documents/Lightning` path or a name from the sample households outside `lightning/samples/`; run `strings` over the binaries for the patterns of 1E7; compare the APK's permissions (`aapt dump permissions` or `apkanalyzer`) with `packaging/android-permissions.txt`. If a check belongs in every release, add it to `tools/release_check.py` with a test in `tests/test_release_check.py` (create it if missing) in its own pull request.
 Done when: this file has one dated line naming the two versions checked and "N findings filed privately"; any new release check passes `python -m pytest tests/test_release_check.py -q`.

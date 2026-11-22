@@ -124,7 +124,7 @@ async def financial_health(request: Request):
             if judged else None)
     needs = [{"label": f"{labels.get(item.key, item.key)} is outside your limit",
               "detail": " · ".join(x for x in (limit_words(item), item.period) if x), "href": item.href,
-              "action": "See details"} for item in outside]
+              "action": "Review"} for item in outside]  # NF-12AB3: a verb, not the old "See details"
     status = page_status.health(within, len(judged), [labels.get(item.key, item.key) for item in outside])
     return render(request, "financial_health.html", **overview, lead=lead, needs=needs, status=status,
                   liquidity_context=liquidity_context,

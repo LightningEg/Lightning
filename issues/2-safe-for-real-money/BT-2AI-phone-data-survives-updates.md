@@ -76,6 +76,7 @@ Done when: a test with a dummy journal profile: the PC page shows the offer only
 the saved file opens on a fresh root as a review copy with the cutoff shown.
 
 ## 2AI6 Owner: the phone survives an update and a reinstall · owner
+**Waived by owner, 2026-11-22:** counted done without a run (launch checklist #579); a tester may still run it, and a failure becomes a bug item.
 Held for the end-to-end check (Overview §9): on a real phone, with a dummy profile, (1) install the current release,
 then the next build over it: the book is there; (2) with 2AI3 on, uninstall and reinstall: Open a profile file
 (2AI2) brings the book back from the outside folder; (3) save a profile file on the PC and open it on a second phone.

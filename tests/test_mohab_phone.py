@@ -66,7 +66,7 @@ TODO_SEE_ALL = "To do: See all"
 # Sections without a tab-bar slot (phone overhaul 2026-10-22): their taps go through More.
 MOVED = {"Accounts", "Cash planning", "Investments", "Financial health", "Health", "Spending", "Currencies", "Settings"}
 # The phone's Choose period sheet (phone overhaul 2026-10-22) names the PC's period buttons in words.
-BUTTONS = {"Custom": "Apply", "YTD": "Year to date", "Monthly": "This month", "Search": None}  # the phone's Search is live: no button, Enter sends it (3AN6)
+BUTTONS = {"Custom": "Apply", "This year": "Year to date", "Monthly": "This month", "Search": None}  # the phone's Search is live: no button, Enter sends it (3AN6)
 
 
 def _phone(app):
@@ -180,7 +180,7 @@ class PhoneMohab(Mohab):
             self.answers[key] = Answer(question, list(self.b.trail), screen)
             return screen
         screen = self.b.open("/budget")
-        for action in actions:
+        for action in (a for a in actions if a != "Look at them"):  # NF-12AL3: the phone is already on Budget's card
             screen = self.b.click(action)
         self.answers[key] = Answer(question, list(self.b.trail), screen)
         return screen

@@ -21,6 +21,7 @@
     <p class="phone-hero-line">{{ 'No limit for this category this month.'|tr(locale) }}</p>
     {% endif %}
   </section>
+  {% include "partials/budget_recoveries.html" %}
   {% if editable or (r and r.cover) %}<div class="phone-two-actions">{% if editable %}<a class="btn" data-popup-open href="/budget/category/{{ category.id }}/edit?month={{ month }}">{{ ('Raise the plan' if r and r.over else 'Edit limit' if r else 'Set a limit')|tr(locale) }}</a>{% endif %}{% if r and r.cover %}<a class="btn primary" data-popup-open href="{{ r.cover }}">{{ 'Move money'|tr(locale) }}</a>{% endif %}</div>{% endif %}
   {% if r and r.line %}<p class="phone-wide-soft phone-cat-note"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 7 13.5 15.5 8.5 10.5 2 17M16 7h6v6"/></svg><span>{{ r.line.text|tr(locale, **r.line['values']) }}</span></p>{% endif %}
   <section class="phone-section is-rose" aria-labelledby="cat-month">

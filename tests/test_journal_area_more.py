@@ -307,3 +307,19 @@ def test_money_lent_paid_back_and_forgiven_reaches_both_devices(devices):
     act(hd, pc, lambda s: s.people_money.forgive("2026-04-01", person, "200", gift, ""))
     assert hd.c.people_money.owed_to_you() == pc.c.people_money.owed_to_you() == 0
     assert hd.c.db.scalar("SELECT COUNT(*) FROM owed_to_you_accounts") == 1
+
+
+def test_a_cost_split_with_others_and_its_edit_reach_both_devices(devices):
+    """NF-12G3: a split makes each person's account on first use, and an edit moves every line on both devices."""
+    hd, pc = devices
+    sara = on_home(hd, lambda s: s.counterparties.ensure_person("Sara"))
+    omar = on_home(hd, lambda s: s.counterparties.ensure_person("Omar"))
+    pc.sync_with(hd.home)
+    bank = account(pc, "Bank").id
+    food = pc.c.categories.get_by_code("EXP.PERSONAL.FOOD").id
+    act(hd, pc, lambda s: s.people_money.split("2026-02-01", bank, "600", food, [(sara, "200"), (omar, "200")], ""))
+    assert hd.c.people_money.owed_to_you() == pc.c.people_money.owed_to_you() == Decimal(400)
+    txn = pc.c.db.scalar("SELECT id FROM transactions WHERE description='Split with Sara and Omar'")
+    act(hd, pc, lambda s: s.people_money.update_split(txn, "2026-02-01", bank, "450", food, [(sara, "200"), (omar, "150")], ""))
+    assert hd.c.people_money.balance(omar) == pc.c.people_money.balance(omar) == Decimal(150)
+    assert hd.c.db.scalar("SELECT COUNT(*) FROM owed_to_you_accounts") == 2

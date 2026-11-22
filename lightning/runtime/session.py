@@ -29,6 +29,10 @@ class ProfileError(ValueError):
     """Safe, deliberately authored messages suitable for the locked UI."""
 
 
+class RestoreNeedsRepair(ProfileError):
+    """An interrupted or unproven restore holds this profile locked (IT-2A4): the screen offers Repair."""
+
+
 PROFILE_CURRENCIES = frozenset(code for code, _ in CASH_ASSETS)
 
 
@@ -802,7 +806,7 @@ class ProfileSession:
         self._locked()
         paths = node.paths
         if writable and not node.writable:
-            raise ProfileError("This PC does not hold the ledger now.")
+            raise ProfileError("This PC does not hold your records now.")
         profile_paths = ProfilePaths(None, paths.data_dir, paths.working_path, paths.keys_path,
                                      paths.data_dir / "backups", paths.lock_path)
         profile_paths.backups_dir.mkdir(mode=0o700, exist_ok=True)

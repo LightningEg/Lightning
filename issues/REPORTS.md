@@ -6,10 +6,10 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | Code | Report | Review date | Kind | Open follow-ups |
 | --- | --- | --- | --- | --- |
 | r1 | [Audit 1: is Lightning ready to demo?](12-desktop-ux/r1-demo-readiness/report.md) | 2026-10-20 | audit | none |
-| r2 | [Audit 2: backend efficiency and loose ends](2-safe-for-real-money/r2-backend-efficiency/report.md) | 2026-10-21 | audit | 2A, 2C, 4A |
+| r2 | [Audit 2: backend efficiency and loose ends](2-safe-for-real-money/r2-backend-efficiency/report.md) | 2026-10-21 | audit | 4A |
 | r3 | [Audit 5: is the backend engine efficient and streamlined?](4-edit-journal-and-devices/r3-backend-streamlining/report.md) | 2026-10-21 | audit | 4A |
 | r4 | [Audit 3: is the edit journal (multi-device sync) solid?](4-edit-journal-and-devices/r4-edit-journal/report.md) | 2026-10-21 | audit | 4A |
-| r5 | [Audit 4: backend correctness and failure boundaries](2-safe-for-real-money/r5-backend-correctness/report.md) | 2026-10-23 | audit | 2A, 2C, 4A |
+| r5 | [Audit 4: backend correctness and failure boundaries](2-safe-for-real-money/r5-backend-correctness/report.md) | 2026-10-23 | audit | 4A |
 | r7 | [Audit 6: open pull request cleanup](1-easy-to-contribute/r7-pull-request-cleanup/report.md) | 2026-10-23 | review | 1H |
 | r11 | [Pairing backend hardening and security review](4-edit-journal-and-devices/r11-pairing-hardening/report.md) | 2026-10-26 | review | 4A |
 | r12 | [v1.5.0 PR review, theme switching and package preparation](10-looks-and-store/r12-v150-release/report.md) | 2026-10-26 | release | 1H, 10A, 10C |
@@ -18,22 +18,24 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r17 | [Audit 10: the phone, tab by tab - quick actions and the answer first](11-phone-ux/r17-phone-tab-audit/report.md) | 2026-10-29 | audit | none |
 | r19 | [Audit 12: the PC app, tab by tab - clutter, hierarchy and flow](12-desktop-ux/r19-desktop-tab-audit/report.md) | 2026-10-30 | audit | none |
 | r20 | [Audit 13: the phone for quick jobs - convenience, taps and the look](11-phone-ux/r20-phone-convenience-audit/report.md) | 2026-11-01 | audit | none |
-| r22 | [Code audit: refactoring, loose ends and smart features](9-later/r22-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 2A, 2C, 4A, 4B |
+| r22 | [Code audit: refactoring, loose ends and smart features](9-later/r22-code-quality-and-smart-features/report.md) | 2026-11-03 | audit | 1H, 4A, 4B |
 | r23 | [CSV import stress test: where it breaks and how to rebuild it](7-planning-import-and-search/r23-csv-import-stress/report.md) | 2026-11-05 | audit | none |
 | r24 | [Desktop and phone UX: logic, visuals, simpler tasks and connected features](12-desktop-ux/r24-desktop-phone-ux/report.md) | 2026-11-05 | audit | 4A, 4B |
 | r25 | [The phone, redesigned: a phone-first architecture, tab by tab](11-phone-ux/r25-phone-ux-architecture/report.md) | 2026-11-06 | research | none |
 | r26 | [Audit 14: using Lightning as a user, on the PC and the phone](12-desktop-ux/r26-user-test-pc-and-phone/report.md) | 2026-11-06 | audit | 12G |
 | r27 | [User journeys and visual unity](12-desktop-ux/r27-journeys-and-visual-unity/report.md) | 2026-11-08 | audit | none |
-| r28 | [International polish: the small things that make Lightning feel finished](3-polish-and-arabic/r28-international-polish/report.md) | 2026-11-08 | audit | 3BH |
+| r28 | [International polish: the small things that make Lightning feel finished](3-polish-and-arabic/r28-international-polish/report.md) | 2026-11-08 | audit | none |
 | r29 | [Audit 15: is the phone ready for Google Play? Security, privacy, tab by tab, themes and motion](11-phone-ux/r29-google-play-readiness/report.md) | 2026-11-09 | audit | none |
 | r30 | [Audit 16: the investment workflow beyond stocks - certificates, gold, property and the rest](12-desktop-ux/r30-investments-beyond-stocks/report.md) | 2026-11-09 | audit | 6D |
 | r31 | [Audit 17: logging entries - the Add sheet, bank messages and the way in from a file](7-planning-import-and-search/r31-logging-entries/report.md) | 2026-11-09 | audit | none |
 | r32 | [Audit 18: Budget and Cash planning, every tab and sub-page](12-desktop-ux/r32-budget-and-cash-planning/report.md) | 2026-11-09 | audit | none |
 | r33 | [Code review: what is slow, loose, complicated or cut off from the rest](1-easy-to-contribute/r33-code-review-and-loose-ends/report.md) | 2026-11-09 | audit | none |
 | r34 | [Audit 19: accounts and transactions - the register, transfers, fixing mistakes and matching the bank](12-desktop-ux/r34-accounts-and-transactions/report.md) | 2026-11-10 | audit | none |
-| r35 | [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](12-desktop-ux/r35-ux-against-users-questions/report.md) | 2026-11-09 | audit | 12AB, 3BH |
+| r35 | [Audit 16: does every screen answer its user's question? Cohesion, efficiency and smart features](12-desktop-ux/r35-ux-against-users-questions/report.md) | 2026-11-09 | audit | none |
 | r36 | [Audit 17: one figure, one owner - do the PC and the phone show the same numbers?](11-phone-ux/r36-figures-one-owner/report.md) | 2026-11-09 | audit | none |
 | r37 | [Audit 20: the cash planning and forecasting workflow, used as a user](7-planning-import-and-search/r37-cash-planning-workflow/report.md) | 2026-11-14 | audit | 7AX, 7AY |
+| r38 | [PC usability audit: strong parts, scattered](12-desktop-ux/r38-pc-usability-audit/report.md) | 2026-11-22 | audit | none |
+| r39 | [Popups and small elements on the PC](12-desktop-ux/r39-popups-and-small-elements/report.md) | 2026-11-22 | audit | none |
 
 
 ## Create and maintain a report

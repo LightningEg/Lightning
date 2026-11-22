@@ -20,19 +20,51 @@
   <div class="lead-rows">{% for row in shown %}<div class="lead-row"><span>{{ row.month }}</span><b>{{ row[page.side]|money(False, 0) }}</b></div>{% else %}<div class="lead-row"><span>{{ 'Nothing in the last 12 months'|tr(locale) }}</span></div>{% endfor %}</div>{% endcall %}
 
 
-{% set has_plans = page.plans or page.reserves %}{% set has_open = page.claims or page.held %}
-{% if has_plans or has_open %}<div class="grid g2" style="margin-top:16px">
-  {% if has_plans %}<section class="card linked-panel" aria-labelledby="cp-plans"><h2 id="cp-plans">{{ 'Plans and reserves'|tr(locale) }}</h2>
-    {% for item in page.plans %}{{ link_row(item.href, item.name, item.kind_label|tr(locale) ~ (' · ' ~ ('next {date}'|tr(locale, date=item.next_due)) if item.next_due else ''), item.amount|money(False, 0)) }}{% endfor %}
-    {% for reserve in page.reserves %}{{ link_row('/reserves/' ~ reserve.id ~ '/payments', reserve.name, 'Reserve'|tr(locale) ~ ' · ' ~ ('{amt} set aside'|tr(locale, amt=reserve.effective_allocated|money(False, 0))), reserve.target|money(False, 0)) }}{% endfor %}
-  </section>{% endif %}
-  {% if has_open %}<section class="card linked-panel" aria-labelledby="cp-open"><h2 id="cp-open">{{ 'Between you'|tr(locale) }}</h2>
+{% set has_plans = page.plans or page.reserves %}{% set editable = not request.state.read_only|default(false) %}
+{# NF-12G6: Between you always shows, led by Owed to you (their RECEIVABLE account: below zero is what you owe them),
+   with Lend, Paid back and Forgive; it pairs with Plans and reserves, which says when there are none. #}
+<div class="grid g2" style="margin-top:16px">
+  <section class="card linked-panel" aria-labelledby="cp-open"><h2 id="cp-open">{{ 'Between you'|tr(locale) }}</h2>
+    {% if page.lent < 0 %}{{ link_row('', 'You owe them'|tr(locale), 'Money they lent you, not yet paid back'|tr(locale), (-page.lent)|money) }}
+    {% else %}{{ link_row('', 'Owed to you'|tr(locale), ('Money you lent, not yet paid back'|tr(locale)) if page.lent else ('Nothing between you now'|tr(locale)), page.lent|money) }}{% endif %}
     {% for claim in page.claims %}{{ link_row('/reimbursements', claim.expense.counterparty or claim.expense.description if claim.expense else 'Reimbursement claim'|tr(locale),
         'Claimed {amt} · received {amt2}'|tr(locale, amt=claim.expected|money, amt2=claim.received|money),
         ('{amt} still owed'|tr(locale, amt=claim.outstanding|money) if claim.outstanding else 'Paid back'|tr(locale))) }}{% endfor %}
     {% for row in page.held %}{{ link_row('/money-from-others', 'Held for them in {name}'|tr(locale, name=row.account_name), row.currency, row.amount|money) }}{% endfor %}
-  </section>{% endif %}
-</div>{% endif %}
+    {% if editable %}<div class="people-money-forms">
+      {% if lend_accounts %}<details><summary class="btn small">{{ 'Lend'|tr(locale) }}</summary>
+        <form method="post" action="/counterparties/{{ party.id }}/lend">
+          <input type="hidden" name="submission" value="{{ new_submission() }}">
+          <div class="field"><label for="lend-day">{{ 'Date'|tr(locale) }}</label><input id="lend-day" type="date" name="day" value="{{ today_iso }}" required></div>
+          <div class="field"><label for="lend-account">{{ 'From account'|tr(locale) }}</label><select id="lend-account" name="account_id" data-own-picker required>{% for a in lend_accounts %}<option value="{{ a.id }}">{{ a.label }}</option>{% endfor %}</select></div>
+          <div class="field"><label for="lend-amount">{{ 'Amount'|tr(locale) }}</label><input id="lend-amount" type="text" name="amount" inputmode="decimal" required></div>
+          <div class="actions"><button class="btn">{{ 'Lend'|tr(locale) }}</button></div>
+          <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></details>{% endif %}
+      {% if page.lent > 0 %}{% if lend_accounts %}<details><summary class="btn small">{{ 'They paid back'|tr(locale) }}</summary>
+        <form method="post" action="/counterparties/{{ party.id }}/repay">
+          <input type="hidden" name="submission" value="{{ new_submission() }}">
+          <div class="field"><label for="repay-day">{{ 'Date'|tr(locale) }}</label><input id="repay-day" type="date" name="day" value="{{ today_iso }}" required></div>
+          <div class="field"><label for="repay-account">{{ 'To account'|tr(locale) }}</label><select id="repay-account" name="account_id" data-own-picker required>{% for a in lend_accounts %}<option value="{{ a.id }}">{{ a.label }}</option>{% endfor %}</select></div>
+          <div class="field"><label for="repay-amount">{{ 'Amount'|tr(locale) }}</label><input id="repay-amount" type="text" name="amount" inputmode="decimal" value="{{ page.lent|typed }}" required></div>
+          <div class="actions"><button class="btn">{{ 'They paid back'|tr(locale) }}</button></div>
+          <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></details>{% endif %}
+      <details><summary class="btn small">{{ 'Forgive'|tr(locale) }}</summary>
+        <form method="post" action="/counterparties/{{ party.id }}/forgive" data-confirm-delete>
+          <input type="hidden" name="submission" value="{{ new_submission() }}">
+          <p class="muted small">{{ 'What you forgive becomes your spending: it leaves Owed to you for good.'|tr(locale) }}</p>
+          <div class="field"><label for="forgive-day">{{ 'Date'|tr(locale) }}</label><input id="forgive-day" type="date" name="day" value="{{ today_iso }}" required></div>
+          <div class="field"><label for="forgive-amount">{{ 'Amount'|tr(locale) }}</label><input id="forgive-amount" type="text" name="amount" inputmode="decimal" value="{{ page.lent|typed }}" required></div>
+          <div class="field"><label for="forgive-category">{{ 'Category'|tr(locale) }}</label><select id="forgive-category" name="category_id" data-own-picker required>{% for cat in forgive_categories %}<option value="{{ cat.id }}"{{ ' selected' if cat.id == forgive_default }}>{{ cat.label|tr(locale) }}</option>{% endfor %}</select></div>
+          <div class="actions"><button class="btn danger">{{ 'Forgive'|tr(locale) }}</button></div>
+          <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"></form></details>{% endif %}
+    </div>{% endif %}
+  </section>
+  <section class="card linked-panel" aria-labelledby="cp-plans"><h2 id="cp-plans">{{ 'Plans and reserves'|tr(locale) }}</h2>
+    {% for item in page.plans %}{{ link_row(item.href, item.name, item.kind_label|tr(locale) ~ (' · ' ~ ('next {date}'|tr(locale, date=item.next_due)) if item.next_due else ''), item.amount|money(False, 0)) }}{% endfor %}
+    {% for reserve in page.reserves %}{{ link_row('/reserves/' ~ reserve.id ~ '/payments', reserve.name, 'Reserve'|tr(locale) ~ ' · ' ~ ('{amt} set aside'|tr(locale, amt=reserve.effective_allocated|money(False, 0))), reserve.target|money(False, 0)) }}{% endfor %}
+    {% if not has_plans %}<p class="muted">{{ 'No plan or reserve names them.'|tr(locale) }}</p>{% endif %}
+  </section>
+</div>
 
 <div class="grid g2" style="margin-top:16px">
   <section class="card linked-panel" aria-labelledby="cp-names"><h2 id="cp-names">{{ 'Names'|tr(locale) }}</h2>

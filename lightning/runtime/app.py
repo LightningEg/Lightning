@@ -101,12 +101,12 @@ class SessionGate:
                 if session.borrowed_home:
                     return "Borrowed from {name}", "hand-back", {"name": session.borrowed_home}
                 return "Borrowed from your phone", "hand-back", {}
-            return "Read only on this PC: the ledger is going home or needs repair.", "", {}
+            return "Read only on this PC: your records are going home or need repair.", "", {}
         try:
             lending = devices.lending_state(session.paths)
             line, values = home_state_message(devices.home_node(session.paths) if lending == "ok" else None, lending)
         except Exception:  # noqa: BLE001 - an unreadable record shows as needing the Devices page
-            line, values = "The ledger's lending record needs checking.", {}
+            line, values = "The lending record of your records needs checking.", {}
         return line, ("take-back" if line else ""), values
 
     def outside_row(self, path: str):

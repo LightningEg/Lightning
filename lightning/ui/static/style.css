@@ -427,11 +427,15 @@ body.popup-open { overflow: hidden; }
 .app-popup-frame { position: relative; max-height: min(90vh, 900px); overflow: auto; background: var(--surface); border: 1px solid var(--border); border-radius: 18px; box-shadow: 0 24px 80px rgb(0 0 0 / 26%); padding: 28px; }
 .app-popup-close { position: absolute; z-index: 2; top: 12px; right: 14px; border: 0; border-radius: 50%; width: 38px; height: 38px; font-size: 26px; line-height: 1; color: var(--muted); background: var(--surface-2); cursor: pointer; }
 .app-popup-content > :first-child { margin-top: 0; }
+/* r39: the popup content carries .main so a page's own rules style it the same in a popup; not the page's box. */
+.app-popup .main.popup-main:not(#_) { max-width:none; width:auto; padding:0; }
+.app-popup .popup-main > .topbar :is(.fullscreen-toggle, .section-gear) { display:none; }  /* the popup has its own Open as a full page and Close */
+.app-popup .popup-main > .topbar::after { content:none; }
+.app-popup .popup-main > .topbar { padding-inline-end:96px; }  /* r39: a page action never sits under Open as a full page and Close */  /* the seam marks a page header, not a dialog (as before r39) */
 .app-popup [data-popup-status] { min-height: 1.4em; }
 .app-popup [data-popup-status]:empty { display:none; }
 .popup-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
-.transaction-choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin: 16px 0; }
-.transaction-choice { min-height: 76px; padding: 14px; text-align: left; font-weight: 700; }
+.transaction-choice-grid { margin: 16px 0; }
 .transaction-effect { padding: 12px 14px; border-radius: 10px; background: var(--surface-2); margin-top: 14px; }
 .transaction-effect:empty { display: none; }
 .field.has-error input, .field.has-error select, .field.has-error textarea { border-color: var(--danger); }
@@ -441,7 +445,6 @@ body.popup-open { overflow: hidden; }
 @media (max-width: 640px) {
   .app-popup { width: 100vw; max-height: 100dvh; margin: auto 0 0; }
   .app-popup-frame { max-height: 94dvh; border-radius: 18px 18px 0 0; padding: 24px 18px calc(24px + env(safe-area-inset-bottom)); }
-  .transaction-choice-grid { grid-template-columns: 1fr; }
 }
 .site-search{display:flex;gap:6px;align-items:center}.site-search input{max-width:220px}.site-search-page{flex-wrap:wrap}.site-search-page label{width:100%}.investment-holding{display:grid;grid-template-columns:1fr auto;gap:8px;padding:10px 0;border-bottom:1px solid var(--line)}.investment-holding>span:last-child{grid-column:1/-1}.reserve-payment-choice{display:grid;grid-template-columns:1fr 160px auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
 @media(max-width:700px){.site-search input{max-width:130px}.reserve-payment-choice{grid-template-columns:1fr}.topbar{align-items:flex-start}.actions{flex-wrap:wrap}}
@@ -784,7 +787,7 @@ input:is([type=checkbox], [type=radio]):not(#_) {
   --tint-growth:#EAF8F0; --tint-held:#EAF3FD;
   --guide-start:#E0F5E9; --guide-end:#D7ECF7; --edge:rgba(255,255,255,.94);
   --line:#DDE9E6; --line-control:#7E96A0; --track:#E6EFEC; --hover:#F0F7F4;
-  --field:#EAF3EE; --field-focus:#F5EFCF;
+  --field:#EAF3EE; --field-focus:#F2F8F5;
   --ink:#0D2233; --ink-2:#304A5C; --muted:#566E7E;
   --meadow:#14A874; --meadow-dark:#0B8A5F; --positive:#097852; --azure:#0B6DD6;
   --rose:#C93D72; --rose-soft:#FCEEF3;
@@ -1599,6 +1602,7 @@ a.chart-meter:hover { background:var(--hover); }
 .main .stat-tile-label { font:700 var(--fs-body)/1.35 var(--display); color:var(--ink); }
 .main .stat-chip { display:inline-flex; align-items:center; gap:4px; flex:none; max-width:55%; height:24px; padding:0 9px; border-radius:999px;
   font:700 var(--fs-meta)/1 var(--body); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:rgba(10,36,66,.06); color:var(--ink-2); }
+.main td .stat-chip { max-width:none; }  /* r39: the 55% cap is for a card header; in a table cell it cut "You hold something here" */
 .main .stat-chip svg { width:13px; height:13px; flex:none; fill:none; stroke:currentColor; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round; }
 .main .stat-chip.is-up { background:var(--tint-growth); color:var(--positive); }
 .main .surface-lead .stat-chip.is-up, .main .surface-mint .stat-chip.is-up { background:var(--surface); }
@@ -2302,6 +2306,7 @@ html:not(.phone) .main .multiples .multiple { padding:0; border:0; background:tr
 .planner-mode-seg label:not(#_) { flex:none; min-width:0; margin:0; cursor:pointer; }
 .planner-mode-seg span:not(#_) { display:grid; place-items:center; height:40px; padding:0 16px; border-radius:999px; font:700 var(--fs-2)/1 var(--body); color:var(--ink-2); background:transparent; }
 .planner-mode-seg label:hover span:not(#_) { background:rgba(255,255,255,.7); color:var(--ink); }
+.planner-mode-seg input:not(#_) { position:absolute; opacity:0; pointer-events:none; }  /* r39: as .planner-mode; the plan form's Type showed its radio */
 .planner-mode-seg input:checked + span:not(#_) { background:var(--action); color:var(--on-action); font-weight:700; }
 .new-money-stack:not(#_) { height:16px; gap:2px; background:var(--track); border-radius:8px; }
 .new-money-stack span:not(#_) { border:0!important; background:var(--tone); }
@@ -2821,7 +2826,7 @@ html[dir="rtl"] td[dir="ltr"], html[dir="rtl"] li.code { text-align: right; }
 .counterparty-picker.has-tile > input:not(#_) { padding-left:42px; }
 
 /* A soft section inside a form: a tinted area, never a card in a card (A16). */
-.soft-section { background:var(--surface-2); border-radius:var(--r-md); padding:16px 18px; margin:14px 0; }
+.soft-section { padding:16px 0 0; margin:16px 0; border-top:1px solid var(--line); }  /* r39 (A16 "card in a card: never"): a section under a hairline, not a box in the card */
 .soft-section[hidden] { display:none; }
 
 /* A10.3 · the date picker's month opens the months, its year opens the years; the cells match the month popup. */
@@ -3183,6 +3188,12 @@ a.period-button { display:inline-flex; align-items:center; justify-content:cente
 
 /* Data tools keep a readable measure on large screens and wrap on phones. */
 .data-settings { width:100%; max-width:960px; min-width:0; }  /* starts where the Appearance card above it starts */
+/* r39 (owner: better grouping): Settings in two columns, the everyday settings left, the rest right; one column when narrow. */
+.data-settings:has(> .settings-columns) { max-width:1280px; }
+.settings-columns { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:16px; align-items:start; }
+.settings-col { display:grid; gap:16px; min-width:0; }
+.settings-col > .settings-list { max-width:none; margin:0!important; }
+@media (max-width: 1100px) { .settings-columns { grid-template-columns:minmax(0, 1fr); } }
 
 .ai-prompt-dialog { width:min(760px,calc(100vw - 32px)); max-width:calc(100vw - 32px); }
 .ai-prompt-dialog textarea { width:100%; max-width:100%; box-sizing:border-box; }
@@ -3250,7 +3261,8 @@ table.figures tfoot th { border-top: 1px solid var(--line); }
 .settings-row label, .settings-name { font-weight: 600; margin: 0; }
 .settings-row small { color: var(--muted); font-size: 13px; line-height: 1.4; }
 .settings-control { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin: 0; }
-.settings-control select:not(#_) { width: auto; min-width: 200px; }
+.settings-control select:not(#_) { width: 220px; min-width: 0; }  /* r39: Theme and Language line up */
+.settings-control .settings-status:empty { display:none; }  /* an empty status takes no room beside the Theme field */
 .settings-status { color: var(--muted); font-size: 13px; min-width: 0; }
 .settings-facts .code { word-break: break-all; }
 .settings-more { display: inline; } .settings-more summary { display: inline; cursor: pointer; text-decoration: underline; }
@@ -3600,3 +3612,6 @@ p { text-wrap:pretty; }
 @media (max-width:700px) { .handoff-row { flex-direction:column; align-items:stretch; } }
 .ask-frame.ask-frame-plain { grid-template-columns:1fr; }
 .import-problems ul { margin:0; padding-left:20px; display:grid; gap:6px; }
+/* NF-12AL3: What changed on Budget; Accept and Dismiss sit side by side so a change is one row. */
+.budget-change-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}.budget-change-actions form{margin:0}
+.budget-changes-more>summary{cursor:pointer;padding-block:8px;color:var(--muted)}

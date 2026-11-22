@@ -2,7 +2,8 @@
 
 Each person has one RECEIVABLE "Owed to you" account (``owed_to_you_accounts`` links it to the person). Lending and
 repayment are transfers between your bank or wallet and that account, so Net worth never moves with them; forgiving
-is spending out of that account. A positive balance is Owed to you (in What you own, under Other you own); a balance
+is spending out of that account. A cost split with others is one money-out document: only your share is spending, each
+other share goes to that person's account (NF-12G3). A positive balance is Owed to you (in What you own, under Other you own); a balance
 below zero is what you owe that person (in What you owe). Nothing is assumed repaid until the repayment is posted.
 """
 from __future__ import annotations
@@ -80,6 +81,26 @@ class PeopleMoneyService:
                                                 f"Forgave {self._person(person_id)['name']}",
                                                 self._person(person_id)["name"], notes)
 
+    def split(self, day, account_id: int, total, category_id: int, shares, notes: str = "", description: str = ""):
+        """A cost you paid in full and split with others: one entry. Your account pays ``total``; only your share
+        (``total`` less the others' shares) is spending in ``category_id``; each person's share (``shares``: person
+        id, amount) goes to their Owed to you account. Paying back is ``repay``."""
+        when = parse_date(day, "day")
+        with self.db.transaction():
+            lines = self._share_lines(shares, when)
+            return self.transactions.record_split(fmt_date(when), int(account_id), total, int(category_id), lines,
+                                                  description or self._split_title(lines), notes=notes)
+
+    def update_split(self, txn_id: int, day, account_id: int, total, category_id: int, shares, notes: str = "",
+                     description: str = ""):
+        """Change a split: every line moves together and the entry keeps its ref."""
+        when = parse_date(day, "day")
+        with self.db.transaction():
+            lines = self._share_lines(shares, when)
+            return self.transactions.update_split(int(txn_id), fmt_date(when), int(account_id), total,
+                                                  int(category_id), lines, description or self._split_title(lines),
+                                                  notes=notes)
+
     # ------------------------------------------------------------ reading
     def balance(self, person_id: int, as_of=None) -> Decimal:
         """What the person owes you on the day (below zero: what you owe them)."""
@@ -122,6 +143,20 @@ class PeopleMoneyService:
         if account.account_type not in LIQUID:
             raise ValidationError("Choose a bank or cash account.", field)
         return account
+
+    def _share_lines(self, shares, when) -> list[tuple[int, object, str]]:
+        """(person, amount) pairs as (Owed to you account, amount, memo); a person's account is made on first use."""
+        lines = []
+        for person_id, amount in shares or ():
+            person = self._person(person_id)
+            account = self.account_for(person["id"], self._opening(when))
+            lines.append((account.id, amount, f"Split with {person['name']}"))
+        return lines
+
+    @staticmethod
+    def _split_title(lines) -> str:
+        names = [memo.removeprefix("Split with ") for _, _, memo in lines]
+        return "Split with " + (", ".join(names[:-1]) + " and " + names[-1] if len(names) > 1 else names[0]) if names else "Split"
 
     @staticmethod
     def _same_currency(cash, account) -> None:

@@ -2,10 +2,17 @@
 date, like a raise: plan on it from its month (a dated basis; earlier months keep the average) or keep the average.
 A month with no scheduled pay is a gap, never a drop."""
 from decimal import Decimal
+import pytest
 
 from lightning.core.dates import today
 from lightning.ui.web import create_app
 from lightning.workflows.review import ReviewInbox
+
+
+def _needs(c, on):
+    """Needs you's rows and Budget's What changed rows (NF-12AL3): plan changes moved to Budget's card."""
+    inbox = ReviewInbox(c)
+    return [*inbox.items(on), *inbox.changes(on)]
 from tests.screens import _ScreenClient, visible_text
 from tests.test_arabic_no_english import _client, _english
 
@@ -37,7 +44,7 @@ def test_a_salary_that_falls_from_a_date_is_offered_from_that_date(c, setup):
         "drop", "2026-12-25", MONTH, Decimal("18000.00"), Decimal("30000.00"), Decimal("12000.00"))
     # Spending room on 18,000 keeps the 20% target: 14,400; the 16,000 plan is 1,600 over it.
     assert (offer["room"], offer["over"]) == (Decimal("14400.00"), Decimal("1600.00"))
-    inbox = {item["label"]: item for item in ReviewInbox(c).items(today())}
+    inbox = {item["label"]: item for item in _needs(c, today())}
     row = inbox["Your income falls to 18,000 from 25 Dec"]
     assert row["popup"] and row["href"] == f"/budget/raise?month={MONTH}" and "Plan on it from then" in row["detail"]
     browser = _ScreenClient(create_app(c), "http://testserver")
@@ -109,3 +116,25 @@ def test_a_small_change_or_a_lump_is_not_a_drop(c, setup):
     assert c.health.income_change_offer(MONTH) is None
     c.planning.create(kind="INCOME", name="Bonus", amount="5000", frequency="YEARLY", start_date="2026-12-20")
     assert c.health.income_change_offer(MONTH) is None
+
+
+@pytest.mark.parametrize("phone", [False, True])
+def test_dismissing_an_income_change_hides_every_budget_offer_until_it_changes(c, setup, phone):
+    from tests.test_budget_exclusions_ui import client_for
+
+    salary = _history(c, setup, plan="16000")
+    item = c.planning.create(kind="INCOME", name="Reduced salary", amount="18000", frequency="MONTHLY",
+                             start_date="2026-12-25", category_id=salary)
+    budget = f"/budget?month={MONTH}"
+    offer = f'/budget/raise?month={MONTH}'
+    desktop = client_for(c, False, "en")
+    reader = client_for(c, phone, "en")
+    assert offer in reader.get(budget).text
+    row = next(row for row in ReviewInbox(c).changes(today()) if row["href"] == offer)
+    assert desktop.post("/needs-you/state", data={"identity": row["review_id"], "action": "reviewed",
+                                                  "back": budget}).status_code == 200
+    assert c.health.income_change_offer(MONTH)["recurring"] == Decimal("18000")
+    assert offer not in reader.get(budget).text
+    assert _basis(c, MONTH) == Decimal("30000")
+    c.planning.set_amount(item, "15000")
+    assert offer in reader.get(budget).text

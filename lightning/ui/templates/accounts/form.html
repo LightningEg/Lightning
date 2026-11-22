@@ -7,7 +7,7 @@
   <div class="form-grid">
     <div class="field {{ 'has-error' if error_field == 'institution' }}">
       <label for="institution">{{ 'Institution'|tr(locale) }}</label>
-      <input id="institution" name="institution" autofocus value="{{ values.institution }}" list="institution-options" data-own-suggestions data-allow-add data-tile-well placeholder="{{ 'e.g. CIB'|tr(locale) }}" autocomplete="off">
+      <input id="institution" name="institution" {{ "" if account else "autofocus" }} value="{{ values.institution }}" list="institution-options" data-own-suggestions data-allow-add data-tile-well placeholder="{{ 'e.g. CIB'|tr(locale) }}" autocomplete="off">
       <datalist id="institution-options">{% for o in institution_options %}<option value="{{ o.value }}" data-label="{{ o.label }}" data-search="{{ o.arabic }}" data-group="{{ o.group }}" data-mono="{{ o.mono }}" data-logo="{{ o.logo }}">{% endfor %}</datalist>
     </div>
     <div class="field {{ 'has-error' if error_field == 'account_type' }}">

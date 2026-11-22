@@ -2,7 +2,7 @@
 the app's screens send these commands, preconditioned on the transaction row."""
 from decimal import Decimal
 
-from .spec import AMOUNT, DATE, LONG, TEXT, Command, items, listof, mapping, optional, ref
+from .spec import AMOUNT, DATE, FLAG, LONG, TEXT, Command, items, listof, mapping, optional, ref
 
 TABLES = ("counterparties", "transactions", "ledger_entries", "reconciled_through")
 REGISTER = dict(account_id=ref("accounts"), date=DATE, amount=AMOUNT, category_id=optional(ref("categories")),
@@ -16,6 +16,13 @@ ENTRY = dict(date=DATE, account_id=ref("accounts"), amount=AMOUNT, notes=LONG, o
 # Ownership postings create a row, or (with txn_id) change the one they made: `creates` keeps an existing identity.
 OWNERSHIP = dict(date=DATE, account_id=ref("accounts"), amount=AMOUNT, notes=LONG, txn_id=optional(ref("transactions")))
 COMMANDS = {
+    "dated_entries.capture": Command("dated_entries.capture", ENTRY | dict(
+        estimate_date=DATE, category_id=ref("categories"), counterparty=TEXT, unsorted=FLAG, left_out=FLAG,
+        paid_for_work=FLAG, expected=optional(AMOUNT), payer_id=optional(ref("counterparties"))), creates="transactions"),
+    "dated_entries.record": Command("dated_entries.record", REGISTER | dict(estimate_date=DATE), creates="transactions"),
+    "dated_entries.edit": Command("dated_entries.edit", REGISTER | dict(estimate_date=optional(DATE), txn_id=ref("transactions")), target=TXN),
+    "dated_entries.edit_metadata": Command("dated_entries.edit_metadata", dict(
+        txn_id=ref("transactions"), estimate_date=optional(DATE), date=DATE, counterparty=TEXT, notes=LONG), target=TXN),
     "transactions.record_in_account": Command("transactions.record_in_account", REGISTER | dict(description=TEXT),
                                               creates="transactions"),
     "transactions.update_in_account": Command("transactions.update_in_account", dict(txn_id=ref("transactions")) | REGISTER,

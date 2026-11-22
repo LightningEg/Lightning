@@ -86,7 +86,7 @@ def test_calendar_and_age_page(c, phone, locale):
         if phone:
             assert 'phone-appbar' in page.text
         if locale == 'ar':
-            assert 'Age of Money' not in page.text
+            assert 'Age of money' not in page.text
 
 
 def test_same_day_cash_age_uses_stable_references_instead_of_local_transaction_ids(tmp_path):
