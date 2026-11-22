@@ -76,7 +76,7 @@
         {% if item.limit is not none %}<div><dt>{{ "Good from"|tr(locale) }}</dt><dd>{{ ('At least' if item.direction == 'minimum' else 'At most')|tr(locale) }} {% if item.unit == '%' %}{{ '%.1f'|format(item.limit) }}%{% else %}{{ '%.0f'|format(item.limit) }} {{ 'months'|tr(locale) }}{% endif %}</dd></div>{% if item.alert is not none %}<div><dt>{{ "Needs you from"|tr(locale) }}</dt><dd>{{ ('Below' if item.direction == 'minimum' else 'Above')|tr(locale) }} {% if item.unit == '%' %}{{ '%.1f'|format(item.alert) }}%{% else %}{{ '%.0f'|format(item.alert) }} {{ 'months'|tr(locale) }}{% endif %}</dd></div>{% endif %}{% else %}<div><dt>{{ "Your limit"|tr(locale) }}</dt><dd>{{ "No limit"|tr(locale) }}</dd></div>{% endif %}
         {% if item.key == 'emergency_fund' and cash_months is not none %}<div><dt>{{ "In cash you own"|tr(locale) }}</dt><dd>{{ "{n} months"|tr(locale, n='%.1f'|format(cash_months)) }}</dd></div>{% endif %}
         {% if item.key == 'emergency_fund' %}<div><dt>{{ 'Target'|tr(locale) }}</dt><dd>{{ fund.target|money if fund.target is not none else 'Unavailable'|tr(locale) }}{% if fund.target is not none %} {{ base }}{% endif %}</dd></div>{% endif %}
-      </dl>{% if item.key == 'emergency_fund' %}{% include "partials/emergency_liquidity_context.html" %}{% endif %}<a class="health-source" href="{{ item.href }}">{{ 'See details'|tr(locale) }}</a></div>
+      </dl>{% if item.key == 'emergency_fund' %}{% include "partials/emergency_liquidity_context.html" %}{% endif %}<a class="health-source" href="{{ item.href }}">{{ 'Open its page'|tr(locale) }}</a></div>
     </details>
     {% endfor %}
   {% endfor %}

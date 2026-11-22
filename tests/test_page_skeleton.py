@@ -9,7 +9,9 @@ Every tab in `sections.SECTIONS` is opened on the sample household at 1366 x 768
   the period control, Undo, the page's action, the gear (A05), none of them outside that group;
 - Undo, when shown, in the header row (`.topbar`), never on a second row inside the page;
 - at most one filled (primary) button on the first screen;
-- at most 2.5 screens tall as it first opens, registers excepted (IV-12Z: the rest opens on request).
+- at most 2.5 screens tall as it first opens, registers excepted (IV-12Z: the rest opens on request);
+- a figure's working has one label, "How it adds up", opened by the figure itself (NF-12AB3): none of the old ways
+  ("See what it is made of", "How it is worked out", "See details") and no "Show the numbers" under a headline figure.
 
 Today's failures are listed in ALLOWED, each with the item that fixes it. A step that fixes a tab removes its name
 from the list; `test_the_allow_list_is_not_stale` fails when a listed tab already passes, so the list only shrinks.
@@ -47,6 +49,11 @@ MEASURE = """() => {
   const controls = top ? [...top.querySelectorAll('.page-controls > *')].filter(e => e.offsetParent !== null).map(kind) : [];
   const stray = top ? [...top.querySelectorAll('.site-period-control, [data-history], .section-gear')]
     .filter(e => !e.closest('.page-controls') && e.offsetParent !== null).length : 0;
+  const OLD = ['See what it is made of', 'How it is worked out', 'See details'];
+  const oldLabels = [...document.querySelectorAll('.main a, .main summary, .main button')]
+    .map(e => e.textContent.trim()).filter(t => OLD.includes(t))
+    .concat([...document.querySelectorAll('.main .lead-main summary, .main .overview-wealth-card .overview-split > section:first-child > details > summary')]
+      .map(e => e.textContent.trim()).filter(t => t === 'Show the numbers'));
   return {
     titleBlock: !!(top && top.querySelector('.topbar-main > .page-title > h1')),
     controls, stray,
@@ -55,6 +62,7 @@ MEASURE = """() => {
     undoTop, undoAll,
     primaries,
     screens: document.documentElement.scrollHeight / innerHeight,
+    oldLabels,
   };
 }"""
 
@@ -125,6 +133,19 @@ def measured(tmp_path_factory):
             page.keyboard.press("Enter")
             opened.append(panel.is_visible())
             out["_working"] = opened
+            leads = {}  # NF-12AB3: the rest of the Leads open their working the same way
+            for url, panel_id in (("/", "working-net-worth"), ("/", "working-net-flow"), ("/investments", "working-value"),
+                                  ("/plan/reserves", "working-emergency")):
+                page.goto(host.origin + url)
+                button = page.locator(f'.fig-open[aria-controls="{panel_id}"]')
+                if not button.count():
+                    leads[url + "#" + panel_id] = "no figure button"
+                    continue
+                button.first.evaluate("b => { for (let d = b.closest('details'); d; d = d.parentElement.closest('details')) d.open = true; }")
+                button.first.click()
+                rows = page.locator(f"#{panel_id} tr").count()
+                leads[url + "#" + panel_id] = "open" if page.locator(f"#{panel_id}").is_visible() and rows else f"{rows} rows"
+            out["_leads"] = leads
             browser.close()
     finally:
         host.stop()
@@ -138,6 +159,8 @@ def _failures(measured) -> dict[tuple[str, str], str]:
             continue
         if m.get("both_ways"):
             found[("working", key)] = "a KPI both opens its working and links away"
+        elif m.get("oldLabels"):
+            found[("working", key)] = f"a working reached by an old label: {m['oldLabels']}"
         if len(m["h1"]) != 1 or m["h1"][0] not in m["titles"]:
             found[("title", key)] = f"H1 {m['h1']} is not the tab's name {m['titles'][0]!r}"
         words = len(m["status"].split())
@@ -182,3 +205,8 @@ def test_the_allow_list_names_real_tabs_and_items():
 def test_a_headline_figure_opens_its_working_in_place(measured):
     """NF-12AB3 (A08.1): closed, then open on a click, closed by Escape, open again with Enter."""
     assert measured["_working"] == [False, True, False, True]
+
+
+def test_every_lead_opens_its_working(measured):
+    """NF-12AB3: Overview's Net worth and Net flow, the Investments Lead and the emergency fund open How it adds up."""
+    assert set(measured["_leads"].values()) == {"open"}, measured["_leads"]

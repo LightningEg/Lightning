@@ -34,8 +34,8 @@
 {% endmacro %}
 
 
-{% from "partials/charts.html" import key_notes, meter %}
-<div data-reserve-refresh="notes">{{ key_notes(notes) }}</div>
+{% from "partials/charts.html" import key_notes, meter, lead_card %}
+{% if lead and not phone_mode() %}<div data-reserve-refresh="notes">{{ lead_card(lead, base) }}</div>{% else %}<div data-reserve-refresh="notes">{{ key_notes(notes) }}</div>{% endif %}
 {% if error %}<p class="flash error">{{ error|tr(locale) }}</p>{% endif %}
 {% set edit = request.query_params.get('edit', '') or ('all' if request.method == 'POST' else '') %}
 
