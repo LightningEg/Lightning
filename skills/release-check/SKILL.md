@@ -40,7 +40,7 @@ Read only the sections named here. Run scripts and print findings, not files. Ru
    `git push origin v2.0.1` starts the tag run: tests, the Windows ZIP, the signed APK, and publishing to `elfekimuhammed/Lightning-downloads` after the
    `production-release` environment approval. Required repository secrets (names only, never print values): `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
    `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`, `LIGHTNING_DOWNLOADS_TOKEN`. If one is missing the run says so; tell the owner, do not work around it.
-9. **After publishing.** Update the website repo (skill `website-sync`): Downloads page, Version Archive and checksums, English and Arabic, and the `Current app release` line in its README.
+9. **After publishing.** Download the release's ZIP and APK into an empty scratchpad folder, check them against `SHA256SUMS`, and run `python tools/release_check.py --artifacts <zip> <apk>`: nothing private, no secret, and exactly the APK permissions in `packaging/android-permissions.txt`. A failure is a private advisory and a new version, never a re-pushed tag. Then update the website repo (skill `website-sync`): Downloads page, Version Archive and checksums, English and Arabic, and the `Current app release` line in its README.
 
 ## Never
 
