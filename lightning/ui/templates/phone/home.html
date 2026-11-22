@@ -41,9 +41,10 @@
 {% if ('bills', false) in s.steps %}<form method="post" action="/start/no-bills" class="phone-first-none"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button type="submit" class="phone-quiet-button">{{ 'I have no regular bills'|tr(locale) }}</button></form>{% endif %}
 <a class="phone-wide-soft" href="/sms"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>{{ 'Paste a bank SMS instead'|tr(locale) }}</a>
 {% else %}
-{# In your accounts: the cash you can reach, each account with its share (IV-11M3). #}
+{# Cash and banks: the cash you can reach, each account with its share (IV-11M3). Named apart from In your accounts,
+   which also counts deposits and holdings (owner, 2026-11-22, r38: one name, one figure). #}
 <section class="phone-hero" aria-labelledby="home-hero">
-  <a id="home-hero" class="phone-hero-label" role="heading" aria-level="2" href="/money/accounts">{{ 'In your accounts'|tr(locale) }} <span aria-hidden="true">{{ chevron() }}</span></a>
+  <a id="home-hero" class="phone-hero-label" role="heading" aria-level="2" href="/money/accounts">{{ 'Cash and banks'|tr(locale) }} <span aria-hidden="true">{{ chevron() }}</span></a>
   <div class="phone-lead" data-fig="cash_in_accounts">{{ s.accounts_total|money }} <small>{{ base }}</small></div>
   <p class="phone-hero-line phone-accounts-line">{{ ('Across 1 account' if s.accounts_count == 1 else 'Across {n} accounts')|tr(locale, n=s.accounts_count) }}</p>
   {% if s.accounts %}<span class="phone-share" aria-hidden="true">{% for a in s.accounts %}<i class="is-{{ loop.index }}" style="flex:{{ '%.1f'|format(a.share) }}"></i>{% endfor %}</span>

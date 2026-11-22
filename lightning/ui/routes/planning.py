@@ -321,7 +321,9 @@ def _upcoming_context(c, request, day, path: str, follow_pay: bool = False) -> d
     show = show if show in UPCOMING_GROUPS else "all"
     cal = month_calendar(c.planning, c.gameya, month, day, c.forecaster)
     if (follow_pay and not request.query_params.get("month") and not any(p >= fmt_date(day) for p in cal.paydays)
-            and not any(e.incoming and e.state in ("late", "upcoming") for e in cal.entries)):
+            and not any(e.incoming and e.state in ("late", "upcoming") for e in cal.entries)
+            # A05: a bill still to pay this month keeps the calendar on this month (PC usability audit, 2026-11-21)
+            and not any(not e.incoming and e.left > ZERO and (e.date >= fmt_date(day) or e.state == "late") for e in cal.entries)):
         # Live: with no payday left this month, open on the month the next one falls in, so "when is my next pay" shows.
         later = month_of(last + timedelta(days=1))  # not money
         later_cal = month_calendar(c.planning, c.gameya, later, day, c.forecaster)

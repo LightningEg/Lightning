@@ -5,7 +5,7 @@
     <span class="settings-name">{{ 'Lightning version'|tr(locale) }}</span>
     <small dir="auto">
     {%- if update_notice %}{% if update_notice.kind == 'updated' %}{{ 'Updated to {v}.'|tr(locale, v=update_notice.version) }}{% else %}{{ "The update to {v} didn’t start, so you’re back on {cur}."|tr(locale, v=update_notice.version, cur=update_notice.current) }} <a href="{{ outside_url('download', locale) }}" target="_blank" rel="noopener">{{ 'Download page'|tr(locale) }}</a>{% endif %}<br>{% endif -%}
-    {%- if st == 'up_to_date' %}{{ 'You have the newest version.'|tr(locale) }}
+    {%- if st == 'up_to_date' %}{{ 'Version {v}'|tr(locale, v=update.current) }} · {{ 'You have the newest version.'|tr(locale) }}
     {%- elif st == 'checking' %}{{ 'Checking…'|tr(locale) }}
     {%- elif st == 'available' %}{{ 'Version {v} is ready · {mb} MB'|tr(locale, v=update.version, mb=update.size_mb) }}
     {%- elif st == 'working' %}{% if update.phase == 'downloading' %}{{ 'Downloading… {pct}%'|tr(locale, pct=update.percent) }}{% else %}{{ 'Checking it works on this PC…'|tr(locale) }}{% endif %}
