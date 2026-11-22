@@ -3,6 +3,7 @@
   {% for claim in work_claims %}
   <p><a href="/reimbursements#claim-{{ claim.id }}">{{ claim.counterparty or claim.description or claim.ref }} · {{ claim.date }}</a>
      · {{ 'Paid back this period'|tr(locale) }} {{ claim.repaid|money }}
+     {% if claim.refunded %}· {{ 'Merchant refund'|tr(locale) }} {{ claim.refunded|money }}{% endif %}
      · {{ 'Owed at period end'|tr(locale) }} {{ claim.owed|money }}</p>
   {% endfor %}
 </details>

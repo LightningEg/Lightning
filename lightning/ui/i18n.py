@@ -970,6 +970,7 @@ ARABIC_UI = {
     'Paid for work': 'دفعت للشغل',
     'Full expense if blank': 'لو فاضي، المبلغ كله',
     'excluded from personal spending': 'مستبعد من مصاريفك الشخصية',
+    'Merchant refund': 'استرداد من التاجر',
     'Paid back this period': 'اترد في الفترة دي',
     'Owed at period end': 'المتبقي ليك آخر الفترة',
     'Apply to work claim': 'اربط بمطالبة الشغل',

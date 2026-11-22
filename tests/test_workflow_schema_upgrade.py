@@ -30,3 +30,42 @@ def test_encrypted_roundtrip_fixture_is_current_and_keeps_its_transactions_out_o
         assert db.scalar("SELECT count(*) FROM sqlite_master WHERE name LIKE 'undo_%'") == 0
     finally:
         db.close()
+
+
+def test_work_refund_reporting_upgrades_existing_claims_and_ledger(tmp_path, monkeypatch):
+    from shutil import copy2
+
+    from lightning.bootstrap import build
+    from lightning.core.dates import parse_month
+    from lightning.database import migrator
+
+    previous_migrations = tmp_path / "migration-90"
+    previous_migrations.mkdir()
+    for migration in sorted(migrator.MIGRATIONS_DIR.glob("*.sql")):
+        if int(migration.name[:4]) <= 90:
+            copy2(migration, previous_migrations)
+    profile = tmp_path / "work-refund.db"
+    with monkeypatch.context() as old_schema:
+        old_schema.setattr(migrator, "MIGRATIONS_DIR", previous_migrations)
+        c = build(profile)
+        try:
+            assert inspect_schema(c.db).current_version == 90
+            account = c.account_flows.open_account("Sample cash", "CASH", "2026-09-01", "50000")
+            work = c.categories.get_by_code("EXP.WORK.TRANSPORT").id
+            expense = c.transactions.record_outflow("2026-09-15", account.id, "1000", work)
+            claim = c.reimbursements.create_claim(expense.id, "1000")
+            c.reimbursements.mark_paid_for_work(claim["id"])
+            c.refunds.record_refund(expense.id, "2026-10-08", "400")
+            ledger = [tuple(row) for row in c.db.all("SELECT * FROM ledger_entries ORDER BY transaction_id,line_no")]
+        finally:
+            c.db.close()
+
+    c = build(profile)
+    try:
+        assert inspect_schema(c.db).current_version == BUNDLED_LATEST_VERSION
+        assert migrator.migrate(c.db) == []
+        assert [tuple(row) for row in c.db.all("SELECT * FROM ledger_entries ORDER BY transaction_id,line_no")] == ledger
+        assert c.reimbursements.list_claims()[0]["outstanding"] == 600
+        assert c.budgets.owned_spending(*parse_month("2026-10")).get(work, 0) == 0
+    finally:
+        c.db.close()
