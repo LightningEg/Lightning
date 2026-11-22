@@ -89,10 +89,9 @@ _TABLE = [
      "loans with payments still to make."),
     ("loan_total_interest", "Total interest", "What a loan with a rate charges in interest over its whole term: on "
      "the amount borrowed for the whole term when the rate is flat, on what is still owed each month when it is "
-     "reducing. Shown only when the loan has a rate; payments stay spending.",
-     "Flat: Amount borrowed × rate × years; reducing: Monthly payment × months − Amount borrowed"),
-    ("loan_cost", "Cost of this loan", "The amount borrowed plus its total interest: what the loan costs in all.",
-     "Amount borrowed + Total interest"),
+     "reducing (monthly payment × months less the amount borrowed). Shown only when the loan has a rate; payments "
+     "stay spending."),
+    ("loan_cost", "Cost of this loan", "The amount borrowed plus its total interest: what the loan costs in all."),
     ("debt_to_net_worth", "Debt to net worth", "What you owe for each pound of net worth. None when net worth is zero or less.",
      "What you owe ÷ Net worth"),
     ("debt_to_cash", "Debt to cash", "What you owe for each pound of cash you own: could your cash clear it today?",
