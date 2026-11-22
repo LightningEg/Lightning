@@ -21,11 +21,13 @@ The demo household at 1366 × 768. A script opened every popup linked from every
 | F3 | Plan form's Type showed a raw radio dot above its segment (page and popup) | A10.2 | Fixed |
 | F4 | Add transaction's Money out / Money in / Transfer were radio dots on buttons | A10.1 | Fixed: one segment |
 | F5 | Fill this month: "4,666.00 fixed", "Personal › Food & groceries", "EGP" spilling into the next column, the limit repeated in Review | A06.1, A16 | Fixed |
-| F6 | Transaction details: the code BUY-2026-11-14-001 under the title, "−18,450.00", "Effect · you", "20:36:40 UTC+00:00" | Glossary › Names, A06.1 | Fixed: date only, whole amounts, the time to the minute (full stamp in its title) |
+| F6 | Transaction details: "−18,450.00", "Effect · you" (the reference under the title and the recorded time with its offset are kept: tests pin them as decided) | A06.1 | Fixed: whole amounts, "Effect" |
 | F7 | Pay a bill: "480.00 EGP" in the header | A06.1 | Fixed |
 | F8 | "Notes containoptional", "Add a tagoptional" and two labels in Ownership missing a space | A14 | Fixed |
 | F9 | Price files: "You hold somet…" chip cut in its table cell | A16 | Fixed |
 | F10 | Edit account: the institution suggestions opened over the form on load; Starting balance a box inside the card | A16 | Fixed: autofocus only when adding; a section under a hairline |
-| F11 | The rest | — | `issues/INBOX.md` line, 2026-11-22 |
+| F11 | The focused field filled yellow (#F5EFCF); owner: "pick a lighter non-clashing one" | A10.3 | Fixed: a light mint well #F2F8F5 with the green edge, guideline Parts A and C in both repos |
+| F12 | Settings: seven cards in the left 60%, Glossary and Ask an AI each a card around one button, Features one switch, Your data mixing backup with privacy, currency and version, Theme and Language of different widths (owner: "not the best in grouping") | A09.2, A10.1 | Fixed: two columns. Appearance and region (theme, language, base currency), Your data (backup, move), Features and guide on the left; Settings in each tab, Help and about (glossary, Ask an AI, privacy, version), Advanced on the right; Back up now a secondary |
+| F13 | The rest | — | `issues/INBOX.md` line, 2026-11-22 |
 
-Checked and fine: titles and Close on every popup, no upper case, no white fields, the yellow focus fill (the guideline's `--field-focus`), every `<select>` holds a fixed list, not your own data.
+Checked and fine: titles and Close on every popup, no upper case, no white fields, every `<select>` holds a fixed list, not your own data.
