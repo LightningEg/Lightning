@@ -769,6 +769,10 @@ class PlanningService:
         return {key: (level.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP), starts)
                 for key, (level, starts) in out.items()}
 
+    def recurring_amount_per_year(self, item: PlannedItem, day: date) -> Decimal:
+        """Annual amount in the item’s currency while the schedule has payments still to come."""
+        return ZERO if self._ended(item, day) else per_year(item)
+
     @staticmethod
     def _ended(item, day: date) -> bool:
         """True when a bounded item (an end date or a payment count) has no payment left on or after `day`."""

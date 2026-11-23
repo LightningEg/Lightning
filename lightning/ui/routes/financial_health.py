@@ -118,9 +118,14 @@ async def financial_health(request: Request):
     # each figure outside its limit is a Needs you row; the list below is the one home of every figure.
     within = sum(1 for item in judged if item.status == "within your limit")  # not money
     outside = [item for item in judged if item.band == "alert"]  # Watch stays quiet (A08)
+    if outside:
+        summary, tone = f"{len(outside)} {'needs' if len(outside) == 1 else 'need'} you", "over"
+    elif within == len(judged):
+        summary, tone = "All of them are good", "in"
+    else:
+        summary, tone = "Watch", "hold"
     lead = (kpis.card("Within your limits", Decimal(within), kpis.compare(f"of the {len(judged)} figures you set a limit for"),
-                      tone="in" if not outside else "over", kind="count", key="within",
-                      line_=kpis.line(f"{len(outside)} {'needs' if len(outside) == 1 else 'need'} you" if outside else "All of them are good"))
+                      tone=tone, kind="count", key="within", line_=kpis.line(summary))
             if judged else None)
     needs = [{"label": f"{labels.get(item.key, item.key)} is outside your limit",
               "detail": " · ".join(x for x in (limit_words(item), item.period) if x), "href": item.href,

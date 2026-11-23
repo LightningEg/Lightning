@@ -24,6 +24,6 @@
     <div><span class="muted small">{{ 'Basis'|tr(locale) }}</span><b>{{ fig[health_fund.figure].label }}</b></div>
     <div><span class="muted small">{{ "Target"|tr(locale) }}</span><b>{% if health_fund.target is not none %}{{ health_fund.target|money }} {{ base }}{% else %}Unavailable{% endif %}</b></div>
   </div>
-  {% if health_fund.average.amount is not none %}<p class="muted small">{% if health_fund.average.scheduled %}From your recurring income{% else %}{{ health_fund.average.window }} · {{ health_fund.average.months_counted }} completed months{% if health_fund.average.manual %} · set by hand{% endif %}{% endif %}</p>{% else %}<p class="muted small">{{ "A target appears when the selected average is available."|tr(locale) }}</p>{% endif %}
+  {% if health_fund.average.amount is not none %}<p class="muted small">{% if health_fund.average.manual %}{{ "Set by hand in Settings"|tr(locale) }}{% elif health_fund.average.since %}{{ health_fund.average.window }}{% elif health_fund.average.scheduled %}From your recurring income{% else %}{{ health_fund.average.window }} · {{ health_fund.average.months_counted }} completed months{% endif %}</p>{% else %}<p class="muted small">{{ "A target appears when the selected average is available."|tr(locale) }}</p>{% endif %}
   <p class="settings-links"><a href="/plan/reserves">{{ "Open Reserves"|tr(locale) }}</a> · <a href="/settings?section=budget">{{ "Change income or spending basis"|tr(locale) }}</a></p>
 </section>

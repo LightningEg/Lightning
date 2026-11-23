@@ -16,7 +16,7 @@ from lightning.core.figures import label
 from lightning.core.money import ZERO, fmt, to_decimal
 from lightning.core.plural import counted
 from lightning.planning.domain import (FREQUENCY_LABELS, KIND_LABELS, RECURRING_KINDS, WEEKEND_MOVE_LABELS, Frequency,
-                                       PaymentStatus, PlanKind, WeekendMove, per_year)
+                                       PaymentStatus, PlanKind, WeekendMove)
 from lightning.planning.bill_state import CATCH_UP_FROM, late_payments
 from lightning.planning.schedule import describe
 from lightning.planning.service import LOAN_CATEGORY
@@ -64,7 +64,7 @@ def _row(c, item, labels, as_of, linked):
     last = next((p for p in reversed(payments) if p.status == PaymentStatus.PAID), None)
     review_next = bool(upcoming and upcoming.status == PaymentStatus.UPCOMING and any(
         candidate["id"] not in linked for candidate in c.planning.plausible_candidates(upcoming, as_of)))
-    per_year = c.planning.amount_in_base(item, _per_year(item), as_of)
+    per_year = c.planning.amount_in_base(item, c.planning.recurring_amount_per_year(item, as_of), as_of)
     recent = fmt_date(as_of - timedelta(days=62))  # not money
     skipped = [p for p in payments if p.status == PaymentStatus.SKIPPED and p.due_date >= recent]
     reserve_links = c.reserves.links_for_transaction(last.transaction_id) if last and last.transaction_id else []
@@ -72,9 +72,6 @@ def _row(c, item, labels, as_of, linked):
             "account": labels["accounts"].get(item.account_id), "category": labels["categories"].get(item.category_id),
             "per_year": per_year, "reserve_links": reserve_links, "review_next": review_next,
             "bill_reserve": labels["bill_reserves"].get(item.id)}
-
-
-_per_year = per_year  # one calculation, in lightning.planning.domain
 
 
 def _form_values(form) -> dict:
