@@ -28,7 +28,7 @@ def test_last_month_copies_base_limit_without_spending_or_carryover(c, setup):
 
     assert row.amount == Decimal("4000")
     assert row.current_amount == Decimal("7000")
-    assert row.current_rule == "7,000 fixed" and row.conflict.startswith("Tick to use this instead")  # r39: the limit is its own column
+    assert row.current_rule == "7,000 fixed" and row.conflict == "" and not row.selected  # r39: the limit is its own column
     assert not row.selected
     assert "From 2026-11" in row.note
 

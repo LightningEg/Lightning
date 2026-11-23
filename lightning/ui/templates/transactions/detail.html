@@ -23,7 +23,7 @@
       <tr><td class="muted">{{ 'Account'|tr(locale) }}</td><td>{{ summary.account_label }}</td></tr>
       {% if summary.category_label %}<tr><td class="muted">{{ 'Category'|tr(locale) }}</td><td class="category-context">{{ category_context(summary.category_label) }}</td></tr>{% endif %}
       {% endif %}
-      {% for effect in cash_effects %}<tr><td class="muted">Effect{% if effect.owner != 'you' %} · {{ effect.owner }}{% endif %}</td><td>Cash in {{ effect.account }} {{ 'increases' if effect.quantity > 0 else 'decreases' }} by {{ effect.quantity|abs|amount_role('row') }} {{ effect.currency }}</td></tr>{% endfor %}
+      {% for effect in cash_effects %}<tr><td class="muted">{{ 'Effect'|tr(locale) }}{% if effect.owner != 'you' %} · {{ effect.owner }}{% endif %}</td><td>{{ ('Cash in {account} increases by {amt}' if effect.quantity > 0 else 'Cash in {account} decreases by {amt}')|tr(locale, account=effect.account, amt=(effect.quantity|abs|amount_role('row')) ~ ' ' ~ effect.currency) }}</td></tr>{% endfor %}
       {% if txn.counterparty %}<tr><td class="muted">{{ 'Payee'|tr(locale) }}</td><td>{% if touched.counterparty %}<a href="/counterparties/{{ touched.counterparty.id }}">{{ txn.counterparty }}</a>{% else %}{{ txn.counterparty }}{% endif %}</td></tr>{% endif %}
       {% for owner in touched.owners %}<tr><td class="muted">{{ 'Held for'|tr(locale) }}</td><td><a href="/counterparties/{{ owner.id }}">{{ owner.name }}</a></td></tr>{% endfor %}
       {% for part in estimate_shifts %}<tr><td class="muted">{{ 'Estimate date'|tr(locale) }}</td><td><time datetime="{{ part.effective_date }}">{{ part.effective_date|day(locale) }}</time> · {{ part.amount|abs|money }} {{ base }}</td></tr>{% endfor %}

@@ -166,7 +166,7 @@ def _expense_stats(a, total, prior, prior_label, largest, selected, first, last,
     average = average_of((r["value"] for r in now_rows), count)
     before = payments(prior_from, prior_to) if prior_from and prior_to else None
     stats.append({"key": "payments", "surface": "out", "label": "Average payment", "value": average, "kind": "money",
-                  "empty": "—", "spark": charts.sparkline(counts), "spark_tone": "spend",
+                  "empty": "—", "spark": charts.sparkline(counts), "spark_tone": "spend", "spark_values": counts,
                   "sub": (f"{counted(count, 'payment', 'payments')}"
                           + (f" · {len(before)} in {prior_label}" if before is not None and prior_label else "")),
                   "href": f"/transactions?{query}"})

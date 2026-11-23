@@ -734,7 +734,7 @@ class BudgetService:
                 conflict = ("Already using last month's plan" if source == "last_month"
                             else "Matches the current base limit.")
             elif rule is not None:  # NF-12AI: a limit you set is kept unless you tick the row
-                conflict = f"Tick to use this instead for {month} only."  # r39: the limit is in its own column already
+                conflict = ""  # r39: the limit is its own column, and the intro says ticking replaces it for the month
             elif auto_loan:
                 conflict = (f"{fmt(auto_loan)} of scheduled payments are already planned automatically. "
                             "Applying this amount would replace that automatic line.")
