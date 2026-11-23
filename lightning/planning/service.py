@@ -17,6 +17,7 @@ from lightning.database.settings import SettingsStore
 from lightning.fx import rate_for
 
 from .domain import (Frequency, Payment, PaymentStatus, PlanKind, PlannedItem, WeekendMove, WhatYouOwe, per_year)
+from .loan_cost import FLAT, REDUCING, LoanCost, loan_cost
 from .repository import PlanningRepository
 from .schedule import payment_dates, previous_due, scheduled_dates
 
@@ -190,6 +191,9 @@ class PlanningService:
         old = self.get(item_id)
         values.setdefault("match_window_days", old.match_window_days)
         values.setdefault("match_tolerance_pct", old.match_tolerance_pct)
+        # A caller that does not send the rate (a payment form fixing the category) keeps it; "" clears it.
+        values.setdefault("interest_rate", old.interest_rate)
+        values.setdefault("rate_kind", old.rate_kind)
         clean = self._validate(values)
         if clean["kind"] not in (PlanKind.BILL, PlanKind.SUBSCRIPTION) and self.reserves.bill_reserve(item_id):
             raise ValidationError("Unlink the reserve before changing this bill into income or a loan.", "kind")
@@ -945,12 +949,52 @@ class PlanningService:
             raise ValidationError(f"Choose an amount tolerance from 0 to {tolerance_limit} percent.", "match_tolerance_pct") from None
         if not 0 <= match_tolerance_pct <= tolerance_limit:
             raise ValidationError(f"Choose an amount tolerance from 0 to {tolerance_limit} percent.", "match_tolerance_pct")
+        interest_rate, rate_kind = self._rate(values, kind)
         return {"kind": kind.value, "name": name, "amount": amount, "frequency": frequency.value,
                 "interval_count": interval, "start_date": start, "end_date": end, "payment_count": count,
                 "account_id": account_id, "category_id": category_id, "counterparty_id": counterparty_id,
                 "principal": principal, "notes": str(values.get("notes") or "").strip(),
                 "weekend_move": weekend_move.value, "month_day": self._month_day(values.get("month_day"), frequency),
-                "match_window_days": match_window_days, "match_tolerance_pct": match_tolerance_pct}
+                "match_window_days": match_window_days, "match_tolerance_pct": match_tolerance_pct,
+                "interest_rate": interest_rate, "rate_kind": rate_kind}
+
+    def set_loan_rate(self, item_id: int, interest_rate=None, rate_kind=None) -> None:
+        """Set or clear a loan's optional yearly rate (empty clears it). Payments and the ledger never change."""
+        item = self.get(item_id)
+        if item.kind != PlanKind.LOAN:
+            raise ValidationError("Only a loan has an interest rate.", "interest_rate")
+        rate, kind = self.loan_rate_terms(interest_rate, rate_kind)
+        with self.db.transaction():
+            self.repo.set_rate(item_id, rate, kind)
+
+    def loan_rate_terms(self, interest_rate, rate_kind) -> tuple[Decimal | None, str | None]:
+        """The checked rate and kind a loan form sent, before anything is saved (empty rate: none)."""
+        return self._rate({"interest_rate": interest_rate, "rate_kind": rate_kind}, PlanKind.LOAN)
+
+    @staticmethod
+    def _rate(values: dict, kind: PlanKind) -> tuple[Decimal | None, str | None]:
+        """A loan's optional annual rate and how it is charged; other kinds never carry one (IV-3H7)."""
+        raw = str(values.get("interest_rate") if values.get("interest_rate") is not None else "").strip().rstrip("%")
+        if kind != PlanKind.LOAN or not raw:
+            return None, None
+        rate = check_places(to_decimal(raw, "interest_rate"), 4, "interest_rate")
+        if not ZERO < rate <= 100:
+            raise ValidationError("Enter a yearly rate above 0 and up to 100%, or leave it empty.", "interest_rate")
+        rate_kind = str(values.get("rate_kind") or "").upper()
+        if rate_kind not in (FLAT, REDUCING):
+            raise ValidationError("Choose whether the rate is flat or reducing.", "rate_kind")
+        return rate, rate_kind
+
+    def loan_cost(self, item: PlannedItem, as_of: date | None = None) -> LoanCost | None:
+        """Total interest and the cost of a loan that has a rate; None without one (the card then reads as before)."""
+        if item.kind != PlanKind.LOAN or item.interest_rate is None or not item.rate_kind:
+            return None
+        months_per = {Frequency.MONTHLY: 1, Frequency.QUARTERLY: 3, Frequency.YEARLY: 12}.get(item.frequency)
+        if months_per is None:
+            return None  # weekly or one-off loans have no monthly term to price
+        progress = self.loan_progress(item, as_of)
+        months = progress["total"] * months_per * item.interval_count
+        return loan_cost(item.principal, item.interest_rate, item.rate_kind, months, item.amount)
 
     @staticmethod
     def _month_day(raw, frequency):

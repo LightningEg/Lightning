@@ -3,7 +3,7 @@
 Budget category preferences use stable category codes. Payday funding carries the preview’s token; a changed
 preview is refused. Automatic plan matching runs only through home automation.
 """
-from .spec import AMOUNT, DATE, FLAG, INT, LONG, MONTH, TEXT, Command, choice, items, listof, optional, ref
+from .spec import AMOUNT, DATE, FLAG, INT, LONG, MONTH, RATE, TEXT, Command, choice, items, listof, optional, ref
 
 TABLES = ("planned_items", "planned_payments", "loan_extra_payments", "installment_purchases", "budgets",
           "budget_carryover", "budget_carryover_resets", "cash_funding", "budget_estimate_dates", "budget_estimate_exclusions")
@@ -59,6 +59,10 @@ COMMANDS = {
         creates="planned_items"),
     "plans.update": Command("planning.update", dict(
         PLAN, item_id=ref("planned_items"), match_window_days=INT, match_tolerance_pct=INT), target=ITEM),
+    # IV-3H7: a loan's optional rate is its own command, so the plan commands keep their exact shape.
+    "plans.set_loan_rate": Command("planning.set_loan_rate", dict(
+        item_id=ref("planned_items"), interest_rate=optional(RATE), rate_kind=optional(choice("FLAT", "REDUCING"))),
+        target=ITEM),
     "plans.set_amount": Command("planning.set_amount", dict(item_id=ref("planned_items"), amount=AMOUNT), target=ITEM),
     "plans.start_after_paid": Command("planning.start_after_paid", dict(item_id=ref("planned_items")), target=ITEM),
     "plans.remove": Command("planning.remove", dict(item_id=ref("planned_items")), target=ITEM),

@@ -11,7 +11,7 @@ from .domain import Frequency, PlanKind, PlannedItem, WeekendMove
 
 _COLUMNS = ("kind", "name", "amount_e6", "frequency", "interval_count", "start_date", "end_date",
             "payment_count", "account_id", "category_id", "counterparty_id", "principal_e6", "notes", "weekend_move", "month_day",
-            "match_window_days", "match_tolerance_pct", "match_tolerance_override_pct")
+            "match_window_days", "match_tolerance_pct", "match_tolerance_override_pct", "interest_rate_e6", "rate_kind")
 
 
 def _item(row) -> PlannedItem:
@@ -23,7 +23,9 @@ def _item(row) -> PlannedItem:
         principal=from_e6(row["principal_e6"]) if row["principal_e6"] is not None else None,
         active=bool(row["active"]), notes=row["notes"],
         weekend_move=WeekendMove(row["weekend_move"]), month_day=row["month_day"],
-        match_window_days=row["match_window_days"], match_tolerance_pct=row["match_tolerance_override_pct"] or row["match_tolerance_pct"])
+        match_window_days=row["match_window_days"], match_tolerance_pct=row["match_tolerance_override_pct"] or row["match_tolerance_pct"],
+        interest_rate=from_e6(row["interest_rate_e6"]) if row["interest_rate_e6"] is not None else None,
+        rate_kind=row["rate_kind"])
 
 
 class PlanningRepository:
@@ -59,6 +61,10 @@ class PlanningRepository:
     def set_start(self, item_id: int, start_date: str, month_day: int | None = None) -> None:
         self.db.execute("UPDATE planned_items SET start_date=?, month_day=COALESCE(?, month_day), updated_at=? "
                         "WHERE id=?", (start_date, month_day, now_iso(), item_id))
+
+    def set_rate(self, item_id: int, rate, rate_kind) -> None:
+        self.db.execute("UPDATE planned_items SET interest_rate_e6=?, rate_kind=?, updated_at=? WHERE id=?",
+                        (to_e6(rate) if rate is not None else None, rate_kind, now_iso(), item_id))
 
     def set_payment_count(self, item_id: int, count: int) -> None:
         self.db.execute("UPDATE planned_items SET payment_count=?,updated_at=? WHERE id=?", (count, now_iso(), item_id))
@@ -221,4 +227,6 @@ class PlanningRepository:
                 to_e6(values["principal"]) if values.get("principal") is not None else None,
                 values.get("notes", ""), values.get("weekend_move", "none"), values.get("month_day"),
                 values["match_window_days"], min(values["match_tolerance_pct"], 25),
-                values["match_tolerance_pct"] if values["match_tolerance_pct"] > 25 else None)
+                values["match_tolerance_pct"] if values["match_tolerance_pct"] > 25 else None,
+                to_e6(values["interest_rate"]) if values.get("interest_rate") is not None else None,
+                values.get("rate_kind"))
