@@ -588,10 +588,10 @@ class BudgetService:
         sections["INVESTMENT"] = BudgetSection("Investment")
         warnings: list[str] = []
         carryover_settings = self.repo.carryover_settings(month)
-        opening_carryovers = {category_id: self._opening_carryover(category_id, month,
-                                                                    carryover_settings.get(category_id, False) and category_id in direct,
-                                                                    children, schedule=schedule)
-                              for category_id in carryover_settings if carryover_settings[category_id]}
+        opening_carryovers = {
+            cid: self._opening_carryover(cid, month, children, one_offs, schedule=schedule)
+            for cid, enabled in carryover_settings.items() if enabled and cid in direct
+        }
         for category in reversed(cats):
             if category.id not in direct:
                 opening_carryovers[category.id] = sum(
@@ -618,10 +618,11 @@ class BudgetService:
                 carryover_enabled=carryover_settings.get(c.id, False),
                 income_percent=income_percent, from_loans=c.id in from_loans, from_bills=c.id in from_bills,
             ))
-            kids_total = sum(((budget[k] or ZERO) + opening_carryovers.get(k, ZERO)
-                              for k in children.get(c.id, []) if budget[k] is not None), ZERO)
+            child_limits = [budget[k] + opening_carryovers.get(k, ZERO)
+                            for k in children.get(c.id, []) if budget[k] is not None]
+            kids_total = sum(child_limits, ZERO)
             parent_available = (budget[c.id] or ZERO) + opening_carryovers.get(c.id, ZERO)
-            if budget[c.id] is not None and kids_total > parent_available:
+            if child_limits and budget[c.id] is not None and kids_total > parent_available:
                 warnings.append(f"{self.categories.display_name(c.id)}: its categories add up to "
                                 f"{fmt(kids_total)}, more than its budget / available limit of {fmt(parent_available)}.")
         income = self.reporting.cash_flow(first, last).inflows
@@ -633,17 +634,17 @@ class BudgetService:
         negative when over. None when no limit covers the category."""
         view = self.month_view(month, schedule=schedule)
         by_id = {line.category_id: line for section in view.sections for line in section.lines}
-        line = shown = by_id.get(category_id)
+        one_offs = self.one_off_ids()
         node = category_id
-        while shown is None or shown.remaining is None:
-            node = self.categories.get(node).parent_id
-            if not node:
-                break
+        while node is not None:
             shown = by_id.get(node)
-        if shown is None or shown.remaining is None or shown.available is None:
-            return None
-        return {"name": shown.name, "limit": shown.available, "spent": shown.planned_actual, "left": shown.remaining,
-                "over": shown.over, "inside": shown is not line}
+            if shown is not None and shown.direct is not None:
+                return {"name": shown.name, "limit": shown.available, "spent": shown.planned_actual,
+                        "left": shown.remaining, "over": shown.over, "inside": node != category_id}
+            if node in one_offs:
+                break  # An unplanned outside-budget category does not spend its parent's limit.
+            node = self.categories.get(node).parent_id
+        return None
 
     def suggested_plan(self, month: str) -> dict[int, Decimal]:
         """Return stable, rounded suggestions for categories with recent spending."""
@@ -935,67 +936,38 @@ class BudgetService:
                 changed += 1
         return changed
 
-    def _opening_carryover(self, category_id: int, month: str, enabled_now: bool,
-                           children: dict[int, list[int]], *, schedule: ScheduleView) -> Decimal:
-        if not enabled_now:
-            return ZERO
-        first, _ = parse_month(month)
-        earliest = self.repo.first_carryover_month(category_id, month)
-        if not earliest:
-            return ZERO
-        cursor = parse_month(earliest)[0]
+    def _opening_carryover(self, category_id: int, month: str, children: dict[int, list[int]],
+                           one_offs: set[int], *, schedule: ScheduleView) -> Decimal:
+        # The first enabled month takes the previous month's closing balance. A pause
+        # discards everything carried into that previous month.
         settings = self.repo.carryover_settings_up_to(month, category_id)
-        active = False
-        setting_index = 0
-        balance = ZERO
+        enabled_since = month
+        for effective, enabled in reversed(settings):
+            if not enabled:
+                break
+            enabled_since = effective
+        first_enabled = parse_month(enabled_since)[0]
+        cursor = max(first_enabled - timedelta(days=1), date(1900, 1, 1))
         reset_month = self.repo.reset_month(category_id, month)
-        if reset_month == month:
-            return ZERO
-        enabling_now = bool(settings and settings[-1] == (month, True))
-        preceding_month = month_of(first - timedelta(days=1))
-        descendants = {category_id}
-        pending = [category_id]
-        while pending:
-            kids = children.get(pending.pop(), [])
-            descendants.update(kids)
-            pending.extend(kids)
-        # One-off spending is left out of each month's budget, so it is left out of what carries over
-        # too (audit 2026-10-05 #11).
-        descendants -= self.one_off_ids()
-        while cursor < first:
+        if reset_month:
+            cursor = max(cursor, parse_month(reset_month)[0])
+        balance = ZERO
+        while month_of(cursor) < month:
             current_month = month_of(cursor)
-            if reset_month == current_month:
+            start, end = parse_month(current_month)
+            limits = self.amounts_for(current_month, schedule=schedule)
+            amount = limits.get(category_id, (None,))[0]
+            if amount is None:
                 balance = ZERO
-            while setting_index < len(settings) and settings[setting_index][0] <= current_month:
-                active = settings[setting_index][1]
-                setting_index += 1
-            next_month = month_of(parse_month(current_month)[1] + timedelta(days=1))
-            # An opt-in effective in the next month immediately carries this
-            # month's final result, even if carryover was previously off.
-            if setting_index < len(settings) and settings[setting_index] == (next_month, True):
-                active = True
-            if enabling_now and current_month == preceding_month:
-                active = True
-            next_cursor = (parse_month(current_month)[1] + timedelta(days=1))
-            if active:
-                direct = self.amounts_for(current_month, schedule=schedule).get(category_id)
-                if direct:
-                    amount, _, period, percent = direct
-                    if period:
-                        amount = self._rolling_average(category_id, current_month, period, children, {})
-                    elif percent is not None:
-                        amount = self.budgeting_income(current_month, schedule=schedule)
-                        if amount is not None:
-                            amount = amount * percent / Decimal(100)
-                    start, end = parse_month(current_month)
-                    spent = self.plan_funded_spending(start, end)
-                    actual = sum((spent.get(cid, ZERO) for cid in descendants), ZERO)
-                    balance = (amount or ZERO) + balance - actual
-                else:
-                    balance = ZERO
             else:
-                balance = ZERO
-            cursor = next_cursor
+                spent = self.plan_funded_spending(start, end)
+                balance += amount
+                pending = [category_id]
+                while pending:
+                    cid = pending.pop()
+                    balance -= spent.get(cid, ZERO)
+                    pending.extend(k for k in children.get(cid, []) if k not in one_offs or k in limits)
+            cursor = end + timedelta(days=1)
         return balance
 
     # ------------------------------------------------------------------ writing
@@ -1020,20 +992,8 @@ class BudgetService:
                 old = current.get(category_id, (None, False, None, None))
                 if old[0] == value and old[2] == period and old[3] is None:
                     continue
-                before = self._repeating_before(category_id, month)
-                desired = (value, period)
-                if only_this_month:
-                    if desired == self._repeating_through(category_id, month):
-                        self.repo.delete(category_id, month, one_off=True)
-                    else:
-                        self.repo.upsert(category_id, month, True, value, period)
-                else:
-                    self.repo.delete(category_id, month, one_off=True)
-                    if desired == before:
-                        self.repo.delete(category_id, month, one_off=False)  # same as before: nothing to store
-                    else:
-                        self.repo.upsert(category_id, month, False, value, period)
-                if value is None and period is None and carryover_now.get(category_id, False):
+                self._write_rule(category_id, month, only_this_month, value, period, None)
+                if not only_this_month and value is None and period is None and carryover_now.get(category_id, False):
                     self.repo.set_carryover(category_id, month, False)
                 changed += 1
         return changed
@@ -1047,14 +1007,19 @@ class BudgetService:
             return self.save_month(month, amounts, only_this_month=True, schedule=schedule)
 
     # ------------------------------------------------------------------ helpers
-    def _repeating_before(self, category_id: int, month: str) -> tuple[Decimal | None, int | None]:
-        rows = [e for e in self.repo.entries_up_to(month) if e.category_id == category_id and not e.one_off
-                and e.month < month]
-        return (rows[-1].amount, rows[-1].average_months) if rows else (None, None)
-
-    def _repeating_through(self, category_id: int, month: str) -> tuple[Decimal | None, int | None]:
-        rows = [e for e in self.repo.entries_up_to(month) if e.category_id == category_id and not e.one_off]
-        return (rows[-1].amount, rows[-1].average_months) if rows else (None, None)
+    def _write_rule(self, category_id: int, month: str, only_this_month: bool, amount: Decimal | None,
+                    average_months: int | None, income_percent: Decimal | None) -> None:
+        """Compare an override with the rule in force that month, and a repeating change with the prior rule."""
+        rows = self.repo.entries_up_to(month)
+        prior = next((r for r in reversed(rows) if r.category_id == category_id and not r.one_off
+                      and (only_this_month or r.month < month)), None)
+        inherited = (prior.amount, prior.average_months, prior.income_percent) if prior else (None, None, None)
+        if not only_this_month:
+            self.repo.delete(category_id, month, one_off=True)
+        if (amount, average_months, income_percent) == inherited:
+            self.repo.delete(category_id, month, one_off=only_this_month)
+        else:
+            self.repo.upsert(category_id, month, only_this_month, amount, average_months, income_percent)
 
     def _rolling_average(self, category_id: int, month: str, months: int,
                          children: dict[int, list[int]], cache: dict[tuple[int, int], Decimal | None]) -> Decimal | None:
@@ -1440,23 +1405,8 @@ class BudgetService:
         value = check_places(to_decimal(percent, "percentage"), 2, "percentage")
         if value < ZERO or value > 10000:
             raise ValidationError("Enter an income percentage from 0 to 10,000.", "percentage")
-        rows = self.repo.entries_up_to(month)
-        prior = next((row for row in reversed(rows) if row.category_id == category_id and not row.one_off
-                      and row.month < month), None)
-        previous = ((prior.amount, prior.average_months, prior.income_percent) if prior else (None, None, None))
-        desired = (None, None, value)
         with self.db.transaction():
-            if only_this_month:
-                if previous == desired:
-                    self.repo.delete(category_id, month, True)
-                else:
-                    self.repo.upsert(category_id, month, True, None, None, value)
-            else:
-                self.repo.delete(category_id, month, True)
-                if previous == desired:
-                    self.repo.delete(category_id, month, False)
-                else:
-                    self.repo.upsert(category_id, month, False, None, None, value)
+            self._write_rule(category_id, month, only_this_month, None, None, value)
         return True
 
     def reset_carryover(self, category_id: int, month: str, *, schedule: ScheduleView) -> None:

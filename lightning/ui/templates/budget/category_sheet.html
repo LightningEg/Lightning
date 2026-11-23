@@ -10,7 +10,7 @@
   <p class="muted small">{% if group %}{{ group }} · {% endif %}{{ month }}</p>
   {% if r %}
   <p class="category-sheet-figure{{ ' is-over' if r.over }}"><b>{{ spent|money(False, 0) }}</b> <small>{{ 'of'|tr(locale) }} {{ planned|money(False, 0) }} {{ base }}</small></p>
-  <span class="category-sheet-bar{{ ' is-over' if r.over }}" role="img" aria-label="{{ spent|money(False, 0) }} {{ 'of'|tr(locale) }} {{ planned|money(False, 0) }}"><i style="width:{{ '%.1f'|format(r.width) }}%"></i>{% if r.pace is not none %}<s style="inset-inline-start:{{ '%.1f'|format(r.pace) }}%"></s>{% endif %}</span>
+  {% if r.width is not none %}<span class="category-sheet-bar{{ ' is-over' if r.over }}" role="img" aria-label="{{ spent|money(False, 0) }} {{ 'of'|tr(locale) }} {{ planned|money(False, 0) }}"><i style="width:{{ '%.1f'|format(r.width) }}%"></i>{% if r.pace is not none %}<s style="inset-inline-start:{{ '%.1f'|format(r.pace) }}%"></s>{% endif %}</span>{% endif %}
   <p class="category-sheet-left">{% if r.over %}<b class="neg">{{ r.amount|money(False, 0) }}</b> {{ 'over plan'|tr(locale) }}{% else %}<b>{{ r.amount|money(False, 0) }}</b> {{ 'left'|tr(locale) }}{% endif %}</p>
   {% if r.line %}<p class="muted small">{{ r.line.text|tr(locale, **r.line['values']) }}</p>{% endif %}
   {% else %}

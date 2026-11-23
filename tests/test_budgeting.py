@@ -1,3 +1,4 @@
+from datetime import date
 from decimal import Decimal
 
 import pytest
@@ -114,6 +115,7 @@ def test_signed_carryover_and_dated_reset(b):
     sep = line(c.budgets.month_view("2026-09", schedule=c.schedules.view()), "EXP.PERSONAL.FOOD")
     assert sep.opening_carryover == Decimal("-2000")
     assert sep.remaining == Decimal("-1000")
+    assert not c.budgets.month_view("2026-09", schedule=c.schedules.view()).warnings
     c.budgets.reset_carryover(food, "2026-09", schedule=c.schedules.view())
     assert line(c.budgets.month_view("2026-09", schedule=c.schedules.view()), "EXP.PERSONAL.FOOD").opening_carryover == 0
     assert line(c.budgets.month_view("2026-10", schedule=c.schedules.view()), "EXP.PERSONAL.FOOD").opening_carryover == Decimal("1000")
@@ -209,3 +211,150 @@ def test_a_budget_row_left_reads_as_the_rounded_figures_beside_it(c, b, monkeypa
     page = TestClient(create_app(c)).get("/budget?period=month&month=2026-09").text
     assert "+37" in page.replace("&#43;", "+") or ">37<" in page  # 671 − 634, not 37.50 rounded up to 38
     assert "+38" not in page.replace("&#43;", "+")
+
+
+def test_carryover_after_one_month_pause_uses_only_the_paused_month(b):
+    c, accounts, ids = b
+    food = ids["EXP.PERSONAL.FOOD"]
+    schedule = c.schedules.view()
+    c.budgets.set_budget(food, "2026-10", "1000", schedule=schedule)
+    c.budgets.set_carryover("2026-11", {food: True}, schedule=schedule)
+    c.budgets.set_carryover("2026-12", {food: False}, schedule=schedule)
+    c.transactions.record_outflow("2026-12-31", accounts["cib"].id, "1200.25", food)
+    c.budgets.set_carryover("2027-01", {food: True}, schedule=schedule)
+    jan = line(c.budgets.month_view("2027-01", schedule=schedule), "EXP.PERSONAL.FOOD")
+    assert jan.opening_carryover == Decimal("-200.25")
+
+
+def test_first_carryover_includes_previous_month_only_limit(b):
+    c, accounts, ids = b
+    food = ids["EXP.PERSONAL.FOOD"]
+    schedule = c.schedules.view()
+    c.budgets.set_budget(food, "2026-12", "900", only_this_month=True, schedule=schedule)
+    c.transactions.record_outflow("2026-12-31", accounts["cib"].id, "1050", food)
+    c.budgets.set_budget(food, "2027-01", "1000", schedule=schedule)
+    c.budgets.set_carryover("2027-01", {food: True}, schedule=schedule)
+    assert line(c.budgets.month_view("2027-01", schedule=schedule), "EXP.PERSONAL.FOOD").opening_carryover == -150
+
+
+def test_percentage_limit_carries_exact_closing_piastres(b):
+    c, _, ids = b
+    food = ids["EXP.PERSONAL.FOOD"]
+    schedule = c.schedules.view()
+    c.settings.set("budget_manual_monthly_income", "12345.67")
+    c.budgets.set_income_percentage(food, "2026-12", "10")
+    c.budgets.set_carryover("2027-01", {food: True}, schedule=schedule)
+    jan = line(c.budgets.month_view("2027-01", schedule=schedule), "EXP.PERSONAL.FOOD")
+    assert jan.opening_carryover == Decimal("1234.57")
+
+
+def test_planned_one_off_expense_reduces_its_own_and_group_carryover(b):
+    c, accounts, ids = b
+    personal, food = ids["EXP.PERSONAL"], ids["EXP.PERSONAL.FOOD"]
+    schedule = c.schedules.view()
+    c.budgets.set_one_off(food, True)
+    c.budgets.save_month("2026-12", {personal: "2000", food: "1000"}, schedule=schedule)
+    c.transactions.record_outflow("2026-12-29", accounts["cib"].id, "2250", food)
+    c.budgets.set_carryover("2027-01", {personal: True, food: True}, schedule=schedule)
+    jan = c.budgets.month_view("2027-01", schedule=schedule)
+    assert line(jan, "EXP.PERSONAL.FOOD").opening_carryover == -1250
+    assert line(jan, "EXP.PERSONAL").opening_carryover == -250
+
+
+@pytest.mark.parametrize("phone", [False, True], ids=["pc", "phone"])
+def test_category_sheet_shows_shortfall_when_carryover_exhausts_the_limit(b, phone):
+    from tests.screens import visible_text
+
+    c, accounts, ids = b
+    food = ids["EXP.PERSONAL.FOOD"]
+    schedule = c.schedules.view()
+    c.budgets.set_budget(food, "2026-08", "1000", schedule=schedule)
+    c.transactions.record_outflow("2026-08-20", accounts["cib"].id, "3000", food)
+    c.budgets.set_carryover("2026-09", {food: True}, schedule=schedule)
+    app = create_app(c)
+    if phone:
+        from lightning.ui.phone.router import mount_phone
+        mount_phone(app)
+
+    @app.middleware("http")
+    async def frame(request, call_next):
+        request.state.phone = phone
+        return await call_next(request)
+
+    client = TestClient(app)
+    sheet = client.get(f"/budget/category/{food}/sheet?month=2026-09")
+    assert sheet.status_code == 200
+    expected = "1,000 EGP over" if phone else "1,000 over plan"
+    assert expected in visible_text(sheet.text)
+    assert "No limit for this category" not in sheet.text
+
+
+def test_skipping_a_month_does_not_turn_off_future_carryovers(b):
+    c, accounts, ids = b
+    food = ids["EXP.PERSONAL.FOOD"]
+    schedule = c.schedules.view()
+    c.budgets.set_budget(food, "2026-10", "1000", schedule=schedule)
+    c.budgets.set_carryover("2026-10", {food: True}, schedule=schedule)
+    c.budgets.set_budget(food, "2026-11", "", only_this_month=True, schedule=schedule)
+    c.transactions.record_outflow("2026-12-18", accounts["cib"].id, "1100", food)
+    december = line(c.budgets.month_view("2026-12", schedule=schedule), "EXP.PERSONAL.FOOD")
+    january = line(c.budgets.month_view("2027-01", schedule=schedule), "EXP.PERSONAL.FOOD")
+    assert december.carryover_enabled and december.opening_carryover == 0
+    assert january.opening_carryover == -100
+
+
+def test_expense_is_covered_only_by_a_limit_that_includes_it(b):
+    c, _, ids = b
+    food, bus, personal = (ids[k] for k in ("EXP.PERSONAL.FOOD", "EXP.PERSONAL.TRANSPORT", "EXP.PERSONAL"))
+    schedule = c.schedules.view()
+    c.budgets.set_budget(food, "2026-12", "1000", schedule=schedule)
+    assert c.budgets.plan_left(bus, "2026-12", schedule=schedule) is None
+    c.budgets.set_budget(personal, "2026-12", "3000", schedule=schedule)
+    assert c.budgets.plan_left(bus, "2026-12", schedule=schedule)["limit"] == 3000
+    c.budgets.set_one_off(bus, True)
+    assert c.budgets.plan_left(bus, "2026-12", schedule=schedule) is None
+    c.budgets.set_budget(bus, "2026-12", "250", schedule=schedule)
+    assert c.budgets.plan_left(bus, "2026-12", schedule=schedule)["limit"] == 250
+
+
+def test_cover_offer_can_be_paid_from_the_donors_base_limit(b):
+    from lightning.ui.budget_rows import cover_from
+    from lightning.ui.phone.screens import budget as phone_budget
+
+    c, accounts, ids = b
+    food, bus, software = (ids[k] for k in ("EXP.PERSONAL.FOOD", "EXP.PERSONAL.TRANSPORT", "EXP.WORK.SOFTWARE"))
+    schedule = c.schedules.view()
+    c.budgets.save_month("2026-10", {bus: "100", food: "1000", software: "200"}, schedule=schedule)
+    c.budgets.set_carryover("2026-11", {bus: True}, schedule=schedule)
+    c.transactions.record_outflow("2026-12-01", accounts["cib"].id, "1150", food)
+    room = c.forecaster.everyday("2026-12", date(2026, 12, 2)).room
+    assert room[bus] == 300 and room[software] == 200
+    offer = cover_from(c, "2026-12", {"category_id": food, "over": Decimal(150)}, room)
+    assert f"from={software}&" in offer["href"]
+    assert phone_budget.build(c, date(2026, 12, 2), "2026-12").move == offer
+    c.budgets.move_room("2026-12", food, software, offer["amount"], True, schedule=schedule)
+    assert c.budgets.plan_left(food, "2026-12", schedule=schedule)["left"] == 0
+
+
+@pytest.mark.parametrize("only_this_month", [True, False])
+def test_clear_a_salary_percentage_limit(b, only_this_month):
+    c, _, ids = b
+    food = ids["EXP.PERSONAL.FOOD"]
+    schedule = c.schedules.view()
+    c.settings.set("budget_manual_monthly_income", "15000")
+    c.budgets.set_income_percentage(food, "2026-10", "10")
+    c.budgets.set_budget(food, "2026-11", "", only_this_month, schedule=schedule)
+    assert food not in c.budgets.amounts_for("2026-11", schedule=schedule)
+    assert (food in c.budgets.amounts_for("2026-12", schedule=schedule)) == only_this_month
+
+
+def test_month_only_salary_rule_can_match_the_old_rate_after_a_raise(b):
+    c, _, ids = b
+    food = ids["EXP.PERSONAL.FOOD"]
+    schedule = c.schedules.view()
+    c.settings.set("budget_manual_monthly_income", "15000")
+    c.budgets.set_income_percentage(food, "2026-10", "10")
+    c.budgets.set_income_percentage(food, "2026-11", "12")
+    c.budgets.set_income_percentage(food, "2026-11", "10", only_this_month=True)
+    assert c.budgets.amounts_for("2026-11", schedule=schedule)[food][0] == 1500
+    assert c.budgets.amounts_for("2026-12", schedule=schedule)[food][0] == 1800
