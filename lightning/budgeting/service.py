@@ -1317,15 +1317,16 @@ class BudgetService:
                                 "spent": average["spent6"]})
         return suggestions
 
-    def background_estimates(self, month: str, *, schedule: ScheduleView) -> list[dict]:
+    def background_estimates(self, month: str, *, schedule: ScheduleView, estimate_month: str | None = None) -> list[dict]:
         """Monthly expectations for untracked spending categories: the average of the last three
         completed months that had spending. They count in the month's plan (owner decision
         2026-10-03); an estimate from one observed month is low confidence and the screens say so.
         Categories that are tracked, one-off, have children, or sit under a parent's own limit
         (covered) are left out, so nothing is counted twice."""
-        return [line for line in self.background(month, schedule=schedule) if line["estimate"] is not None]
+        return [line for line in self.background(month, schedule=schedule, estimate_month=estimate_month) if line["estimate"] is not None]
 
-    def background(self, month: str, tracked: set[int] | None = None, *, schedule: ScheduleView) -> list[dict]:
+    def background(self, month: str, tracked: set[int] | None = None, *, schedule: ScheduleView,
+                   estimate_month: str | None = None) -> list[dict]:
         """Every untracked category background_estimates considers, with `estimate` None when it had no
         spending in the three completed months. `tracked` replaces the month's own tracked categories."""
         view = self.month_view(month, schedule=schedule)
@@ -1333,8 +1334,9 @@ class BudgetService:
         exclusions = self.one_off_ids(with_children=False)
         by_id, children = self._outflow_children()
         groups = {group.category_id for section in view.sections for group in section.groups}
-        months = self._completed_months(month, 3)  # the three completed months before this one, newest first
-        full = self._full_window(month, 3)
+        basis = estimate_month or month
+        months = self._completed_months(basis, 3)
+        full = self._full_window(basis, 3)
         lines = []
         for section in view.sections:
             for line in section.lines:
@@ -1352,11 +1354,11 @@ class BudgetService:
         return lines
 
     @request_cached(deep=True)
-    def plan_summary(self, month: str, *, schedule: ScheduleView) -> dict:
+    def plan_summary(self, month: str, *, schedule: ScheduleView, estimate_month: str | None = None) -> dict:
         """The month's plan as every screen shows it: Planned (limits plus background estimates),
         Spent (owned spending funded by the monthly plan, one-off categories left out) and Left in plan."""
         view = self.month_view(month, schedule=schedule)
-        estimates = self.background_estimates(month, schedule=schedule)
+        estimates = self.background_estimates(month, schedule=schedule, estimate_month=estimate_month)
         planned = view.available + sum((e["estimate"] for e in estimates), ZERO)
         first, last = parse_month(month)
         one_offs = self.one_off_ids()

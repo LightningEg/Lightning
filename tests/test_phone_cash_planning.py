@@ -171,3 +171,41 @@ def test_planned_obligations_without_accounts_keep_the_planning_sections(c, monk
         assert f'id="{section}"' in html
     if planned == "bill":
         assert "Landlord" in _text(_coming(html))
+
+
+def test_side_income_is_before_the_salary_and_only_bills_are_counted(c, setup, monkeypatch):
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
+    salary = c.categories.get_by_code("EXP.WORK.SALARY").id
+    _plan(c, salary=("Payroll", "INCOME", "30000", "2026-10-25", {"category_id": salary}),
+          side=("Tutoring", "INCOME", "500", "2026-10-12", {}),
+          bill=("Internet", "BILL", "120", "2026-10-10", {}))
+    page = _phone(c).get("/plan").text
+    before, after = page.split('id="after-section"')
+    assert "Tutoring" in _coming(page) and "Payroll" not in _coming(page)
+    assert "Payroll" in after and "Tutoring" not in after
+    assert "1 bill" in _hero(before) and "2 bills" not in _hero(before)
+
+
+def test_cash_after_bills_uses_only_the_unfunded_part_of_a_bill(c, setup, monkeypatch):
+    from tests.test_reserve_bills import prepared
+    from lightning.ui.phone.presenters.cash_planning import _phone_cash
+
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-12-01")
+    prepared(c, setup)
+    day = date(2026, 12, 1)
+    _plan(c, salary=("Payroll", "INCOME", "30000", "2026-12-25", {}))
+    f = c.forecaster.forecast(day)
+    view = _phone_cash(c, f, f.upcoming, [], c.position.at(day), day)
+    assert view["due"] == 1000
+    assert view["keep"] == f.free_cash - 200
+
+
+def test_thirty_day_totals_include_partial_loan_and_exclude_past_due_income(c, setup, monkeypatch):
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
+    bank = setup[0]["cib"].id
+    c.planning.create(kind="INCOME", name="Old bonus", amount="800", frequency="ONCE", start_date="2026-09-01")
+    loan = c.planning.create(kind="LOAN", name="Phone", amount="1000", frequency="MONTHLY",
+                             start_date="2026-10-10", payment_count="2")
+    c.planning.record_payment(loan, "2026-10-10", "2026-10-05", "400", bank)
+    hero = _text(_hero(_phone(c).get("/plan").text))
+    assert "Coming in · 30 days 0" in hero and "Going out · 30 days 600" in hero

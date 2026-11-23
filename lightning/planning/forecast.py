@@ -26,6 +26,11 @@ def _months(start: date, count: int) -> list[str]:
     return [f"{(index + i) // 12}-{(index + i) % 12 + 1:02d}" for i in range(count)]
 
 
+def forecast_end(day: date, months: int = HORIZON_MONTHS) -> date:
+    """Last date included in the monthly cash plan and its scenarios."""
+    return parse_month(_months(day, months)[-1])[1]
+
+
 def _due_circle_events(service, day: date) -> list[DepositEvent]:
     """Cash still needed today, without guessing when an overdue payout arrives."""
     gameya = getattr(service, "gameya", None)
@@ -134,13 +139,13 @@ class CashForecaster:
             raise ValueError(f"Free cash on {as_of} is unknown: reserve history is incomplete for that date.")
         return free
 
-    def _budget(self, month: str, current: bool) -> tuple[Decimal, set[int]]:
+    def _budget(self, month: str, current: bool, estimate_month: str | None = None) -> tuple[Decimal, set[int]]:
         """Budget still to spend in the month, and the categories the plan covers.
 
         It is the Budget screen's own plan (BudgetService.plan_summary): limits plus background
         estimates, so the forecast and the Budget tab show one Left in plan (audit 2026-10-05 #7)."""
         view = self.budgets.month_view(month, schedule=self.schedules.view())
-        summary = self.budgets.plan_summary(month, schedule=self.schedules.view())
+        summary = self.budgets.plan_summary(month, schedule=self.schedules.view(), estimate_month=estimate_month)
         covered = {line.category_id for section in view.sections for line in section.lines
                    if line.budget is not None or line.covered}
         covered |= {estimate["category_id"] for estimate in summary["estimates"]}
@@ -295,7 +300,7 @@ class CashForecaster:
                 received = (self.reporting.cash_flow(parse_month(key)[0], day).inflows if current else ZERO)
                 income, estimated = max(average - received, ZERO), True
             outgoing = [p for p in in_month if not p.item.is_income]
-            budget_room, covered = self._budget(key, current)
+            budget_room, covered = self._budget(key, current, estimate_month=month_keys[0])
             covered_bills = sum((self.planning.amount_in_base(p, p.still_owed, day)
                                  - bill_coverage.get((p.item.id, p.due_date), ZERO)
                                  for p in outgoing if p.item.category_id in covered), ZERO)
@@ -472,9 +477,7 @@ class CashForecaster:
         spending = goals = emergency = rest = ZERO
         for index, row in enumerate(rows):
             share = Decimal(1)
-            if index:
-                if until is None:
-                    break
+            if index and until is not None:
                 first_day, last_day = parse_month(row.month)
                 pay_day = parse_date(until)
                 if pay_day <= first_day:

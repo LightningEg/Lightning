@@ -390,3 +390,18 @@ def test_activity_category_change_preserves_bill_funding_attribution(c, setup):
     c.activity_review.apply(txn, c.activity_review.fingerprint(txn), category_id=category)
     assert c.reserves.bill_payment_funding()[(bill, txn)] == 800
     assert c.budgets.plan_funded_spending('2026-12-01', '2026-12-31')[category] == 200
+
+
+def test_bill_preview_matches_budget_left_after_posting(c, setup, monkeypatch):
+    from lightning.ui.routes.planning import _payment_effects
+
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-12-20")
+    bank, category, bill, _ = prepared(c, setup)
+    schedule = c.schedules.view()
+    c.budgets.set_budget(category, "2026-12", "1500", schedule=schedule)
+    item = c.planning.get(bill)
+    payment, = c.planning.payments(item, "2026-12-20")
+    preview = _payment_effects(c, item, payment, "2026-12-20")
+    c.planning.record_payment(bill, payment.due_date, "2026-12-20", "1000", bank)
+    actual = c.budgets.plan_left(category, "2026-12", schedule=schedule)
+    assert preview["budget"]["left_after"] == actual["left"] == 1300

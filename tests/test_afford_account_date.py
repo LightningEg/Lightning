@@ -38,4 +38,6 @@ def test_the_page_names_the_account_the_date_and_the_basis(c, setup, monkeypatch
     assert "Fits your plan" in page.text and cib.name in page.text and "2026-11-12" in page.text
     assert "Basis: posted cash plus bills" in page.text and "Nothing is recorded until you save it" in page.text
     assert f"/accounts/{cib.id}/transaction/new?" in page.text
+    short = TestClient(create_app(c)).get("/plan", params={"afford": "999999", "afford_account": cib.id})
+    assert "Fits your plan" not in short.text and "short of free cash" in short.text
     assert c.db.scalar("SELECT count(*) FROM transactions") == count        # asking records nothing

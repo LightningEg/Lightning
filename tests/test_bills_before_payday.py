@@ -12,6 +12,7 @@ from lightning.core.figures import label
 from lightning.samples import load_mohab_2026
 from lightning.ui import visuals
 from lightning.ui.web import create_app
+from tests.test_phone_cash_planning import _phone
 
 
 def _cards(html: str) -> list[str]:
@@ -49,5 +50,12 @@ def test_a_dollar_bill_and_a_part_paid_instalment_give_one_due_before_payday(c, 
     assert visuals.cash_plan(c, f, day)["before_total"] == total  # the stat and the chart
     with TestClient(create_app(c)) as browser:
         cards = _cards(browser.get("/plan").text)
+        desktop = browser.get("/payday").text
+    with _phone(c) as phone:
+        mobile = phone.get("/payday").text
+    converted = c.planning.amount_in_base(before["Cloud storage"], before["Cloud storage"].still_owed, day)
+    for page in (desktop, mobile):
+        cloud = page.split("Cloud storage", 1)[1].split("</b>", 1)[0]
+        assert f"{converted:,.0f} EGP" in cloud
     due = next(card for card in cards if label("payments_before_next_income") in card)
     assert f"{total:,.0f}" in due

@@ -42,7 +42,7 @@ def test_plan_totals():
     assert (loans.paid, loans.borrowed, loans.left) == (D(35), D(110), D(75))
     assert total([D(1), D(2)]) == D(3)
     assert reserve_effect({"name": "Rent", "effective_allocated": D(300)}, D(500))["after"] == 0
-    effect = budget_effect(SimpleNamespace(name="Food", remaining=D(100)), "2026-01", D(150))
+    effect = budget_effect({"name": "Food", "left": D(100)}, "2026-01", D(150))
     assert effect["left_after"] == D(-50) and effect["over"]
     assert share_of_free_cash(D(250), D(1000)) == D(25)
     item = SimpleNamespace(category_id=7)
