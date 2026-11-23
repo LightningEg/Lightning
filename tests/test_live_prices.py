@@ -314,6 +314,50 @@ def test_a_fund_matches_by_its_words_not_their_order_and_the_nearest_names_are_o
     assert 2 not in work.linked and "Beltone Equity Opportunity Fund" in work.closest[2]
 
 
+
+def test_a_reviewed_thndr_link_names_a_fund_whose_name_mubasher_spells_otherwise(monkeypatch):
+    """NF-6A1: Thndr's "Beltone Wafra Fund" (FND:BWA) is found by its reviewed Mubasher number, however Mubasher names
+    it; a link to a number Mubasher no longer lists falls back to the name, and a typed fund code is matched by name."""
+    from types import SimpleNamespace as NS
+    from lightning.workflows import live_prices
+    from lightning.workflows.live_prices import Plan, Want, link_funds
+    monkeypatch.setattr(live_prices, "fund_links", lambda: {"BWA": "7", "AZG": "404"})
+    listing = [NS(key="EG:FUND:7", name="Wafra - Beltone"), NS(key="EG:FUND:8", name="AZ Gold Fund")]
+    work = Plan("2026-10-30", unlinked=[Want(1, "Beltone Wafra Fund", "", "eg-funds", ticker="BWA"),
+                                        Want(2, "AZ Gold Fund", "", "eg-funds", ticker="azg"),
+                                        Want(3, "My own fund", "", "eg-funds", ticker="XYZ")])
+    matched = link_funds(work, listing)
+    assert work.linked == {1: "EG:FUND:7", 2: "EG:FUND:8"} and [w.key for w in matched] == ["EG:FUND:7", "EG:FUND:8"]
+    assert 3 not in work.linked
+
+
+def test_the_reviewed_fund_links_file_reads_only_complete_rows(tmp_path, monkeypatch):
+    from lightning.assets import catalog
+    links = tmp_path / "fund_links.csv"
+    links.write_text("ticker,mubasher_id,mubasher_name,reviewed\nbwa,7,Wafra,2026-11-22\nAZG,,AZ Gold,\nX,abc,,\n",
+                     encoding="utf-8")
+    monkeypatch.setattr(catalog, "FUND_LINKS_FILE", links)
+    catalog.fund_links.cache_clear()
+    try:
+        assert catalog.fund_links() == {"BWA": "7"}
+    finally:
+        catalog.fund_links.cache_clear()
+    catalog_tickers = {row["ticker"] for row in catalog.instruments() if row["kind"] == "Fund"}
+    assert set(catalog.fund_links()) <= catalog_tickers   # every bundled link names a Thndr fund the picker offers
+
+
+def test_fund_link_proposals_say_how_each_thndr_fund_matched():
+    import json
+    from pathlib import Path
+    from lightning.market.sources import mubasher
+    from tools.market.fund_links import proposals
+    funds = mubasher.parse_funds(json.loads((Path(__file__).parent / "fixtures/market/mubasher_funds.json")
+                                            .read_text(encoding="utf-8"))).instruments
+    rows = proposals(funds, [{"kind": "Fund", "ticker": "AZS", "name": "AZ Savings Fund"},
+                             {"kind": "Fund", "ticker": "ZZZ", "name": "Qqqq"},
+                             {"kind": "Stocks", "ticker": "COMI", "name": "CIB"}])
+    assert rows == [["AZS", "AZ Savings Fund", "exact", "4104", "AZ Savings Fund"], ["ZZZ", "Qqqq", "none", "", ""]]
+
 class Abroad(Sources):
     """The Gulf and European boards, and Yahoo's London series in pence."""
 

@@ -191,6 +191,9 @@ These need the owner's decision before the file is published:
 ## 6A1 Funds, currencies and gold matched to holdings · M
 Includes the reviewed Thndr-to-Mubasher fund mapping.
 
+Built 2026-11-22 (PR #754): a held fund whose code is a Thndr ticker (FND:BWA) is linked by `lightning/assets/fund_links.csv` (ticker, Mubasher number, Mubasher's name, date reviewed) before its name is tried; a link to a number Mubasher no longer lists falls back to the name. `python -m tools.market.fund_links` prints proposals (exact, near, none) and writes nothing; the Price packs workflow runs it with the input `fund-links`. **Left:** the file has no rows yet. Mubasher answered HTTP 401 to the cloud runner on 2026-11-22, so the proposals need a run from a home connection, then a review of each row before it goes in.
+Owner, 2026-11-22: the owner runs `python -m tools.market.fund_links > links.csv` at home and attaches it to #573; an AI reviews each row into `fund_links.csv`. #573 stays open for 6A2 and 6A3 (PR #754 is *Part of #573*).
+
 ## 6A2 US stocks and FX revaluation, with multi-currency · L
 Upcoming projects #15 and #16.
 
