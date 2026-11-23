@@ -1013,6 +1013,7 @@ TEMPLATES = {
     "Not tracked · {n} categories · {a} expected": "مش متتابعة · {n} فئة · {a} متوقع",
     "{m} of {n} months had spending": "{m} من {n} شهور فيها صرف",
     "Little history · {m} months with spending": "تاريخ قليل · {m} شهور فيها صرف",
+    "Your average of the last 3 months · Little history · {m} months with spending": "متوسطك في آخر 3 شهور · تاريخ قليل · {m} شهور فيها صرف",
     "{n}-month average": "متوسط {n} شهور",
     "{x}% of income": "{x}% من الدخل",
     "Budget carryover": "ترحيل الميزانية",
