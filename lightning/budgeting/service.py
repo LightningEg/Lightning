@@ -634,17 +634,17 @@ class BudgetService:
         negative when over. None when no limit covers the category."""
         view = self.month_view(month, schedule=schedule)
         by_id = {line.category_id: line for section in view.sections for line in section.lines}
-        line = shown = by_id.get(category_id)
+        one_offs = self.one_off_ids()
         node = category_id
-        while shown is None or shown.remaining is None:
-            node = self.categories.get(node).parent_id
-            if not node:
-                break
+        while node is not None:
             shown = by_id.get(node)
-        if shown is None or shown.remaining is None or shown.available is None:
-            return None
-        return {"name": shown.name, "limit": shown.available, "spent": shown.planned_actual, "left": shown.remaining,
-                "over": shown.over, "inside": shown is not line}
+            if shown is not None and shown.direct is not None:
+                return {"name": shown.name, "limit": shown.available, "spent": shown.planned_actual,
+                        "left": shown.remaining, "over": shown.over, "inside": node != category_id}
+            if node in one_offs:
+                break  # An unplanned outside-budget category does not spend its parent's limit.
+            node = self.categories.get(node).parent_id
+        return None
 
     def suggested_plan(self, month: str) -> dict[int, Decimal]:
         """Return stable, rounded suggestions for categories with recent spending."""
@@ -980,20 +980,8 @@ class BudgetService:
                 old = current.get(category_id, (None, False, None, None))
                 if old[0] == value and old[2] == period and old[3] is None:
                     continue
-                before = self._repeating_before(category_id, month)
-                desired = (value, period)
-                if only_this_month:
-                    if desired == self._repeating_through(category_id, month):
-                        self.repo.delete(category_id, month, one_off=True)
-                    else:
-                        self.repo.upsert(category_id, month, True, value, period)
-                else:
-                    self.repo.delete(category_id, month, one_off=True)
-                    if desired == before:
-                        self.repo.delete(category_id, month, one_off=False)  # same as before: nothing to store
-                    else:
-                        self.repo.upsert(category_id, month, False, value, period)
-                if value is None and period is None and carryover_now.get(category_id, False):
+                self._write_rule(category_id, month, only_this_month, value, period, None)
+                if not only_this_month and value is None and period is None and carryover_now.get(category_id, False):
                     self.repo.set_carryover(category_id, month, False)
                 changed += 1
         return changed
@@ -1007,14 +995,19 @@ class BudgetService:
             return self.save_month(month, amounts, only_this_month=True, schedule=schedule)
 
     # ------------------------------------------------------------------ helpers
-    def _repeating_before(self, category_id: int, month: str) -> tuple[Decimal | None, int | None]:
-        rows = [e for e in self.repo.entries_up_to(month) if e.category_id == category_id and not e.one_off
-                and e.month < month]
-        return (rows[-1].amount, rows[-1].average_months) if rows else (None, None)
-
-    def _repeating_through(self, category_id: int, month: str) -> tuple[Decimal | None, int | None]:
-        rows = [e for e in self.repo.entries_up_to(month) if e.category_id == category_id and not e.one_off]
-        return (rows[-1].amount, rows[-1].average_months) if rows else (None, None)
+    def _write_rule(self, category_id: int, month: str, only_this_month: bool, amount: Decimal | None,
+                    average_months: int | None, income_percent: Decimal | None) -> None:
+        """Compare an override with the rule in force that month, and a repeating change with the prior rule."""
+        rows = self.repo.entries_up_to(month)
+        prior = next((r for r in reversed(rows) if r.category_id == category_id and not r.one_off
+                      and (only_this_month or r.month < month)), None)
+        inherited = (prior.amount, prior.average_months, prior.income_percent) if prior else (None, None, None)
+        if not only_this_month:
+            self.repo.delete(category_id, month, one_off=True)
+        if (amount, average_months, income_percent) == inherited:
+            self.repo.delete(category_id, month, one_off=only_this_month)
+        else:
+            self.repo.upsert(category_id, month, only_this_month, amount, average_months, income_percent)
 
     def _rolling_average(self, category_id: int, month: str, months: int,
                          children: dict[int, list[int]], cache: dict[tuple[int, int], Decimal | None]) -> Decimal | None:
@@ -1400,23 +1393,8 @@ class BudgetService:
         value = check_places(to_decimal(percent, "percentage"), 2, "percentage")
         if value < ZERO or value > 10000:
             raise ValidationError("Enter an income percentage from 0 to 10,000.", "percentage")
-        rows = self.repo.entries_up_to(month)
-        prior = next((row for row in reversed(rows) if row.category_id == category_id and not row.one_off
-                      and row.month < month), None)
-        previous = ((prior.amount, prior.average_months, prior.income_percent) if prior else (None, None, None))
-        desired = (None, None, value)
         with self.db.transaction():
-            if only_this_month:
-                if previous == desired:
-                    self.repo.delete(category_id, month, True)
-                else:
-                    self.repo.upsert(category_id, month, True, None, None, value)
-            else:
-                self.repo.delete(category_id, month, True)
-                if previous == desired:
-                    self.repo.delete(category_id, month, False)
-                else:
-                    self.repo.upsert(category_id, month, False, None, None, value)
+            self._write_rule(category_id, month, only_this_month, None, None, value)
         return True
 
     def reset_carryover(self, category_id: int, month: str, *, schedule: ScheduleView) -> None:

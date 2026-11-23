@@ -6,13 +6,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, timedelta
-from decimal import ROUND_CEILING, Decimal
+from decimal import Decimal
 
 from lightning.workflows.review import ReviewInbox
 from lightning.budgeting.domain import spent_outside
 from lightning.core.dates import month_of, parse_month
 from lightning.planning.domain import plan_parts
 from lightning.planning.salary_day import payday_to_plan
+from lightning.ui.budget_rows import cover_from
 from lightning.ui.charts import ranked_donut
 from lightning.ui.budget_exclusions import exclusion_context
 
@@ -112,7 +113,9 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     shown_needs = tuple(needs[:ATTENTION])
     listed = tuple(r for r in rows if r not in shown_needs)     # a category is never listed twice
     planned, paid, count = c.planning.month_fixed_costs(e.payments, shown, day)
-    move = _cover(c, shown, schedule, [r for r in rows if r.left < 0], e.room) if state == "current" else None
+    move = None
+    if state == "current" and rows and rows[0].left < 0:
+        move = cover_from(c, shown, {"category_id": rows[0].category_id, "over": -rows[0].left}, e.room)
     changes = ReviewInbox(c).changes(day) if state == "current" else None
     raise_offer = (c.health.income_change_offer(shown)
                    if changes and any(item["href"].startswith("/budget/raise") for item in changes) else None)
@@ -182,24 +185,6 @@ def spend_donut(rows: list[CategoryRow], spent: Decimal) -> dict | None:
         slices.append({"label": "Other", "value": rest, "other": True})
     d = ranked_donut(slices)
     return d if d["segments"] else None
-
-
-def _cover(c, month: str, schedule, over: list[CategoryRow], room: dict) -> dict | None:
-    """The category with the most room left (its bills still to pay set aside) that can cover the largest overspend;
-    both need a plan of their own, as Move room asks. The PC's Budget makes the same offer."""
-    if not over:
-        return None
-    target = min(over, key=lambda r: r.left)
-    plans = c.budgets.amounts_for(month, loans=False, schedule=schedule)
-    if target.category_id not in plans:
-        return None
-    amount = (-target.left).to_integral_value(rounding=ROUND_CEILING)
-    best = max(((left, cid) for cid, left in room.items()
-                if cid != target.category_id and cid in plans and left >= amount), default=None)
-    if best is None:
-        return None
-    return {"name": c.categories.get(best[1]).name, "amount": amount,
-            "href": f"/budget/move?month={month}&to={target.category_id}&from={best[1]}&amount={amount}"}
 
 
 @dataclass(frozen=True)
