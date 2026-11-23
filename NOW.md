@@ -39,6 +39,8 @@ Reserved codes: none
 - **Import and planning (11-12, Claude):** 7AK closed (7AK3 dollar purchases, settled by the pound debit), 7AR closed (7AR4 .ics); 7AQ closes in #580. Owner checks held in Overview §9. **Read:** Architecture › SMS currency.
 
 
+- **Google Play (owner, 11-22):** closed test running; public release planned for 1 December (site Home, Downloads, roadmap #213). **Read:** `docs/google-play.md`.
+
 Plan: `python tools/board.py` (GitHub issues; skill `dispatch`).
 
 1. **Report work paused** (owner); branches wait on native checks. **Read:** `issues/9-later/r22-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.
