@@ -106,3 +106,12 @@ gam'eya's own page, certificates, other currencies, the phone's forms beyond a l
 - **2026-11-14, owner decisions (question dialog).** Five items filed: BT-7AV (W1, W2), BV-7AW (W3, W7, L3), IV-7AX
   (L1, L2), BV-7AY (W4, W5, P1), BT-7AZ (W6: payday is the salary only). The other findings are lines in
   `issues/INBOX.md`. No fixes in the audit's session.
+
+- **2026-11-23, cash-planning insights.** Checked the plan against posted cash, remaining instalments, linked
+  reserves, expected income and the forecast date. A side payment before salary now appears on its own date,
+  and the next 30 days excludes overdue income. With no payday the budget covers the same months as the bills.
+  Future spending estimates use months completed when the forecast is made. A partially reserve-funded bill's
+  preview agrees with the budget after it is posted. Both payday layouts show foreign bills in the total's
+  currency. Affordability and the scenario picker use the last month in the cash forecast, so a purchase
+  after the forecast ends cannot receive a verdict based on an earlier balance. Regression examples are in `tests/test_phone_cash_planning.py`, `tests/test_planning.py`,
+  `tests/test_reserve_bills.py` and `tests/test_bills_before_payday.py`.

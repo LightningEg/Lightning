@@ -104,7 +104,8 @@ def reserve_effect(reserve: dict, owed: Decimal) -> dict:
             "after": reserve["effective_allocated"] - used}
 
 
-def budget_effect(line, month: str, owed: Decimal) -> dict:
+def budget_effect(plan: dict, month: str, owed: Decimal, reserve: dict | None = None) -> dict:
     """What paying ``owed`` leaves in its category's budget line for the month."""
-    after = line.remaining - owed
-    return {"name": line.name, "month": month, "left_before": line.remaining, "left_after": after, "over": after < 0}
+    plan_funded = owed - reserve["used"] if reserve else owed
+    after = plan["left"] - plan_funded
+    return {"name": plan["name"], "month": month, "left_before": plan["left"], "left_after": after, "over": after < 0}

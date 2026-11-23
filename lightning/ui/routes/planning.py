@@ -4,7 +4,6 @@ from __future__ import annotations
 import calendar
 from dataclasses import asdict
 from datetime import timedelta
-from decimal import Decimal
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
@@ -18,6 +17,7 @@ from lightning.core.plural import counted
 from lightning.planning.domain import (FREQUENCY_LABELS, KIND_LABELS, RECURRING_KINDS, WEEKEND_MOVE_LABELS, Frequency,
                                        PaymentStatus, PlanKind, WeekendMove)
 from lightning.planning.bill_state import CATCH_UP_FROM, late_payments
+from lightning.planning.forecast import forecast_end
 from lightning.planning.schedule import describe
 from lightning.planning.service import LOAN_CATEGORY
 from lightning.planning.totals import (LoanTotals, RecurringEntry, RecurringTotals, a_month, budget_effect,
@@ -116,8 +116,9 @@ async def plan_page(request: Request):
     forecast = c.forecaster.forecast(day)
     owe = c.planning.what_you_owe(day)
     window_end = day + timedelta(days=30)  # not money
+    early = {(row["item"].id, row["payment"].due_date) for row in c.planning.early_payments(day)}
     next_payments = [p for p in c.planning.all_payments(window_end, day)
-                     if p.status in (PaymentStatus.DUE, PaymentStatus.UPCOMING)]
+                     if p.outstanding and (p.item.id, p.due_date) not in early]
     # Late payments first, each with its days late (computed here, not in the template).
     next_payments.sort(key=lambda p: (not p.days_late(day), p.due_date, p.item.name.casefold()))
     plan = visuals.cash_plan(c, forecast, day)
@@ -127,7 +128,7 @@ async def plan_page(request: Request):
                        label("emergency_top_up"): "/plan/reserves",
                        label("savings_target_rest"): "/settings?section=financial-health#health-limit-savings_rate"}
     # Honest numbers (A01): with no income planned there is nothing to forecast from.
-    has_income = bool(c.planning.items((PlanKind.INCOME,)))
+    has_income = bool(forecast.next_income_date or any(m.income for m in forecast.months))
     stats = _plan_stats(forecast, plan, day, has_income)
     # KPI cards (guideline 3.32 A08): each figure against something. Free cash against the last month end it
     # was at, payments before payday with the late ones, the lowest point against today.
@@ -144,7 +145,7 @@ async def plan_page(request: Request):
     # Needs you rows under it, each with Mark paid.
     lead = next((k for k in kpi_cards if k["key"] == "safe"), None)
     kpi_cards = [k for k in kpi_cards if k["key"] != "safe"]
-    needs = [{"label": f"{p.item.name} is late", "detail": f"Due {p.due_date} · {fmt(p.still_owed, 0)} · {p.days_late(day)} days late",
+    needs = [{"label": f"{p.item.name} is late", "detail": f"Due {p.due_date} · {fmt(c.planning.amount_in_base(p, p.still_owed, day), 0)} · {p.days_late(day)} days late",
               "href": f"/plan/items/{p.item.id}/pay?due={p.due_date}&back=%2Fplan", "popup": True, "action": "Mark paid"}
              for p in late]
     if len(late) >= CATCH_UP_FROM:
@@ -156,7 +157,7 @@ async def plan_page(request: Request):
     calendar_view = _upcoming_context(c, request, day, "/plan", follow_pay=True)
     calendar_view.pop("lead"), calendar_view.pop("answer")  # the Plan page has its own Lead and answer
     afford, afford_error, afford_plan_url = None, "", ""
-    raw_afford = request.query_params.get("afford", "").replace(",", "").strip()
+    raw_afford = request.query_params.get("afford", "").strip()
     if raw_afford:
         afford, afford_error, afford_plan_url = _afford_answer(c, request, raw_afford, forecast, day)
     afford_account = _afford_account_answer(c, request, afford, day)
@@ -711,10 +712,10 @@ def _afford_answer(c, request, raw: str, forecast, day):
     (answer, error, Plan this purchase link)."""
     from lightning.planning.afford import after_payday, can_afford, plan_purchase_url
     try:
-        amount = Decimal(raw)
+        amount = to_decimal(raw, "amount")
         afford = can_afford(amount, forecast.safe_to_spend, forecast.free_cash, forecast.next_income_date,
                             forecast.expected_by_payday, forecast.income_before_payday_items, c.base_currency)
-    except (ArithmeticError, ValueError):
+    except (ArithmeticError, ValueError, ValidationError):
         return None, "Type an amount above zero.", ""
     raw_date = str(request.query_params.get("afford_date", "")).strip()
     try:
@@ -723,13 +724,17 @@ def _afford_answer(c, request, raw: str, forecast, day):
         return None, "Type a date like 2026-12-10.", ""
     if on < day:
         return None, "Pick today or a later date.", ""
+    if on > forecast_end(day):
+        return None, "That date is beyond the cash forecast.", ""
     raw_account = str(request.query_params.get("afford_account", ""))
     accounts = [a for a in _paying_accounts(c) if a.currency == c.base_currency]
     account = next((a for a in accounts if raw_account.isdigit() and a.id == int(raw_account)), None)
     payer = account or (accounts[0] if accounts else None)
     if payer is not None and forecast.next_income_date and fmt_date(on) > forecast.next_income_date:
-        later = after_payday(c.forecaster, amount, on, payer.id, day, max(on, day + timedelta(days=90)))  # not money
-        afford = later or afford
+        later = after_payday(c.forecaster, amount, on, payer.id, day, forecast_end(day))
+        if later is None:
+            return None, "Add current exchange rates to work it out.", ""
+        afford = later
     return afford, "", plan_purchase_url(amount, fmt_date(on), account.id if account else None)
 
 
@@ -758,20 +763,22 @@ def _afford_account_answer(c, request, afford, day):
                                "return_to": "/plan"}))}
 
 
-def _payment_effects(c, item, payment, paid_on) -> dict:
+def _payment_effects(c, item, payment, paid_on) -> dict | None:
     """What recording this payment would change, before it is recorded (NF-3AZ4): the bill's reserve and the
     category's budget line for the month it would be paid in. Read-only."""
-    owed = payment.still_owed
+    try:
+        owed = c.planning.amount_in_base(payment, payment.still_owed, paid_on)
+    except ValidationError:  # No rate for a base-currency preview on the proposed posting date.
+        return None
     reserve = c.reserves.bill_reserve(item.id)
     effects = {"owed": owed, "reserve": None, "budget": None}
     if reserve:
         effects["reserve"] = reserve_effect(reserve, owed)
     if item.category_id and not item.is_income:
         month = str(paid_on)[:7]
-        view = c.budgets.month_view(month, schedule=c.schedules.view())
-        line = next((l for sec in view.sections for l in sec.lines if l.category_id == item.category_id), None)
-        if line is not None and line.budget is not None:
-            effects["budget"] = budget_effect(line, month, owed)
+        plan = c.budgets.plan_left(item.category_id, month, schedule=c.schedules.view())
+        if plan is not None:
+            effects["budget"] = budget_effect(plan, month, owed, effects["reserve"])
     return effects
 
 
@@ -934,7 +941,8 @@ async def forecast_inputs(request: Request):
 async def scenario_page(request: Request):
     from lightning.planning.scenarios import compare_scenario, occurrence_key
     c = container(request)
-    day, end = today(), today() + timedelta(days=90)  # not money
+    day = today()
+    end = forecast_end(day)
     values = {key: str(request.query_params.get(key, '')) for key in
               ('income', 'delay', 'purchase', 'purchase_date', 'account_id', 'bill', 'bill_amount')}
     # One question at a time (F10, r24): the chosen kind, else the one that already has values, else a purchase.
@@ -957,7 +965,7 @@ async def scenario_page(request: Request):
     plan_url = ""
     if comparison.assumptions and values["purchase"] and not error:
         from lightning.planning.afford import plan_purchase_url
-        plan_url = plan_purchase_url(Decimal(values["purchase"].replace(",", "")), values["purchase_date"],
+        plan_url = plan_purchase_url(to_decimal(values["purchase"]), values["purchase_date"],
                                      int(values["account_id"]))
     return render(request, "planning/scenarios.html", comparison=comparison, values=values, error=error, what=what,
                   lead=lead, chart=chart, status=page_status, plan_url=plan_url,

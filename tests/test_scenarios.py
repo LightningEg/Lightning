@@ -98,6 +98,8 @@ def test_the_afford_date_counts_without_an_account_and_a_past_date_is_refused(mo
     assert "Your lowest point ahead would be" in after or "short in" in after
     past = _text(_get(c, "/plan", phone, afford="30000", afford_date="2025-01-01").text)
     assert "Pick today or a later date." in past and "Plan this purchase" not in past
+    beyond = _text(_get(c, "/plan", phone, afford="99000000", afford_date="2027-02-01").text)
+    assert "That date is beyond the cash forecast." in beyond and "Plan this purchase" not in beyond
     assert "Can I afford this?" in after and "Plan this purchase" in after
 
 
@@ -117,9 +119,17 @@ def test_plan_this_purchase_opens_the_one_off_form_and_lands_in_the_forecast(moh
 def test_a_scenario_purchase_offers_plan_this_purchase(mohab_now):
     c = mohab_now
     bank = next(a for a in c.accounts.list(active_only=True) if a.account_type.value == "BANK")
-    page = _get(c, "/plan/scenarios", purchase="5000", purchase_date="2026-12-05", account_id=str(bank.id)).text
+    page = _get(c, "/plan/scenarios", purchase="٥٬٠٠٠", purchase_date="2026-12-05", account_id=str(bank.id)).text
     assert "Plan this purchase" in page and "start_date=2026-12-05" in html.unescape(page)
     assert "Plan this purchase" not in _get(c, "/plan/scenarios").text
+
+
+def test_scenario_date_picker_and_calculation_end_with_the_last_forecast_month(mohab_now):
+    c = mohab_now
+    bank = next(a for a in c.accounts.list(active_only=True) if a.account_type.value == "BANK")
+    page = _get(c, "/plan/scenarios", purchase="99000000", purchase_date="2027-02-01", account_id=str(bank.id))
+    assert 'max="2027-01-31"' in page.text
+    assert "date inside the comparison period" in page.text and "Plan this purchase" not in page.text
 
 
 def test_a_missing_rate_leaves_the_first_day_below_zero_unknown_not_an_error():

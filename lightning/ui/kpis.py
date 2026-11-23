@@ -226,7 +226,8 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
     else:
         safe_compare = compare("No free cash today")
     saving = f.taken_off(*(figure_label(k) for k in ("saving_for_goals", "emergency_top_up", "savings_target_rest")))
-    due = f.taken_off(figure_label("payments_before_next_income"), "Gam'eya instalments before next income")
+    due = f.taken_off(figure_label("payments_before_next_income"), figure_label("bill_reserve_coverage"),
+                      "Gam'eya instalments before next income")
     cards = [card(figure_label("safe_to_spend"), f.safe_to_spend, safe_compare, tone="hold" if f.safe_to_spend >= 0 else "over",
                   key="safe", chip_=chip("today"),
                   visual=segments([("Safe", max(f.safe_to_spend, ZERO), "hold"),
@@ -264,7 +265,12 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
     low = f.lowest if has_income else None
     if low is not None:
         drop = f.drop_to_lowest
-        low_compare = (compare("below today", fmt(drop, 0)) if drop > 0 else compare("above today", fmt(-drop, 0), "good"))
+        if drop > 0:
+            low_compare = compare("below today", fmt(drop, 0))
+        elif drop < 0:
+            low_compare = compare("above today", fmt(-drop, 0), "good")
+        else:
+            low_compare = compare("Same as today")
         in_months = f.lowest_in_months(monthly_spending)
         months_text = (f"{in_months:.1f} months of spending at its lowest" if in_months is not None
                        else "Runs short: the month ends below zero" if low.closing < 0 else "")

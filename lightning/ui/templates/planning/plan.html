@@ -31,7 +31,7 @@
   <input name="afford_date" value="{{ afford_date }}" data-smart-date inputmode="numeric" placeholder="{{ 'Date (today if empty)'|tr(locale) }}" aria-label="{{ 'Date'|tr(locale) }}">
   <button class="btn">{{ 'Check'|tr(locale) }}</button>
   {% if afford_account %}{% set aa = afford_account.answer %}<div class="afford-answer" role="status" id="afford-account">
-    <p><b>{{ 'Fits your plan'|tr(locale) }}:</b> {{ afford.headline|tr(locale) }} <small class="muted">{{ 'Counts bills, budget and goals before the next income.'|tr(locale) }}</small></p>
+    <p><b>{{ ('Fits your plan' if afford.verdict == 'yes' else 'Your plan')|tr(locale) }}:</b> {{ afford.headline|tr(locale) }} <small class="muted">{{ 'Counts bills, budget and goals before the next income.'|tr(locale) }}</small></p>
     {% if aa.balance_on is none %}<p><b>{{ aa.account }}:</b> {{ 'Nothing is recorded in this account yet, so its balance on {date} is unknown.'|tr(locale, date=aa.on) }}</p>
     {% else %}<p class="{{ 'is-yes' if aa.enough else 'is-no' }}"><b>{{ aa.account }} · {{ aa.on }}:</b> {{ 'about {a} {c} before, {b} {c} after paying'|tr(locale, a=aa.balance_on|money(places=0), b=aa.after|money(places=0), c=base) }}{% if aa.enough %} · {{ 'enough' |tr(locale) }}{% else %} · {{ 'not enough from {date}'|tr(locale, date=aa.short_on) }}{% endif %}</p>
     <small class="muted">{{ 'Basis: posted cash plus bills, income and certificate events already scheduled for this account. It assumes no other spending, transfers or budget use before then.'|tr(locale) }}</small>{% endif %}

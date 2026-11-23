@@ -75,10 +75,10 @@ def budget(e, has_plan: bool, period_key: str, spent: Decimal, planned: Decimal)
 
 def cash_plan(safe: Decimal, until: str | None, has_income: bool) -> dict:
     """How much is safe to spend before payday?"""
-    if not has_income:
-        return sentence("Add your salary to see what is safe to spend.")
     if safe < ZERO:
         return sentence("Promised payments are {amt} more than your free cash.", amt=fmt(-safe, 0))
+    if not has_income:
+        return sentence("Add your salary to see what is safe to spend.")
     if until:
         return sentence("You can spend {amt} today and stay on plan.", amt=fmt(safe, 0))
     return sentence("You can spend {amt} in the next 3 months and stay on plan.", amt=fmt(safe, 0))

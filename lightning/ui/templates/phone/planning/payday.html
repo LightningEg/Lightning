@@ -10,7 +10,7 @@
 {% if a.missing %}<p class="flash error">{{ 'Add current exchange rates before assigning cash.'|tr(locale) }} {{ a.missing|join(', ') }}</p>{% endif %}
 {% if a.ready is not none %}{% include "partials/payday_proposal.html" %}{% include "partials/payday_customize.html" %}{% endif %}
 <section class="card phone-card"><h2>{{ 'Before your next payday'|tr(locale) }}</h2>
-{% for payment in forecast.payments_before_income %}<div class="compact-row"><span>{{ payment.item.name }} <small class="muted">{{ payment.due_date|day(locale) }}</small></span><b>{{ payment.still_owed|money(places=0) }}</b></div>{% else %}<p class="muted">{{ 'Nothing is due before payday.'|tr(locale) }}</p>{% endfor %}
+{% for payment, amount in bill_rows %}<div class="compact-row"><span>{{ payment.item.name }} <small class="muted">{{ payment.due_date|day(locale) }}</small></span><b>{{ amount|money(places=0) }} {{ base }}</b></div>{% else %}<p class="muted">{{ 'Nothing is due before payday.'|tr(locale) }}</p>{% endfor %}
 <p class="muted">{{ 'Due before payday'|tr(locale) }} {{ forecast.payments_before_income_total|money(places=0) }} {{ base }} · {{ 'Safe to spend today'|tr(locale) }} {{ forecast.safe_to_spend|money(places=0) }} {{ base }}</p>
 {{ expected_block(expected, base) }}
 </section>

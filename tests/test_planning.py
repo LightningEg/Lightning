@@ -496,3 +496,22 @@ def test_a_bill_cannot_be_paid_twice_for_the_same_due_date(c, setup):
     assert c.reporting.cash_flow(date(2026, 10, 1), day).outflows == spent
     c.planning.reopen(item_id, "2026-10-20")  # after reopening it can be recorded again
     c.planning.record_payment(item_id, "2026-10-20", "2026-10-20", "650", None)
+
+
+def test_without_payday_safe_cash_covers_the_same_window_as_the_bills(c, setup, monkeypatch):
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
+    food = setup[1]["EXP.PERSONAL.FOOD"]
+    c.budgets.set_budget(food.id, "2026-10", "1000", schedule=c.schedules.view())
+    f = c.forecaster.forecast(date(2026, 10, 6))
+    assert f.next_income_date is None and len(f.months) == 3
+    assert f.safe_to_spend == f.free_cash - 3000
+
+
+def test_estimated_income_shows_the_forecast_and_afford_accepts_arabic_prices(c, setup, monkeypatch):
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
+    bank = setup[0]["cib"].id
+    c.transactions.record_inflow("2026-09-25", bank, "10000", setup[1]["EXP.WORK.SALARY"].id)
+    page = TestClient(create_app(c)).get("/plan", params={"afford": "١٬٢٥٠٫٥٠"})
+    assert page.status_code == 200
+    assert 'class="plan-forecast-table"' in page.text
+    assert 'amount=1250.50' in page.text
