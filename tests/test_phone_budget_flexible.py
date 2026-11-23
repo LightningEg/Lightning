@@ -171,3 +171,17 @@ def test_work_claim_uses_selected_month_even_without_a_plan(c, setup):
     assert "Paid back this period 400" in october.text
     assert september.text.count(f'/reimbursements#claim-{claim["id"]}') == 1
     assert 'aria-labelledby="work-heading"' not in september.text
+
+
+def test_refund_after_carryover_uses_up_the_allowance(c, setup):
+    accounts, cats = setup
+    food = cats["EXP.PERSONAL.FOOD"].id
+    bank = accounts["cib"].id
+    schedule = c.schedules.view()
+    c.budgets.set_budget(food, "2026-10", "500", schedule=schedule)
+    c.transactions.record_outflow("2026-10-29", bank, "1000", food)
+    c.budgets.set_carryover("2026-11", {food: True}, schedule=schedule)
+    c.transactions.record_refund("2026-11-02", bank, "125", food)
+    budget = screen.build(c, date(2026, 11, 3), "2026-11")
+    row = next(row for row in budget.categories if row.category_id == food)
+    assert row.left == 125 and row.state == "ok"

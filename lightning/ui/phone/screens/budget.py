@@ -101,9 +101,9 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
             limit, spent = line.available, line.planned_actual
             if not limit and not spent:
                 continue
-            share = float(min(max(spent / limit * 100, ZERO), Decimal(100))) if limit > 0 else (100.0 if spent > 0 else 0.0)  # not money
+            share = float(min(max(spent / limit * 100, ZERO), Decimal(100))) if limit > 0 else (100.0 if line.over else 0.0)  # not money
             gap = line.remaining
-            ahead = gap > 0 and pace_pct is not None and spent / limit * 100 >= pace_pct + AHEAD_POINTS  # not money
+            ahead = limit > 0 and gap > 0 and pace_pct is not None and spent / limit * 100 >= pace_pct + AHEAD_POINTS  # not money
             kind = "over" if gap < 0 else ("ahead" if ahead else ("done" if limit > 0 and gap == 0 else "ok"))
             rows.append(CategoryRow(line.category_id, line.name, limit, spent, gap, share,
                                     state != "past" and kind in ("over", "ahead"), kind, line.one_off))

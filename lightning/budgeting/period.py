@@ -219,9 +219,9 @@ def category_pace(planned: Decimal, spent: Decimal, first: date, last: date, day
     """One category's month against its plan: Left (whole, as the figures beside it read), the share spent, the
     share of the month gone (None outside the month) and whether spending runs 10 points ahead of it."""
     left = quantize(planned, 0) - quantize(spent, 0)
-    share = spent / planned * 100
+    share = spent / planned * 100 if planned > ZERO else None
     current = first <= day <= last
     days = (last - first).days + 1
-    pace = (Decimal((day - first).days + 1) / days * 100) if current else None
+    pace = (Decimal((day - first).days + 1) / days * 100) if current and share is not None else None
     return {"left": left, "share": share, "current": current, "pace": pace,
             "risk": left >= ZERO and pace is not None and share >= pace + 10}
