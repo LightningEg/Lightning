@@ -70,3 +70,60 @@ def test_owing_more_than_you_own_is_said_not_divided(c, setup):
     assert c.position.at(TODAY).net_worth < 0 and h.debt_to_net_worth.percent is None
     page = TestClient(create_app(c)).get("/plan/loans").text
     assert "You owe more than you own" in page and "tone-over" in page
+
+
+def test_expired_commitments_leave_fixed_costs_but_missed_payments_are_still_owed(c, setup):
+    _, cats = setup
+    c.settings.set("budget_manual_monthly_income", "10000")
+    c.planning.create(kind="BILL", name="Rent", amount="3000", frequency="MONTHLY", start_date="2026-10-01")
+    for kind, name, bound in (("BILL", "School bus", {"payment_count": "2"}),
+                              ("SUBSCRIPTION", "Gym", {"end_date": "2026-11-15"})):
+        c.planning.create(kind=kind, name=name, amount="1000", frequency="MONTHLY",
+                          start_date="2026-10-15", category_id=cats["EXP.PERSONAL.FOOD"].id, **bound)
+    november = c.health.at(date(2026, 11, 15))
+    december = c.health.at(TODAY)
+    assert november.fixed_costs_to_income.percent == 50
+    assert december.fixed_costs_to_income.percent == 30
+    assert december.debt_to_cash.part == 13000  # three rents plus both unpaid bus and gym payments
+    fixed = next(f for f in c.health.figures(TODAY) if f.key == "fixed_costs_to_income")
+    assert fixed.period == "Monthly · Set by hand in Settings"
+
+
+def test_refunds_above_spending_do_not_raise_a_savings_alert(c, setup):
+    accounts, cats = setup
+    bank = accounts["cib"].id
+    c.transactions.record_inflow("2026-11-01", bank, "10000", cats["EXP.WORK.SALARY"].id)
+    c.transactions.record_refund("2026-11-05", bank, "2000", cats["EXP.PERSONAL.FOOD"].id)
+    saving = next(f for f in c.health.figures(TODAY) if f.key == "savings_rate")
+    assert "Refunds" in saving.gap and saving.value is None
+    assert saving.band is None and saving.status is None
+
+
+def test_watch_is_not_counted_as_good_in_the_health_summary():
+    from lightning.ui.status import health
+
+    for alerts in ([], ["Fixed costs to income"]):
+        summary = health(2, 4, alerts)
+        assert summary == {"text": "{n} of {m} figures are within your limits.", "values": {"n": 2, "m": 4}}
+
+
+def test_debt_meter_keeps_custom_limits_on_the_same_scale(c, setup):
+    from lightning.ui.health_rows import meter
+
+    c.health.set_limit("debt_to_cash", "80", alert_raw="200")
+    debt = next(f for f in c.health.figures(TODAY) if f.key == "debt_to_cash")
+    good, alert = meter(debt)["ticks"]
+    assert 0 < good < alert < 100
+    assert abs(good / alert - 80 / 200) < 0.00001
+
+
+def test_monthly_loan_burden_reflects_a_smaller_final_instalment(c, setup):
+    accounts, _ = setup
+    c.settings.set("budget_manual_monthly_income", "10000")
+    loan = c.planning.create(kind="LOAN", name="Phone", amount="1000", frequency="MONTHLY",
+                             start_date="2027-01-05", payment_count="3")
+    c.planning.record_early_payment(loan, "2750", "0", "2026-12-20", accounts["cib"].id, "3000")
+    assert c.health.at(date(2026, 12, 19)).loans_a_month == 1000
+    h = c.health.at(TODAY)
+    assert h.debt_to_net_worth.part == 250
+    assert h.loans_a_month == 250 and h.loan_payments_to_income.percent == D("2.5")

@@ -95,3 +95,21 @@ def test_pc_savings_chart_has_zero_axis_and_percent_labels(c, setup, monkeypatch
     chart = page.split('<figure class="chart chart-trend"', 1)[1].split('</figure>', 1)[0]
     assert 'chart-grid-zero' in chart and '0.0%' in chart
     assert '50.0%' in chart and 'class="chart-line tone-in"' in chart
+
+
+def test_health_explains_manual_income_and_a_refund_month_on_both_screens(c, setup):
+    from tests.test_budget_exclusions_ui import client_for
+
+    accounts, cats = setup
+    c.settings.set("budget_manual_monthly_income", "10000")
+    c.budgets.set_emergency_basis("income")
+    c.transactions.record_inflow("2026-11-01", accounts["cib"].id, "10000", cats["EXP.WORK.SALARY"].id)
+    c.transactions.record_refund("2026-11-05", accounts["cib"].id, "500", cats["EXP.PERSONAL.FOOD"].id)
+    for phone in (False, True):
+        client = client_for(c, phone, "en")
+        page = visible_text(client.get("/financial-health").text)
+        assert "Refunds were more than your spending" in page
+        assert "Savings rate is outside your limit" not in page
+        assert "Set by hand in Settings" in page
+        settings = visible_text(client.get("/settings?section=financial-health").text)
+        assert "Set by hand in Settings" in settings and "0 completed months" not in settings
