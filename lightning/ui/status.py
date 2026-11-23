@@ -97,9 +97,9 @@ def health(within: int, judged: int, outside: list[str]) -> dict:
     """How do my figures compare with my limits?"""
     if not judged:
         return sentence("Add your income and spending to compare them with your limits.")
-    if not outside:
+    if within == judged:
         return sentence("All {n} figures are within your limits.", n=judged)
-    if len(outside) == 1:
+    if len(outside) == 1 and within == judged - 1:  # not money
         return sentence("One thing needs you: {name}. Everything else is within your limits.", name=outside[0])
     return sentence("{n} of {m} figures are within your limits.", n=within, m=judged)
 

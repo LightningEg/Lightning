@@ -6,13 +6,14 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, timedelta
-from decimal import ROUND_CEILING, Decimal
+from decimal import Decimal
 
 from lightning.workflows.review import ReviewInbox
 from lightning.budgeting.domain import spent_outside
 from lightning.core.dates import month_of, parse_month
 from lightning.planning.domain import plan_parts
 from lightning.planning.salary_day import payday_to_plan
+from lightning.ui.budget_rows import cover_from
 from lightning.ui.charts import ranked_donut
 from lightning.ui.budget_exclusions import exclusion_context
 
@@ -59,9 +60,10 @@ class BudgetScreen:
     everyday_plan: Decimal = ZERO     # IV-11M5: the hero's Planned and Spent wells
     everyday_spent: Decimal = ZERO
     days_left: int = 0
-    work: tuple = ()                  # IV-11M5: open work claims, paid for someone else to pay back ({id, name, payer, outstanding})
+    work: tuple = ()                  # IV-11M5: other open reimbursement claims
     trend: dict | None = None         # IV-11M5 Spending: six months of spending, the usual month, daily average, biggest day
     exclusions: tuple = ()
+    work_period: tuple[dict, ...] = ()
     changes: list | None = None       # NF-12AL3: what changed this month (current month with a plan only)
 
 
@@ -77,11 +79,12 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     except Exception:
         first, last = parse_month(this)
     shown = month_of(first)
+    work_period = tuple(c.reimbursements.work_period(first, last))
     schedule = c.schedules.view()
     prev, nxt = _shift(shown, -1), "" if shown > this else _shift(shown, 1)  # this month leads to next (NF-12AL4)
     if not c.budgets.has_plan(shown, schedule=schedule):
         return BudgetScreen(shown, prev, nxt, "no_plan", None, None, None, None, (), 0, (), ZERO, ZERO, 0,
-                            exclusions=exclusion_context(c)["estimate_exclusions"])
+                            exclusions=exclusion_context(c)["estimate_exclusions"], work_period=work_period)
     e = c.forecaster.everyday(shown, day)
     state = "current" if e.current else ("past" if last < day else "future")
     left = e.everyday_left
@@ -99,9 +102,9 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
             limit, spent = line.available, line.planned_actual
             if not limit and not spent:
                 continue
-            share = float(min(max(spent / limit * 100, ZERO), Decimal(100))) if limit > 0 else (100.0 if spent > 0 else 0.0)  # not money
+            share = float(min(max(spent / limit * 100, ZERO), Decimal(100))) if limit > 0 else (100.0 if line.over else 0.0)  # not money
             gap = line.remaining
-            ahead = gap > 0 and pace_pct is not None and spent / limit * 100 >= pace_pct + AHEAD_POINTS  # not money
+            ahead = limit > 0 and gap > 0 and pace_pct is not None and spent / limit * 100 >= pace_pct + AHEAD_POINTS  # not money
             kind = "over" if gap < 0 else ("ahead" if ahead else ("done" if limit > 0 and gap == 0 else "ok"))
             rows.append(CategoryRow(line.category_id, line.name, limit, spent, gap, share,
                                     state != "past" and kind in ("over", "ahead"), kind, line.one_off))
@@ -110,7 +113,9 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
     shown_needs = tuple(needs[:ATTENTION])
     listed = tuple(r for r in rows if r not in shown_needs)     # a category is never listed twice
     planned, paid, count = c.planning.month_fixed_costs(e.payments, shown, day)
-    move = _cover(c, shown, schedule, [r for r in rows if r.left < 0], e.room) if state == "current" else None
+    move = None
+    if state == "current" and rows and rows[0].left < 0:
+        move = cover_from(c, shown, {"category_id": rows[0].category_id, "over": -rows[0].left}, e.room)
     changes = ReviewInbox(c).changes(day) if state == "current" else None
     raise_offer = (c.health.income_change_offer(shown)
                    if changes and any(item["href"].startswith("/budget/raise") for item in changes) else None)
@@ -123,16 +128,16 @@ def build(c, day: date, month: str = "") -> BudgetScreen:
                         payday=payday_to_plan(c.db, c.settings, day) if state == "current" else None,
                         everyday_plan=e.everyday_plan, everyday_spent=e.everyday_spent, days_left=e.days_left,
                         trend=spending_trend(c, shown, day), work=work_claims(c),
-                        exclusions=exclusion_context(c)["estimate_exclusions"],
+                        exclusions=exclusion_context(c)["estimate_exclusions"], work_period=work_period,
                         changes=[item for item in changes if not item["href"].startswith("/budget/raise")]
                         if changes is not None else None)
 
 
 def work_claims(c) -> tuple:
-    """Paid for the company (or anyone) to claim back: the reimbursement claims with money still outstanding."""
+    """Other reimbursement claims that still have money outstanding."""
     rows = []
     for claim in c.reimbursements.list_claims():
-        if claim["outstanding"] <= ZERO:
+        if claim["paid_for_work"] or claim["outstanding"] <= ZERO:
             continue
         t = dict(claim["expense"]) if claim.get("expense") else {}
         rows.append({"id": claim["id"], "name": t.get("counterparty") or t.get("description") or "", "payer": claim.get("payer_name") or "",
@@ -180,24 +185,6 @@ def spend_donut(rows: list[CategoryRow], spent: Decimal) -> dict | None:
         slices.append({"label": "Other", "value": rest, "other": True})
     d = ranked_donut(slices)
     return d if d["segments"] else None
-
-
-def _cover(c, month: str, schedule, over: list[CategoryRow], room: dict) -> dict | None:
-    """The category with the most room left (its bills still to pay set aside) that can cover the largest overspend;
-    both need a plan of their own, as Move room asks. The PC's Budget makes the same offer."""
-    if not over:
-        return None
-    target = min(over, key=lambda r: r.left)
-    plans = c.budgets.amounts_for(month, loans=False, schedule=schedule)
-    if target.category_id not in plans:
-        return None
-    amount = (-target.left).to_integral_value(rounding=ROUND_CEILING)
-    best = max(((left, cid) for cid, left in room.items()
-                if cid != target.category_id and cid in plans and left >= amount), default=None)
-    if best is None:
-        return None
-    return {"name": c.categories.get(best[1]).name, "amount": amount,
-            "href": f"/budget/move?month={month}&to={target.category_id}&from={best[1]}&amount={amount}"}
 
 
 @dataclass(frozen=True)

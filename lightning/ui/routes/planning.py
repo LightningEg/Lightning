@@ -16,7 +16,7 @@ from lightning.core.figures import label
 from lightning.core.money import ZERO, fmt, to_decimal
 from lightning.core.plural import counted
 from lightning.planning.domain import (FREQUENCY_LABELS, KIND_LABELS, RECURRING_KINDS, WEEKEND_MOVE_LABELS, Frequency,
-                                       PaymentStatus, PlanKind, WeekendMove, per_year)
+                                       PaymentStatus, PlanKind, WeekendMove)
 from lightning.planning.bill_state import CATCH_UP_FROM, late_payments
 from lightning.planning.schedule import describe
 from lightning.planning.service import LOAN_CATEGORY
@@ -32,7 +32,8 @@ router = APIRouter(prefix="/plan")
 
 FIELDS = ("kind", "name", "amount", "frequency", "interval_count", "start_date", "end_date", "payment_count",
           "account_id", "category_id", "counterparty", "principal", "notes", "weekend_move",
-          "match_window_days", "match_tolerance_pct")
+          "match_window_days", "match_tolerance_pct", "interest_rate", "rate_kind")
+RATE_FIELDS = ("interest_rate", "rate_kind")
 TABS = (("plan", "Plan", "/plan"), ("upcoming", "Upcoming", "/plan/upcoming"), ("recurring", "Recurring", "/plan/recurring"),
         ("loans", "Loans", "/plan/loans"), ("reserves", "Reserves", "/plan/reserves"))
 
@@ -63,7 +64,7 @@ def _row(c, item, labels, as_of, linked):
     last = next((p for p in reversed(payments) if p.status == PaymentStatus.PAID), None)
     review_next = bool(upcoming and upcoming.status == PaymentStatus.UPCOMING and any(
         candidate["id"] not in linked for candidate in c.planning.plausible_candidates(upcoming, as_of)))
-    per_year = c.planning.amount_in_base(item, _per_year(item), as_of)
+    per_year = c.planning.amount_in_base(item, c.planning.recurring_amount_per_year(item, as_of), as_of)
     recent = fmt_date(as_of - timedelta(days=62))  # not money
     skipped = [p for p in payments if p.status == PaymentStatus.SKIPPED and p.due_date >= recent]
     reserve_links = c.reserves.links_for_transaction(last.transaction_id) if last and last.transaction_id else []
@@ -71,9 +72,6 @@ def _row(c, item, labels, as_of, linked):
             "account": labels["accounts"].get(item.account_id), "category": labels["categories"].get(item.category_id),
             "per_year": per_year, "reserve_links": reserve_links, "review_next": review_next,
             "bill_reserve": labels["bill_reserves"].get(item.id)}
-
-
-_per_year = per_year  # one calculation, in lightning.planning.domain
 
 
 def _form_values(form) -> dict:
@@ -87,7 +85,15 @@ def _save_values(c, values: dict) -> dict:
     if name:
         found = c.counterparties.resolve(name)
         party = found["id"] if found else c.counterparties.create(name)
-    return {k: v for k, v in values.items() if k != "counterparty"} | {"counterparty_id": party}
+    return {k: v for k, v in values.items() if k not in ("counterparty", *RATE_FIELDS)} | {"counterparty_id": party}
+
+
+def _save_rate(c, item_id: int, values: dict) -> None:
+    """A loan's optional rate is saved by its own call after the plan (IV-3H7)."""
+    if values.get("kind") != "LOAN":
+        return
+    if values.get("interest_rate") or c.planning.get(item_id).interest_rate is not None:  # set, changed or cleared
+        c.planning.set_loan_rate(item_id, values.get("interest_rate", ""), values.get("rate_kind", ""))
 
 
 def _back(form, default: str) -> str:
@@ -374,6 +380,7 @@ async def loans_page(request: Request):
     c.planning.match_payments(day)
     labels = _labels(c)
     loans = [{"item": item, "progress": c.planning.loan_progress(item, day), "schedule": describe(item),
+              "cost": c.planning.loan_cost(item, day),
               "account": labels["accounts"].get(item.account_id)} for item in c.planning.items((PlanKind.LOAN,))]
     for entry in loans:
         entry["meter"] = charts.meter(entry["progress"]["paid_amount"], entry["progress"]["total_amount"])
@@ -587,7 +594,10 @@ async def create_item(request: Request):
     back = _back(form, "/plan/loans" if values["kind"] == "LOAN" else "/plan/recurring")
     try:
         with settled_save(request, container(request)):
+            if values["kind"] == "LOAN":
+                c.planning.loan_rate_terms(values["interest_rate"], values["rate_kind"])  # refused before anything is saved
             item_id = c.planning.create(**_save_values(c, values))
+            _save_rate(c, item_id, values)
             message = f"{values['name']} added."
             if str(form.get("past_due", "paid")) == "paid":
                 moved = c.planning.start_after_paid(item_id)
@@ -628,7 +638,9 @@ async def edit_item(request: Request, item_id: int):
               "principal": f"{item.principal:.2f}" if item.principal else "", "notes": item.notes,
               "weekend_move": item.weekend_move.value,
               "match_window_days": str(item.match_window_days),
-              "match_tolerance_pct": str(item.match_tolerance_pct)}
+              "match_tolerance_pct": str(item.match_tolerance_pct),
+              "interest_rate": f"{item.interest_rate.normalize():f}" if item.interest_rate is not None else "",
+              "rate_kind": item.rate_kind or "FLAT"}
     back = "/plan/loans" if item.kind == PlanKind.LOAN else "/plan/recurring"
     return _item_form(request, c, values, item=item, back=back)
 
@@ -642,7 +654,10 @@ async def update_item(request: Request, item_id: int):
     back = _back(form, "/plan/loans" if item.kind == PlanKind.LOAN else "/plan/recurring")
     try:
         with settled_save(request, container(request)):
+            if values["kind"] == "LOAN":
+                c.planning.loan_rate_terms(values["interest_rate"], values["rate_kind"])
             c.planning.update(item_id, **_save_values(c, values))
+            _save_rate(c, item_id, values)
     except LightningError as exc:
         return _item_form(request, c, values, item=item, error=exc.message, error_field=exc.field or "",
                           status_code=400, back=back)
@@ -807,7 +822,7 @@ async def settle_payment(request: Request, item_id: int):
                     if category not in {str(option["id"]) for option in allowed}:
                         raise ValidationError("Choose a valid category.", "category_id")
                     values = {key: value for key, value in asdict(item).items()
-                              if key not in {"id", "active", "month_day"}}
+                              if key not in {"id", "active", "month_day", *RATE_FIELDS}}
                     c.planning.update(item_id, **(values | {"category_id": category}))
                 c.planning.record_payment(item_id, due, str(form.get("date_paid", "")), str(form.get("amount", "")),
                                           int(str(form.get("account_id"))) if str(form.get("account_id", "")).isdigit() else None)

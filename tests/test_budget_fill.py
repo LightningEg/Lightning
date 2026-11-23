@@ -3,6 +3,7 @@ from decimal import Decimal
 import pytest
 
 from lightning.core.errors import ValidationError
+from lightning.ui.i18n import translate
 from lightning.ui.web import create_app
 from screens import _ScreenClient
 
@@ -62,6 +63,21 @@ def test_average_source_uses_three_full_months_and_counts_quiet_months(c, setup)
     c.transactions.record_outflow("2026-11-03", accounts["cib"].id, "900", other.id)
     row = next(row for row in _proposal(c, "average").rows if row.category_id == other.id)
     assert row.amount == Decimal("300")
+    assert row.note == "Your average of the last 3 months · 1 of 3 months had spending"  # rule 5: Fill says why
+
+
+def test_average_source_says_when_the_profile_is_newer_than_the_window(c, setup):
+    """NF-12AK rule 5: a profile newer than the window keeps months-with-spending, and Fill labels it like Budget."""
+    accounts, _ = setup
+    food = _food(c)
+    c.transactions.record_outflow("2026-11-12", accounts["cib"].id, "900", food.id)
+    row = next(row for row in _proposal(c, "average").rows if row.category_id == food.id)
+    assert (row.amount, row.note) == (Decimal("900"), "Your average of the last 3 months · Low confidence · 1 observed month")
+    c.transactions.record_outflow("2026-10-12", accounts["cib"].id, "1100", food.id)
+    row = next(row for row in _proposal(c, "average").rows if row.category_id == food.id)
+    assert (row.amount, row.note) == (Decimal("1000"), "Your average of the last 3 months · Little history · 2 months with spending")
+    assert translate(row.note, "ar") == "متوسطك في آخر 3 شهور · تاريخ قليل · شهرين فيها صرف"
+    assert translate("Your average of the last 3 months · 1 of 3 months had spending", "ar") == "متوسطك في آخر 3 شهور · 1 من 3 شهور فيها صرف"
 
 
 def test_average_source_skips_one_off_categories(c, setup):

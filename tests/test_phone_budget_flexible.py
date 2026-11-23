@@ -144,3 +144,44 @@ def test_the_plan_list_types_a_limit_beside_each_everyday_category_and_saves_it(
         assert moved.status_code == 303 and moved.headers["location"] == "/budget/plan?month=2026-10"
     saved = client.post(f"/budget/rule/{forms[0]}", data={"month": "2026-10", "rule": "1234"}, headers={"X-Requested-With": "fetch"})
     assert saved.status_code == 204 and 'value="1234"' in client.get("/budget/plan?month=2026-10").text
+
+
+def test_work_claim_uses_selected_month_even_without_a_plan(c, setup):
+    account = setup[0]["cib"]
+    work = c.categories.get_by_code("EXP.WORK.TRANSPORT").id
+    expense = c.transactions.record_outflow("2026-09-15", account.id, "1000", work, description="Work trip")
+    claim = c.reimbursements.create_work_claim(expense.id)
+    receipt = c.transactions.record_inflow("2026-10-08", account.id, "400", work)
+    c.reimbursements.link_receipt(claim["id"], receipt.id, "400")
+
+    # September has a plan, while October has only transactions.
+    food = c.categories.get_by_code("EXP.PERSONAL.FOOD").id
+    c.budgets.set_budget(food, "2026-09", "1200", only_this_month=True, schedule=c.schedules.view())
+    assert c.budgets.has_plan("2026-09", schedule=c.schedules.view())
+    assert not c.budgets.has_plan("2026-10", schedule=c.schedules.view())
+    app = create_app(c)
+    mount_phone(app)
+    client = TestClient(app)
+
+    september = client.get("/budget?month=2026-09")
+    october = client.get("/budget?month=2026-10")
+    assert september.status_code == october.status_code == 200
+    assert "Owed at period end 1,000" in september.text
+    assert "Owed at period end 600" in october.text
+    assert "Paid back this period 400" in october.text
+    assert september.text.count(f'/reimbursements#claim-{claim["id"]}') == 1
+    assert 'aria-labelledby="work-heading"' not in september.text
+
+
+def test_refund_after_carryover_uses_up_the_allowance(c, setup):
+    accounts, cats = setup
+    food = cats["EXP.PERSONAL.FOOD"].id
+    bank = accounts["cib"].id
+    schedule = c.schedules.view()
+    c.budgets.set_budget(food, "2026-10", "500", schedule=schedule)
+    c.transactions.record_outflow("2026-10-29", bank, "1000", food)
+    c.budgets.set_carryover("2026-11", {food: True}, schedule=schedule)
+    c.transactions.record_refund("2026-11-02", bank, "125", food)
+    budget = screen.build(c, date(2026, 11, 3), "2026-11")
+    row = next(row for row in budget.categories if row.category_id == food)
+    assert row.left == 125 and row.state == "ok"

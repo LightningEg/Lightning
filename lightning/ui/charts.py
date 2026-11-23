@@ -316,9 +316,12 @@ def sankey(sources: list[dict], targets: list[dict], hub_label: str, min_gap: fl
 
 def meter(used: Decimal, total: Decimal | None) -> dict:
     """Spent of plan (or saved of target). Over plan fills the track in strong rose."""
-    if not total or total <= 0:
+    if total is None:
         return {"width": 0.0, "over": used > 0, "left": None}
-    return {"width": float(min(used / total, Decimal(1)) * 100), "over": used > total,
+    if total <= ZERO:
+        return {"width": 100.0 if used > total else 0.0, "over": used > total,
+                "left": _gap(total, used), "over_by": _gap(used, total), "share": None}
+    return {"width": float(max(ZERO, min(used / total, Decimal(1))) * 100), "over": used > total,
             "left": _gap(total, used), "over_by": _gap(used, total), "share": float(used / total * 100)}
 
 
@@ -328,9 +331,11 @@ def bullet(used: Decimal, plan: Decimal | None) -> dict:
 
     Widths are percentages of the row's scale (the larger of plan and spent)."""
     plan = plan or ZERO
-    used = max(used, ZERO)
-    scale = max(plan, used) or Decimal(1)
-    return {"plan": float(plan / scale * 100), "spent": float(min(used, plan) / scale * 100),
+    if plan <= ZERO:
+        return {"plan": 0.0, "spent": 0.0, "over": 100.0 if used > plan else 0.0,
+                "is_over": used > plan, "left": _gap(plan, used), "over_by": _gap(used, plan), "share": None}
+    scale = max(plan, used)
+    return {"plan": float(plan / scale * 100), "spent": float(max(ZERO, min(used, plan)) / scale * 100),
             "over": float((used - plan) / scale * 100) if used > plan else 0.0,
             "is_over": used > plan, "left": _gap(plan, used), "over_by": _gap(used, plan),
             "share": float(used / plan * 100) if plan else None}

@@ -230,12 +230,21 @@ class HealthService:
 
     def loans_a_month(self, day: date) -> Decimal:
         """Loan payments a month, counting only loans with payments still to make."""
-        return sum((self.planning.amount_in_base(item, per_year(item) / 12, day) for item in self.planning.items((PlanKind.LOAN,))
-                    if self.planning.loan_progress(item, day)["still_to_pay"] > 0), ZERO)
+        total = ZERO
+        for item in self.planning.items((PlanKind.LOAN,)):
+            left = self.planning.loan_progress(item, day)["still_to_pay"]
+            if left > ZERO:
+                payment = replace(item, amount=min(item.amount, left))
+                monthly = min(per_year(payment) / 12, left)
+                total += self.planning.amount_in_base(item, monthly, day)
+        return total
 
     def bills_a_month(self, day: date | None = None) -> Decimal:
         """Bills and subscriptions a month: what Cash planning › Recurring totals."""
-        return sum((self.planning.amount_in_base(item, per_year(item) / 12, day or today()) for item in self.planning.items((PlanKind.BILL, PlanKind.SUBSCRIPTION))), ZERO)
+        on = day or today()
+        items = self.planning.items((PlanKind.BILL, PlanKind.SUBSCRIPTION))
+        monthly = ((item, self.planning.recurring_amount_per_year(item, on) / 12) for item in items)
+        return sum((self.planning.amount_in_base(item, amount, on) for item, amount in monthly if amount), ZERO)
 
     def at(self, day: date) -> Health:
         position = self.position.at(day, match_payments=False)
@@ -491,7 +500,7 @@ class HealthService:
         end = parse_month(month_of(day))[0] - timedelta(days=1)
         flow = self.reporting.cash_flow(parse_month(month_of(end))[0], end)
         limit = self.limit_values()["savings_rate"]
-        if flow.savings_rate is None or not flow.inflows or limit is None or flow.savings_rate >= limit:
+        if flow.refunds_beat_spending or flow.savings_rate is None or not flow.inflows or limit is None or flow.savings_rate >= limit:
             return None
         usual = self.budgets.income_average(month_of(end), schedule=self.schedules.view()).amount
         if usual and flow.inflows < usual / 2:
@@ -571,6 +580,12 @@ class HealthService:
 
         avg_label = "Average monthly income" if fund.basis == "income" else "Average monthly spending"
         emergency_status = compare_to_limit(fund.months, limits["emergency_fund"], "minimum")
+        income_basis = "Set by hand in Settings" if income_average.manual else income_average.window
+        saving = figure("savings_rate", None if savings.refunds_beat_spending else savings.savings_rate,
+                        "%", savings_month, limits["savings_rate"], "minimum",
+                        (("Net flow", savings.net), ("Money in", savings.inflows)), "/")
+        if savings.rate_says_nothing:
+            saving = replace(saving, value=None, gap=_gap(savings))
         figures = (
             figure("net_worth", position.net_worth, "money", f"As of {fmt_date(day)}", None, "maximum",
                    (("What you own", position.what_you_own), ("What you owe", position.what_you_owe)), "/"),
@@ -579,13 +594,7 @@ class HealthService:
                          (("Reserves for emergencies", fund.set_aside), (avg_label, fund.monthly)), "/plan/reserves",
                          alert=alerts["emergency_fund"],
                          band=band_of(fund.months, limits["emergency_fund"], alerts["emergency_fund"], "minimum")),
-            HealthFigure("savings_rate", None, "%", savings_month, limits["savings_rate"], "minimum",
-                         "outside your limit" if limits["savings_rate"] is not None else None,
-                         (("Net flow", savings.net), ("Money in", savings.inflows)), "/", _gap(savings),
-                         alert=alerts["savings_rate"], band="alert" if limits["savings_rate"] is not None else None)
-            if savings.rate_says_nothing else
-            figure("savings_rate", savings.savings_rate, "%", savings_month, limits["savings_rate"], "minimum",
-                   (("Net flow", savings.net), ("Money in", savings.inflows)), "/"),
+            saving,
             figure("planned_savings_rate", check.planned_savings_rate, "%", f"{month_of(day)} plan",
                    limits["savings_rate"], "minimum",
                    (("Plan leaves to save", check.plan_saves), ("Saving for goals", check.goals),
@@ -595,11 +604,11 @@ class HealthService:
                    (("What you owe", health.debt_to_cash.part), ("Cash you own", health.debt_to_cash.whole)), "/plan/loans"),
             figure("debt_to_net_worth", health.debt_to_net_worth.percent, "%", fmt_date(day), limits["debt_to_net_worth"], "maximum",
                    (("What you owe", health.debt_to_net_worth.part), ("Net worth", health.debt_to_net_worth.whole)), "/plan/loans"),
-            figure("fixed_costs_to_income", health.fixed_costs_to_income.percent, "%", f"Monthly · {income_average.window}", limits["fixed_costs_to_income"], "maximum",
+            figure("fixed_costs_to_income", health.fixed_costs_to_income.percent, "%", f"Monthly · {income_basis}", limits["fixed_costs_to_income"], "maximum",
                    (("Bills and subscriptions a month", health.bills_a_month),
                     ("Loan payments a month", health.loans_a_month),
                     ("Average monthly income", health.fixed_costs_to_income.whole)), "/plan/recurring"),
-            figure("loan_payments_to_income", health.loan_payments_to_income.percent, "%", f"Monthly · {income_average.window}", limits["loan_payments_to_income"], "maximum",
+            figure("loan_payments_to_income", health.loan_payments_to_income.percent, "%", f"Monthly · {income_basis}", limits["loan_payments_to_income"], "maximum",
                    (("Loan payments a month", health.loan_payments_to_income.part),
                     ("Average monthly income", health.loan_payments_to_income.whole)), "/plan/loans"),
         )

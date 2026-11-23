@@ -14,7 +14,7 @@
     {% if r %}
     <div class="phone-lead{{ ' is-negative' if r.over }}"><bdi class="fig">{{ r.amount|money(False, 0) }}</bdi> <small>{{ base }} {{ ('over'|tr(locale)) if r.over else ('left'|tr(locale)) }}</small></div>
     <p class="phone-hero-line">{{ 'You spent {spent} of the {plan} you planned.'|tr(locale, spent=spent|money(False, 0), plan=planned|money(False, 0)) }}</p>
-    <span class="category-sheet-bar{{ ' is-over' if r.over }}" role="img" aria-label="{{ spent|money(False, 0) }} {{ 'of'|tr(locale) }} {{ planned|money(False, 0) }}"><i style="width:{{ '%.1f'|format(r.width) }}%"></i>{% if r.pace is not none %}<s style="inset-inline-start:{{ '%.1f'|format(r.pace) }}%"></s>{% endif %}</span>
+    {% if r.width is not none %}<span class="category-sheet-bar{{ ' is-over' if r.over }}" role="img" aria-label="{{ spent|money(False, 0) }} {{ 'of'|tr(locale) }} {{ planned|money(False, 0) }}"><i style="width:{{ '%.1f'|format(r.width) }}%"></i>{% if r.pace is not none %}<s style="inset-inline-start:{{ '%.1f'|format(r.pace) }}%"></s>{% endif %}</span>{% endif %}
     <p class="category-bar-ends"><span>{{ fig.spent.label }}</span><span>{{ 'Plan {amt}'|tr(locale, amt=planned|money(False, 0)) }}</span></p>
     {% else %}
     <div class="phone-lead"><bdi class="fig">{{ spent|money(False, 0) }}</bdi> <small>{{ base }}</small></div>

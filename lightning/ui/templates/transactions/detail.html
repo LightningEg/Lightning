@@ -4,7 +4,7 @@
 {% macro category_context(label) %}{% set parts = label.split(' › ') %}{% if parts|length > 1 %}<b>{{ parts[0]|tr(locale) }}</b>{% for part in parts[1:] %}<div>{{ part|tr(locale) }}</div>{% endfor %}{% else %}{{ label|tr(locale) }}{% endif %}{% endmacro %}
 {% block title %}{{ txn.ref }}{% endblock %}
 {% block heading %}<h1>{{ ('Refund' if txn.type.value == 'IN' and lines and lines[0].effect == 'OUTFLOW' else summary.type_label)|tr(locale) }}</h1>
-<div class="muted"><bdi dir="ltr">{{ txn.ref }}</bdi> · {{ txn.date }}{% if txn.source == 'SYSTEM' %} · <span class="pill">{{ 'System-generated'|tr(locale) }}</span>{% endif %}{% if txn.is_void %} · <span class="pill void">{{ 'deleted'|tr(locale) }}</span>{% endif %}</div>{% endblock %}
+<div class="muted"><bdi dir="ltr">{{ txn.ref }}</bdi> · {% if estimate_shifts %}{{ 'Posting date'|tr(locale) }} {% endif %}{{ txn.date }}{% if txn.source == 'SYSTEM' %} · <span class="pill">{{ 'System-generated'|tr(locale) }}</span>{% endif %}{% if txn.is_void %} · <span class="pill void">{{ 'deleted'|tr(locale) }}</span>{% endif %}</div>{% endblock %}
 {% block content %}
 <div class="grid g2">
   <div class="card">
@@ -26,10 +26,12 @@
       {% for effect in cash_effects %}<tr><td class="muted">{{ 'Effect'|tr(locale) }}{% if effect.owner != 'you' %} · {{ effect.owner }}{% endif %}</td><td>{{ ('Cash in {account} increases by {amt}' if effect.quantity > 0 else 'Cash in {account} decreases by {amt}')|tr(locale, account=effect.account, amt=(effect.quantity|abs|amount_role('row')) ~ ' ' ~ effect.currency) }}</td></tr>{% endfor %}
       {% if txn.counterparty %}<tr><td class="muted">{{ 'Payee'|tr(locale) }}</td><td>{% if touched.counterparty %}<a href="/counterparties/{{ touched.counterparty.id }}">{{ txn.counterparty }}</a>{% else %}{{ txn.counterparty }}{% endif %}</td></tr>{% endif %}
       {% for owner in touched.owners %}<tr><td class="muted">{{ 'Held for'|tr(locale) }}</td><td><a href="/counterparties/{{ owner.id }}">{{ owner.name }}</a></td></tr>{% endfor %}
+      {% for part in estimate_shifts %}<tr><td class="muted">{{ 'Estimate date'|tr(locale) }}</td><td><time datetime="{{ part.effective_date }}">{{ part.effective_date|day(locale) }}</time> · {{ part.amount|abs|money }} {{ base }}</td></tr>{% endfor %}
       {% if foreign %}<tr><td class="muted">{{ 'Paid in'|tr(locale) }}</td><td><bdi class="num">{{ foreign.label }}</bdi> · {{ ("the bank’s pound debit" if foreign.settled else "pounds at the day’s rate until the bank’s debit")|tr(locale) }}</td></tr>{% endif %}
       {% if txn.notes %}<tr><td class="muted">{{ 'Notes'|tr(locale) }}</td><td>{{ txn.notes|tagged }}</td></tr>{% endif %}
       <tr><td class="muted">{{ "Recorded"|tr(locale) }}</td><td class="small"><time datetime="{{ txn.created_at }}" title="{{ txn.created_at }}">{{ recorded_at }}</time>{% if txn.updated_at != txn.created_at %} · {{ 'Updated'|tr(locale) }} <time datetime="{{ txn.updated_at }}" title="{{ txn.updated_at }}">{{ updated_at }}</time>{% endif %}</td></tr>
     </table>
+    {% import "partials/estimate_date.html" as dates with context %}{{ dates.edit_entry(txn, estimate_date, revision) }}
     <div class="actions mt-card">
       {% if not txn.is_void %}
         {% if txn.source == 'SYSTEM' %}<span class="muted small">{{ "Deleting this value update removes its effect from the account."|tr(locale) }}</span>

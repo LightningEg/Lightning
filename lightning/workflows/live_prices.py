@@ -42,6 +42,7 @@ from dataclasses import dataclass, field
 from datetime import date, datetime, time as clock, timedelta, timezone
 from decimal import Decimal
 
+from lightning.assets.catalog import fund_links
 from lightning.core.dates import fmt_date, wall_now
 from lightning.core.plural import counted
 from lightning.fx import rate_for, save_rate
@@ -76,6 +77,7 @@ class Want:
     purity: Decimal = Decimal(1)                          # gold: karat / 24
     currency: str = ""                                    # Gulf and Europe: the holding's own, checked on the board
     mic: str = ""
+    ticker: str = ""                                      # an unlinked fund's own code: FND:BWA -> BWA
 
 
 @dataclass
@@ -172,14 +174,17 @@ def fund_name(text: str) -> str:
 
 
 def link_funds(work: Plan, instruments) -> list[Want]:
-    """Name each unlinked fund by the one Mubasher fund with the same name; the matched become wants."""
+    """Name each unlinked fund by its reviewed Thndr-to-Mubasher link, else by the one Mubasher fund with the same
+    name; the matched become wants."""
     by_name: dict[str, list[str]] = {}
     for instrument in instruments:
         by_name.setdefault(fund_name(instrument.name), []).append(instrument.key)
     matched = []
     names = {instrument.key: instrument.name for instrument in instruments}
+    reviewed = fund_links()
     for want in work.unlinked:
-        keys = by_name.get(fund_name(want.name), [])
+        linked = f"EG:FUND:{reviewed[want.ticker.upper()]}" if want.ticker.upper() in reviewed else ""
+        keys = [linked] if linked in names else by_name.get(fund_name(want.name), [])
         if len(keys) == 1 and want.asset_id not in work.linked:
             want.key, work.linked[want.asset_id] = keys[0], keys[0]
             work.wants.append(want)
@@ -249,7 +254,7 @@ def plan(c, on: date, now: datetime | None = None) -> Plan:
             continue
         found = instrument_key(asset)
         if found is None and asset.code.startswith("FND:"):
-            result.unlinked.append(Want(asset.id, asset.name, "", "eg-funds", month_ends))
+            result.unlinked.append(Want(asset.id, asset.name, "", "eg-funds", month_ends, ticker=asset.ticker))
             continue
         if found is None:
             if month_ends:

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from datetime import date, timedelta
 
-from lightning.core.dates import now_iso
+from lightning.core.dates import estimate_date_override, now_iso
 from lightning.core.errors import ConflictError, NotFoundError, ValidationError
 from lightning.core.money import check_places, from_e6, to_decimal, to_e6
 from lightning.core.refs import parse_row_id
@@ -28,10 +28,37 @@ _OWNED = ("le.category_id IS NOT NULL AND le.owner_id IS NULL AND c.movement='OU
           "AND a.is_cash=1 AND le.effect='OUTFLOW'")
 
 
+def linked_refunds_sql(expense_id: str, *, condition: str = "1") -> str:
+    """Scalar SQL for posted refunds. Older dual-linked deposits count only as claim receipts."""
+    return ("(SELECT COALESCE(SUM(MIN(rl.amount_e6, ("
+            "SELECT COALESCE(SUM(le.amount_base_e6),0) FROM ledger_entries le "
+            "JOIN categories c ON c.id=le.category_id JOIN financial_assets a ON a.id=le.asset_id "
+            f"WHERE le.transaction_id=r.id AND {_OWNED} AND le.amount_base_e6>0 "
+            "AND EXISTS (SELECT 1 FROM ledger_entries x WHERE x.transaction_id=rl.expense_id "
+            "AND x.category_id=le.category_id AND x.owner_id IS NULL AND x.amount_base_e6<0)"
+            "))),0) FROM refund_links rl "
+            "JOIN transactions r ON r.id=rl.refund_id AND r.status='POSTED' AND r.type='IN' "
+            "JOIN transactions e ON e.id=rl.expense_id AND r.date>=e.date "
+            f"WHERE rl.expense_id={expense_id} AND {condition} "
+            "AND NOT EXISTS (SELECT 1 FROM money_from_others m WHERE m.transaction_id=r.id) "
+            "AND NOT EXISTS (SELECT 1 FROM reimbursement_receipts rr WHERE rr.receipt_id=rl.refund_id))")
+
+
 class RefundLinkService:
     def __init__(self, db: Database, transactions=None):
         self.db = db
         self.transactions = transactions  # TransactionService: records a refund from its purchase
+
+    def set_estimate_date(self, link_id: int, estimate_date: str | None) -> None:
+        self._require_writable()
+        day = estimate_date_override(estimate_date)
+        with self.db.transaction(undo_label="Change estimate date"):
+            row = self.db.one("SELECT estimate_date_override FROM refund_links WHERE id=?", (link_id,))
+            if row is None:
+                raise NotFoundError("This recovery link no longer exists.")
+            if row["estimate_date_override"] != day:
+                self.db.execute("UPDATE refund_links SET estimate_date_override=?,updated_at=? WHERE id=?",
+                                (day, now_iso(), link_id))
 
     def _require_writable(self) -> None:
         if self.db.read_only:
@@ -57,10 +84,11 @@ class RefundLinkService:
     def _returned_e6(self, expense_id: int, *, besides_refund: int | None = None) -> int:
         """What has already come back for a purchase: its other refund links and its claim's receipts."""
         refunds = int(self.db.scalar(
-            "SELECT COALESCE(SUM(amount_e6),0) FROM refund_links WHERE expense_id=? AND refund_id IS NOT ?",
+            "SELECT " + linked_refunds_sql("?", condition="rl.refund_id IS NOT ?"),
             (expense_id, besides_refund)) or 0)
         receipts = int(self.db.scalar(
             "SELECT COALESCE(SUM(rr.amount_e6),0) FROM reimbursement_receipts rr "
+            "JOIN transactions r ON r.id=rr.receipt_id AND r.status='POSTED' "
             "JOIN reimbursement_claims rc ON rc.id=rr.claim_id WHERE rc.expense_id=?", (expense_id,)) or 0)
         return refunds + receipts
 
@@ -73,8 +101,8 @@ class RefundLinkService:
         """The purchase a refund names, with the amount linked, or None."""
         refund_id = parse_row_id(refund_id, "refund_id")
         row = self.db.one(
-            "SELECT rl.id,rl.refund_id,rl.expense_id,rl.amount_e6,t.ref,t.date,t.description,t.counterparty,t.status "
-            "FROM refund_links rl JOIN transactions t ON t.id=rl.expense_id WHERE rl.refund_id=?", (refund_id,))
+            "SELECT rl.*,COALESCE(d.estimate_date,t.date) automatic_date,t.ref,t.date,t.description,t.counterparty,t.status "
+            "FROM refund_links rl JOIN transactions t ON t.id=rl.expense_id LEFT JOIN budget_estimate_dates d ON d.transaction_id=t.id WHERE rl.refund_id=?", (refund_id,))
         if not row:
             return None
         link = dict(row)
@@ -103,6 +131,8 @@ class RefundLinkService:
         """Purchases a refund can name: posted, in one of the refund's expense categories, from six months before
         it up to its date, with something still to return; newest first. Each carries the most it can take."""
         refund_id = parse_row_id(refund_id, "refund_id")
+        if self.db.scalar("SELECT 1 FROM reimbursement_receipts WHERE receipt_id=?", (refund_id,)):
+            return []
         refund = self._transaction(refund_id)
         lines = self._lines(refund_id, "IN") if refund else {}
         if not lines:
@@ -120,6 +150,8 @@ class RefundLinkService:
             room = self._room_e6(refund_id, expense_id, lines)
             if room > 0:
                 expense = dict(self._transaction(expense_id))
+                expense["automatic_date"] = self.db.scalar(
+                    "SELECT estimate_date FROM budget_estimate_dates WHERE transaction_id=?", (expense_id,)) or expense["date"]
                 offered.append({**expense, "max_amount": from_e6(room)})
         return offered
 
@@ -164,12 +196,27 @@ class RefundLinkService:
                 raise ValidationError("That is more than the refund, or more than the purchase has left to return.",
                                       "amount")
             now = now_iso()
+            previous = self.db.one("SELECT * FROM refund_links WHERE refund_id=? AND expense_id=?", (refund_id, expense_id))
             self.db.execute("DELETE FROM refund_links WHERE refund_id=?", (refund_id,))
             cur = self.db.execute(
                 "INSERT INTO refund_links(refund_id,expense_id,amount_e6,created_at,updated_at) VALUES (?,?,?,?,?)",
                 (refund_id, expense_id, value_e6, now, now))
+            if previous and previous["estimate_date_override"]:
+                self.set_estimate_date(cur.lastrowid, previous["estimate_date_override"])
         return {"id": int(cur.lastrowid), "refund_id": refund_id, "expense_id": expense_id,
                 "amount": from_e6(value_e6)}
+
+    def link_dated(self, refund_id, expense_id, amount, estimate_date):
+        with self.db.transaction(undo_label="Link refund to its purchase"):
+            link = self.link(refund_id, expense_id, amount)
+            self.set_estimate_date(link["id"], estimate_date)
+            return link
+
+    def record_dated_refund(self, expense_id, date, amount, notes, estimate_date):
+        with self.db.transaction(undo_label="Record a refund"):
+            link = self.record_refund(expense_id, date, amount, notes)
+            self.set_estimate_date(link["id"], estimate_date)
+            return link
 
     def record_refund(self, expense_id, date: str, amount, notes: str = "") -> dict:
         """*Record a refund* on a purchase: money back to the purchase's account, in its category, already naming

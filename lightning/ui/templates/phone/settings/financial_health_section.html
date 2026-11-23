@@ -18,6 +18,6 @@
     <div><dt>{{ 'Basis'|tr(locale) }}</dt><dd>{{ fig[health_fund.figure].label }}</dd></div>
     <div><dt>{{ "Target"|tr(locale) }}</dt><dd>{% if health_fund.target is not none %}<bdi class="fig">{{ health_fund.target|money }} {{ base }}</bdi>{% else %}{{ 'Unavailable'|tr(locale) }}{% endif %}</dd></div>
   </dl>
-  {% if health_fund.average.amount is not none %}<p class="phone-note">{% if health_fund.average.scheduled %}From your recurring income{% else %}{{ health_fund.average.window }} · {{ health_fund.average.months_counted }} completed months{% if health_fund.average.manual %} · set by hand{% endif %}{% endif %}</p>{% else %}<p class="phone-note">{{ "A target appears when the selected average is available."|tr(locale) }}</p>{% endif %}
+  {% if health_fund.average.amount is not none %}<p class="phone-note">{% if health_fund.average.manual %}{{ "Set by hand in Settings"|tr(locale) }}{% elif health_fund.average.since %}{{ health_fund.average.window }}{% elif health_fund.average.scheduled %}From your recurring income{% else %}{{ health_fund.average.window }} · {{ health_fund.average.months_counted }} completed months{% endif %}</p>{% else %}<p class="phone-note">{{ "A target appears when the selected average is available."|tr(locale) }}</p>{% endif %}
   <div class="phone-rows"><a class="phone-row" href="/plan/reserves"><span>{{ "Open Reserves"|tr(locale) }}</span><b>{{ chevron() }}</b></a><a class="phone-row" href="/settings?section=budget"><span>{{ "Change income or spending basis"|tr(locale) }}</span><b>{{ chevron() }}</b></a></div>
 </section>

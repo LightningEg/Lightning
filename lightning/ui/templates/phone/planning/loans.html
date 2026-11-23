@@ -23,6 +23,8 @@
       <div><dt>{{ 'Still to pay'|tr(locale) }}</dt><dd><bdi class="fig">{{ pr.still_to_pay|money }}</bdi></dd></div>
       <div><dt>{{ 'Next payment'|tr(locale) }}</dt><dd>{% if pr.next %}<bdi class="fig">{{ pr.next.still_owed|money }}</bdi> · {{ pr.next.due_date }}{% else %}{{ 'Paid off'|tr(locale) }}{% endif %}</dd></div>
       <div><dt>{{ 'Last payment'|tr(locale) }}</dt><dd>{{ pr.last_date or '—' }}</dd></div>
+      {% if l.cost %}<div><dt>{{ fig.loan_total_interest.label }}</dt><dd><bdi class="fig">{{ l.cost.interest|money }}</bdi> · {{ '{rate}% {kind}'|tr(locale, rate=i.interest_rate.normalize(), kind=(('flat' if i.rate_kind == 'FLAT' else 'reducing')|tr(locale))) }}</dd></div>
+      <div><dt>{{ fig.loan_cost.label }}</dt><dd><bdi class="fig">{{ l.cost.cost|money }}</bdi> · {{ '{amount} borrowed'|tr(locale, amount=l.cost.principal|money) }}</dd></div>{% endif %}
     </dl>
     {% if pr.extra_payments or pr.skipped %}<div class="phone-rows">
       {% for p in pr.extra_payments %}<a class="phone-row" href="/transactions/{{ p.transaction_id }}/sheet"><span>{{ 'Extra payment'|tr(locale) }}<small>{{ p.date }}</small></span><b><bdi class="fig">{{ p.principal|money(False,2) }}</bdi></b></a>{% endfor %}

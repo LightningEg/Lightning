@@ -454,11 +454,11 @@ async def category_sheet(request: Request, category_id: int):
     planned = line.available if line is not None else None
     spent = line.planned_actual if line is not None and planned is not None else (line.actual if line is not None else ZERO)
     r = None
-    if planned is not None and planned > ZERO:
+    if planned is not None:
         figures = category_pace(planned, spent, first, last, today())
         left, share, current, pace = figures["left"], figures["share"], figures["current"], figures["pace"]
         r = {"category_id": category_id, "over": left < ZERO, "amount": abs(left), "share": share,
-             "width": round(float(min(max(share, ZERO), Decimal(100))), 1),
+             "width": round(float(min(max(share, ZERO), Decimal(100))), 1) if share is not None else None,
              "risk": figures["risk"],
              "pace": round(float(pace), 1) if pace is not None else None}
         r["line"] = pace_line(r)

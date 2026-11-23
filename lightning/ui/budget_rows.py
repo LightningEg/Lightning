@@ -83,11 +83,12 @@ def cover_from(c, month: str, target: dict, room: dict[int, Decimal]) -> dict | 
     """The category with the most room left (its bills still to pay set aside) that can cover the largest
     overspend; both need a plan of their own, as Move room asks (budget_move.html)."""
     plans = c.budgets.amounts_for(month, loans=False, schedule=c.schedules.view())
-    if target["category_id"] not in plans:
+    if plans.get(target["category_id"], (None,))[0] is None:
         return None
     amount = Decimal(target["over"]).to_integral_value(rounding=ROUND_CEILING)
     best = max(((left, cid) for cid, left in room.items()
-                if cid != target["category_id"] and cid in plans and left >= amount), default=None)
+                if cid != target["category_id"] and left >= amount
+                and (plans.get(cid, (None,))[0] or ZERO) >= amount), default=None)
     if best is None:
         return None
     return {"name": c.categories.get(best[1]).name, "amount": amount,

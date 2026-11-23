@@ -12,11 +12,12 @@ def meter(item) -> dict | None:
         return None
     value = max(Decimal(item.value), Decimal(0))
     limit = Decimal(item.limit) if item.limit is not None else None
-    if item.unit == "%":
-        top = max(Decimal(100), value * Decimal("1.1"), (limit or 0) * Decimal("1.1"))  # not money
-    else:
-        top = max((limit or 0) * Decimal("1.25"), value * Decimal("1.1"), Decimal(1))  # not money
     alert = Decimal(item.alert) if item.alert is not None else None
+    largest = max(value, limit or 0, alert or 0)
+    if item.unit == "%":
+        top = max(Decimal(100), largest * Decimal("1.1"))  # not money
+    else:
+        top = max((limit or 0) * Decimal("1.25"), largest * Decimal("1.1"), Decimal(1))  # not money
     return {"fill": float(min(value / top * 100, Decimal(100))),  # not money
             "tick": float(limit / top * 100) if limit is not None else None,  # not money
             "ticks": [float(min(bound / top * 100, Decimal(100))) for bound in (limit, alert) if bound is not None],  # not money

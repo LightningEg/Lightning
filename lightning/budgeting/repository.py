@@ -67,13 +67,6 @@ class BudgetRepository:
                            (category_id, month))
         return [(str(row["month"]), bool(row["enabled"])) for row in rows]
 
-    def first_carryover_month(self, category_id: int, month: str) -> str | None:
-        row = self.db.one("SELECT MIN(month) AS month FROM ("
-                          "SELECT month FROM budgets WHERE category_id=? AND one_off=0 AND month<=? "
-                          "UNION ALL SELECT month FROM budget_carryover WHERE category_id=? AND month<=?)",
-                          (category_id, month, category_id, month))
-        return str(row["month"]) if row and row["month"] else None
-
     def set_carryover(self, category_id: int, month: str, enabled: bool) -> None:
         from lightning.core.dates import now_iso
         now = now_iso()

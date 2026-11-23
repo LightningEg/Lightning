@@ -10,7 +10,7 @@ import json
 
 from lightning.categories.domain import Category, CategoryFamily, Movement, Scope
 from lightning.categories.service import CategoryService
-from lightning.core.dates import month_of, now_iso, parse_month
+from lightning.core.dates import estimate_date_override, month_of, now_iso, parse_month
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, check_places, fmt, fmt as _fmt, from_e6, to_decimal
@@ -369,6 +369,30 @@ class BudgetService:
     def is_left_out(self, transaction_id: int) -> bool:
         return int(transaction_id) in self.left_out_ids()
 
+    def estimate_date(self, transaction_id: int) -> str | None:
+        return self.db.scalar("SELECT estimate_date FROM budget_estimate_dates WHERE transaction_id=?", (transaction_id,))
+
+    def can_set_estimate_date(self, transaction_id: int) -> bool:
+        return bool(self.db.scalar(
+            "SELECT 1 FROM transactions t JOIN ledger_entries le ON le.transaction_id=t.id "
+            "JOIN categories c ON c.id=le.category_id WHERE t.id=? AND t.status='POSTED' "
+            "AND t.type IN ('OUT','IN') AND le.owner_id IS NULL AND le.effect IN ('INFLOW','OUTFLOW') "
+            "AND c.movement='OUTFLOW' AND c.income_class IS NULL AND c.family<>'INVESTMENT' "
+            "AND c.code<>'EXP.SYSTEM.CUSTODY'", (transaction_id,)))
+
+    def set_estimate_date(self, transaction_id: int, estimate_date: str | None) -> None:
+        day = estimate_date_override(estimate_date)
+        with self.db.transaction(undo_label="Change estimate date"):
+            if day is None:
+                self.db.execute("DELETE FROM budget_estimate_dates WHERE transaction_id=?", (transaction_id,))
+                return
+            if not self.can_set_estimate_date(transaction_id):
+                raise ValidationError("Choose an entry with personal spending for an estimate date.", "estimate_date")
+            self.db.execute("INSERT INTO budget_estimate_dates(transaction_id,estimate_date) VALUES (?,?) "
+                            "ON CONFLICT(transaction_id) DO UPDATE SET estimate_date=excluded.estimate_date "
+                            "WHERE budget_estimate_dates.estimate_date<>excluded.estimate_date",
+                            (transaction_id, day))
+
     def can_leave_out(self, transaction_id: int) -> bool:
         """A posted expense with the user's own spending in an expense category: the only kind estimates can skip."""
         rows = self.db.all(
@@ -564,10 +588,10 @@ class BudgetService:
         sections["INVESTMENT"] = BudgetSection("Investment")
         warnings: list[str] = []
         carryover_settings = self.repo.carryover_settings(month)
-        opening_carryovers = {category_id: self._opening_carryover(category_id, month,
-                                                                    carryover_settings.get(category_id, False) and category_id in direct,
-                                                                    children, schedule=schedule)
-                              for category_id in carryover_settings if carryover_settings[category_id]}
+        opening_carryovers = {
+            cid: self._opening_carryover(cid, month, children, one_offs, schedule=schedule)
+            for cid, enabled in carryover_settings.items() if enabled and cid in direct
+        }
         for category in reversed(cats):
             if category.id not in direct:
                 opening_carryovers[category.id] = sum(
@@ -594,10 +618,11 @@ class BudgetService:
                 carryover_enabled=carryover_settings.get(c.id, False),
                 income_percent=income_percent, from_loans=c.id in from_loans, from_bills=c.id in from_bills,
             ))
-            kids_total = sum(((budget[k] or ZERO) + opening_carryovers.get(k, ZERO)
-                              for k in children.get(c.id, []) if budget[k] is not None), ZERO)
+            child_limits = [budget[k] + opening_carryovers.get(k, ZERO)
+                            for k in children.get(c.id, []) if budget[k] is not None]
+            kids_total = sum(child_limits, ZERO)
             parent_available = (budget[c.id] or ZERO) + opening_carryovers.get(c.id, ZERO)
-            if budget[c.id] is not None and kids_total > parent_available:
+            if child_limits and budget[c.id] is not None and kids_total > parent_available:
                 warnings.append(f"{self.categories.display_name(c.id)}: its categories add up to "
                                 f"{fmt(kids_total)}, more than its budget / available limit of {fmt(parent_available)}.")
         income = self.reporting.cash_flow(first, last).inflows
@@ -609,17 +634,17 @@ class BudgetService:
         negative when over. None when no limit covers the category."""
         view = self.month_view(month, schedule=schedule)
         by_id = {line.category_id: line for section in view.sections for line in section.lines}
-        line = shown = by_id.get(category_id)
+        one_offs = self.one_off_ids()
         node = category_id
-        while shown is None or shown.remaining is None:
-            node = self.categories.get(node).parent_id
-            if not node:
-                break
+        while node is not None:
             shown = by_id.get(node)
-        if shown is None or shown.remaining is None or shown.available is None:
-            return None
-        return {"name": shown.name, "limit": shown.available, "spent": shown.planned_actual, "left": shown.remaining,
-                "over": shown.over, "inside": shown is not line}
+            if shown is not None and shown.direct is not None:
+                return {"name": shown.name, "limit": shown.available, "spent": shown.planned_actual,
+                        "left": shown.remaining, "over": shown.over, "inside": node != category_id}
+            if node in one_offs:
+                break  # An unplanned outside-budget category does not spend its parent's limit.
+            node = self.categories.get(node).parent_id
+        return None
 
     def suggested_plan(self, month: str) -> dict[int, Decimal]:
         """Return stable, rounded suggestions for categories with recent spending."""
@@ -675,9 +700,10 @@ class BudgetService:
             # profile covers them, else over the months with spending), as a tidy figure; categories outside the budget
             # are left out.
             one_offs = self.one_off_ids()
+            window, full = self._completed_months(month, 3), self._full_window(month, 3)
             for category_id, amount in self.first_plan_suggestions(month).items():
                 if category_id in by_id and category_id not in one_offs:
-                    candidates[category_id] = (amount, "Your average of the last 3 months")
+                    candidates[category_id] = (amount, self._average_note(category_id, window, full))
         elif source == "schedule":
             for category_id, data in schedule.bills(month).items():
                 if category_id in by_id and data["amount"] > ZERO:
@@ -773,6 +799,17 @@ class BudgetService:
         by_id = {c.id: c for c in self.categories.tree(Movement.OUTFLOW)}
         rows.sort(key=lambda row: (by_id[row.category_id].sort_order, row.category_name.casefold()))
         return BudgetFillProposal(month, "changes", tuple(rows), unchanged=unchanged)
+
+    def _average_note(self, category_id: int, window: list[dict[int, Decimal]], full: bool) -> str:
+        """Fill's source label for an average (NF-12AK rule 5): the same words as Budget's average label, so one
+        purchase in three covered months reads "1 of 3 months had spending" and a newer profile says so."""
+        observed = self._tree_average({category_id}, window, full=full)[1]  # suggested_plan offers leaves only
+        head = "Your average of the last 3 months"
+        if full:
+            return f"{head} · {observed} of 3 months had spending"
+        if observed == 1:
+            return f"{head} · Low confidence · 1 observed month"
+        return f"{head} · Little history · {observed} months with spending"
 
     @staticmethod
     def _fill_rule_name(rule) -> str:
@@ -899,67 +936,38 @@ class BudgetService:
                 changed += 1
         return changed
 
-    def _opening_carryover(self, category_id: int, month: str, enabled_now: bool,
-                           children: dict[int, list[int]], *, schedule: ScheduleView) -> Decimal:
-        if not enabled_now:
-            return ZERO
-        first, _ = parse_month(month)
-        earliest = self.repo.first_carryover_month(category_id, month)
-        if not earliest:
-            return ZERO
-        cursor = parse_month(earliest)[0]
+    def _opening_carryover(self, category_id: int, month: str, children: dict[int, list[int]],
+                           one_offs: set[int], *, schedule: ScheduleView) -> Decimal:
+        # The first enabled month takes the previous month's closing balance. A pause
+        # discards everything carried into that previous month.
         settings = self.repo.carryover_settings_up_to(month, category_id)
-        active = False
-        setting_index = 0
-        balance = ZERO
+        enabled_since = month
+        for effective, enabled in reversed(settings):
+            if not enabled:
+                break
+            enabled_since = effective
+        first_enabled = parse_month(enabled_since)[0]
+        cursor = max(first_enabled - timedelta(days=1), date(1900, 1, 1))
         reset_month = self.repo.reset_month(category_id, month)
-        if reset_month == month:
-            return ZERO
-        enabling_now = bool(settings and settings[-1] == (month, True))
-        preceding_month = month_of(first - timedelta(days=1))
-        descendants = {category_id}
-        pending = [category_id]
-        while pending:
-            kids = children.get(pending.pop(), [])
-            descendants.update(kids)
-            pending.extend(kids)
-        # One-off spending is left out of each month's budget, so it is left out of what carries over
-        # too (audit 2026-10-05 #11).
-        descendants -= self.one_off_ids()
-        while cursor < first:
+        if reset_month:
+            cursor = max(cursor, parse_month(reset_month)[0])
+        balance = ZERO
+        while month_of(cursor) < month:
             current_month = month_of(cursor)
-            if reset_month == current_month:
+            start, end = parse_month(current_month)
+            limits = self.amounts_for(current_month, schedule=schedule)
+            amount = limits.get(category_id, (None,))[0]
+            if amount is None:
                 balance = ZERO
-            while setting_index < len(settings) and settings[setting_index][0] <= current_month:
-                active = settings[setting_index][1]
-                setting_index += 1
-            next_month = month_of(parse_month(current_month)[1] + timedelta(days=1))
-            # An opt-in effective in the next month immediately carries this
-            # month's final result, even if carryover was previously off.
-            if setting_index < len(settings) and settings[setting_index] == (next_month, True):
-                active = True
-            if enabling_now and current_month == preceding_month:
-                active = True
-            next_cursor = (parse_month(current_month)[1] + timedelta(days=1))
-            if active:
-                direct = self.amounts_for(current_month, schedule=schedule).get(category_id)
-                if direct:
-                    amount, _, period, percent = direct
-                    if period:
-                        amount = self._rolling_average(category_id, current_month, period, children, {})
-                    elif percent is not None:
-                        amount = self.budgeting_income(current_month, schedule=schedule)
-                        if amount is not None:
-                            amount = amount * percent / Decimal(100)
-                    start, end = parse_month(current_month)
-                    spent = self.plan_funded_spending(start, end)
-                    actual = sum((spent.get(cid, ZERO) for cid in descendants), ZERO)
-                    balance = (amount or ZERO) + balance - actual
-                else:
-                    balance = ZERO
             else:
-                balance = ZERO
-            cursor = next_cursor
+                spent = self.plan_funded_spending(start, end)
+                balance += amount
+                pending = [category_id]
+                while pending:
+                    cid = pending.pop()
+                    balance -= spent.get(cid, ZERO)
+                    pending.extend(k for k in children.get(cid, []) if k not in one_offs or k in limits)
+            cursor = end + timedelta(days=1)
         return balance
 
     # ------------------------------------------------------------------ writing
@@ -984,20 +992,8 @@ class BudgetService:
                 old = current.get(category_id, (None, False, None, None))
                 if old[0] == value and old[2] == period and old[3] is None:
                     continue
-                before = self._repeating_before(category_id, month)
-                desired = (value, period)
-                if only_this_month:
-                    if desired == self._repeating_through(category_id, month):
-                        self.repo.delete(category_id, month, one_off=True)
-                    else:
-                        self.repo.upsert(category_id, month, True, value, period)
-                else:
-                    self.repo.delete(category_id, month, one_off=True)
-                    if desired == before:
-                        self.repo.delete(category_id, month, one_off=False)  # same as before: nothing to store
-                    else:
-                        self.repo.upsert(category_id, month, False, value, period)
-                if value is None and period is None and carryover_now.get(category_id, False):
+                self._write_rule(category_id, month, only_this_month, value, period, None)
+                if not only_this_month and value is None and period is None and carryover_now.get(category_id, False):
                     self.repo.set_carryover(category_id, month, False)
                 changed += 1
         return changed
@@ -1011,14 +1007,19 @@ class BudgetService:
             return self.save_month(month, amounts, only_this_month=True, schedule=schedule)
 
     # ------------------------------------------------------------------ helpers
-    def _repeating_before(self, category_id: int, month: str) -> tuple[Decimal | None, int | None]:
-        rows = [e for e in self.repo.entries_up_to(month) if e.category_id == category_id and not e.one_off
-                and e.month < month]
-        return (rows[-1].amount, rows[-1].average_months) if rows else (None, None)
-
-    def _repeating_through(self, category_id: int, month: str) -> tuple[Decimal | None, int | None]:
-        rows = [e for e in self.repo.entries_up_to(month) if e.category_id == category_id and not e.one_off]
-        return (rows[-1].amount, rows[-1].average_months) if rows else (None, None)
+    def _write_rule(self, category_id: int, month: str, only_this_month: bool, amount: Decimal | None,
+                    average_months: int | None, income_percent: Decimal | None) -> None:
+        """Compare an override with the rule in force that month, and a repeating change with the prior rule."""
+        rows = self.repo.entries_up_to(month)
+        prior = next((r for r in reversed(rows) if r.category_id == category_id and not r.one_off
+                      and (only_this_month or r.month < month)), None)
+        inherited = (prior.amount, prior.average_months, prior.income_percent) if prior else (None, None, None)
+        if not only_this_month:
+            self.repo.delete(category_id, month, one_off=True)
+        if (amount, average_months, income_percent) == inherited:
+            self.repo.delete(category_id, month, one_off=only_this_month)
+        else:
+            self.repo.upsert(category_id, month, only_this_month, amount, average_months, income_percent)
 
     def _rolling_average(self, category_id: int, month: str, months: int,
                          children: dict[int, list[int]], cache: dict[tuple[int, int], Decimal | None]) -> Decimal | None:
@@ -1064,44 +1065,90 @@ class BudgetService:
         for cid, amount in taken.items():
             basis[cid] = basis.get(cid, ZERO) - amount + excluded_funding.get(cid, ZERO)
             moved.add(cid)
-        left_out = self.left_out_ids()
-        for shift in self._recovery_shifts():
-            if shift["expense_id"] in left_out:  # left out above with its expense, in the month it arrived
+        for shift in self._estimate_portions():
+            cid, amount = shift["category_id"], shift["amount"]
+            if first <= shift["posting_date"] <= last and first <= shift["effective_date"] <= last:
                 continue
-            if first <= shift["receipt_date"] <= last:  # it arrived here: undo its reduction here
-                basis[shift["category_id"]] = basis.get(shift["category_id"], ZERO) + shift["amount"]
-                moved.add(shift["category_id"])
-            if first <= shift["expense_date"] <= last:  # it belongs to the expense: count it here
-                basis[shift["category_id"]] = basis.get(shift["category_id"], ZERO) - shift["amount"]
+            if first <= shift["posting_date"] <= last:
+                basis[cid] = basis.get(cid, ZERO) - amount
+                moved.add(cid)
+            if first <= shift["effective_date"] <= last:
+                basis[cid] = basis.get(cid, ZERO) + amount
         # A month whose only line was money back that moved to its expense had no spending of its own.
         return {cid: max(amount, ZERO) for cid, amount in basis.items() if amount or cid not in moved}
 
     @request_cached(deep=True)
-    def _recovery_shifts(self) -> list[dict]:
-        """Linked money back that arrived in another month than its expense: per receipt and spending category, the
+    def _estimate_portions(self, transaction_id: int | None = None) -> list[dict]:
+        """Signed portions for display on one entry, or portions that move for the estimate calculation."""
+        excluded = self.left_out_ids()
+        linked = {}
+        shifts = []
+        for row in self._recovery_shifts(transaction_id):
+            key = (row["receipt_id"], row["category_id"])
+            linked[key] = linked.get(key, ZERO) + row["amount"]
+            if row["expense_id"] not in excluded and (transaction_id is not None or row["receipt_date"] != row["expense_date"]):
+                shifts.append(dict(transaction_id=row["receipt_id"], category_id=row["category_id"], linked=True,
+                                   posting_date=row["receipt_date"], effective_date=row["expense_date"], amount=-row["amount"]))
+        scope = "AND t.id=?" if transaction_id is not None else "AND d.estimate_date<>t.date"
+        args = (transaction_id,) if transaction_id is not None else ()
+        rows = self.db.all(
+            "SELECT t.id,t.date,COALESCE(d.estimate_date,t.date) estimate_date,le.category_id, "
+            "SUM(COALESCE(w.amount_e6,0)-le.amount_base_e6) amount_e6 "
+            "FROM transactions t LEFT JOIN budget_estimate_dates d ON d.transaction_id=t.id "
+            "JOIN ledger_entries le ON le.transaction_id=t.id JOIN categories c ON c.id=le.category_id "
+            "LEFT JOIN work_claim_allocations w ON w.transaction_id=t.id AND w.line_no=le.line_no "
+            "WHERE t.status='POSTED' AND t.type IN ('IN','OUT') "
+            "AND le.owner_id IS NULL AND le.effect IN ('INFLOW','OUTFLOW') AND c.movement='OUTFLOW' "
+            "AND c.income_class IS NULL AND c.family<>'INVESTMENT' AND c.code<>'EXP.SYSTEM.CUSTODY' "
+            f"{scope} GROUP BY t.id,le.category_id", args)
+        funding_by_day = {}
+        for row in rows:
+            tid, cid, day = row["id"], row["category_id"], row["date"]
+            if tid in excluded:
+                continue
+            if day not in funding_by_day:
+                funding_by_day[day] = self.funding.adjustments(day, day)
+            funding = funding_by_day[day].get((tid, cid), {})
+            amount = from_e6(row["amount_e6"]) - sum(funding.values(), ZERO) + linked.get((tid, cid), ZERO)
+            if amount:
+                shifts.append(dict(transaction_id=tid, category_id=cid, linked=False, posting_date=day,
+                                   effective_date=row["estimate_date"], amount=amount))
+        return shifts
+
+    def estimate_attribution(self, transaction_id: int) -> list[dict]:
+        return self._estimate_portions(transaction_id)
+
+    @request_cached(deep=True)
+    def _recovery_shifts(self, transaction_id: int | None = None) -> list[dict]:
+        """Linked money back with its posting and resolved estimate dates: per receipt and spending category, the
         amount the receipt took off that category (never more than the amount linked) and both dates. Money back is a
         claim's receipt or a refund that names its purchase (NF-12AK3); money that is both counts once, as a receipt. The part
         of a refund that went back to the reserve that paid for the purchase (NF-12AK4) never reduced plan spending, so it
         does not move."""
+        scope = "AND r.id=?" if transaction_id is not None else ""
+        args = (transaction_id,) if transaction_id is not None else ()
         rows = [*self.db.all(
-            "SELECT rr.id link_id,rr.amount_e6 linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
+            "SELECT rr.id link_id,rr.amount_e6 linked_e6,r.id receipt_id,r.date receipt_date,COALESCE(rr.estimate_date_override,d.estimate_date,e.date) expense_date,e.id expense_id,"
             "le.category_id,SUM(le.amount_base_e6) total_e6 "
             "FROM reimbursement_receipts rr JOIN reimbursement_claims rc ON rc.id=rr.claim_id "
             "JOIN transactions r ON r.id=rr.receipt_id JOIN transactions e ON e.id=rc.expense_id "
-            "JOIN ledger_entries le ON le.transaction_id=r.id "
-            "WHERE rc.paid_for_work=0 AND r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
+            "LEFT JOIN budget_estimate_dates d ON d.transaction_id=e.id JOIN ledger_entries le ON le.transaction_id=r.id "
+            "WHERE rc.paid_for_work=0 AND r.status='POSTED' AND e.status='POSTED' "
             "AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
-            "GROUP BY rr.id,le.category_id ORDER BY rr.id,le.category_id"), *self.db.all(
-            "SELECT 'refund:'||rl.id link_id,rl.amount_e6-COALESCE((SELECT SUM(x.amount_e6) FROM reserve_refunds x "
-            "WHERE x.refund_id=rl.refund_id),0) linked_e6,r.date receipt_date,e.date expense_date,e.id expense_id,"
-            "le.category_id,SUM(le.amount_base_e6) total_e6 "
+            f"{scope} GROUP BY rr.id,le.category_id ORDER BY rr.id,le.category_id", args), *self.db.all(
+            "SELECT 'refund:'||rl.id link_id,"
+            "rl.amount_e6-COALESCE((SELECT SUM(x.amount_e6) FROM reserve_refunds x WHERE x.refund_id=r.id),0)"
+            "-COALESCE((SELECT SUM(work_e6) FROM work_claim_refund_lines WHERE transaction_id=r.id),0) linked_e6,"
+            "r.id receipt_id,r.date receipt_date,COALESCE(rl.estimate_date_override,d.estimate_date,e.date) expense_date,e.id expense_id,le.category_id,"
+            "SUM(le.amount_base_e6-COALESCE(w.work_e6,0)) total_e6 "
             "FROM refund_links rl JOIN transactions r ON r.id=rl.refund_id JOIN transactions e ON e.id=rl.expense_id "
-            "JOIN ledger_entries le ON le.transaction_id=r.id "
-            "WHERE r.status='POSTED' AND e.status='POSTED' AND substr(r.date,1,7)<>substr(e.date,1,7) "
+            "LEFT JOIN budget_estimate_dates d ON d.transaction_id=e.id JOIN ledger_entries le ON le.transaction_id=r.id "
+            "LEFT JOIN work_claim_refund_lines w ON w.transaction_id=le.transaction_id AND w.line_no=le.line_no "
+            "WHERE r.status='POSTED' AND e.status='POSTED' "
             "AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') AND le.owner_id IS NULL "
             "AND NOT EXISTS (SELECT 1 FROM reimbursement_receipts x WHERE x.receipt_id=rl.refund_id) "
             "AND le.category_id IN (SELECT category_id FROM ledger_entries WHERE transaction_id=rl.expense_id) "
-            "GROUP BY rl.id,le.category_id ORDER BY rl.id,le.category_id")]
+            f"{scope} GROUP BY rl.id,le.category_id ORDER BY rl.id,le.category_id", args)]
         investment, shifts, left = self._investment_ids(), [], {}
         for row in rows:
             category = self.categories.get(int(row["category_id"]))
@@ -1113,7 +1160,7 @@ class BudgetService:
             if amount <= ZERO:
                 continue
             left[row["link_id"]] = remaining - amount
-            shifts.append({"category_id": category.id, "amount": amount, "expense_id": int(row["expense_id"]),
+            shifts.append({"receipt_id": row["receipt_id"], "category_id": category.id, "amount": amount, "expense_id": int(row["expense_id"]),
                            "receipt_date": row["receipt_date"], "expense_date": row["expense_date"]})
         return shifts
 
@@ -1140,10 +1187,13 @@ class BudgetService:
             "JOIN ledger_entries le ON le.transaction_id=r.id "
             f"WHERE rc.paid_for_work=0 AND e.status='POSTED' AND r.status='POSTED' AND {owned} "
             "GROUP BY rr.id,le.category_id,le.date "
-            "UNION ALL SELECT 'refund:'||rl.id link_id,rl.amount_e6 linked_e6,NULL transaction_id,le.date,le.category_id,"
-            "SUM(le.amount_base_e6) total_e6 FROM budget_estimate_exclusions x "
+            "UNION ALL SELECT 'refund:'||rl.id link_id,"
+            "rl.amount_e6-COALESCE((SELECT SUM(work_e6) FROM work_claim_refund_lines WHERE transaction_id=r.id),0) linked_e6,"
+            "NULL transaction_id,le.date,le.category_id,"
+            "SUM(le.amount_base_e6-COALESCE(w.work_e6,0)) total_e6 FROM budget_estimate_exclusions x "
             "JOIN transactions e ON e.id=x.transaction_id JOIN refund_links rl ON rl.expense_id=e.id "
             "JOIN transactions r ON r.id=rl.refund_id JOIN ledger_entries le ON le.transaction_id=r.id "
+            "LEFT JOIN work_claim_refund_lines w ON w.transaction_id=le.transaction_id AND w.line_no=le.line_no "
             f"WHERE e.status='POSTED' AND r.status='POSTED' AND {owned} "
             "AND NOT EXISTS (SELECT 1 FROM reimbursement_receipts y WHERE y.receipt_id=rl.refund_id) "
             "GROUP BY rl.id,le.category_id,le.date ORDER BY 1,5,4")
@@ -1171,7 +1221,9 @@ class BudgetService:
         row = self.db.one("SELECT MIN(le.date) first FROM ledger_entries le JOIN transactions t ON t.id=le.transaction_id "
                           "WHERE t.status='POSTED' AND le.category_id IS NOT NULL AND le.effect IN ('INFLOW','OUTFLOW') "
                           "AND le.owner_id IS NULL")
-        return row["first"] if row and row["first"] else None
+        if not row or not row["first"]:
+            return None
+        return min([row["first"], *(shift["effective_date"] for shift in self._estimate_portions())])
 
     def _full_window(self, month: str, months: int) -> bool:
         """True when the profile was already recording in the oldest of the `months` completed months before
@@ -1353,23 +1405,8 @@ class BudgetService:
         value = check_places(to_decimal(percent, "percentage"), 2, "percentage")
         if value < ZERO or value > 10000:
             raise ValidationError("Enter an income percentage from 0 to 10,000.", "percentage")
-        rows = self.repo.entries_up_to(month)
-        prior = next((row for row in reversed(rows) if row.category_id == category_id and not row.one_off
-                      and row.month < month), None)
-        previous = ((prior.amount, prior.average_months, prior.income_percent) if prior else (None, None, None))
-        desired = (None, None, value)
         with self.db.transaction():
-            if only_this_month:
-                if previous == desired:
-                    self.repo.delete(category_id, month, True)
-                else:
-                    self.repo.upsert(category_id, month, True, None, None, value)
-            else:
-                self.repo.delete(category_id, month, True)
-                if previous == desired:
-                    self.repo.delete(category_id, month, False)
-                else:
-                    self.repo.upsert(category_id, month, False, None, None, value)
+            self._write_rule(category_id, month, only_this_month, None, None, value)
         return True
 
     def reset_carryover(self, category_id: int, month: str, *, schedule: ScheduleView) -> None:

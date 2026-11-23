@@ -1,0 +1,27 @@
+{% macro field(value=none, automatic=none, purchase=false) -%}
+<label class="field"><span>{{ 'Count in spending estimates on'|tr(locale) }}</span>
+  <input data-keep-text type="date" name="estimate_date" value="{{ value or '' }}">
+  <small class="muted">{% if automatic %}{{ 'Automatic date'|tr(locale) }} · <time datetime="{{ automatic }}">{{ automatic|day(locale) }}</time>{% elif purchase %}{{ 'Leave empty to follow the selected purchase.'|tr(locale) }}{% else %}{{ 'Leave empty to use the posting date.'|tr(locale) }}{% endif %}</small>
+</label>
+{%- endmacro %}
+
+{% macro options(value=none, automatic=none) -%}
+<details class="phone-more money-only"{% if value %} open{% endif %}>
+  <summary>{{ 'Estimate date'|tr(locale) }}</summary>
+  {{ field(value, automatic) }}
+</details>
+{%- endmacro %}
+
+{% macro edit_entry(txn, value, revision) -%}
+{% if can_date and not request.state.read_only|default(false) %}
+<details class="phone-more"><summary>{{ ('Change unlinked amount date' if txn.type.value == 'IN' and refund and refund.link else 'Change estimate date')|tr(locale) }}</summary>
+  <form method="post" action="/transactions/{{ txn.id }}/estimate-date">
+    {{ field(value, txn.date) }}
+    {% if txn.type.value == 'IN' %}<small class="muted">{{ 'Linked amounts have their own estimate date.'|tr(locale) }}</small>{% endif %}
+    <input type="hidden" name="revision" value="{{ revision }}">
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    <button class="btn small">{{ 'Save'|tr(locale) }}</button>
+  </form>
+</details>
+{% endif %}
+{%- endmacro %}
