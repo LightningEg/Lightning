@@ -36,8 +36,9 @@
           </div>
         </section>
         <section aria-labelledby="nw-trend-heading">
-          <div class="overview-block-head"><div><h3 id="nw-trend-heading">{{ "Over time"|tr(locale) }}</h3><p>At the end of each month{% if networth_trend.labels %} · {{ networth_trend.labels[0].text }} to {{ networth_trend.labels[-1].text }}{% endif %}</p></div></div>
-          {{ trend(networth_trend, fig[lead].label ~ ' at the end of each month', 'Plan', 120) }}
+          <div class="overview-block-head"><div><h3 id="nw-trend-heading">{{ "Over time"|tr(locale) }}</h3><p>{{ 'Month ends'|tr(locale) }} · {{ 'Through {date}'|tr(locale, date=position_as_of) }}</p></div></div>
+          {{ trend(networth_trend, networth_trend.series[0].name|tr(locale) ~ ' · ' ~ position_as_of, 'Plan', 120) }}
+          {% if networth_trend.missing_months %}<p class="muted small">{{ 'Missing valuations for {months}.'|tr(locale, months=networth_trend.missing_months|join(', ')) }}</p>{% endif %}
           {% for month, amount in networth_trend.openings %}<p class="muted small">{{ month }} includes {{ amount|money }} of opening balances: yours before, so not a change.</p>{% endfor %}
         </section>
       </div>
@@ -85,7 +86,7 @@
         </section>
         {# Feedback ticket 83 (and batch 002 row 51): the right half no longer repeats the left as bars. #}
         <section aria-labelledby="madeof-heading"><div class="overview-block-head"><div><h3 id="madeof-heading">{{ "What it is made of"|tr(locale) }}</h3><p>{{ fig.what_you_own.label }} by kind</p></div></div>
-          {{ donut(wealth_donut, fig.what_you_own.label, base) }}</section>
+          {{ donut(wealth_donut, ('Known subtotal'|tr(locale)) if pos.unvalued else fig.what_you_own.label, base) }}</section>
       </div>
     </article>
     {# Feedback ticket 83: If you sold today beside the period's Net cash flow (Free cash took What it is made of). #}
@@ -110,14 +111,14 @@
           <div class="overview-headline overview-flow-net{{ ' is-negative' if cash_flow.net < 0 }}"><button type="button" class="fig-open" aria-expanded="false" aria-controls="working-net-flow" title="{{ 'How it adds up'|tr(locale) }}">{{ cash_flow.net|money(True) }} <small>{{ base }}</small></button></div>
           {{ working_panel(net_flow_working, 'working-net-flow', base, here='/') }}
           {# Feedback ticket 99: money in against money out as two bars, so the gap reads without arithmetic. #}
-          {% set flow_max = [cash_flow.inflows, cash_flow.outflows]|max %}{% if flow_max > 0 %}<div class="net-flow-bars" role="img" aria-label="{{ fig.money_in.label }} {{ cash_flow.inflows|money }}, {{ fig.money_out.label }} {{ cash_flow.outflows|money }}">
+          {% set flow_max = [cash_flow.inflows, cash_flow.outflows]|max %}{% if flow_max > 0 and not cash_flow.savings_picture_note %}<div class="net-flow-bars" role="img" aria-label="{{ fig.money_in.label }} {{ cash_flow.inflows|money }}, {{ fig.money_out.label }} {{ cash_flow.outflows|money }}">
             <span class="flow-bar is-in"><i style="width:{{ '%.1f'|format(cash_flow.inflows / flow_max * 100) }}%"></i></span>
             <span class="flow-bar is-out"><i style="width:{{ '%.1f'|format(cash_flow.outflows / flow_max * 100) }}%"></i></span>
           </div>{% endif %}
-          {% if waffle.bar.state != 'empty' %}<details class="overview-disclosure savings-squares" id="savings-squares"><summary><span>{{ "Savings, square by square"|tr(locale) }}</span><b></b></summary><div class="overview-disclosure-body">{{ saved_split(waffle, period.tag) }}</div></details>{% endif %}
+          {% if cash_flow.savings_picture_note %}<p class="muted" id="savings-squares">{{ cash_flow.savings_picture_note|tr(locale) }}</p>{% elif waffle.bar.state != 'empty' %}<details class="overview-disclosure savings-squares" id="savings-squares"><summary><span>{{ "Savings, square by square"|tr(locale) }}</span><b></b></summary><div class="overview-disclosure-body">{{ saved_split(waffle, period.tag) }}</div></details>{% endif %}
           <div class="overview-inline-list">
             <details class="overview-disclosure"><summary><span>{{ fig.money_in.label }}</span><b>{{ cash_flow.inflows|money }}</b></summary><div class="overview-disclosure-body">{% for r in money_in_rows %}<a href="{{ r.href }}"><span>{{ r.label }}</span><b>{{ r.value|money }}</b></a>{% else %}<p class="muted small">{{ "No money in was recorded in this period."|tr(locale) }}</p>{% endfor %}</div></details>
-            <details class="overview-disclosure"><summary><span>{{ fig.money_out.label }}</span><b>{{ ('−' ~ (cash_flow.outflows|money)) if cash_flow.outflows > 0 else cash_flow.outflows|money }}</b></summary><div class="overview-disclosure-body">{% for r in money_out_rows %}<a href="{{ r.href }}"><span>{{ r.label }}</span><b>{{ r.value|money }}</b></a>{% else %}<p class="muted small">{{ "No money out was recorded in this period."|tr(locale) }}</p>{% endfor %}</div></details>
+            <details class="overview-disclosure"><summary><span>{{ fig.money_out.label }}</span><b>{{ (-cash_flow.outflows)|money(True) }}</b></summary><div class="overview-disclosure-body">{% for r in money_out_rows %}<a href="{{ r.href }}"><span>{{ r.label }}</span><b>{{ r.value|money }}</b></a>{% else %}<p class="muted small">{{ "No money out was recorded in this period."|tr(locale) }}</p>{% endfor %}</div></details>
             <div class="overview-static-row overview-subtotal"><span>{{ fig.net_flow.label }}</span><b>{{ cash_flow.net|money(True) }}</b></div>
           </div>
         </section>

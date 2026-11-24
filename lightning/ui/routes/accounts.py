@@ -173,19 +173,7 @@ async def currency_accounts(request: Request):
         combined_trend = charts.trend([point.day[:7] for point in points], [
             {"name": translate("Cash and investments", ui_locale()), "tone": "hold", "values": values}])
         if not combined_trend["too_short"]:
-            series = combined_trend["series"][0]
-            dots, run, lines = iter(series["dots"]), [], []
-            for value in values:
-                if value is None:
-                    if len(run) > 1:
-                        lines.append(" ".join(run))
-                    run = []
-                else:
-                    dot = next(dots)
-                    run.append(f"{dot['x']:.2f},{dot['y']:.2f}")
-            if len(run) > 1:
-                lines.append(" ".join(run))
-            series["lines"] = lines
+            charts.break_at_missing(combined_trend["series"][0])
     totals = c.reporting.fx_positions.totals(positions)
     return render(request, "accounts/currencies.html", positions=shown, other=other, chosen=chosen, trend=trend,
                   totals=totals, period=period, period_error=period_error,

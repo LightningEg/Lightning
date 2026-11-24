@@ -258,3 +258,16 @@ def test_see_all_lists_every_to_do_row_and_home_links_to_it(sample):
     if screen.todo_total > len(screen.todo):
         assert 'href="/todo"' in client.get("/home").text
     assert 'href="/needs-you"' not in client.get("/home").text
+
+
+def test_over_plan_ring_is_full_and_names_the_actual_percentage(c, setup, monkeypatch):
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-04")
+    bank, food = setup[0]["cib"].id, setup[1]["EXP.PERSONAL.FOOD"].id
+    c.budgets.set_budget(food, "2026-10", "100", schedule=c.schedules.view())
+    c.planning.create(kind="INCOME", name="Salary", amount="1000", frequency="MONTHLY", start_date="2026-10-25")
+    c.transactions.record_outflow("2026-10-04", bank, "150", food)
+    app = create_app(c)
+    mount_phone(app)
+    page = TestClient(app).get("/home").text
+    assert 'aria-label="150% spent"' in page
+    assert 'stroke-dasharray="100.0 100"' in page

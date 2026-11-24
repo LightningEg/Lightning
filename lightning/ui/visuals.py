@@ -10,7 +10,7 @@ from decimal import Decimal
 from urllib.parse import urlencode
 
 from lightning.core.figures import label
-from lightning.core.dates import WEEK_STARTS, fmt_date, months_back, parse_date, parse_month
+from lightning.core.dates import WEEK_STARTS, fmt_date, month_of, months_back, parse_date, parse_month
 from lightning.core.money import ZERO, fmt, quantize, round_to_total
 
 from lightning.planning.domain import PlanKind
@@ -124,9 +124,15 @@ def money_sankey(c, first: date, last: date, cash_flow, sources_shown: int = 3, 
 
 
 def savings_rates(c, end: date, count: int = 6) -> list:
-    """Savings rate for each recent month, the service's own figure (None for a month with no money in)."""
-    return [c.reporting.cash_flow(parse_month(key)[0], day).savings_rate
-            for key, day in month_ends(end, count, c.reporting.first_activity_date())]
+    """Consecutive recent months whose savings rates can be shown on the Overview."""
+    rates = []
+    for key, day in month_ends(end, count, c.reporting.first_activity_date()):
+        flow = c.reporting.cash_flow(parse_month(key)[0], day)
+        if flow.savings_rate is None or flow.rate_says_nothing:
+            rates.clear()  # The small line has no labels to explain a gap or an undefined rate.
+        else:
+            rates.append(flow.savings_rate)
+    return rates
 
 
 def savings_rate_spark(c, end: date, count: int = 6) -> dict:
@@ -142,11 +148,16 @@ def holdings_donut(position, include_cash: bool = False, divisor: Decimal = Deci
         slices.append({"label": "Cash you own", "value": position.cash_you_own, "tone": "cash"})
     for cls in position.classes:
         slices.append({"label": cls.name, "value": cls.value, "tone": charts.class_tone(cls.code)})
-    if include_cash and position.other_you_own > 0:
+    if include_cash and position.other_you_own:
         slices.append({"label": "Other you own", "value": position.other_you_own, "tone": "other"})
+    if divisor != 1:
+        slices = [{**part, "value": part["value"] / divisor} for part in slices]
+    if include_cash and any(part["value"] < 0 for part in slices):
+        # A negative component has no angular share of the whole. Keep the signed reconciliation.
+        return {"segments": [], "signed_parts": [part for part in slices if part["value"]],
+                "total": position.what_you_own / divisor}
     folded = "Smaller classes" if not include_cash else "Everything else"   # a real class is named Other Investments (r30 N3, IV-3BH8)
-    return charts.donut([{**slice_, "value": slice_["value"] / divisor} for slice_ in slices] if divisor != 1 else slices,
-                        folded_label=folded)
+    return charts.donut(slices, folded_label=folded)
 
 
 def forecast_trend(forecast) -> dict:
@@ -172,8 +183,15 @@ def net_worth_trend(c, end: date, count: int = 12) -> dict:
     owes = any(pos.what_you_owe for _, pos in points)
     # One line: the breakdown right under the chart carries What you own and What you owe.
     series = [{"name": "Net worth" if owes else "What you own", "tone": "hold", "area": True,
-               "values": [pos.net_worth if owes else pos.what_you_own for _, pos in points]}]
+               "values": [None if pos.unvalued else pos.net_worth if owes else pos.what_you_own for _, pos in points]}]
     out = charts.trend([k for k, _ in points], series)
+    out["missing_months"] = [month for month, pos in points if pos.unvalued]
+    if not out["too_short"] and out["missing_months"]:
+        charts.break_at_missing(out["series"][0])
+    if not out["too_short"] and end != parse_month(month_of(end))[1]:
+        last = out["series"][0]["last"]
+        if last and last["label"] == month_of(end):
+            last["label"] = fmt_date(end)
     # A month's rise can be an account added as already owned: say so, it is not a change (audit 2026-10-05).
     opened = c.reporting.opening_balances_by_month(ends[1][1].replace(day=1), end) if len(ends) > 1 else {}
     out["openings"] = [(key, opened[key]) for key, _ in ends[1:] if key in opened]

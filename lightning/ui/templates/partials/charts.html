@@ -68,6 +68,7 @@
   </div>
   <ul class="chart-legend-list">{% for s in d.segments %}<li><i class="chart-key tone-{{ s.tone }}"></i><span>{{ s.label }}</span><b>{{ '%.1f'|format(s.share) }}%</b><small>{{ s.value|money }}</small></li>{% endfor %}
     <li class="chart-legend-total"><i class="chart-key" aria-hidden="true"></i><span>Total{% if of and of[1] %} · {{ '%.0f'|format(d.total / of[1] * 100) }}% of {{ of[0]|lower }}{% endif %}</span><b>100%</b><small>{{ d.total|money }}</small></li></ul>
+  {% elif d.signed_parts %}<ul class="chart-legend-list">{% for p in d.signed_parts %}<li><i class="chart-key tone-{{ p.tone }}"></i><span>{{ p.label|tr(locale) }}</span><small>{{ p.value|money }}</small></li>{% endfor %}<li class="chart-legend-total"><span>{{ center_label }}</span><small>{{ d.total|money }} {{ base }}</small></li></ul>
   {% else %}<p class="chart-empty">{{ "Nothing to show yet."|tr(locale) }}</p>{% endif %}
 </figure>
 {% endmacro %}
@@ -301,7 +302,7 @@
     <span class="saved-key">{% if bar.state == 'overspent' %}<span><i class="k overspent"></i>{{ 'Overspent'|tr(locale) }} {{ bar.overspent_amount|money }}</span>{% else %}<span><i class="k kept"></i>{{ 'Savings'|tr(locale) }} {{ bar.saved_amount|money }}</span>{% endif %}<span><i class="k spent"></i>{{ 'Spent'|tr(locale) }} {{ bar.spent_amount|money }}</span></span>
   </span>
 </span>
-<small class="muted inv-saved-note">{% if w.money_in > 0 %}{{ 'Money in'|tr(locale) }} {{ w.money_in|money }} · {{ 'One square is 1% of income'|tr(locale) }}{% endif %}{% if bar.state == 'overspent' %} · {{ 'Darker squares show spending beyond income'|tr(locale) }}{% endif %}</small>
+<small class="muted inv-saved-note">{% if w.money_in > 0 %}{{ 'Money in'|tr(locale) }} {{ w.money_in|money }} · {{ 'One square is 1% of income'|tr(locale) }}{% endif %}{% if bar.state == 'overspent' %} · {{ 'Darker squares show spending beyond income'|tr(locale) }}{% if bar.excess_rate is not none and bar.excess_rate > 100 %} · {{ 'The grid stops at 100% of income.'|tr(locale) }}{% endif %}{% endif %}</small>
 {% else %}<span class="stat-tile-value">—</span><span class="stat-tile-sub">{{ "No money in this period"|tr(locale) }}</span>{% endif %}
 {% endmacro %}
 

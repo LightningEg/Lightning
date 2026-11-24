@@ -160,6 +160,15 @@ class CashFlow:
         return self.outflows < ZERO
 
     @property
+    def savings_picture_note(self) -> str:
+        """Why a share-of-income graphic cannot represent these signed flows."""
+        if self.refunds_beat_spending:
+            return self.gap_sentence + "."
+        if self.inflows < ZERO:
+            return "More income was returned than received in this period."
+        return ""
+
+    @property
     def gap_sentence(self) -> str:
         """The words a screen shows in place of a rate that says nothing."""
         if self.refunds_beat_spending:
