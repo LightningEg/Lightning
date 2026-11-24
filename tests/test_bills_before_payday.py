@@ -59,3 +59,23 @@ def test_a_dollar_bill_and_a_part_paid_instalment_give_one_due_before_payday(c, 
         assert f"{converted:,.0f} EGP" in cloud
     due = next(card for card in cards if label("payments_before_next_income") in card)
     assert f"{total:,.0f}" in due
+
+
+def test_home_bills_due_show_the_outstanding_amount_in_profile_currency(c, monkeypatch):
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-02")
+    load_mohab_2026(c)
+    names = {a.name: a.id for a in c.accounts.list()}
+    today = date(2026, 10, 2)
+    cloud = c.planning.create(kind="BILL", name="Dollar hosting", amount="20", frequency="ONCE",
+                              start_date=today.isoformat(), account_id=names["Dollar savings"])
+    loan = c.planning.create(kind="LOAN", name="Phone instalment", amount="1000", frequency="MONTHLY",
+                             start_date=today.isoformat(), payment_count="2", account_id=names["CIB Payroll"])
+    c.planning.record_payment(loan, today.isoformat(), today.isoformat(), "250", names["CIB Payroll"])
+    payments = {p.item.id: p for p in c.position.at(today).owe.bills_due_items}
+    converted = c.planning.amount_in_base(payments[cloud], payments[cloud].still_owed, today)
+    assert converted > 20 and payments[loan].still_owed == 750
+    with TestClient(create_app(c)) as browser:
+        card = browser.get("/").text.split('id="cash-heading"', 1)[1].split('id="madeof-heading"', 1)[0]
+    for name, expected in (("Dollar hosting", converted), ("Phone instalment", 750)):
+        row = card.split(name, 1)[1].split("</a>", 1)[0]
+        assert f"<b>{expected:,.0f}</b>" in row

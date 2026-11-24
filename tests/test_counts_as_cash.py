@@ -68,3 +68,29 @@ def test_the_switch_on_the_investment_page(c):
     form.pop("counts_as_cash")
     client.post(f"/investments/assets/{fund.id}/edit", data=form)
     assert c.assets.get_asset(fund.id).counts_as_cash is False
+
+
+def test_home_and_free_cash_explanation_include_the_same_adjustments(c, monkeypatch):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    from tests.screens import visible_text
+
+    monkeypatch.setenv("LIGHTNING_TODAY", DAY)
+    bank, _, fund = _fund(c)
+    c.assets.set_counts_as_cash(fund.id, True)
+    bill = c.planning.create(kind="BILL", name="Insurance", amount="1000", frequency="ONCE",
+                             start_date=DAY, account_id=bank.id)
+    reserve = c.reserves.create("Insurance money", "1000")
+    c.reserves.allocate(reserve["id"], "800")
+    c.reserves.set_planned_item(reserve["id"], bill)
+    position = c.position.at(DAY)
+    assert position.free_cash == 61000
+    assert position.set_aside_or_due == 11000
+    assert position.cash_you_own + sum(row.amount for row in position.free_cash_adjustments) == position.free_cash
+    with TestClient(create_app(c)) as browser:
+        home = visible_text(browser.get("/").text.split('id="cash-heading"', 1)[1].split('id="madeof-heading"', 1)[0])
+        popup = visible_text(browser.get("/explain/free-cash").text)
+    for text in (home, popup):
+        assert "Counted as cash +12,000" in text
+        assert "Bill cash already set aside +800" in text
+        assert "61,000" in text
