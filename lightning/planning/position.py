@@ -225,6 +225,21 @@ class Position:
         return None if self.reserves is None else self.spendable_cash - self.reserves - self.bills_due + self.bill_reserve_coverage
 
     @property
+    def free_cash_working(self):
+        """Phone Home's ladder: from Cash and banks (Spendable cash: spendable accounts plus what counts as cash) to
+        Free cash, each step signed, adding up to it. None while reserves are unknown."""
+        from lightning.core.figures import label
+        from lightning.core.working import Working, WorkingRow
+        if self.free_cash is None:
+            return None
+        rows = [WorkingRow("Cash and banks", self.spendable_cash, "/money/accounts"),
+                WorkingRow(label("reserves"), -self.reserves, "/plan/reserves"),
+                WorkingRow(label("bills_due"), -self.bills_due, "/plan")]
+        if self.bill_reserve_coverage:
+            rows.append(WorkingRow(label("bill_reserve_coverage"), self.bill_reserve_coverage, "/plan/reserves"))
+        return Working("free_cash", self.free_cash, tuple(rows), home="/plan")
+
+    @property
     def counted_as_cash(self) -> Decimal:
         """NF-7AU: holdings the person marked to count with cash, at their value (inside Holdings value too)."""
         return sum((item.value or ZERO for item in self.counted_as_cash_items), ZERO)

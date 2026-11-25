@@ -75,7 +75,7 @@ def test_phone_safe_to_spend_bars_use_the_reconciled_display(c, setup, monkeypat
     with TestClient(phone) as client:
         response = client.get('/home')   # IV-11M3 (mockup v2.0): Safe to spend's working is Home's card sheet
     assert response.status_code == 200
-    section = response.text.split('phone-working', 1)[1].split('</div>\n', 1)[0]
+    section = response.text.split('id="home-safe"', 1)[1].split('phone-working', 1)[1].split('</div>\n', 1)[0]   # the Safe to spend step's sheet
     rows = re.findall(r'<div class="phone-row"><span>([^<]+)</span><b><bdi class="fig">([^<]+)</bdi></b>', section)
     values = [int(value.replace(',', '').replace('−', '-')) for _, value in rows]
     headline = int(re.search(r'data-fig="safe_to_spend">([\d,]+)', response.text).group(1).replace(',', ''))   # the card's own figure

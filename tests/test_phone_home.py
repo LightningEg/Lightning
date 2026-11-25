@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import re
 from datetime import date
+from decimal import Decimal
 from types import SimpleNamespace
 
 import pytest
@@ -86,12 +87,13 @@ def _page(sample, day="2026-10-04"):
     return TestClient(app).get("/home")
 
 
-def test_the_page_shows_accounts_safe_to_spend_quick_actions_to_do_and_latest_in_that_order(sample):
-    """IV-11M3 (mockup v2.0): In your accounts, Safe to spend with its wells, four quick actions, To do, Latest."""
+def test_the_page_shows_the_ladder_quick_actions_to_do_and_latest_in_that_order(sample):
+    """Owner proposal 2026-11-25: the ladder Cash and banks, Free cash, Safe to spend; four quick actions in one strip
+    (Pay a bill the fourth); To do; Latest."""
     html = _page(sample).text
-    assert (html.index('id="home-hero"') < html.index('id="home-safe"') < html.index('class="phone-quick"')
-            < html.index('id="todo-heading"') < html.index('id="latest-heading"'))
-    assert "Bills before payday" in html and 'id="month-heading"' not in html
+    assert (html.index('id="home-hero"') < html.index('data-fig="free_cash"') < html.index('id="home-safe"')
+            < html.index('class="phone-quick"') < html.index('id="todo-heading"') < html.index('id="latest-heading"'))
+    assert 'id="month-heading"' not in html and 'href="/money/bills">' in html
     for kind in ("out", "in", "transfer"):
         assert f"/accounts/add-transaction?kind={kind}" in html
     assert html.count('class="phone-row') >= 4
@@ -228,8 +230,8 @@ def test_the_payday_meter_reads_budgets_own_everyday_figures(sample):
     assert meter.ahead == (e.pace_gap > 0)
     html = _page(sample).text
     card = html.split('id="home-safe"', 1)[1].split('id="todo-heading"', 1)[0]
-    assert f'stroke-dasharray="{meter.spent:.1f} 100"' in card   # IV-11M3: the ring of everyday money spent
-    assert ("phone-ring is-bad" in card) == meter.ahead
+    assert f'<i style="width:{min(meter.spent, 100):.1f}%">' in card   # the payday meter under the ladder (C11.1)
+    assert ("phone-pay-meter is-ahead" in card) == meter.ahead
 
 
 def test_no_meter_without_a_plan(tmp_path, monkeypatch):
@@ -258,3 +260,17 @@ def test_see_all_lists_every_to_do_row_and_home_links_to_it(sample):
     if screen.todo_total > len(screen.todo):
         assert 'href="/todo"' in client.get("/home").text
     assert 'href="/needs-you"' not in client.get("/home").text
+
+
+def test_the_ladder_adds_up_step_by_step(sample):
+    """Owner proposal 2026-11-25: Cash and banks is where Free cash starts (Spendable cash, with any holding counted
+    as cash), its rows add up to it, Free cash's working starts from it, and Safe to spend's working starts from Free
+    cash. No step needs a catch-all row."""
+    c, day = _on(sample, "2026-10-04")
+    screen = home.build(c, day)
+    position = c.position.at(day)
+    assert screen.accounts_total == position.spendable_cash
+    assert sum((a["balance"] for a in screen.accounts), Decimal(0)) == screen.accounts_total
+    assert screen.free_working.rows[0].amount == screen.accounts_total
+    assert screen.free_working.sum == screen.free_cash == position.free_cash
+    assert screen.working.rows[0].amount == screen.free_cash and screen.working.total == screen.safe
