@@ -391,6 +391,25 @@ class ReportingService:
                 rows.append({"id": account.id, "label": account.label, "currency": account.currency, "value": value})
         return rows
 
+    def owned_spendable_cash_by_account(self, as_of: date | str) -> list[dict]:
+        """The accounts behind Owned spendable cash, the mirror of owned_cash_kept_apart_by_account: their values
+        add up to owned_spendable_cash (phone Home's Cash and banks lists them)."""
+        day = self._day(as_of)
+        brokerage = {row["id"]: row["value"] or ZERO for row in self._owned_brokerage_cash_by_account(day)}
+        rows = []
+        for account in self.accounts.list():
+            if not account.counts_as_spendable(self.base_currency):
+                continue
+            if account.account_type == AccountType.BROKERAGE:
+                value = brokerage.get(account.id, ZERO)
+            elif account.account_type in {AccountType.CASH, AccountType.BANK}:
+                value = self.owned_account_value(account.id, day)
+            else:
+                continue
+            if value:
+                rows.append({"account": account, "value": value})
+        return rows
+
     def owned_spendable_cash(self, as_of: date | str) -> Decimal:
         """Cash you own less cash kept apart: what Free cash starts from."""
         return self.owned_liquid_cash(as_of) - self.owned_cash_kept_apart(as_of)

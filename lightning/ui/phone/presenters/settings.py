@@ -13,4 +13,4 @@ def present(request, c, context: dict) -> dict:
         last = datetime.fromtimestamp(newest).date().isoformat()
     except (ValueError, OSError):
         last = ""
-    return {"profile_name": name, "last_backup_day": last}
+    return {"profile_name": name, "last_backup_day": last, "display_name": c.settings.get("display_name") or ""}

@@ -15,8 +15,18 @@
 {% block content %}
 {% from "partials/macros.html" import inst_tile, expected_block with context %}
 {% set s = screen %}
-{# IV-11M3 (owner, 2026-11-14): one Ink line in the display face, the greeting lighter than the name, never grey. #}
-<p class="phone-greeting">{% if s.state == 'first_run' %}{{ 'Welcome'|tr(locale) }}{% else %}{{ s.greeting|tr(locale) }}{% endif %}{% if s.name %}, <b>{{ s.name }}</b>{% endif %}</p>
+{# The welcome (owner, 2026-11-25): the time of day over the name you chose in Settings (else the profile's own name),
+   then today and how far payday is. Warm, never a figure. #}
+{% set part = 'morning' if s.greeting == 'Good morning' else 'afternoon' if s.greeting == 'Good afternoon' else 'evening' %}
+<header class="phone-welcome is-{{ part }}">
+  <span class="phone-welcome-mark" aria-hidden="true"><svg viewBox="0 0 24 24">{% if part == 'morning' %}<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>{% elif part == 'afternoon' %}<path d="M17 18a5 5 0 0 0-10 0M12 2v7M4.2 10.2l1.4 1.4M1 18h2M21 18h2M18.4 11.6l1.4-1.4M23 22H1M8 6l4-4 4 4"/>{% else %}<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>{% endif %}</svg></span>
+  <div class="phone-welcome-text">
+    <p class="phone-welcome-hi">{{ ('Welcome' if s.state == 'first_run' else s.greeting)|tr(locale) }}</p>
+    {% if s.name %}<p class="phone-welcome-name"><bdi>{{ s.name }}</bdi></p>{% endif %}
+    <p class="phone-welcome-day">{{ s.today|weekday(locale) }}{% if s.days_to_payday is not none and s.state != 'first_run' %} · {% if s.days_to_payday <= 0 %}{{ 'Payday today'|tr(locale) }}{% elif s.days_to_payday == 1 %}{{ 'Payday tomorrow'|tr(locale) }}{% else %}{{ 'Payday in {n} days'|tr(locale, n=s.days_to_payday) }}{% endif %}{% endif %}</p>
+  </div>
+  {% if not s.name %}<a class="phone-welcome-ask" href="/settings#your-name">{{ 'Add your name'|tr(locale) }}</a>{% endif %}
+</header>
 {% if s.state == 'first_run' %}
 {% set done = s.steps|selectattr(1)|list|length %}{% set count = s.steps|length %}
 <section class="phone-hero phone-first-hero" aria-labelledby="home-hero">
@@ -41,39 +51,41 @@
 {% if ('bills', false) in s.steps %}<form method="post" action="/start/no-bills" class="phone-first-none"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}"><button type="submit" class="phone-quiet-button">{{ 'I have no regular bills'|tr(locale) }}</button></form>{% endif %}
 <a class="phone-wide-soft" href="/sms"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>{{ 'Paste a bank SMS instead'|tr(locale) }}</a>
 {% else %}
-{# Cash and banks: the cash you can reach, each account with its share (IV-11M3). Named apart from In your accounts,
-   which also counts deposits and holdings (owner, 2026-11-22, r38: one name, one figure). #}
-<section class="phone-hero" aria-labelledby="home-hero">
-  <a id="home-hero" class="phone-hero-label" role="heading" aria-level="2" href="/money/accounts">{{ 'Cash and banks'|tr(locale) }} <span aria-hidden="true">{{ chevron() }}</span></a>
-  <div class="phone-lead" data-fig="cash_in_accounts">{{ s.accounts_total|money }} <small>{{ base }}</small></div>
-  <p class="phone-hero-line phone-accounts-line">{{ ('Across 1 account' if s.accounts_count == 1 else 'Across {n} accounts')|tr(locale, n=s.accounts_count) }}</p>
-  {% if s.accounts %}<span class="phone-share" aria-hidden="true">{% for a in s.accounts %}<i class="is-{{ loop.index }}" style="flex:{{ '%.1f'|format(a.share) }}"></i>{% endfor %}</span>
-  <div class="phone-hero-rows">{% for a in s.accounts %}<a class="phone-acct" href="{{ '/accounts/' ~ a.id if a.id else '/money/accounts' }}"><span class="phone-acct-tile">{% if a.id %}{{ inst_tile(a.institution, kind=a.type) }}{% else %}<span class="inst-tile">···</span>{% endif %}<i class="is-{{ loop.index }}"></i></span><span class="phone-acct-text"><b>{{ a.name|tr(locale) if not a.id else a.name }}</b><small>{{ a.kind|tr(locale, n=a.get('count', 0)) }}</small></span><b class="fig">{{ a.balance|money }}</b></a>{% endfor %}</div>{% endif %}
-</section>
-{# Safe to spend: the card is the way into its working (How it adds up). #}
+{# The ladder (owner proposal, 2026-11-25): Cash and banks, then Free cash, then Safe to spend, the answer, in Nile.
+   Each step opens its own sheet: the accounts and what counts as cash, then each figure's working, so the three add
+   up on screen. Cash and banks is where Free cash starts (Position.spendable_cash); r38 keeps it apart from In your
+   accounts, which also counts deposits and holdings. Under the steps: the verdict and the payday meter (C11.1). #}
 {% set pct = s.meter.spent if s.meter else none %}
 {% if s.state == 'overspent' %}{% set verdict, vclass = 'Over.', 'is-bad' %}{% set line = '{amt} more is promised than your free cash.'|tr(locale, amt=(-s.safe)|money) %}
-{% else %}{% set verdict, vclass = ('Ahead of pace.' if s.meter and s.meter.ahead else 'On pace.'), ('is-bad' if s.meter and s.meter.ahead else 'is-good') %}
+{% else %}{% set verdict, vclass = ('Ahead of pace.' if s.meter and s.meter.ahead else 'On pace.' if s.meter else ''), ('is-bad' if s.meter and s.meter.ahead else 'is-good') %}
 {% if s.per_day is not none and s.per_day_to_payday %}{% set line = 'About {amt} a day until payday on {sa}.'|tr(locale, amt=s.per_day|money, sa=s.until) %}
 {% elif s.per_day is not none %}{% set line = 'About {amt} a day for {n} days.'|tr(locale, amt=s.per_day|money, n=s.per_day_days) %}
 {% elif s.until %}{% set line = 'On top of your plan until {sa}.'|tr(locale, sa=s.until) %}
 {% else %}{% set line = 'From free cash, after what is promised over the next 3 months.'|tr(locale) %}{% endif %}{% endif %}
-{% set lead %}<div class="phone-safe" id="home-safe"><div class="phone-hero-top"><div><span class="phone-hero-label">{{ fig.safe_to_spend.label }} <span aria-hidden="true">{{ chevron() }}</span></span>
-  <div class="phone-lead{{ ' is-negative' if s.safe < 0 }}" data-fig="safe_to_spend">{{ s.safe|money }} <small>{{ base }}</small></div></div>
-  {% if pct is not none %}{{ ring(pct, '%d%%'|format(pct|round|int), 'spent'|tr(locale), s.meter.ahead) }}{% endif %}</div>
-  <p class="phone-hero-line"><b class="{{ vclass }}">{{ verdict|tr(locale) }}</b> {{ line|keep_dates }}</p>
-  {% if s.expected %}<p class="phone-hero-line" id="home-expected">{{ s.expected.label|tr(locale) }} <b class="fig">{{ s.expected.value|money }}</b> <small>{{ base }}</small> · {{ 'Payday'|tr(locale) }} {{ s.expected.date|keep_dates }}</p>{% endif %}</div>{% endset %}
-<div class="phone-safe-card">
-{% call sheet(fig.safe_to_spend.label, lead, 'phone-home-hero') %}{{ working_rows(s.working) }}{{ expected_block(s.expected, base) }}{% endcall %}
-<div class="phone-wells">{% if s.everyday_left is not none %}<a class="phone-well" href="/budget/flexible"><span>{{ fig.everyday_left.label }}</span><b class="fig">{{ s.everyday_left|money }}</b></a>{% endif %}
-  <a class="phone-well" href="/plan"><span>{{ 'Bills before payday'|tr(locale) }}</span><b class="fig">{{ s.bills_before_payday|money }}</b></a></div>
-</div>
-{# Four quick actions, by meaning (IV-11M3). #}
+{% macro rung(label, value, fig_key) -%}
+<span class="phone-rung-dot" aria-hidden="true"></span><span class="phone-rung-label"{% if fig_key == 'cash_in_accounts' %} id="home-hero"{% elif fig_key == 'safe_to_spend' %} id="home-safe"{% endif %}>{{ label }}</span>
+<b class="phone-rung-fig fig{{ ' is-negative' if value is not none and value < 0 }}" data-fig="{{ fig_key }}">{{ value|money if value is not none else '–' }}</b><small class="phone-rung-cur">{{ base }}</small>
+{%- endmacro %}
+<section class="phone-hero phone-ladder{{ ' is-over' if s.safe < 0 }}" aria-labelledby="home-hero">
+  <div class="phone-rungs">
+    {% call sheet('Cash and banks'|tr(locale), rung('Cash and banks'|tr(locale), s.accounts_total, 'cash_in_accounts'), 'phone-rung is-cash') %}
+      <p class="phone-sheet-sub">{{ ('Across 1 account' if s.accounts_count == 1 else 'Across {n} accounts')|tr(locale, n=s.accounts_count) }}</p>
+      {% if s.accounts %}<span class="phone-share" aria-hidden="true">{% for a in s.accounts %}<i class="is-{{ loop.index }}" style="flex:{{ '%.1f'|format(a.share) }}"></i>{% endfor %}</span>
+      <div class="phone-hero-rows">{% for a in s.accounts %}<a class="phone-acct" href="{{ a.href }}"><span class="phone-acct-tile">{% if a.type %}{{ inst_tile(a.institution, kind=a.type) }}{% elif a.id %}<span class="inst-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17l6-6 4 4 6-7M14 8h6v6"/></svg></span>{% else %}<span class="inst-tile">···</span>{% endif %}<i class="is-{{ loop.index }}"></i></span><span class="phone-acct-text"><b>{{ a.name|tr(locale) if a.name == 'Other' else a.name }}</b><small>{{ a.kind|tr(locale, n=a.get('count', 0)) }}</small></span><b class="fig">{{ a.balance|money }}</b></a>{% endfor %}</div>{% endif %}
+      <a class="phone-quiet" href="/money/accounts">{{ 'Open its page'|tr(locale) }}</a>
+    {% endcall %}
+    {% call sheet(fig.free_cash.label, rung(fig.free_cash.label, s.free_cash, 'free_cash'), 'phone-rung is-free') %}{% if s.free_working %}{{ working_rows(s.free_working) }}{% endif %}{% endcall %}
+    {% call sheet(fig.safe_to_spend.label, rung(fig.safe_to_spend.label, s.safe, 'safe_to_spend'), 'phone-rung is-safe') %}{{ working_rows(s.working) }}{{ expected_block(s.expected, base) }}{% endcall %}
+  </div>
+  <p class="phone-hero-line">{% if verdict %}<b class="{{ vclass }}">{{ verdict|tr(locale) }}</b> {% endif %}{{ line|keep_dates }}</p>
+  {% if pct is not none %}<span class="phone-pay-meter{{ ' is-ahead' if s.meter.ahead }}" role="img" aria-label="{{ '{n}% spent'|tr(locale, n=pct|round|int) }}"><i style="width:{{ '%.1f'|format([pct, 100]|min) }}%"></i><b style="inset-inline-start:{{ '%.1f'|format([s.meter.pace, 100]|min) }}%"></b></span>{% endif %}
+</section>
+{# Four quick actions in one strip, by meaning (owner, 2026-11-25: much smaller than the tiles). Paste a bank SMS lives in Add. #}
 <nav class="phone-quick" aria-label="{{ 'Add'|tr(locale) }}">
-  <a href="/accounts/add-transaction?kind=out&amp;return_to=%2Fhome" data-popup-open><span class="phone-quick-tile is-out"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></span>{{ 'Expense'|tr(locale) }}</a>
-  <a href="/accounts/add-transaction?kind=in&amp;return_to=%2Fhome" data-popup-open><span class="phone-quick-tile is-in"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></span>{{ 'Income'|tr(locale) }}</a>
-  <a href="/accounts/add-transaction?kind=transfer&amp;return_to=%2Fhome" data-popup-open><span class="phone-quick-tile is-move"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></svg></span>{{ 'Transfer'|tr(locale) }}</a>
-  <a href="/sms"><span class="phone-quick-tile"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span>{{ 'From SMS'|tr(locale) }}</a>
+  <a href="/accounts/add-transaction?kind=out&amp;return_to=%2Fhome" data-popup-open><svg class="is-out" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>{{ 'Expense'|tr(locale) }}</a>
+  <a href="/accounts/add-transaction?kind=in&amp;return_to=%2Fhome" data-popup-open><svg class="is-in" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>{{ 'Income'|tr(locale) }}</a>
+  <a href="/accounts/add-transaction?kind=transfer&amp;return_to=%2Fhome" data-popup-open><svg class="is-move" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></svg>{{ 'Transfer'|tr(locale) }}</a>
+  <a href="/money/bills"><svg class="is-bill" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/></svg>{{ 'Pay a bill'|tr(locale) }}</a>
 </nav>
 {% if s.todo %}
 <section class="phone-section is-rose phone-todo" aria-labelledby="todo-heading">

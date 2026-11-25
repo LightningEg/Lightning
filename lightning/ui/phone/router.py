@@ -83,7 +83,8 @@ def phone_router() -> APIRouter:
         if running(c):   # IV-11N2: setup was left half way; it resumes where it stopped
             return redirect("/start")
         _read_new_sms(request, c)
-        return render_phone(request, "phone/home.html", screen=screen.build(c, today()))
+        session = getattr(request.app.state, "profile_session", None)
+        return render_phone(request, "phone/home.html", screen=screen.build(c, today(), getattr(session, "name", "") or ""))
 
     @router.get("/budget/flexible")
     @months.get("/budget")
