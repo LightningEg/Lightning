@@ -3,7 +3,7 @@
    as the words change; they are in search_results.html, which this page and that request share. #}
 {% extends "base.html" %}
 {% block title %}{{ 'Search'|tr(locale) }}{% endblock %}
-{% block phone_back %}<a class="phone-back" href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Overview'|tr(locale) }}</span></a>{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Home'|tr(locale) }}</span></a>{% endblock %}
 {% block heading %}{% endblock %}
 {% block content %}
 <form class="phone-search phone-live-search" method="get" action="/search" role="search" data-live-search="#search-results">

@@ -253,7 +253,7 @@ def test_see_all_lists_every_to_do_row_and_home_links_to_it(sample):
     client = TestClient(app)
     page = client.get("/todo")
     assert page.status_code == 200
-    body = page.text[page.text.index('<h1>'):]
+    body = page.text[page.text.index('phone-todo"'):]   # the list card, after the hero (polish 2026-11-25)
     assert len(re.findall(r'class="phone-row[ "]', body)) == len(rows)
     for r in rows:
         assert r.href.replace("&", "&amp;") in body

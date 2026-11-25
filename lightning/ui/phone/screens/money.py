@@ -170,6 +170,9 @@ class BillsPage:
     week: tuple[BillRow, ...]
     before_payday: tuple[BillRow, ...]
     after_payday: tuple[BillRow, ...]
+    due_before_payday: Decimal = Decimal(0)   # the forecaster's Due before payday, the page's lead (2026-11-25)
+    bills_due: Decimal = Decimal(0)           # Bills due: late and unpaid (Position.bills_due)
+    payday: str = ""                          # the next income date, "" when none is planned
 
 
 def bills_page(c, day: date) -> BillsPage:
@@ -177,5 +180,8 @@ def bills_page(c, day: date) -> BillsPage:
     The same open bills Home's To do and Money's Coming up read, so a bill is counted once everywhere."""
     rows = bill_state.unpaid_bills(c.planning, day, BILLS_HORIZON_DAYS)
     pick = lambda *states: tuple(b for b in rows if b.state in states)  # noqa: E731
+    forecast = c.forecaster.forecast(day)
     return BillsPage(pick(BillState.LATE, BillState.LATE_STALE), pick(BillState.DUE_SOON),
-                     pick(BillState.BEFORE_PAYDAY), pick(BillState.LATER))
+                     pick(BillState.BEFORE_PAYDAY), pick(BillState.LATER),
+                     due_before_payday=forecast.payments_before_income_total, bills_due=c.position.at(day).bills_due,
+                     payday=forecast.next_income_date or "")
