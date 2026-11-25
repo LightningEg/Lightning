@@ -5,8 +5,10 @@
 (() => {
   const SKIP_TYPES = new Set(["hidden", "checkbox", "radio", "date", "month", "time", "datetime-local", "password",
     "file", "range", "color", "submit", "button", "reset", "image"]);
-  let lastPerson = 0;
-  const person = () => { lastPerson = Date.now(); };
+  let lastPerson = 0, lastTarget = null;
+  // The tap must land on the field itself (2026-11-25): the tap that opens a sheet is not a tap on the field the sheet
+  // then focuses, so the pay sheet's amount stays filled in.
+  const person = (event) => { lastPerson = Date.now(); lastTarget = event && event.target instanceof Node ? event.target : null; };
   document.addEventListener("pointerdown", person, true);
   document.addEventListener("touchstart", person, true);
   document.addEventListener("keydown", (event) => { if (event.key === "Tab") person(); }, true);
@@ -25,7 +27,9 @@
     el.value = "";
   };
 
-  document.addEventListener("focusin", (event) => { if (Date.now() - lastPerson <= 600) open(event.target); });
+  const tapped = (el) => lastTarget === null || lastTarget === el || (lastTarget instanceof Node && el.contains(lastTarget))
+    || (lastTarget instanceof HTMLLabelElement && lastTarget.control === el);
+  document.addEventListener("focusin", (event) => { if (Date.now() - lastPerson <= 600 && tapped(event.target)) open(event.target); });
   // A tap on a field that is already focused (a picker closed and left it so) opens it empty too, unless text was typed in it.
   document.addEventListener("pointerdown", (event) => { if (event.target === document.activeElement) open(event.target); }, true);
   document.addEventListener("input", (event) => { if (event.isTrusted && event.target instanceof HTMLElement) event.target.dataset.fieldTyped = "1"; }, true);  // the page's own events do not count as typing
