@@ -63,6 +63,7 @@ class OwnedHolding:
     marked_as_cash: bool = False  # NF-7AU: its investment is marked to count with cash
 
     cash_override: Decimal | None = None  # explicit share of owned value for this account
+    protected_amount: Decimal | None = None
 
     @property
     def cash_percent(self) -> Decimal:
@@ -74,12 +75,15 @@ class OwnedHolding:
 
     @property
     def cash_value(self) -> Decimal:
-        return max(ZERO, self.value or ZERO) * self.cash_percent / 100
+        value = max(ZERO, self.value or ZERO)
+        if self.protected_amount is not None and not self.locked_until:
+            return max(ZERO, value - self.protected_amount)
+        return value * self.cash_percent / 100
 
     @property
     def counts_as_cash(self) -> bool:
         """Marked to count with cash and not locked (a certificate in its lock-up never counts)."""
-        return self.cash_percent > ZERO
+        return self.cash_value > ZERO
 
     @property
     def locked_until(self) -> str | None:
@@ -263,6 +267,13 @@ class Position:
                      if getattr(item, "cash_value", ZERO) > ZERO)
 
     @property
+    def excluded_cash_items(self) -> tuple[OwnedHolding, ...]:
+        """Configured holdings whose rule currently adds nothing to Free cash."""
+        return tuple(item for cls in self.classes for item in cls.items
+                     if item.quantity > ZERO and not item.cash_value
+                     and (item.cash_override is not None or item.protected_amount is not None or item.marked_as_cash))
+
+    @property
     def spendable_account_cash(self) -> Decimal:
         return self.cash_you_own - self.kept_apart
 
@@ -361,7 +372,7 @@ class PositionService:
         rows, unvalued = self.reporting.holdings(day)
         custody = {(r["account_id"], r["asset_id"]): r["units"]
                    for r in self.money_from_others.investment_positions(day)}
-        shares = self.assets.holding_cash_percentages(day)
+        rules = self.assets.holding_cash_rules(day)
         result = []
         for row in rows:
             asset = self.assets.get_asset(row.asset_id)
@@ -380,10 +391,11 @@ class PositionService:
                 value = row.value
             if row.asset_class_code == GAMEYA_CLASS and (value or ZERO) < ZERO:
                 continue  # the pot taken early is Gam'eya still to pay (What you owe), not a negative holding
+            default, _ = rules.get((None, row.asset_id), (asset.counts_as_cash, None))
+            percent, floor = rules.get((row.account.id, row.asset_id), (None, None))
             result.append(OwnedHolding(row.account.id, row.account.label, row.asset_id, asset.name,
                                        row.asset_class_code, quantity, value, asset.unit,
-                                       None if held else row.cost, asset.counts_as_cash,
-                                       shares.get((row.account.id, row.asset_id))))
+                                       None if held else row.cost, bool(default), percent, floor))
         return result, unvalued
 
     def foreign_holdings(self, as_of: date | str, base_currency: str) -> dict[str, tuple[Decimal, bool]]:

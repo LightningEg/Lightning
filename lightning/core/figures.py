@@ -105,7 +105,7 @@ _TABLE = [
     ("kept_apart", "Kept apart", "Cash you own that is not ready to spend: cash in a brokerage, cash in another "
      "currency, or an account you set apart. It stays in what you own and in If you sold today."),
     ("counted_as_cash", "Counted as cash", "The share of your investments you include in Free cash. Each holding "
-     "uses its investment default until you choose a percentage for that account. Only your owned share counts. "
+     "uses its investment default until you choose a percentage or an amount to keep invested for that account. Only your owned share counts. "
      "Locked certificates contribute zero, and the counted amount requires redemption before you can spend it."),
     ("bill_reserve_coverage", "Bill cash already set aside",
      "Saved cash in a reserve explicitly linked to a bill, covering its earliest unpaid payments once. "

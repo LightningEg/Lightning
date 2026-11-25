@@ -378,11 +378,13 @@ def _cash_holding(c, account_id, asset_id, day):
 
 def _cash_choice(c, fields):
     mode = fields.get("mode")
+    if mode == "floor":
+        return {"cash_override": None, "protected_amount": c.assets.protected_amount(fields.get("protected", ""))}
     if mode == "custom":
-        return c.assets.cash_percentage(fields.get("percent", ""))
+        return {"cash_override": c.assets.cash_percentage(fields.get("percent", "")), "protected_amount": None}
     if mode not in ("default", "none", "all"):
         raise ValidationError("Choose how much to count in Free cash.")
-    return {"default": None, "none": ZERO, "all": Decimal(100)}[mode]
+    return {"cash_override": {"default": None, "none": ZERO, "all": Decimal(100)}[mode], "protected_amount": None}
 
 
 @router.get("/holding/{asset_id:int}/cash/{account_id:int}/preview")
@@ -392,7 +394,7 @@ async def holding_cash_preview(request: Request, asset_id: int, account_id: int)
     if item is None or c.assets.get_asset(asset_id).is_cash or c.deposits.certificate_for_asset(asset_id):
         raise NotFoundError("Choose an open investment holding.")
     try:
-        preview = replace(item, cash_override=_cash_choice(c, request.query_params))
+        preview = replace(item, **_cash_choice(c, request.query_params))
     except LightningError as exc:
         return Response(translate(exc.message, c.settings.get("locale")), status_code=400, media_type="text/plain")
     return Response(_cash_preview_text(c, preview), media_type="text/plain")
@@ -400,10 +402,12 @@ async def holding_cash_preview(request: Request, asset_id: int, account_id: int)
 
 def _cash_preview_text(c, item):
     locale = c.settings.get("locale")
-    if item.cash_percent == ZERO:
+    if item.cash_percent == ZERO and item.protected_amount is None:
         return translate("This holding contributes zero to Free cash.", locale)
     if item.value is None:
         return translate("Value unavailable. This holding contributes zero until it has a value.", locale)
+    if item.cash_value == ZERO:
+        return translate("This holding contributes zero to Free cash.", locale)
     return translate("{amount} {currency} counted in Free cash. Redemption required.", locale,
                      amount=fmt(item.cash_value, 2), currency=c.reporting.base_currency)
 
@@ -418,7 +422,11 @@ async def save_holding_cash(request: Request, asset_id: int, account_id: int):
         with settled_save(request, c):
             if _cash_holding(c, account_id, asset_id, day) is None or c.deposits.certificate_for_asset(asset_id):
                 raise ValidationError("Choose an open investment holding.")
-            c.assets.set_holding_cash_percent(account_id, asset_id, day, _cash_choice(c, fields))
+            rule = _cash_choice(c, fields)
+            if rule["protected_amount"] is not None:
+                c.assets.set_holding_cash_floor(account_id, asset_id, day, rule["protected_amount"])
+            else:
+                c.assets.set_holding_cash_percent(account_id, asset_id, day, rule["cash_override"])
     except LightningError as exc:
         return redirect(back, exc.message)
     return redirect(back, "Free cash preference saved.")
@@ -811,8 +819,8 @@ async def update_asset(request: Request, asset_id: int):
             asset = c.assets.update_investment(asset_id, values["name"], values["class_code"], values["isin"],
                                                values["notes"], active=bool(values["active"]), ticker=values["symbol"],
                                                mic=values["mic"])
-            if "cash_switch" in form:  # NF-7AU: only a form that showed the switch sets it
-                asset = c.assets.set_counts_as_cash(asset_id, bool(values["counts_as_cash"]))
+            if "cash_switch" in form and bool(values["counts_as_cash"]) != asset.counts_as_cash:  # NF-7AU: only a form that showed the switch sets it
+                asset = c.assets.set_dated_cash_default(asset_id, fmt_date(today()), bool(values["counts_as_cash"]))
     except LightningError as exc:
         return _asset_form(request, values, asset=asset, error=exc, status=400)
     return redirect("/investments/assets", f"Saved {asset.name}.")

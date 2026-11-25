@@ -458,3 +458,10 @@ def test_holding_cash_share_and_reset_replay(devices):
         settle(hd, pc, pc.command("assets.set_holding_cash_percent", percent=percent, **args))
         for device in (hd, pc):
             assert device.c.position.at("2026-09-10").counted_as_cash == expected
+    default = pc.command("assets.set_dated_cash_default", asset_id=stock, effective_on="2026-09-12", counts=True)
+    floor = pc.command("assets.set_holding_cash_floor", amount="400.00", **(args | {"effective_on": "2026-09-13"}))
+    settle(hd, pc, default, floor)
+    for device in (hd, pc):
+        assert device.c.position.at("2026-09-11").counted_as_cash == 0
+        assert device.c.position.at("2026-09-12").counted_as_cash == 1000
+        assert device.c.position.at("2026-09-13").counted_as_cash == 600

@@ -136,7 +136,7 @@ def test_percentage_preview_and_invalid_edits(c, monkeypatch):
         fields = {"mode": "custom", "percent": invalid}
         assert client.get(path + "/preview", params=fields).status_code == 400
         client.post(path, data=fields, follow_redirects=False)
-    assert c.assets.holding_cash_percentages(DAY) == {}
+    assert c.assets.holding_cash_rules(DAY) == {}
     client.post(path, data=custom, follow_redirects=False)
     assert c.position.at(DAY).counted_as_cash == 3060
     assert c.position.at("2026-10-14").counted_as_cash == 0
@@ -161,9 +161,99 @@ def test_upgrading_preserves_existing_investment_defaults(tmp_path, monkeypatch)
     seed(db)
     assets = AssetService(db)
     fund = assets.create_investment("Money market", "FUND.MONEY_MARKET", "MMKT")
-    assets.set_counts_as_cash(fund.id, True)
+    db.execute("UPDATE financial_assets SET counts_as_cash=1 WHERE id=?", (fund.id,))
     monkeypatch.setattr(migrator, "MIGRATIONS_DIR", migrator._BUNDLED_MIGRATIONS_DIR)
     assert migrator.migrate(db)[0] == "0094_holding_cash_shares (APPLIED)"
     assert assets.get_asset(fund.id).counts_as_cash
-    assert assets.holding_cash_percentages(DAY) == {}
+    assert assets.holding_cash_rules(DAY) == {}
     assert migrator.migrate(db) == []
+
+
+def test_floor_price_changes_redemption_and_broker_cash(c, monkeypatch):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    monkeypatch.setenv("LIGHTNING_TODAY", DAY)
+    _, broker, fund = _fund(c)
+    browser = TestClient(create_app(c))
+    path = f"/investments/holding/{fund.id}/cash/{broker.id}"
+    from datetime import date
+    day = date.fromisoformat(DAY)
+    baseline = c.position.at(DAY)
+    funding_before = c.funding.preview(day)["cash"]
+    forecast_before = c.forecaster.forecast(day)
+    fields = {"mode": "floor", "protected": "٩٠٠٠"}
+    assert "3,000" in browser.get(path + "/preview", params=fields).text
+    assert c.position.at(DAY).free_cash == baseline.free_cash
+    browser.post(path, data=fields, follow_redirects=False)
+    after = c.position.at(DAY)
+    assert after.free_cash == baseline.free_cash + 3000
+    assert after.net_worth == baseline.net_worth
+    assert c.funding.preview(day)["cash"] == funding_before + 3000
+    forecast_after = c.forecaster.forecast(day)
+    assert forecast_after.free_cash == after.free_cash
+    assert forecast_after.safe_to_spend == forecast_before.safe_to_spend + 3000
+    assert emergency_liquidity_context(after)["unknown"][0]["value"] == 9000
+    assert c.position.at("2026-10-14").counted_as_cash == 0
+    assert browser.get(path + "/preview", params={"mode": "floor", "protected": "-1"}).status_code == 400
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-18")
+    c.assets.set_price(fund.id, "2026-10-16", "80")
+    assert c.position.at("2026-10-16").counted_as_cash == 0
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-16")
+    detail = browser.get("/explain/free-cash").text
+    assert "Holdings contributing zero" in detail and "9,000" in detail
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-18")
+    c.assets.set_price(fund.id, "2026-10-17", "140")
+    assert c.position.at("2026-10-17").counted_as_cash == 5000
+    c.investments.sell("2026-10-17", broker.id, fund.id, "50", "140")
+    sold = c.position.at("2026-10-17")
+    assert sold.counted_as_cash == 0
+    assert sold.free_cash == baseline.free_cash
+    browser.post(f"/accounts/{broker.id}/spendable", data={"spendable": "yes"}, follow_redirects=False)
+    assert c.position.at("2026-10-17").free_cash == sold.free_cash + sold.brokerage_cash
+    c.assets.set_holding_cash_percent(broker.id, fund.id, "2026-10-18", "25")
+    assert c.position.at("2026-10-18").counted_as_cash == 1750
+
+
+def test_inherited_defaults_preserve_history_and_respect_overrides(c):
+    _, broker, fund = _fund(c)
+    c.assets.set_dated_cash_default(fund.id, DAY, True)
+    assert c.position.at("2026-10-14").counted_as_cash == 0
+    c.assets.set_holding_cash_floor(broker.id, fund.id, "2026-10-16", 2000)
+    c.assets.set_dated_cash_default(fund.id, "2026-10-17", False)
+    c.assets.set_holding_cash_percent(broker.id, fund.id, "2026-10-18", None)
+    assert c.position.at(DAY).counted_as_cash == 12000
+    assert c.position.at("2026-10-17").counted_as_cash == 10000
+    assert c.position.at("2026-10-18").counted_as_cash == 0
+
+
+def test_cash_preferences_survive_workbook_export(c, tmp_path):
+    from lightning.bootstrap import build
+    from lightning.workflows.data_export import export_all
+    from lightning.workflows.workbook_import import confirm_import
+
+    _, broker, fund = _fund(c)
+    c.assets.set_dated_cash_default(fund.id, DAY, True)
+    c.assets.set_holding_cash_floor(broker.id, fund.id, "2026-10-16", "8500.25")
+    data, _, _ = export_all(c, "xlsx")
+    restored = build(tmp_path / "restored.db")
+    try:
+        confirm_import(restored, data)
+        assert restored.position.at("2026-10-14").counted_as_cash == 0
+        assert restored.position.at(DAY).counted_as_cash == 12000
+        assert restored.position.at("2026-10-16").counted_as_cash == Decimal("3499.75")
+    finally:
+        restored.db.close()
+
+
+def test_floor_requires_a_positive_owned_valuation_and_an_unlocked_holding():
+    from lightning.planning.position import OwnedHolding
+
+    item = OwnedHolding(1, "Broker", 2, "Fund", "FUND.FIXED_INCOME", Decimal(10), None, "units",
+                        protected_amount=Decimal("0.25"))
+    for value in (None, Decimal("-1"), Decimal("0"), Decimal("0.25")):
+        item.value = value
+        assert item.cash_value == 0
+    item.value = Decimal("10.75")
+    assert item.cash_value == Decimal("10.50")
+    item._locked_until = "2027-01-01"
+    assert item.cash_value == 0

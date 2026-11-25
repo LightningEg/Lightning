@@ -114,18 +114,35 @@ class AssetRepository:
 
     def holding_cash_shares(self, day: str):
         rows = self.db.all(
-            "SELECT account_id, asset_id, percent_bps FROM holding_cash_shares AS share "
+            "SELECT account_id, asset_id, percent_bps, protected_e6 FROM holding_cash_shares AS share "
             "WHERE effective_on=(SELECT MAX(effective_on) FROM holding_cash_shares "
-            "WHERE account_id=share.account_id AND asset_id=share.asset_id AND effective_on<=?)", (day,))
-        return {(r["account_id"], r["asset_id"]): r["percent_bps"] for r in rows if r["percent_bps"] is not None}
+            "WHERE account_id=share.account_id AND asset_id=share.asset_id AND effective_on<=?) "
+            "UNION ALL SELECT NULL,asset_id,counts*100,NULL FROM investment_cash_defaults AS d "
+            "WHERE effective_on=(SELECT MAX(effective_on) FROM investment_cash_defaults "
+            "WHERE asset_id=d.asset_id AND effective_on<=?)", (day, day))
+        return {(r["account_id"], r["asset_id"]): (r["percent_bps"], from_e6(r["protected_e6"])
+                if r["protected_e6"] is not None else None) for r in rows}
 
-    def set_holding_cash_share(self, account_id, asset_id, day, bps):
+    def has_dated_cash_default(self, asset_id):
+        return bool(self.db.scalar("SELECT 1 FROM investment_cash_defaults WHERE asset_id=? LIMIT 1", (asset_id,)))
+
+    def set_dated_cash_default(self, asset_id, day, counts, previous):
+        self.db.execute("INSERT OR IGNORE INTO investment_cash_defaults(asset_id,effective_on,counts) "
+                        "VALUES(?, '0001-01-01', ?)", (asset_id, int(previous)))
+        self.db.execute("INSERT INTO investment_cash_defaults(asset_id,effective_on,counts) VALUES(?,?,?) "
+                        "ON CONFLICT(asset_id,effective_on) DO UPDATE SET counts=excluded.counts",
+                        (asset_id, day, int(counts)))
+        latest = self.db.scalar("SELECT counts FROM investment_cash_defaults WHERE asset_id=? "
+                                "ORDER BY effective_on DESC LIMIT 1", (asset_id,))
+        self.set_counts_as_cash(asset_id, bool(latest))
+
+    def set_holding_cash_share(self, account_id, asset_id, day, bps, protected=None):
         now = now_iso()
         self.db.execute(
-            "INSERT INTO holding_cash_shares(account_id,asset_id,effective_on,percent_bps,created_at,updated_at) "
-            "VALUES(?,?,?,?,?,?) ON CONFLICT(account_id,asset_id,effective_on) DO UPDATE SET "
-            "percent_bps=excluded.percent_bps,updated_at=excluded.updated_at",
-            (account_id, asset_id, day, bps, now, now))
+            "INSERT INTO holding_cash_shares(account_id,asset_id,effective_on,percent_bps,protected_e6,created_at,updated_at) "
+            "VALUES(?,?,?,?,?,?,?) ON CONFLICT(account_id,asset_id,effective_on) DO UPDATE SET "
+            "percent_bps=excluded.percent_bps,protected_e6=excluded.protected_e6,updated_at=excluded.updated_at",
+            (account_id, asset_id, day, bps, None if protected is None else to_e6(protected), now, now))
 
     # prices
     def upsert_price(self, asset_id: int, date: str, price, currency: str, source: str) -> None:

@@ -1,6 +1,21 @@
-{% if cash_sources and cash_sources.counted_as_cash_items %}
+{% if cash_sources %}
+{% if broker_cash %}
+<h3>{{ 'Brokerage cash'|tr(locale) }}</h3>
+<ul>{% for row in broker_cash %}<li><a href="/accounts/{{ row.id }}">{{ row.label }}</a> · {{ ('Spendable' if row.spendable else 'Kept apart')|tr(locale) }} · {{ row.value|money if row.value is not none else '—' }} {{ base }}</li>{% endfor %}</ul>
+{% endif %}
+{% if cash_sources.counted_as_cash_items %}
 <p>{{ 'Cash in spendable accounts before reserves and bills'|tr(locale) }} · {{ cash_sources.spendable_account_cash|money }} {{ base }}</p>
 <h3>{{ 'Counted as cash · requires redemption'|tr(locale) }}</h3>
 <ul>{% for item in cash_sources.counted_as_cash_items %}<li><a href="/investments/holding/{{ item.asset_id }}?account={{ item.account_id }}&date={{ as_of }}">{{ item.asset }} · {{ item.account }}</a>
-  ({{ item.cash_percent|units }}%) · {{ item.cash_value|money }} {{ base }}</li>{% endfor %}</ul>
+  {% if item.protected_amount is none %}({{ item.cash_percent|units }}%){% else %}({{ "Amount to keep invested"|tr(locale) }} · {{ item.protected_amount|money }} {{ base }}){% endif %} · {{ item.cash_value|money }} {{ base }}</li>{% endfor %}</ul>
+{% endif %}
+{% if cash_sources.excluded_cash_items %}
+<details><summary>{{ 'Holdings contributing zero'|tr(locale) }}</summary>
+<ul>{% for item in cash_sources.excluded_cash_items %}<li><a href="/investments/holding/{{ item.asset_id }}?account={{ item.account_id }}&date={{ as_of }}">{{ item.asset }} · {{ item.account }}</a> ·
+  {% if item.locked_until %}{{ 'Locked until'|tr(locale) }} {{ item.locked_until }}
+  {% elif item.protected_amount is none and not item.cash_percent %}0%
+  {% elif item.value is none %}{{ 'Value unavailable'|tr(locale) }}
+  {% elif item.protected_amount is not none %}{{ 'Amount to keep invested'|tr(locale) }} · {{ item.protected_amount|money }} {{ base }}
+  {% else %}{{ item.cash_value|money }} {{ base }}{% endif %}</li>{% endfor %}</ul></details>
+{% endif %}
 {% endif %}

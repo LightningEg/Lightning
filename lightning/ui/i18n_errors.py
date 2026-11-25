@@ -1,6 +1,7 @@
 """Arabic for the plain error sentences (IV-3BD). Keys are the exact English text."""
 
 ERRORS_AR = {
+    "Enter an amount of zero or more.": "أدخل مبلغًا يساوي صفرًا أو أكثر.",
     "Enter a percentage from 0 to 100.": "أدخل نسبة من ٠ إلى ١٠٠.",
     "Choose an investment holding.": "اختر حيازة استثمارية.",
     "Choose how much to count in Free cash.": "اختر النسبة التي تُحسب ضمن النقدية المتاحة.",

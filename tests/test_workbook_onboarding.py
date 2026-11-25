@@ -46,7 +46,7 @@ def test_comprehensive_roundtrip_and_legacy_headers(c, tmp_path):
     target = build(tmp_path/'new.db', key=b'k' * 32)
     target.db.execute("INSERT INTO profile_identity(singleton,profile_id) VALUES(1,'00000000-0000-0000-0000-000000000001')")
     prepared = prepare_import(target, data)
-    assert len(prepared) == 67
+    assert len(prepared) == 68
     assert "holding_cash_shares" in prepared
     assert 'budget_estimate_dates' in prepared
     assert target.db.scalar('SELECT count(*) FROM transactions') == 0
@@ -59,7 +59,7 @@ def test_comprehensive_roundtrip_and_legacy_headers(c, tmp_path):
     with pytest.raises(ValueError, match='empty profile'):
         confirm_import(target, data)
     legacy = tabular_workbook_bytes([(name[:31], headers, rows, widths) for name, headers, rows, widths in _raw_tables(c)
-                                     if name != "holding_cash_shares"])
+                                     if name not in ("holding_cash_shares", "investment_cash_defaults")])
     old_target = build(tmp_path/'legacy.db')
     confirm_import(old_target, legacy)
     assert old_target.db.scalar('SELECT count(*) FROM transactions') == 2

@@ -425,7 +425,8 @@ class ReportingService:
             if not account.active and not amount:
                 continue
             valuation = self.valuer.value(self.assets.cash_asset(account.currency), amount, day)
-            rows.append({"id": account.id, "label": account.label, "value": valuation.value})
+            rows.append({"id": account.id, "label": account.label, "value": valuation.value,
+                         "spendable": account.counts_as_spendable(self.base_currency)})
         return rows
 
     @request_cached
