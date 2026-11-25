@@ -10,6 +10,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from lightning.core.dates import month_of, now, parse_date
+from lightning.core.figures import label
 from lightning.ui.expected import expected_by_payday
 from lightning.ui.phone.screens.budget import month_bar
 from lightning.planning import bill_state
@@ -103,7 +104,7 @@ def _cash_accounts(c, position) -> tuple[tuple, Decimal, int]:
                      "href": f"/accounts/{a.id}"})
     for item in position.counted_as_cash_items:
         value = getattr(item, "cash_value", item.value)  # a share of the holding once one is chosen (IV PR 762)
-        rows.append({"id": item.account_id, "name": item.asset, "kind": "Counted as cash", "institution": item.asset,
+        rows.append({"id": item.account_id, "name": item.asset, "kind": label("counted_as_cash"), "institution": item.asset,
                      "type": "", "balance": value, "href": "/investments"})
     rows.sort(key=lambda r: (-r["balance"], r["name"].casefold()))
     total = position.spendable_cash
@@ -113,7 +114,7 @@ def _cash_accounts(c, position) -> tuple[tuple, Decimal, int]:
         other = {"id": 0, "name": "Other", "kind": "{n} accounts", "count": len(rest), "institution": "", "type": "",
                  "balance": c.reporting.balances_total([r["balance"] for r in rest]), "href": "/money/accounts"}
         rows = rows[:ACCOUNTS_SHOWN - 1] + [other]  # not money: three rows, then Other
-    positive = sum((r["balance"] for r in rows if r["balance"] > 0), Decimal(0))
+    positive = sum((r["balance"] for r in rows if r["balance"] > 0), Decimal(0))  # not money: the bar's whole length
     for r in rows:
         r["share"] = float(r["balance"] / positive * 100) if positive > 0 and r["balance"] > 0 else 0.0  # not money: a bar's length
     return tuple(rows), total, count
