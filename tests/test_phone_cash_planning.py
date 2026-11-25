@@ -209,3 +209,18 @@ def test_thirty_day_totals_include_partial_loan_and_exclude_past_due_income(c, s
     c.planning.record_payment(loan, "2026-10-10", "2026-10-05", "400", bank)
     hero = _text(_hero(_phone(c).get("/plan").text))
     assert "Coming in · 30 days 0" in hero and "Going out · 30 days 600" in hero
+
+
+def test_nothing_due_leads_with_all_covered_and_afford_opens_on_its_answer(c, setup, monkeypatch):
+    """Owner, 2026-11-25: with nothing due before payday Plan leads with its verdict, not a big zero; Can I afford this?
+    is one row that opens its sheet, and after Check the sheet opens again on the answer."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
+    _plan(c, salary=("ACME Egypt", "INCOME", "45000", "2026-10-25", {}), later=("Gym", "BILL", "300", "2026-10-28", {}))
+    phone = _phone(c)
+    hero = _hero(phone.get("/plan").text)
+    assert "All covered" in hero and "Nothing is due before payday." in hero and hero.count("Due before payday") == 1
+    closed = phone.get("/plan").text
+    assert re.search(r'<details class="phone-sheet-row">\s*<summary[^>]*>.*?id="afford-h"', closed, re.S)
+    answered = phone.get("/plan?afford=100&afford_date=2026-10-20").text
+    assert re.search(r'<details class="phone-sheet-row" open>\s*<summary[^>]*>.*?id="afford-h"', answered, re.S)
+    assert 'role="status"' in answered.split('id="afford-h"', 1)[1]
