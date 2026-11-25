@@ -2,7 +2,7 @@
    recording it changes, then Record it now; Skip last. Same form posts as the PC page. #}
 {% extends "base.html" %}
 {% block title %}{{ item.name }} · {{ payment.due_date }}{% endblock %}
-{% block heading %}<h1>{{ item.name }}</h1><p class="phone-note">{{ item.kind_label|tr(locale) }} · {{ payment.due_date }} · <bdi class="fig">{{ payment.amount|money }} {{ currency }}</bdi></p>{% endblock %}
+{% block heading %}<h1>{{ item.name }}</h1><p class="phone-note">{{ item.kind_label|tr(locale) }} · {{ payment.due_date }} · <bdi class="fig">{{ payment.amount|money(places=0) }} {{ currency }}</bdi></p>{% endblock %}
 {% block content %}
 {% set session = request.state.session_token|default('') %}
 {% macro hidden() %}<input type="hidden" name="due" value="{{ payment.due_date }}"><input type="hidden" name="back" value="{{ back }}">{% endmacro %}
