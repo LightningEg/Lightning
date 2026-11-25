@@ -221,7 +221,7 @@ def test_the_next_bill_is_named_and_opens_its_pay_sheet(c, setup, monkeypatch):
     assert 'class="card phone-needs"' not in html
     week = html[html.index('id="week-heading"'):]
     week = week[:week.index("</section>")]
-    row = re.search(r'<a class="phone-row" data-popup-open href="(/plan/items/\d+/pay\?due=2026-10-01[^"]*)"><span>Internet', week)
+    row = re.search(r'<a class="phone-row phone-acct-row" data-popup-open href="(/plan/items/\d+/pay\?due=2026-10-01[^"]*)">(?:(?!</a>).)*<b>Internet</b>', week, re.S)
     assert row and "Landlord" in week and "Gym" not in week   # Gym is 20 days out: after this week
 
 

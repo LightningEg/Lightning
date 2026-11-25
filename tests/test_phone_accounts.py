@@ -82,7 +82,7 @@ def test_a_bank_gets_its_name_a_circle_its_own_group_and_a_closed_account_its_fo
 def test_money_lists_every_balance_as_one_row_and_the_page_behind_more_adds_up(phone):
     """IV-3AY10: the slot's job now lives on Money; its N more page is the full list, balances only, no fields."""
     html = phone.get("/money/accounts").text
-    assert re.search(r'<a class="phone-row" href="/accounts/\d+"><span>CIB Payroll</span><b>', html)
+    assert re.search(r'<a class="phone-row phone-acct-row" href="/accounts/\d+">(?:(?!</a>).)*<b>CIB Payroll</b>', html, re.S)   # a tile, then the name (polish 2026-11-25)
     assert not re.search(r'<input(?![^>]*type="hidden")', html.split('<main', 1)[1].split("</main>", 1)[0]) and "<td" not in html  # no field; an undo form's hidden inputs are not fields
     money = phone.get("/money").text
     assert re.search(r'<a class="phone-row phone-acct-row" href="/accounts/\d+">.*?<b>CIB Payroll</b>', money, re.S)   # IV-11M7 (mockup v2.0): a tile, then the name
