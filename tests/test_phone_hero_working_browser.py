@@ -33,7 +33,7 @@ def test_each_hero_opens_its_working(c, monkeypatch):
             page = browser.new_context(viewport={"width": 360, "height": 800}, is_mobile=True, has_touch=True).new_page()
             page.goto(host.origin + "/home")
             assert page.locator('.phone-ladder #home-safe').is_visible()   # owner proposal 2026-11-25: Safe to spend, the ladder's last step
-            heroes = {"/home": "details.phone-sheet-row:has(.phone-rung.is-safe)"}
+            heroes = {"/home": "details.phone-sheet-row:has(.phone-rung.is-safe)", "/money": "details.phone-sheet-row:has(.phone-rung.is-safe)"}
             for path, rows, home in (("/home", "Free cash", "/plan"), ("/money", "Cash you own", "/"), ("/budget", "Bills to pay", "/budget")):
                 page.goto(host.origin + path)
                 found = heroes.get(path, "details.phone-sheet-row:has(.phone-lead)")

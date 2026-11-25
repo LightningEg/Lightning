@@ -214,6 +214,24 @@ class Position:
         return Working("net_worth", self.net_worth, tuple(r for r in rows if r.amount), home="/")
 
     @property
+    def what_you_own_working(self):
+        """Money's ladder (owner, 2026-11-25): What you own, part by part, adding up to it."""
+        from lightning.core.working import Working, WorkingRow
+        rows = [WorkingRow("Cash you own", self.cash_you_own, "/money/accounts"),
+                WorkingRow("Holdings", self.holdings_value, "/investments"),
+                WorkingRow("Other you own", self.other_you_own, "/money/accounts")]
+        return Working("what_you_own", self.what_you_own, tuple(r for r in rows if r.amount))
+
+    @property
+    def what_you_owe_working(self):
+        """Money's ladder: What you owe, part by part, adding up to it."""
+        from lightning.core.working import Working, WorkingRow
+        rows = [WorkingRow("Loans and bills", self.owe.total, "/plan/loans"),
+                WorkingRow("Gam'eya still to pay", self.gameya_owed, "/money/accounts"),
+                WorkingRow("You owe people", self.you_owe_people, "/money-from-others")]
+        return Working("what_you_owe", self.what_you_owe, tuple(r for r in rows if r.amount))
+
+    @property
     def portfolio_working(self):
         """NF-12AB2: Portfolio value by asset class."""
         from lightning.core.working import Working, WorkingRow

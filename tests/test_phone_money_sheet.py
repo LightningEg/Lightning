@@ -32,7 +32,7 @@ def phone(tmp_path, monkeypatch):
 
 def test_the_net_worth_sheet_has_its_parts_then_dollars_and_gold_and_the_line_shows_once(phone):
     html = phone.get("/money").text
-    sheet = html[html.index('class="phone-sheet-row'):]
+    sheet = html[html.index('phone-rung is-safe'):]   # Net worth, the ladder's last step (owner, 2026-11-25)
     sheet = sheet[:sheet.index("</details>")]
     assert html.count('class="phone-chart-trend"') == 1 and "phone-chart-trend" in sheet   # IV-11M7 (mockup v2.0): the line lives in Net worth's sheet
     units = re.findall(r'<span>(In [^<]+)<small>', sheet)
@@ -55,3 +55,17 @@ def test_the_older_phone_overview_is_gone():
     assert "phone/dashboard/fold.html" not in names
     source = (templates.env.loader.get_source(templates.env, "phone/dashboard/index.html")[0])
     assert source.strip().endswith('{% extends "phone/home.html" %}')   # the address is Home
+
+
+def test_money_is_a_ladder_whose_steps_add_up(phone, tmp_path):
+    """Owner, 2026-11-25: What you own, What you owe, then Net worth in Nile, each sheet adding up to its step."""
+    from datetime import date
+    html = phone.get("/money").text
+    assert html.index('data-fig="what_you_own"') < html.index('data-fig="what_you_owe"') < html.index('data-fig="net_worth"')
+    assert html.count('href="/investments"') == 1   # the holdings are listed once, in Accounts
+    c = build(tmp_path / "ladder.db")
+    load_mohab_2026(c)
+    position = c.position.at(date(2026, 11, 11))
+    assert position.what_you_own_working.sum == position.what_you_own
+    assert position.what_you_owe_working.sum == position.what_you_owe
+    assert position.what_you_own - position.what_you_owe == position.net_worth
