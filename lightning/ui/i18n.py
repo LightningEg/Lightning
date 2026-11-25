@@ -1398,6 +1398,7 @@ ARABIC_UI = {
     'Cash and banks': 'الكاش والبنوك',
     'Counted as cash': 'محسوب كنقدية',
     'Pay a bill': 'ادفع فاتورة',
+    'Holdings, prices and what changed': 'المقتنيات والأسعار واللي اتغيّر',
     'Nothing is due before payday. These come next.': 'مفيش حاجة مستحقة قبل القبض. دول اللي جايين بعد كده.',
     '1 after payday': 'واحدة بعد القبض',
     '{n} after payday': '{n} بعد القبض',

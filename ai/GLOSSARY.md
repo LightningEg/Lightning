@@ -366,6 +366,7 @@ Categories are not split into income and expense trees: pick the activity that e
 | **Code** | Stable machine identifier for links, imports and technical search; not shown in ordinary UI. |
 | **ID** | Internal database key; never shown. |
 | **Cash and banks** | The first step of the phone Home's ladder (Cash and banks, Free cash, Safe to spend; owner, 2026-11-25): where Free cash starts, Spendable cash: every spendable account (`reporting.service.ReportingService.owned_spendable_cash_by_account`) plus the share of holdings Counted as cash (`planning.position.Position.spendable_cash`). Its rows add up to it; its sheet lists them, and Free cash's working starts from it (`Position.free_cash_working`). Deposits and other holdings are not in it, so it is never called In your accounts (owner, 2026-11-22, r38). |
+| **Money's ladder** | Money's hero (owner, 2026-11-25): What you own → What you owe → Net worth in a Nile tile, each opening its sheet (`Position.what_you_own_working`, `Position.what_you_owe_working`, `Position.net_worth_working`), the same shape as Home's ladder. |
 | **Ticker / symbol** | Public exchange symbol; not Lightning's code or ID. Optional ISIN also matches sources. |
 | **Exchange** | Where a stock or ETF trades, stored as ISO 10383 MIC, shown by common name; no exchange means EGX; funds and gold have none. |
 | **Price file** | One market's closing prices, published as a checked folder and refreshed after close; Settings › Price files picks them. Code: pack. |
