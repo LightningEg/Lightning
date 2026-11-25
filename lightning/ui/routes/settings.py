@@ -403,6 +403,17 @@ async def save_privacy(request: Request):
     return Response(status_code=204)
 
 
+@router.post("/name")
+async def save_name(request: Request):
+    """The name Home greets you by (owner, 2026-11-25). Empty goes back to the profile's own name."""
+    from lightning.ui.phone.screens.home import NAME_LONGEST
+    form = await request.form()
+    name = " ".join(str(form.get("name", "")).split())[:NAME_LONGEST]
+    with settled_save(request, container(request)):
+        container(request).settings.set("display_name", name)
+    return redirect("/settings#your-name")
+
+
 @router.post("/locale")
 async def save_locale(request: Request):
     """Store the interface language in this profile; unsupported values fall back to English."""

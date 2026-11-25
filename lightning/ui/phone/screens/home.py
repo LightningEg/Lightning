@@ -78,7 +78,9 @@ class HomeScreen:
     bills_before_payday: Decimal = Decimal(0)   # the forecaster's Due before payday (what Safe to spend takes off)
     spent_today: Decimal = Decimal(0)
     greeting: str = "Good evening"
-    name: str = ""
+    name: str = ""                     # what Home calls you: Settings' name, else the profile's own name
+    today: str = ""
+    days_to_payday: int | None = None  # not money: days until the next income date; None when none is planned
     steps: tuple = ()                  # first day: (key, done) for the salary account, the payday, the first payment
     expected: dict | None = None       # Expected by payday, the secondary line under Safe to spend today (lightning.ui.expected)
     free_cash: Decimal | None = None   # the ladder's middle step (Position.free_cash, its one formula); None while reserves are unknown
@@ -86,6 +88,14 @@ class HomeScreen:
 
 
 ACCOUNTS_SHOWN = 4
+
+
+NAME_LONGEST = 40
+
+
+def welcome_name(c, profile_name: str = "") -> str:
+    """The name Home greets you by (owner, 2026-11-25): the one you chose in Settings, else the profile's own name."""
+    return (c.settings.get("display_name") or "").strip()[:NAME_LONGEST] or (profile_name or "").strip()[:NAME_LONGEST]
 
 
 def _greeting(hour: int) -> str:
@@ -141,7 +151,7 @@ def _first_run(c, steps: tuple) -> bool:
     return not c.accounts.list() or not c.planning.items((PlanKind.INCOME,))
 
 
-def build(c, day: date) -> HomeScreen:
+def build(c, day: date, profile_name: str = "") -> HomeScreen:
     inbox = ReviewInbox(c)
     items = inbox.items(day)
     forecast = inbox.forecast
@@ -191,5 +201,6 @@ def build(c, day: date) -> HomeScreen:
                       accounts=accounts, accounts_total=accounts_total, accounts_count=accounts_count,
                       bills_before_payday=forecast.payments_before_income_total,
                       spent_today=c.reporting.cash_flow(day, day).outflows,
-                      greeting=_greeting(now().hour), name=c.settings.get("display_name") or "", steps=steps,
+                      greeting=_greeting(now().hour), name=welcome_name(c, profile_name), steps=steps,
+                      today=day.isoformat(), days_to_payday=(parse_date(until) - day).days if until else None,  # not money: days
                       expected=None if first_run else expected_by_payday(forecast))

@@ -55,6 +55,18 @@ def _as_month(value) -> tuple[int, int] | None:
     return int(found.group(1)), int(found.group(2))
 
 
+_WEEKDAYS_AR = ("الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت", "الأحد")
+
+
+def weekday_text(value, locale: str = "en") -> str:
+    """The day with its name, for a greeting: Wednesday 25 Nov, الأربعاء ٢٥ نوفمبر."""
+    day = _as_date(value)
+    if day is None:
+        return "" if value is None else str(value)
+    name = _WEEKDAYS_AR[day.weekday()] if _arabic(locale) else calendar.day_name[day.weekday()]
+    return _digits(f"{name} {day.day} {_short(day.month, locale)}", locale)
+
+
 def day_text(value, locale: str = "en", today: date | None = None) -> str:
     """Today, Yesterday, 8 Nov (this year), 8 Nov 2025 (another year). Text that is not a date comes back as it is."""
     day = _as_date(value)

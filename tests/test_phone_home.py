@@ -274,3 +274,21 @@ def test_the_ladder_adds_up_step_by_step(sample):
     assert screen.free_working.rows[0].amount == screen.accounts_total
     assert screen.free_working.sum == screen.free_cash == position.free_cash
     assert screen.working.rows[0].amount == screen.free_cash and screen.working.total == screen.safe
+
+
+def test_home_welcomes_you_by_the_name_you_chose_else_the_profile_name(sample):
+    """Owner, 2026-11-25: Settings' name leads; empty, Home uses the profile's own name; a long name is cut to fit."""
+    c, day = _on(sample, "2026-10-04")
+    assert home.build(c, day, "Mohab").name == "Mohab"
+    app = create_app(c)
+    mount_phone(app)
+    client = TestClient(app)
+    client.post("/settings/name", data={"name": "  Mo   Salah  "}, follow_redirects=False)
+    assert c.settings.get("display_name") == "Mo Salah"
+    assert home.build(c, day, "Mohab").name == "Mo Salah"
+    page = client.get("/home").text
+    assert '<p class="phone-welcome-name"><bdi>Mo Salah</bdi></p>' in page and "Payday" in page
+    client.post("/settings/name", data={"name": "x" * 90}, follow_redirects=False)
+    assert len(home.build(c, day).name) == home.NAME_LONGEST
+    client.post("/settings/name", data={"name": ""}, follow_redirects=False)
+    assert home.build(c, day, "Mohab").name == "Mohab"

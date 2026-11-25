@@ -29,7 +29,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from lightning import DISPLAY_VERSION
 from lightning.bootstrap import Container
 from lightning.core.dates import WEEK_STARTS, fmt_date, month_of, today
-from lightning.ui.date_text import day_text, human_dates, month_chip, month_short, month_text, range_text
+from lightning.ui.date_text import day_text, human_dates, month_chip, month_short, month_text, range_text, weekday_text
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.figures import FIGURES
 from lightning.core.memo import request_cache
@@ -214,6 +214,7 @@ templates.env.filters["day_label"] = _day_label
 templates.env.filters["dict_day"] = lambda values, locale=None: {
     k: (day_text(v, _locale(locale)) if k == "date" and v else v) for k, v in values.items()}
 templates.env.filters["day"] = lambda value, locale=None: day_text(value, _locale(locale))
+templates.env.filters["weekday"] = lambda value, locale=None: weekday_text(value, _locale(locale))
 templates.env.filters["month"] = lambda value, locale=None: month_text(value, _locale(locale))
 templates.env.filters["month_short"] = lambda value, locale=None: month_short(value, _locale(locale))
 templates.env.filters["month_chip"] = lambda value, locale=None: month_chip(value, _locale(locale))

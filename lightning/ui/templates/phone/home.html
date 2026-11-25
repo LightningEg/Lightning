@@ -15,8 +15,18 @@
 {% block content %}
 {% from "partials/macros.html" import inst_tile, expected_block with context %}
 {% set s = screen %}
-{# IV-11M3 (owner, 2026-11-14): one Ink line in the display face, the greeting lighter than the name, never grey. #}
-<p class="phone-greeting">{% if s.state == 'first_run' %}{{ 'Welcome'|tr(locale) }}{% else %}{{ s.greeting|tr(locale) }}{% endif %}{% if s.name %}, <b>{{ s.name }}</b>{% endif %}</p>
+{# The welcome (owner, 2026-11-25): the time of day over the name you chose in Settings (else the profile's own name),
+   then today and how far payday is. Warm, never a figure. #}
+{% set part = 'morning' if s.greeting == 'Good morning' else 'afternoon' if s.greeting == 'Good afternoon' else 'evening' %}
+<header class="phone-welcome is-{{ part }}">
+  <span class="phone-welcome-mark" aria-hidden="true"><svg viewBox="0 0 24 24">{% if part == 'morning' %}<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>{% elif part == 'afternoon' %}<path d="M17 18a5 5 0 0 0-10 0M12 2v7M4.2 10.2l1.4 1.4M1 18h2M21 18h2M18.4 11.6l1.4-1.4M23 22H1M8 6l4-4 4 4"/>{% else %}<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/>{% endif %}</svg></span>
+  <div class="phone-welcome-text">
+    <p class="phone-welcome-hi">{{ ('Welcome' if s.state == 'first_run' else s.greeting)|tr(locale) }}</p>
+    {% if s.name %}<p class="phone-welcome-name"><bdi>{{ s.name }}</bdi></p>{% endif %}
+    <p class="phone-welcome-day">{{ s.today|weekday(locale) }}{% if s.days_to_payday is not none and s.state != 'first_run' %} · {% if s.days_to_payday <= 0 %}{{ 'Payday today'|tr(locale) }}{% elif s.days_to_payday == 1 %}{{ 'Payday tomorrow'|tr(locale) }}{% else %}{{ 'Payday in {n} days'|tr(locale, n=s.days_to_payday) }}{% endif %}{% endif %}</p>
+  </div>
+  {% if not s.name %}<a class="phone-welcome-ask" href="/settings#your-name">{{ 'Add your name'|tr(locale) }}</a>{% endif %}
+</header>
 {% if s.state == 'first_run' %}
 {% set done = s.steps|selectattr(1)|list|length %}{% set count = s.steps|length %}
 <section class="phone-hero phone-first-hero" aria-labelledby="home-hero">
