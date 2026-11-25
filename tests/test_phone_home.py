@@ -292,3 +292,15 @@ def test_home_welcomes_you_by_the_name_you_chose_else_the_profile_name(sample):
     assert len(home.build(c, day).name) == home.NAME_LONGEST
     client.post("/settings/name", data={"name": ""}, follow_redirects=False)
     assert home.build(c, day, "Mohab").name == "Mohab"
+
+
+def test_pay_a_bill_opens_its_sheet_on_home_with_each_bill_one_tap_away(sample):
+    """Owner, 2026-11-25: Pay a bill in two taps. Home's strip opens a sheet of the bills due (or the next ones), each
+    row opening its payment and coming back to Home; every bill stays one link away."""
+    c, day = _on(sample, "2026-10-04")
+    screen = home.build(c, day)
+    soon = screen.bills.late + screen.bills.week + screen.bills.before_payday or screen.bills.after_payday[:3]
+    html = _page(sample).text
+    sheet = html.split('phone-quick-bill', 1)[1].split("</details>", 1)[0]
+    assert sheet.count("back=%2Fhome") == len(soon) > 0
+    assert 'href="/money/bills"' in sheet

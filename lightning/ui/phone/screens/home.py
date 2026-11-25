@@ -85,6 +85,7 @@ class HomeScreen:
     expected: dict | None = None       # Expected by payday, the secondary line under Safe to spend today (lightning.ui.expected)
     free_cash: Decimal | None = None   # the ladder's middle step (Position.free_cash, its one formula); None while reserves are unknown
     free_working: object = None        # Free cash's working, from Cash and banks (Position.free_cash_working)
+    bills: object = None               # Pay a bill's sheet (owner, 2026-11-25): Money's BillsPage, the one bill state
 
 
 ACCOUNTS_SHOWN = 4
@@ -128,6 +129,11 @@ def _cash_accounts(c, position) -> tuple[tuple, Decimal, int]:
     for r in rows:
         r["share"] = float(r["balance"] / positive * 100) if positive > 0 and r["balance"] > 0 else 0.0  # not money: a bar's length
     return tuple(rows), total, count
+
+
+def _bills(c, day: date):
+    from lightning.ui.phone.screens.money import bills_page
+    return bills_page(c, day)
 
 
 def _first_steps(c, has_rows: bool, has_payment: bool) -> tuple:
@@ -193,6 +199,7 @@ def build(c, day: date, profile_name: str = "") -> HomeScreen:
                       meter=None if first_run else payday_meter(everyday),
                       working=forecast.safe_to_spend_working, free_cash=position.free_cash,
                       free_working=position.free_cash_working,
+                      bills=None if first_run else _bills(c, day),
                       todo=_shown(rows), todo_total=len(rows), latest=latest,
                       spent=c.reporting.cash_flow(day.replace(day=1), day).outflows,
                       left_in_plan=plan["left"] if plan else None, month=month, catch_up=away,

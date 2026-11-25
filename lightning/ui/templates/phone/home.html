@@ -85,7 +85,18 @@
   <a href="/accounts/add-transaction?kind=out&amp;return_to=%2Fhome" data-popup-open><svg class="is-out" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg>{{ 'Expense'|tr(locale) }}</a>
   <a href="/accounts/add-transaction?kind=in&amp;return_to=%2Fhome" data-popup-open><svg class="is-in" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg>{{ 'Income'|tr(locale) }}</a>
   <a href="/accounts/add-transaction?kind=transfer&amp;return_to=%2Fhome" data-popup-open><svg class="is-move" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h14M14 4l4 4-4 4M20 16H6M10 12l-4 4 4 4"/></svg>{{ 'Transfer'|tr(locale) }}</a>
-  <a href="/money/bills"><svg class="is-bill" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/></svg>{{ 'Pay a bill'|tr(locale) }}</a>
+  {# Pay a bill opens its sheet right here (owner, 2026-11-25: two taps, Home, then the bill): what is late and due
+     before payday, each row opening its payment; every bill is one link away. #}
+  {% set bill_btn %}<svg class="is-bill" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/></svg><span class="phone-quick-word">{{ 'Pay a bill'|tr(locale) }}</span>{% endset %}
+  {% set b = s.bills %}
+  {% call sheet('Pay a bill'|tr(locale), bill_btn, 'phone-quick-bill') %}
+    {% if b %}{% set soon = b.late + b.week + b.before_payday %}{% set next_up = not soon %}{% if next_up %}{% set soon = b.after_payday[:3] %}{% endif %}
+    <p class="phone-sheet-sub">{% if b.bills_due > 0 %}<b class="is-bad">{{ '{amt} late.'|tr(locale, amt=b.bills_due|money) }}</b> {% endif %}{{ fig.payments_before_next_income.label }} <b class="fig">{{ b.due_before_payday|money }}</b></p>
+    {% if soon %}{% if next_up %}<p class="phone-sheet-sub">{{ 'After payday'|tr(locale) }}</p>{% endif %}<div class="phone-rows">{% for r in soon %}<a class="phone-row phone-acct-row" data-popup-open href="/plan/items/{{ r.payment.item.id }}/pay?due={{ r.due_date }}&amp;back=%2Fhome"><span class="phone-txn-av is-out" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/></svg></span><span class="phone-acct-text"><b>{{ r.payment.item.name }}</b><small>{{ r.due_date|day(locale) }}{% if r.late_days %} · {{ ('Late · 1 day' if r.late_days == 1 else 'Late · {n} days')|tr(locale, n=r.late_days) }}{% endif %}</small></span><b><bdi class="fig">{{ r.payment.amount|money }}</bdi> {{ chevron() }}</b></a>{% endfor %}</div>
+    {% if next_up %}<p class="phone-note">{{ 'Nothing is due before payday. These come next.'|tr(locale) }}</p>{% endif %}
+    {% else %}<p class="phone-note">{{ 'Nothing is due.'|tr(locale) }}</p>{% endif %}{% endif %}
+    <a class="phone-quiet" href="/money/bills">{{ 'All bills'|tr(locale) }}{% if b and b.after_payday and not next_up %} · {{ ('1 after payday' if b.after_payday|length == 1 else '{n} after payday')|tr(locale, n=b.after_payday|length) }}{% endif %}</a>
+  {% endcall %}
 </nav>
 {% if s.todo %}
 <section class="phone-section is-rose phone-todo" aria-labelledby="todo-heading">

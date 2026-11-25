@@ -1694,3 +1694,11 @@ html.phone .phone-content .phone-row > .phone-period-pick:not(#_) { display: inl
 html.phone .phone-content .phone-row.has-chip:has(> .phone-row-pick) > span:nth-child(2) { flex: 1 0 auto; min-width: max-content; }
 html.phone .phone-content .phone-row.has-chip > .phone-row-pick { flex: 0 1 auto; min-width: 0; }
 html.phone .phone-content .phone-row.has-chip > .phone-row-pick select { max-width: 100%; text-overflow: ellipsis; }
+
+/* Pay a bill (Home's strip, 2026-11-25): the fourth part is a sheet's summary, drawn like its three neighbours. */
+.phone-quick > details { min-width: 0; border-inline-start: 1px solid var(--v2-hair); }
+html.phone .phone-content .phone-quick .phone-sheet-summary.phone-quick-bill:not(#_) { display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; min-height: 56px; height: 100%; margin: 0; padding: 6px 2px; border: 0; background: none; color: var(--c-ink-2); font-size: 12px; font-weight: 700; line-height: 1.2; text-align: center; }
+.phone-quick-bill:active { background: var(--v2-pill); }
+.phone-quick .phone-sheet-panel { text-align: start; font-size: 15px; font-weight: 500; color: var(--c-ink); }
+html.phone .phone-content .phone-quick-bill > .phone-quick-word:not(#_) { display: block; font-size: 12px; font-weight: 700; line-height: 1.2; color: var(--c-ink-2); }
