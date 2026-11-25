@@ -4,7 +4,7 @@
 {% block title %}Bills{% endblock %}
 {% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a><span class="phone-appbar-title">{{ 'Bills'|tr(locale) }}</span>{% endblock %}
 {% set p = page %}
-{% block heading %}<section class="phone-hero" aria-labelledby="bills-lead"><div id="bills-lead" class="phone-hero-label" role="heading" aria-level="2">{{ 'Due before payday'|tr(locale) }}</div>
+{% block heading %}<section class="phone-hero" aria-labelledby="bills-lead"><div id="bills-lead" class="phone-hero-label" role="heading" aria-level="2">{{ fig.payments_before_next_income.label }}</div>
 <div class="phone-lead">{{ p.due_before_payday|money }} <small>{{ base }}</small></div>
 <p class="phone-hero-line">{% if p.bills_due > 0 %}<b class="is-bad">{{ '{amt} late.'|tr(locale, amt=p.bills_due|money) }}</b> {{ 'Pay these first.'|tr(locale) }}{% else %}<b class="is-good">{{ 'Nothing late.'|tr(locale) }}</b>{% endif %}{% if p.payday %} {{ 'Payday {date}.'|tr(locale, date=p.payday|day(locale)) }}{% endif %}</p></section>{% endblock %}
 {% macro group(id, title, rows, tint='') %}{% if rows %}<section class="phone-section{{ ' ' ~ tint if tint }}" aria-labelledby="{{ id }}-heading">
