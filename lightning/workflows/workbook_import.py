@@ -470,6 +470,8 @@ def prepare_import(c, data):
         tables[name] = ([fields[h]['name'] for h in chosen], records)
     if problems:
         raise WorkbookProblems(problems)
+    # Workbooks exported before migration 0094 inherit the existing investment defaults.
+    tables.setdefault("holding_cash_shares", ([field["name"] for field in schema["holding_cash_shares"]], []))
     missing = set(schema) - set(tables)
     if missing:
         raise WorkbookProblems([f'Sheet "{_sheet_of(name)}" is missing. Keep every sheet of the template, even the empty ones.' for name in sorted(missing)])

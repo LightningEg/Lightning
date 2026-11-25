@@ -447,3 +447,14 @@ def test_count_as_cash_switch_replays_on_both_devices(devices):
     settle(hd, pc, reset)
     assert not hd.c.assets.get_asset_by_code("STK:ALPH").counts_as_cash
     assert not pc.c.assets.get_asset_by_code("STK:ALPH").counts_as_cash
+
+
+def test_holding_cash_share_and_reset_replay(devices):
+    hd, pc = devices
+    broker, stock = setup(hd, pc)
+    settle(hd, pc, buy(pc, broker, stock))
+    args = dict(asset_id=stock, account_id=broker, effective_on="2026-09-10")
+    for percent, expected in (("25.5", 255), ("0", 0), ("100", 1000), (None, 0)):
+        settle(hd, pc, pc.command("assets.set_holding_cash_percent", percent=percent, **args))
+        for device in (hd, pc):
+            assert device.c.position.at("2026-09-10").counted_as_cash == expected

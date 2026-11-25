@@ -53,6 +53,7 @@ class AssetRepository:
         self.db = db
 
     # asset classes
+    @request_cached(deep=True)
     def list_classes(self) -> list[AssetClass]:
         return [_class(r) for r in self.db.all("SELECT * FROM asset_classes ORDER BY sort_order, code")]
 
@@ -110,6 +111,21 @@ class AssetRepository:
     def set_counts_as_cash(self, asset_id: int, counts: bool) -> None:
         self.db.execute("UPDATE financial_assets SET counts_as_cash=?, updated_at=? WHERE id=?",
                         (int(counts), now_iso(), asset_id))
+
+    def holding_cash_shares(self, day: str):
+        rows = self.db.all(
+            "SELECT account_id, asset_id, percent_bps FROM holding_cash_shares AS share "
+            "WHERE effective_on=(SELECT MAX(effective_on) FROM holding_cash_shares "
+            "WHERE account_id=share.account_id AND asset_id=share.asset_id AND effective_on<=?)", (day,))
+        return {(r["account_id"], r["asset_id"]): r["percent_bps"] for r in rows if r["percent_bps"] is not None}
+
+    def set_holding_cash_share(self, account_id, asset_id, day, bps):
+        now = now_iso()
+        self.db.execute(
+            "INSERT INTO holding_cash_shares(account_id,asset_id,effective_on,percent_bps,created_at,updated_at) "
+            "VALUES(?,?,?,?,?,?) ON CONFLICT(account_id,asset_id,effective_on) DO UPDATE SET "
+            "percent_bps=excluded.percent_bps,updated_at=excluded.updated_at",
+            (account_id, asset_id, day, bps, now, now))
 
     # prices
     def upsert_price(self, asset_id: int, date: str, price, currency: str, source: str) -> None:

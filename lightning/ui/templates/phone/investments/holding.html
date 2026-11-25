@@ -17,6 +17,7 @@
   <div><dt>{{ 'Total return'|tr(locale) }}</dt><dd class="{{ total_return|tone }}"><bdi class="fig">{{ total_return|money(True) }}</bdi></dd></div>
   <div><dt>{{ ('XIRR' if display_return and display_return.annualized else 'Return')|tr(locale) }}</dt><dd>{% if display_return and display_return.percent is not none %}{{ display_return.percent|signed_pct }}{{ ('% a year' if display_return.annualized else '%')|tr(locale) }}{% else %}—{% endif %}</dd></div>
 </dl>
+{% include "partials/holding_cash.html" %}
 {% set q = '&account=' ~ h.account_id ~ '&asset=' ~ h.asset_id %}
 <a class="btn primary phone-save" data-popup-open href="/investments/new?kind=buy{{ q }}">{{ 'Buy more'|tr(locale) }}</a>
 {% if j.value_cost and not j.value_cost.too_short %}<section class="phone-section phone-chart-card" aria-label="{{ 'Value against cost'|tr(locale) }}">{{ area_trend(j.value_cost, 'Value against cost'|tr(locale)) }}</section>{% endif %}

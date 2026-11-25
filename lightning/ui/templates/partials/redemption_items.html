@@ -1,0 +1,6 @@
+{% if cash_sources and cash_sources.counted_as_cash_items %}
+<p>{{ 'Cash in spendable accounts before reserves and bills'|tr(locale) }} · {{ cash_sources.spendable_account_cash|money }} {{ base }}</p>
+<h3>{{ 'Counted as cash · requires redemption'|tr(locale) }}</h3>
+<ul>{% for item in cash_sources.counted_as_cash_items %}<li><a href="/investments/holding/{{ item.asset_id }}?account={{ item.account_id }}&date={{ as_of }}">{{ item.asset }} · {{ item.account }}</a>
+  ({{ item.cash_percent|units }}%) · {{ item.cash_value|money }} {{ base }}</li>{% endfor %}</ul>
+{% endif %}

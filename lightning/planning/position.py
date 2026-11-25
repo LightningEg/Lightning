@@ -62,10 +62,24 @@ class OwnedHolding:
     cost: Decimal | None = None  # what you paid, where only the account's details say (a property, NF-12M1)
     marked_as_cash: bool = False  # NF-7AU: its investment is marked to count with cash
 
+    cash_override: Decimal | None = None  # explicit share of owned value for this account
+
+    @property
+    def cash_percent(self) -> Decimal:
+        if self.locked_until:
+            return ZERO
+        if self.cash_override is not None:
+            return self.cash_override
+        return Decimal(100) if self.marked_as_cash else ZERO
+
+    @property
+    def cash_value(self) -> Decimal:
+        return max(ZERO, self.value or ZERO) * self.cash_percent / 100
+
     @property
     def counts_as_cash(self) -> bool:
         """Marked to count with cash and not locked (a certificate in its lock-up never counts)."""
-        return self.marked_as_cash and not self.locked_until
+        return self.cash_percent > ZERO
 
     @property
     def locked_until(self) -> str | None:
@@ -100,16 +114,15 @@ class ClassValue:
     @property
     def counted_as_cash(self) -> Decimal:
         """NF-7AU: the value of this class's holdings that count with cash (in Free cash at full value)."""
-        return sum((item.value or ZERO for item in self.items if item.counts_as_cash), ZERO)
+        return sum((item.cash_value for item in self.items), ZERO)
 
     @property
     def after_sale_beyond_cash(self) -> Decimal:
         """What the holdings not counted as cash would fetch if sold: If you sold today's share of this class."""
-        counted = [item for item in self.items if item.counts_as_cash]
-        if not counted:
+        if not any(item.counts_as_cash for item in self.items):
             return self.after_sale
-        return sum(((item.value or ZERO) * getattr(item, "_realization_factor", self.factor) / 100
-                    for item in self.items if not item.counts_as_cash), ZERO)
+        return sum((((item.value or ZERO) - item.cash_value) * getattr(item, "_realization_factor", self.factor) / 100
+                    for item in self.items), ZERO)
 
     @property
     def locked_until(self) -> str | None:
@@ -242,16 +255,20 @@ class Position:
     @property
     def counted_as_cash(self) -> Decimal:
         """NF-7AU: holdings the person marked to count with cash, at their value (inside Holdings value too)."""
-        return sum((item.value or ZERO for item in self.counted_as_cash_items), ZERO)
+        return sum((item.cash_value for item in self.counted_as_cash_items), ZERO)
 
     @property
     def counted_as_cash_items(self) -> tuple[OwnedHolding, ...]:
         return tuple(item for cls in self.classes for item in cls.items
-                     if getattr(item, "counts_as_cash", False) and item.value)
+                     if getattr(item, "cash_value", ZERO) > ZERO)
+
+    @property
+    def spendable_account_cash(self) -> Decimal:
+        return self.cash_you_own - self.kept_apart
 
     @property
     def spendable_cash(self) -> Decimal:
-        return self.cash_you_own - self.kept_apart + self.counted_as_cash
+        return self.spendable_account_cash + self.counted_as_cash
 
     @property
     def portfolio_value(self) -> Decimal:
@@ -344,6 +361,7 @@ class PositionService:
         rows, unvalued = self.reporting.holdings(day)
         custody = {(r["account_id"], r["asset_id"]): r["units"]
                    for r in self.money_from_others.investment_positions(day)}
+        shares = self.assets.holding_cash_percentages(day)
         result = []
         for row in rows:
             asset = self.assets.get_asset(row.asset_id)
@@ -364,7 +382,8 @@ class PositionService:
                 continue  # the pot taken early is Gam'eya still to pay (What you owe), not a negative holding
             result.append(OwnedHolding(row.account.id, row.account.label, row.asset_id, asset.name,
                                        row.asset_class_code, quantity, value, asset.unit,
-                                       None if held else row.cost, asset.counts_as_cash))
+                                       None if held else row.cost, asset.counts_as_cash,
+                                       shares.get((row.account.id, row.asset_id))))
         return result, unvalued
 
     def foreign_holdings(self, as_of: date | str, base_currency: str) -> dict[str, tuple[Decimal, bool]]:

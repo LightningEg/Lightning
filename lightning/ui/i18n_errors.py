@@ -1,6 +1,10 @@
 """Arabic for the plain error sentences (IV-3BD). Keys are the exact English text."""
 
 ERRORS_AR = {
+    "Enter a percentage from 0 to 100.": "أدخل نسبة من ٠ إلى ١٠٠.",
+    "Choose an investment holding.": "اختر حيازة استثمارية.",
+    "Choose how much to count in Free cash.": "اختر النسبة التي تُحسب ضمن النقدية المتاحة.",
+    "Choose an open investment holding.": "اختر حيازة استثمارية ما زلت تملكها.",
     "That did not save": "ما اتحفظش",
     "This form came from outside Lightning, so it was not sent.": "الفورم ده جه من برّه لايتنينج، فمتبعتش.",
     "That request was not complete.": "الطلب ده مكانش كامل.",

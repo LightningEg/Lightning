@@ -322,6 +322,25 @@ class AssetService:
                 self.repo.set_counts_as_cash(asset_id, bool(counts))
         return self.get_asset(asset_id)
 
+    @request_cached
+    def holding_cash_percentages(self, day: str) -> dict[tuple[int, int], Decimal]:
+        return {key: Decimal(bps) / 100 for key, bps in self.repo.holding_cash_shares(day).items()}
+
+    @staticmethod
+    def cash_percentage(value) -> Decimal:
+        percent = check_places(to_decimal(value, "percent"), 2, "percent")
+        if not ZERO <= percent <= 100:
+            raise ValidationError("Enter a percentage from 0 to 100.", "percent")
+        return percent
+
+    def set_holding_cash_percent(self, account_id: int, asset_id: int, effective_on: str, percent):
+        if self.get_asset(asset_id).is_cash:
+            raise ValidationError("Choose an investment holding.")
+        day = fmt_date(parse_date(effective_on))
+        bps = None if percent is None else int(self.cash_percentage(percent) * 100)
+        with self.db.transaction():
+            self.repo.set_holding_cash_share(account_id, asset_id, day, bps)
+
     def link_market(self, asset_id: int, key: str | None) -> None:
         """Remember which market-file instrument an asset is (EG:COMI, EG:FUND:4104)."""
         asset = self.get_asset(asset_id)
