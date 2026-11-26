@@ -9,8 +9,9 @@ from decimal import ROUND_DOWN, ROUND_UP, Decimal
 from typing import Protocol
 
 from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
+from lightning.core.errors import ValidationError
 from lightning.core.figures import label
-from lightning.core.money import ZERO, from_e6
+from lightning.core.money import ZERO, from_e6, to_decimal
 from lightning.deposits.domain import DepositEvent
 
 from .domain import CashForecast, EverydayBudget, ExpectedIncome, ForecastMonth, Payment, PaymentStatus, PlanKind
@@ -161,6 +162,20 @@ class CashForecaster:
         return reserve_goal_needs(self.reserves, month, as_of)
 
     # -------------------------------------------------------------- everyday
+    def overspend_options(self, month: str, category_id: int):
+        schedule = self.schedules.view()
+        plan = self.budgets.plan_left(category_id, month, schedule=schedule)
+        if not plan or plan["inside"] or not plan["over"]:
+            return []
+        return self.budgets.cover_options(month, category_id, -plan["left"], self.everyday(month).room, schedule=schedule)
+
+    def cover_overspend(self, month: str, to_id: int, from_id: int, amount):
+        value = to_decimal(amount)
+        with self.budgets.db.transaction():
+            if not any(row["id"] == from_id and row["amount"] == value for row in self.overspend_options(month, to_id)):
+                raise ValidationError("The budget changed. Review the available room again.")
+            self.budgets.move_room(month, to_id, from_id, value, True, schedule=self.schedules.view())
+
     def everyday(self, month: str, as_of: date | None = None) -> EverydayBudget:
         """The month's plan as bills and everyday money (owner 2026-10-19). Bills to pay are the bills and loan
         payments in planned categories not paid yet, counted as the forecast counts them for this month, so
@@ -190,7 +205,13 @@ class CashForecaster:
         last_month = self._everyday_by_day(before_last.replace(day=1), before_last)
         shape, usual_days = self._usual_month(first)
         view = self.budgets.month_view(month, schedule=self.schedules.view())
-        room = {line.category_id: line.remaining - unpaid.get(line.category_id, ZERO)
+        protected = dict(unpaid)
+        for cid, amount in unpaid.items():
+            parent = self.categories.get(cid).parent_id
+            while parent is not None:
+                protected[parent] = protected.get(parent, ZERO) + amount
+                parent = self.categories.get(parent).parent_id
+        room = {line.category_id: line.remaining - protected.get(line.category_id, ZERO)
                 for section in view.sections for line in section.lines
                 if line.depth > 1 and line.remaining is not None}
         return EverydayBudget(month, summary["planned"], summary["spent"], summary["left"], bills_to_pay, everyday_left,

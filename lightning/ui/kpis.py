@@ -159,7 +159,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         parts = [(row["name"], row["over"], "over" if i == 0 else "out") for i, row in enumerate(over[:3])]
         if len(over) > 3:
             parts.append(("Other", over_plan_total([row["over"] for row in over[3:]]), "neutral"))
-        act = (line(action=f"Move {fmt(move['amount'], 0)} from {move['name']}", href=move["href"], popup=True) if move
+        act = (line(action=f"Move {move['amount_text']} from {move['name']}", href=move["href"], popup=True) if move
                else line(action="See categories", href="#budget-meters"))
         cards.append(card("Over plan", total, compare("over their plan", f"{names} categor{'y' if names == 1 else 'ies'}", "bad"),
                           tone="over", needs=True, key="over", chip_=chip("Needs you", "over"),
