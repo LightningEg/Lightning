@@ -60,6 +60,8 @@ class MoneyScreen:
     health_watch: int | None = None    # health figures outside their Good band; None when none has a limit
     working: object = None             # NF-12AB4: Net worth's working, for the hero's sheet
     trend: dict | None = None          # charts.trend of net worth at each month end; the last point is today
+    own_working: object = None         # Money's ladder (owner, 2026-11-25): What you own, then What you owe, each with its parts
+    owe_working: object = None
     own_split: tuple[dict, ...] = ()   # what you own by asset class family: {key, label, value, share}, A04 order
     strip: tuple[dict, ...] = ()       # NF-7AR3: today and the next 13 days of payments, each day a way into Upcoming
     units: tuple[dict, ...] = ()       # 3AY10 (owner 2026-11-11): Net worth in US dollars and grams of 21K gold, dated
@@ -127,7 +129,8 @@ def build(c, day: date) -> MoneyScreen:
     bills = bill_state.unpaid_bills(c.planning, day, BILLS_HORIZON_DAYS)
     funded, goals = _goals(c)
     return MoneyScreen(
-        working=now.net_worth_working, net_worth=now.net_worth, what_you_own=now.what_you_own, what_you_owe=now.what_you_owe, since_start=since,
+        working=now.net_worth_working, own_working=now.what_you_own_working, owe_working=now.what_you_owe_working,
+        net_worth=now.net_worth, what_you_own=now.what_you_own, what_you_owe=now.what_you_owe, since_start=since,
         accounts=tuple(rows[:ACCOUNTS_SHOWN]), accounts_more=max(len(rows) - ACCOUNTS_SHOWN, 0),  # not money
         accounts_total=c.reporting.balances_total([r.balance for r in rows]), held_for_others=now.held_for_others,
         coming_up=tuple(b for b in bills if b.state in UPCOMING)[:COMING_UP],
@@ -170,6 +173,9 @@ class BillsPage:
     week: tuple[BillRow, ...]
     before_payday: tuple[BillRow, ...]
     after_payday: tuple[BillRow, ...]
+    due_before_payday: Decimal = Decimal(0)   # the forecaster's Due before payday, the page's lead (2026-11-25)
+    bills_due: Decimal = Decimal(0)           # Bills due: late and unpaid (Position.bills_due)
+    payday: str = ""                          # the next income date, "" when none is planned
 
 
 def bills_page(c, day: date) -> BillsPage:
@@ -177,5 +183,8 @@ def bills_page(c, day: date) -> BillsPage:
     The same open bills Home's To do and Money's Coming up read, so a bill is counted once everywhere."""
     rows = bill_state.unpaid_bills(c.planning, day, BILLS_HORIZON_DAYS)
     pick = lambda *states: tuple(b for b in rows if b.state in states)  # noqa: E731
+    forecast = c.forecaster.forecast(day)
     return BillsPage(pick(BillState.LATE, BillState.LATE_STALE), pick(BillState.DUE_SOON),
-                     pick(BillState.BEFORE_PAYDAY), pick(BillState.LATER))
+                     pick(BillState.BEFORE_PAYDAY), pick(BillState.LATER),
+                     due_before_payday=forecast.payments_before_income_total, bills_due=c.position.at(day).bills_due,
+                     payday=forecast.next_income_date or "")

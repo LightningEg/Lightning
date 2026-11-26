@@ -16,8 +16,11 @@
 {% block heading %}{% if cash and (has_accounts or cash.due) %}
 {# IV-11M6 (mockup v2.0): Coming up leads with Due before payday, its verdict, the next 30 days in and out and a timeline to payday. #}
 <section class="phone-hero phone-plan-hero" aria-labelledby="lead-heading"><a id="lead-heading" class="phone-hero-label" role="heading" aria-level="2" href="/plan/upcoming">{{ fig.payments_before_next_income.label }} <span aria-hidden="true">{{ chevron() }}</span></a>
-  <div class="phone-lead" data-fig="payments_before_next_income">{{ cash.due|money }} <small>{{ base }}</small></div>
-  <p class="phone-hero-line">{% if cash.covered %}<b class="is-good">{{ 'Covered.'|tr(locale) }}</b>{% if cash.until %} {{ 'After these you keep {amt} until {date}.'|tr(locale, amt=cash.keep|money, date=cash.until)|keep_dates }}{% endif %}{% else %}<b class="is-bad">{{ 'Short.'|tr(locale) }}</b>{% for s in cash.lines %} {{ s.text|tr(locale, **s['values'])|keep_dates }}{% endfor %}{% endif %}</p>
+  {# Owner, 2026-11-25: with nothing due before payday the answer is the verdict, not a big zero. #}
+  {% if cash.due == 0 and cash.covered %}<div class="phone-lead phone-lead-verdict"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>{{ 'All covered'|tr(locale) }}</div>
+  <p class="phone-hero-line">{{ 'Nothing is due before payday.'|tr(locale) }}{% if cash.until %} {{ 'You keep {amt} until {date}.'|tr(locale, amt=cash.keep|money, date=cash.until)|keep_dates }}{% endif %}</p>
+  {% else %}<div class="phone-lead" data-fig="payments_before_next_income">{{ cash.due|money }} <small>{{ base }}</small></div>
+  <p class="phone-hero-line">{% if cash.covered %}<b class="is-good">{{ 'Covered.'|tr(locale) }}</b>{% if cash.until %} {{ 'After these you keep {amt} until {date}.'|tr(locale, amt=cash.keep|money, date=cash.until)|keep_dates }}{% endif %}{% else %}<b class="is-bad">{{ 'Short.'|tr(locale) }}</b>{% for s in cash.lines %} {{ s.text|tr(locale, **s['values'])|keep_dates }}{% endfor %}{% endif %}</p>{% endif %}
   <div class="phone-wells"><span class="phone-well"><span>{{ 'Coming in · 30 days'|tr(locale) }}</span><b class="fig">{{ cash.coming_in|money(True) }}</b></span><span class="phone-well"><span>{{ 'Going out · 30 days'|tr(locale) }}</span><b class="fig">{{ cash.going_out|money }}</b></span></div>
   {% if cash.timeline is not none and cash.until %}<div class="phone-timeline" aria-hidden="true"><span class="phone-timeline-line"></span><i class="is-today" style="inset-inline-start:0%"></i>{% for d in cash.timeline %}<i class="{{ 'is-late' if d.late else 'is-bill' }}" style="inset-inline-start:{{ '%.1f'|format(d.at) }}%"></i>{% endfor %}<i class="is-payday" style="inset-inline-start:100%"></i></div>
   <p class="phone-timeline-ends"><span>{{ 'Today'|tr(locale) }}</span><span>{{ ('1 bill' if cash.bill_count == 1 else '{n} bills')|tr(locale, n=cash.bill_count) }}</span><span>{{ cash.until|day_label(locale) }}</span></p>{% endif %}
@@ -52,16 +55,24 @@
 {% endif %}
 
 {# BV-7AW (r37 M1): Can I afford this? on the phone: a price and a date; the same answer as the PC #}
-{% if has_accounts %}<section class="phone-section" aria-labelledby="afford-h">
-  <header class="phone-section-head"><h2 id="afford-h">{{ 'Can I afford this?'|tr(locale) }}</h2></header>
-  <form method="get" action="/plan" class="phone-form">
-    <label>{{ 'Price'|tr(locale) }}<input name="afford" inputmode="decimal" class="money-input" value="{{ afford_amount }}"></label>
-    <label>{{ 'Date'|tr(locale) }}<input name="afford_date" type="date" min="{{ as_of }}" value="{{ afford_date }}"></label>
-    <button class="btn primary phone-save">{{ 'Check'|tr(locale) }}</button>
-  </form>
-  {% if afford %}<p class="phone-note" role="status">{{ afford.headline|tr(locale) }}</p>
-  {% if afford_plan_url %}<a class="phone-row" href="{{ afford_plan_url }}"><span>{{ 'Plan this purchase'|tr(locale) }}<small>{{ 'Nothing is saved until you save it.'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
-  {% elif afford_error %}<div class="flash error" role="alert">{{ afford_error|tr(locale) }}</div>{% endif %}
+{% if has_accounts %}<section class="phone-section phone-afford" aria-labelledby="afford-h">
+  {# Owner, 2026-11-25: one row that opens its sheet; after Check the sheet opens again on the answer. #}
+  <details class="phone-sheet-row"{% if afford or afford_error %} open{% endif %}>
+    <summary class="phone-row phone-sheet-summary phone-acct-row"><span class="phone-txn-av is-flat" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7zM9 7a3 3 0 0 1 6 0"/></svg></span><span class="phone-acct-text"><b id="afford-h">{{ 'Can I afford this?'|tr(locale) }}</b><small>{{ 'A price and a date, checked against your plan'|tr(locale) }}</small></span><b>{{ chevron() }}</b></summary>
+    <div class="phone-sheet-panel" role="dialog" aria-label="{{ 'Can I afford this?'|tr(locale) }}">
+      <span class="phone-grabber" aria-hidden="true"></span>
+      <h2 class="phone-sheet-title">{{ 'Can I afford this?'|tr(locale) }}</h2>
+      <form method="get" action="/plan" class="phone-form">
+        <label>{{ 'Price'|tr(locale) }}<input name="afford" inputmode="decimal" class="money-input" value="{{ afford_amount }}"></label>
+        <label>{{ 'Date'|tr(locale) }}<input name="afford_date" type="date" min="{{ as_of }}" value="{{ afford_date }}"></label>
+        <button class="btn primary phone-save">{{ 'Check'|tr(locale) }}</button>
+      </form>
+      {% if afford %}<p class="phone-note" role="status">{{ afford.headline|tr(locale) }}</p>
+      {% if afford_plan_url %}<a class="phone-row" href="{{ afford_plan_url }}"><span>{{ 'Plan this purchase'|tr(locale) }}<small>{{ 'Nothing is saved until you save it.'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
+      {% elif afford_error %}<div class="flash error" role="alert">{{ afford_error|tr(locale) }}</div>{% endif %}
+      <button type="button" class="btn phone-save" data-sheet-close>{{ 'Done'|tr(locale) }}</button>
+    </div>
+  </details>
 </section>{% endif %}
 
 {% set dated = f.dated %}

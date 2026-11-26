@@ -21,6 +21,13 @@
 {% macro head(tile, title, sub, id, tint='') %}<header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24">{{ tile|safe }}</svg></span><span class="phone-head-text"><h2 id="{{ id }}">{{ title|tr(locale) }}</h2><small>{{ sub|tr(locale) }}</small></span></header>{% endmacro %}
 {% set name = profile_name or ('Your profile'|tr(locale)) %}
 <a class="phone-profile-card" href="/profiles"><span class="phone-profile-initial" aria-hidden="true">{{ name[:1]|upper }}</span><span class="phone-profile-text"><b>{{ name }}</b><small>{{ 'Encrypted on this phone · Lightning {version}'|tr(locale, version='v' ~ app_version) }}</small></span>{{ chevron() }}</a>
+{# What Home calls you (owner, 2026-11-25): empty keeps the profile's own name. #}
+<form method="post" action="/settings/name" class="phone-section phone-name-form" id="your-name">
+  <label class="phone-name-label" for="welcome-name">{{ 'What should we call you?'|tr(locale) }}</label>
+  <div class="phone-name-row"><input id="welcome-name" name="name" maxlength="40" autocomplete="nickname" value="{{ display_name }}" placeholder="{{ profile_name or ('Your name'|tr(locale)) }}"><button type="submit" class="btn primary">{{ 'Save'|tr(locale) }}</button></div>
+  <small class="phone-name-note">{{ 'Home greets you by this name. Leave it empty to use your profile name.'|tr(locale) }}</small>
+  <input type="hidden" name="__session" value="{{ session }}">
+</form>
 
 <section class="phone-section" aria-labelledby="theme-heading">
   {{ head('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/>', 'How it looks', 'Theme, language, privacy', 'theme-heading') }}
