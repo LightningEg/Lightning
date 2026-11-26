@@ -40,7 +40,7 @@ def test_the_strip_shows_after_the_salary_until_the_plan_is_saved(mohab):
     html = _phone(mohab).get("/budget").text
     strip = html[html.index('class="phone-row phone-payday-strip"'):]
     assert strip.startswith('class="phone-row phone-payday-strip" href="/payday"')
-    assert "Plan this month" in strip[:300] and html.index("phone-payday-strip") < html.index('id="lead-heading"')
+    assert "Plan this month" in strip[:300] and html.index('id="lead-heading"') < html.index("phone-payday-strip")   # owner, 2026-11-25: the answer first, the strip under it
     salary = salary_review(mohab.db, date(2026, 10, 5))
     mohab.settings.set("review_item_" + review_identity(salary), json.dumps({"status": "reviewed"}, sort_keys=True))
     assert "phone-payday-strip" not in _phone(mohab).get("/budget").text   # the plan is saved: the strip is gone

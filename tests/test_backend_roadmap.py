@@ -54,7 +54,7 @@ def test_the_phone_home_reads_far_less_than_the_pc_overview(c, monkeypatch):
         pc_page, pc_reads = _reads(c, monkeypatch, lambda: pc.get("/"))
         phone_page, phone_reads = _reads(c, monkeypatch, lambda: phone.get("/"))
     assert pc_page.status_code == 200 and phone_page.status_code == 200
-    assert 'class="phone-tabbar"' in phone_page.text and "phone-home-hero" in phone_page.text
+    assert 'class="phone-tabbar"' in phone_page.text and "phone-ladder" in phone_page.text
     assert phone_reads <= PHONE_HOME_BUDGET, f"phone Home ran {phone_reads} SELECT statements"
     assert phone_reads < pc_reads * 0.8
 

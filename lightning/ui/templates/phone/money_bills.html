@@ -1,18 +1,21 @@
-{# Bills (IV-3AY10): the one bill state. Late first as a block, then this week, before payday and after payday. #}
+{# Bills (IV-3AY10; polished 2026-11-25): Due before payday leads, with what is late; then the one bill state as cards,
+   Late first, then this week, before payday and after payday. A row opens its payment. #}
 {% extends "base.html" %}
 {% block title %}Bills{% endblock %}
-{% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a>{% endblock %}
-{% block heading %}<h1>{{ 'Bills'|tr(locale) }}</h1>{% endblock %}
-{% macro group(id, title, rows) %}{% if rows %}<section class="phone-section" aria-labelledby="{{ id }}-heading">
-  <header class="phone-section-head"><h2 id="{{ id }}-heading">{{ title|tr(locale) }}</h2></header>
-  <div class="phone-rows">{% for b in rows %}<a class="phone-row" data-popup-open href="/plan/items/{{ b.payment.item.id }}/pay?due={{ b.due_date }}&amp;back=%2Fmoney%2Fbills"><span>{{ b.payment.item.name }}<small>{{ b.due_date }}{% if b.late_days %} · {{ ('Late · 1 day' if b.late_days == 1 else 'Late · {n} days')|tr(locale, n=b.late_days) }}{% endif %}</small></span><b><bdi class="fig">{{ b.payment.amount|money }}</bdi></b></a>{% endfor %}</div>
+{% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a><span class="phone-appbar-title">{{ 'Bills'|tr(locale) }}</span>{% endblock %}
+{% set p = page %}
+{% block heading %}<section class="phone-hero" aria-labelledby="bills-lead"><div id="bills-lead" class="phone-hero-label" role="heading" aria-level="2">{{ fig.payments_before_next_income.label }}</div>
+<div class="phone-lead">{{ p.due_before_payday|money }} <small>{{ base }}</small></div>
+<p class="phone-hero-line">{% if p.bills_due > 0 %}<b class="is-bad">{{ '{amt} late.'|tr(locale, amt=p.bills_due|money) }}</b> {{ 'Pay these first.'|tr(locale) }}{% else %}<b class="is-good">{{ 'Nothing late.'|tr(locale) }}</b>{% endif %}{% if p.payday %} {{ 'Payday {date}.'|tr(locale, date=p.payday|day(locale)) }}{% endif %}</p></section>{% endblock %}
+{% macro group(id, title, rows, tint='') %}{% if rows %}<section class="phone-section{{ ' ' ~ tint if tint }}" aria-labelledby="{{ id }}-heading">
+  <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/></svg></span><span class="phone-head-text"><h2 id="{{ id }}-heading">{{ title|tr(locale) }}</h2><small>{{ ('1 bill' if rows|length == 1 else '{n} bills')|tr(locale, n=rows|length) }}</small></span></header>
+  <div class="phone-rows">{% for b in rows %}<a class="phone-row phone-acct-row" data-popup-open href="/plan/items/{{ b.payment.item.id }}/pay?due={{ b.due_date }}&amp;back=%2Fmoney%2Fbills"><span class="phone-txn-av is-out" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6M9 16h3"/></svg></span><span class="phone-acct-text"><b>{{ b.payment.item.name }}</b><small>{{ b.due_date|day(locale) }}{% if b.late_days %} · {{ ('Late · 1 day' if b.late_days == 1 else 'Late · {n} days')|tr(locale, n=b.late_days) }}{% endif %}</small></span><b><bdi class="fig">{{ b.payment.amount|money }}</bdi> {{ chevron() }}</b></a>{% endfor %}</div>
 </section>{% endif %}{% endmacro %}
 {% block content %}
-{% set p = page %}
-{{ group('late', 'Late', p.late) }}
+{{ group('late', 'Late', p.late, 'is-rose') }}
 {{ group('week', 'This week', p.week) }}
 {{ group('before', 'Before payday', p.before_payday) }}
 {{ group('after', 'After payday', p.after_payday) }}
 {% if not (p.late or p.week or p.before_payday or p.after_payday) %}<p class="phone-note">{{ 'Nothing is due.'|tr(locale) }}</p>{% endif %}
-<a class="phone-row" href="/plan/recurring"><span>{{ 'Recurring'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
+<section class="phone-section"><div class="phone-rows"><a class="phone-row phone-acct-row" href="/plan/recurring"><span class="phone-txn-av is-flat" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/></svg></span><span class="phone-acct-text"><b>{{ 'Recurring'|tr(locale) }}</b><small>{{ 'Every bill and income that repeats'|tr(locale) }}</small></span><b>{{ chevron() }}</b></a></div></section>
 {% endblock %}

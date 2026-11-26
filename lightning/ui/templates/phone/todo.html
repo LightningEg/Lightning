@@ -1,16 +1,18 @@
-{# To do, all of it (IV-3AY14, C11.1): Home's To do rows, not cut to three, then back to Home. #}
+{# To do, all of it (IV-3AY14, C11.1; polished 2026-11-25): how many things need you leads, then every row with its one
+   verb, whole EGP as on Home. Back is the app bar's. #}
 {% extends "phone/base.html" %}
 {% from "phone/partials/todo.html" import todo_rows with context %}
 {% block title %}To do{% endblock %}
-{% block phone_back %}<a class="phone-back" href="/home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Home'|tr(locale) }}</span></a>{% endblock %}
-{% block heading %}<h1>{{ 'To do'|tr(locale) }}</h1>{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/home"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Home'|tr(locale) }}</span></a><span class="phone-appbar-title">{{ 'To do'|tr(locale) }}</span>{% endblock %}
+{% block heading %}<section class="phone-hero" aria-labelledby="todo-lead"><div id="todo-lead" class="phone-hero-label" role="heading" aria-level="2">{{ 'To do'|tr(locale) }}</div>
+<div class="phone-lead">{{ screen.rows|length }} <small>{{ ('thing needs you' if screen.rows|length == 1 else 'things need you')|tr(locale) }}</small></div>
+<p class="phone-hero-line">{% if screen.rows %}{{ 'Each row does its job in one tap.'|tr(locale) }}{% else %}<b class="is-good">{{ 'All done.'|tr(locale) }}</b> {{ 'Nothing to do today.'|tr(locale) }}{% endif %}</p></section>{% endblock %}
 {% block content %}
 {% if screen.rows %}
-<section class="phone-section phone-todo" aria-label="{{ 'To do'|tr(locale) }}">
+<section class="phone-section is-rose phone-todo" aria-label="{{ 'To do'|tr(locale) }}">
   <div class="phone-rows">
   {{ todo_rows(screen.rows) }}
   </div>
 </section>
-{% else %}<p class="phone-note">{{ 'Nothing to do today.'|tr(locale) }}</p>{% endif %}
-<section class="phone-section"><a class="btn" href="/home">{{ 'Done'|tr(locale) }}</a></section>
+{% endif %}
 {% endblock %}

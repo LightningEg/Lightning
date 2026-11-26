@@ -1,7 +1,7 @@
-"""Home (guideline C11 v2.0, IV-11M3): "Am I OK today, and what do I do next?". Always today: a greeting, In your accounts
-(the cash in your bank and wallet accounts, each with its share), the Safe to spend card (its working in a sheet, a ring of
-everyday money spent, Left in budget and Bills before payday), four quick actions, To do (three rows: name, figure, when,
-one verb), Latest five. The first day shows the three steps to the number instead. The state (first run, catch-up, payday,
+"""Home (guideline C11 v2.0, IV-11M3; owner proposal 2026-11-25): "Am I OK today, and what do I do next?". Always today:
+a greeting; the ladder Cash and banks, Free cash, Safe to spend (each step opens its own sheet: the accounts, then each
+figure's working) with the payday meter under it; four quick actions in one strip; To do (three rows: name, figure,
+when, one verb); Latest five. The first day shows the three steps to the number instead. The state (first run, catch-up, payday,
 overspent, calm; C13) decides what leads. Services calculate; this module only picks and orders."""
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from lightning.core.dates import month_of, now, parse_date
-from lightning.accounts.domain import AccountType
+from lightning.core.figures import label
 from lightning.ui.expected import expected_by_payday
 from lightning.ui.phone.screens.budget import month_bar
 from lightning.planning import bill_state
@@ -72,46 +72,68 @@ class HomeScreen:
     catch_up: bill_state.CatchUp
     month_bar: dict | None = None      # IV-11D2: the plan as one bar (spent, left, over); None without a plan
     everyday_left: Decimal | None = None  # IV-12P: Left for everyday (owner, 2026-11-09); None with no plan
-    accounts: tuple = ()               # IV-11M3: In your accounts, the bank and cash accounts (dicts: id, name, kind, institution, balance, share)
+    accounts: tuple = ()               # Cash and banks: spendable accounts and holdings counted as cash (dicts: id, name, kind, institution, balance, share, href)
     accounts_total: Decimal = Decimal(0)
     accounts_count: int = 0
     bills_before_payday: Decimal = Decimal(0)   # the forecaster's Due before payday (what Safe to spend takes off)
     spent_today: Decimal = Decimal(0)
     greeting: str = "Good evening"
-    name: str = ""
+    name: str = ""                     # what Home calls you: Settings' name, else the profile's own name
+    today: str = ""
+    days_to_payday: int | None = None  # not money: days until the next income date; None when none is planned
     steps: tuple = ()                  # first day: (key, done) for the salary account, the payday, the first payment
     expected: dict | None = None       # Expected by payday, the secondary line under Safe to spend today (lightning.ui.expected)
+    free_cash: Decimal | None = None   # the ladder's middle step (Position.free_cash, its one formula); None while reserves are unknown
+    free_working: object = None        # Free cash's working, from Cash and banks (Position.free_cash_working)
+    bills: object = None               # Pay a bill's sheet (owner, 2026-11-25): Money's BillsPage, the one bill state
 
 
-CASH_KINDS = (AccountType.BANK, AccountType.CASH)
 ACCOUNTS_SHOWN = 4
+
+
+NAME_LONGEST = 40
+
+
+def welcome_name(c, profile_name: str = "") -> str:
+    """The name Home greets you by (owner, 2026-11-25): the one you chose in Settings, else the profile's own name."""
+    return (c.settings.get("display_name") or "").strip()[:NAME_LONGEST] or (profile_name or "").strip()[:NAME_LONGEST]
 
 
 def _greeting(hour: int) -> str:
     return "Good morning" if 4 <= hour < 12 else "Good afternoon" if hour < 17 else "Good evening"
 
 
-def _cash_accounts(c, day: date) -> tuple[tuple, Decimal, int]:
-    """Cash and banks (r38): active bank and cash accounts with a positive balance, largest first, four then Other."""
-    rows, base = [], c.reporting.base_currency
-    for a in c.accounts.list(active_only=True):
-        if a.parent_id or a.account_type not in CASH_KINDS or a.currency != base:
-            continue
-        value = c.reporting.account_value(a.id, day)
-        if value is not None and value > 0:
-            rows.append({"id": a.id, "name": a.name, "kind": a.type_short, "institution": a.institution or a.name,
-                         "type": "CASH_AT_HAND" if a.cash_at_hand else a.account_type.value, "balance": value})
+def _cash_accounts(c, position) -> tuple[tuple, Decimal, int]:
+    """Cash and banks (r38; owner, 2026-11-25): where Free cash starts, Spendable cash. Every spendable account
+    (reporting's own split) and each holding's share that counts as cash, largest first, three then Other. The rows
+    add up to the figure, so the ladder Cash and banks, Free cash, Safe to spend adds up step by step."""
+    rows = []
+    for r in c.reporting.owned_spendable_cash_by_account(position.as_of):
+        a = r["account"]
+        rows.append({"id": a.id, "name": a.name, "kind": a.type_short, "institution": a.institution or a.name,
+                     "type": "CASH_AT_HAND" if a.cash_at_hand else a.account_type.value, "balance": r["value"],
+                     "href": f"/accounts/{a.id}"})
+    for item in position.counted_as_cash_items:
+        value = getattr(item, "cash_value", item.value)  # a share of the holding once one is chosen (IV PR 762)
+        rows.append({"id": item.account_id, "name": item.asset, "kind": label("counted_as_cash"), "institution": item.asset,
+                     "type": "", "balance": value, "href": "/investments"})
     rows.sort(key=lambda r: (-r["balance"], r["name"].casefold()))
-    total = c.reporting.balances_total([r["balance"] for r in rows]) if rows else Decimal(0)
+    total = position.spendable_cash
     count = len(rows)
     if len(rows) > ACCOUNTS_SHOWN:
         rest = rows[ACCOUNTS_SHOWN - 1:]  # not money: the rows after the first three
         other = {"id": 0, "name": "Other", "kind": "{n} accounts", "count": len(rest), "institution": "", "type": "",
-                 "balance": c.reporting.balances_total([r["balance"] for r in rest])}
+                 "balance": c.reporting.balances_total([r["balance"] for r in rest]), "href": "/money/accounts"}
         rows = rows[:ACCOUNTS_SHOWN - 1] + [other]  # not money: three rows, then Other
+    positive = sum((r["balance"] for r in rows if r["balance"] > 0), Decimal(0))  # not money: the bar's whole length
     for r in rows:
-        r["share"] = float(r["balance"] / total * 100) if total > 0 else 0.0  # not money: a bar's length
+        r["share"] = float(r["balance"] / positive * 100) if positive > 0 and r["balance"] > 0 else 0.0  # not money: a bar's length
     return tuple(rows), total, count
+
+
+def _bills(c, day: date):
+    from lightning.ui.phone.screens.money import bills_page
+    return bills_page(c, day)
 
 
 def _first_steps(c, has_rows: bool, has_payment: bool) -> tuple:
@@ -135,7 +157,7 @@ def _first_run(c, steps: tuple) -> bool:
     return not c.accounts.list() or not c.planning.items((PlanKind.INCOME,))
 
 
-def build(c, day: date) -> HomeScreen:
+def build(c, day: date, profile_name: str = "") -> HomeScreen:
     inbox = ReviewInbox(c)
     items = inbox.items(day)
     forecast = inbox.forecast
@@ -169,12 +191,15 @@ def build(c, day: date) -> HomeScreen:
     else:
         state = "calm"
     first_run = state == "first_run"
-    accounts, accounts_total, accounts_count = _cash_accounts(c, day)
+    position = c.position.at(day)
+    accounts, accounts_total, accounts_count = _cash_accounts(c, position)
     return HomeScreen(state=state, safe=None if first_run else safe, until=until, per_day=per_day,
                       per_day_days=everyday.days_left if everyday else 0,
                       per_day_to_payday=bool(until) and until <= next_month.isoformat(),
                       meter=None if first_run else payday_meter(everyday),
-                      working=forecast.safe_to_spend_working,
+                      working=forecast.safe_to_spend_working, free_cash=position.free_cash,
+                      free_working=position.free_cash_working,
+                      bills=None if first_run else _bills(c, day),
                       todo=_shown(rows), todo_total=len(rows), latest=latest,
                       spent=c.reporting.cash_flow(day.replace(day=1), day).outflows,
                       left_in_plan=plan["left"] if plan else None, month=month, catch_up=away,
@@ -183,5 +208,6 @@ def build(c, day: date) -> HomeScreen:
                       accounts=accounts, accounts_total=accounts_total, accounts_count=accounts_count,
                       bills_before_payday=forecast.payments_before_income_total,
                       spent_today=c.reporting.cash_flow(day, day).outflows,
-                      greeting=_greeting(now().hour), name=c.settings.get("display_name") or "", steps=steps,
+                      greeting=_greeting(now().hour), name=welcome_name(c, profile_name), steps=steps,
+                      today=day.isoformat(), days_to_payday=(parse_date(until) - day).days if until else None,  # not money: days
                       expected=None if first_run else expected_by_payday(forecast))

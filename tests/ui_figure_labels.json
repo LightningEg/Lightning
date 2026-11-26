@@ -27,7 +27,7 @@
  "templates/phone/deposits/receipt_events.html": 2,
  "templates/phone/investments/_explain.html": 2,
  "templates/phone/investments/holding.html": 3,
- "templates/phone/money.html": 3,
+ "templates/phone/money.html": 1,
  "templates/phone/money_accounts.html": 1,
  "templates/phone/money_report.html": 4,
  "templates/phone/partials/charts.html": 1,

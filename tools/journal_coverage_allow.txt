@@ -117,6 +117,7 @@ POST /settings/financial-health-limit
 POST /settings/fx-rate
 POST /settings/liquidation-factor/{asset_class_id:int}
 POST /settings/locale
+POST /settings/name
 POST /settings/privacy
 POST /setup/currency
 POST /setup/guide

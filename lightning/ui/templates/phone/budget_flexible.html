@@ -14,7 +14,9 @@
 {% set s = screen %}{% set view = request.query_params.get('view', '') %}
 {% if s.state == 'no_plan' %}<div class="phone-chips"><span class="phone-chip phone-month-chip"><a href="/budget?month={{ s.prev_month }}" aria-label="{{ 'Earlier month'|tr(locale) }}">{{ chevron(back=True) }}</a><span>{{ s.month }}</span>{% if s.next_month %}<a href="/budget?month={{ s.next_month }}" aria-label="{{ 'Later month'|tr(locale) }}">{{ chevron() }}</a>{% else %}<span class="phone-month-end" aria-hidden="true">&#160;</span>{% endif %}</span></div>{% endif %}
 {# 3AY9 (owner 2026-11-11): from the salary's day until this month's plan is saved, a strip at the top opens payday #}
-{% if s.payday %}<a class="phone-row phone-payday-strip" href="/payday"><span>{{ "Plan this month’s {amt}"|tr(locale, amt=s.payday.amount|money) }}<small>{{ 'Salary arrived'|tr(locale) }} · {{ s.payday.date }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
+{% set payday_strip %}<a class="phone-row phone-payday-strip" href="/payday"><span>{{ "Plan this month’s {amt}"|tr(locale, amt=s.payday.amount|money) }}<small>{{ 'Salary arrived'|tr(locale) }} · {{ s.payday.date }}</small></span><b>{{ chevron() }}</b></a>{% endset %}
+{# Owner, 2026-11-25: the answer first. With no plan yet the strip is the answer; otherwise it follows the hero. #}
+{% if s.payday and s.state == 'no_plan' %}{{ payday_strip }}{% endif %}
 {% if s.state == 'no_plan' %}
 <section class="phone-section" aria-labelledby="plan-heading">
   <header class="phone-section-head"><h2 id="plan-heading">{{ 'Make my plan'|tr(locale) }}</h2></header>
@@ -30,6 +32,7 @@
   <div class="phone-wells"><span class="phone-well"><span>{{ fig.planned.label }}</span><b class="fig">{{ s.everyday_plan|money }}</b></span><span class="phone-well"><span>{{ fig.spent.label }}</span><b class="fig">{{ s.everyday_spent|money }}</b></span></div>
 </div>{% endset %}
 {# NF-12AB4: the hero is the way into its working (C06.1) #}{% if s.working %}{% call sheet(fig.everyday_left.label, lead, 'phone-home-hero phone-hero-sheet') %}{{ working_rows(s.working) }}{% endcall %}{% else %}{{ lead }}{% endif %}
+{% if s.payday %}{{ payday_strip }}{% endif %}
 <div class="phone-chips phone-stepper"><span class="phone-chip phone-month-chip"><a href="/budget?month={{ s.prev_month }}{{ '&amp;view=spending' if view == 'spending' }}" aria-label="{{ 'Earlier month'|tr(locale) }}">{{ chevron(back=True) }}</a><span>{{ s.month|month(locale) }}</span>{% if s.next_month %}<a href="/budget?month={{ s.next_month }}{{ '&amp;view=spending' if view == 'spending' }}" aria-label="{{ 'Later month'|tr(locale) }}">{{ chevron() }}</a>{% else %}<span class="phone-month-end" aria-hidden="true">&#160;</span>{% endif %}</span></div>
 <nav class="phone-chips phone-track" aria-label="{{ 'Budget'|tr(locale) }}"><a class="phone-chip{{ ' is-chosen' if view != 'spending' }}" href="/budget?month={{ s.month }}"{% if view != 'spending' %} aria-current="page"{% endif %}>{{ 'Categories'|tr(locale) }}</a><a class="phone-chip{{ ' is-chosen' if view == 'spending' }}" href="/budget?month={{ s.month }}&amp;view=spending"{% if view == 'spending' %} aria-current="page"{% endif %}>{{ 'Spending'|tr(locale) }}</a><a class="phone-chip" href="/budget/plan?month={{ s.month }}">{{ 'Edit plan'|tr(locale) }}</a></nav>
 {% if view == 'spending' %}

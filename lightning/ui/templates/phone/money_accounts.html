@@ -1,16 +1,22 @@
-{# Every balance (IV-3AY10): the page behind Money's "N more". No fields; a row opens the account. #}
+{# Every balance (IV-3AY10; polished 2026-11-25): In your accounts leads in the hero card, then every account as a row
+   with its tile, then what you do from here. A row opens the account. #}
 {% extends "base.html" %}
+{% from "partials/macros.html" import inst_tile with context %}
 {% block title %}Accounts{% endblock %}
-{% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a>{% endblock %}
-{% block heading %}<h1>{{ 'Accounts'|tr(locale) }}</h1>{% endblock %}
+{% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a><span class="phone-appbar-title">{{ 'Accounts'|tr(locale) }}</span>{% endblock %}
+{% block heading %}<section class="phone-hero" aria-labelledby="accounts-lead"><div id="accounts-lead" class="phone-hero-label" role="heading" aria-level="2">{{ fig.in_your_accounts.label }}</div>
+<div class="phone-lead" data-fig="in_your_accounts">{{ page.total|money }} <small>{{ base }}</small></div>
+<p class="phone-hero-line">{{ ('Across 1 account' if page.rows|length == 1 else 'Across {n} accounts')|tr(locale, n=page.rows|length) }}{% if page.held_for_others %} · {{ 'Includes {amt} held for others.'|tr(locale, amt=page.held_for_others|money) }}{% endif %}</p></section>{% endblock %}
 {% block content %}
-<p class="phone-money-line">{{ 'Total'|tr(locale) }} <b><bdi class="fig">{{ page.total|money }}</bdi></b></p>
-<div class="phone-rows">{% for a in page.rows %}<a class="phone-row" href="/accounts/{{ a.id }}"><span>{{ a.name }}</span><b><bdi class="fig">{{ a.balance|money }}</bdi></b></a>{% else %}<p class="phone-note">{{ 'No accounts yet.'|tr(locale) }}</p>{% endfor %}</div>
-{% if page.held_for_others %}<p class="phone-note">{{ 'Includes {amt} held for others.'|tr(locale, amt=page.held_for_others|money) }}</p>{% endif %}
-<div class="phone-rows">
-  <a class="phone-row" href="/accounts/new"><span>{{ 'Add account'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-  <a class="phone-row" href="/money-from-others"><span>{{ 'Held for others'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-  <a class="phone-row" href="/sms"><span>{{ 'From SMS'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-  <a class="phone-row" href="/transactions/deleted"><span>{{ 'Deleted transactions'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
-</div>
+<section class="phone-section" aria-label="{{ 'Accounts'|tr(locale) }}">
+  <div class="phone-rows">{% for a in page.rows %}<a class="phone-row phone-acct-row" href="/accounts/{{ a.id }}"><span class="phone-acct-tile">{{ inst_tile(a.institution, kind=a.type) }}</span><span class="phone-acct-text"><b>{{ a.name }}</b><small>{{ a.kind|tr(locale) }}</small></span><b><bdi class="fig">{{ a.balance|money }}</bdi> {{ chevron() }}</b></a>{% else %}<p class="phone-note">{{ 'No accounts yet.'|tr(locale) }}</p>{% endfor %}</div>
+</section>
+<section class="phone-section" aria-label="{{ 'More'|tr(locale) }}">
+  <div class="phone-rows">
+    <a class="phone-row phone-acct-row" href="/accounts/new"><span class="phone-txn-av is-flat" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span class="phone-acct-text"><b>{{ 'Add account'|tr(locale) }}</b></span><b>{{ chevron() }}</b></a>
+    <a class="phone-row phone-acct-row" href="/money-from-others"><span class="phone-txn-av is-flat" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></span><span class="phone-acct-text"><b>{{ 'Held for others'|tr(locale) }}</b></span><b>{{ chevron() }}</b></a>
+    <a class="phone-row phone-acct-row" href="/sms"><span class="phone-txn-av is-flat" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></span><span class="phone-acct-text"><b>{{ 'From SMS'|tr(locale) }}</b></span><b>{{ chevron() }}</b></a>
+    <a class="phone-row phone-acct-row" href="/transactions/deleted"><span class="phone-txn-av is-flat" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></span><span class="phone-acct-text"><b>{{ 'Deleted transactions'|tr(locale) }}</b></span><b>{{ chevron() }}</b></a>
+  </div>
+</section>
 {% endblock %}

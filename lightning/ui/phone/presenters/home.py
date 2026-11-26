@@ -6,4 +6,5 @@ from __future__ import annotations
 def present(request, c, context: dict) -> dict:
     from lightning.core.dates import today
     from lightning.ui.phone.screens import home
-    return {"screen": home.build(c, today()), "__template__": "phone/home.html"}
+    session = getattr(request.app.state, "profile_session", None)
+    return {"screen": home.build(c, today(), getattr(session, "name", "") or ""), "__template__": "phone/home.html"}
