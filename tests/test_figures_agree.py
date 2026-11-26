@@ -125,3 +125,16 @@ def test_the_payday_proposal_lines_add_up_to_the_cash_they_share(household):
     lines = re.search(r"Bills protected ([\d,]+) EGP .*? ([\d,]+) EGP Emergency and goals ([\d,]+) EGP Left unassigned ([\d,]+) EGP", text)
     available = _n(re.search(r"Cash available to assign ([\d,]+)", text).group(1))
     assert abs(sum(_n(x) for x in lines.groups()) - available) <= 2
+
+
+def test_overdrawn_account_reconciles_with_owned_asset_on_home(c):
+    from lightning.transactions.domain import TxnSource
+
+    bank = c.account_flows.open_account("Current account", "BANK", "2026-09-01", "100")
+    c.account_flows.open_account("Flat", "OTHER_ASSET", "2026-09-01", "1000")
+    c.transactions.record_outflow("2026-09-02", bank.id, "300", c.categories.get_by_code("EXP.PERSONAL.FOOD").id,
+                                  source=TxnSource.IMPORT)
+    html = TestClient(create_app(c)).get("/?month=2026-09").text
+    figure = html.split('class="chart chart-donut"', 1)[1].split("</figure>", 1)[0]
+    assert "chart-donut-ring" not in figure
+    assert "−200" in figure and "1,000" in figure and "800 EGP" in figure

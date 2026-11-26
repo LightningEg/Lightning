@@ -241,12 +241,14 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
         free_chip = chip(month_of(day), "good" if change >= 0 else "bad", "up" if change > 0 else "down" if change < 0 else None)
     else:
         free_compare, free_chip = compare("Your first month: nothing to compare yet"), chip(month_of(day))
-    held = position.set_aside_or_due
+    if position.counted_as_cash:
+        free_detail = f"{figure_label('counted_as_cash')}: {fmt(position.counted_as_cash, 0)}"
+    elif position.brokerage_cash:
+        free_detail = f"Cash you own {fmt(position.cash_you_own, 0)}, including {fmt(position.brokerage_cash, 0)} in your brokerage"
+    else:
+        free_detail = f"Cash you own {fmt(position.cash_you_own, 0)}, less {fmt(position.set_aside_or_due, 0)} set aside or due"
     cards.append(card(figure_label("free_cash"), f.free_cash, free_compare, tone="hold", key="free", chip_=free_chip,
-                      visual=spark([*past_free, f.free_cash]),
-                      line_=line(f"Cash you own {fmt(position.cash_you_own, 0)}, including {fmt(position.brokerage_cash, 0)} in your brokerage"
-                                 if position.brokerage_cash else
-                                 f"Cash you own {fmt(position.cash_you_own, 0)}, less {fmt(held, 0)} set aside or due"), href="/"))
+                      visual=spark([*past_free, f.free_cash]), line_=line(free_detail), href="/"))
 
     before_total = f.payments_before_income_total  # the same total Safe to spend takes off (7N)
     if late:
@@ -298,7 +300,7 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
     cards = []
     rate = flow.savings_rate
     if rate is None or flow.inflows <= 0:
-        cards.append(card(figure_label("savings_rate"), None, compare("No money in this period"), tone="in", key="savings",
+        cards.append(card(figure_label("savings_rate"), None, compare(flow.savings_picture_note or "No money in this period"), tone="in", key="savings",
                           chip_=chip(period_chip), href=savings_href))
     elif flow.rate_says_nothing:  # honest numbers (A01): a rate like −1,177% says nothing, the sentence does
         cards.append(card(figure_label("savings_rate"), None,

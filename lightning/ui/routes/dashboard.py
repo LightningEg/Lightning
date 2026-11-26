@@ -176,7 +176,8 @@ async def dashboard(request: Request):
         money_in_rows=visuals.money_in_groups(c, first, as_of),
         money_out_rows=visuals.money_out_groups(c, first, as_of),
         wealth_donut=visuals.holdings_donut(position, include_cash=True),
-        networth_trend=networth_trend, free_cash_steps=visuals.free_cash_steps(position),
+        networth_trend=networth_trend,
+        due_rows=[(p, c.planning.amount_in_base(p, p.still_owed, position_day)) for p in owe.bills_due_items[:6]],
         month=month, this_month=month_of(today()), period=period, period_error=period_error,
         date_from=fmt_date(first), date_to=fmt_date(as_of), as_of=fmt_date(as_of), position_as_of=fmt_date(position_day), position_is_today=position_is_today, status=status, kpi_cards=kpi_cards,
         waffle=saved_and_invested(cash_flow, closing_report["net_money"]), dates_note=dates_note, lead_change=lead_change,
@@ -492,17 +493,13 @@ async def explain_overview_figure(request: Request, kind: str):
     elif kind == "free-cash":
         title = label("free_cash")
         figure = "free_cash"
-        explanation = (FIGURES["free_cash"].meaning + " " + FIGURES["bills_due"].meaning  # not money
-                       + " Brokerage cash counts, but move it to a bank or wallet before everyday spending.")
+        explanation = FIGURES["free_cash"].meaning
         rows = [{"label": label("bank_and_wallet_cash"), "value": position.bank_and_wallet_cash},
                 {"label": label("brokerage_cash"), "value": position.brokerage_cash}]
-        if position.reserves is None:
-            total, foot = None, "Free cash is unavailable: reserve history cannot be rebuilt for this date."
-        else:
-            rows.append({"label": label("reserves"), "value": -position.reserves, "href": "/plan/reserves"})
-            if position.bills_due:
-                rows.append({"label": label("bills_due"), "value": -position.bills_due, "href": "/plan"})
-            total, foot = position.free_cash, f"Position as of {day}."
+        rows.extend({"label": row.name, "value": row.amount, "href": row.href} for row in position.free_cash_adjustments)
+        total = position.free_cash
+        foot = (f"Position as of {day}." if total is not None else
+                "Free cash is unavailable: reserve history cannot be rebuilt for this date.")
         action = ("Open Cash planning", "/plan")
         notes = c.freshness.for_free_cash(day)
     elif kind == "flow":

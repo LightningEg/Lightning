@@ -244,10 +244,10 @@ class EverydayBudget:
 
     @property
     def spent_share(self) -> Decimal | None:
-        """Everyday money gone, as a share of the everyday plan (0 to 1): the fill of Home's payday meter (IV-11D1)."""
+        """Everyday money gone, as a share of the everyday plan, including spending over plan (IV-11D1)."""
         if self.everyday_plan <= 0:
             return None
-        return min(max(self.everyday_spent / self.everyday_plan, ZERO), Decimal(1))
+        return max(self.everyday_spent / self.everyday_plan, ZERO)
 
     @property
     def pace_share(self) -> Decimal | None:

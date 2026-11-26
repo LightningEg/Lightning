@@ -104,6 +104,25 @@ def trend(labels: list[str], series: list[dict], plan: Decimal | None = None,
             "zero_y": y(ZERO) if bottom < 0 else None}
 
 
+def break_at_missing(series: dict) -> None:
+    """Draw separate runs for known values. A filled area would bridge the missing dates."""
+    values = series["values"]
+    dots, run, lines = iter(series["dots"]), [], []
+    for value in values:
+        if value is None:
+            if len(run) > 1:
+                lines.append(" ".join(run))
+            run = []
+        else:
+            dot = next(dots)
+            run.append(f"{dot['x']:.2f},{dot['y']:.2f}")
+    if len(run) > 1:
+        lines.append(" ".join(run))
+    series["lines"] = lines
+    if any(value is None for value in values):
+        series["area"] = ""
+
+
 LABEL_HEIGHT = 16  # px: one end label (12px type), also the least space between two labels at one end
 LABEL_NEAR_X = 30  # % of the plot width: end labels closer than this sideways compete for the same space
 
