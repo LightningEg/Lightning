@@ -3,6 +3,7 @@
 {% block heading %}<h1>{{ 'Cover this month'|tr(locale) }}</h1><p class="phone-note">{{ target.name }} · {{ month|month(locale) }}</p>{% endblock %}
 {% block content %}
 <form method="post" action="/budget/move" class="phone-form">
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
   {% include "partials/budget_cover_options.html" %}
   <button class="btn primary phone-save">{{ 'Cover this month'|tr(locale) }}</button>
 </form>
