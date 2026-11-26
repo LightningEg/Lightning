@@ -38,7 +38,7 @@ STATES = ("first_run", "catch_up", "payday", "overspent", "calm")
 class PaydayMeter:
     """C06.1 meter with a tick under Safe to spend (IV-11D1): the fill is everyday money gone, the tick is where the
     pace is today; ahead (rose) when spending is past the pace, Budget's own verdict (EverydayBudget.pace_gap)."""
-    spent: float    # percent of the everyday plan spent, 0 to 100
+    spent: float    # percentage spent, including overspending
     pace: float     # percent the pace allows by today, 0 to 100
     ahead: bool
 

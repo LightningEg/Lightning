@@ -36,8 +36,10 @@ from decimal import Decimal
 
 from lightning.core.dates import fmt_date, parse_date, today
 from lightning.core.errors import NotFoundError
+from lightning.core.figures import label
 from lightning.core.memo import request_cached
 from lightning.core.money import ZERO, quantize, round_to_total
+from lightning.core.working import Working, WorkingRow
 
 from lightning.investments.domain import default_sale_factor
 
@@ -181,7 +183,7 @@ class Position:
     @property
     def set_aside_or_due(self) -> Decimal:
         """IT-12AE4: owned cash that is not free: kept apart, in reserves, or owed to bills due."""
-        return (self.kept_apart or ZERO) + (self.reserves or ZERO) + self.bills_due
+        return (self.kept_apart or ZERO) + (self.reserves or ZERO) + self.bills_due - self.bill_reserve_coverage
 
     def by_family(self, keys, family_of) -> dict:
         """IT-12AE4: What you own by family (A04): cash you own under ``"cash"``, each holding class under
@@ -204,7 +206,6 @@ class Position:
     @property
     def net_worth_working(self):
         """NF-12AB2: what Net worth is made of, every part signed, adding up to it."""
-        from lightning.core.working import Working, WorkingRow
         rows = [WorkingRow("Cash you own", self.cash_you_own, "/accounts"),
                 WorkingRow("Holdings", self.holdings_value, "/investments"),
                 WorkingRow("Other you own", self.other_you_own, "/accounts"),
@@ -234,7 +235,6 @@ class Position:
     @property
     def portfolio_working(self):
         """NF-12AB2: Portfolio value by asset class."""
-        from lightning.core.working import Working, WorkingRow
         return Working("portfolio_value", self.portfolio_value,
                        tuple(WorkingRow(c.name, c.value, "/investments") for c in self.classes if c.value), home="/investments")
 
@@ -243,11 +243,24 @@ class Position:
         return None if self.reserves is None else self.spendable_cash - self.reserves - self.bills_due + self.bill_reserve_coverage
 
     @property
+    def free_cash_adjustments(self) -> list[WorkingRow]:
+        """Signed adjustments from owned cash to free cash, valued on this position's date."""
+        rows = []
+        if self.kept_apart:
+            rows.append(WorkingRow(label("kept_apart"), -self.kept_apart, "/accounts"))
+        if self.counted_as_cash:
+            rows.append(WorkingRow(label("counted_as_cash"), self.counted_as_cash, "/investments"))
+        if self.reserves is not None:
+            rows.append(WorkingRow(label("reserves"), -self.reserves, "/plan/reserves"))
+        rows.append(WorkingRow(label("bills_due"), -self.bills_due, "/plan"))
+        if self.bill_reserve_coverage:
+            rows.append(WorkingRow(label("bill_reserve_coverage"), self.bill_reserve_coverage, "/plan/reserves"))
+        return rows
+
+    @property
     def free_cash_working(self):
         """Phone Home's ladder: from Cash and banks (Spendable cash: spendable accounts plus what counts as cash) to
         Free cash, each step signed, adding up to it. None while reserves are unknown."""
-        from lightning.core.figures import label
-        from lightning.core.working import Working, WorkingRow
         if self.free_cash is None:
             return None
         rows = [WorkingRow("Cash and banks", self.spendable_cash, "/money/accounts"),

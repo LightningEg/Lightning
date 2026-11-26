@@ -59,7 +59,44 @@ def test_shared_savings_view(c, income, spend, path):
     assert 'Invested' not in key and 'Kept' not in key
     if D(spend) > D(income):
         assert 'Overspent' in key and '-' not in re.sub(r'<[^>]+>', '', key)
+    if D(income) and D(spend) > 2 * D(income):
+        assert 'The grid stops at 100% of income.' in note[1]
     if not D(income):
         figures = re.search(r'<span class="inv-saved-figures">(.*?)</em>', html, re.S)[1]
         assert '%' not in figures
         assert '1%' not in note[1]
+
+
+@pytest.mark.parametrize("income", ["0", "1000"])
+def test_overview_shows_net_refunds_without_a_negative_bar_or_an_implied_savings_rate(c, setup, income):
+    bank = setup[0]["cib"].id
+    if D(income):
+        c.transactions.record_inflow("2026-09-01", bank, income, setup[1]["EXP.WORK.SALARY"].id)
+    c.transactions.record_refund("2026-09-03", bank, "200", setup[1]["EXP.PERSONAL.FOOD"].id)
+    page = TestClient(create_app(c)).get("/?month=2026-09").text
+    assert "Refunds were more than your spending" in page
+    assert 'class="net-flow-bars"' not in page and 'class="waffle inv-waffle"' not in page
+    assert 'id="savings-squares"' in page
+    assert "+200" in page.split('id="flow-heading"', 1)[1]
+
+
+def test_monthly_savings_spark_restarts_after_a_month_with_net_refunds(c, setup):
+    from datetime import date
+    from lightning.ui.visuals import savings_rates
+
+    account = setup[0]["cib"].id
+    salary, food = setup[1]["EXP.WORK.SALARY"].id, setup[1]["EXP.PERSONAL.FOOD"].id
+    for month in ("09", "10", "11"):
+        c.transactions.record_inflow(f"2026-{month}-01", account, "1000", salary)
+    c.transactions.record_refund("2026-10-05", account, "200", food)
+    c.transactions.record_outflow("2026-11-05", account, "300", food)
+    assert savings_rates(c, date(2026, 11, 15)) == [D(70)]
+
+
+def test_returned_salary_explains_negative_money_in(c, setup):
+    bank = setup[0]["cib"].id
+    c.transactions.record_outflow("2026-09-01", bank, "1000", setup[1]["EXP.WORK.SALARY"].id)
+    c.transactions.record_outflow("2026-09-02", bank, "200", setup[1]["EXP.PERSONAL.FOOD"].id)
+    page = TestClient(create_app(c)).get("/?month=2026-09").text
+    assert "More income was returned than received" in page
+    assert 'class="net-flow-bars"' not in page and 'class="waffle inv-waffle"' not in page

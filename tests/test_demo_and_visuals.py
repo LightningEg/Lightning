@@ -539,3 +539,22 @@ def test_arabic_welcome_translates_built_in_sample_previews_but_keeps_names(c, p
         assert text in page
     for text in ("Which months did resale-stock", "How do zero-invoice months", "What does a EGP 7,800", "Emergency reserve"):
         assert text not in page
+
+
+def test_overview_history_leaves_a_gap_for_a_missing_valuation(demo, monkeypatch):
+    from dataclasses import replace
+    from lightning.ui import visuals
+
+    c, _ = demo
+    position_at = c.position.at
+
+    def position(day):
+        result = position_at(day)
+        return replace(result, unvalued=("USD",)) if day.month == 8 else result
+
+    monkeypatch.setattr(c.position, "at", position)
+    t = visuals.net_worth_trend(c, date(2026, 9, 30))
+    series = t["series"][0]
+    assert t["missing_months"] == ["2026-08"]
+    assert series["values"][1] is None
+    assert len(series["dots"]) == 2 and series["lines"] == [] and series["area"] == ""

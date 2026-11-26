@@ -57,6 +57,9 @@ def test_lending_more_cash_than_you_own_is_refused_and_owed_to_you_is_not_a_hold
 
 
 def test_a_person_account_below_zero_counts_in_what_you_owe(c, setup):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+
     accounts, _ = setup
     friend = c.counterparties.ensure_person("Omar")
     account = c.people_money.account_for(friend, "2026-09-01")
@@ -66,6 +69,10 @@ def test_a_person_account_below_zero_counts_in_what_you_owe(c, setup):
     assert after.you_owe_people == D(700) and after.owed_to_you == 0
     assert after.what_you_owe == before.what_you_owe + 700 and after.net_worth == before.net_worth
     assert after.in_your_accounts == before.in_your_accounts
+    with TestClient(create_app(c)) as browser:
+        home = browser.get("/").text
+    debt = home.split("What you owe</span>", 1)[1].split("</details>", 1)[0]
+    assert "You owe people" in debt and "<b>700</b>" in debt
 
 
 def test_an_older_profile_upgrades_and_takes_the_owed_to_you_class(monkeypatch, tmp_path):
