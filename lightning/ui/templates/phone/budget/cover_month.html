@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Cover this month'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Cover this month'|tr(locale) }}</h1><p class="phone-note">{{ target.name }} · {{ month|month(locale) }}</p>{% endblock %}
+{% block content %}
+<form method="post" action="/budget/move" class="phone-form">
+  {% include "partials/budget_cover_options.html" %}
+  <button class="btn primary phone-save">{{ 'Cover this month'|tr(locale) }}</button>
+</form>
+{% endblock %}
