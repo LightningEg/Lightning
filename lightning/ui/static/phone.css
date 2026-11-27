@@ -1713,11 +1713,11 @@ html.phone .phone-content .phone-afford { padding: 4px 16px; }
 .phone-row.budget-change { flex-wrap: wrap; }
 .phone-row.budget-change > span:first-child { flex: 1 1 10rem; }
 .phone-row.budget-change > .budget-change-actions { flex-direction: row; justify-content: flex-start; }
-html.phone .phone-content .phone-row.budget-change .budget-change-actions .btn:not(#_) { min-height: 44px; }
+html.phone .phone-content .phone-row.budget-change .budget-change-actions .btn:not(#_) { min-height: 44px; scroll-margin-block-end: 84px; }
 
 html.phone .phone-content .phone-row.phone-theme-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; }
 html.phone .phone-content .phone-row.phone-theme-row > span:nth-child(2) { min-width: 0; }
-html.phone .phone-content .phone-row.phone-theme-row > .phone-row-pick { grid-column: 2; display: grid; margin-inline-start: 0; }
+html.phone .phone-content .phone-row.phone-theme-row > .phone-row-pick { grid-column: 1 / -1; display: grid; margin-inline-start: 0; }
 html.phone .phone-content .phone-theme-row .phone-row-pick select:not(#_) {
   width: 100%; max-width: 100%; padding-inline-end: 8px; appearance: auto; -webkit-appearance: auto;
   text-align: start; text-align-last: start; text-overflow: ellipsis;
