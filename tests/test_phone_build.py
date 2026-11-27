@@ -67,6 +67,10 @@ def test_the_lock_pins_every_package_as_one_file_from_the_published_wheels():
         assert f"https://github.com/{lock.REPOSITORY}/releases/download/{tag}/" in next(
             line for line in entries if line.startswith(name + " @ "))
     for line in entries:
+        name, url = line.split(" @ ")
+        if name in lock.PORTABLE:
+            assert url.split()[0] == lock.PORTABLE[name][1]
+            continue
         assert line.split(" @ ")[1].startswith(("https://files.pythonhosted.org/", "https://github.com/"))
     wanted = lock.pinned((ROOT / "requirements" / "android.in").read_text(encoding="utf-8"))
     assert all(_locked()[name] == version for name, version in wanted.items())  # the lock follows android.in

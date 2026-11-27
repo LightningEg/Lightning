@@ -24,7 +24,7 @@ LOCK = ROOT / "requirements" / "android.lock"
 REPOSITORY = "elfekimuhammed/Lightning"
 NATIVE = ("cffi", "cryptography", "pydantic-core", "sqlcipher3")
 # Upstream's unchanged portable wheel: MIT-licensed, no Android extension required.
-PORTABLE = {"rapidfuzz": ("3.14.3", "https://github.com/LightningEg/Lightning/raw/835b0bb48f8f134f73a0d754a3b5344e317931b0/packaging/third-party/rapidfuzz-3.14.3-py3-none-any.whl", "8e300f5974c411be699fd53f775fffbe94204a012a3091e23e1a300c2fc8ebad")}
+PORTABLE = {"rapidfuzz": ("3.14.3", "https://raw.githubusercontent.com/LightningEg/Lightning/835b0bb48f8f134f73a0d754a3b5344e317931b0/packaging/third-party/rapidfuzz-3.14.3-py3-none-any.whl", "8e300f5974c411be699fd53f775fffbe94204a012a3091e23e1a300c2fc8ebad")}
 PYTHON, API = (3, 13), 24
 
 
