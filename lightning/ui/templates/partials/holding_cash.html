@@ -1,0 +1,26 @@
+{% if cash_item %}
+<section class="card phone-section">
+  <h2>{{ 'Count in free cash'|tr(locale) }}</h2>
+  {% if cash_editable %}
+  <form method="post" action="/investments/holding/{{ h.asset_id }}/cash/{{ h.account_id }}" data-holding-cash>
+    <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+    <label>{{ h.account_label }}
+      <select name="mode">
+        <option value="default" {% if cash_item.cash_override is none and cash_item.protected_amount is none %}selected{% endif %}>{{ 'Use investment default'|tr(locale) }} ({{ 100 if asset.counts_as_cash else 0 }}%)</option>
+        <option value="none" {% if cash_item.cash_override == 0 %}selected{% endif %}>{{ 'None'|tr(locale) }} (0%)</option>
+        <option value="all" {% if cash_item.cash_override == 100 %}selected{% endif %}>{{ 'All'|tr(locale) }} (100%)</option>
+        <option value="custom" {% if cash_item.cash_override not in (none, 0, 100) %}selected{% endif %}>{{ 'Custom percentage'|tr(locale) }}</option>
+        <option value="floor" {% if cash_item.protected_amount is not none %}selected{% endif %}>{{ 'Keep a fixed amount invested'|tr(locale) }}</option>
+      </select>
+    </label>
+    <label>{{ 'Custom percentage'|tr(locale) }} <input name="percent" inputmode="decimal" value="{{ cash_item.cash_override if cash_item.cash_override is not none else '' }}"></label>
+    <label>{{ 'Amount to keep invested'|tr(locale) }} ({{ base }}) <input name="protected" inputmode="decimal" value="{{ cash_item.protected_amount if cash_item.protected_amount is not none else '' }}"></label>
+    <p><output aria-live="polite">{{ cash_preview }}</output></p>
+    <button class="btn">{{ 'Save'|tr(locale) }}</button>
+  </form>
+  <a href="/investments/assets/{{ h.asset_id }}/edit">{{ "Edit investment default"|tr(locale) }}</a>
+  {% else %}
+  <p>{{ cash_preview }} <a href="/investments/holding/{{ h.asset_id }}?account={{ h.account_id }}">{{ 'Open current holding'|tr(locale) }}</a></p>
+  {% endif %}
+</section>
+{% endif %}
