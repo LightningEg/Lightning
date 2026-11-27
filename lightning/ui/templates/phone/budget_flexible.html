@@ -69,7 +69,7 @@
 <section class="phone-section is-rose" aria-labelledby="cats-heading">
   <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M21 12A9 9 0 1 1 12 3v9zM15 3.5A9 9 0 0 1 20.5 9H15z"/></svg></span><span class="phone-head-text"><h2 id="cats-heading">{{ 'Personal'|tr(locale) }}</h2><small>{{ '{spent} of {plan} spent'|tr(locale, spent=s.everyday_spent|money, plan=s.everyday_plan|money) }}</small></span></header>
   <div class="phone-rows">{% for r in listed %}{{ cat_row(r) }}{% else %}<p class="phone-note">{{ 'No category has a limit yet.'|tr(locale) }}</p>{% endfor %}</div>
-  {% if s.move %}<a class="phone-row" data-popup-open href="{{ s.move.href }}"><span>{{ 'Move it'|tr(locale) }}<small>{{ '{amt} from {name}'|tr(locale, amt=s.move.amount|money, name=s.move.name) }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
+  {% if s.move %}<a class="phone-row" data-popup-open href="{{ s.move.href }}"><span>{{ 'Move it'|tr(locale) }}<small>{{ '{amt} from {name}'|tr(locale, amt=s.move.amount_text, name=s.move.name) }}</small></span><b>{{ chevron() }}</b></a>{% endif %}
 </section>
 {% if s.work %}<section class="phone-section" aria-labelledby="work-heading">
   <header class="phone-section-head"><span class="phone-head-tile" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16M4 6h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2"/></svg></span><span class="phone-head-text"><h2 id="work-heading">{{ 'Work'|tr(locale) }}</h2><small>{{ 'Paid for others, to claim back'|tr(locale) }}</small></span></header>

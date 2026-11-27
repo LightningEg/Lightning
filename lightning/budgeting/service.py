@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import replace
-from decimal import ROUND_HALF_UP, Decimal
+from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal
 import math
 from datetime import date, timedelta
 import json
@@ -13,7 +13,7 @@ from lightning.categories.service import CategoryService
 from lightning.core.dates import estimate_date_override, month_of, now_iso, parse_month
 from lightning.core.errors import NotFoundError, ValidationError
 from lightning.core.memo import request_cached
-from lightning.core.money import ZERO, check_places, fmt, fmt as _fmt, from_e6, to_decimal
+from lightning.core.money import ZERO, check_places, fmt, fmt as _fmt, from_e6, quantize, to_decimal
 from lightning.database.connection import Database
 from lightning.database.settings import raw_setting
 from lightning.reporting.service import ReportingService
@@ -248,6 +248,52 @@ class BudgetService:
         if len(shares) < PACE_HISTORY_NEEDED:
             return [Decimal(t) / days for t in range(days + 1)], False
         return [sum((share[t] for share in shares), ZERO) / len(shares) for t in range(days + 1)], True
+
+    def cover_options(self, month: str, to_id: int, overspend: Decimal, room: dict[int, Decimal], *, schedule: ScheduleView) -> list[dict]:
+        """Amounts transferable from independent limits, after spending and outstanding bills."""
+        plans = self.amounts_for(month, loans=False, schedule=schedule)
+        to_limit = plans.get(to_id, (None,))[0]
+        if to_limit is None:
+            return []
+        gap = quantize(overspend)
+        categories = {cat.id: cat for cat in self.categories.tree(Movement.OUTFLOW)}
+        if to_id not in categories:
+            return []
+        lines = {line.category_id: line for section in self.month_view(month, schedule=schedule).sections
+                 for line in section.lines}
+        child_limits, child_room = {}, {}
+        for cid, line in lines.items():
+            if cid in categories and line.available is not None:
+                parent = categories[cid].parent_id
+                child_limits[parent] = child_limits.get(parent, ZERO) + max(line.available, ZERO)
+                child_room[parent] = child_room.get(parent, ZERO) + max(room.get(cid, ZERO), ZERO)
+
+        def parent_limit(cid):
+            parent = categories[cid].parent_id
+            while parent in categories:
+                if parent in plans:
+                    return parent
+                parent = categories[parent].parent_id
+            return None
+
+        recipient_parent = parent_limit(to_id)
+        options = []
+        for cid, left in room.items():
+            limit = plans.get(cid, (None,))[0]
+            if limit is None or cid == to_id or cid not in categories:
+                continue
+            donor = categories[cid]
+            if not donor.active or parent_limit(cid) != recipient_parent:
+                continue
+            # A parent's remaining limit must still cover the limits assigned to its children.
+            unassigned = lines[cid].available - child_limits.get(cid, ZERO)
+            available = min(left - child_room.get(cid, ZERO), limit, unassigned).quantize(Decimal("0.01"), rounding=ROUND_DOWN)
+            amount = min(gap, available)
+            if amount > ZERO:
+                options.append({"id": cid, "name": donor.name, "amount": amount, "available": available,
+                                "new_limit": limit - amount, "target_limit": to_limit + amount, "uncovered": gap - amount,
+                                "carryover": lines[cid].carryover_enabled or lines[to_id].carryover_enabled})
+        return sorted(options, key=lambda row: (-row["amount"], -row["available"], row["name"], row["id"]))
 
     def move_room(self, month: str, to_id: int, from_id: int, amount: object, only_this_month: bool = False, *,
                   schedule: ScheduleView) -> None:

@@ -17,6 +17,12 @@ from lightning.core.figures import FIGURES
 from lightning.ui.i18n_system import FULL_MONTHS, MONTHS, SERVER_ONLY, SYSTEM_TEXT, WEEKDAYS
 
 ARABIC_UI = {
+    'Choose a limit to reduce this month': 'اختار الحد اللي هتقلله الشهر ده',
+    'Carryover follows the balance left at month end.': 'الترحيل بيتحسب على الرصيد المتبقي في آخر الشهر.',
+    'Still over plan': 'لسه فوق الخطة',
+    'Your usual monthly limits stay the same.': 'الحدود الشهرية المعتادة هتفضل زي ما هي.',
+    'The budget changed. Review the available room again.': 'الميزانية اتغيرت. راجع المبلغ المتاح تاني.',
+    'No budget room is available for this move.': 'مفيش مبلغ متاح للنقل ده.',
     'Change unlinked amount date': 'غيّر تاريخ تقدير المبلغ غير المربوط',
     'Posting date': 'تاريخ تسجيل العملية',
     'Linked amounts have their own estimate date.': 'المبالغ المربوطة ليها تاريخ تقدير خاص بيها.',

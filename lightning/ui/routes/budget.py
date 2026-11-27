@@ -192,13 +192,13 @@ def _page(request: Request, month: str, values: dict | None = None, error: str =
         lead, pace_card = by_key.get("left"), by_key.get("everyday")
         kpi_cards = kpis.row([by_key.get("everyday"), by_key.get("saves")])
         rows = {r["category_id"]: r for r in meter_lines}
-        for i, o in enumerate(over):
-            move = cover_from(c, month, o, everyday.room) if i == 0 else None
+        for o in over:
+            move = cover_from(c, month, o, everyday.room)
             r = rows[o["category_id"]]
             needs.append({"label": f"{o['name']} is {fmt(o['over'], 0)} over its plan",
                           "detail": f"{fmt(r['used'], 0)} spent of {fmt(r['total'], 0)}",
                           "href": move["href"] if move else r["href"], "popup": True,  # Move room or the category sheet (3G6)
-                          "action": f"Move {fmt(move['amount'], 0)} from {move['name']}" if move else "See it"})
+                          "action": f"Move {move['amount_text']} from {move['name']}" if move else "See it"})
     if lead is not None and raise_offer and not by_key.get("saves") and not income_in_changes:
         needs.append(income_change_row(raise_offer, month))
     status = page_status.budget(everyday, has_plan, period.key, period_actual, period_budgeted)
@@ -904,6 +904,11 @@ async def move_room_popup(request: Request):
     to_plan, from_plan = plans.get(to.id, (None,))[0], plans.get(source.id, (None,))[0]
     if to_plan is None or from_plan is None:
         return redirect(f"/budget?month={month}", "Both categories need a plan of their own this month.")
+    if query.get("cover") == "1":
+        options = c.forecaster.overspend_options(month, to.id)
+        if not options:
+            return redirect(f"/budget?month={month}", "No budget room is available for this move.")
+        return render(request, "budget/cover_month.html", month=month, target=to, options=options)
     reason = _move_reason(c, month, to.id)
     next_month = month_of(parse_month(month)[1] + timedelta(days=1))  # not money
     later = c.budgets.amounts_for(next_month, loans=False, schedule=c.schedules.view())
@@ -939,10 +944,18 @@ async def move_room(request: Request):
     only_this_month = form.get("scope") == "month"  # NF-12AJ: otherwise the usual plan, as before
     try:
         parse_month(month)
-        to_id, from_id = int(str(form.get("to", ""))), int(str(form.get("from", "")))
+        to_id = int(str(form.get("to", "")))
+        cover = form.get("cover_choice")
+        if cover is not None:
+            source, amount = str(cover).split("/", 1)
+            from_id, only_this_month = int(source), True
+        else:
+            from_id, amount = int(str(form.get("from", ""))), str(form.get("amount", ""))
         with settled_save(request, container(request)):
-            c.budgets.move_room(month, to_id, from_id, str(form.get("amount", "")), only_this_month,
-                                schedule=c.schedules.view())
+            if cover is not None:
+                c.forecaster.cover_overspend(month, to_id, from_id, amount)
+            else:
+                c.budgets.move_room(month, to_id, from_id, amount, only_this_month, schedule=c.schedules.view())
     except ValueError:
         return redirect(f"/budget?month={month}", "Choose two categories.")
     except LightningError as exc:

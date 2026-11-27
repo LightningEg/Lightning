@@ -1,0 +1,9 @@
+  <input type="hidden" name="month" value="{{ month }}"><input type="hidden" name="to" value="{{ target.id }}">
+  <input type="hidden" name="scope" value="month"><input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  <fieldset><legend>{{ 'Choose a limit to reduce this month'|tr(locale) }}</legend>
+  {% for row in options %}<p><label><input type="radio" name="cover_choice" value="{{ row.id }}/{{ row.amount }}" {% if loop.first %}checked{% endif %}>
+    {{ row.name }} · {{ 'Move'|tr(locale) }} {{ row.amount|money(False,2) }} {{ base }}
+    <br><small>{{ row.name }} → {{ row.new_limit|money(False,2) }} · {{ target.name }} → {{ row.target_limit|money(False,2) }}
+    {% if row.uncovered %} · {{ 'Still over plan'|tr(locale) }} {{ row.uncovered|money(False,2) }}{% endif %}{% if row.carryover %}<br>{{ "Carryover follows the balance left at month end."|tr(locale) }}{% endif %}</small></label></p>{% endfor %}
+  </fieldset>
+  <p>{{ 'Your usual monthly limits stay the same.'|tr(locale) }}</p>
