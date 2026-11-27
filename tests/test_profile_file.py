@@ -393,6 +393,8 @@ def test_phone_settings_offers_the_outside_copy_and_writes_it(tmp_path):
         answer = phone.post("/profiles/outside-copy", data={"csrf": csrf, "action": "choose"}, follow_redirects=False)
         assert answer.status_code == 303 and folder.asked == 1
         folder.kind = "ok"                              # the person picked a folder; the app shows Settings again
+        phone.get("/settings")
+        phone.portal.call(lambda: app.gate.outside_task)
         page = phone.get("/settings").text
         assert len(folder.files) == 1 and next(iter(folder.files)).startswith("Home-")
         row = page[page.index("Keep a copy outside the app"):][:200]

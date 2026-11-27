@@ -62,10 +62,15 @@ def check(local, home, pending):
         raise UpdateRequired("home")
     if home["catalog"] != local["catalog"]:
         raise JournalError("Verified compatible catalog checkpoint required; edits remain pending")
-    from .codec import unpack
     for wire in pending:
-        body = unpack(wire)["body"]
-        known = home["entry_kinds"]
-        if (body["kind_version"] != 1 or short(body["kind"]) not in known.get("commands", ())) if body["kind"].startswith("command.") \
-                else known.get(body["kind"]) != body["kind_version"]:
+        if not supports_proposal(home, wire):
             raise UpdateRequired("home")
+
+
+def supports_proposal(peer, wire):
+    from .codec import unpack
+    body = unpack(wire)["body"]
+    kinds = peer["entry_kinds"]
+    if body["kind"].startswith("command."):
+        return body["kind_version"] == 1 and short(body["kind"]) in kinds["commands"]
+    return kinds.get(body["kind"]) == body["kind_version"]

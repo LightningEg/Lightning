@@ -2534,6 +2534,8 @@ ARABIC_UI = {
     'A copy goes to {folder} the next time you open Lightning.': 'هتتحفظ نسخة في {folder} أول ما تفتح لايتنينج تاني.',
     'Last copy: {day}, in {folder}.': 'آخر نسخة: {day}، في {folder}.',
     'Choose a folder': 'اختيار مجلد',
+    'Retry now': 'حاول تاني',
+    'Recovery uses the entries saved on this device. Edits still on the missing device may be absent.': 'الاسترداد بيستخدم العمليات المحفوظة على الجهاز ده. أي تعديلات لسه على الجهاز المفقود ممكن ما تظهرش.',
     'Change folder': 'غيّر المجلد',
     'The folder is gone, or Lightning may no longer use it. Choose it again.': 'المجلد مش موجود، أو لايتنينج مبقاش مسموح له يستخدمه. اختاره تاني.',
     'The copy could not be saved there. Check the folder and its free space.': 'النسخة متحفظتش هناك. راجع المجلد والمساحة الفاضية فيه.',

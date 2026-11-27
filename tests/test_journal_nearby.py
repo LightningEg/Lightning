@@ -38,10 +38,11 @@ def setup(devices):
     return hs
 
 
-def test_nearby_number_and_confirmation_admit_once_then_sync_without_another_prompt(devices):
+@pytest.mark.parametrize("older_device", [False, True])
+def test_nearby_number_and_confirmation_admit_once_then_sync_without_another_prompt(devices, older_device):
     home, pc = devices
     hs = setup(devices)
-    hs.begin("Pairing password")
+    hs.begin("Pairing password", older_device=older_device)
     code = hs.screen()["code"]
     assert code.isdecimal() and len(code) == 6
     body = __import__('lightning.sync.journal.codec',fromlist=['unpack']).unpack(hs.advertise("0"*64,47513))["body"]
@@ -60,6 +61,7 @@ def test_nearby_number_and_confirmation_admit_once_then_sync_without_another_pro
         await ps.join(identifier,code)
         assert home.c.db.scalar("SELECT COUNT(*) FROM journal_origins WHERE device=?",(pc.identity.device_id,)) == 0
         assert hs.screen()["digits"] == ps.screen()["pending"]
+        assert len(hs.screen()["digits"]) == (6 if older_device else 2)
         ps.compare(ps.screen()["pending"])
         hs.confirm(hs.screen()["digits"])
         assert hs.screen()["confirmed"] and hs.screen()["code"]

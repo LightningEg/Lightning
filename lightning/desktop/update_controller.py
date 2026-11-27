@@ -188,12 +188,13 @@ class UpdateController:
     # --------------------------------------------------------------- the app's own start
     def startup(self) -> None:
         """Called once when the app starts: leave one working folder after a crash, tidy a finished update."""
-        paths = Paths(self.install, self.updates / "none", self.updates)
-        repair(RealHost(), paths)
-        if self.after_update:
-            for child in self.updates.glob("*"):
-                if child.is_dir() and child.name != "ok":
-                    shutil.rmtree(child, ignore_errors=True)
+        # The staged helper owns the swap until this child serves its chooser.
+        # Repairing here would roll the live attempt back before it can acknowledge.
+        if not self.after_update:
+            repair(RealHost(), Paths(self.install, self.updates / "none", self.updates))
+            # At the next normal start the helper no longer runs from staged/.
+            if (self.updates / f"ok-{self.current}").is_file():
+                shutil.rmtree(self.updates / self.current, ignore_errors=True)
 
     def chooser_loaded(self) -> None:
         """The profile chooser answered: tell the helper the new version started (before any unlock or migration)."""

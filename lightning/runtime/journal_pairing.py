@@ -88,10 +88,11 @@ class NearbyPairing(JoiningDriver):
             state["problem"] = str(error)[:200]
             self._save_client(state)
 
-    def begin(self, password):
+    def begin(self, password, *, older_device=False):
         if self.desk is None or self.keys is None:
             raise JournalError("Open pairing on the home")
-        self.desk.begin(self.keys(),password,method=TWO_DIGIT_MATCH)
+        method = "number-match" if older_device else TWO_DIGIT_MATCH
+        self.desk.begin(self.keys(), password, method=method)
 
     def stop(self):
         self.db.execute("DELETE FROM journal_local WHERE name='pairing'")

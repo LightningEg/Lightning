@@ -86,36 +86,56 @@ class OutsideCopy:
         failed copy is a line in Settings, never a broken page."""
         try:
             return self._keep(session)
-        except Exception as exc:  # noqa: BLE001 - the page that triggered this must still open
-            LOG.warning("outside copy failed: %s", type(exc).__name__)
-            try:
-                document = self._read()
-                document["problem"] = WRITE_FAILED
-                self._save(document)
-            except OSError:
-                pass
+        except Exception as exc:
+            self.failed(exc)
             return False
 
+    def failed(self, exc):
+        LOG.warning("outside copy failed: %s", type(exc).__name__)
+        try:
+            document = self._read()
+            document["problem"] = WRITE_FAILED
+            self._save(document)
+        except OSError:
+            pass
+
+    def retry(self):
+        document = self._read()
+        document.pop("tried", None)
+        self._save(document)
+
     def _keep(self, session) -> bool:
+        job = self.reserve(session)
+        if not job:
+            return False
+        return self.deliver(job, session.write_profile_file(self.staging))
+
+    def reserve(self, session):
         paths = getattr(session, "paths", None)
         profile = getattr(paths, "profile", None)
         if session.container is None or profile is None or session.borrowed is not None \
                 or not session.container.db.encrypted:
-            return False
+            return None
         state, folder = self.bridge.state()
         if state != "ok":
-            return False
+            return None
         document = self._read()
         entry = document["profiles"].get(profile.profile_id, {})
         same_folder = entry.get("folder") == folder
         if same_folder and entry.get("date") == _today():
-            return False
+            return None
         if document.get("tried") == [profile.profile_id, folder, _today()]:
-            return False  # it failed today already: try again tomorrow, or when the folder is chosen again
+            return None  # it failed today already: try again tomorrow, or when the folder is chosen again
         document["tried"] = [profile.profile_id, folder, _today()]
         self._save(document)
         self.staging.mkdir(parents=True, exist_ok=True)
-        saved = session.write_profile_file(self.staging)
+        return profile.profile_id, folder, _today()
+
+    def deliver(self, job, saved):
+        profile_id, folder, day = job
+        document = self._read()
+        entry = document["profiles"].get(profile_id, {})
+        same_folder = entry.get("folder") == folder
         try:
             written = self.bridge.write(str(saved), saved.name)
         finally:
@@ -135,7 +155,7 @@ class OutsideCopy:
                 kept.append(name)  # could not delete it now: try again with the next copy
             elif not old:
                 kept.append(name)
-        document["profiles"][profile.profile_id] = {"date": _today(), "folder": folder, "written": kept}
+        document["profiles"][profile_id] = {"date": day, "folder": folder, "written": kept}
         document["problem"] = ""
         document.pop("tried", None)
         self._save(document)

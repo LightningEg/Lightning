@@ -54,6 +54,9 @@ class Fake:
         for key in [k for k in self.files if k == str(source) or k.startswith(str(source) + "/")]:
             self.files[str(target) + key[len(str(source)):]] = self.files.pop(key)
 
+    def unlink(self, path):
+        self.files.pop(str(path), None)
+
     def rmtree(self, path):
         for key in [k for k in self.files if k.startswith(str(path) + "/")]:
             self._op()
@@ -128,6 +131,44 @@ def test_success_deletes_the_old_folder_and_launches_the_new_one():
     assert fake.launched == [(f"{INSTALL}/Lightning.exe", ("--after-update", "2.0.3"))]
     assert json.loads(fake.files[str(UPDATES / "update.json")])["step"] == "ok"
     assert b"2.0.4" in fake.files[str(UPDATES / "update.log")]
+
+
+def test_new_child_uses_helpers_state_directory_and_does_not_repair_a_live_swap(tmp_path):
+    from lightning.desktop.update_controller import UpdateController
+
+    updates = tmp_path / "updates"
+    staged = updates / "2.0.4" / "staged"
+    host = seed()
+    install = tmp_path / "Lightning"
+    paths = uh.Paths(install, staged, updates)
+    for name, data in OLD.items():
+        host.files[str(install / name)] = data
+    for name, data in host.tree(STAGED).items():
+        host.files[str(staged / name)] = data
+
+    def launch(exe, args):
+        assert args == ["--after-update", "2.0.3"]
+        assert host.exists(paths.state)
+        # Exercise the actual child startup against the state on disk.
+        for folder in (install, paths.previous, updates):
+            folder.mkdir(exist_ok=True)
+        paths.state.write_text(host.read_text(paths.state))
+        controller = UpdateController(install, updates, current="2.0.4", after_update=args[1])
+        controller.startup()
+        assert paths.previous.exists()
+        controller.chooser_loaded()
+        host.write_text(paths.ok_marker("2.0.4"), paths.ok_marker("2.0.4").read_text())
+        return {"args": args}
+
+    host.launch = launch
+    assert uh.main(install, 7, "2.0.3", staged=staged, host=host) == 0
+
+
+def test_retry_does_not_accept_an_earlier_success_marker():
+    fake = seed(new="crash")
+    fake.files[str(UPDATES / "ok-2.0.4")] = b"ok"
+    assert swap(fake) == "new app failed"
+    assert installed(fake) == OLD
 
 
 def test_an_older_previous_folder_is_replaced():

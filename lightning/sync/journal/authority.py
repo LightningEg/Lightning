@@ -260,7 +260,10 @@ class AuthorityMemory:
         body = self.verify_transition(wire,allow_observed=True)
         if body["mode"] != "recover" or body["home"] != store.config["device"] or body["cutoff"] != store.cursor():
             raise JournalError("Recovery requires the verified surviving prefix")
+        store.verify()
         await registry.publish(wire)
+        if store.cursor() != body["cutoff"]:
+            raise JournalError("The surviving checkpoint changed during recovery")
         if self.state()["generation"] == body["previous"]:
             self.observe(wire, local_device=store.config["device"])
         fault("authority_observed")

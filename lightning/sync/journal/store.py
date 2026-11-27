@@ -202,7 +202,7 @@ class JournalStore:
     def decisions(self):
         return [dict(row) for row in self.db.all("SELECT proposal_id,decision,displayed FROM journal_outbox WHERE decision IS NOT NULL ORDER BY seq")]
 
-    def _put_record(self, effect):
+    def _put_record(self, effect, *, legacy87=False):
         if "source" in effect:
             source = effect["source"]
             target = self.resolve(effect.get("alias", effect["record"]))
@@ -221,7 +221,7 @@ class JournalStore:
             if self.adapter is None:
                 raise JournalError("Unsupported financial effect adapter")
             if self.config["role"] == "replica":
-                self.adapter.apply(effect["domain"])
+                self.adapter.apply(effect["domain"], legacy87=legacy87)
             if not effect["groups"] and not effect["deleted"]:
                 # A command changed these transactions: the register's field groups for them are
                 # stale, so they leave the register rather than revert the change on a later edit.
@@ -263,7 +263,7 @@ class JournalStore:
             if known != value["hash"]:
                 raise JournalError("Unknown checkpoint; verified snapshot required")
 
-    def apply(self, wire, *, fault=lambda phase: None):
+    def apply(self, wire, *, legacy87=False, fault=lambda phase: None):
         """Apply a signed, typed complete commit; never reinterpret a proposal."""
         if self.config["role"] != "replica":
             raise JournalError("Only replicas replay confirmed effects")
@@ -281,10 +281,19 @@ class JournalStore:
             current = self.cursor()
             if body["revision"] != current["revision"] + 1 or body["previous"] != current["hash"]:
                 raise JournalError("Missing or inconsistent predecessor")
+            if legacy87:
+                from .legacy87 import fingerprint
+                # Expanding old rows writes migration defaults. Confirm no local
+                # financial information would be overwritten before doing so.
+                fingerprint(self.adapter.rows)
             for effect in body["effects"]:
-                self._put_record(effect)
+                self._put_record(effect, legacy87=legacy87)
             fault("replica_effects")
-            if self.fingerprint() != body["fingerprint"]:
+            if legacy87:
+                actual = fingerprint(self.adapter.rows)
+            else:
+                actual = self.fingerprint()
+            if actual != body["fingerprint"]:
                 raise JournalError("Ledger fingerprint mismatch; verified snapshot required")
             self.db.execute("INSERT INTO journal_commits VALUES(?,?,?,?)", (body["revision"], digest(body), body["proposal_id"], wire))
             own = self.db.one("SELECT wire FROM journal_outbox WHERE proposal_id=?", (body["proposal_id"],))
