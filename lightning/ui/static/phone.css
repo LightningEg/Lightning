@@ -1713,7 +1713,7 @@ html.phone .phone-content .phone-afford { padding: 4px 16px; }
 .phone-row.budget-change { flex-wrap: wrap; }
 .phone-row.budget-change > span:first-child { flex: 1 1 10rem; }
 .phone-row.budget-change > .budget-change-actions { flex-direction: row; justify-content: flex-start; }
-.phone-row.budget-change .budget-change-actions .btn { min-height: 44px; }
+html.phone .phone-content .phone-row.budget-change .budget-change-actions .btn:not(#_) { min-height: 44px; }
 
 html.phone .phone-content .phone-row.phone-theme-row { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 4px 12px; }
 html.phone .phone-content .phone-row.phone-theme-row > span:nth-child(2) { min-width: 0; }
