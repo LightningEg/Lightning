@@ -53,6 +53,37 @@ def _barrier(db):
     return state
 
 
+# Columns added to existing journal rows between ledger schemas 87 and 95.
+# Their migration defaults have no financial effect on an existing row.
+_ADDED_COLUMNS = {
+    "reimbursement_claims": {"paid_for_work": 0, "work_closed_on": None},
+    "refund_links": {"estimate_date_override": None},
+    "reimbursement_receipts": {"estimate_date_override": None},
+    "planned_items": {"interest_rate_e6": None, "rate_kind": None},
+}
+
+
+def _upgrade_87_hashes(rows):
+    """Translate only hashes proven to describe the same pre-migration row."""
+    for name, defaults in _ADDED_COLUMNS.items():
+        table = rows.tables[name]
+        for row in rows.db.all(f"SELECT * FROM {name}"):
+            key = rows.identity(table, row)
+            values = rows.encode(table, row)
+            if any(values[column] != default for column, default in defaults.items()):
+                raise JournalError("Unexpected values in newly migrated journal columns")
+            previous = {column: value for column, value in values.items() if column not in defaults}
+            slot = name + ":" + canonical(key).decode()
+            old_hash = rows.row_hash(name, key, previous)
+            new_hash = rows.row_hash(name, key, values)
+            stored = rows.db.scalar("SELECT hash FROM journal_fp WHERE uuid=?", (slot,))
+            if stored == new_hash:
+                continue  # Resuming after the cache transaction committed.
+            if stored != old_hash:
+                raise JournalError("Pre-upgrade journal row differs from its recorded fingerprint")
+            rows.db.execute("UPDATE journal_fp SET hash=? WHERE uuid=?", (new_hash, slot))
+
+
 def upgrade_profile(paths, key: bytes) -> dict | None:
     """Back up and apply pending migrations before the runtime builds a journal profile.
 
@@ -96,7 +127,11 @@ def upgrade_profile(paths, key: bytes) -> dict | None:
             raise JournalError("Journal migration remains incomplete; keep the profile locked")
         # Ensure every synchronized table can be represented after migration.
         from .effects import Replicator
-        Replicator(db, config["profile"]).fingerprint(cached=False)
+        rows = Replicator(db, config["profile"])
+        with db.transaction():
+            if state["from_schema"] == 87 and remaining.current_version == 95:
+                _upgrade_87_hashes(rows)
+            rows.fingerprint(cached=False)
         return state
     finally:
         db.close()
