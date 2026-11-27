@@ -242,16 +242,21 @@ class LocalChannel:
             if type(result["result"]) is dict and set(result["result"]) == {"refused"}:
                 raise HomeRefused(str(result["result"]["refused"])[:200])
             return result["result"]
-        from .compatibility import capabilities, check
+        from .compatibility import UpdateRequired, capabilities, check, supports_proposal
         store = self.device.store
         local, held, wanted, applied = capabilities(store), None, [], False
+        remote_caps = None
         while True:
             pending = store.pending()
             known = {row[0] for row in store.db.all("SELECT proposal_id FROM journal_remote_states")}
             entries = [(origin_id(unpack(wire)["body"]["origin"]), wire) for wire in pending]
             unsent = [] if held else [(identifier, wire) for identifier, wire in entries if identifier not in known]
             batch, size = [], 0
+            blocked = False
             for identifier, wire in unsent:
+                if remote_caps is not None and not supports_proposal(remote_caps, wire):
+                    blocked = True
+                    break
                 chunks = encode(wire)
                 if batch and (len(batch) >= ROUND_PROPOSALS or size + sum(map(len, chunks)) > REQUEST_BUDGET):
                     break
@@ -263,7 +268,16 @@ class LocalChannel:
                                                   cursor=store.cursor(), pieces=wanted))
             if type(result) is not dict or {"capabilities", "reject", "held", "states", "commits", "cursor"} - set(result):
                 raise JournalError("Invalid sync round reply")
-            check(local, result["capabilities"], pending)
+            peer = result["capabilities"]
+            check(local, peer, [])
+            if result["reject"] and remote_caps is None and batch:
+                # Older homes reject the entire round when even one operation is
+                # new to them. Retry the supported prefix, then download normally.
+                if any(not supports_proposal(peer, decode(chunks)) for _, chunks in batch):
+                    remote_caps = peer
+                    continue
+            check(local, peer, [decode(chunks) for _, chunks in batch])
+            remote_caps = peer
             if result["reject"]:
                 raise JournalError(result["reject"])
             states = result["states"]
@@ -289,12 +303,14 @@ class LocalChannel:
                 if not result["commits"] and not result.get("pieces") and not wanted:
                     raise JournalError("Verified checkpoint required")
                 continue
-            if len(batch) < len(unsent) and not held:
+            if len(batch) < len(unsent) and not held and not blocked:
                 continue
             if applied:
                 store.verify()
             with store.db.transaction():
                 store.db.execute("INSERT OR REPLACE INTO journal_local VALUES('last_sync',?)", (datetime.now(timezone.utc).isoformat(),))
+            if blocked:
+                raise UpdateRequired("home")
             if held:
                 raise UploadHeld(held)
             return

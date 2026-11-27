@@ -215,13 +215,24 @@ class SessionGate:
                                                   device_line_values=device_values)
             self.app.state.container = self.session.container
             updates = getattr(self, "updates", None)
-            if updates is not None and scope["method"] == "GET" and request.url.path in ("/", "/profiles"):
-                updates.chooser_loaded()  # the new version reached its chooser: the helper may stop waiting
             if self.session.journal is not None and self.session.journal.task is None:
                 self.session.journal.start(self, files_dir=self.session.root.parent if getattr(self, "phone", False) else None)
             if self.session.container is not None and request.url.path != "/profiles/health" and not request.url.path.startswith("/static/"):
                 self.session.last_activity = time.monotonic()
-            await self.app(scope, receive, send)
+            if updates is not None and updates.after_update and scope["method"] == "GET" and path in ("/", "/profiles"):
+                success = False
+
+                async def chooser_response(message):
+                    nonlocal success
+                    if message["type"] == "http.response.start":
+                        success = message["status"] == 200
+                    await send(message)
+
+                await self.app(scope, receive, chooser_response)
+                if success:
+                    updates.chooser_loaded()
+            else:
+                await self.app(scope, receive, send)
 
 
 def profile_app(credentials: Credentials, root: Path | str | None = None, devices: Devices | None = None,

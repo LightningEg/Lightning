@@ -21,7 +21,7 @@
         {% else %}<p class="muted">Waiting for your other device.</p>{% endif %}
         <form method="post" action="/devices/stop"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Stop pairing</button></form>
       {% else %}
-        <form method="post" action="/devices/open"><input type="hidden" name="__session" value="{{ session }}"><div class="field"><label for="pair-password">Profile password</label><input id="pair-password" name="password" type="password" autocomplete="current-password" required></div><button class="btn primary">Pair a device</button></form>
+        <form method="post" action="/devices/open"><input type="hidden" name="__session" value="{{ session }}"><div class="field"><label for="pair-password">Profile password</label><input id="pair-password" name="password" type="password" autocomplete="current-password" required></div><button class="btn primary">Pair a device</button><button class="btn" name="older_device" value="1">Pair with an older Lightning version</button></form>
       {% endif %}
     {% elif pairing.pending and pairing.stage in ['handshake','proving','cancelling'] %}<p>Pairing was interrupted. Resume to check its saved state.</p><form method="post" action="/devices/resume"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Resume pairing</button></form>
 <form method="post" action="/devices/cancel"><input type="hidden" name="__session" value="{{ session }}"><button class="btn">Cancel this pairing</button></form>

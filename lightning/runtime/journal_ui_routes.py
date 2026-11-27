@@ -174,7 +174,7 @@ def journal_ui_router(session) -> APIRouter:
                 if pairing is None:
                     raise JournalError("Nearby pairing is unavailable")
                 if action == "open":
-                    pairing.begin(str(data.get("password", "")))
+                    pairing.begin(str(data.get("password", "")), older_device=data.get("older_device") == "1")
                 elif action == "stop":
                     pairing.stop()
                 elif action == "find":
