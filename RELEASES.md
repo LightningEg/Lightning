@@ -2,6 +2,96 @@
 
 What changed in each version, in plain words. Generated from `ai/changelog/` by `python tools/release_notes.py`; do not edit by hand. The full detail for each version is in the same folder.
 
+## 2.3.3 · 2026-11-27
+
+**Capture**
+
+- Choose how bank messages save and recognize saved payees in top-up messages.
+- SMS recognizes saved payees in longer bank labels and handles small spelling differences.
+- Review a bank message on your phone and remember the payee and category for similar purchases.
+- Bank statements with repeated categories or missing references open faster for review.
+
+**Plan**
+
+- When a category goes over its plan, cover it for one month by trimming another category, with a preview of both new limits.
+- Choose how much of each holding counts in Free cash, keep a fixed amount invested, and see which funds and brokerage balances contribute.
+- Cash planning now shows the unpaid part of bills, what savings cover and how far today's money will last through the forecast.
+- Financial health now reflects finished bills and reduced loan payments, explains refund months, and distinguishes figures to watch from figures within your limits.
+- Budget carries the correct closing balance into the next month and shows how much a category is over even when its allowance is exhausted.
+- Skipping one month preserves later carryovers, salary-percentage limits follow the selected months, and cover suggestions use amounts you can move.
+- When Fill suggests your average, it now says how many of the last three months had spending, or that the history is still short.
+- A loan can take its yearly rate, flat or reducing, and the Loans tab then shows the total interest and what the loan costs in all.
+- Merchant refunds reduce what work owes and keep the work share out of personal spending.
+- Phone Budget shows what work owed at the end of the month you select.
+- Linked refunds reduce the amount available for reimbursement.
+- Correcting a refund updates the amount still available to recover.
+- Choose when a purchase or its linked repayment counts in spending estimates on desktop and phone.
+- Dismissed income reminders stay hidden on both desktop and phone until the figures change.
+- Cash planning now opens on this month while you still have a bill to pay, and buying gold or a fund is no longer shown in red like spending.
+- The Overview lists the next seven days' payments by name, with a Pay button on each one still to pay.
+- Budget opens on what changed this month, a category shows what you paid, got back and still expect back, and a refund of something a reserve paid for goes back to that reserve.
+- Mark a purchase Paid for work, track what your employer owes and keep reimbursements out of personal spending.
+- Home and Reserves do less repeated work when checking planned payments.
+- Home now leads with Safe to spend today, and Expected by payday shows what arrives before payday, with its dates.
+
+**Understand**
+
+- Home charts now explain refunds, overdrafts and missing valuations, and the phone budget meter shows how far spending went over plan.
+- Home now shows how cash set apart, investments counted as cash and bill reserves affect free cash, plus the amount still due on each bill.
+- The Needs you count on the Overview is now the number of things that need you, not the number of rows.
+- Click any headline figure on the PC, like Net worth or Portfolio value, to see how it adds up right under it.
+- In Arabic, the warning that more is promised than your free cash now shows its amount with Arabic digit grouping.
+
+**Own**
+
+- A fund you picked from the Thndr list can now get its online price even when Mubasher spells its name differently, once its link has been checked.
+- A cost you paid for others can be split in one entry: only your share counts as spending and each person's share shows as owed to you until they pay it back.
+- Retrying a lending, repayment or forgiveness form no longer posts the same transaction twice.
+- On a person's page you can now record money you lent them, money they paid back, and money you forgive.
+- Bought a theme on Google Play? Add the profile to your website account once from Settings, and the website shows the theme as yours.
+- A certificate now has its own page showing its rate, the payments the bank makes, interest received so far, the next payment and when it matures.
+- A certificate that pays its interest at maturity now grows in value as the interest is earned, marked as an estimate, instead of jumping on the day it is cashed in.
+- A variable certificate's new rate can be entered from the date the bank changed it, so earlier payments keep the old rate.
+
+**Protect**
+
+- Every published download is now checked for private files, secrets and extra phone permissions before it is trusted.
+- When a restore was cut off, unlocking now always offers Repair, which undoes or finishes it in one step, in English and Arabic.
+- On Windows a power cut during restore clean-up can no longer leave a copy with no record that locks the profile.
+- A restore cut off before it changed anything is now undone by Repair instead of needing a second restore.
+- A restore cut off before it starts changing anything no longer leaves the profile locked.
+
+**Everywhere**
+
+- The phone's Home now calls the cash in your bank, wallet and cash accounts Cash and banks, so In your accounts always means the same figure on phone and PC.
+- Phone setup shows the bank SMS explanation in Arabic.
+- Transaction search finds Arabic spelling variants and Arabic category names.
+
+**Feel**
+
+- Accounts, Bills, Report and To do on the phone now open on their answer, and To do shows whole pounds like Home.
+- On the phone, Budget shows what is left before the payday banner, Plan says "All covered" when nothing is due, and Can I afford this? opens in a sheet.
+- On the phone, Pay a bill on Home now opens the bills due right there, so paying one takes two taps.
+- Money on the phone now shows what you own, what you owe and your net worth as three steps you can tap, and lists each holding once.
+- Paying a bill on the phone now opens with the amount already filled in.
+- Home on the phone now shows how your cash becomes Free cash and then Safe to spend, each tap showing its parts, with smaller quick actions.
+- Home greets you by name with today's date and how many days until payday, and Settings lets you choose the name.
+- Many small fixes: full names in Transactions, readable spending tiles, clearer budget and cash planning cards, and tidier popups.
+- The app now says "your records" and "value updates" instead of "ledger" and "reevaluation", in English and Arabic.
+- Cash planning has one name everywhere, and "YTD", "The journey" and "Back to the dashboard" now read "This year", "How it went" and "Back to Overview".
+- Reserves, the weekly review, Held for others and payday now use plain labels such as "Payments made", "Late or due", "To match" and "History".
+- Popups now look like the pages they come from, with cleaner amounts, labels and buttons throughout.
+- The field you are typing in is now a light mint instead of yellow.
+- Settings is regrouped into two tidy columns: appearance, your data and features on the left; help, each tab's settings and advanced on the right.
+- The Safety and Settings pages are now titled as the sidebar names them, and Settings shows the app version once.
+- Months in the period control now read like Nov 2026 instead of 2026-11, and clicking one opens the month picker.
+- Transactions say Payee in forms and Who in tables, in English and Arabic.
+- Setting up Lightning on the phone now explains what it does with four short examples and walks you through your first account, salary, cash wallet, bank messages and fingerprint.
+
+**Reach**
+
+- The developer page's guideline now defines two short animations that show what the code really does.
+
 ## 2.3.2 · 2026-11-15
 
 **Capture**
