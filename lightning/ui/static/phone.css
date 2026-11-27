@@ -1692,8 +1692,16 @@ html.phone .phone-content .phone-row > .phone-period-pick:not(#_) { display: inl
 .phone-period-pick svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; color: var(--c-ink-2); }
 /* Settings rows with a chip: the label keeps its word whole, the picker takes what is left (no "Them e"). */
 html.phone .phone-content .phone-row.has-chip:has(> .phone-row-pick) > span:nth-child(2) { flex: 1 0 auto; min-width: max-content; }
+/* r40: Budget's change rows put Fill and Dismiss under the text when they do not fit beside it (Dismiss ran 6px past a 320px screen). */
+html.phone .phone-content .budget-change.phone-row { flex-wrap: wrap; }
+html.phone .phone-content .budget-change .budget-change-actions { flex-direction: row; justify-content: flex-start; }
+/* r40: Home's line a day opens Budget, whose figure it is; it reads as the sentence, with a 44px target. */
+html.phone .phone-content .phone-hero-link { color: inherit; text-decoration: none; padding-block: 12px; }
 html.phone .phone-content .phone-row.has-chip > .phone-row-pick { flex: 0 1 auto; min-width: 0; }
 html.phone .phone-content .phone-row.has-chip > .phone-row-pick select { max-width: 100%; text-overflow: ellipsis; }
+/* r40: the rule above lost to the 210px cap's #_ weight, so at 320px a long theme name still ran 33px past the edge
+   (26px in Arabic); the same weight here lets the picker shrink to the row. */
+html.phone .phone-content .phone-row-pick select:not(#_) { max-width: min(210px, 100%); text-overflow: ellipsis; }
 
 /* Pay a bill (Home's strip, 2026-11-25): the fourth part is a sheet's summary, drawn like its three neighbours. */
 .phone-quick > details { min-width: 0; border-inline-start: 1px solid var(--v2-hair); }
