@@ -200,3 +200,9 @@ Audience: GoatCounter and Supabase aggregates as defined above (skill `usage-que
 ## Dated follow-ups
 
 Append dated decisions and results here; keep the recommendation above as written.
+
+- **2026-11-27, owner decisions (asked in this session):** **adopted** the payday plan that fills itself, all three
+  phases in order. Phase 2 **without reading payment notifications for now** (not yet): more banks' SMS, voice entry
+  and imports from other apps carry it. **Voice entry yes**, on the device, amount and category read by ordinary
+  tested rules. **No share card**: phase 3's review stays inside the app. Still open: which parked items make room on
+  the board (decision 5).
