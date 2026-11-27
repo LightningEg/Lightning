@@ -36,6 +36,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r37 | [Audit 20: the cash planning and forecasting workflow, used as a user](7-planning-import-and-search/r37-cash-planning-workflow/report.md) | 2026-11-14 | audit | 7AX, 7AY |
 | r38 | [PC usability audit: strong parts, scattered](12-desktop-ux/r38-pc-usability-audit/report.md) | 2026-11-22 | audit | none |
 | r39 | [Popups and small elements on the PC](12-desktop-ux/r39-popups-and-small-elements/report.md) | 2026-11-22 | audit | none |
+| r40 | [Next milestone: one money plan. Usability, readability and the links between features](7-planning-import-and-search/r40-one-money-plan/report.md) | 2026-11-27 | audit | none |
 
 
 ## Create and maintain a report
