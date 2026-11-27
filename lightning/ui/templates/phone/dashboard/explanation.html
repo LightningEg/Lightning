@@ -5,4 +5,4 @@
 {% block content %}<p class="phone-note">{{ explanation|tr(locale) }}</p>
 <div class="phone-rows">{% for row in rows %}<{{ 'a' if row.href else 'div' }} class="phone-row"{% if row.href %} href="{{ row.href }}"{% endif %}><span>{{ row.label|tr(locale) }}</span><b><bdi class="fig">{{ row.value|money(True) }}</bdi></b></{{ 'a' if row.href else 'div' }}>{% endfor %}
 <div class="phone-row"><span><b>{{ (fig[figure].label if figure else 'Total'|tr(locale)) if total is not none else 'Unavailable'|tr(locale) }}</b></span><b><bdi class="fig">{{ total|money(True) }}</bdi></b></div></div>
-<p class="phone-note">{{ foot|tr(locale) }}</p>{% include "partials/freshness.html" %}<a class="btn phone-save" href="{{ action[1] }}">{{ action[0] }}</a>{% endblock %}
+<p class="phone-note">{{ foot|tr(locale) }}</p>{% include "partials/redemption_items.html" %}{% include "partials/freshness.html" %}<a class="btn phone-save" href="{{ action[1] }}">{{ action[0] }}</a>{% endblock %}

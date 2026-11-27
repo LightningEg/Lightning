@@ -515,6 +515,8 @@ async def explain_overview_figure(request: Request, kind: str):
         return render(request, "not_found.html", status_code=404, message="Explanation not found.")
     return render(request, "dashboard/explanation.html", title=title, explanation=explanation, figure=figure,
                   rows=rows, total=total, foot=foot, recent=[], action=action, notes=notes,
+                  broker_cash=c.reporting.owned_brokerage_cash_by_account(day) if kind == "free-cash" else (),
+                  cash_sources=position if kind == "free-cash" else None, as_of=day,
                   note_days=lambda note: c.freshness.days_old(note, day))
 
 

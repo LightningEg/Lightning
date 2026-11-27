@@ -22,6 +22,7 @@
     <span class="stat-tile-sub">{% if display_return and display_return.explanation %}{{ display_return.explanation|tr(locale) }}{% elif display_return and display_return.days_held is not none %}{{ (('Held {n} day' if display_return.days_held==1 else 'Held {n} days')|tr(locale, n=display_return.days_held)) }}{% else %}{{ 'Not enough dated cash flows to calculate a return'|tr(locale) }}{% endif %}</span></div>
 </section>
 
+{% include "partials/holding_cash.html" %}
 {% if not h.has_other_owners and (h.flows or []) %}
 <section class="card" id="risk-free" aria-labelledby="risk-free-head">
   <div class="section-head"><div><h2 id="risk-free-head">{{ "Against the risk-free rate"|tr(locale) }}</h2>

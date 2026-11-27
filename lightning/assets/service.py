@@ -319,8 +319,53 @@ class AssetService:
             raise ValidationError("Currencies cannot be edited here.")
         if asset.counts_as_cash != bool(counts):
             with self.db.transaction():
-                self.repo.set_counts_as_cash(asset_id, bool(counts))
+                if self.repo.has_dated_cash_default(asset_id):
+                    self.repo.set_dated_cash_default(asset_id, fmt_date(today()), counts, asset.counts_as_cash)
+                else:
+                    self.repo.set_counts_as_cash(asset_id, bool(counts))
         return self.get_asset(asset_id)
+
+    def set_dated_cash_default(self, asset_id: int, effective_on: str, counts: bool):
+        asset = self.get_asset(asset_id)
+        if asset.is_cash:
+            raise ValidationError("Choose an investment holding.")
+        with self.db.transaction():
+            self.repo.set_dated_cash_default(asset_id, fmt_date(parse_date(effective_on)), counts, asset.counts_as_cash)
+        return self.get_asset(asset_id)
+
+    @request_cached
+    def holding_cash_rules(self, day: str):
+        return {key: (Decimal(bps) / 100 if bps is not None else None, floor)
+                for key, (bps, floor) in self.repo.holding_cash_shares(day).items()}
+
+    @staticmethod
+    def protected_amount(value):
+        amount = check_places(to_decimal(value), 2)
+        if amount < ZERO:
+            raise ValidationError("Enter an amount of zero or more.")
+        return amount
+
+    def set_holding_cash_floor(self, account_id: int, asset_id: int, effective_on: str, amount):
+        if self.get_asset(asset_id).is_cash:
+            raise ValidationError("Choose an investment holding.")
+        with self.db.transaction():
+            self.repo.set_holding_cash_share(account_id, asset_id, fmt_date(parse_date(effective_on)), None,
+                                             self.protected_amount(amount))
+
+    @staticmethod
+    def cash_percentage(value) -> Decimal:
+        percent = check_places(to_decimal(value, "percent"), 2, "percent")
+        if not ZERO <= percent <= 100:
+            raise ValidationError("Enter a percentage from 0 to 100.", "percent")
+        return percent
+
+    def set_holding_cash_percent(self, account_id: int, asset_id: int, effective_on: str, percent):
+        if self.get_asset(asset_id).is_cash:
+            raise ValidationError("Choose an investment holding.")
+        day = fmt_date(parse_date(effective_on))
+        bps = None if percent is None else int(self.cash_percentage(percent) * 100)
+        with self.db.transaction():
+            self.repo.set_holding_cash_share(account_id, asset_id, day, bps)
 
     def link_market(self, asset_id: int, key: str | None) -> None:
         """Remember which market-file instrument an asset is (EG:COMI, EG:FUND:4104)."""
