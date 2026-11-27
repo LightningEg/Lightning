@@ -46,6 +46,9 @@ def test_everyday_allowance_has_its_own_name_while_home_keeps_the_whole_plan(moh
     home_page = client.get("/home")
     budget_page = client.get("/budget/flexible")
     assert home_page.status_code == budget_page.status_code == 200
+    assert 'Everyday budget remaining:' in home_page.text
+    assert 'href="/budget/flexible?breakdown=1"' in home_page.text
+    assert '<details class="phone-sheet-row" open>' in client.get("/budget/flexible?breakdown=1").text
     assert 'Left in plan' not in home_page.text   # Home names neither: its ladder ends on Safe to spend (owner, 2026-11-25)
     assert f'>{FIGURES["everyday_left"].label} <span aria-hidden="true">' in budget_page.text  # NF-12AB4: the hero opens its working
     assert f'>{_money(e.everyday_left, places=0)} <small>' in budget_page.text

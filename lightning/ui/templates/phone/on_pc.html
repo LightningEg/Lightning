@@ -5,7 +5,13 @@
 {% block heading %}<h1>{{ 'This is on your PC'|tr(locale) }}</h1>{% endblock %}
 {% block content %}
 <section class="phone-section">
-  <p>{% if asked %}{{ '{name} works best on your PC, where there is room for it. Your data is the same on both.'|tr(locale, name=asked|tr(locale)) }}{% else %}{{ 'This works best on your PC, where there is room for it. Your data is the same on both.'|tr(locale) }}{% endif %}</p>
+  {% if asked %}
+    {% set section, tab, tool = asked %}
+    <p>{% if tool %}{{ 'On your PC, open {section}, choose {tab}, then open {tool}.'|tr(locale, section=section|tr(locale), tab=tab|tr(locale), tool=tool|tr(locale)) }}{% else %}{{ 'On your PC, open {section}, then choose {tab}.'|tr(locale, section=section|tr(locale), tab=tab|tr(locale)) }}{% endif %}</p>
+  {% else %}
+    <p>{{ 'Open Lightning on your PC to continue.'|tr(locale) }}</p>
+  {% endif %}
+  <p>{{ 'Check that your recent edits are on the PC before you continue.'|tr(locale) }}</p>
   <a class="btn primary" href="{{ leave }}">{{ 'Back'|tr(locale) }}</a>
 </section>
 {% endblock %}

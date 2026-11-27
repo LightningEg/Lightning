@@ -331,8 +331,8 @@ class TestInvestmentPages:
 
         accounts, _ = setup
         asset = c.assets.create_investment("Commercial International Bank", "STOCK", "COMI")
-        c.investments.add_holding(accounts["thndr"].id, asset.id, "10", "950", "2025-09-10")
-        c.assets.set_price(asset.id, "2026-09-30", "100")
+        c.investments.add_holding(accounts["thndr"].id, asset.id, "10", "201", "2025-09-10")
+        c.assets.set_price(asset.id, "2026-09-30", "20.40")
 
         page = TestClient(create_app(c)).get("/investments?period=month&month=2026-09").text
         table = page.split('id="holdings-table"', 1)[1].split("</table>", 1)[0]
@@ -345,7 +345,7 @@ class TestInvestmentPages:
         assert all(len(re.findall(r"<(?:th|td)\b", row)) == 7 for row in rows)
         assert "Holding details" not in table and 'class="small muted"' not in table
         row = re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", rows[-1]))
-        assert "Commercial International Bank" in table and "950 1,000" in row and "+5.3%" in row
+        assert "Commercial International Bank" in table and "20.10 20.40 201 204" in row and "+1.5%" in row
         assert "<small" not in table and "<form" not in table and "data-horizon-edit" not in table
         assert 'data-holdings-group' in page and 'holdings-views' not in page
         picker = page.split('data-holdings-group', 1)[1].split('</select>', 1)[0]

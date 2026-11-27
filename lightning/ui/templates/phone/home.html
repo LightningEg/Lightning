@@ -58,8 +58,8 @@
 {% set pct = s.meter.spent if s.meter else none %}
 {% if s.state == 'overspent' %}{% set verdict, vclass = 'Over.', 'is-bad' %}{% set line = '{amt} more is promised than your free cash.'|tr(locale, amt=(-s.safe)|money) %}
 {% else %}{% set verdict, vclass = ('Ahead of pace.' if s.meter and s.meter.ahead else 'On pace.' if s.meter else ''), ('is-bad' if s.meter and s.meter.ahead else 'is-good') %}
-{% if s.per_day is not none and s.per_day_to_payday %}{% set line = 'About {amt} a day until payday on {sa}.'|tr(locale, amt=s.per_day|money, sa=s.until) %}
-{% elif s.per_day is not none %}{% set line = 'About {amt} a day for {n} days.'|tr(locale, amt=s.per_day|money, n=s.per_day_days) %}
+{% if s.per_day is not none and s.per_day_to_payday %}{% set line = 'Everyday budget remaining: {amt} {cur} a day until payday on {sa}.'|tr(locale, amt=s.per_day|money, cur=base, sa=s.until) %}
+{% elif s.per_day is not none %}{% set line = 'Everyday budget remaining: {amt} {cur} a day for {n} days.'|tr(locale, amt=s.per_day|money, cur=base, n=s.per_day_days) %}
 {% elif s.until %}{% set line = 'On top of your plan until {sa}.'|tr(locale, sa=s.until) %}
 {% else %}{% set line = 'From free cash, after what is promised over the next 3 months.'|tr(locale) %}{% endif %}{% endif %}
 {% macro rung(label, value, fig_key) -%}
@@ -77,7 +77,7 @@
     {% call sheet(fig.free_cash.label, rung(fig.free_cash.label, s.free_cash, 'free_cash'), 'phone-rung is-free') %}{% if s.free_working %}{{ working_rows(s.free_working) }}{% endif %}{% endcall %}
     {% call sheet(fig.safe_to_spend.label, rung(fig.safe_to_spend.label, s.safe, 'safe_to_spend'), 'phone-rung is-safe') %}{{ working_rows(s.working) }}{{ expected_block(s.expected, base) }}{% endcall %}
   </div>
-  <p class="phone-hero-line">{% if verdict %}<b class="{{ vclass }}">{{ verdict|tr(locale) }}</b> {% endif %}{{ line|keep_dates }}</p>
+  <p class="phone-hero-line">{% if verdict %}<b class="{{ vclass }}">{{ verdict|tr(locale) }}</b> {% endif %}{% if s.state != 'overspent' and s.per_day is not none %}<a class="phone-budget-pace" href="/budget/flexible?breakdown=1">{{ line|keep_dates }}</a>{% else %}{{ line|keep_dates }}{% endif %}</p>
   {% if pct is not none %}<span class="phone-pay-meter{{ ' is-ahead' if s.meter.ahead }}" role="img" aria-label="{{ '{n}% spent'|tr(locale, n=pct|round|int) }}"><i style="width:{{ '%.1f'|format([pct, 100]|min) }}%"></i><b style="inset-inline-start:{{ '%.1f'|format([s.meter.pace, 100]|min) }}%"></b></span>{% endif %}
 </section>
 {# Four quick actions in one strip, by meaning (owner, 2026-11-25: much smaller than the tiles). Paste a bank SMS lives in Add. #}
