@@ -133,3 +133,5 @@ wealth, privately on your own devices. That is this milestone. Household sharing
 ## Dated follow-ups
 
 Append dated dispositions here; keep the findings above as written.
+
+- **2026-11-27:** at the owner's request, [r41](../r41-the-next-big-thing/report.md) places this milestone as phase 1 of the next big thing (the payday plan that fills itself).

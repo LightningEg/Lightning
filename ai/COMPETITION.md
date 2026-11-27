@@ -215,6 +215,12 @@ refresh before quoting.
 - **Monarch:** AI assistant, reworked goals, equity vesting in net worth and cash-flow planning, receipt scanning
   (Winter release). [Monarch](https://www.monarch.com/blog/winter-release).
 
+- **Google Play, rendered 2026-11-27 (Egypt):** Say 4.8 from 2.75K reviews, 50K+ downloads; its listing now leads
+  with bank texts, app notifications, "Ask Say AI", a household budget with your partner and voice ("150 pounds on
+  fuel"). Masareef (المصاريف) 4.7 from 32.4K reviews, 1M+ downloads, with ads. Qershnat 4.8 from 696 reviews, 10K+
+  downloads, now with ads. Pockito 100+ downloads, but its pitch is Lightning's: "what's safe to spend today: one
+  daily budget after bills and your savings goal", plus voice, a receipt scanner and an offline-first ledger.
+
 **What it means for Lightning:** reading bank SMS is now table stakes in Egypt, not an edge. None of the Egyptian apps
 shows one plan that adds up across budget, bills, savings and wealth, offline and on your own devices: that is the
 next milestone (r40). Say's shared household budget makes "no household sharing" (Loses, above) the gap to watch.

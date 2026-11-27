@@ -37,6 +37,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r38 | [PC usability audit: strong parts, scattered](12-desktop-ux/r38-pc-usability-audit/report.md) | 2026-11-22 | audit | none |
 | r39 | [Popups and small elements on the PC](12-desktop-ux/r39-popups-and-small-elements/report.md) | 2026-11-22 | audit | none |
 | r40 | [Next milestone: one money plan. Usability, readability and the links between features](7-planning-import-and-search/r40-one-money-plan/report.md) | 2026-11-27 | audit | none |
+| r41 | [The next big thing for Lightning: the payday plan that fills itself](7-planning-import-and-search/r41-the-next-big-thing/report.md) | 2026-11-27 | research | none |
 
 
 ## Create and maintain a report

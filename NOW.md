@@ -2,7 +2,7 @@
 
 ## Claimed
 
-Reserved codes: r41 (Claude, next big thing strategy report, 2026-11-27)
+Reserved codes: none
 
 | Who | Work | Files | Since |
 |---|---|---|---|
@@ -41,7 +41,7 @@ Reserved codes: r41 (Claude, next big thing strategy report, 2026-11-27)
 
 - **Google Play (owner, 11-22):** closed test running; public release planned for 1 December (site Home, Downloads, roadmap #213). **Read:** `docs/google-play.md`.
 
-- **r40 (Claude, 11-27):** next milestone proposed: one money plan (M1-M5); owner: Safe to spend keeps its figure, plus a nudge. Not yet an item. **Read:** r40.
+- **r40, r41 (Claude, 11-27):** next big thing proposed: the payday plan that fills itself (r41 phases 0-3; r40 M1-M5); owner: Safe to spend keeps its figure, plus a nudge. Owner picks pending; no items yet. **Read:** r41.
 
 Plan: `python tools/board.py` (GitHub issues; skill `dispatch`).
 
