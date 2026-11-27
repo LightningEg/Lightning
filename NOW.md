@@ -2,7 +2,7 @@
 
 ## Claimed
 
-Reserved codes: none
+Reserved codes: r41 (Claude, next big thing strategy report, 2026-11-27)
 
 | Who | Work | Files | Since |
 |---|---|---|---|
