@@ -37,6 +37,7 @@ Audits and reviews of a specific source snapshot. Active work lives in
 | r38 | [PC usability audit: strong parts, scattered](12-desktop-ux/r38-pc-usability-audit/report.md) | 2026-11-22 | audit | none |
 | r39 | [Popups and small elements on the PC](12-desktop-ux/r39-popups-and-small-elements/report.md) | 2026-11-22 | audit | none |
 | r40 | [Update survival and mixed phone/PC versions](2-safe-for-real-money/r40-update-survival/report.md) | 2026-11-27 | audit | 2AI |
+| r41 | [Product polish across a household’s daily workflows](12-desktop-ux/r41-product-polish/report.md) | 2026-11-27 | audit | 12G, 2AI |
 
 
 ## Create and maintain a report
