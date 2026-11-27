@@ -2,7 +2,7 @@
 
 ## Claimed
 
-Reserved codes: none
+Reserved codes: r40 (Claude, next milestone report, 2026-11-27)
 
 | Who | Work | Files | Since |
 |---|---|---|---|
