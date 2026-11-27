@@ -21,7 +21,7 @@
   <form method="post" action="{{ action }}" class="phone-form" {% if txn_id %}data-popup-autosave{% else %}data-phone-toast{% endif %}>
     <input type="hidden" name="return_to" value="{{ return_to }}">
     <input type="hidden" name="early_checked" value="{{ values.early_checked or '' }}">
-    {% if txn_id %}<input type="hidden" name="revision" value="{{ revision }}">{% else %}<input type="hidden" name="submission" value="{{ new_submission() }}">{% endif %}
+    {% if txn_id %}<input type="hidden" name="revision" value="{{ revision }}">{% else %}<input type="hidden" name="submission" value="{{ values.submission or new_submission() }}">{% endif %}
     {% if txn_id %}<input type="hidden" name="account_id" value="{{ values.account_id }}">{% endif %}
     {% if fresh %}<input type="hidden" name="sms_ending" value="{{ values.sms_ending or '' }}"><input type="hidden" name="sms_fp" value="{{ values.sms_fp or '' }}">{% endif %}
     {% if split_categories %}<input type="hidden" name="kind" value="{{ values.kind }}"><p class="phone-note">{{ 'Split across {names}; the full amount and its split are kept.'|tr(locale, names=split_categories|join(', ')) }}</p>
@@ -82,6 +82,7 @@
       <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}{% set usual_account = (usual_accounts or {}).get(person.name) %}<option value="{{ person.name }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}{% if usual_account %} data-account="{{ usual_account }}"{% endif %}>{% endfor %}</datalist>
       {% if error_field == 'counterparty' %}<small class="field-error">{{ "Choose a saved payee."|tr(locale) }}</small>{% endif %}
     </div>
+    {% if not txn_id and (split_available or values.shares) %}{% include "partials/people_split_entry.html" %}{% endif %}
     {% if fresh %}{% include "partials/work_claim_entry.html" %}{% endif %}
     <details class="phone-more"{% if values.owner_id or values.notes or values.left_out or values.estimate_date %} open{% endif %}>
       <summary>{{ "More options"|tr(locale) }}<span class="phone-chevron">{{ chevron() }}</span></summary>

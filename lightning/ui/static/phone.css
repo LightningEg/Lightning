@@ -413,6 +413,9 @@ html[dir="rtl"].phone .chevron.chevron-back:has(> path) { transform: none; }
 .phone-more > summary { min-height: 44px; display: flex; align-items: center; font-weight: 700; color: var(--c-ink); cursor: pointer; }  /* a quiet link, as .phone-quiet */
 .phone-more > summary .phone-chevron { margin-left: 4px; }
 .phone-more[open] > summary .phone-chevron .chevron { transform: rotate(90deg); }
+.phone-form [data-share-rows] > [data-share-row] { margin-block: 10px; }
+html.phone .phone-entry .phone-form [data-share-row] input:not(#_) { min-height: 54px; }
+.phone-form [data-people-split] .btn:not(#_) { min-height: 44px; }
 .phone-save { width: 100%; min-height: 48px; margin-top: 4px; justify-content: center; }
 .phone-rows.is-list { margin: 0; }
 .phone-rows.is-list > .phone-row:first-child { border-top: 0; }

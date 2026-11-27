@@ -1,0 +1,18 @@
+{% macro share_row(person='', amount='') -%}
+<div class="{{ 'field' if phone_mode() else 'row' }}" data-share-row>
+  <label class="field">{{ 'Person'|tr(locale) }}<input type="text" name="share_person" value="{{ person }}" list="popup-split-people" data-own-suggestions autocomplete="off" spellcheck="false"></label>
+  <label class="field">{{ 'Share amount'|tr(locale) }}<input type="text" name="share_amount" value="{{ amount }}" inputmode="decimal"></label>
+  <div class="field"><button type="button" class="btn" data-share-remove>{{ 'Remove share'|tr(locale) }}</button></div>
+</div>
+{%- endmacro %}
+<details class="{{ 'phone-more' if phone_mode() else 'field' }} out-only" data-people-split{% if values.kind != 'out' %} hidden{% endif %}{% if values.shares %} open{% endif %}>
+  <summary>{{ 'Split with others'|tr(locale) }}</summary>
+  <p class="muted small">{{ 'Enter the full payment above and what each person owes below.'|tr(locale) }}</p>
+  {% if not owners %}<p class="muted small">{{ 'Save a person in Payees to use their name here.'|tr(locale) }}</p>{% endif %}
+  <datalist id="popup-split-people">{% for person in owners %}<option value="{{ person.name }}">{% endfor %}</datalist>
+  <div data-share-rows>
+    {% for person, amount in values.shares or [('', '')] %}{{ share_row(person, amount) }}{% endfor %}
+  </div>
+  <template data-share-template>{{ share_row() }}</template>
+  <button type="button" class="btn" data-share-add>{{ 'Add a person'|tr(locale) }}</button>
+</details>

@@ -4,6 +4,7 @@ import re
 from dataclasses import replace
 from decimal import Decimal
 from datetime import timedelta
+from itertools import zip_longest
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Request
@@ -423,6 +424,7 @@ async def record_property_flow(request: Request, account_id: int):
 def _transaction_popup_context(request, account, values, action, error=None, txn_id=None, split_categories=None):
     c = container(request)
     counterparties = c.counterparties.list_active()
+    split_available = account.account_type.value in ("BANK", "CASH") and account.currency == c.base_currency
     return dict(account=account, values=values, action=action, txn_id=txn_id, hide_global_error=True,
                 title="Edit transaction" if txn_id else "Add transaction",
                 revision=values.get("revision", c.transactions.revision(txn_id)) if txn_id else "",
@@ -433,6 +435,7 @@ def _transaction_popup_context(request, account, values, action, error=None, txn
                 counterparties=counterparties,
                 counterparty_categories=register.counterparty_category_map(c, [row["name"] for row in counterparties]),
                 owners=c.counterparties.list_owners(),
+                split_available=split_available,
                 split_categories=split_categories or [],
                 return_to=str(values.get("return_to") or f"/accounts/{account.id}"),
                 error=error.message if error else "", error_field=error.field if error else "")
@@ -472,6 +475,23 @@ async def new_transaction_popup(request: Request, account_id: int):
                   **_transaction_popup_context(request, account, values, f"/accounts/{account_id}/transaction/new"))
 
 
+def _popup_people_split(c, account_id, day, amount, category_id, values):
+    if values["owner_id"] or values.get("estimate_date") or values.get("paid_for_work") == "1":
+        raise ValidationError("Split a personal expense without a work claim or a plan date.", "shares")
+    if not category_id:
+        raise ValidationError("Choose a spending category for your share.", "category")
+    people = {person["name"].casefold(): person["id"] for person in c.counterparties.list_people()}
+    shares = []
+    for name, raw in values["shares"]:
+        person_id = people.get(name.strip().casefold())
+        if person_id is None:
+            raise ValidationError("Choose a saved person for each share.", "shares")
+        shares.append((person_id, to_decimal(raw, "shares")))
+    counterparty = values["counterparty"].strip()
+    return c.people_money.split(day, account_id, amount, category_id, shares, notes=values["notes"],
+                                description=counterparty)
+
+
 def _save_popup_transaction(c, account_id: int, values: dict):
     kind = values["kind"]
     if kind not in {"out", "in", "transfer"}:
@@ -498,6 +518,8 @@ def _save_popup_transaction(c, account_id: int, values: dict):
             # Left empty: a rule decides first, then the counterparty's usual category, as in the register.
             category_id = register.category_when_empty(c, values["counterparty"].strip(), values["notes"],
                                                        -amount if kind == "out" else amount, account_id)
+        if kind == "out" and values.get("shares"):
+            return _popup_people_split(c, account_id, day, amount, category_id, values)
         unsorted = not category_id
         if unsorted:
             # NF-7AN: save now, sort later. With only an amount the entry waits as To sort (filed Unaccounted, a
@@ -590,6 +612,14 @@ async def save_transaction_popup(request: Request, account_id: int):
     payload = {key: value for key, value in values.items() if key not in
                ("return_to", "paid_for_work", "work_expected", "work_payer")} | {"account": account_id}
     values["estimate_date"] = str(form.get("estimate_date", ""))
+    values["submission"] = str(form.get("submission", ""))
+    values["sms_fp"], values["sms_ending"] = (str(form.get(key, "")) for key in ("sms_fp", "sms_ending"))
+    if values["kind"] == "out":
+        values["shares"] = [(name, amount) for name, amount in
+                            zip_longest(form.getlist("share_person"), form.getlist("share_amount"), fillvalue="")
+                            if name.strip() or amount.strip()]
+        if values["shares"]:
+            payload["shares"] = values["shares"]
     if values["estimate_date"]:
         payload["estimate_date"] = values["estimate_date"]
     if values["kind"] == "out" and values["paid_for_work"] == "1":
@@ -609,17 +639,28 @@ async def save_transaction_popup(request: Request, account_id: int):
                 _remember_sms(c, form, account_id)
         if earlier is not None:
             return redirect(values["return_to"], "Saved.")
+        locale = c.settings.get("locale") or "en"
+        split_feedback = ""
+        if values.get("shares"):
+            personal, owed = c.people_money.split_amounts(txn)
+            split_feedback = translate("Your share: {personal}. Owed to you: {owed}.", locale,
+                                       personal=f"{fmt(personal)} {account.currency}",
+                                       owed=f"{fmt(owed)} {account.currency}")
         if str(form.get("again", "")) == "1" and earlier is None:  # Save and add another: a fresh sheet, same account and day
             back = "/accounts/%d/transaction/new?%s" % (account_id, urlencode({
                 "date": values["date"], "return_to": values["return_to"]}))
-            response = redirect(back, "Saved. Add the next one.")
+            message = "Saved. Add the next one."
+            if split_feedback:
+                message = f"{split_feedback} {translate(message, locale)}"
+            response = redirect(back, message)
             response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,  # not money
                                 httponly=True, samesite="lax")
             return response
-        feedback = register._budget_feedback(c, txn)
+        feedback = split_feedback or register._budget_feedback(c, txn)
         if matched_reserve < 0:
             feedback = (feedback + " Several reserves match; choose beside the transaction in its account list.").strip()
-        response = redirect(values["return_to"], f"Saved. {feedback}".strip())
+        saved = translate("Saved.", locale) if split_feedback else "Saved."
+        response = redirect(values["return_to"], f"{saved} {feedback}".strip())
         response.set_cookie(LAST_ACCOUNT_COOKIE, str(int(account.id)), max_age=365 * 24 * 3600,  # not money: seconds; the stored id
                             httponly=True, samesite="lax")
         return response
