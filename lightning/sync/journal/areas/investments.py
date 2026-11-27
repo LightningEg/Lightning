@@ -7,7 +7,7 @@ carries the whole form (`investments.update`).
 """
 from .spec import AMOUNT, DATE, FLAG, LONG, RATE, TEXT, Command, items, optional, ref
 
-TABLES = ("investment_custody_events", "investment_dividend_assets", "investment_targets", "investment_liquidation_factors",
+TABLES = ("investment_cash_defaults", "holding_cash_shares", "investment_custody_events", "investment_dividend_assets", "investment_targets", "investment_liquidation_factors",
           "price_history", "reevaluation_periods", "reevaluation_entries", "reevaluation_account_posts",
           "reevaluation_suppressed_accounts")
 
@@ -83,6 +83,12 @@ COMMANDS = {
     # NF-7AU: count an investment's value with Free cash, or not.
     "assets.set_counts_as_cash": Command("assets.set_counts_as_cash", dict(asset_id=ref("financial_assets"), counts=FLAG),
                                          target=ASSET),
+    "assets.set_holding_cash_floor": Command("assets.set_holding_cash_floor", dict(
+        asset_id=ref("financial_assets"), account_id=ref("accounts"), effective_on=DATE, amount=AMOUNT)),
+    "assets.set_dated_cash_default": Command("assets.set_dated_cash_default", dict(
+        asset_id=ref("financial_assets"), effective_on=DATE, counts=FLAG)),
+    "assets.set_holding_cash_percent": Command("assets.set_holding_cash_percent", dict(
+        asset_id=ref("financial_assets"), account_id=ref("accounts"), effective_on=DATE, percent=optional(RATE))),
     "assets.set_preferences": Command("assets.set_investment_preferences", dict(
         asset_id=ref("financial_assets"), bucket=TEXT, horizon=optional(TEXT)), target=ASSET),
     "assets.set_price": Command("assets.set_price", dict(asset_id=ref("financial_assets"), date=DATE, price=RATE)),

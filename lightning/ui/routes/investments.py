@@ -370,6 +370,68 @@ async def _render_planner(request: Request, raw_amount: str="10000"):
                   planner_ready=bool(planning_targets) or by_current_mix, by_current_mix=by_current_mix,allocation_sum=owned.suggested_total(rows))
 
 
+def _cash_holding(c, account_id, asset_id, day):
+    holdings, _ = c.position.owned_holdings(day)
+    return next((item for item in holdings if item.account_id == account_id and item.asset_id == asset_id
+                 and item.quantity > ZERO), None)
+
+
+def _cash_choice(c, fields):
+    mode = fields.get("mode")
+    if mode == "floor":
+        return {"cash_override": None, "protected_amount": c.assets.protected_amount(fields.get("protected", ""))}
+    if mode == "custom":
+        return {"cash_override": c.assets.cash_percentage(fields.get("percent", "")), "protected_amount": None}
+    if mode not in ("default", "none", "all"):
+        raise ValidationError("Choose how much to count in Free cash.")
+    return {"cash_override": {"default": None, "none": ZERO, "all": Decimal(100)}[mode], "protected_amount": None}
+
+
+@router.get("/holding/{asset_id:int}/cash/{account_id:int}/preview")
+async def holding_cash_preview(request: Request, asset_id: int, account_id: int):
+    c = container(request)
+    item = _cash_holding(c, account_id, asset_id, today())
+    if item is None or c.assets.get_asset(asset_id).is_cash or c.deposits.certificate_for_asset(asset_id):
+        raise NotFoundError("Choose an open investment holding.")
+    try:
+        preview = replace(item, **_cash_choice(c, request.query_params))
+    except LightningError as exc:
+        return Response(translate(exc.message, c.settings.get("locale")), status_code=400, media_type="text/plain")
+    return Response(_cash_preview_text(c, preview), media_type="text/plain")
+
+
+def _cash_preview_text(c, item):
+    locale = c.settings.get("locale")
+    if item.cash_percent == ZERO and item.protected_amount is None:
+        return translate("This holding contributes zero to Free cash.", locale)
+    if item.value is None:
+        return translate("Value unavailable. This holding contributes zero until it has a value.", locale)
+    if item.cash_value == ZERO:
+        return translate("This holding contributes zero to Free cash.", locale)
+    return translate("{amount} {currency} counted in Free cash. Redemption required.", locale,
+                     amount=fmt(item.cash_value, 2), currency=c.reporting.base_currency)
+
+
+@router.post("/holding/{asset_id:int}/cash/{account_id:int}")
+async def save_holding_cash(request: Request, asset_id: int, account_id: int):
+    c = container(request)
+    fields = await request.form()
+    day = fmt_date(today())
+    back = f"/investments/holding/{asset_id}?account={account_id}"
+    try:
+        with settled_save(request, c):
+            if _cash_holding(c, account_id, asset_id, day) is None or c.deposits.certificate_for_asset(asset_id):
+                raise ValidationError("Choose an open investment holding.")
+            rule = _cash_choice(c, fields)
+            if rule["protected_amount"] is not None:
+                c.assets.set_holding_cash_floor(account_id, asset_id, day, rule["protected_amount"])
+            else:
+                c.assets.set_holding_cash_percent(account_id, asset_id, day, rule["cash_override"])
+    except LightningError as exc:
+        return redirect(back, exc.message)
+    return redirect(back, "Free cash preference saved.")
+
+
 @router.get("/holding/{asset_id:int}")
 async def holding_detail(request: Request, asset_id: int):
     c=container(request); day=request.query_params.get("date",fmt_date(today()))
@@ -401,7 +463,9 @@ async def holding_detail(request: Request, asset_id: int):
     stale_price=any(row["asset_id"]==asset_id for row in c.reporting.stale_prices(day))
     rate_history = risk_free.parse_history(c.settings.get(risk_free.SETTING_KEY))
     bench = None if h.has_other_owners else risk_free.benchmark(list(h.flows), h.value, day, rate_history)
-    return render(request,"investments/holding.html",rate_history=rate_history,bench=bench,h=h,asset=asset,bucket=bucket,horizon=horizon,day=day,stale_price=stale_price,
+    cash_item = None if asset.is_cash else _cash_holding(c, h.account_id, asset_id, day)
+    return render(request,"investments/holding.html",cash_item=cash_item, cash_editable=day == fmt_date(today()),
+                  cash_preview=_cash_preview_text(c, cash_item) if cash_item else None,rate_history=rate_history,bench=bench,h=h,asset=asset,bucket=bucket,horizon=horizon,day=day,stale_price=stale_price,
                   journey=journey, purchases=purchases, sales=sales, gain_pct=gain_pct, total_return=total_return, breakdown=breakdown,
                   xirr_pct=h.xirr_pct,
                   display_return=h.display_return,
@@ -755,8 +819,8 @@ async def update_asset(request: Request, asset_id: int):
             asset = c.assets.update_investment(asset_id, values["name"], values["class_code"], values["isin"],
                                                values["notes"], active=bool(values["active"]), ticker=values["symbol"],
                                                mic=values["mic"])
-            if "cash_switch" in form:  # NF-7AU: only a form that showed the switch sets it
-                asset = c.assets.set_counts_as_cash(asset_id, bool(values["counts_as_cash"]))
+            if "cash_switch" in form and bool(values["counts_as_cash"]) != asset.counts_as_cash:  # NF-7AU: only a form that showed the switch sets it
+                asset = c.assets.set_dated_cash_default(asset_id, fmt_date(today()), bool(values["counts_as_cash"]))
     except LightningError as exc:
         return _asset_form(request, values, asset=asset, error=exc, status=400)
     return redirect("/investments/assets", f"Saved {asset.name}.")

@@ -2336,6 +2336,7 @@ const initAutosaveExisting = (root = document) => root.querySelectorAll("form[da
   });
 });
 initAutosaveExisting();
+initHoldingCashFields(document);
 
 // Budget: one-click averages, per-category overrides, and typing means manual.
 const initBudgetEditor = () => {
@@ -3497,6 +3498,7 @@ document.addEventListener("lightning:page", (event) => {
   initAsOf(root);
   initPhoneBulk();
   initAutosaveExisting(root);
+  initHoldingCashFields(root);
   initBudgetEditor();
   initAccountType();
   initCounterpartyFilters(root);
@@ -3610,4 +3612,31 @@ document.querySelectorAll("[data-refresh-seconds]").forEach((node) => {
     const typing = document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
     if (document.visibilityState === "visible" && !typing) window.location.reload();
   }, seconds * 1000);
+});
+
+function showHoldingCashFields(form) {
+  form.elements.percent.closest("label").hidden = form.elements.mode.value !== "custom";
+  form.elements.protected.closest("label").hidden = form.elements.mode.value !== "floor";
+}
+function initHoldingCashFields(root) {
+  root.querySelectorAll("form[data-holding-cash]").forEach(showHoldingCashFields);
+}
+
+// The server values the owned units in the profile currency for both preview and save.
+document.addEventListener("input", async function (event) {
+  const form = event.target.closest("[data-holding-cash]");
+  if (!form) return;
+  showHoldingCashFields(form);
+  const query = new URLSearchParams({mode: form.elements.mode.value, percent: form.elements.percent.value,
+    protected: form.elements.protected.value});
+  const output = form.querySelector("output");
+  form.dataset.previewQuery = query.toString();
+  output.textContent = "…";
+  try {
+    const response = await fetch(form.action + "/preview?" + query);
+    const message = await response.text();
+    if (form.dataset.previewQuery === query.toString()) output.textContent = response.ok || response.status === 400 ? message : t("Preview unavailable.");
+  } catch {
+    if (form.dataset.previewQuery === query.toString()) output.textContent = t("Preview unavailable.");
+  }
 });

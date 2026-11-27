@@ -126,7 +126,7 @@ def test_migration_0093_keeps_every_loan_as_it_was_with_no_rate(monkeypatch, tmp
     db.execute("INSERT INTO planned_items(kind,name,amount_e6,frequency,interval_count,start_date,payment_count,principal_e6,"
                "created_at,updated_at) VALUES ('LOAN','Car loan',3000000000,'MONTHLY',1,'2026-01-15',24,60000000000,'x','x')")
     monkeypatch.setattr(migrator, "MIGRATIONS_DIR", migrator._BUNDLED_MIGRATIONS_DIR)
-    assert migrator.migrate(db) == ["0093_loan_rate (APPLIED)"]
+    assert migrator.migrate(db)[0] == "0093_loan_rate (APPLIED)"
     row = db.one("SELECT amount_e6,principal_e6,payment_count,interest_rate_e6,rate_kind FROM planned_items")
     assert tuple(row) == (3000000000, 60000000000, 24, None, None)
     assert migrator.migrate(db) == []  # a second run does nothing
