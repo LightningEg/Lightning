@@ -272,3 +272,26 @@ def test_a_loan_rate_reaches_both_devices_and_a_plan_edit_keeps_it(devices):
     pc.sync_with(hd.home)
     assert plan(hd, "Car loan").rate_kind == "FLAT" and plan(hd, "Car loan").notes == "Bank loan"
     same(hd, pc)
+
+
+def test_month_only_overspend_cover_validates_again_on_home(devices):
+    hd, pc = devices
+    food, shopping = (uid(pc, "categories", category(pc, code).id)
+                      for code in ("EXP.PERSONAL.FOOD", "EXP.PERSONAL.SHOPPING"))
+    for key in (food, shopping):
+        pc.command("budgets.set", category_id=key, month="2026-09", amount="100.00", only_this_month=False,
+                   average_months=None)
+    pc.save(groups(pc, amount="-150.00"))
+    pc.sync_with(hd.home)
+    args = dict(month="2026-09", to_id=food, from_id=shopping, amount="50.00")
+    first = pc.command("forecaster.cover_overspend", **args)
+    duplicate = pc.command("forecaster.cover_overspend", **args)
+    pc.sync_with(hd.home)
+    assert status(hd, first)["status"] == "accepted"
+    assert status(hd, duplicate)["status"] == "rejected"
+    for device in (hd, pc):
+        c = device.c
+        key = category(device, "EXP.PERSONAL.SHOPPING").id
+        assert c.budgets.plan_left(key, "2026-09", schedule=c.schedules.view())["limit"] == 50
+        assert c.budgets.plan_left(key, "2026-10", schedule=c.schedules.view())["limit"] == 100
+    same(hd, pc)

@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Cover this month'|tr(locale) }}{% endblock %}
+{% block heading %}<h1>{{ 'Cover this month'|tr(locale) }}</h1><p>{{ target.name }} · {{ month|month(locale) }}</p>{% endblock %}
+{% block content %}
+<form method="post" action="/budget/move" class="card stack">
+  <input type="hidden" name="__session" value="{{ request.state.session_token|default('') }}">
+  {% include "partials/budget_cover_options.html" %}
+  <button class="btn primary">{{ 'Cover this month'|tr(locale) }}</button>
+</form>
+{% endblock %}

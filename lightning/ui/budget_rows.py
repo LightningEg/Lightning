@@ -3,7 +3,7 @@ phone layer never imports the PC routes."""
 from __future__ import annotations
 
 from datetime import timedelta
-from decimal import ROUND_CEILING, Decimal
+from decimal import Decimal
 from math import pi
 from urllib.parse import quote
 
@@ -80,19 +80,14 @@ def month_bills(c, everyday, month: str) -> dict[int, tuple[Decimal, Decimal]]:
 
 
 def cover_from(c, month: str, target: dict, room: dict[int, Decimal]) -> dict | None:
-    """The category with the most room left (its bills still to pay set aside) that can cover the largest
-    overspend; both need a plan of their own, as Move room asks (budget_move.html)."""
-    plans = c.budgets.amounts_for(month, loans=False, schedule=c.schedules.view())
-    if plans.get(target["category_id"], (None,))[0] is None:
+    to_id = target["category_id"]
+    options = c.budgets.cover_options(month, to_id, target["over"], room, schedule=c.schedules.view())
+    if not options:
         return None
-    amount = Decimal(target["over"]).to_integral_value(rounding=ROUND_CEILING)
-    best = max(((left, cid) for cid, left in room.items()
-                if cid != target["category_id"] and left >= amount
-                and (plans.get(cid, (None,))[0] or ZERO) >= amount), default=None)
-    if best is None:
-        return None
-    return {"name": c.categories.get(best[1]).name, "amount": amount,
-            "href": f"/budget/move?month={month}&to={target['category_id']}&from={best[1]}&amount={amount}"}
+    row = options[0]
+    amount_text = fmt(row["amount"], 0 if row["amount"] == row["amount"].to_integral_value() else 2)
+    return {**row, "amount_text": amount_text,
+            "href": f"/budget/move?month={month}&to={to_id}&from={row['id']}&amount={row['amount']}&cover=1"}
 
 
 def tree_ids(c, category_id: int) -> set[int]:

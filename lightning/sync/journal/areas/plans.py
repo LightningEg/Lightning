@@ -87,6 +87,8 @@ COMMANDS = {
     "budgets.save_month": Command("budgets.save_month", dict(month=MONTH, lines=CELLS, only_this_month=FLAG),
                                   adapt=_month),
     "budgets.apply_fill": Command("budgets.apply_fill", dict(month=MONTH, lines=CELLS), adapt=_fill),
+    "forecaster.cover_overspend": Command("forecaster.cover_overspend", dict(
+        month=MONTH, to_id=ref("categories"), from_id=ref("categories"), amount=AMOUNT)),
     "budgets.move_room_scoped": Command("budgets.move_room", dict(
         month=MONTH, to_id=ref("categories"), from_id=ref("categories"), amount=AMOUNT, only_this_month=FLAG)),
     "budgets.set_carryover": Command("budgets.set_carryover", dict(

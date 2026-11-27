@@ -358,3 +358,71 @@ def test_month_only_salary_rule_can_match_the_old_rate_after_a_raise(b):
     c.budgets.set_income_percentage(food, "2026-11", "10", only_this_month=True)
     assert c.budgets.amounts_for("2026-11", schedule=schedule)[food][0] == 1500
     assert c.budgets.amounts_for("2026-12", schedule=schedule)[food][0] == 1800
+
+
+def test_choose_month_only_cover_with_partial_room_and_stale_offer(b, monkeypatch):
+    from fastapi.testclient import TestClient
+    from lightning.ui.web import create_app
+    from lightning.ui.budget_rows import cover_from
+
+    c, accounts, ids = b
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-12-05")
+    food, shopping, bus = (ids[k] for k in ("EXP.PERSONAL.FOOD", "EXP.WORK.SOFTWARE", "EXP.PERSONAL.TRANSPORT"))
+    schedule = c.schedules.view()
+    c.budgets.save_month("2026-11", {food: "100", shopping: "80", bus: "35.25"}, schedule=schedule)
+    c.transactions.record_outflow("2026-12-03", accounts["cib"].id, "140.50", food)
+    month = "2026-12"
+    offer = cover_from(c, month, {"category_id": food, "over": Decimal("40.50")},
+                       c.forecaster.everyday(month).room)
+    assert offer["amount"] == Decimal("40.50")
+    client = TestClient(create_app(c))
+    page = client.get(offer["href"]).text
+    assert f'value="{shopping}/40.50"' in page and f'value="{bus}/35.25"' in page
+    assert 'name="scope" value="usual"' not in page
+    data = {"month": month, "to": food, "cover_choice": f"{bus}/35.25"}
+    client.post("/budget/move", data=data, follow_redirects=False)
+    assert c.budgets.plan_left(food, month, schedule=schedule)["left"] == Decimal("-5.25")
+    assert c.budgets.plan_left(bus, month, schedule=schedule)["limit"] == 0
+    client.post("/budget/move", data={**data, "cover_choice": f"{shopping}/40.50"}, follow_redirects=False)
+    assert c.budgets.plan_left(shopping, month, schedule=schedule)["limit"] == 80
+    client.post("/budget/move", data={**data, "cover_choice": f"{shopping}/5.25"}, follow_redirects=False)
+    assert c.budgets.plan_left(food, month, schedule=schedule)["left"] == 0
+    assert c.budgets.plan_left(shopping, month, schedule=schedule)["limit"] == Decimal("74.75")
+    assert c.budgets.plan_left(shopping, "2027-01", schedule=schedule)["limit"] == 80
+    assert c.budgets.plan_left(food, "2027-01", schedule=schedule)["limit"] == 100
+
+
+def test_month_only_cover_preserves_unpaid_bill_and_rechecks_donor_spending(b, monkeypatch):
+    from lightning.core.errors import ValidationError
+
+    c, accounts, ids = b
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-12-05")
+    food, donor = ids["EXP.PERSONAL.FOOD"], ids["EXP.PERSONAL.TRANSPORT"]
+    schedule = c.schedules.view()
+    c.budgets.save_month("2026-12", {food: "100", donor: "150"}, schedule=schedule)
+    c.transactions.record_outflow("2026-12-03", accounts["cib"].id, "220", food)
+    c.planning.create(kind="BILL", name="Travel pass", amount="100", frequency="ONCE",
+                      start_date="2026-12-21", category_id=donor)
+    [offer] = c.forecaster.overspend_options("2026-12", food)
+    assert offer["amount"] == 50 and offer["uncovered"] == 70
+    c.transactions.record_outflow("2026-12-05", accounts["cib"].id, "50", donor)
+    assert c.forecaster.overspend_options("2026-12", food) == []
+    with pytest.raises(ValidationError, match="budget changed"):
+        c.forecaster.cover_overspend("2026-12", food, donor, offer["amount"])
+    assert c.budgets.plan_left(food, "2026-12", schedule=schedule)["limit"] == 100
+    assert c.budgets.plan_left(donor, "2026-12", schedule=schedule)["limit"] == 150
+
+
+def test_cover_preserves_an_unspent_child_limit(b, monkeypatch):
+    c, accounts, ids = b
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-12-05")
+    food, donor = ids["EXP.PERSONAL.FOOD"], ids["EXP.PERSONAL.TRANSPORT"]
+    child = c.categories.create(donor, "Train").id
+    schedule = c.schedules.view()
+    c.budgets.save_month("2026-12", {food: "100", donor: "150", child: "70"}, schedule=schedule)
+    c.transactions.record_outflow("2026-12-01", accounts["cib"].id, "200", food)
+    c.transactions.record_outflow("2026-12-02", accounts["cib"].id, "60", donor)
+    [offer] = c.forecaster.overspend_options("2026-12", food)
+    assert offer["id"] == donor and offer["amount"] == 20
+    c.forecaster.cover_overspend("2026-12", food, donor, 20)
+    assert c.budgets.plan_left(donor, "2026-12", schedule=schedule)["left"] == 70
