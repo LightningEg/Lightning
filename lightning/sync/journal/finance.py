@@ -390,7 +390,9 @@ class CashAdapter:
         return self._result()
 
     def _result(self):
-        rows = self.captured
+        return self.pack_rows(self.captured)
+
+    def pack_rows(self, rows):
         if not rows:
             raise ValidationError("This action changed nothing")
         if len(rows) <= MAX_ROWS and len(canonical(rows)) <= 40 * 1024:
@@ -457,9 +459,12 @@ class CashAdapter:
         body = dict(row=own, owned=self.rows.record_hashes(table, local_id))
         return stable_digest(body)
 
-    def apply(self, domain):
+    def apply(self, domain, *, legacy87=False):
         """Typed exact replay on replicas, with no normal save/rule/automation call."""
         domain = self.assemble(domain)
+        if legacy87:
+            from .legacy87 import expand
+            domain = expand(domain)
         with self.writing():
             self.rows.apply(domain, bounded=len(domain["rows"]) <= MAX_ROWS)
             self.rows.reset()  # The effect names every touched row, deletes included; triggers could not name those.

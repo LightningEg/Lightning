@@ -165,7 +165,7 @@ class LocalChannel:
 
     def _round(self, home, sender, value):
         """Receive what fits, process, report statuses and as many commits as one reply holds."""
-        from .compatibility import capabilities, check
+        from .compatibility import _capabilities, capabilities, check
         fields(value, ("capabilities", "proposals", "status", "cursor", "pieces"))
         if type(value["pieces"]) is not list or len(value["pieces"]) > 4:
             raise JournalError("Invalid sync round")
@@ -184,20 +184,40 @@ class LocalChannel:
             if inner["origin"]["device"] != sender:
                 raise JournalError("A local sender cannot impersonate another origin")
         check_cursor(value["cursor"])
+        from . import legacy87
         mine = capabilities(home.store)
+        history = legacy87.through(home.store.db)
+        if history is not None:
+            _capabilities(value["capabilities"])
+            if history == -1 and value["capabilities"].get("ledger_schema") == 87:
+                mine = dict(mine, ledger_schema=87)
+            # Positive versions are required for capability values. Zero revisions
+            # encoded as 1; active history covers all revisions in this reply.
+            last = home.store.cursor()["revision"] if history == -1 else history
+            mine["entry_kinds"]["legacy87.through"] = last + 1
         result = dict(capabilities=mine, reject=None, held=None, states={}, commits=[], pieces=[], cursor=home.store.cursor())
         try:
             check(value["capabilities"], mine, wires)
         except (JournalError, TypeError, KeyError) as error:
             result["reject"] = str(error) or "Incompatible peer"
             return result
+        peer_updated = False
+        if history == -1:
+            if value["capabilities"]["ledger_schema"] == 95:
+                cursor = home.store.db.execute("""INSERT OR IGNORE INTO journal_local(name,value)
+                    SELECT 'peer95:' || device || '/' || incarnation, '1' FROM journal_origins
+                    WHERE device=? AND revoked=0""", (sender,))
+                peer_updated = cursor.rowcount > 0
+            else:
+                home.store.db.execute("""DELETE FROM journal_local WHERE name IN
+                    (SELECT 'peer95:' || device || '/' || incarnation FROM journal_origins WHERE device=?)""", (sender,))
         for wire in wires:
             try:
                 home.receive(wire)
             except JournalError as error:  # Later proposals wait; downloads continue.
                 result["held"] = str(error)
                 break
-        if wires:
+        if wires or peer_updated:
             home.process(limit=50)
         result["states"] = {identifier: home.status(identifier) for identifier in ids}
         result["cursor"] = home.store.cursor()
@@ -206,6 +226,9 @@ class LocalChannel:
         except JournalError as error:
             result["reject"] = str(error)
             return result
+        if history == -1:
+            last = legacy87.through(home.store.db)
+            mine["entry_kinds"]["legacy87.through"] = (result["cursor"]["revision"] if last == -1 else last) + 1
         size = 0
         for item in value["pieces"]:  # Chunks of a large effect the device is waiting for, first.
             data = home.store.chunk(item)
@@ -242,16 +265,22 @@ class LocalChannel:
             if type(result["result"]) is dict and set(result["result"]) == {"refused"}:
                 raise HomeRefused(str(result["result"]["refused"])[:200])
             return result["result"]
-        from .compatibility import capabilities, check
+        from .compatibility import UpdateRequired, capabilities, check, supports_proposal
         store = self.device.store
         local, held, wanted, applied = capabilities(store), None, [], False
+        remote_caps = None
+        legacy87 = False
         while True:
             pending = store.pending()
             known = {row[0] for row in store.db.all("SELECT proposal_id FROM journal_remote_states")}
             entries = [(origin_id(unpack(wire)["body"]["origin"]), wire) for wire in pending]
             unsent = [] if held else [(identifier, wire) for identifier, wire in entries if identifier not in known]
             batch, size = [], 0
+            blocked = False
             for identifier, wire in unsent:
+                if remote_caps is not None and not supports_proposal(remote_caps, wire):
+                    blocked = True
+                    break
                 chunks = encode(wire)
                 if batch and (len(batch) >= ROUND_PROPOSALS or size + sum(map(len, chunks)) > REQUEST_BUDGET):
                     break
@@ -263,7 +292,26 @@ class LocalChannel:
                                                   cursor=store.cursor(), pieces=wanted))
             if type(result) is not dict or {"capabilities", "reject", "held", "states", "commits", "cursor"} - set(result):
                 raise JournalError("Invalid sync round reply")
-            check(local, result["capabilities"], pending)
+            peer = result["capabilities"]
+            if (remote_caps is None and result["reject"] and local["ledger_schema"] == 95
+                    and isinstance(peer, dict) and peer.get("ledger_schema") == 87
+                    and local["app"].startswith("2.3.") and store.adapter is not None
+                    and store.db.scalar("SELECT value FROM journal_local WHERE name='upgraded_replica_87'") == "1"):
+                from .legacy87 import fingerprint
+                local = dict(local, ledger_schema=87)
+                check(local, peer, [])
+                fingerprint(store.adapter.rows)
+                remote_caps, legacy87 = peer, True
+                continue
+            check(local, peer, [])
+            if result["reject"] and remote_caps is None and batch:
+                # Older homes reject the entire round when even one operation is
+                # new to them. Retry the supported prefix, then download normally.
+                if any(not supports_proposal(peer, decode(chunks)) for _, chunks in batch):
+                    remote_caps = peer
+                    continue
+            check(local, peer, [decode(chunks) for _, chunks in batch])
+            remote_caps = peer
             if result["reject"]:
                 raise JournalError(result["reject"])
             states = result["states"]
@@ -280,7 +328,9 @@ class LocalChannel:
             wanted = []
             for commit in result["commits"]:
                 try:
-                    applied = store.apply(decode(commit)) or applied
+                    wire = decode(commit)
+                    old_format = legacy87 or unpack(wire)["body"]["revision"] < peer["entry_kinds"].get("legacy87.through", 0)
+                    applied = store.apply(wire, legacy87=old_format) or applied
                 except ChunksMissing as error:  # A large effect: fetch its chunks next round.
                     wanted = error.missing[:4]
                     break
@@ -289,12 +339,14 @@ class LocalChannel:
                 if not result["commits"] and not result.get("pieces") and not wanted:
                     raise JournalError("Verified checkpoint required")
                 continue
-            if len(batch) < len(unsent) and not held:
+            if len(batch) < len(unsent) and not held and not blocked:
                 continue
             if applied:
                 store.verify()
             with store.db.transaction():
                 store.db.execute("INSERT OR REPLACE INTO journal_local VALUES('last_sync',?)", (datetime.now(timezone.utc).isoformat(),))
+            if blocked:
+                raise UpdateRequired("home")
             if held:
                 raise UploadHeld(held)
             return

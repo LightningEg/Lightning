@@ -267,7 +267,7 @@ def test_unconfigured_cloud_recovery_fails_with_clear_unavailable_error(devices,
             control.close()
 
 
-def test_recovery_requires_live_registry_publication_and_preserves_old_branch(devices, tmp_path):
+def test_recovery_requires_live_registry_publication_and_preserves_old_branch(devices, tmp_path, monkeypatch):
     home, pc = devices
     owner, controls = memories(devices, tmp_path)
     wire = change(home, pc, owner, mode="recover")
@@ -278,6 +278,12 @@ def test_recovery_requires_live_registry_publication_and_preserves_old_branch(de
         async def publish(self, request):
             assert request == wire
     try:
+        def corrupt():
+            raise JournalError("Ledger fingerprint mismatch")
+        with monkeypatch.context() as patch:
+            patch.setattr(pc.store, "verify", corrupt)
+            with pytest.raises(JournalError, match="fingerprint mismatch"):
+                asyncio.run(controls[1].recover(pc.store, wire, Unavailable()))
         with pytest.raises(OSError):
             asyncio.run(controls[1].recover(pc.store, wire, Unavailable()))
         assert controls[1].state()["generation"] == home.store.config["generation"]

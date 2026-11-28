@@ -134,6 +134,8 @@ class JournalServices:
         identifier = origin_id(unpack(wire)["body"]["origin"])
         home = self._device.home
         state = home.status(identifier) if home else None
+        if state and state["reason"] == "peer-upgrade-needed":
+            raise PendingOnHome("Edit saved. Update the other paired devices and reconnect to apply it.")
         if state is None or state["status"] in ("staged", "review"):
             raise PendingOnHome("Saved on this device. It takes effect when the home confirms it.")
         if state["status"] == "rejected":

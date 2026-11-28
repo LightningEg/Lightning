@@ -28,6 +28,7 @@ WAIT_OLD_EXIT, RENAME_TRIES, RENAME_PAUSE, WAIT_NEW_START = 60.0, 10, 1.0, 90.0
 class Host(Protocol):
     def exists(self, path: Path) -> bool: ...
     def rename(self, source: Path, target: Path) -> None: ...
+    def unlink(self, path: Path) -> None: ...
     def rmtree(self, path: Path) -> None: ...
     def copytree(self, source: Path, target: Path) -> None: ...
     def read_text(self, path: Path) -> str: ...
@@ -162,6 +163,8 @@ def run(host: Host, paths: Paths, *, old_pid: int, old_version: str, new_version
             return "old app still open"
         host.sleep(0.5)
     repair(host, paths)
+    if host.exists(paths.ok_marker(new_version)):
+        host.unlink(paths.ok_marker(new_version))
     _set_step(host, paths, "renaming", old_version, new_version)
     if host.exists(paths.previous):
         host.rmtree(paths.previous)
@@ -188,7 +191,13 @@ def run(host: Host, paths: Paths, *, old_pid: int, old_version: str, new_version
         return "copy corrupt"
     log("new version in place; starting it")
     _set_step(host, paths, "launched", old_version, new_version)
-    process = host.launch(paths.exe, ["--after-update", old_version])
+    try:
+        process = host.launch(paths.exe, ["--after-update", old_version])
+    except OSError:
+        _rollback(host, paths)
+        _set_step(host, paths, "failed", old_version, new_version)
+        host.launch(paths.exe, ["--update-failed", new_version])
+        return "new app failed"
     deadline = host.now() + WAIT_NEW_START
     while not host.exists(paths.ok_marker(new_version)):
         if host.exited(process) or host.now() >= deadline:
@@ -201,8 +210,14 @@ def run(host: Host, paths: Paths, *, old_pid: int, old_version: str, new_version
             return "new app failed"
         host.sleep(0.5)
     _set_step(host, paths, "ok", old_version, new_version)
+    if sys.platform == "win32" and isinstance(host, RealHost):
+        from lightning.desktop.shortcuts import refresh_desktop_shortcuts
+        try:
+            refresh_desktop_shortcuts(paths.exe, paths.previous)
+        except (OSError, subprocess.SubprocessError):
+            log("Windows could not refresh the desktop shortcuts")
     _drop_previous(host, paths)
-    log("the new version started; the old version's folder is deleted")
+    log("the new version started")
     return "updated"
 
 
@@ -217,6 +232,7 @@ class RealHost:
 
     def exists(self, path): return path.exists()
     def rename(self, source, target): os.rename(source, target)
+    def unlink(self, path): path.unlink(missing_ok=True)
     def rmtree(self, path): shutil.rmtree(path)
     def copytree(self, source, target): shutil.copytree(source, target)
     def read_text(self, path): return path.read_text(encoding="utf-8")
@@ -256,7 +272,9 @@ class RealHost:
 
     def launch(self, exe, args): return subprocess.Popen([str(exe), *args], cwd=exe.parent)
     def exited(self, process): return process.poll() is not None
-    def terminate(self, process): process.terminate()
+    def terminate(self, process):
+        process.terminate()
+        process.wait(timeout=10)
     def sleep(self, seconds): time.sleep(seconds)
     def now(self): return time.time()
 
@@ -265,7 +283,7 @@ def main(install: Path, old_pid: int, old_version: str, *, staged: Path | None =
          host: Host | None = None) -> int:
     """Entry for `--finish-update`: the staged folder is where this program runs from."""
     staged = staged or Path(sys.executable).resolve().parent
-    updates = updates or staged.parent
+    updates = updates or staged.parent.parent
     new_version = staged.parent.name  # updates\<version>\staged
     result = run(host or RealHost(), Paths(install, staged, updates), old_pid=old_pid, old_version=old_version,
                  new_version=new_version)

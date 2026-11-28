@@ -19,6 +19,8 @@ from lightning.database.snapshot import verify_connection
 
 from .codec import JournalError, canonical, fields, hash_value, number
 
+from .legacy87 import ADDED_COLUMNS
+
 _BARRIER = "upgrade_barrier"
 
 
@@ -53,6 +55,27 @@ def _barrier(db):
     return state
 
 
+def _upgrade_87_hashes(rows):
+    """Translate only hashes proven to describe the same pre-migration row."""
+    for name, defaults in ADDED_COLUMNS.items():
+        table = rows.tables[name]
+        for row in rows.db.all(f"SELECT * FROM {name}"):
+            key = rows.identity(table, row)
+            values = rows.encode(table, row)
+            if any(values[column] != default for column, default in defaults.items()):
+                raise JournalError("Unexpected values in newly migrated journal columns")
+            previous = {column: value for column, value in values.items() if column not in defaults}
+            slot = name + ":" + canonical(key).decode()
+            old_hash = rows.row_hash(name, key, previous)
+            new_hash = rows.row_hash(name, key, values)
+            stored = rows.db.scalar("SELECT hash FROM journal_fp WHERE uuid=?", (slot,))
+            if stored == new_hash:
+                continue  # Resuming after the cache transaction committed.
+            if stored != old_hash:
+                raise JournalError("Pre-upgrade journal row differs from its recorded fingerprint")
+            rows.db.execute("UPDATE journal_fp SET hash=? WHERE uuid=?", (new_hash, slot))
+
+
 def upgrade_profile(paths, key: bytes) -> dict | None:
     """Back up and apply pending migrations before the runtime builds a journal profile.
 
@@ -70,7 +93,9 @@ def upgrade_profile(paths, key: bytes) -> dict | None:
         inspection = inspect_schema(db)
         if state is None and not inspection.pending:
             return None
-        if config.get("role") != "home":
+        start = state["from_schema"] if state else inspection.current_version
+        replica_upgrade = config.get("role") == "replica" and start == 87 and inspection.latest_version == 95
+        if config.get("role") != "home" and not replica_upgrade:
             raise JournalError("Only the journal home can migrate the ledger schema")
         if state is None:
             saved = backup(db, paths.backups_dir, pre_upgrade=True)
@@ -96,7 +121,20 @@ def upgrade_profile(paths, key: bytes) -> dict | None:
             raise JournalError("Journal migration remains incomplete; keep the profile locked")
         # Ensure every synchronized table can be represented after migration.
         from .effects import Replicator
-        Replicator(db, config["profile"]).fingerprint(cached=False)
+        rows = Replicator(db, config["profile"])
+        with db.transaction():
+            if state["from_schema"] == 87 and remaining.current_version == 95:
+                _upgrade_87_hashes(rows)
+                if config["role"] == "home":
+                    db.execute("CREATE TABLE IF NOT EXISTS journal_wire_history(id INTEGER PRIMARY KEY, last_87 INTEGER NOT NULL)")
+                    db.execute("INSERT OR IGNORE INTO journal_wire_history VALUES(1,-1)")
+            actual = rows.fingerprint(cached=False)
+            if replica_upgrade:
+                if actual != rows.fingerprint(cached=True):
+                    raise JournalError("Replica fingerprint mismatch after migration")
+                db.execute("INSERT OR REPLACE INTO journal_local VALUES('upgraded_replica_87','1')")
+                db.execute("DELETE FROM journal_local WHERE name=?", (_BARRIER,))
+                return None
         return state
     finally:
         db.close()

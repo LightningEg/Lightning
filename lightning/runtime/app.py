@@ -75,6 +75,7 @@ class SessionGate:
     def __init__(self, app, session: ProfileSession):
         self.app, self.session = app, session
         self.mutex = asyncio.Lock()
+        self.outside_task = None
 
     async def set_mode(self, mode: str) -> None:
         """Sync's mode change for the open profile (lightning.runtime.devices.AppBridge), between requests."""
@@ -113,14 +114,34 @@ class SessionGate:
         """For the phone's Settings › Backup: None when the phone cannot keep a copy outside the app, else its
         status (BT-2AI3). Loading Settings or Home is also when a due copy is written, at most once a day."""
         outside = getattr(self, "outside", None)
-        if outside is None or path not in ("/", "/settings") or self.session.container is None:
+        if outside is None or path not in ("/", "/home", "/settings") or self.session.container is None:
             return None
         try:
-            outside.keep(self.session)
+            if self.outside_task is None or self.outside_task.done():
+                job = outside.reserve(self.session)
+                if job:
+                    self.outside_task = asyncio.create_task(self._outside_copy(job, self.session.paths))
             profile = self.session.paths.profile if self.session.paths is not None else None
             return outside.status(profile.profile_id if profile is not None else "") if path == "/settings" else None
         except Exception:  # noqa: BLE001 - a bridge that cannot answer offers no row
             return None
+
+    async def _outside_copy(self, job, paths):
+        from .profile_file import write_profile_file
+
+        try:
+            # The initiating request finishes before this job takes the mutex.
+            # Only the snapshot needs the open profile. Use a worker-owned SQLCipher
+            # connection; Android folder writes then proceed without the session lock.
+            async with self.mutex:
+                if self.session.paths is not paths or self.session.container is None:
+                    self.outside.retry()
+                    return
+                key = self.session.container.db.copy_key()
+                saved = await asyncio.to_thread(write_profile_file, paths, key, self.outside.staging)
+            await asyncio.to_thread(self.outside.deliver, job, saved)
+        except Exception as error:
+            self.outside.failed(error)
 
     async def change_role(self, role) -> None:
         """Change the open profile's role between requests, never during one (multi-device task 06)."""
@@ -215,13 +236,24 @@ class SessionGate:
                                                   device_line_values=device_values)
             self.app.state.container = self.session.container
             updates = getattr(self, "updates", None)
-            if updates is not None and scope["method"] == "GET" and request.url.path in ("/", "/profiles"):
-                updates.chooser_loaded()  # the new version reached its chooser: the helper may stop waiting
             if self.session.journal is not None and self.session.journal.task is None:
                 self.session.journal.start(self, files_dir=self.session.root.parent if getattr(self, "phone", False) else None)
             if self.session.container is not None and request.url.path != "/profiles/health" and not request.url.path.startswith("/static/"):
                 self.session.last_activity = time.monotonic()
-            await self.app(scope, receive, send)
+            if updates is not None and updates.after_update and scope["method"] == "GET" and path in ("/", "/profiles"):
+                success = False
+
+                async def chooser_response(message):
+                    nonlocal success
+                    if message["type"] == "http.response.start":
+                        success = message["status"] == 200
+                    await send(message)
+
+                await self.app(scope, receive, chooser_response)
+                if success:
+                    updates.chooser_loaded()
+            else:
+                await self.app(scope, receive, send)
 
 
 def profile_app(credentials: Credentials, root: Path | str | None = None, devices: Devices | None = None,
@@ -346,6 +378,8 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
             expiry.cancel()
             with suppress(asyncio.CancelledError):
                 await expiry
+            if gate.outside_task is not None:
+                await gate.outside_task
             borrowed = session.borrowed
             session.close()
             app.state.container = None
@@ -422,7 +456,11 @@ def profile_app(credentials: Credentials, root: Path | str | None = None, device
         the folder belongs to the phone, not to one profile."""
         if gate.outside is not None:
             form = await request.form()
-            if form.get("action") == "stop":
+            if gate.outside_task is not None and not gate.outside_task.done():
+                return PlainTextResponse("A backup is in progress. Try again when it finishes.", status_code=409)
+            if form.get("action") == "retry":
+                gate.outside.retry()
+            elif form.get("action") == "stop":
                 gate.outside.stop()
             else:
                 gate.outside.choose()

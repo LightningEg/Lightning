@@ -174,7 +174,7 @@ def journal_ui_router(session) -> APIRouter:
                 if pairing is None:
                     raise JournalError("Nearby pairing is unavailable")
                 if action == "open":
-                    pairing.begin(str(data.get("password", "")))
+                    pairing.begin(str(data.get("password", "")), older_device=data.get("older_device") == "1")
                 elif action == "stop":
                     pairing.stop()
                 elif action == "find":
@@ -208,6 +208,8 @@ def journal_ui_router(session) -> APIRouter:
                                 if key in parameters or (extra_proofs and key in {"answer", "recovery"})})
             if inspect.isawaitable(outcome):
                 outcome = await outcome
+            if action == "recover-home":
+                current.refresh_authority()
             return render(request, message=str(outcome or "The device action completed"))
         except (JournalError, OSError, TimeoutError, ValueError) as error:
             return render(request, error=str(error))
