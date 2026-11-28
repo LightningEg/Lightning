@@ -215,3 +215,10 @@ Append dated decisions and results here; keep the recommendation above as writte
   other apps), posted to the board when phase 1 closes; phase 3 is the monthly review, NF-12AL (#638).
 - **2026-11-28, owner pick (board limit):** phase 1's two items (IT-7BB #779, IV-11P #780) may keep the board above
   AGENTS.md's 20 open items until phase 1 closes; phase 2 items are posted only then.
+- **2026-11-28, phase 3 built as NF-7BF (#790):** NF-12AL (#638), named above for phase 3, had delivered Budget's
+  "what changed" card. The phone's Report now says whether the period left you richer, the change in grams of 21K
+  gold, and why (Kept + Investing result + Other changes); `tests/test_did_i_get_richer.py`. Inflation waits for the
+  owner's pick of a source.
+- **2026-11-28, owner picks on the month review:** the phone Report leads with Change in net worth, as the PC Overview
+  does, so the lead, the verdict and Why it changed are one figure (1A); inflation is left out (2B); #638 closed as
+  completed (3A); #775 is brought up to date with main, keeping only what main lacks (4A).

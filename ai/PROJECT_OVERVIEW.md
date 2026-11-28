@@ -248,6 +248,8 @@ From the full UX review of 2026-10-03 (Mohab's year at 1,366 × 768) and the tab
 
 **Owner decisions (2026-11-27, [r41](../issues/7-planning-import-and-search/r41-the-next-big-thing/report.md)):** the next milestone is the payday plan that fills itself, in three phases: the payday plan (r40 M1-M3 and the nudge), then capture (more banks' SMS, voice entry for cash in Egyptian Arabic on the device, imports from other apps; reading payment notifications is not adopted for now), then the month-end review in pounds and grams of gold against inflation (no share card). Household sharing comes after.
 
+**Owner decisions (2026-11-28, NF-7BF):** the phone Report leads with Change in net worth, as the PC Overview does, and explains it with the same bridge (Net flow + Market moves + Other changes), plus the change in grams of 21K gold; the month review shows no inflation figure.
+
 **Still open:** import button says "Post ready rows" while undecided rows post as Unaccounted; bulk counterparty edit.
 
 <a id="upcoming-projects"></a>

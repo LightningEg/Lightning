@@ -1,4 +1,4 @@
-{# The period report (IV-3AY11 prerequisite; polished 2026-11-25): Change in what you own leads, its period one tap away
+{# The period report (IV-3AY11 prerequisite; polished 2026-11-25): Change in net worth leads (owner, 2026-11-28), its period one tap away
    in Choose period (C04.2: a sheet, never chips and fields on the page), Money in and out as the two wells, then the rows. #}
 {% extends "base.html" %}
 {% from "phone/partials/sheet.html" import sheet with context %}
@@ -6,10 +6,13 @@
 {% block phone_back %}<a class="phone-back" href="/money"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6"/></svg><span>{{ 'Money'|tr(locale) }}</span></a><span class="phone-appbar-title">{{ 'Report'|tr(locale) }}</span>{% endblock %}
 {% set s = screen %}
 {% block heading %}<section class="phone-hero" aria-labelledby="change-heading">
-  <div id="change-heading" class="phone-hero-label" role="heading" aria-level="2">{{ 'Change in what you own'|tr(locale) }}</div>
+  <div id="change-heading" class="phone-hero-label" role="heading" aria-level="2">{{ fig.change_in_net_worth.label }}</div>
   {% if s.change is not none %}<div class="phone-lead{{ ' is-negative' if s.change < 0 }}">{{ s.change|money(True) }} <small>{{ base }}</small></div>
   {% else %}<p class="phone-hero-line">{{ s.change_reason|tr(locale) }}</p>{% endif %}
   <p class="phone-hero-line">{{ s.start|day_range(s.end, locale) }}</p>
+  {# NF-7BF (r41 phase 3): did the period leave you richer (net worth, as the PC Overview), and in gold. A16: the
+     verdict names the direction and the day; the amount is in Why it changed. #}
+  {% set b = s.bridge %}{% if b %}<p class="phone-hero-line phone-richer">{% if b.change > 0 %}<b class="is-good">{{ 'Richer than on {sa}.'|tr(locale, sa=s.since)|keep_dates }}</b>{% elif b.change < 0 %}<b class="is-bad">{{ 'Poorer than on {sa}.'|tr(locale, sa=s.since)|keep_dates }}</b>{% else %}{{ 'The same as on {sa}.'|tr(locale, sa=s.since)|keep_dates }}{% endif %}{% if s.gold_change is not none %} {{ ('In gold: {g} grams of 21K more.' if s.gold_change >= 0 else 'In gold: {g} grams of 21K fewer.')|tr(locale, g=s.gold_change|abs|money(False, 1)) }}{% endif %}</p>{% endif %}
   <div class="phone-wells"><div class="phone-well"><span>{{ 'Money in'|tr(locale) }}</span><b class="fig pos">{{ s.money_in|money }}</b></div><div class="phone-well"><span>{{ 'Money out'|tr(locale) }}</span><b class="fig">{{ s.money_out|money }}</b></div></div>
 </section>{% endblock %}
 {% block content %}
@@ -25,8 +28,11 @@
 {% endcall %}
 </section>
 <section class="phone-section" aria-label="{{ 'Report'|tr(locale) }}">
+{% set b = s.bridge %}{% if b %}<h2 class="phone-sheet-sub" id="why-changed">{{ 'Why it changed'|tr(locale) }}</h2>
+<div class="phone-rows" aria-labelledby="why-changed">
+  {% for key in ('net_flow', 'market_moves', 'other_changes') %}<div class="phone-row"><span>{{ fig[key].label }}</span><b class="{{ 'neg' if b[key] < 0 else 'pos' }}"><bdi class="fig">{{ b[key]|money(True) }}</bdi></b></div>{% endfor %}
+</div>{% endif %}
 <div class="phone-rows">
-  <div class="phone-row"><span>{{ 'Kept'|tr(locale) }}</span><b class="{{ 'neg' if s.net < 0 else 'pos' }}"><bdi class="fig">{{ s.net|money(True) }}</bdi></b></div>
   {% if s.savings_rate is not none %}<div class="phone-row"><span>{{ 'Savings rate'|tr(locale) }}</span><b><bdi class="fig">{{ s.savings_rate|round(0)|int }}%</bdi></b></div>{% endif %}
   {% if s.investing_result is not none %}<a class="phone-row" href="/investments"><span>{{ 'Investing result'|tr(locale) }}</span><b class="{{ 'neg' if s.investing_result < 0 else 'pos' }}"><bdi class="fig">{{ s.investing_result|money(True) }}</bdi> {{ chevron() }}</b></a>{% endif %}
   <a class="phone-row" href="/birdview/expenses"><span>{{ 'Where it went'|tr(locale) }}</span><b>{{ chevron() }}</b></a>
