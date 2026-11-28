@@ -213,3 +213,5 @@ Append dated decisions and results here; keep the recommendation above as writte
   Everyday budget relabel waits for the website repo to be attached to a session. Items filed: phase 1 IT-7BB and
   IV-11P (on the board); phase 2 NF-7BC (more banks' SMS), NF-7BD (voice entry, three steps) and NF-7BE (imports from
   other apps), posted to the board when phase 1 closes; phase 3 is the monthly review, NF-12AL (#638).
+- **2026-11-28, owner pick (board limit):** phase 1's two items (IT-7BB #779, IV-11P #780) may keep the board above
+  AGENTS.md's 20 open items until phase 1 closes; phase 2 items are posted only then.
