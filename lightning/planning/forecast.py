@@ -8,7 +8,7 @@ from datetime import date, timedelta
 from decimal import ROUND_DOWN, ROUND_UP, Decimal
 from typing import Protocol
 
-from lightning.core.dates import fmt_date, month_of, parse_date, parse_month, today
+from lightning.core.dates import add_months, fmt_date, month_of, parse_date, parse_month, today
 from lightning.core.errors import ValidationError
 from lightning.core.figures import label
 from lightning.core.money import ZERO, from_e6, to_decimal
@@ -16,7 +16,6 @@ from lightning.deposits.domain import DepositEvent
 
 from .domain import CashForecast, EverydayBudget, ExpectedIncome, ForecastMonth, Payment, PaymentStatus, PlanKind
 from .dated_cash import dated_cash_forecast
-from .schedule import _add_months as _months_on
 from .schedule_view import reserve_goal_needs
 
 HORIZON_MONTHS = 3
@@ -453,7 +452,7 @@ class CashForecaster:
             # Run far enough for the next step too, so it starts from this run.
             now = self.forecast(day, months=index + 1 + HORIZON_MONTHS, refill=moved)
             after = now.expected_by_payday if step == 0 else lowest(now, index)
-            rows.append({"date": fmt_date(_months_on(first, step)), "amount": amount, "fund_after": set_aside + moved,
+            rows.append({"date": fmt_date(add_months(first, step)), "amount": amount, "fund_after": set_aside + moved,
                          "safe_after": after, "keeps_plan": after >= ZERO, "lowest": step > 0})
         return rows
 

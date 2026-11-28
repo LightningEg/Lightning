@@ -1,5 +1,5 @@
 """Home's To do (IV-3AY6, IV-11E, guideline C04.4, C11.1): the actions waiting on the person, one row each with its
-figure and one verb, in the order a failed data check, late or due-soon bill, payday, catch-up, to sort, weekly check, prices, then the
+figure and one verb, in the order a failed data check, late or due-soon bill (on payday, the payday row first), catch-up, to sort, weekly check, prices, then the
 rest. Bills come from the one bill state (planning/bill_state.py); everything else from the review inbox, one row per
 item, read from the item's glance."""
 from __future__ import annotations
@@ -9,9 +9,11 @@ from datetime import date
 from decimal import Decimal
 
 from lightning.planning.bill_state import BillRow, BillState, CatchUp
-from lightning.workflows.review import group_of
+from lightning.workflows.review import consequence_of, group_of
 
 ORDER = ("check", "bill", "payday", "catch_up", "sort", "weekly", "prices", "other")  # a figure that is wrong first (NF-2AJ)
+PAYDAY_ORDER = ("check", "payday", "bill", "catch_up", "sort", "weekly", "prices", "other")  # income arrived today or yesterday (C13)
+GROUPS = ("review", "suggestion")  # IV-11P: Needs review first, Suggestions below
 
 
 @dataclass(frozen=True)
@@ -28,6 +30,13 @@ class TodoRow:
     count: int | None = 1      # catch-up: bills left stale; others: the {n} in ``when``
     since: str = ""            # catch-up: the last day anything was recorded; others: the {sa} in ``when``
     when: str = ""             # others: when or how many, a translatable phrase ("every month", "{n} to match")
+    group: str = "review"      # one of GROUPS (IV-11P)
+
+
+def _group(kind: str, item: dict) -> str:
+    """Needs review for every named kind and for any other item that is late, due or not yet matched; the rest are
+    Suggestions (IV-11P)."""
+    return "review" if kind != "other" or consequence_of(item) in ("risk", "unreconciled") else "suggestion"
 
 
 def _row(kind: str, item: dict) -> TodoRow:
@@ -36,16 +45,16 @@ def _row(kind: str, item: dict) -> TodoRow:
     g = item.get("glance")
     if g:
         return TodoRow(kind, g["name"], g["verb"], item["href"], popup=bool(item.get("popup")), amount=g.get("amount"),
-                       count=g.get("n"), since=g.get("sa") or "", when=g.get("when") or "")
+                       count=g.get("n"), since=g.get("sa") or "", when=g.get("when") or "", group=_group(kind, item))
     action = item.get("action") or "Open"
     return TodoRow(kind, item["label"], "Open" if action == "Review" else action, item["href"],
-                   popup=bool(item.get("popup")), count=None)
+                   popup=bool(item.get("popup")), count=None, group=_group(kind, item))
 
 
 def todo_rows(c, day: date, bills: list[BillRow], inbox_items: list[dict], away: CatchUp,
               paid_today: bool = False) -> list[TodoRow]:
-    """Every action waiting, most urgent first, one row per thing. The screen shows the first three and links to the
-    rest. ``paid_today``: income arrived today or yesterday, the only time the payday row leads (C13)."""
+    """Every action waiting, Needs review before Suggestions, most urgent first, one row per thing. The screen shows the
+    first three and links to the rest. ``paid_today``: income arrived today or yesterday, the only time the payday row leads (C13)."""
     rows: list[TodoRow] = []
     for r in bills:
         if r.state in (BillState.LATE, BillState.DUE_SOON):
@@ -64,4 +73,8 @@ def todo_rows(c, day: date, bills: list[BillRow], inbox_items: list[dict], away:
     for item in others:
         kind = "weekly" if item["href"] == "/review" else {"activity": "sort", "prices": "prices", "checks": "check"}.get(group_of(item), "other")
         rows.append(_row(kind, item))
-    return sorted(rows, key=lambda r: ORDER.index(r.kind))  # stable: bills earliest first, the rest in the inbox's order
+    # C13: on payday "Salary arrived · Plan it" is the first row; only a figure that is wrong comes before it (NF-2AJ),
+    # since a wrong figure would make the plan wrong too. Bills follow it, earliest first.
+    order = PAYDAY_ORDER if paid_today else ORDER
+    # stable: bills earliest first, the rest in the inbox's order
+    return sorted(rows, key=lambda r: (GROUPS.index(r.group), order.index(r.kind)))

@@ -28,6 +28,10 @@ class TestMoney:
             value = Decimal(text)
             assert money.from_e6(money.to_e6(value)) == value
 
+    def test_extreme_exponent_reports_an_amount_error(self):
+        with pytest.raises(ValidationError, match="too large"):
+            money.to_decimal(Decimal("1e1000000"))
+
     def test_float_trap_avoided(self):
         total = sum(money.to_e6(Decimal("0.1")) for _ in range(10))
         assert money.from_e6(total) == Decimal("1.0")
@@ -35,6 +39,18 @@ class TestMoney:
     def test_refuses_precision_loss(self):
         with pytest.raises(ValidationError):
             money.to_e6(Decimal("0.0000001"))
+
+    def test_excess_precision_survives_input_validation(self):
+        value = money.to_decimal("1." + "0" * 28 + "1")
+        with pytest.raises(ValidationError):
+            money.check_places(value, 2)
+        with pytest.raises(ValidationError):
+            money.to_e6(value)
+
+    def test_insignificant_zeros_near_input_limit(self):
+        value = money.to_decimal("999999999999.99" + "0" * 28)
+        assert money.check_places(value, 2) == value
+        assert money.to_e6(value) == 999999999999990000
 
     def test_places(self):
         money.check_places(Decimal("12.34"), 2)
@@ -56,6 +72,15 @@ class TestDates:
         for bad in ["2026-02-30", "31/2", "", "2026/12/31", "13/13"]:
             with pytest.raises(ValidationError):
                 dates.parse_date(bad)
+
+    @pytest.mark.parametrize(("today", "entered", "expected"), [
+        ("2026-03-31", "30/4", date(2026, 4, 30)),
+        ("2026-03-31", "1/5", date(2025, 5, 1)),
+        ("2028-01-31", "٢٩/٢", date(2028, 2, 29)),
+    ])
+    def test_yearless_date_uses_a_calendar_month_of_lookahead(self, monkeypatch, today, entered, expected):
+        monkeypatch.setenv("LIGHTNING_TODAY", today)
+        assert dates.parse_date(entered) == expected
 
     def test_month(self):
         assert dates.parse_month("2026-02") == (date(2026, 2, 1), date(2026, 2, 28))

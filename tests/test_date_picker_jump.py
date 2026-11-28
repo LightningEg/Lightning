@@ -7,6 +7,7 @@ pytest.importorskip('playwright')
 from playwright.sync_api import sync_playwright
 from lightning.runtime.http import Host
 from lightning.ui.web import create_app
+from test_bulk_action_safety import ui  # noqa: F401 (shared browser fixture)
 from tests.browser_support import require_chromium, chromium_executable
 
 CHROMIUM = chromium_executable()
@@ -56,6 +57,17 @@ def test_transaction_calendar_starts_on_saturday(c, setup, phone, locale):
                 assert not errors
     finally:
         host.stop()
+
+
+def test_typed_date_clamps_the_month_ahead_cutoff(ui):
+    page, origin = ui()
+    page.goto(origin + '/accounts/new')
+    page.clock.set_fixed_time("2026-03-31T12:00:00")
+    field = page.locator('#opening_balance_date')
+    for entered, expected in [('30/4', '2026-04-30'), ('1/5', '2025-05-01')]:
+        field.fill(entered)
+        field.blur()
+        assert field.input_value() == expected
 
 
 def _open_calendar(page, host):

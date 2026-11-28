@@ -11,11 +11,11 @@ interest earned so far, an estimate from its terms; the redemption then records 
 """
 from __future__ import annotations
 
-import calendar
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal, ROUND_HALF_UP
 
+from lightning.core.dates import add_months
 from lightning.core.money import ZERO
 
 
@@ -32,13 +32,6 @@ class Period:
     end: date
     rate: Decimal      # percentage points in force for this period
     interest: Decimal  # unrounded; compound periods earn on the principal plus what earlier periods added
-
-
-def add_months(start: date, months: int) -> date:
-    month_index = start.year * 12 + start.month - 1 + months
-    year, zero_month = divmod(month_index, 12)
-    month = zero_month + 1
-    return date(year, month, min(start.day, calendar.monthrange(year, month)[1]))
 
 
 def whole_months(start: date, end: date) -> int:

@@ -140,7 +140,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
                         else compare("over the plan’s pace", fmt(gap, 0), "bad"))
         against = e.against_last_month_same_day
         tail = (line(f"{_signed(against)} against {previous} by day {e.day}") if against is not None
-                else line(f"Everyday plan {fmt(e.everyday_plan, 0)}"))
+                else line(f"{figure_label('everyday_plan')} {fmt(e.everyday_plan, 0)}"))
         cards.append(card("Everyday spending", e.everyday_spent, pace_compare, tone="out", key="everyday",
                           chip_=chip(f"by day {e.day}"), visual=meter(e.everyday_spent, e.everyday_plan),  # r38: spent of the everyday plan, as past months show; the pace chart stays the picture over time
                           line_=tail, href="#budget-pace"))
@@ -150,7 +150,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         change = (compare(f"against {previous}", _signed(e.against_last_month), "good" if e.everyday_spent <= before else "bad")
                   if before is not None else compare("of the everyday plan", f"{used:.0f}%" if used is not None else "—"))
         cards.append(card("Everyday spending", e.everyday_spent, change, tone="out", key="everyday", chip_=chip(month),
-                          visual=meter(e.everyday_spent, e.everyday_plan), line_=line(f"Everyday plan {fmt(e.everyday_plan, 0)}"),
+                          visual=meter(e.everyday_spent, e.everyday_plan), line_=line(f"{figure_label('everyday_plan')} {fmt(e.everyday_plan, 0)}"),
                           href="#budget-pace"))
 
     if over:
@@ -215,7 +215,7 @@ def budget_period(spent: Decimal, planned: Decimal, months: list[tuple[str, Deci
 
 # ── Cash planning ──────────────────────────────────────────────────────────────────────────────────────────
 def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, free_then: Decimal | None, then: str, past_free: list[Decimal],
-              position, monthly_spending: Decimal | None, has_income: bool) -> list[dict]:
+              position, monthly_spending: Decimal | None, has_income: bool, next_after=None) -> list[dict]:
     """Safe to spend, Free cash, Due before payday and the lowest point ahead, each against something."""
     parts = dict(f.safe_to_spend_parts)
     until = f.next_income_date
@@ -233,7 +233,7 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
                   visual=segments([("Safe", max(f.safe_to_spend, ZERO), "hold"),
                                    ("Budget", -parts.get(figure_label("left_in_plan_after_bills"), ZERO), "out"),
                                    ("Savings", saving, "in"), ("Due", due, "over")]),
-                  line_=line("On top of your plan"), working=f.safe_to_spend_working)]
+                  working=f.safe_to_spend_working)]  # r40 F18: the Lead's Expected by payday block is its one line
 
     if free_then is not None:
         change = f.free_cash_change(free_then)
@@ -254,25 +254,36 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
     if late:
         due_compare = compare("already late", fmt(late_total, 0), "bad")
         due_chip = chip(f"{len(late)} late", "bad")
+    elif until and not before:
+        # r40: nothing before payday reads as the verdict, as on the phone (owner, 2026-11-25), and the line names
+        # the first payment after payday so a bill two days later is not missed (Audit 10, F15).
+        due_compare = compare("Nothing is due before payday.", "All covered", "good")
+        due_chip = chip(f"{counted(0, 'payment', 'payments')}")
     else:
         due_compare = compare(("payment before payday" if len(before) == 1 else "payments before payday") if until else "payments in the next 3 months",
                               str(len(before)))
         due_chip = chip(f"{counted(len(before), 'payment', 'payments')}")
     nxt = before[0] if before else None
-    due_line = (line(f"Next: {nxt.item.name} · {nxt.due_date}", "See late ones" if late else "", "#plan-next" if late else "")
-                if nxt else line("Nothing else is due before then", "See late ones" if late else "", "#plan-next" if late else ""))
+    if nxt:
+        due_line = line(f"Next: {nxt.item.name} · {nxt.due_date}", "See late ones" if late else "", "#plan-next" if late else "")
+    elif next_after is not None and not late:
+        due_line = line(f"Next: {next_after.item.name} · {next_after.due_date}", "Upcoming", "/plan/upcoming")
+    else:
+        due_line = line("Nothing else is due before then", "See late ones" if late else "", "#plan-next" if late else "")
     cards.append(card(figure_label("payments_before_next_income"), before_total, due_compare, tone="out", key="before",
                       chip_=due_chip, visual=timeline(day, until, late, before), line_=due_line, href="#plan-next"))
 
     low = f.lowest if has_income else None
-    if low is not None:
+    if low is not None and f.lowest_repeats_safe_to_spend:
+        pass  # IT-7BB: the same figure as Safe to spend, which leads the page; one name per figure
+    elif low is not None:
         drop = f.drop_to_lowest
         if drop > 0:
-            low_compare = compare("below today", fmt(drop, 0))
+            low_compare = compare("below Free cash today", fmt(drop, 0))
         elif drop < 0:
-            low_compare = compare("above today", fmt(-drop, 0), "good")
+            low_compare = compare("above Free cash today", fmt(-drop, 0), "good")
         else:
-            low_compare = compare("Same as today")
+            low_compare = compare("Same as Free cash today")
         in_months = f.lowest_in_months(monthly_spending)
         months_text = (f"{in_months:.1f} months of spending at its lowest" if in_months is not None
                        else "Runs short: the month ends below zero" if low.closing < 0 else "")
@@ -336,7 +347,9 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
         cards.append(card(figure_label("safe_to_spend"), f.safe_to_spend, safe_compare, tone="hold" if f.safe_to_spend >= 0 else "over",
                           key="safe", chip_=chip("today"),
                           visual=segments([("Safe", max(f.safe_to_spend, ZERO), "hold"), ("Promised", promised, "out")]),
-                          line_=line(f"Expected by payday {fmt(f.expected_by_payday, 0)} on {until}" if until else "On top of your plan"),
+                          # r40 F18: Expected by payday only when it is another figure; otherwise just the day
+                          line_=line(f"Payday {until}" if until and f.expected_repeats_safe_to_spend
+                                     else f"Expected by payday {fmt(f.expected_by_payday, 0)} on {until}" if until else ""),
                           working=f.safe_to_spend_working))  # NF-12AB3: the figure opens its working; its home is one link in it
 
     if plan is not None:

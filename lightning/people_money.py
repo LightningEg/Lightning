@@ -13,6 +13,7 @@ from decimal import Decimal
 from lightning.accounts.domain import AccountType
 from lightning.core.dates import fmt_date, now_iso, parse_date, today
 from lightning.core.errors import NotFoundError, ValidationError
+from lightning.core.ledger import Effect
 from lightning.core.money import ZERO, check_places, fmt, from_e6, to_decimal, to_e6
 
 LIQUID = {AccountType.BANK, AccountType.CASH}
@@ -90,6 +91,13 @@ class PeopleMoneyService:
             lines = self._share_lines(shares, when)
             return self.transactions.record_split(fmt_date(when), int(account_id), total, int(category_id), lines,
                                                   description or self._split_title(lines), notes=notes)
+
+    @staticmethod
+    def split_amounts(txn) -> tuple[Decimal, Decimal]:
+        """The saved split's personal expense and the amount posted to the other people's accounts."""
+        personal = -sum((line.amount for line in txn.lines if line.effect == Effect.OUTFLOW), ZERO)
+        owed = sum((line.amount for line in txn.lines if line.effect == Effect.INTERNAL and line.amount > ZERO), ZERO)
+        return personal, owed
 
     def update_split(self, txn_id: int, day, account_id: int, total, category_id: int, shares, notes: str = "",
                      description: str = ""):

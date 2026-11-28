@@ -26,7 +26,7 @@ per person, of the account type `RECEIVABLE` that the `accounts` CHECK list alre
 `0053_gameya.sql`, worked like a Gam'eya account: lending and repayment are transfers, forgiving is spending). If the
 owner picks another option, rewrite 12G2-12G9 before anyone starts them.
 
-2026-11-22: 12G3 built (`PeopleMoneyService.split/update_split`, `TransactionService.record_split`; synced). 2026-11-10: 12G2 built (`lightning/people_money.py`, migration 0078, `tests/test_people_money.py`; synced as `people_money.lend/repay/forgive`). 2026-11-08, before it: nothing was built: `AccountType` (`lightning/accounts/domain.py`) has no
+2026-11-27: 12G7 built (Money out on PC and phone, with form replay and repayment covered by tests). 2026-11-22: 12G3 built (`PeopleMoneyService.split/update_split`, `TransactionService.record_split`; synced). 2026-11-10: 12G2 built (`lightning/people_money.py`, migration 0078, `tests/test_people_money.py`; synced as `people_money.lend/repay/forgive`). 2026-11-08, before it: nothing was built: `AccountType` (`lightning/accounts/domain.py`) has no
 `RECEIVABLE`, no service lends or splits, and `lightning/planning/position.py` has no "Owed to you" figure. Pieces to
 reuse: `ReimbursementService` (`lightning/reimbursements.py`, claims on an expense, never posts money),
 `MoneyFromOthersService` (`lightning/money_from_others.py`, Held for others), `GameyaService`
@@ -40,20 +40,6 @@ Each step is one pull request. Read only the files a step names; money rules are
 `^## `). Run the step's test command, then `python -m pytest tests/test_issues.py -q`; for a visible change also
 `python -m pytest tests/test_mohab_year.py -q`. Delete the step's heading in the same commit (AGENTS.md §3).
 
-
-## 12G7 Split on the Add sheet, PC and phone · M · sonnet
-Needs 12G3 merged first.
-Files: `lightning/ui/templates/transactions/form_popup.html`, `lightning/ui/templates/phone/transactions/form_popup.html`,
-`lightning/ui/routes/accounts.py` (`new_transaction_popup` ~446, `_save_popup_transaction` ~467),
-`lightning/ui/static/app.js` (only to add/remove a share row), `lightning/ui/i18n.py`.
-Do: on Money out only, a "Split with others" disclosure: rows of person (type and pick from
-`c.counterparties.list_people()`) and amount, and "Add a person" (the only script change: clone a share row).
-On save with share rows, `_save_popup_transaction` calls `PeopleMoneyService.split`; the saved result's flash says
-"Your share: X, owed to you: Y" with both figures from the service (no sum in the template or JS). PC and
-phone templates are separate (Part C on the phone: full-width rows, 54px wells).
-Done when: new `tests/test_split_add_sheet.py` posts the form with total 1,200 and two shares of 400 and asserts one
-transaction with a 400 category line and 800 Owed to you; the phone form posts the same; Arabic has no English.
-`python -m pytest tests/test_split_add_sheet.py tests/test_arabic_no_english.py -q`.
 
 ## 12G4 Who owes what, per person · M · sonnet
 Needs 12G2 merged first.

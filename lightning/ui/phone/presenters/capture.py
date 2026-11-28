@@ -31,6 +31,10 @@ def _capture_context(c, account) -> dict:
     spend = [a for a in _entry_accounts(c) if a.account_type.value in ("CASH", "BANK") or a.id == account.id]
     spend_ids = {a.id for a in spend}
     return {"entry_accounts": [{"id": a.id, "name": a.name} for a in spend],
+            "voice_today": today().isoformat(),
+            "voice_aliases": {key: [row["alias"] for row in rows]
+                             for key, rows in c.counterparties.aliases_by_counterparty().items()},
+            "voice_history": c.transactions.recent_payee_categories(),
             "usual_payees": [p for p in c.transactions.usual_payees() if p["account_id"] in spend_ids][:3],
             # IV-11M4 Log again: the last three payees paid, with what that payment was (a tap fills it in)
             "log_again": [p | {"amount_text": _plain(p["amount"])} for p in c.transactions.recent_expenses()

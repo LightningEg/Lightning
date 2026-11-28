@@ -46,7 +46,8 @@ def test_an_empty_profile_is_the_first_run_with_no_hero(tmp_path, monkeypatch):
     c.db.close()
 
 
-@pytest.mark.parametrize("day,state,first", [("2026-10-02", "payday", "bill"), ("2026-10-04", "calm", "bill"),
+# r41: on payday "Salary arrived · Plan" is To do's first row (guideline C13); bills lead on other days.
+@pytest.mark.parametrize("day,state,first", [("2026-10-02", "payday", "payday"), ("2026-10-04", "calm", "bill"),
                                               ("2026-10-11", "catch_up", "bill")])
 def test_the_state_follows_the_day_and_to_do_leads_with_bills(sample, day, state, first):
     screen = home.build(*_on(sample, day))
@@ -260,6 +261,32 @@ def test_see_all_lists_every_to_do_row_and_home_links_to_it(sample):
     if screen.todo_total > len(screen.todo):
         assert 'href="/todo"' in client.get("/home").text
     assert 'href="/needs-you"' not in client.get("/home").text
+
+
+def test_to_do_puts_needs_review_first_and_suggestions_below_with_the_count_unchanged(sample):
+    """IV-11P (r40 F5): imports, receipts and interest to match are Needs review, offers are Suggestions below; the
+    lead still counts every row (A09.2) and Home's three rows come from Needs review first."""
+    from lightning.ui.phone.screens import todo
+    c, day = _on(sample, "2026-10-04")
+    rows = todo.build(c, day).rows
+    review = [r for r in rows if r.group == "review"]
+    offers = [r for r in rows if r.group == "suggestion"]
+    assert review and offers and rows == tuple(review + offers)
+    assert {r.action for r in review} >= {"Pay", "Finish", "Match"}
+    assert {"Make it a bill", "Top up", "Plan less"} <= {r.action for r in offers}
+    assert all(r.group == "review" for r in home.build(c, day).todo)
+    app = create_app(c)
+    mount_phone(app)
+    client = TestClient(app)
+    for locale, heads in (("en", ("Needs review", "Suggestions")), ("ar", ("محتاج مراجعة", "اقتراحات"))):
+        assert client.post("/settings/locale", data={"locale": locale}, follow_redirects=False).status_code == 303
+        text = client.get("/todo").text
+        lead = text.split('class="phone-lead">', 1)[1].split("<", 1)[0].strip()
+        assert lead == (str(len(rows)) if locale == "en" else str(len(rows)).translate(str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩"))) or lead == str(len(rows))
+        assert text.index(heads[0]) < text.index(heads[1])
+        between = text.split('id="todo-review"', 1)[1].split('id="todo-offers"', 1)[0]
+        assert len(re.findall(r'class="phone-row[ "]', between)) == len(review)
+    client.post("/settings/locale", data={"locale": "en"}, follow_redirects=False)  # the sample is shared
 
 
 def test_over_plan_meter_is_full_and_names_the_actual_percentage(c, setup, monkeypatch):
