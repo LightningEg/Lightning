@@ -18,6 +18,7 @@
   <link rel="stylesheet" href="{{ static_url('visual-flow.css') }}">
 {% if arabic_ui_src %}<script nonce="{{ request.state.csp_nonce|default('') }}" src="{{ arabic_ui_src }}"></script>{% endif %}
 <script nonce="{{ request.state.csp_nonce|default('') }}">window.LIGHTNING_UI=window.LIGHTNING_UI||{{ arabic_translations|default({})|tojson }};window.lightningT=(text,values)=>{const raw=String(text);let out=window.LIGHTNING_UI[raw];if(!out){for(const [pattern,translated] of Object.entries(window.LIGHTNING_UI)){if(!pattern.includes('{'))continue;const names=[...pattern.matchAll(/\{([a-z_]+)\}/g)].map(m=>m[1]);const parts=pattern.split(/\{[a-z_]+\}/g).map(part=>part.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'));const match=new RegExp('^'+parts.join('(.+?)')+'$').exec(raw);if(match){out=translated;names.forEach((name,i)=>out=out.replaceAll(`{${name}}`,match[i+1]));break;}}}out=out||raw;for(const [key,value] of Object.entries(values||{}))out=out.replaceAll(`{${key}}`,String(value));return out;};</script>
+<script nonce="{{ request.state.csp_nonce|default('') }}">/* A page change fades (@view-transition in style.css). Resizing the window mid-fade aborts it, and Chromium reports the aborted transition's promises as an uncaught error; the page itself is fine, so they are caught here. */(()=>{const quiet=e=>{const t=e.viewTransition;if(t)for(const p of [t.ready,t.finished,t.updateCallbackDone])if(p)p.catch(()=>{});};addEventListener('pageswap',quiet);addEventListener('pagereveal',quiet);})();</script>
 </head>
 <body data-base-currency="{{ base }}">
 <div class="shell">
