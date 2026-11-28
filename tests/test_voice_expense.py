@@ -30,6 +30,18 @@ def test_voice_phrases():
         ["fuel 150 2026-02-31", "150", ""],
         ["fuel 150 dollars", "", "2026-03-01"],
         ["fuel خمسين وربع", "", "2026-03-01"],
+        ["fuel 70 plus tip 10 total 80 pounds", "80", "2026-03-01"],
+        ["بنزين ٧٠ و١٠ بقشيش الإجمالي ٨٠ جنيه", "80", "2026-03-01"],
+        ["fuel 60 pounds total", "60", "2026-03-01"],
+        ["fuel 40 plus 10 sub total 50", "", "2026-03-01"],
+        ["حوالي ١٥٠ بنزين", "", "2026-03-01"],
+        ["not 90 on fuel", "", "2026-03-01"],
+        ["fuel 40 each", "", "2026-03-01"],
+        ["fuel 50 change", "", "2026-03-01"],
+        ["بنزين ٣٥ ريال", "", "2026-03-01"],
+        ["fuel 30 two days ago", "30", "2026-02-27"],
+        ["بنزين ٣٠ من ٣ أيام", "30", "2026-02-26"],
+        ["بنزين أول امبارح ٤٠", "40", "2026-02-27"],
         ["yesterday fuel", "", "2026-02-28"],
         ["fuel 20 last Friday", "20", ""],
         ["50 dollars fuel", "", "2026-03-01"],
@@ -51,6 +63,11 @@ def test_voice_phrases():
     assert.deepEqual(ambiguous.choices.map(o=>o.value),['1','2']);
     assert.equal(lightningVoiceParse('150 كارفور بقالة',byName).category,'2');
     assert.equal(lightningVoiceParse('fuel 10 and groceries 20',byName).multipleAmounts,true);
+    assert.equal(lightningVoiceParse('fuel 20 each',context).amountQuestion,'total');
+    assert.equal(lightningVoiceParse('fuel 20 USD',context).amountQuestion,'currency');
+    assert.equal(lightningVoiceParse('fuel 20 or 30',context).amountQuestion,'multiple');
+    const local = {...context, categories:[...context.categories,{value:'3',label:'بنزين'}]};
+    assert.equal(lightningVoiceParse('١٥٠ بنزين',local).category,'3');
     assert.equal(lightningVoiceParse('15 fossilfuel',byName).category,'');
     """
     subprocess.run([node, "-e", script, json.dumps(cases)], cwd=Path(__file__).resolve().parents[1], check=True)

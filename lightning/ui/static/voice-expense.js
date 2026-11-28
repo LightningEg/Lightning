@@ -83,11 +83,11 @@
       for (const phrase of new Set(names)) {
         if (!phrase) continue;
         const pos = (" " + words + " ").indexOf(" " + phrase + " ");
-        if (pos >= 0) found.push({option, pos, end: pos + phrase.length});
+        if (pos >= 0) found.push({option, pos, end: pos + phrase.length, exact: phrase === name});
       }
     }
     return [...new Set(found.filter(a => !found.some(b => b.pos <= a.pos && b.end >= a.end &&
-      b.end-b.pos > a.end-a.pos)).map(a => a.option))];
+      (b.end-b.pos > a.end-a.pos || (b.exact && !a.exact)))).map(a => a.option))];
   }
 
   const monthNames = [
@@ -112,6 +112,16 @@
       const month = monthNames.findIndex(names => names.includes(name1 || name2)) + 1;
       return record(year || today.slice(0, 4), month, before || after);
     });
+    const daysAgo = count => {
+      const date = new Date(today + "T12:00:00Z");
+      date.setUTCDate(date.getUTCDate() - count);
+      days.add(date.toISOString().slice(0, 10));
+      return " ";
+    };
+    words = words.replace(/(?:^| )(?:the day before yesterday|اول (?:امبارح|مبارح)|من يومين|two days ago)(?= |$)/g,
+      () => daysAgo(2));
+    words = words.replace(/(?:^| )(?:(\d{1,3}) days? ago|من (\d{1,3}) (?:ايام|يوم))(?= |$)/g,
+      (_, en, ar) => daysAgo(Number(en || ar)));
     words = words.replace(/(?:^| )(yesterday|امبارح|مبارح|البارح|today|النهارده|النهاردا)(?= |$)/g, (_, word) => {
       const date = new Date(today + "T12:00:00Z");
       if (!["today", "النهارده", "النهاردا"].includes(word)) date.setUTCDate(date.getUTCDate() - 1);
@@ -141,13 +151,27 @@
         words = (" " + words + " ").replaceAll(" " + normalize(name) + " ", " ").trim();
       }
     }
-    const values = amounts(words);
-    const half = /(?:جنيه|جنيها|pounds?) (?:ونص|and a half)(?: |$)/.test(words);
+    // A single explicitly labelled total can distinguish the final price from tip or line items.
+    // Limit it to the final clause so a subtotal or later adjustment cannot become the amount paid.
+    const totalMarker = /(?:^| )(?:grand total|total paid|total|الاجمالي|اجمالي|المجموع)(?= |$)/g;
+    const markers = [...words.matchAll(totalMarker)];
+    const tail = markers.length === 1 ? words.slice(markers[0].index + markers[0][0].length).trim() : "";
+    const totalWords = tail.replace(/(?:^| )(?:egyptian pounds?|pounds?|egp|جنيه|جنيها)(?= |$)/g, " ").trim();
+    const justNumber = totalWords && totalWords.split(/ +/).every(word => numbers.has(word) ||
+      numbers.has(word.replace(/^و/, "")) || /^(?:[\d.,]+|and|و|hundred|thousand)$/.test(word));
+    const subtotal = /(?:^| )sub total(?= |$)/.test(words);
+    const explicitTotal = !subtotal && justNumber && amounts(totalWords).length === 1;
+    const values = amounts(explicitTotal ? totalWords : words);
+    const change = /(?:^| )(?:change|cash back|الباقي|باقي|فكه)(?= |$)/.test(words);
+    const unitPrice = /(?:^| )(?:each|per|apiece|للواحد|للواحده|للقطعه|للكيلو)(?= |$)/.test(words);
+    const foreign = /[$€]/.test(text) || tokens.some(token =>
+      /^(?:usd|eur|gbp|sar|aed|riyals?|dirhams?|dollars?|euros?|دولار|يورو|ريال|درهم)$/.test(token));
+    const half = !explicitTotal && /(?:جنيه|جنيها|pounds?) (?:ونص|and a half)(?: |$)/.test(words);
     const amount = values.length === 1 && Number(values[0]) > 0 ? values[0] : "";
     const unsupported = /[$€]/.test(text) || tokens.some(token =>
       /^(?:million|مليون|قرش|قروش|piastres?|cents?|dollars?|دولار|euros?|يورو|quarter|ربع|وربع|الا|point|فاصله|negative|minus|سالب)$/.test(token)) ||
       /(?:^| )-\d/.test(words);
-    const unknownFraction = !half && tokens.some(word => ["ونص", "نص", "نصف", "half"].includes(word));
+    const unknownFraction = !explicitTotal && !half && tokens.some(word => ["ونص", "نص", "نصف", "half"].includes(word));
     const payee = parties.length === 1 ? parties[0] : null;
     const history = categories.filter(o => payee?.history?.includes(o.value));
     let category = "";
@@ -157,8 +181,16 @@
     let price = amount;
     if (unsupported || unknownFraction || (half && price.includes("."))) price = "";
     else if (price && half) price += ".50";
+    let amountQuestion = "";
+    if (foreign) amountQuestion = "currency";
+    else if (!explicitTotal && (change || unitPrice || subtotal || (markers.length && values.length > 1))) amountQuestion = "total";
+    else if (/(?:^| )(?:about|around|approximately|maybe|حوالي|تقريبا|يمكن|مش|not)(?= |$)/.test(words))
+      amountQuestion = "confirm";
+    else if (values.length > 1) amountQuestion = "multiple";
+    if (amountQuestion) price = "";
     return {
       amount: price,
+      amountQuestion,
       category,
       choices: cats.length ? cats : history,
       dateSpoken: date.spoken,
