@@ -44,6 +44,7 @@ Never at the cost of a test, a required check, or a read you need.
 - **Tell the owner only what helps:** results, decisions, actions, real risks. No narration.
 - **A list of tasks ends with a tally (owner rule, 2026-11-11):** when the owner gives several tasks, end every round with what is done (with its PR or commit) and what is still left (with why: waiting on the owner, CI evidence, or not started). Never stop on "done" while items remain unsaid.
 - **Decisions are the owner's, always as a pick-list (owner rule, 2026-11-03):** when something needs the owner's input (a choice, a risk, a missing fact, a blocked PR), ask in the session's question dialog (the question tool), never as an open question in prose. Give 2-4 distinct options, each with its trade-off, put your recommendation first and mark it "(Recommended)". Do the safe part of the task meanwhile; never wait silently and never decide it yourself. Record the answer where the next AI will read it (the item, `ai/PROJECT_OVERVIEW.md` owner decisions, or `NOW.md`).
+- **No decision is parked (owner rule, 2026-11-28):** anything waiting on the owner is asked in the question dialog in the same round, with 2-4 options, never left as a "waiting on you" or "Left" line in a summary or tally. Ask the open ones in batches of up to four until none is left unasked; a tally lists only what is decided, done, or waiting on something other than a decision.
 
 ## 3. Every task
 
