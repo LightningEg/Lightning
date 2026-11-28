@@ -206,3 +206,10 @@ Append dated decisions and results here; keep the recommendation above as writte
   and imports from other apps carry it. **Voice entry yes**, on the device, amount and category read by ordinary
   tested rules. **No share card**: phase 3's review stays inside the app. Still open: which parked items make room on
   the board (decision 5).
+
+- **2026-11-28, owner picks (all the recommended options):** on payday the salary row leads To do (guideline C13,
+  #778); the five "someday" items were closed to make room (#431, #573, #574, #576, #577); To do gets two groups with
+  the count unchanged (IV-11P); #777 and #778 merged when green; the next work is one name per figure (IT-7BB). The
+  Everyday budget relabel waits for the website repo to be attached to a session. Items filed: phase 1 IT-7BB and
+  IV-11P (on the board); phase 2 NF-7BC (more banks' SMS), NF-7BD (voice entry, three steps) and NF-7BE (imports from
+  other apps), posted to the board when phase 1 closes; phase 3 is the monthly review, NF-12AL (#638).
