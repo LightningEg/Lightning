@@ -112,6 +112,7 @@ protocol = [
     "lightning.sync.journal.areas.spec",
     "lightning.sync.journal.codec",
     "lightning.sync.journal.errors",
+    "lightning.sync.journal.legacy87",
     "lightning.sync.journal.request_limits",
 ]
 financial_adapters = [
