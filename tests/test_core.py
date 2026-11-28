@@ -73,6 +73,15 @@ class TestDates:
             with pytest.raises(ValidationError):
                 dates.parse_date(bad)
 
+    @pytest.mark.parametrize(("today", "entered", "expected"), [
+        ("2026-03-31", "30/4", date(2026, 4, 30)),
+        ("2026-03-31", "1/5", date(2025, 5, 1)),
+        ("2028-01-31", "٢٩/٢", date(2028, 2, 29)),
+    ])
+    def test_yearless_date_uses_a_calendar_month_of_lookahead(self, monkeypatch, today, entered, expected):
+        monkeypatch.setenv("LIGHTNING_TODAY", today)
+        assert dates.parse_date(entered) == expected
+
     def test_month(self):
         assert dates.parse_month("2026-02") == (date(2026, 2, 1), date(2026, 2, 28))
         with pytest.raises(ValidationError):
