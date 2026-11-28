@@ -523,6 +523,24 @@ class PositionService:
         return (closing.what_you_own - opening.what_you_own
                 - self.reporting.opening_balances_between(start_day, end_day)), ""
 
+    def change_in_gold(self, start: date | str, end: date | str, gold_start: tuple[Decimal, str] | None,
+                       gold_end: tuple[Decimal, str] | None) -> Decimal | None:
+        """Change in what you own counted in grams of 21K gold (NF-7BF): what you own at the end, less opening balances
+        recorded in the period, ÷ the 21K gram price at the end, minus what you owned the day before the start ÷ the
+        21K gram price then. ``gold_*`` are ZakatService.gold_price_24k for those days. None when a price or a
+        valuation is missing: richer in pounds can be poorer in gold, so a guess is never shown."""
+        if not (gold_start and gold_start[0] and gold_end and gold_end[0]):
+            return None
+        start_day, end_day = parse_date(start), parse_date(end)
+        closing = self.reporting.net_worth(fmt_date(end_day))
+        opening = self.reporting.net_worth(fmt_date(start_day - timedelta(days=1)))
+        if closing.unvalued or opening.unvalued:
+            return None
+        karat = Decimal(21) / Decimal(24)
+        recorded = self.reporting.opening_balances_between(start_day, end_day)
+        return ((closing.what_you_own - recorded) / (gold_end[0] * karat)
+                - opening.what_you_own / (gold_start[0] * karat))
+
     def change_in_net_worth(self, start: date | str, end: date | str,
                             since_first_record: bool = False) -> tuple[Decimal | None, str]:
         """Change in net worth = Net worth at the end − Net worth the day before the start.
