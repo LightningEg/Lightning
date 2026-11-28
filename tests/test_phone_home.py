@@ -46,7 +46,8 @@ def test_an_empty_profile_is_the_first_run_with_no_hero(tmp_path, monkeypatch):
     c.db.close()
 
 
-@pytest.mark.parametrize("day,state,first", [("2026-10-02", "payday", "bill"), ("2026-10-04", "calm", "bill"),
+# r41: on payday "Salary arrived · Plan" is To do's first row (guideline C13); bills lead on other days.
+@pytest.mark.parametrize("day,state,first", [("2026-10-02", "payday", "payday"), ("2026-10-04", "calm", "bill"),
                                               ("2026-10-11", "catch_up", "bill")])
 def test_the_state_follows_the_day_and_to_do_leads_with_bills(sample, day, state, first):
     screen = home.build(*_on(sample, day))
