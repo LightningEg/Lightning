@@ -43,7 +43,7 @@ def test_phone_payday_preview_and_enable(c, setup, monkeypatch):
                     page.locator('.phone-customize > summary').click()
                     if language == 'en':
                         assert page.get_by_text('No bank transfer will be made', exact=False).count() == 1
-                        assert page.get_by_text('Bills protected').count() == 1 and page.get_by_text('Left unassigned').count() == 1
+                        assert page.get_by_text('Bills protected', exact=True).count() == 1 and page.get_by_text('Left unassigned', exact=True).count() == 1  # IT-7BB: the relation line also names it
                     # BV-3AS (IV-12Q1: the boxes sit behind Customize, tied to the Confirm form by form=): entry amounts at currency precision, and each name, note and field on its own line.
                     values = page.eval_on_selector_all('input[type=text][form="payday-confirm"]', 'els => els.map(e => e.value)')
                     assert values and all(__import__('re').fullmatch(r'-?[\d,]+(\.\d{1,2})?', v) for v in values), values
