@@ -1,4 +1,4 @@
-{# To do, all of it (IV-3AY14, C11.1; polished 2026-11-25): how many things need you leads, then every row with its one
+{# To do, all of it (IV-3AY14, C11.1; polished 2026-11-25): how many things need you leads, then every row, Needs review before Suggestions (IV-11P), with its one
    verb, whole EGP as on Home. Back is the app bar's. #}
 {% extends "phone/base.html" %}
 {% from "phone/partials/todo.html" import todo_rows with context %}
@@ -8,10 +8,22 @@
 <div class="phone-lead">{{ screen.rows|length }} <small>{{ ('thing needs you' if screen.rows|length == 1 else 'things need you')|tr(locale) }}</small></div>
 <p class="phone-hero-line">{% if screen.rows %}{{ 'Each row does its job in one tap.'|tr(locale) }}{% else %}<b class="is-good">{{ 'All done.'|tr(locale) }}</b> {{ 'Nothing to do today.'|tr(locale) }}{% endif %}</p></section>{% endblock %}
 {% block content %}
-{% if screen.rows %}
-<section class="phone-section is-rose phone-todo" aria-label="{{ 'To do'|tr(locale) }}">
+{# IV-11P: Needs review first, Suggestions below; the lead's count above is every row of both (A09.2). #}
+{% set review = screen.rows|selectattr('group', 'equalto', 'review')|list %}
+{% set offers = screen.rows|selectattr('group', 'equalto', 'suggestion')|list %}
+{% if review %}
+<section class="phone-section is-rose phone-todo" aria-labelledby="todo-review">
+  <header class="phone-section-head"><h2 id="todo-review">{{ 'Needs review'|tr(locale) }}</h2><span>{{ review|length }}</span></header>
   <div class="phone-rows">
-  {{ todo_rows(screen.rows) }}
+  {{ todo_rows(review) }}
+  </div>
+</section>
+{% endif %}
+{% if offers %}
+<section class="phone-section phone-todo" aria-labelledby="todo-offers">
+  <header class="phone-section-head"><h2 id="todo-offers">{{ 'Suggestions'|tr(locale) }}</h2><span>{{ offers|length }}</span></header>
+  <div class="phone-rows">
+  {{ todo_rows(offers) }}
   </div>
 </section>
 {% endif %}

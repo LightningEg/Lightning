@@ -88,6 +88,7 @@ Record on a real phone with the demo household (no real money on screen); upload
 | Permission | Why |
 |---|---|
 | `POST_NOTIFICATIONS` | Reminders the person turned on, and the foreground service's notification. Asked when reminders are turned on, never at first start. |
+| `RECORD_AUDIO` | Requested when the person taps Speak expense. On supported phones Android recognizes speech on the device. Lightning receives the text to fill an editable draft. |
 | `USE_BIOMETRIC` | Optional fingerprint unlock (Settings › This phone). |
 | `com.android.vending.BILLING` | Theme purchases (Play build only). |
 | `INTERNET`, `ACCESS_NETWORK_STATE`, `VIBRATE`, `FOREGROUND_SERVICE*` | Normal permissions; no declaration. |

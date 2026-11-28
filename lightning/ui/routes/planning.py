@@ -25,6 +25,7 @@ from lightning.planning.totals import (LoanTotals, RecurringEntry, RecurringTota
 
 from .. import charts, keynotes, kpis, visuals, status as page_status
 from ..expected import expected_by_payday
+from ..no_job import no_job_yet
 from ..web import container, redirect, render, settled_save
 from . import reserves as reserve_routes
 
@@ -135,12 +136,15 @@ async def plan_page(request: Request):
     past = [(key, value) for key, value in plan["past_free"] if value is not None]
     late = [p for p in next_payments if p.days_late(day) and not p.item.is_income]
     position = c.position.at(day)
+    monthly_spending = c.budgets.spending_average(month_of(day)).amount
     kpi_cards = kpis.cash_plan(forecast, day=day, before=plan["before_income"], late=late,
                                late_total=c.planning.still_owed_in_base(late, day),
                                free_then=past[-1][1] if past else None,
                                then=fmt_date(parse_month(past[-1][0])[1]) if past else "",
                                past_free=[value for _, value in past], position=position,
-                               monthly_spending=c.budgets.spending_average(month_of(day)).amount, has_income=has_income)
+                               monthly_spending=monthly_spending, has_income=has_income,
+                               next_after=next((p for p in next_payments if not p.item.is_income and not p.days_late(day)
+                                                and p.due_date > (forecast.next_income_date or "")), None))
     # Answer first (guideline 3.33, A09): Safe to spend is the page's Lead with its working beside it; late payments are
     # Needs you rows under it, each with Mark paid.
     lead = next((k for k in kpi_cards if k["key"] == "safe"), None)
@@ -170,7 +174,7 @@ async def plan_page(request: Request):
                   afford_accounts=[a for a in _paying_accounts(c) if a.currency == c.base_currency],
                   afford_date=str(request.query_params.get("afford_date", "")),
                   afford_account_id=str(request.query_params.get("afford_account", "")), tabs=TABS, plan_tab="plan", forecast=forecast, owe=owe, has_income=has_income,
-                  lead=lead, expected=expected_by_payday(forecast), needs=needs, status=status, afford=afford, afford_error=afford_error,
+                  lead=lead, expected=expected_by_payday(forecast), no_job=no_job_yet(forecast.safe_to_spend, monthly_spending, has_income), needs=needs, status=status, afford=afford, afford_error=afford_error,
                   afford_amount=raw_afford, afford_plan_url=afford_plan_url,
                   gameya_owed=position.gameya_still_to_pay,
                   notes=[], plan=plan, breakdown_links=breakdown_links, stats=stats, kpi_cards=kpi_cards, forecast_chart=visuals.forecast_trend(forecast),

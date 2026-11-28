@@ -47,7 +47,7 @@ _TABLE = [
     ("lowest_scheduled_cash", "Lowest scheduled cash",
      "The lowest projected day-end owned cash balance from confirmed cash and scheduled payments. Excludes variable spending and savings goals; reserves remain in cash. Missing FX makes it unavailable."),
     ("cash_available_to_assign", "Cash available to assign",
-     "Actual owned liquid cash left after reserves and funded spending. The payday proposal shares it out in four parts that add up to it: Bills protected (bills due outside those funds), To your plan, Emergency and goals, Left unassigned. Missing FX makes it unavailable; expected income never contributes.",
+     "Actual owned liquid cash left after reserves and funded spending. The payday proposal shares it out in four parts that add up to it: Bills protected (bills, loan payments and gam'eya instalments due before payday that those funds do not cover), To your plan, Emergency and goals, Left unassigned. Missing FX makes it unavailable; expected income never contributes.",
      ""),
     ("funded_spending_left", "Spending money left this month",
      "This month's assigned category cash after owned spending and refunds, floored at zero. Unused funding does not carry automatically.",
@@ -198,6 +198,9 @@ _TABLE = [
     ("spent", "Spent", "Money out in the category this month."),
     ("left_in_plan", "Left in plan", "What is left of the plan; the Overview and Budget show the same month "
      "figure, and a negative one reads \"Over plan\". Categories outside the budget are left out of Spent.", "Planned − Spent"),
+    ("everyday_plan", "Everyday plan", "Planned less the bills and loan payments scheduled in planned categories: "
+     "the plan's money for everyday spending. Planned always names the whole plan, bills included (IT-7BB).",
+     "Planned − Bills inside the plan"),
     ("everyday_left", "Left for everyday", "The plan's remaining money after unpaid planned bills and loans, "
      "floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance and "
      "the phone Home's lead (owner, 2026-11-09); Safe to spend today leads Cash planning on both apps (IV-12P)."),
@@ -365,6 +368,7 @@ _SOURCES = {
     "planned": (BOTH, f"{BL}.available"),
     "spent": (LEDGER, f"{BL}.actual"),
     "left_in_plan": (BOTH, f"{BL}.remaining"),
+    "everyday_plan": (PLAN, "lightning.planning.domain.EverydayBudget.everyday_plan"),
     "everyday_left": (BOTH, "lightning.planning.domain.EverydayBudget.everyday_left"),
     "plan_leaves_to_save": (PLAN, "lightning.planning.health.PlanCheck.plan_saves"),
     "not_yet_given_a_job": (PLAN, "lightning.planning.health.PlanCheck.unassigned"),

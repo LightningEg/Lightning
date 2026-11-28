@@ -5,7 +5,7 @@ from datetime import date
 from decimal import Decimal
 from enum import StrEnum
 
-from lightning.core.money import ZERO
+from lightning.core.money import ZERO, quantize
 
 from .dated_cash import DatedCashForecast
 
@@ -221,10 +221,14 @@ class EverydayBudget:
     def everyday_left_working(self):
         """NF-12AB4: the phone Budget hero's figure, Left in plan less the bills still to pay."""
         from lightning.core.working import Working, WorkingRow
-        return Working("everyday_left", self.everyday_left, (WorkingRow("Planned", self.planned, "/budget"),
-                                                             WorkingRow("Spent", -self.spent, "/budget"),
-                                                             WorkingRow("Bills to pay", -self.bills_to_pay, "/money/bills")),
-                       home="/budget")
+        rows = [WorkingRow("Planned", self.planned, "/budget"), WorkingRow("Spent", -self.spent, "/budget"),
+                WorkingRow("Bills to pay", -self.bills_to_pay, "/money/bills")]
+        # IT-7BB: the figure is floored at zero, so bills beyond what is left get their own row; without it the
+        # shown rows were bent to add up (Planned 34,417 here, 34,416 on Budget).
+        beyond = self.everyday_left - sum((row.amount for row in rows), ZERO)
+        if beyond:
+            rows.append(WorkingRow("Bills beyond the plan", beyond, "/money/bills"))
+        return Working("everyday_left", self.everyday_left, tuple(rows), home="/budget")
 
     @property
     def per_day(self) -> Decimal | None:
@@ -425,6 +429,18 @@ class CashForecast:
         """Free cash today less the lowest month-end ahead; None without a forecast month."""
         low = self.lowest
         return None if low is None else self.free_cash - low.closing
+
+    @property
+    def expected_repeats_safe_to_spend(self) -> bool:
+        """r40 F18: no income is expected before payday, so Expected by payday is Safe to spend again (whole pounds)."""
+        return quantize(self.expected_by_payday, 0) == quantize(self.safe_to_spend, 0)
+
+    @property
+    def lowest_repeats_safe_to_spend(self) -> bool:
+        """IT-7BB (r40 F11): the lowest month-end ahead, in whole pounds, equals Safe to spend today, so a second card
+        would show the same figure under another name."""
+        low = self.lowest
+        return low is not None and quantize(low.closing, 0) == quantize(self.safe_to_spend, 0)
 
     def lowest_in_months(self, monthly_spending: Decimal) -> Decimal | None:
         """The lowest month-end ahead in months of spending; None without either, or when that point is not above zero."""

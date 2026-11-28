@@ -244,6 +244,10 @@ From the full UX review of 2026-10-03 (Mohab's year at 1,366 × 768) and the tab
 
 **Owner decisions (2026-11-11):** phone Home keeps Safe to spend beside the Left for everyday label (a full row only when more is promised than free cash), so Home stays within 1.2 screens (IV-12P). No beta channel for supporters; Play's closed test covers early builds (NF-10B step 3 dropped). The three comparison pages are approved as written, to be linked from the menu and Home, and a fourth compares an AI assistant: you do not own your data, it can be powerful but expensive (OW-8AA, NF-8AB). Shares in Europe and the Gulf are parked until after launch (NF-6B). For Geeks: build only two true motion moments (a posting that must balance, a row becomes ciphertext) (IV-8AC, built 2026-11-22: guideline D07 .balance and .cipher, website PR #212) and make the Arabic-links-to-English label a guideline rule (IV-8AD); the stats check stays manual (OW-8D). IT-1H stays held: the Actions allowlist is unchanged. Post the next batch of about ten contributor tasks (IT-1N2).
 
+**Owner decision (2026-11-27, [r40](../issues/7-planning-import-and-search/r40-one-money-plan/report.md)):** Safe to spend keeps its figure; a nudge under it will offer to give the part the plan has not assigned a job (emergency fund, a goal, invest, keep), always confirmed by the person. r40 proposes the next milestone, one money plan (adopted as r41's phase 1 below).
+
+**Owner decisions (2026-11-27, [r41](../issues/7-planning-import-and-search/r41-the-next-big-thing/report.md)):** the next milestone is the payday plan that fills itself, in three phases: the payday plan (r40 M1-M3 and the nudge), then capture (more banks' SMS, voice entry for cash in Egyptian Arabic on the device, imports from other apps; reading payment notifications is not adopted for now), then the month-end review in pounds and grams of gold against inflation (no share card). Household sharing comes after.
+
 **Still open:** import button says "Post ready rows" while undecided rows post as Unaccounted; bulk counterparty edit.
 
 <a id="upcoming-projects"></a>

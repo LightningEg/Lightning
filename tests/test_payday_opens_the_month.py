@@ -1,0 +1,90 @@
+"""r41 phase 1 (payday opens the month): the day after the salary, To do leads with "Salary arrived · Plan" (guideline
+C13), and the payday step's Bills protected are the bills due before the next payday, the same total Safe to spend
+takes off, so the step and Home tell one story (r37 W8, r40 F13)."""
+from __future__ import annotations
+
+from datetime import date
+
+import pytest
+
+from lightning.bootstrap import build
+from lightning.samples import load_mohab_2026
+from lightning.planning.bill_state import BillRow, BillState, CatchUp
+from lightning.workflows.todo import todo_rows
+
+DAY = date(2026, 10, 2)   # October's salary arrived on the 1st
+
+
+@pytest.fixture
+def mohab(tmp_path, monkeypatch):
+    monkeypatch.setenv("LIGHTNING_TODAY", DAY.isoformat())
+    monkeypatch.setenv("LIGHTNING_PRICES_OFFLINE", "1")
+    c = build(tmp_path / "t.db")
+    load_mohab_2026(c)
+    yield c
+    c.db.close()
+
+
+def test_bills_protected_are_the_bills_before_the_next_payday(mohab):
+    forecast = mohab.forecaster.forecast(DAY)
+    proposal = mohab.funding.preview(DAY)["proposal"]
+    assert forecast.payments_before_income, "the sample has bills before November's salary"
+    # Bills protected are what Safe to spend keeps back for them: the bills before payday and any gam'eya instalment.
+    assert proposal["bills"] == forecast.payments_before_income_total + forecast.taken_off("Gam'eya instalments before next income")
+    # The four parts still add up to Cash available to assign (BT-12AD).
+    assert (proposal["bills"] + proposal["to_plan"] + proposal["reserves"] + proposal["unassigned"]
+            == proposal["available_before"])
+
+
+def test_the_payday_row_leads_to_do_on_payday_and_bills_follow(mohab):
+    bill = BillRow(payment=mohab.forecaster.forecast(DAY).payments_before_income[0], state=BillState.DUE_SOON,
+                   late_days=0, days_until=1)
+    payday_item = {"label": "Salary arrived", "href": "/payday", "action": "Plan"}
+    away = CatchUp(days_since_entry=0, stale_bills=0, away=False)
+    on_payday = todo_rows(mohab, DAY, [bill], [payday_item], away, paid_today=True)
+    assert [r.kind for r in on_payday] == ["payday", "bill"]
+    later = todo_rows(mohab, DAY, [bill], [payday_item], away, paid_today=False)
+    assert [r.kind for r in later] == ["bill"], "the payday row shows only the day the salary lands and the next"
+
+
+def test_home_on_payday_shows_the_payday_row_first(mohab):
+    from lightning.ui.phone.screens.home import build as home
+    screen = home(mohab, DAY)
+    assert screen.state == "payday"
+    kinds = [r.kind for r in screen.todo]
+    assert kinds[0] == "payday", kinds
+
+
+def test_the_nudge_names_safe_to_spend_only_when_it_is_more_than_a_month_of_spending():
+    from decimal import Decimal as D
+    from lightning.ui.no_job import no_job_yet
+    assert no_job_yet(D("51420"), D("25000"), True)["amount"] == D("51420")
+    assert no_job_yet(D("20000"), D("25000"), True) is None         # within a month of spending: no nudge
+    assert no_job_yet(D("51420"), None, True) is None              # nothing to compare with yet
+    assert no_job_yet(D("51420"), D("25000"), False) is None       # no income planned
+    hrefs = [href for _, href in no_job_yet(D("51420"), D("25000"), True)["links"]]
+    assert hrefs == ["/plan/reserves", "/investments/planner", "/payday"]
+
+
+def test_the_nudge_shows_on_pc_cash_planning_and_in_the_phone_sheet(mohab):
+    from fastapi.testclient import TestClient
+    from lightning.ui.no_job import no_job_yet
+    from lightning.ui.phone.router import mount_phone
+    from lightning.ui.web import create_app
+    from lightning.core.dates import month_of
+    from lightning.core.money import fmt
+    forecast = mohab.forecaster.forecast(DAY)
+    nudge = no_job_yet(forecast.safe_to_spend, mohab.budgets.spending_average(month_of(DAY)).amount, True)
+    assert nudge, "Mohab holds more than a month of spending beyond his plan"
+    pc = TestClient(create_app(mohab)).get("/plan").text
+    assert 'id="no-job-yet"' in pc and f"{fmt(forecast.safe_to_spend, 0)} has no job in your plan yet." in pc
+    assert 'href="/payday"' in pc.split('id="no-job-yet"', 1)[1].split("</div>", 1)[0]
+    app = create_app(mohab)
+    mount_phone(app)
+
+    async def as_phone(scope, receive, send):
+        if scope["type"] == "http":
+            scope.setdefault("state", {})["phone"] = True
+        await app(scope, receive, send)
+    home = TestClient(as_phone).get("/home").text
+    assert home.count('id="no-job-yet"') == 1 and "has no job in your plan yet." in home

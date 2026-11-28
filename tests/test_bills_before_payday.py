@@ -79,3 +79,14 @@ def test_home_bills_due_show_the_outstanding_amount_in_profile_currency(c, monke
     for name, expected in (("Dollar hosting", converted), ("Phone instalment", 750)):
         row = card.split(name, 1)[1].split("</a>", 1)[0]
         assert f"<b>{expected:,.0f}</b>" in row
+
+
+def test_nothing_before_payday_is_the_verdict_and_names_the_next_payment(c, setup, monkeypatch):
+    """r40: on the PC, nothing due before payday read as a bare "0 payments before payday ... Nothing else is due
+    before then" while the rent fell two days after payday; the card now says All covered and names that payment."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-29")
+    c.planning.create(kind="INCOME", name="ACME Egypt", amount="45000", frequency="MONTHLY", start_date="2026-11-01")
+    c.planning.create(kind="BILL", name="Landlord", amount="12000", frequency="MONTHLY", start_date="2026-11-03")
+    card = next(text for text in _cards(TestClient(create_app(c)).get("/plan").text) if label("payments_before_next_income") in text)
+    assert "All covered Nothing is due before payday." in card, card
+    assert "Next: Landlord" in card and "Nothing else is due before then" not in card, card

@@ -45,6 +45,8 @@ def test_home_gives_budgets_own_per_day_figure(sample):
     lines = [re.sub(r"<[^>]+>", "", m) for m in re.findall(r'<p class="phone-hero-line">(.*?)</p>', html, re.S)]
     line = next(l for l in lines if "a day" in l).strip().removeprefix("On pace.").removeprefix("Ahead of pace.").strip()   # IV-11M3: a verdict leads
     assert line.strip() == f"About {fmt(everyday.per_day, 0)} a day until payday on {said('2026-11-01')}.", line
+    # r40: the figure is Budget's, so it opens Budget and never reads as Safe to spend by the day
+    assert re.search(r'<a class="phone-hero-link" href="/budget">About [\d,]+ a day', html)
     root = _phone(sample).get("/").text   # the phone's / is Home: the same figure
     assert re.findall(r"About ([\d,]+) a day", root) == [fmt(everyday.per_day, 0)], root
 
