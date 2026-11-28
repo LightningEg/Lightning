@@ -233,7 +233,7 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
                   visual=segments([("Safe", max(f.safe_to_spend, ZERO), "hold"),
                                    ("Budget", -parts.get(figure_label("left_in_plan_after_bills"), ZERO), "out"),
                                    ("Savings", saving, "in"), ("Due", due, "over")]),
-                  line_=line("On top of your plan"), working=f.safe_to_spend_working)]
+                  working=f.safe_to_spend_working)]  # r40 F18: the Lead's Expected by payday block is its one line
 
     if free_then is not None:
         change = f.free_cash_change(free_then)
@@ -347,7 +347,9 @@ def overview(flow, *, period_chip: str, rates: list[Decimal | None], usual: Deci
         cards.append(card(figure_label("safe_to_spend"), f.safe_to_spend, safe_compare, tone="hold" if f.safe_to_spend >= 0 else "over",
                           key="safe", chip_=chip("today"),
                           visual=segments([("Safe", max(f.safe_to_spend, ZERO), "hold"), ("Promised", promised, "out")]),
-                          line_=line(f"Expected by payday {fmt(f.expected_by_payday, 0)} on {until}" if until else "On top of your plan"),
+                          # r40 F18: Expected by payday only when it is another figure; otherwise just the day
+                          line_=line(f"Payday {until}" if until and f.expected_repeats_safe_to_spend
+                                     else f"Expected by payday {fmt(f.expected_by_payday, 0)} on {until}" if until else ""),
                           working=f.safe_to_spend_working))  # NF-12AB3: the figure opens its working; its home is one link in it
 
     if plan is not None:

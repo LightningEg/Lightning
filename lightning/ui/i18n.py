@@ -3957,6 +3957,7 @@ ARABIC_UI = {
     'Safe to spend today': 'المتاح للصرف النهارده',
     'You can spend {amt} today and stay on plan.': 'تقدر تصرف {amt} النهارده وتفضل على الخطة.',
     'Expected by payday {amt} on {date}': 'المتوقع لحد القبض {amt} يوم {date}',
+    'Payday {date}': 'يوم القبض {date}',
     'Expected by payday': 'المتوقع لحد القبض',
     'Payday chosen from': 'يوم القبض متحدد من',
     'your salary': 'مرتبك',

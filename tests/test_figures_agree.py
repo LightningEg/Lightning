@@ -174,3 +174,37 @@ def test_one_month_one_story_each_figure_one_name_one_value(household):
             total, rows = line.replace("EGP", "").split(" = ")
             terms = re.findall(r"(^|[+−]) ?[^+−\d]*?([\d,]+)", rows.strip())
             assert sum(_n(v) * (-1 if s == "−" else 1) for s, v in terms) == _n(total.split()[-1]), line
+
+
+def test_reserves_count_the_same_for_free_cash_and_the_payday_step(household):
+    """A reserve made on a pinned day counts from that day: Free cash and the payday step hold the same reserves."""
+    c, day = household
+    assert c.position.at(day).reserves == c.funding.preview(day)["reserved"]
+
+
+def test_the_payday_proposal_protects_gameya_instalments_as_safe_to_spend_does(tmp_path, monkeypatch):
+    from datetime import date
+    from lightning.bootstrap import build
+    from lightning.planning.funding import GAMEYA_BEFORE_PAYDAY
+    from lightning.samples import load_mohab_2026
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-11-01")
+    monkeypatch.setenv("LIGHTNING_PRICES_OFFLINE", "1")
+    c = build(tmp_path / "gameya.db")
+    load_mohab_2026(c)
+    day = date(2026, 11, 1)
+    instalments = c.forecaster.forecast(day).taken_off(GAMEYA_BEFORE_PAYDAY)
+    preview = c.funding.preview(day)
+    assert instalments > 0 and preview["gameya"] == instalments
+    page = _client(c, False).get("/payday").text
+    assert GAMEYA_BEFORE_PAYDAY.replace("'", "&#39;") not in page and "Gam&#x27;eya instalments before" not in page
+    c.db.close()
+
+
+def test_safe_to_spend_says_expected_by_payday_only_when_it_differs(household):
+    """r40 F18: with no income before payday, Expected by payday is Safe to spend again; the card names the day."""
+    c, day = household
+    f = c.forecaster.forecast(day)
+    home = _main_text(_client(c, False), "/")
+    shown = f"Expected by payday {fmt(f.expected_by_payday, 0)} on" in home
+    assert shown == (not f.expected_repeats_safe_to_spend)
+    assert "On top of your plan" not in _main_text(_client(c, False), "/plan")

@@ -47,7 +47,7 @@ _TABLE = [
     ("lowest_scheduled_cash", "Lowest scheduled cash",
      "The lowest projected day-end owned cash balance from confirmed cash and scheduled payments. Excludes variable spending and savings goals; reserves remain in cash. Missing FX makes it unavailable."),
     ("cash_available_to_assign", "Cash available to assign",
-     "Actual owned liquid cash left after reserves and funded spending. The payday proposal shares it out in four parts that add up to it: Bills protected (bills due outside those funds), To your plan, Emergency and goals, Left unassigned. Missing FX makes it unavailable; expected income never contributes.",
+     "Actual owned liquid cash left after reserves and funded spending. The payday proposal shares it out in four parts that add up to it: Bills protected (bills, loan payments and gam'eya instalments due before payday that those funds do not cover), To your plan, Emergency and goals, Left unassigned. Missing FX makes it unavailable; expected income never contributes.",
      ""),
     ("funded_spending_left", "Spending money left this month",
      "This month's assigned category cash after owned spending and refunds, floored at zero. Unused funding does not carry automatically.",

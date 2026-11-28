@@ -431,6 +431,11 @@ class CashForecast:
         return None if low is None else self.free_cash - low.closing
 
     @property
+    def expected_repeats_safe_to_spend(self) -> bool:
+        """r40 F18: no income is expected before payday, so Expected by payday is Safe to spend again (whole pounds)."""
+        return quantize(self.expected_by_payday, 0) == quantize(self.safe_to_spend, 0)
+
+    @property
     def lowest_repeats_safe_to_spend(self) -> bool:
         """IT-7BB (r40 F11): the lowest month-end ahead, in whole pounds, equals Safe to spend today, so a second card
         would show the same figure under another name."""
