@@ -330,7 +330,7 @@ def build(db_path: str | Path | None = None, backup_on_start: bool = False, *,
         reimbursements=reimbursements,
         refunds=RefundLinkService(db, transactions),
         funding=CashFundingService(db, budgets, reporting, reserves, planning, categories, settings, schedules,
-                                   position),
+                                   position, forecaster),
         deposit_receipts=deposit_receipts,
         freshness=FreshnessService(reporting, position, accounts, reconciliation, deposit_receipts, forecaster),
     )

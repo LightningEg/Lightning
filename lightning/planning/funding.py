@@ -17,11 +17,14 @@ from lightning.planning.salary_day import review_identity, salary_review
 
 WHOLE = Decimal("1")
 HALF = Decimal("0.5")
+GAMEYA_BEFORE_PAYDAY = "Gam'eya instalments before next income"
 
 
 class CashFundingService:
-    def __init__(self, db, budgets, reporting, reserves, planning, categories, settings, schedules, position=None):
+    def __init__(self, db, budgets, reporting, reserves, planning, categories, settings, schedules, position=None,
+                 forecaster=None):
         self.db, self.budgets, self.reporting = db, budgets, reporting
+        self.forecaster = forecaster  # gam'eya instalments before payday, the figure Safe to spend takes off
         self.position = position  # NF-7AU: investments counted as cash join the cash this pool starts from
         self.schedules = schedules
         self.reserves, self.planning, self.categories, self.settings = reserves, planning, categories, settings
@@ -86,8 +89,12 @@ class CashFundingService:
             if owned and self.reporting.valuer.fx(account.currency, day.isoformat()) is None:
                 missing.add(account.currency)
         covered = {cid for row in rows for cid in row["ids"]}
+        # Gam'eya instalments due before payday are protected too, the same amount Safe to spend takes off; they
+        # sit in no category, so no envelope covers them.
+        gameya = (self.forecaster.forecast(day, match_payments=False).taken_off(GAMEYA_BEFORE_PAYDAY) if self.forecaster is not None
+                  else ZERO)
         unfunded_due = (sum((max(row["due"] - row["remaining"], ZERO) for row in rows), ZERO)
-                        + sum((amount for p, amount in due if p.item.category_id not in covered), ZERO))
+                        + sum((amount for p, amount in due if p.item.category_id not in covered), ZERO) + gameya)
         funded = sum((row["remaining"] for row in rows), ZERO)
         ready = own_cash - assigned_reserves - funded - unfunded_due if not missing else None
         pool = max(ready or ZERO, ZERO)
@@ -140,7 +147,7 @@ class CashFundingService:
                     "assigned": unfunded_due + to_plan + reserves_added,   # IV-12Q1: what Confirm gives a job
                     "available_before": available,
                     "unassigned": None if available is None else available - unfunded_due - to_plan - reserves_added}
-        return {"month": month, "rows": rows, "reserves": reserve_rows, "cash": own_cash,
+        return {"month": month, "rows": rows, "reserves": reserve_rows, "cash": own_cash, "gameya": gameya,
                 "funded": funded, "reserved": assigned_reserves, "unfunded_due": unfunded_due,
                 "ready": ready, "left_after_preview": pool, "missing": sorted(set(missing)), "token": token,
                 # Cash available to assign (BT-12AD, owner 2026-11-10): owned cash after reserves and funded
@@ -228,7 +235,7 @@ def payday_relations(preview: dict, forecast, position) -> dict | None:
             kept.append(WorkingRow("Other differences", rest))
         return Working(key, total, tuple(kept))
 
-    gameya = forecast.taken_off("Gam'eya instalments before next income")
+    gameya = forecast.taken_off(GAMEYA_BEFORE_PAYDAY) - preview.get("gameya", ZERO)
     budget = forecast.taken_off(label("left_in_plan_after_bills"))
     saving = forecast.taken_off(*(label(k) for k in ("saving_for_goals", "emergency_top_up", "savings_target_rest")))
     return {
@@ -240,7 +247,7 @@ def payday_relations(preview: dict, forecast, position) -> dict | None:
         # one by one and tops up reserves with what they need this month.
         "unassigned": working("left_unassigned", unassigned, [
             (label("safe_to_spend"), forecast.safe_to_spend), (label("funded_spending_left"), -funded),
-            (label("reserves"), -reserves_gap), ("Gam'eya instalments before next income", gameya),
+            (label("reserves"), -reserves_gap), (GAMEYA_BEFORE_PAYDAY, gameya),
             ("To your plan beyond Budget until payday", -(pr["to_plan"] - budget)),
             ("Emergency and goals beyond Safe to spend's saving", -(pr["reserves"] - saving))]),
     }
