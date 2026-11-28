@@ -141,6 +141,21 @@ def test_nothing_before_payday_names_the_next_payment_after_it(c, setup, monkeyp
     text = _text(_due(_phone(c).get("/plan").text))
     assert "Nothing is due before 1 Nov. Next: Landlord, 12,000 on 3 Nov." in text
 
+
+def test_bills_after_payday_are_never_listed_under_before_payday(c, setup, monkeypatch):
+    """r40: with nothing due before payday, the salary and the later bills sat under "Before payday" with Pay buttons,
+    so bills due after payday read as due now. They get the After payday section, which keeps the page's anchor."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-29")
+    _plan(c, salary=("ACME Egypt", "INCOME", "45000", "2026-11-01", {}),
+          rent=("Landlord", "BILL", "12000", "2026-11-03", {}))
+    page = _phone(c).get("/plan").text
+    coming = _coming(page)
+    assert 'id="plan-next"' in coming and 'id="after-section"' in coming
+    assert translate("Before payday", "en") not in _text(coming)
+    rows = _text(coming.split('class="phone-rows"')[1])
+    assert rows.index("ACME Egypt") < rows.index("Landlord")
+    assert page.count('id="after-section"') == 1
+
 @pytest.mark.parametrize("locale", ["en", "ar"])
 def test_an_empty_profile_shows_no_zero_tiles(c, monkeypatch, locale):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")

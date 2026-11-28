@@ -215,7 +215,7 @@ def budget_period(spent: Decimal, planned: Decimal, months: list[tuple[str, Deci
 
 # ── Cash planning ──────────────────────────────────────────────────────────────────────────────────────────
 def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, free_then: Decimal | None, then: str, past_free: list[Decimal],
-              position, monthly_spending: Decimal | None, has_income: bool) -> list[dict]:
+              position, monthly_spending: Decimal | None, has_income: bool, next_after=None) -> list[dict]:
     """Safe to spend, Free cash, Due before payday and the lowest point ahead, each against something."""
     parts = dict(f.safe_to_spend_parts)
     until = f.next_income_date
@@ -254,13 +254,22 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
     if late:
         due_compare = compare("already late", fmt(late_total, 0), "bad")
         due_chip = chip(f"{len(late)} late", "bad")
+    elif until and not before:
+        # r40: nothing before payday reads as the verdict, as on the phone (owner, 2026-11-25), and the line names
+        # the first payment after payday so a bill two days later is not missed (Audit 10, F15).
+        due_compare = compare("Nothing is due before payday.", "All covered", "good")
+        due_chip = chip(f"{counted(0, 'payment', 'payments')}")
     else:
         due_compare = compare(("payment before payday" if len(before) == 1 else "payments before payday") if until else "payments in the next 3 months",
                               str(len(before)))
         due_chip = chip(f"{counted(len(before), 'payment', 'payments')}")
     nxt = before[0] if before else None
-    due_line = (line(f"Next: {nxt.item.name} · {nxt.due_date}", "See late ones" if late else "", "#plan-next" if late else "")
-                if nxt else line("Nothing else is due before then", "See late ones" if late else "", "#plan-next" if late else ""))
+    if nxt:
+        due_line = line(f"Next: {nxt.item.name} · {nxt.due_date}", "See late ones" if late else "", "#plan-next" if late else "")
+    elif next_after is not None and not late:
+        due_line = line(f"Next: {next_after.item.name} · {next_after.due_date}", "Upcoming", "/plan/upcoming")
+    else:
+        due_line = line("Nothing else is due before then", "See late ones" if late else "", "#plan-next" if late else "")
     cards.append(card(figure_label("payments_before_next_income"), before_total, due_compare, tone="out", key="before",
                       chip_=due_chip, visual=timeline(day, until, late, before), line_=due_line, href="#plan-next"))
 

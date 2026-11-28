@@ -195,9 +195,39 @@ The owner's eight candidate points, tested against this file, the product docs a
 - Document how the 7-day licence is checked.
 - Refresh the Qershnat and Say rows (read 2026-10-04).
 
+## Field check, 2026-11-27
+
+Read for r40 from store listings, vendor pages and third-party reviews; versions and prices disagree between sources, so
+refresh before quoting.
+
+- **Say:** the October 2026 Play listing adds bank-text and app-notification capture, every bank and app in one list
+  (App Store 1.0.64, 18 Sept), Everyday widgets and a **shared household budget** ("you both see who spent what").
+  Prices still disagree by source. [App Store](https://apps.apple.com/us/app/say-hands-free-budget-app/id6746735689),
+  [Google Play](https://play.google.com/store/apps/details?id=com.moments.expenses).
+- **Qershnat:** 5.x with a completely new look; adds a crypto market, medicines and custom default categories; Play
+  updated 3 Oct 2026. [Google Play](https://play.google.com/store/apps/details?id=com.qrshnat.app.gms&hl=en),
+  [App Store (Egypt)](https://apps.apple.com/eg/app/qershnat/id6768779178).
+- **New Egyptian SMS trackers:** Pockito (Play; bank SMS and payment alerts, an AI helper that sets budgets and adds
+  bills) and Masareef on iPhone (bank SMS, bills, budget help). [Pockito](https://play.google.com/store/apps/details?id=com.pockito),
+  [Masareef](https://apps.apple.com/no/app/masareef-auto-expense-tracker/id6806735875).
+- **Copilot:** its Money Assistant is out of beta; it suggests recategorizations and refund matches and asks before it
+  changes anything; household sharing is still missing. [Copilot](https://www.copilot.money/dispatch/beta-introducing-your-money-assistant).
+- **Monarch:** AI assistant, reworked goals, equity vesting in net worth and cash-flow planning, receipt scanning
+  (Winter release). [Monarch](https://www.monarch.com/blog/winter-release).
+
+- **Google Play, rendered 2026-11-27 (Egypt):** Say 4.8 from 2.75K reviews, 50K+ downloads; its listing now leads
+  with bank texts, app notifications, "Ask Say AI", a household budget with your partner and voice ("150 pounds on
+  fuel"). Masareef (المصاريف) 4.7 from 32.4K reviews, 1M+ downloads, with ads. Qershnat 4.8 from 696 reviews, 10K+
+  downloads, now with ads. Pockito 100+ downloads, but its pitch is Lightning's: "what's safe to spend today: one
+  daily budget after bills and your savings goal", plus voice, a receipt scanner and an offline-first ledger.
+
+**What it means for Lightning:** reading bank SMS is now table stakes in Egypt, not an edge. None of the Egyptian apps
+shows one plan that adds up across budget, bills, savings and wealth, offline and on your own devices: that is the
+next milestone (r40). Say's shared household budget makes "no household sharing" (Loses, above) the gap to watch.
+
 ## Watch list
 
-Check every few months and edit this file. Last full check 2026-10-04 (Egyptian apps) and 2026-10-05 (suites).
+Check every few months and edit this file. Last full check 2026-10-04 (Egyptian apps) and 2026-10-05 (suites); field check 2026-11-27 (above).
 - **Say:** Pro price, trial rules, new features, rating, whether it adds investments.
 - **Qershnat:** price once "finished", an SMS review step, gam'eya, zakat, rating.
 - **Masroofy:** bank-message import and how many Egyptian banks work.
