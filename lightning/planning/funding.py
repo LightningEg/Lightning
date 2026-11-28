@@ -91,7 +91,7 @@ class CashFundingService:
         covered = {cid for row in rows for cid in row["ids"]}
         # Gam'eya instalments due before payday are protected too, the same amount Safe to spend takes off; they
         # sit in no category, so no envelope covers them.
-        gameya = (self.forecaster.forecast(day).taken_off(GAMEYA_BEFORE_PAYDAY) if self.forecaster is not None
+        gameya = (self.forecaster.forecast(day, match_payments=False).taken_off(GAMEYA_BEFORE_PAYDAY) if self.forecaster is not None
                   else ZERO)
         unfunded_due = (sum((max(row["due"] - row["remaining"], ZERO) for row in rows), ZERO)
                         + sum((amount for p, amount in due if p.item.category_id not in covered), ZERO) + gameya)

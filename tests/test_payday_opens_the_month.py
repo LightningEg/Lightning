@@ -29,7 +29,8 @@ def test_bills_protected_are_the_bills_before_the_next_payday(mohab):
     forecast = mohab.forecaster.forecast(DAY)
     proposal = mohab.funding.preview(DAY)["proposal"]
     assert forecast.payments_before_income, "the sample has bills before November's salary"
-    assert proposal["bills"] == forecast.payments_before_income_total
+    # Bills protected are what Safe to spend keeps back for them: the bills before payday and any gam'eya instalment.
+    assert proposal["bills"] == forecast.payments_before_income_total + forecast.taken_off("Gam'eya instalments before next income")
     # The four parts still add up to Cash available to assign (BT-12AD).
     assert (proposal["bills"] + proposal["to_plan"] + proposal["reserves"] + proposal["unassigned"]
             == proposal["available_before"])
