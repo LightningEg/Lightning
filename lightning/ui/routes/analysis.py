@@ -14,7 +14,7 @@ from urllib.parse import urlencode
 
 from fastapi import APIRouter, HTTPException, Request, Response
 
-from lightning.core.dates import fmt_date, parse_date, parse_month, month_of, today
+from lightning.core.dates import add_months, fmt_date, parse_date, parse_month, month_of, today
 from lightning.core.errors import LightningError
 from lightning.core.money import ZERO, fmt
 from lightning.reporting.period_compare import CompareTotals, compare_rows, item_trend
@@ -34,27 +34,21 @@ def _month_bounds(day: date) -> tuple[date, date]:
     return day.replace(day=1), day.replace(day=calendar.monthrange(day.year, day.month)[1])
 
 
-def _shift_months(day: date, months: int) -> date:
-    index = day.year * 12 + day.month - 1 + months  # not money
-    year, month = divmod(index, 12)
-    return date(year, month + 1, min(day.day, calendar.monthrange(year, month + 1)[1]))  # not money
-
-
 def preset_periods(kind: str, now: date | None = None) -> tuple[tuple[date, date], tuple[date, date]]:
     """This period (to date) against the same days of the one before: month, quarter or year."""
     now = now or parse_date(today())
     if kind == "quarter":
         first = date(now.year, (now.month - 1) // 3 * 3 + 1, 1)  # not money
-        back = _shift_months(first, -3)
+        back = add_months(first, -3)
         span = (now - first).days  # not money
         return (first, now), (back, min(back + timedelta(days=span), first - timedelta(days=1)))  # not money
     if kind == "year":
         first = date(now.year, 1, 1)
         back = date(now.year - 1, 1, 1)  # not money
-        return (first, now), (back, _shift_months(now, -12))
+        return (first, now), (back, add_months(now, -12))
     first, _ = _month_bounds(now)
-    back = _shift_months(first, -1)
-    return (first, now), (back, min(_shift_months(now, -1), first - timedelta(days=1)))  # not money
+    back = add_months(first, -1)
+    return (first, now), (back, min(add_months(now, -1), first - timedelta(days=1)))  # not money
 
 
 def _periods(request: Request) -> tuple[str, tuple[date, date], tuple[date, date]]:
@@ -112,14 +106,14 @@ def item_lines(c, kind: str, item, start: date, end: date) -> list[dict]:
 def analyse(c, kind: str, item, now: date | None = None) -> dict:
     """Trend over the last twelve months, total, monthly average, this month against last, top payments."""
     now = now or parse_date(today())
-    first = _shift_months(now.replace(day=1), -(TREND_MONTHS - 1))  # not money
+    first = add_months(now.replace(day=1), -(TREND_MONTHS - 1))  # not money
     lines = item_lines(c, kind, item, first, now)
     keys = []
     cursor = first
     while cursor <= now:
         keys.append(cursor.strftime("%Y-%m"))
-        cursor = _shift_months(cursor, 1)
-    this_key, last_key = now.strftime("%Y-%m"), _shift_months(now.replace(day=1), -1).strftime("%Y-%m")
+        cursor = add_months(cursor, 1)
+    this_key, last_key = now.strftime("%Y-%m"), add_months(now.replace(day=1), -1).strftime("%Y-%m")
     data = item_trend(keys, lines, _payee, this_key, last_key, TOP_SHOWN)
     top = data.pop("top")
     return {**data, "date_from": fmt_date(first), "date_to": fmt_date(now), "top": top}

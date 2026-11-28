@@ -52,7 +52,7 @@ def to_decimal(value: object, field: str = "amount") -> Decimal:
         raise ValidationError("Enter a number.", field)
     if not result.is_finite():
         raise ValidationError("Enter a finite number.", field)
-    if abs(result) >= TOO_LARGE:
+    if result.copy_abs() >= TOO_LARGE:
         raise ValidationError("That amount is too large.", field)
     return result
 
@@ -244,8 +244,17 @@ class _SumParser:
 
 
 def decimal_places(value: Decimal) -> int:
-    exponent = value.normalize().as_tuple().exponent
-    return max(0, -exponent) if isinstance(exponent, int) else 0
+    # normalize() rounds to the active Decimal context before stripping zeros.
+    # Inspect the original coefficient so an over-precise input cannot round into range.
+    if not value.is_finite() or value.is_zero():
+        return 0
+    _, digits, exponent = value.as_tuple()
+    places = max(0, -exponent)
+    for digit in reversed(digits):
+        if digit or not places:
+            break
+        places -= 1
+    return places
 
 
 def check_places(value: Decimal, places: int, field: str = "amount") -> Decimal:

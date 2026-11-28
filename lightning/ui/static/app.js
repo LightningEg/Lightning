@@ -907,7 +907,9 @@ const isoDate = (value) => {
       // month ahead (typing 20/12 in January means last December).
       const now = new Date();
       const candidate = new Date(now.getFullYear(), Number(month) - 1, Number(day));
-      const monthAhead = new Date(now.getFullYear(), now.getMonth() + 1, now.getDate());
+      if (candidate.getMonth() !== Number(month) - 1) return null;
+      const monthAhead = new Date(now.getFullYear(), now.getMonth() + 2, 0);
+      monthAhead.setDate(Math.min(now.getDate(), monthAhead.getDate()));
       year = String(now.getFullYear() - (candidate > monthAhead ? 1 : 0));
     }
     else if (year.length === 2) year = `20${year}`;

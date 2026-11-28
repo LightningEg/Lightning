@@ -23,6 +23,14 @@ def estimate_date_override(value) -> str | None:
     return parse_date(value, "estimate_date").isoformat() if value not in ("", None) else None
 
 
+def add_months(start: date, months: int) -> date:
+    """Shift calendar months, clamping the day to the destination month end."""
+    month_index = start.year * 12 + start.month - 1 + months
+    year, zero_month = divmod(month_index, 12)
+    month = zero_month + 1
+    return date(year, month, min(start.day, calendar.monthrange(year, month)[1]))
+
+
 def parse_date(value: object, field: str = "date") -> date:
     if isinstance(value, datetime):
         return value.date()
@@ -46,8 +54,7 @@ def parse_date(value: object, field: str = "date") -> date:
             # This year, unless that would be more than a month ahead
             # (typing 20/12 in January means last December).
             current = today()
-            month_ahead = date(current.year + (current.month == 12), current.month % 12 + 1,
-                               min(current.day, 28))
+            month_ahead = add_months(current, 1)
             try:
                 candidate = date(current.year, month, day)
             except ValueError:
