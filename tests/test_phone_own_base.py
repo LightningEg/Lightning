@@ -59,10 +59,13 @@ def test_a_pc_only_page_opens_this_is_on_your_pc(c, monkeypatch):
     mount_phone(app)
     client = TestClient(app)
     page = client.get("/checks")
-    assert page.status_code == 200 and "This is on your PC" in page.text and "Data checks works best on your PC" in page.text
+    assert page.status_code == 200 and "This is on your PC" in page.text and "On your PC, open Settings, then choose Data checks." in page.text
     assert 'href="/money"' in page.text and "<table" not in page.text
+    assert "Check that your recent edits are on the PC" in page.text
+    prices = client.get("/pc", params={"for": "/investments/prices/markets?date=2026-11-27"})
+    assert "On your PC, open Investments, choose Prices, then open Price files." in prices.text
     direct = client.get("/pc?return_to=/activity")
-    assert 'class="phone-back" href="/activity"' in direct.text and "This works best on your PC" in direct.text
+    assert 'class="phone-back" href="/activity"' in direct.text and "Open Lightning on your PC to continue." in direct.text
     assert 'class="phone-back" href="/money"' in client.get("/pc?return_to=//evil.example").text   # never an outside address
 
 

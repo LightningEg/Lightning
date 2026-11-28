@@ -42,7 +42,7 @@ def test_holdings_table_labels_foreign_unit_prices(c, setup):
     page = TestClient(create_app(c)).get("/investments?period=custom&date_from=2026-09-01&date_to=2026-09-30").text
     row = page[page.index('class="holding-link" href="/investments/holding/'):].split('</tr>', 1)[0]
     assert '25,000' in row and '31,200' in row and '+6,200' in row
-    assert '50 <small>USD</small>' in row and '60 <small>USD</small>' in row
+    assert '50.00 <small>USD</small>' in row and '60.00 <small>USD</small>' in row
 
 
 def test_holding_page_shows_what_was_paid_in_its_own_currency(c, setup):

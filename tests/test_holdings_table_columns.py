@@ -18,4 +18,4 @@ def test_table_shows_average_cost_and_price_now(c, setup):
     table = html.split('id="holdings-table"')[1].split("</table>")[0]
     head = table.split("</thead>")[0]
     assert "Avg cost" in head and "Price now" in head and "XIRR" not in head
-    assert D("2200") / 20 == D("110") and ">110<" in table and ">150<" in table
+    assert D("2200") / 20 == D("110") and ">110.00<" in table and ">150.00<" in table

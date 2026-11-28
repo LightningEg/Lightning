@@ -302,10 +302,15 @@ def _safe_back(value: str) -> str:
     return value if value.startswith("/") and not value.startswith("//") else "/money"
 
 
-def _on_pc_label(path: str) -> str:
+def _on_pc_label(path: str) -> tuple[str, str, str] | None:
     """The plain name of a PC-only page for its message; unknown addresses say nothing specific."""
-    names = {"/checks": "Data checks", "/investments/prices": "Price files"}
-    return names.get(path.split("?")[0], "")
+    from lightning.ui.sections import locate
+
+    path = path.partition("?")[0].partition("#")[0]
+    section, tab = locate(path)
+    if section is None or tab is None:
+        return None
+    return section.label, tab.label, tab.gear_label if path == tab.gear else ""
 
 
 def render_phone(request: Request, name: str, status_code: int = 200, **context) -> HTMLResponse:

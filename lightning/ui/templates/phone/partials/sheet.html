@@ -3,8 +3,8 @@
    <details>, so it works with no script: a tap on the backdrop or on Done closes it. Usage:
      {% set row %}<span>Net flow</span><b>+1,200</b>{% endset %}
      {% call sheet('Net flow', row) %}...{% endcall %} #}
-{% macro sheet(title, row, cls='') -%}
-<details class="phone-sheet-row">
+{% macro sheet(title, row, cls='', opened=False) -%}
+<details class="phone-sheet-row"{% if opened %} open{% endif %}>
   <summary class="phone-row phone-sheet-summary {{ cls }}">{{ row }}</summary>
   <div class="phone-sheet-panel" role="dialog" aria-label="{{ title }}">
     <span class="phone-grabber" aria-hidden="true"></span>
