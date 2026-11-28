@@ -105,7 +105,7 @@ def test_cash_plannings_free_cash_compares_with_the_last_month_end(mohab, monkey
     now = c.forecaster.forecast(date(2026, 10, 19)).free_cash
     assert said(f"+{now - then:,.0f} since 2026-09-30") in cards[1]
     assert "Due before payday 4 late" in cards[2] and "already late" in cards[2]
-    assert "below today" in cards[3] and "months of spending at its lowest" in cards[3]
+    assert "below Free cash today" in cards[3] and "months of spending at its lowest" in cards[3]
 
 
 def test_pace_follows_the_usual_month_not_a_straight_line(mohab, monkeypatch):

@@ -223,7 +223,7 @@ def test_thirty_day_totals_include_partial_loan_and_exclude_past_due_income(c, s
                              start_date="2026-10-10", payment_count="2")
     c.planning.record_payment(loan, "2026-10-10", "2026-10-05", "400", bank)
     hero = _text(_hero(_phone(c).get("/plan").text))
-    assert "Coming in · 30 days 0" in hero and "Going out · 30 days 600" in hero
+    assert "Coming in · 30 days 0" in hero and "Bills and loans · 30 days 600" in hero
 
 
 def test_nothing_due_leads_with_all_covered_and_afford_opens_on_its_answer(c, setup, monkeypatch):

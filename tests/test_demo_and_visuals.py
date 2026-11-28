@@ -175,7 +175,8 @@ def test_every_tab_of_the_demo_opens_with_its_key_notes(demo):
         elif url == "/birdview/expenses":  # KPI cards give the gist (3Q1): Largest payment drops when it is the biggest category
             assert page.text.count('<article class="kpi-card') in (3, 4) and 'class="stat-tile surface-' not in page.text, url
         elif url == "/plan":  # safe to spend leads with its working (3.33); free cash, what's due and the lowest point ahead
-            assert "lead-hero" in page.text and page.text.count('<article class="kpi-card') == 3, url
+            cards = 2 if c.forecaster.forecast().lowest_repeats_safe_to_spend else 3  # IT-7BB: no second Safe to spend
+            assert "lead-hero" in page.text and page.text.count('<article class="kpi-card') == cards, url
             assert "chart-waterfall" in page.text and "section-tabs" in page.text, url
         elif url == "/budget":  # left in plan, everyday spending against pace, and what needs you (3.32)
             assert 2 <= page.text.count('<article class="kpi-card') <= 4 and 'class="key-note' not in page.text, url

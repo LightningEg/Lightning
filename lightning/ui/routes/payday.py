@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Request
 
 from lightning.core.errors import LightningError
+from lightning.planning.funding import payday_relations
 from .. import kpis, status
 from ..expected import expected_by_payday
 from ..web import container, redirect, render, settled_save
@@ -21,7 +22,8 @@ def _page(request, c, **extra):
     pr = allocation["proposal"]
     forecast = c.forecaster.forecast()
     bill_rows = [(p, c.planning.amount_in_base(p, p.still_owed, forecast.as_of)) for p in forecast.payments_before_income]
-    return render(request, "planning/payday.html", enabled=c.funding.enabled, allocation=allocation,
+    relations = payday_relations(allocation, forecast, c.position.at(forecast.as_of))
+    return render(request, "planning/payday.html", enabled=c.funding.enabled, allocation=allocation, relations=relations,
                   forecast=forecast, bill_rows=bill_rows, expected=expected_by_payday(forecast), lead=lead, split=split,
                   status=status.payday(pr["available_before"], pr["unassigned"], c.funding.enabled, pr["assigned"]), **extra)
 

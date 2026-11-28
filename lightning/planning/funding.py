@@ -16,6 +16,7 @@ from lightning.planning.salary_day import review_identity, salary_review
 
 
 WHOLE = Decimal("1")
+HALF = Decimal("0.5")
 
 
 class CashFundingService:
@@ -201,3 +202,45 @@ class CashFundingService:
             salary = salary_review(self.db, today())
             if salary:
                 self.settings.set("review_item_" + review_identity(salary), json.dumps({"status": "reviewed"}, sort_keys=True))
+
+
+def payday_relations(preview: dict, forecast, position) -> dict | None:
+    """IT-7BB (r40 M1): how the payday step's two figures relate to the ones every other screen leads with, as two
+    workings whose rows add up: Cash available to assign from Free cash, and Left unassigned from Safe to spend
+    today. Each row is a figure the person has seen elsewhere; a row that is zero is left out, and anything the
+    named rows do not explain is one last row, so the line never claims a sum that does not hold."""
+    from lightning.core.figures import label
+    from lightning.core.working import Working, WorkingRow
+
+    pr = preview["proposal"]
+    available, unassigned = preview["available"], pr["unassigned"]
+    if available is None or unassigned is None:
+        return None
+    funded = preview["funded"]
+    reserves_gap = preview["reserved"] - (position.reserves or ZERO)  # reserves the proposal keeps beyond Free cash's
+    bills_due = position.bills_due - position.bill_reserve_coverage
+
+    def working(key: str, total: Decimal, rows: list[tuple[str, Decimal]]) -> Working:
+        # A row under half a pound would show as 0: it joins the last row instead.
+        kept = [WorkingRow(name, amount) for name, amount in rows if abs(amount) >= HALF]
+        rest = total - sum((row.amount for row in kept), ZERO)
+        if abs(rest) >= HALF:
+            kept.append(WorkingRow("Other differences", rest))
+        return Working(key, total, tuple(kept))
+
+    gameya = forecast.taken_off("Gam'eya instalments before next income")
+    budget = forecast.taken_off(label("left_in_plan_after_bills"))
+    saving = forecast.taken_off(*(label(k) for k in ("saving_for_goals", "emergency_top_up", "savings_target_rest")))
+    return {
+        # Free cash already took off the bills due; here they stay in, as part of Bills protected.
+        "available": working("cash_available_to_assign", available, [
+            (label("free_cash"), forecast.free_cash), (label("bills_due"), bills_due),
+            (label("funded_spending_left"), -funded), (label("reserves"), -reserves_gap)]),
+        # Safe to spend keeps back the same bills before payday; the proposal differs where it funds categories
+        # one by one and tops up reserves with what they need this month.
+        "unassigned": working("left_unassigned", unassigned, [
+            (label("safe_to_spend"), forecast.safe_to_spend), (label("funded_spending_left"), -funded),
+            (label("reserves"), -reserves_gap), ("Gam'eya instalments before next income", gameya),
+            ("To your plan beyond Budget until payday", -(pr["to_plan"] - budget)),
+            ("Emergency and goals beyond Safe to spend's saving", -(pr["reserves"] - saving))]),
+    }

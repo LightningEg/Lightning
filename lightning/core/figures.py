@@ -198,6 +198,9 @@ _TABLE = [
     ("spent", "Spent", "Money out in the category this month."),
     ("left_in_plan", "Left in plan", "What is left of the plan; the Overview and Budget show the same month "
      "figure, and a negative one reads \"Over plan\". Categories outside the budget are left out of Spent.", "Planned − Spent"),
+    ("everyday_plan", "Everyday plan", "Planned less the bills and loan payments scheduled in planned categories: "
+     "the plan's money for everyday spending. Planned always names the whole plan, bills included (IT-7BB).",
+     "Planned − Bills inside the plan"),
     ("everyday_left", "Left for everyday", "The plan's remaining money after unpaid planned bills and loans, "
      "floored at zero this month. Other months use Left in plan. The phone Budget's everyday spending allowance and "
      "the phone Home's lead (owner, 2026-11-09); Safe to spend today leads Cash planning on both apps (IV-12P)."),
@@ -365,6 +368,7 @@ _SOURCES = {
     "planned": (BOTH, f"{BL}.available"),
     "spent": (LEDGER, f"{BL}.actual"),
     "left_in_plan": (BOTH, f"{BL}.remaining"),
+    "everyday_plan": (PLAN, "lightning.planning.domain.EverydayBudget.everyday_plan"),
     "everyday_left": (BOTH, "lightning.planning.domain.EverydayBudget.everyday_left"),
     "plan_leaves_to_save": (PLAN, "lightning.planning.health.PlanCheck.plan_saves"),
     "not_yet_given_a_job": (PLAN, "lightning.planning.health.PlanCheck.unassigned"),
