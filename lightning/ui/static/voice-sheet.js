@@ -112,7 +112,8 @@
       active = {id, receive, unchanged: () => initial.every(([name, value]) => field(name).value === value)};
       mic.textContent = say("Cancel recording", "إلغاء التسجيل");
       status.textContent = say("Listening…", "سامعك…");
-      mic.href = "lightning-voice://record?id=" + id + "&lang=" + lang.value;
+      const language = lang.value === "ar-EG" ? "ar-EG" : "en-US";
+      mic.href = "lightning-voice://record?id=" + id + "&lang=" + language;
     });
     form.addEventListener("change", e => {
       if (e.target.name === "kind") {
