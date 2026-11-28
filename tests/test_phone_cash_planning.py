@@ -141,6 +141,21 @@ def test_nothing_before_payday_names_the_next_payment_after_it(c, setup, monkeyp
     text = _text(_due(_phone(c).get("/plan").text))
     assert "Nothing is due before 1 Nov. Next: Landlord, 12,000 on 3 Nov." in text
 
+
+def test_bills_after_payday_are_never_listed_under_before_payday(c, setup, monkeypatch):
+    """r40: with nothing due before payday, the salary and the later bills sat under "Before payday" with Pay buttons,
+    so bills due after payday read as due now. They get the After payday section, which keeps the page's anchor."""
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-29")
+    _plan(c, salary=("ACME Egypt", "INCOME", "45000", "2026-11-01", {}),
+          rent=("Landlord", "BILL", "12000", "2026-11-03", {}))
+    page = _phone(c).get("/plan").text
+    coming = _coming(page)
+    assert 'id="plan-next"' in coming and 'id="after-section"' in coming
+    assert translate("Before payday", "en") not in _text(coming)
+    rows = _text(coming.split('class="phone-rows"')[1])
+    assert rows.index("ACME Egypt") < rows.index("Landlord")
+    assert page.count('id="after-section"') == 1
+
 @pytest.mark.parametrize("locale", ["en", "ar"])
 def test_an_empty_profile_shows_no_zero_tiles(c, monkeypatch, locale):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-06")
@@ -208,7 +223,7 @@ def test_thirty_day_totals_include_partial_loan_and_exclude_past_due_income(c, s
                              start_date="2026-10-10", payment_count="2")
     c.planning.record_payment(loan, "2026-10-10", "2026-10-05", "400", bank)
     hero = _text(_hero(_phone(c).get("/plan").text))
-    assert "Coming in · 30 days 0" in hero and "Going out · 30 days 600" in hero
+    assert "Coming in · 30 days 0" in hero and "Bills and loans · 30 days 600" in hero
 
 
 def test_nothing_due_leads_with_all_covered_and_afford_opens_on_its_answer(c, setup, monkeypatch):

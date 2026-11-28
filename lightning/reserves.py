@@ -127,7 +127,7 @@ class CashReserveService:
         row = self.db.one("SELECT allocated_e6,status,created_at,planned_item_id FROM cash_reserves WHERE id=?", (reserve_id,))
         if row and self.db.has_table("reserve_allocation_history"):
             self.db.execute("INSERT INTO reserve_allocation_history(reserve_id,created_date,effective_date,allocated_e6,status,planned_item_id) VALUES(?,?,?,?,?,?)",
-                            (reserve_id, str(row["created_at"])[:10], today().isoformat(), row["allocated_e6"], row["status"], row["planned_item_id"]))
+                            (reserve_id, min(str(row["created_at"])[:10], today().isoformat()), today().isoformat(), row["allocated_e6"], row["status"], row["planned_item_id"]))
 
     def get(self, reserve_id: int):
         reserve_id = self._id(reserve_id, "reserve_id")
@@ -591,7 +591,7 @@ class CashReserveService:
         if reserve["kind"] == "EMERGENCY":
             raise ValidationError("The Emergency Fund cannot be deleted.")
         self.db.execute("INSERT INTO reserve_allocation_history(reserve_id,created_date,effective_date,allocated_e6,status) VALUES(?,?,?,?,?)",
-                        (reserve_id, str(reserve["created_at"])[:10], today().isoformat(), reserve["allocated_e6"], "DELETED"))
+                        (reserve_id, min(str(reserve["created_at"])[:10], today().isoformat()), today().isoformat(), reserve["allocated_e6"], "DELETED"))
         self.db.execute("DELETE FROM cash_reserves WHERE id=?", (reserve_id,))
 
     @staticmethod

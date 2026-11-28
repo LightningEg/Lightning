@@ -167,6 +167,12 @@
 
 {# Expected by payday (owner, 2026-11-18): the figure, the payday date, how payday was chosen, and each expected income
    counted, with its amount and date. e comes from lightning/ui/expected.py. #}
+{# r41 phase 1 (owner, 2026-11-27): Safe to spend keeps its figure; when it is more than a month of usual spending, the
+   money with no job in the plan is offered one. Links only: nothing moves until the person chooses on that page. #}
+{% macro no_job_block(n, base) %}{% if n %}<div class="no-job-yet" id="no-job-yet" data-nudge="no_job_yet">
+  <p><b>{{ '{amt} has no job in your plan yet.'|tr(ui_locale(), amt=n.amount|money(places=0)) }}</b> {{ 'Give some of it one:'|tr(ui_locale()) }}
+  {% for text, href in n.links %}<a href="{{ href }}">{{ text|tr(ui_locale()) }}</a>{{ ' · ' if not loop.last }}{% endfor %}</p>
+</div>{% endif %}{% endmacro %}
 {% macro expected_block(e, base) %}{% if e %}<div class="expected-by-payday" id="expected-by-payday" data-fig="expected_by_payday">
   <p><b>{{ e.label|tr(ui_locale()) }}</b> <span class="fig">{{ e.value|money(places=0) }}</span> <small>{{ base }}</small>
   <small class="muted"> · {{ 'Payday'|tr(ui_locale()) }} {{ e.date|keep_dates }} · {{ 'Payday chosen from'|tr(ui_locale()) }} {{ e.source|tr(ui_locale()) }}</small></p>

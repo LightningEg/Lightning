@@ -21,7 +21,7 @@
   <form method="post" action="{{ action }}" class="phone-form" {% if txn_id %}data-popup-autosave{% else %}data-phone-toast{% endif %}>
     <input type="hidden" name="return_to" value="{{ return_to }}">
     <input type="hidden" name="early_checked" value="{{ values.early_checked or '' }}">
-    {% if txn_id %}<input type="hidden" name="revision" value="{{ revision }}">{% else %}<input type="hidden" name="submission" value="{{ new_submission() }}">{% endif %}
+    {% if txn_id %}<input type="hidden" name="revision" value="{{ revision }}">{% else %}<input type="hidden" name="submission" value="{{ values.submission or new_submission() }}">{% endif %}
     {% if txn_id %}<input type="hidden" name="account_id" value="{{ values.account_id }}">{% endif %}
     {% if fresh %}<input type="hidden" name="sms_ending" value="{{ values.sms_ending or '' }}"><input type="hidden" name="sms_fp" value="{{ values.sms_fp or '' }}">{% endif %}
     {% if split_categories %}<input type="hidden" name="kind" value="{{ values.kind }}"><p class="phone-note">{{ 'Split across {names}; the full amount and its split are kept.'|tr(locale, names=split_categories|join(', ')) }}</p>
@@ -32,6 +32,17 @@
         {% endfor %}
       </div>
     </div>{% endif %}
+    {% if fresh and not values.repeat and not values.sms_fp and account.currency == 'EGP' %}
+    <div data-voice-entry data-voice-today="{{ voice_today }}" hidden>
+      <a class="phone-pill" data-voice-mic data-no-swap href="#">{{ 'سجّل مصروف بصوتك' if locale == 'ar' else 'Speak expense' }}</a>
+      <select data-voice-language aria-label="{{ 'لغة التسجيل' if locale == 'ar' else 'Speech language' }}">
+        <option value="ar-EG" {{ 'selected' if locale == 'ar' }}>مصري</option>
+        <option value="en-US" {{ 'selected' if locale != 'ar' }}>English</option>
+      </select>
+      <p class="phone-note" data-voice-status role="status">{{ 'قول المبلغ وصرفته على إيه، بأي ترتيب. مثلاً: «امبارح دفعت مية وخمسين جنيه بنزين».' if locale == 'ar' else 'Say the amount and what it was for, in any order. Try “Yesterday I spent 150 pounds on fuel”.' }}</p>
+      <div data-voice-choices class="phone-cat-chips"></div>
+    </div>
+    {% endif %}
     {% if fresh and log_again and not values.repeat and not values.amount %}<div class="field phone-usual" data-usual-entries>
       <span class="phone-field-label" id="popup-usual-label">{{ 'Log again'|tr(locale) }}</span>
       <div class="phone-log-again" role="group" aria-labelledby="popup-usual-label">
@@ -79,9 +90,10 @@
     <div class="field money-only {{ 'has-error' if error_field == 'counterparty' }}" {{ 'hidden' if values.kind == 'transfer' }}>
       <label for="popup-counterparty">{{ 'Payee'|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label>
       <input id="popup-counterparty" name="counterparty" value="{{ values.counterparty }}" list="popup-counterparties" data-own-suggestions autocomplete="off" enterkeyhint="next" spellcheck="false">
-      <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}{% set usual_account = (usual_accounts or {}).get(person.name) %}<option value="{{ person.name }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}{% if usual_account %} data-account="{{ usual_account }}"{% endif %}>{% endfor %}</datalist>
+      <datalist id="popup-counterparties">{% for person in counterparties %}{% set learned = (counterparty_categories or {}).get(person.name) %}{% set usual_account = (usual_accounts or {}).get(person.name) %}<option value="{{ person.name }}" data-default-category="{{ person.default_category_id or '' }}" data-aliases='{{ (voice_aliases|default({})).get(person.id, [])|tojson }}' data-history="{{ (voice_history|default({})).get(person.name, [])|join(',') }}"{% if learned %} data-category="{{ learned.id }}"{% endif %}{% if usual_account %} data-account="{{ usual_account }}"{% endif %}>{% endfor %}</datalist>
       {% if error_field == 'counterparty' %}<small class="field-error">{{ "Choose a saved payee."|tr(locale) }}</small>{% endif %}
     </div>
+    {% if not txn_id and (split_available or values.shares) %}{% include "partials/people_split_entry.html" %}{% endif %}
     {% if fresh %}{% include "partials/work_claim_entry.html" %}{% endif %}
     <details class="phone-more"{% if values.owner_id or values.notes or values.left_out or values.estimate_date %} open{% endif %}>
       <summary>{{ "More options"|tr(locale) }}<span class="phone-chevron">{{ chevron() }}</span></summary>

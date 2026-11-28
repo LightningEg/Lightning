@@ -2,7 +2,7 @@
 
 Date: 2026-11-27
 Reviewed commit: e1426e49 (v2.3.3), compared with v2.3.1 and v2.3.2
-Code: r40
+Code: r42
 Pillar: protect
 
 ## Findings

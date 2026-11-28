@@ -43,6 +43,7 @@ public final class MainActivity extends Activity {
     static volatile Activity current;  // the open window, for bridges that show system sheets (Play Billing, NF-11B3)
     private static final AtomicBoolean journalSyncRunning = new AtomicBoolean();
     private WebView web;
+    private final ExpenseSpeech speech = new ExpenseSpeech(this);
     private FrameLayout root;
     private View trouble;  // our own "starting again" screen, in place of Android's "Web page not available"
     private boolean failedNow;  // the page about to finish is the one that failed
@@ -90,6 +91,11 @@ public final class MainActivity extends Activity {
      *  /ar/marketplace.html, lightning/ui/entitlements.py MARKETPLACE_PATHS) are the ones the app writes itself. */
     private boolean outsideLink(Uri uri) {
         return "https".equals(uri.getScheme()) && uri.getHost() != null && uri.getUserInfo() == null;
+    }
+
+    void voiceResult(String id, String text, String reason) {
+        if (web == null || web.getUrl() == null || !ours(Uri.parse(web.getUrl()))) return;
+        ExpenseSpeech.deliver(web, id, text, reason);
     }
 
     private void openOutside(Uri target) {
@@ -195,6 +201,16 @@ public final class MainActivity extends Activity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 Uri target = request.getUrl();
+                if ("lightning-voice".equals(target.getScheme())) {
+                    if (request.isForMainFrame() && request.hasGesture() && view.getUrl() != null
+                            && ours(Uri.parse(view.getUrl()))) {
+                        if ("cancel".equals(target.getHost())) speech.cancel();
+                        else if ("record".equals(target.getHost())) {
+                            speech.start(target.getQueryParameter("id"), target.getQueryParameter("lang"));
+                        }
+                    }
+                    return true;
+                }
                 if (ours(target)) return false;
                 if (outsideLink(target)) openOutside(target);  // a web page: the phone's browser, never this window
                 return true;  // a file, an app link or anything else: never opened
@@ -209,7 +225,11 @@ public final class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String finishedUrl) {
-                if (ours(Uri.parse(finishedUrl))) checkReminders();
+                if (ours(Uri.parse(finishedUrl))) {
+                    checkReminders();
+                    if (speech.available()) view.evaluateJavascript(
+                            "window.lightningVoiceAvailable=true;window.dispatchEvent(new Event('voiceavailable'))", null);
+                }
                 if (failedNow) failedNow = false;  // the failed load finishing: our screen stays
                 else if (ours(Uri.parse(finishedUrl))) hideTrouble();  // a page loaded: back to the app
             }
@@ -278,6 +298,7 @@ public final class MainActivity extends Activity {
     @Override
     public void onRequestPermissionsResult(int code, String[] permissions, int[] results) {
         super.onRequestPermissionsResult(code, permissions, results);
+        if (code == ExpenseSpeech.PERMISSION) speech.permission(results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED);
         if (code == SmsBridge.REQUEST_SMS && web != null && origin != null) {
             web.loadUrl(origin.buildUpon().path("/sms").build().toString());  // read right away, or say why not
         }
@@ -455,6 +476,7 @@ public final class MainActivity extends Activity {
     protected void onStop() {
         reminderHandler.removeCallbacks(reminderPoll);
         journalSyncHandler.removeCallbacks(foregroundJournalSync);
+        speech.cancel();
         super.onStop();
         new Thread(() -> {
             try {

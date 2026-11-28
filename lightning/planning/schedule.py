@@ -4,17 +4,11 @@ from __future__ import annotations
 import calendar
 from datetime import date, timedelta
 
+from lightning.core.dates import add_months
+
 from .domain import Frequency, PlannedItem, WeekendMove
 
 _MONTH_STEP = {Frequency.MONTHLY: 1, Frequency.QUARTERLY: 3, Frequency.YEARLY: 12}
-
-
-def _add_months(anchor: date, months: int) -> date:
-    """Same day of month, clamped to the month's last day (31 → 30/28/29)."""
-    index = anchor.year * 12 + anchor.month - 1 + months
-    year, month = divmod(index, 12)
-    last = calendar.monthrange(year, month + 1)[1]
-    return date(year, month + 1, min(anchor.day, last))
 
 
 WEEKEND = {4, 5}  # Friday and Saturday in date.weekday()
@@ -59,7 +53,7 @@ def scheduled_dates(item: PlannedItem, until: str | date) -> list[tuple[int, str
         elif item.frequency == Frequency.WEEKLY:
             day = start + timedelta(weeks=item.interval_count * number)
         else:
-            day = _add_months(start, _MONTH_STEP[item.frequency] * item.interval_count * number)
+            day = add_months(start, _MONTH_STEP[item.frequency] * item.interval_count * number)
             if item.month_day:
                 day = day.replace(day=min(item.month_day, calendar.monthrange(day.year, day.month)[1]))
         if day is None or (last and day > last) or (limit is not None and number >= limit):
@@ -85,7 +79,7 @@ def previous_due(item: PlannedItem, due: str) -> str | None:
         return None
     if item.frequency == Frequency.WEEKLY:
         return (day - timedelta(weeks=item.interval_count)).isoformat()
-    return _add_months(day, -_MONTH_STEP[item.frequency] * item.interval_count).isoformat()
+    return add_months(day, -_MONTH_STEP[item.frequency] * item.interval_count).isoformat()
 
 
 def describe(item: PlannedItem) -> str:

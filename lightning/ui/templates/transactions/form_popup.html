@@ -8,7 +8,7 @@
   {% if error %}<div class="flash error" role="alert">{{ error|tr(locale) }}</div>{% endif %}
   <form method="post" action="{{ action }}" {% if txn_id %}data-popup-autosave{% endif %}>
     <input type="hidden" name="return_to" value="{{ return_to }}">
-    <input type="hidden" name="early_checked" value="{{ values.early_checked or '' }}">{% if txn_id %}<input type="hidden" name="revision" value="{{ revision }}">{% else %}<input type="hidden" name="submission" value="{{ new_submission() }}">{% endif %}
+    <input type="hidden" name="early_checked" value="{{ values.early_checked or '' }}">{% if txn_id %}<input type="hidden" name="revision" value="{{ revision }}">{% else %}<input type="hidden" name="submission" value="{{ values.submission or new_submission() }}">{% endif %}
     {% if txn_id %}<input type="hidden" name="account_id" value="{{ values.account_id }}">{% endif %}
     {% if split_categories %}<input type="hidden" name="kind" value="{{ values.kind }}"><p class="muted">This expense is split across {{ split_categories|join(', ') }}. Editing here preserves its full amount and category split.</p>
     {% else %}{# r39 (A10.1): a segment picks the kind; the radios are its parts, not dots on buttons #}<div class="transaction-choice-grid"><span class="planner-mode-seg" role="radiogroup" aria-label="{{ 'Transaction type'|tr(locale) }}">
@@ -60,6 +60,7 @@
     </div>
     <div class="field"><label for="popup-notes">{{ 'Notes'|tr(locale) }} <span class="muted">{{ "(optional)"|tr(locale) }}</span></label><input id="popup-notes" name="notes" value="{{ values.notes }}"></div>
     {% import "partials/estimate_date.html" as dates with context %}{{ dates.options(values.estimate_date) }}
+    {% if not txn_id and (split_available or values.shares) %}{% include "partials/people_split_entry.html" %}{% endif %}
     {% if not txn_id %}{% include "partials/work_claim_entry.html" %}{% endif %}
     {% if txn_id %}{% from "partials/macros.html" import left_out_switch %}{{ left_out_switch(values) }}{% endif %}
     <div class="transaction-effect" data-transaction-effect role="status" aria-live="polite"></div>
