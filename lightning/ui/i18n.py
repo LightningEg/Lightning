@@ -526,6 +526,7 @@ ARABIC_UI = {
     'Emergency fund or a goal': 'صندوق الطوارئ أو هدف',
     "This month's payday plan": 'خطة قبض الشهر ده',
     '{amt} to pay, of {amt2} left this month': '{amt} عليك تدفعهم، من {amt2} فاضلين الشهر ده',
+    '{amt} to pay this week': '{amt} عليك تدفعهم الأسبوع ده',
     'Nothing to pay this week': 'مفيش حاجة تدفعها الأسبوع ده',
     'Next: {name}, {amt} on {date}.': 'اللي بعده: {name}، {amt} يوم {date}.',
     'Nothing else is due this month.': 'مفيش حاجة تانية مستحقة الشهر ده.',

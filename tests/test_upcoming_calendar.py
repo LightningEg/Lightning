@@ -159,6 +159,10 @@ def test_the_overview_shows_the_next_seven_days_and_a_quiet_week_names_the_next_
     rows = week.split('week-list', 1)[1].split("</section>", 1)[0]      # r38: a list by name, each with Pay
     assert rows.count('week-row') == 1 and "Internet" in rows and "Pay</b>" in rows and "/pay?due=2026-11-20" in rows
     assert "650 to pay, of 3,150 left this month" in week
+    # r40: from 28 Nov the week reaches December's rent, which November's "left this month" cannot hold
+    monkeypatch.setenv("LIGHTNING_TODAY", "2026-11-28")
+    crossing = client.get("/").text.split('id="week-heading"', 1)[1].split("</header>", 1)[0]
+    assert "12,000 to pay this week" in crossing and "left this month" not in crossing, crossing
 
 
 def test_the_overview_has_no_week_without_a_plan(c):

@@ -41,6 +41,8 @@ Reserved codes: none
 
 - **Google Play (owner, 11-22):** closed test running; public release planned for 1 December (site Home, Downloads, roadmap #213). **Read:** `docs/google-play.md`.
 
+- **r40, r41 (Claude, 11-27):** owner adopted the payday plan that fills itself (r41 phases 1-3, r40 M1-M5): voice yes, notifications not yet, no share card; Safe to spend keeps its figure plus a nudge. Items are filed when phase 1 starts; owner still to pick which parked items make room. **Read:** r41 follow-ups.
+
 Plan: `python tools/board.py` (GitHub issues; skill `dispatch`).
 
 1. **Report work paused** (owner); branches wait on native checks. **Read:** `issues/9-later/r22-code-quality-and-smart-features/evidence/report-finalization-2026-11-04.md`.

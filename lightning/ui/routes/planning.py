@@ -142,7 +142,9 @@ async def plan_page(request: Request):
                                free_then=past[-1][1] if past else None,
                                then=fmt_date(parse_month(past[-1][0])[1]) if past else "",
                                past_free=[value for _, value in past], position=position,
-                               monthly_spending=monthly_spending, has_income=has_income)
+                               monthly_spending=monthly_spending, has_income=has_income,
+                               next_after=next((p for p in next_payments if not p.item.is_income and not p.days_late(day)
+                                                and p.due_date > (forecast.next_income_date or "")), None))
     # Answer first (guideline 3.33, A09): Safe to spend is the page's Lead with its working beside it; late payments are
     # Needs you rows under it, each with Mark paid.
     lead = next((k for k in kpi_cards if k["key"] == "safe"), None)
