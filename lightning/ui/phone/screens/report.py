@@ -10,6 +10,7 @@ from decimal import Decimal
 from lightning.core.dates import fmt_date, month_of
 from lightning.core.errors import LightningError
 from lightning.investments.report import investment_period
+from lightning.planning.position import net_worth_bridge
 from lightning.ui.periods import parse_period
 
 KEYS = ("month", "last", "ytd", "all", "custom")
@@ -29,9 +30,9 @@ class ReportScreen:
     savings_rate: Decimal | None
     investing_result: Decimal | None  # the period's gain or loss on holdings; None when a price is missing
     keys: tuple[tuple[str, str], ...]
-    since: str = ""                  # NF-7BF: the day before the period, what the lead is measured against
-    gold_change: Decimal | None = None   # the same change in grams of 21K gold; None when a gold price is missing
-    other_change: Decimal | None = None  # prices, gold, currencies, loans: the lead less Kept and Investing result
+    since: str = ""                  # NF-7BF: the day before the period, what "richer" is measured against
+    bridge: dict | None = None       # why net worth changed (planning.position.net_worth_bridge), as on the PC Overview
+    gold_change: Decimal | None = None   # the change in net worth in grams of 21K gold; None when a gold price is missing
 
 
 def _period(c, day: date, key: str, date_from: str = "", date_to: str = ""):
@@ -57,13 +58,15 @@ def build(c, day: date, key: str = "month", date_from: str = "", date_to: str = 
     investing = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(start), fmt_date(end))
     label = (month_of(start) if key in ("month", "last") else
              f"{fmt_date(start)} – {fmt_date(end)}" if key == "custom" else period.label)
-    # NF-7BF: did the period leave you richer, why, and in gold. Kept + Investing result + Other changes = the lead.
-    before = start - timedelta(days=1)
+    # NF-7BF: did the period leave you richer, why, and in gold: the PC Overview's net worth bridge (OV-3) and its gold
+    # side, both worked out in planning/position.py.
+    before = start - timedelta(days=1)  # not money: the day before the period
+    worth, _ = c.position.change_in_net_worth(start, end, since_first_record=key == "all")
+    bridge = net_worth_bridge(worth, flow.net, investing)
     gold = (c.position.change_in_gold(start, end, c.zakat.gold_price_24k(fmt_date(before)), c.zakat.gold_price_24k(fmt_date(end)))
-            if change is not None else None)
-    other = change - flow.net - (investing["result"] or Decimal(0)) if change is not None else None
+            if bridge else None)
     return ReportScreen(key=key, label=label, start=fmt_date(start), end=fmt_date(end), change=change,
                         change_reason=reason, money_in=flow.inflows, money_out=flow.outflows, net=flow.net,
                         savings_rate=flow.savings_rate, investing_result=investing["result"],
                         keys=(("month", "This month"), ("last", "Last month"), ("ytd", "This year"), ("all", "All time")),
-                        since=fmt_date(before), gold_change=gold, other_change=other)
+                        since=fmt_date(before), bridge=bridge, gold_change=gold)

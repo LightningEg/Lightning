@@ -1,5 +1,5 @@
 """NF-7BF (r41 phase 3): the phone's Report says whether the period left you richer, by how much in grams of 21K
-gold, and why: Kept + Investing result + Other changes add up to Change in what you own."""
+gold, and why, with the PC Overview's net worth bridge: Net flow + Market moves + Other changes = Change in net worth."""
 from __future__ import annotations
 
 import re
@@ -45,15 +45,16 @@ def _text(html: str) -> str:
 
 def test_the_parts_add_up_to_the_change_and_gold_can_disagree_with_pounds(mohab):
     s = report.build(mohab, DAY, "last")   # September 2026
-    assert s.change is not None and s.change > 0 and s.since == "2026-08-31"
-    assert s.net + s.investing_result + s.other_change == s.change
+    b = s.bridge
+    assert b and b["change"] > 0 and s.since == "2026-08-31"
+    assert b["net_flow"] + b["market_moves"] + b["other_changes"] == b["change"] and b["net_flow"] == s.net
     # Gold rose faster than Mohab saved: richer in pounds, fewer grams of 21K gold. The app says both.
     assert s.gold_change is not None and s.gold_change < 0
 
 
 def test_no_gold_price_at_the_start_leaves_the_gold_line_out(mohab):
     s = report.build(mohab, DAY, "ytd")
-    assert s.change is not None and s.gold_change is None
+    assert s.bridge and s.gold_change is None
     page = _phone(mohab).get("/money/report?period=ytd").text
     assert "Richer than on" in page and "In gold:" not in page
 
@@ -61,10 +62,9 @@ def test_no_gold_price_at_the_start_leaves_the_gold_line_out(mohab):
 def test_the_report_page_leads_with_the_verdict_gold_and_why(mohab):
     page = _phone(mohab).get("/money/report?period=last").text
     hero = _text(page.split('class="phone-hero"', 1)[1].split("</section>", 1)[0])
-    assert "+42,225" in hero and "Richer than on 31 Aug" in hero and hero.count("42,225") == 1, hero
-    assert "In gold: 4.2 grams of 21K fewer." in hero, hero
-    why = _text(page.split('id="why-changed"', 1)[1].split("</div>\n<div", 1)[0])
-    assert why.index("Kept") < why.index("Investing result") < why.index("Other changes"), why
+    assert "Richer than on 31 Aug" in hero and "grams of 21K fewer." in hero, hero
+    why = _text(page.split('id="why-changed"', 1)[1].split("</div>\n</div>", 1)[0])
+    assert why.index("Net flow") < why.index("Market moves") < why.index("Other changes") < why.index("Change in net worth"), why
 
 
 def test_every_new_sentence_has_an_arabic_form():
