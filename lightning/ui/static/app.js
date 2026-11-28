@@ -3642,3 +3642,27 @@ document.addEventListener("input", async function (event) {
     if (form.dataset.previewQuery === query.toString()) output.textContent = t("Preview unavailable.");
   }
 });
+
+
+document.addEventListener("change", (event) => {
+  if (!event.target.matches('[name="kind"]')) return;
+  const split = event.target.form?.querySelector("[data-people-split]");
+  if (split) split.hidden = event.target.value !== "out";
+});
+
+document.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-share-add], [data-share-remove]");
+  if (!button) return;
+  const split = button.closest("[data-people-split]");
+  if (button.hasAttribute("data-share-add")) {
+    const row = split.querySelector("[data-share-template]").content.firstElementChild.cloneNode(true);
+    split.querySelector("[data-share-rows]").append(row);
+    initOwnDataPickers(row);
+    row.querySelector('[name="share_person"]').focus();
+  } else {
+    const row = button.closest("[data-share-row]");
+    row.querySelectorAll("[aria-controls]").forEach((input) => document.getElementById(input.getAttribute("aria-controls"))?.remove());
+    row.remove();
+    split.querySelector("[data-share-add]").focus();
+  }
+});
