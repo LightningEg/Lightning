@@ -28,6 +28,10 @@ class TestMoney:
             value = Decimal(text)
             assert money.from_e6(money.to_e6(value)) == value
 
+    def test_extreme_exponent_reports_an_amount_error(self):
+        with pytest.raises(ValidationError, match="too large"):
+            money.to_decimal(Decimal("1e1000000"))
+
     def test_float_trap_avoided(self):
         total = sum(money.to_e6(Decimal("0.1")) for _ in range(10))
         assert money.from_e6(total) == Decimal("1.0")
@@ -35,6 +39,18 @@ class TestMoney:
     def test_refuses_precision_loss(self):
         with pytest.raises(ValidationError):
             money.to_e6(Decimal("0.0000001"))
+
+    def test_excess_precision_survives_input_validation(self):
+        value = money.to_decimal("1." + "0" * 28 + "1")
+        with pytest.raises(ValidationError):
+            money.check_places(value, 2)
+        with pytest.raises(ValidationError):
+            money.to_e6(value)
+
+    def test_insignificant_zeros_near_input_limit(self):
+        value = money.to_decimal("999999999999.99" + "0" * 28)
+        assert money.check_places(value, 2) == value
+        assert money.to_e6(value) == 999999999999990000
 
     def test_places(self):
         money.check_places(Decimal("12.34"), 2)
