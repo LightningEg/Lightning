@@ -39,7 +39,7 @@
         <option value="ar-EG" {{ 'selected' if locale == 'ar' }}>مصري</option>
         <option value="en-US" {{ 'selected' if locale != 'ar' }}>English</option>
       </select>
-      <p class="phone-note" data-voice-status role="status">{{ 'مثلاً: مية وخمسين جنيه بنزين' if locale == 'ar' else 'Try “150 pounds on fuel yesterday”.' }}</p>
+      <p class="phone-note" data-voice-status role="status">{{ 'قول المبلغ وصرفته على إيه، بأي ترتيب. مثلاً: «امبارح دفعت مية وخمسين جنيه بنزين».' if locale == 'ar' else 'Say the amount and what it was for, in any order. Try “Yesterday I spent 150 pounds on fuel”.' }}</p>
       <div data-voice-choices class="phone-cat-chips"></div>
     </div>
     {% endif %}
