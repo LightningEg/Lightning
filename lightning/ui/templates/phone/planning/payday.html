@@ -2,7 +2,7 @@
 {% from "phone/partials/hero.html" import hero %}{% from "partials/macros.html" import expected_block %}
 {% block title %}{{ 'Fund your payday plan'|tr(locale) }}{% endblock %}
 {% block heading %}<h1>{{ 'Fund your payday plan'|tr(locale) }}</h1>{% endblock %}
-{% block top_actions %}<a class="btn" href="/plan">{{ 'Cash planning'|tr(locale) }}</a>{% endblock %}
+{# r41: no Cash planning button here; Plan's tabs, which hold this step, and the tab bar lead back (it doubled the first tab). #}
 {% block content %}
 {# IV-12Q1: one short step on the phone too: the figure, the bar and four rows, Confirm; the boxes behind Customize. #}
 {% set a = allocation %}{% set phone = true %}

@@ -1,5 +1,5 @@
 """Home's To do (IV-3AY6, IV-11E, guideline C04.4, C11.1): the actions waiting on the person, one row each with its
-figure and one verb, in the order a failed data check, late or due-soon bill, payday, catch-up, to sort, weekly check, prices, then the
+figure and one verb, in the order a failed data check, late or due-soon bill (on payday, the payday row first), catch-up, to sort, weekly check, prices, then the
 rest. Bills come from the one bill state (planning/bill_state.py); everything else from the review inbox, one row per
 item, read from the item's glance."""
 from __future__ import annotations
@@ -12,6 +12,7 @@ from lightning.planning.bill_state import BillRow, BillState, CatchUp
 from lightning.workflows.review import group_of
 
 ORDER = ("check", "bill", "payday", "catch_up", "sort", "weekly", "prices", "other")  # a figure that is wrong first (NF-2AJ)
+PAYDAY_ORDER = ("check", "payday", "bill", "catch_up", "sort", "weekly", "prices", "other")  # income arrived today or yesterday (C13)
 
 
 @dataclass(frozen=True)
@@ -64,4 +65,7 @@ def todo_rows(c, day: date, bills: list[BillRow], inbox_items: list[dict], away:
     for item in others:
         kind = "weekly" if item["href"] == "/review" else {"activity": "sort", "prices": "prices", "checks": "check"}.get(group_of(item), "other")
         rows.append(_row(kind, item))
-    return sorted(rows, key=lambda r: ORDER.index(r.kind))  # stable: bills earliest first, the rest in the inbox's order
+    # C13: on payday "Salary arrived · Plan it" is the first row; only a figure that is wrong comes before it (NF-2AJ),
+    # since a wrong figure would make the plan wrong too. Bills follow it, earliest first.
+    order = PAYDAY_ORDER if paid_today else ORDER
+    return sorted(rows, key=lambda r: order.index(r.kind))  # stable: bills earliest first, the rest in the inbox's order

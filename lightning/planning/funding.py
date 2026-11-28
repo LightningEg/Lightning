@@ -1,15 +1,17 @@
 """Optional cash funding. Actual cash, spending room and reserves remain distinct."""
 from __future__ import annotations
 
+from datetime import timedelta
 from hashlib import sha256
 from decimal import ROUND_DOWN, ROUND_HALF_UP, Decimal
 import json
 
 from lightning.accounts.domain import AccountType
-from lightning.core.dates import month_of, now_iso, parse_month, today
+from lightning.core.dates import month_of, now_iso, parse_date, parse_month, today
 from lightning.core.errors import ValidationError
 from lightning.core.money import ZERO, check_places, from_e6, to_decimal, to_e6
 from lightning.database.portable_ids import portable_ids
+from lightning.planning.bill_state import next_income_date
 from lightning.planning.salary_day import review_identity, salary_review
 
 
@@ -46,7 +48,11 @@ class CashFundingService:
         spent = self.budgets.plan_funded_spending(start, day)
         due, missing = [], set()
         bill_coverage = self.planning.bill_reserve_coverage(day, day)
-        for payment in self.planning.all_payments(day, day):
+        # Bills protected are the bills due before the next payday, as the page lists them and Safe to spend takes
+        # them off (r37 W8, r40): counting only those due by today put the rent two days later under To your plan.
+        payday = next_income_date(self.planning, day)
+        through = parse_date(payday) - timedelta(days=1) if payday else day  # not money: the day before payday
+        for payment in self.planning.all_payments(max(through, day), day):
             if not payment.outstanding or payment.item.is_income:
                 continue
             account = self.reporting.accounts.get(payment.item.account_id) if payment.item.account_id else None
