@@ -34,6 +34,7 @@ public final class ProbeActivity extends Activity {
     private Uri origin;
     private String checks = "";
     private boolean isolationTested;
+    private boolean voiceDelivered;
     private String fetchResult = "not run";
     private final List<String> visited = new ArrayList<>();
     private final List<String> blocked = new ArrayList<>();
@@ -145,6 +146,7 @@ public final class ProbeActivity extends Activity {
         origin = Uri.parse(launch);
         visited.clear(); blocked.clear(); intercepted.clear(); left.clear();
         isolationTested = false;
+        voiceDelivered = false;
         fetchResult = "not run";
         web = new WebView(this);
         WebSettings settings = web.getSettings();
@@ -185,6 +187,12 @@ public final class ProbeActivity extends Activity {
                 if ("/".equals(page.getPath()) && !isolationTested) {
                     isolationTested = true;
                     testIsolation(view);
+                    String sample = "دفعت ١٥٠ في \"Shell\"";
+                    view.evaluateJavascript("window.lightningVoiceResult=(id,text)=>window.__heard=[id,text]", ignored -> {
+                        ExpenseSpeech.deliver(view, "draft-1", sample, "");
+                        view.evaluateJavascript("window.__heard?.[0]==='draft-1' && window.__heard[1]==="
+                                + org.json.JSONObject.quote(sample), result -> voiceDelivered = "true".equals(result));
+                    });
                 }
             }
 
@@ -220,6 +228,7 @@ public final class ProbeActivity extends Activity {
         boolean overview = visited.contains("/");
         text.append(overview ? "OK  " : "FAIL ").append("04c WebView pages: ").append(visited.size())
                 .append(" loaded, Overview ").append(overview ? "shown" : "never shown").append(": ").append(visited).append('\n');
+        text.append(voiceDelivered ? "OK  " : "FAIL ").append("Voice transcript reached the WebView callback\n");
         boolean https = false;
         for (String url : blocked) https |= url.startsWith("https:");
         // WebView itself may refuse the file and intent links before asking us; either way no page may leave the app.
