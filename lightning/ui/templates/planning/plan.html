@@ -13,9 +13,9 @@
 {# 3AM3: page actions stay in the header’s More actions (A05), above the Lead #}
 {% block top_actions %}<details class="action-menu"><summary aria-label="{{ 'More actions'|tr(locale) }}" title="{{ 'More actions'|tr(locale) }}">{{ icon_more() }}</summary><div><a href="/plan/scenarios">{{ 'Compare scenarios'|tr(locale) }}</a><a href="/plan/inputs">{{ 'Forecast inputs'|tr(locale) }}</a><a href="/plan/reserves">{{ fig.reserves.label }}</a><a href="/payday">{{ 'Fund your payday plan'|tr(locale) }}</a></div></details>{% endblock %}
 {% block content %}
-{% from "partials/charts.html" import stat_tiles, kpi_row, trend, bars, lead_card %}{% from "partials/macros.html" import needs_rows, expected_block %}
+{% from "partials/charts.html" import stat_tiles, kpi_row, trend, bars, lead_card %}{% from "partials/macros.html" import needs_rows, expected_block, no_job_block %}
 {% set f = forecast %}{% set p = plan %}
-{% set expected_html %}{{ expected_block(expected, base) }}{% endset %}
+{% set expected_html %}{{ expected_block(expected, base) }}{{ no_job_block(no_job, base) }}{% endset %}
 {% if lead %}{% call lead_card(lead, base, main_extra=expected_html) %}<div class="lead-side-head" id="plan-build"><div><h3>{{ 'How safe to spend is worked out'|tr(locale) }}</h3><p>{{ "From free cash to safe to spend"|tr(locale) }}</p></div></div>
     {{ linked_breakdown(p.build) }}
     {# Feedback ticket 102: when only what is left in the budget pushes safe to spend below zero, the way out is the budget. #}

@@ -12,6 +12,7 @@ from decimal import Decimal
 from lightning.core.dates import month_of, now, parse_date
 from lightning.core.figures import label
 from lightning.ui.expected import expected_by_payday
+from lightning.ui.no_job import no_job_yet
 from lightning.ui.phone.screens.budget import month_bar
 from lightning.planning import bill_state
 from lightning.planning.domain import PlanKind
@@ -83,6 +84,7 @@ class HomeScreen:
     days_to_payday: int | None = None  # not money: days until the next income date; None when none is planned
     steps: tuple = ()                  # first day: (key, done) for the salary account, the payday, the first payment
     expected: dict | None = None       # Expected by payday, the secondary line under Safe to spend today (lightning.ui.expected)
+    no_job: dict | None = None         # the "no job yet" nudge in Safe to spend's sheet (lightning.ui.no_job, r41)
     free_cash: Decimal | None = None   # the ladder's middle step (Position.free_cash, its one formula); None while reserves are unknown
     free_working: object = None        # Free cash's working, from Cash and banks (Position.free_cash_working)
     bills: object = None               # Pay a bill's sheet (owner, 2026-11-25): Money's BillsPage, the one bill state
@@ -210,4 +212,5 @@ def build(c, day: date, profile_name: str = "") -> HomeScreen:
                       spent_today=c.reporting.cash_flow(day, day).outflows,
                       greeting=_greeting(now().hour), name=welcome_name(c, profile_name), steps=steps,
                       today=day.isoformat(), days_to_payday=(parse_date(until) - day).days if until else None,  # not money: days
-                      expected=None if first_run else expected_by_payday(forecast))
+                      expected=None if first_run else expected_by_payday(forecast),
+                      no_job=None if first_run else no_job_yet(safe, c.budgets.spending_average(month).amount, bool(until)))
