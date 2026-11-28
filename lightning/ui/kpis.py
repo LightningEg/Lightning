@@ -140,7 +140,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
                         else compare("over the plan’s pace", fmt(gap, 0), "bad"))
         against = e.against_last_month_same_day
         tail = (line(f"{_signed(against)} against {previous} by day {e.day}") if against is not None
-                else line(f"Everyday plan {fmt(e.everyday_plan, 0)}"))
+                else line(f"{figure_label('everyday_plan')} {fmt(e.everyday_plan, 0)}"))
         cards.append(card("Everyday spending", e.everyday_spent, pace_compare, tone="out", key="everyday",
                           chip_=chip(f"by day {e.day}"), visual=meter(e.everyday_spent, e.everyday_plan),  # r38: spent of the everyday plan, as past months show; the pace chart stays the picture over time
                           line_=tail, href="#budget-pace"))
@@ -150,7 +150,7 @@ def budget_month(e, *, over: list[dict], check, raise_offer: dict | None, move: 
         change = (compare(f"against {previous}", _signed(e.against_last_month), "good" if e.everyday_spent <= before else "bad")
                   if before is not None else compare("of the everyday plan", f"{used:.0f}%" if used is not None else "—"))
         cards.append(card("Everyday spending", e.everyday_spent, change, tone="out", key="everyday", chip_=chip(month),
-                          visual=meter(e.everyday_spent, e.everyday_plan), line_=line(f"Everyday plan {fmt(e.everyday_plan, 0)}"),
+                          visual=meter(e.everyday_spent, e.everyday_plan), line_=line(f"{figure_label('everyday_plan')} {fmt(e.everyday_plan, 0)}"),
                           href="#budget-pace"))
 
     if over:
@@ -274,14 +274,16 @@ def cash_plan(f, *, day: date, before: list, late: list, late_total: Decimal, fr
                       chip_=due_chip, visual=timeline(day, until, late, before), line_=due_line, href="#plan-next"))
 
     low = f.lowest if has_income else None
-    if low is not None:
+    if low is not None and f.lowest_repeats_safe_to_spend:
+        pass  # IT-7BB: the same figure as Safe to spend, which leads the page; one name per figure
+    elif low is not None:
         drop = f.drop_to_lowest
         if drop > 0:
-            low_compare = compare("below today", fmt(drop, 0))
+            low_compare = compare("below Free cash today", fmt(drop, 0))
         elif drop < 0:
-            low_compare = compare("above today", fmt(-drop, 0), "good")
+            low_compare = compare("above Free cash today", fmt(-drop, 0), "good")
         else:
-            low_compare = compare("Same as today")
+            low_compare = compare("Same as Free cash today")
         in_months = f.lowest_in_months(monthly_spending)
         months_text = (f"{in_months:.1f} months of spending at its lowest" if in_months is not None
                        else "Runs short: the month ends below zero" if low.closing < 0 else "")
