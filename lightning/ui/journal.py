@@ -368,7 +368,7 @@ def create_journal_app(device, *, session_token, channel=None, synchronize=None,
                 await pairing.find()
             return JSONResponse(dict(version=digest(pairing.screen())))
         if action == "open":
-            pairing.begin(str(data.get("password","")))
+            pairing.begin(str(data.get("password", "")), older_device=data.get("older_device") == "1")
         elif action == "stop":
             pairing.stop()
         elif action == "find":

@@ -1,6 +1,8 @@
 """Single-home confirmation and a separate idempotent review lane for dummy data."""
 from __future__ import annotations
 
+from . import legacy87
+
 from functools import wraps
 
 from .codec import (JournalError, authenticate, canonical, digest, origin_id,
@@ -158,6 +160,10 @@ class JournalHome:
                                 wire = None
                             else:
                                 wire = self._finish(row, *result)
+                    except legacy87.NeedsNewSchema:
+                        self.db.execute("UPDATE journal_inbox SET reason='peer-upgrade-needed' WHERE proposal_id=?",
+                                        (row["proposal_id"],))
+                        continue  # The transaction rolled back. Keep the original staged for retry.
                     except Exception as error:
                         if ((isinstance(error, self.db.driver.DatabaseError)
                              and not isinstance(error, self.db.driver.IntegrityError))
@@ -300,6 +306,15 @@ class JournalHome:
                     generation=self.store.config["generation"], revision=current["revision"] + 1,
                     previous=current["hash"], proposal_id=row["proposal_id"], proposal_hash=row["hash"],
                     outcome=outcome, reason=reason, effects=effects, fingerprint=self.store.fingerprint())
+        if legacy87.through(self.db) == -1:
+            if legacy87.old_devices(self.store):
+                for effect in effects:
+                    if "domain" in effect:
+                        rows = legacy87.project(self.store.adapter.assemble(effect["domain"]))
+                        effect["domain"] = self.store.adapter.pack_rows(rows)
+                body["fingerprint"] = legacy87.fingerprint(self.store.adapter.rows)
+            else:
+                self.db.execute("UPDATE journal_wire_history SET last_87=? WHERE id=1", (current["revision"],))
         _commit(body)
         wire = seal(body, self.signer)
         authenticate(unpack(wire), self.store.config["home_key"])

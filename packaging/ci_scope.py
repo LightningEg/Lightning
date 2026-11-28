@@ -274,6 +274,20 @@ def check_release_tag(tag: str, sha: str) -> list[str]:
         problems.append("Could not fetch origin/main to check where the tag points.")
     elif _git("merge-base", "--is-ancestor", sha, "origin/main").returncode != 0:
         problems.append(f"Tag {tag} points at {sha[:8]}, which is not on main. Release only commits on main.")
+    match = re.fullmatch(r"(v[0-9]+\.[0-9]+)\.([0-9]+)", tag)
+    if match:
+        family, patch = match.groups()
+        tags = _git("tag", "--list", family + ".*", "--sort=-version:refname")
+        if tags.returncode:
+            problems.append("Could not check earlier patch releases.")
+        else:
+            for prior in tags.stdout.splitlines():
+                suffix = prior.removeprefix(family + ".")
+                if suffix.isdecimal() and int(suffix) < int(patch):
+                    if _git("diff", "--quiet", prior, sha, "--", "lightning/database/migrations").returncode:
+                        problems.append(f"Ledger migrations differ from {prior}. Use a new minor version "
+                                        "so paired devices can keep sharing one ledger format across patches.")
+                    break
     return problems
 
 

@@ -85,6 +85,7 @@ AR = {
     "Resume pairing": "كمّل الربط",
     "On your other device, select this device from Nearby devices.": "على الجهاز التاني، اختيار الجهاز ده من الأجهزة القريبة.",
     "This pairing offer is closed. Open pairing again.": "عرض الربط ده اتقفل. ممكن يبدأ ربط جديد.",
+    "Pair with an older Lightning version": "إقران مع إصدار أقدم من لايتنينج",
     "Type these two digits on your other device, then approve here.": "كتابة الرقمين دول على الجهاز التاني، وبعدها الموافقة هنا.",
     "Type the two digits shown on the home.": "كتابة الرقمين اللي ظاهرين على الجهاز الأساسي.",
     "The two digits on the home": "الرقمين على الجهاز الأساسي",

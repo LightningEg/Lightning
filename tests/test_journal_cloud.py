@@ -197,6 +197,7 @@ def test_capability_mismatch_keeps_origin_queue_and_does_not_advance_home(device
     home, pc = devices
     carrier = Carrier()
     hp, pp = peers(devices, carrier)
+    home.save(groups(home, "-3.00"))
     original = pc.save(groups(pc))
     real = compatibility.capabilities
     monkeypatch.setattr(compatibility, "capabilities", lambda store: real(store) | (
@@ -207,8 +208,9 @@ def test_capability_mismatch_keeps_origin_queue_and_does_not_advance_home(device
         asyncio.run(pp.channel.synchronize(request, home_id=home.identity.device_id))
     assert error.value.target == "home"
     assert pc.store.pending() == [original]
-    assert home.store.cursor()["revision"] == 0
-    assert home.c.db.scalar("SELECT COUNT(*) FROM journal_inbox") == 0  # Refused before receiving anything.
+    assert pc.store.cursor() == home.store.cursor()
+    assert home.store.cursor()["revision"] == 1
+    assert home.c.db.scalar("SELECT COUNT(*) FROM journal_inbox WHERE device=?", (pc.identity.device_id,)) == 0  # Refused before receiving anything.
 
 
 def test_forged_reply_capabilities_are_checked_before_any_commit_is_applied(devices):
