@@ -11,6 +11,9 @@
   <div class="compact-row"><span{{ ' class="kc-key"'|safe if split }}>{% if split %}<span class="seg-in">{% endif %}{{ 'Emergency and goals'|tr(locale) }}{% if split %}</span>{% endif %}</span><b>{{ pr.reserves|money(places=0) }} {{ base }}</b></div>
   <div class="compact-row"><span{{ ' class="kc-key"'|safe if split }}>{% if split %}<span class="seg-neutral">{% endif %}{{ 'Left unassigned'|tr(locale) }}{% if split %}</span>{% endif %}</span><b class="{{ 'neg' if pr.unassigned < 0 else '' }}">{{ pr.unassigned|money(places=0) }} {{ base }}</b></div>
 </div>
+{# IT-7BB: one line each on how the two figures relate to Free cash and Safe to spend today; the rows and their
+   whole-pound values come from planning.funding.payday_relations, which makes them add up. #}
+{% if relations %}<div class="payday-relations">{% for key, label in (('available', fig.cash_available_to_assign.label), ('unassigned', 'Left unassigned'|tr(locale))) %}{% set w = relations[key] %}<p class="muted small" data-relation="{{ key }}">{{ label }} {{ w.total|money(places=0) }} = {% for r in w.shown %}{% if not loop.first %} {{ '+' if r.amount >= 0 else '−' }} {% elif r.amount < 0 %}−{% endif %}{{ r.name|tr(locale) }} {{ (r.amount|abs)|money(places=0) }}{% endfor %} {{ base }}</p>{% endfor %}</div>{% endif %}
 {% if allocation.ready is not none and allocation.ready < 0 %}<p class="notice">{{ 'Funded spending and obligations exceed owned cash. Reduce assignments before adding more.'|tr(locale) }}</p>{% endif %}
 <form method="post" action="/payday/apply" id="payday-confirm" class="payday-confirm"><input type="hidden" name="__session" value="{{ session_token }}"><input type="hidden" name="fingerprint" value="{{ allocation.token }}">
 {% if enabled %}<button class="btn primary{{ ' phone-save' if phone }}" type="submit">{{ 'Confirm cash assignments'|tr(locale) }}</button>{% else %}<p>{{ 'Turn on cash funding to confirm this proposal.'|tr(locale) }}</p>{% endif %}</form>

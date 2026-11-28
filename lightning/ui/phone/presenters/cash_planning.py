@@ -114,7 +114,8 @@ def _phone_cash(c, f, next_payments, late, position, day) -> dict:
                 for r in bills] if span else []
     return {"due": due, "lines": lines, "now": now, "ahead": ahead, "payday": payday, "rest": rest[:PHONE_ROWS_SHOWN],
             "rest_more": max(len(rest) - PHONE_ROWS_SHOWN, 0), "tiles": tiles,  # not money
-            "covered": covered, "keep": keep, "until": until or "",
+            # IT-7BB: "you keep" names Safe to spend, the figure Home and the hero above lead with, not Free cash.
+            "covered": covered, "keep": keep, "safe": f.safe_to_spend, "until": until or "",
             "coming_in": coming_in, "going_out": going_out, "timeline": timeline, "bill_count": len(bills)}
 
 
