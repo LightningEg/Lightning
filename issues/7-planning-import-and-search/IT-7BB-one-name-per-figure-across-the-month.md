@@ -8,6 +8,7 @@ model: opus
 status: new
 created: 2026-11-28
 by: Claude
+github: 779
 ---
 
 ## Report

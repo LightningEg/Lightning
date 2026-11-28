@@ -8,6 +8,7 @@ model: sonnet
 status: new
 created: 2026-11-28
 by: Claude
+github: 780
 ---
 
 ## Report
