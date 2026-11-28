@@ -35,6 +35,7 @@
       const select = form.querySelector('select[name="category_id"]');
       const chips = sheet.querySelector("[data-category-chips]");
       const kindNow = () => (form.querySelector('[name="kind"]:checked') || {}).value || "out";
+      window.lightningInitVoice(form);
       let openOther = false;
       const sync = () => {
         const kind = kindNow();
@@ -101,9 +102,13 @@
       if (date && label) {
         const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
         const paint = () => {
+          if (!date.value) {
+            label.textContent = t("Choose date");
+            return;
+          }
           const now = new Date(), back = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
           const [y, m, d] = (date.value || iso(now)).split("-").map(Number);
-          label.textContent = date.value === iso(now) || !date.value ? t("Today") : date.value === iso(back) ? t("Yesterday")
+          label.textContent = date.value === iso(now) ? t("Today") : date.value === iso(back) ? t("Yesterday")
             : new Date(y, m - 1, d).toLocaleDateString(document.documentElement.lang || undefined, { day: "numeric", month: "short" });
         };
         label.hidden = false;

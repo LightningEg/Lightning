@@ -468,6 +468,15 @@ class TransactionService:
         return search.usual_categories(
             self.repo, window=self.USUAL_WINDOW, minimum=self.USUAL_MIN, days=self.USUAL_DAYS)
 
+    def recent_payee_categories(self) -> dict[str, list[int]]:
+        """Distinct category choices in each payee's last few transactions, newest first."""
+        choices = {}
+        for row in self.repo.recent_categories(self.USUAL_WINDOW):
+            seen = choices.setdefault(row["counterparty"], [])
+            if row["category_id"] not in seen:
+                seen.append(row["category_id"])
+        return choices
+
     def usual_payees(self, limit: int = 3, days: int = 30) -> list[dict]:
         """The payees used most in the last ``days`` days, for the Add sheet's first row (NF-7AM): [{name, kind,
         account_id, category_id}] from each payee's newest entry; a tap fills payee, category and account."""
