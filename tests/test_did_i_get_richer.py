@@ -46,7 +46,7 @@ def _text(html: str) -> str:
 def test_the_parts_add_up_to_the_change_and_gold_can_disagree_with_pounds(mohab):
     s = report.build(mohab, DAY, "last")   # September 2026
     b = s.bridge
-    assert b and b["change"] > 0 and s.since == "2026-08-31"
+    assert b and b["change"] > 0 and b["change"] == s.change and s.since == "2026-08-31"
     assert b["net_flow"] + b["market_moves"] + b["other_changes"] == b["change"] and b["net_flow"] == s.net
     # Gold rose faster than Mohab saved: richer in pounds, fewer grams of 21K gold. The app says both.
     assert s.gold_change is not None and s.gold_change < 0
@@ -64,7 +64,9 @@ def test_the_report_page_leads_with_the_verdict_gold_and_why(mohab):
     hero = _text(page.split('class="phone-hero"', 1)[1].split("</section>", 1)[0])
     assert "Richer than on 31 Aug" in hero and "grams of 21K fewer." in hero, hero
     why = _text(page.split('id="why-changed"', 1)[1].split("</div>\n</div>", 1)[0])
-    assert why.index("Net flow") < why.index("Market moves") < why.index("Other changes") < why.index("Change in net worth"), why
+    assert why.index("Net flow") < why.index("Market moves") < why.index("Other changes"), why
+    lead = _text(page.split('class="phone-lead', 1)[1].split("</div>", 1)[0]).lstrip('">')
+    assert "Change in net worth" in hero and lead.startswith("+"), (hero, lead)   # owner, 2026-11-28: one figure leads
 
 
 def test_every_new_sentence_has_an_arabic_form():

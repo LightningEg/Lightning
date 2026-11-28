@@ -1,5 +1,5 @@
 """The period report on the phone (IV-3AY11 prerequisite): "How did a period go?". Home is always today, so the
-Overview's month, year and all-time reading lives here, behind Money: the change in what you own, money in, out and
+Overview's month, year and all-time reading lives here, behind Money: the change in net worth, money in, out and
 kept, the savings rate, and what investing did. Services calculate; this module only picks and orders."""
 from __future__ import annotations
 
@@ -22,7 +22,7 @@ class ReportScreen:
     label: str                       # "2026-10", "Year to date", "All time"
     start: str
     end: str
-    change: Decimal | None           # change in what you own; None when a valuation is missing
+    change: Decimal | None           # change in net worth (owner, 2026-11-28); None when a valuation is missing
     change_reason: str
     money_in: Decimal
     money_out: Decimal
@@ -54,15 +54,16 @@ def build(c, day: date, key: str = "month", date_from: str = "", date_to: str = 
         period = _period(c, day, key)
     start, end = period.start, period.end
     flow = c.reporting.cash_flow(start, end)
-    change, reason = c.position.change_in_what_you_own(start, end, since_first_record=key == "all")
+    # Owner, 2026-11-28 (r40 decision 1A): the Report leads with Change in net worth, as the PC Overview does, so the
+    # lead, the verdict and Why it changed are one figure.
+    change, reason = c.position.change_in_net_worth(start, end, since_first_record=key == "all")
     investing = investment_period(c.db, c.accounts, c.assets, c.reporting, fmt_date(start), fmt_date(end))
     label = (month_of(start) if key in ("month", "last") else
              f"{fmt_date(start)} – {fmt_date(end)}" if key == "custom" else period.label)
     # NF-7BF: did the period leave you richer, why, and in gold: the PC Overview's net worth bridge (OV-3) and its gold
     # side, both worked out in planning/position.py.
     before = start - timedelta(days=1)  # not money: the day before the period
-    worth, _ = c.position.change_in_net_worth(start, end, since_first_record=key == "all")
-    bridge = net_worth_bridge(worth, flow.net, investing)
+    bridge = net_worth_bridge(change, flow.net, investing)
     gold = (c.position.change_in_gold(start, end, c.zakat.gold_price_24k(fmt_date(before)), c.zakat.gold_price_24k(fmt_date(end)))
             if bridge else None)
     return ReportScreen(key=key, label=label, start=fmt_date(start), end=fmt_date(end), change=change,

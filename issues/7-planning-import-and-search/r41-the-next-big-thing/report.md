@@ -219,3 +219,6 @@ Append dated decisions and results here; keep the recommendation above as writte
   "what changed" card. The phone's Report now says whether the period left you richer, the change in grams of 21K
   gold, and why (Kept + Investing result + Other changes); `tests/test_did_i_get_richer.py`. Inflation waits for the
   owner's pick of a source.
+- **2026-11-28, owner picks on the month review:** the phone Report leads with Change in net worth, as the PC Overview
+  does, so the lead, the verdict and Why it changed are one figure (1A); inflation is left out (2B); #638 closed as
+  completed (3A); #775 is brought up to date with main, keeping only what main lacks (4A).

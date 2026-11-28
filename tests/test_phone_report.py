@@ -26,7 +26,7 @@ def mohab(c, monkeypatch):
 def test_a_month_agrees_with_the_services_it_reads(mohab):
     r = screen.build(mohab, DAY, "month")
     flow = mohab.reporting.cash_flow(date(2026, 10, 1), DAY)
-    change, _ = mohab.position.change_in_what_you_own(date(2026, 10, 1), DAY)
+    change, _ = mohab.position.change_in_net_worth(date(2026, 10, 1), DAY)   # owner, 2026-11-28: net worth leads
     assert (r.money_in, r.money_out, r.net) == (flow.inflows, flow.outflows, flow.net) and r.change == change
     assert r.label == "2026-10" and r.start == "2026-10-01" and r.end == "2026-10-12"
 
@@ -45,6 +45,6 @@ def test_an_unknown_period_falls_back_to_this_month_and_the_page_renders(mohab):
     mount_phone(app)
     client = TestClient(app)
     page = client.get("/money/report?period=ytd")
-    assert page.status_code == 200 and "Change in what you own" in page.text and ".00" not in page.text.split("<main", 1)[1]
+    assert page.status_code == 200 and "Change in net worth" in page.text and ".00" not in page.text.split("<main", 1)[1]
     assert 'href="/money/report"' in client.get("/money/reviews").text   # behind Money's Reports and reviews row (IV-11H)
     assert 'href="/money/reviews"' in client.get("/money").text
