@@ -1426,6 +1426,7 @@ ARABIC_UI = {
     'thing needs you': 'حاجة مستنياك',
     'things need you': 'حاجات مستنياك',
     'Each row does its job in one tap.': 'كل صف بيخلّص مهمته بضغطة واحدة.',
+    'Suggestions': 'اقتراحات',
     'All done.': 'خلصت كله.',
     '{amt} late.': '{amt} متأخرة.',
     'Payday {date}.': 'القبض {date}.',

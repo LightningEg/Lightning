@@ -263,6 +263,32 @@ def test_see_all_lists_every_to_do_row_and_home_links_to_it(sample):
     assert 'href="/needs-you"' not in client.get("/home").text
 
 
+def test_to_do_puts_needs_review_first_and_suggestions_below_with_the_count_unchanged(sample):
+    """IV-11P (r40 F5): imports, receipts and interest to match are Needs review, offers are Suggestions below; the
+    lead still counts every row (A09.2) and Home's three rows come from Needs review first."""
+    from lightning.ui.phone.screens import todo
+    c, day = _on(sample, "2026-10-04")
+    rows = todo.build(c, day).rows
+    review = [r for r in rows if r.group == "review"]
+    offers = [r for r in rows if r.group == "suggestion"]
+    assert review and offers and rows == tuple(review + offers)
+    assert {r.action for r in review} >= {"Pay", "Finish", "Match"}
+    assert {"Make it a bill", "Top up", "Plan less"} <= {r.action for r in offers}
+    assert all(r.group == "review" for r in home.build(c, day).todo)
+    app = create_app(c)
+    mount_phone(app)
+    client = TestClient(app)
+    for locale, heads in (("en", ("Needs review", "Suggestions")), ("ar", ("محتاج مراجعة", "اقتراحات"))):
+        assert client.post("/settings/locale", data={"locale": locale}, follow_redirects=False).status_code == 303
+        text = client.get("/todo").text
+        lead = text.split('class="phone-lead">', 1)[1].split("<", 1)[0].strip()
+        assert lead == (str(len(rows)) if locale == "en" else str(len(rows)).translate(str.maketrans("0123456789", "٠١٢٣٤٥٦٧٨٩"))) or lead == str(len(rows))
+        assert text.index(heads[0]) < text.index(heads[1])
+        between = text.split('id="todo-review"', 1)[1].split('id="todo-offers"', 1)[0]
+        assert len(re.findall(r'class="phone-row[ "]', between)) == len(review)
+    client.post("/settings/locale", data={"locale": "en"}, follow_redirects=False)  # the sample is shared
+
+
 def test_over_plan_meter_is_full_and_names_the_actual_percentage(c, setup, monkeypatch):
     monkeypatch.setenv("LIGHTNING_TODAY", "2026-10-04")
     bank, food = setup[0]["cib"].id, setup[1]["EXP.PERSONAL.FOOD"].id
